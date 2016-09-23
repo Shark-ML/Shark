@@ -37,27 +37,27 @@ namespace blas {
 
 template<class T, class VecV, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename VecV::scalar_type >,
+	std::is_convertible<T, typename VecV::value_type >,
 	vector_scalar_multiply<VecV>
 >::type
 operator* (vector_expression<VecV, Device> const& v, T scalar){
-	typedef typename VecV::scalar_type scalar_type;
-	return vector_scalar_multiply<VecV>(v(), scalar_type(scalar));
+	typedef typename VecV::value_type value_type;
+	return vector_scalar_multiply<VecV>(v(), value_type(scalar));
 }
 template<class T, class VecV, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename VecV::scalar_type >,
+	std::is_convertible<T, typename VecV::value_type >,
         vector_scalar_multiply<VecV>
 >::type
 operator* (T scalar, vector_expression<VecV, Device> const& v){
-	typedef typename VecV::scalar_type scalar_type;
-	return vector_scalar_multiply<VecV>(v(), scalar_type(scalar));//explicit cast prevents warning, alternative would be to template functors::scalar_multiply on T as well
+	typedef typename VecV::value_type value_type;
+	return vector_scalar_multiply<VecV>(v(), value_type(scalar));//explicit cast prevents warning, alternative would be to template functors::scalar_multiply on T as well
 }
 
 template<class VecV, class Device>
 vector_scalar_multiply<VecV> operator-(vector_expression<VecV, Device> const& v){
-	typedef typename VecV::scalar_type scalar_type;
-	return vector_scalar_multiply<VecV>(v(), scalar_type(-1));//explicit cast prevents warning, alternative would be to template functors::scalar_multiply on T as well
+	typedef typename VecV::value_type value_type;
+	return vector_scalar_multiply<VecV>(v(), value_type(-1));//explicit cast prevents warning, alternative would be to template functors::scalar_multiply on T as well
 }
 
 ///\brief Creates a vector having a constant value.

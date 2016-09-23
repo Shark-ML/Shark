@@ -57,10 +57,9 @@ class matrix:public matrix_container<matrix<T, L>, cpu_tag > {
 	typedef std::vector<T> array_type;
 public:
 	typedef typename array_type::value_type value_type;
-	typedef value_type scalar_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
-	typedef typename array_type::size_type index_type;
+	typedef typename array_type::size_type size_type;
 
 	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
@@ -92,7 +91,7 @@ public:
 	/// \brief Dense matrix constructor with defined size
 	/// \param size1 number of rows
 	/// \param size2 number of columns
-	matrix(index_type size1, index_type size2)
+	matrix(size_type size1, size_type size2)
 	:m_size1(size1)
 	, m_size2(size2)
 	, m_data(size1 * size2) {}
@@ -101,7 +100,7 @@ public:
 	/// \param size1 number of rows
 	/// \param size2 number of columns
 	/// \param init initial value assigned to all elements
-	matrix(index_type size1, index_type size2, value_type const& init)
+	matrix(size_type size1, size_type size2, value_type const& init)
 	: m_size1(size1)
 	, m_size2(size2)
 	, m_data(size1 * size2, init) {}
@@ -172,11 +171,11 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	index_type size1() const {
+	size_type size1() const {
 		return m_size1;
 	}
 	///\brief Returns the number of columns of the matrix.
-	index_type size2() const {
+	size_type size2() const {
 		return m_size2;
 	}
 	
@@ -198,7 +197,7 @@ public:
 	/// \brief Resize a matrix to new dimensions. If resizing is performed, the data is not preserved.
 	/// \param size1 the new number of rows
 	/// \param size2 the new number of colums
-	void resize(index_type size1, index_type size2) {
+	void resize(size_type size1, size_type size2) {
 		m_data.resize(size1* size2);
 		m_size1 = size1;
 		m_size2 = size2;
@@ -209,18 +208,18 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		return m_data[orientation::element(i, m_size1, j, m_size2)];
 	}
-	reference operator()(index_type i, index_type j) {
+	reference operator()(size_type i, size_type j) {
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		return m_data[orientation::element(i, m_size1, j, m_size2)];
 	}
 	
-	void set_element(index_type i, index_type j,value_type t){
+	void set_element(size_type i, size_type j,value_type t){
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		m_data[orientation::element(i, m_size1, j, m_size2)]  = t;
@@ -236,7 +235,7 @@ public:
 		m1.swap(m2);
 	}
 	
-	friend void swap_rows(matrix& a, index_type i, matrix& b, index_type j){
+	friend void swap_rows(matrix& a, size_type i, matrix& b, size_type j){
 		SIZE_CHECK(i < a.size1());
 		SIZE_CHECK(j < b.size1());
 		SIZE_CHECK(a.size2() == b.size2());
@@ -245,13 +244,13 @@ public:
 		}
 	}
 	
-	friend void swap_rows(matrix& a, index_type i, index_type j) {
+	friend void swap_rows(matrix& a, size_type i, size_type j) {
 		if(i == j) return;
 		swap_rows(a,i,a,j);
 	}
 	
 	
-	friend void swap_columns(matrix& a, index_type i, matrix& b, index_type j){
+	friend void swap_columns(matrix& a, size_type i, matrix& b, size_type j){
 		SIZE_CHECK(i < a.size2());
 		SIZE_CHECK(j < b.size2());
 		SIZE_CHECK(a.size1() == b.size1());
@@ -260,7 +259,7 @@ public:
 		}
 	}
 	
-	friend void swap_columns(matrix& a, index_type i, index_type j) {
+	friend void swap_columns(matrix& a, size_type i, size_type j) {
 		if(i == j) return;
 		swap_columns(a,i,a,j);
 	}
@@ -271,16 +270,16 @@ public:
 	typedef dense_storage_iterator<value_type const> const_row_iterator;
 	typedef dense_storage_iterator<value_type const> const_column_iterator;
 
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_data.data() + i*stride1(),0,stride2());
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(m_data.data() + i*stride1()+stride2()*size2(),size2(),stride2());
 	}
-	row_iterator row_begin(index_type i){
+	row_iterator row_begin(size_type i){
 		return row_iterator(m_data.data() + i*stride1(),0,stride2());
 	}
-	row_iterator row_end(index_type i){
+	row_iterator row_end(size_type i){
 		return row_iterator(m_data.data() + i*stride1()+stride2()*size2(),size2(),stride2());
 	}
 	
@@ -300,7 +299,7 @@ public:
 	typedef typename blas::major_iterator<self_type>::type major_iterator;
 	
 	//sparse interface
-	major_iterator set_element(major_iterator pos, index_type index, value_type value) {
+	major_iterator set_element(major_iterator pos, size_type index, value_type value) {
 		RANGE_CHECK(pos.index() == index);
 		*pos=value;
 		return pos;
@@ -316,7 +315,7 @@ public:
 		return end;
 	}
 	
-	void reserve(index_type non_zeros) {}
+	void reserve(size_type non_zeros) {}
 	void reserve_row(std::size_t, std::size_t){}
 	void reserve_column(std::size_t, std::size_t){}
 
@@ -342,15 +341,15 @@ public:
 	}
 
 private:
-	index_type stride1() const {
+	size_type stride1() const {
 		return orientation::stride1(m_size1, m_size2);
 	}
-	index_type stride2() const {
+	size_type stride2() const {
 		return orientation::stride2(m_size1, m_size2);
 	}
 
-	index_type m_size1;
-	index_type m_size2;
+	size_type m_size1;
+	size_type m_size2;
 	array_type m_data;
 };
 template<class T, class L>

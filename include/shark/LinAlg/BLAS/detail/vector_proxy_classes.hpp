@@ -37,9 +37,8 @@ namespace blas {
 template<class V>
 class vector_reference:public vector_expression<vector_reference<V>, typename V::device_type >{
 public:
-	typedef typename V::index_type index_type;
+	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
-	typedef typename V::scalar_type scalar_type;
 	typedef typename V::const_reference const_reference;
 	typedef typename reference<V>::type reference;
 
@@ -62,7 +61,7 @@ public:
 	}
 	
 	/// \brief Return the size of the vector.
-	index_type size() const {
+	size_type size() const {
 		return expression().size();
 	}
 	
@@ -79,10 +78,10 @@ public:
 	// ---------
 	
 	// Element access
-	reference operator()(index_type i) const{
+	reference operator()(size_type i) const{
 		return expression()(i);
 	}
-	reference operator [](index_type i) const{
+	reference operator [](size_type i) const{
 		return expression() [i];
 	}
 	
@@ -119,7 +118,7 @@ public:
 	}
 	
 	//sparse interface
-	iterator set_element(iterator pos, index_type index, value_type value){
+	iterator set_element(iterator pos, size_type index, value_type value){
 		return expression().set_element(pos,index,value);
 	}
 
@@ -130,7 +129,7 @@ public:
 		return expression().clear_range(start,end);
 	}
 	
-	void reserve(index_type non_zeros){
+	void reserve(size_type non_zeros){
 		expression().reserve(non_zeros);
 	}
 
@@ -150,9 +149,8 @@ private:
 template<class V>
 class vector_range:public vector_expression<vector_range<V>, typename V::device_type >{
 public:
-	typedef typename V::index_type index_type;
+	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
-	typedef typename V::scalar_type scalar_type;
 	typedef typename V::const_reference const_reference;
 	typedef typename reference<V>::type reference;
 
@@ -164,7 +162,7 @@ public:
 	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction and destruction
-	vector_range(vector_closure_type const& data, index_type start, index_type end):
+	vector_range(vector_closure_type const& data, size_type start, size_type end):
 		m_expression(data), m_start(start), m_size(end-start){
 		RANGE_CHECK(start <= end);
 		RANGE_CHECK(start <= m_expression.size());
@@ -185,7 +183,7 @@ public:
 	// Internal Accessors
 	// ---------
 	
-	index_type start() const{
+	size_type start() const{
 		return m_start;
 	}
 	
@@ -197,7 +195,7 @@ public:
 	}
 	
 	/// \brief Return the size of the vector.
-	index_type size() const {
+	size_type size() const {
 		return m_size;
 	}
 
@@ -210,7 +208,7 @@ public:
 	// ---------
 
 	// Element access
-	reference operator()(index_type i) const{
+	reference operator()(size_type i) const{
 		return m_expression(m_start +i);
 	}
 
@@ -256,7 +254,7 @@ public:
 		clear_range(begin(),end());
 	}
 	
-	iterator set_element(iterator pos, index_type index, value_type value){
+	iterator set_element(iterator pos, size_type index, value_type value){
 		return iterator(m_expression.set_element(pos.inner(),index+start(),value),start());
 	}
 	
@@ -268,13 +266,13 @@ public:
 		return iterator(m_expression.clear_element(pos.inner()),start());
 	}
 	
-	void reserve(index_type non_zeros){
+	void reserve(size_type non_zeros){
 		m_expression.reserve(non_zeros);
 	}
 private:
 	vector_closure_type m_expression;
-	index_type m_start;
-	index_type m_size;
+	size_type m_start;
+	size_type m_size;
 };
 
 /// \brief Represents a given chunk of memory as a dense vector of elements of type T.
@@ -285,9 +283,8 @@ class dense_vector_adaptor: public vector_expression<dense_vector_adaptor<T>, cp
 	typedef dense_vector_adaptor<T> self_type;
 public:
 
-	typedef std::size_t index_type;
+	typedef std::size_t size_type;
 	typedef typename boost::remove_const<T>::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef T&  reference;
 
@@ -323,7 +320,7 @@ public:
 	/// \param values the block of memory used
 	/// \param size size of the self_type
  	/// \param stride distance between elements of the self_type in memory
-	dense_vector_adaptor(T* values, index_type size, index_type stride = 1 ):
+	dense_vector_adaptor(T* values, size_type size, size_type stride = 1 ):
 		m_values(values),m_size(size),m_stride(stride){}	
 
 	/// \brief Copy-constructor of a self_type
@@ -335,7 +332,7 @@ public:
 	, m_stride(v.raw_storage().stride){}
 	
 	/// \brief Return the size of the vector.
-	index_type size() const {
+	size_type size() const {
 		return m_size;
 	}
 	
@@ -350,25 +347,25 @@ public:
 
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
-	const_reference operator()(index_type i) const {
+	const_reference operator()(size_type i) const {
 		return m_values[i*m_stride];
 	}
 	
 	/// \brief Return a reference to the element \f$i\f$
 	/// \param i index of the element
-	reference operator()(index_type i) {
+	reference operator()(size_type i) {
 		return m_values[i*m_stride];
 	}	
 
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
-	const_reference operator[](index_type i) const {
+	const_reference operator[](size_type i) const {
 		return m_values[i*m_stride];
 	}
 	
 	/// \brief Return a reference to the element \f$i\f$
 	/// \param i index of the element
-	reference operator[](index_type i) {
+	reference operator[](size_type i) {
 		return m_values[i*m_stride];
 	}
 
@@ -379,13 +376,13 @@ public:
 	/// \brief Set element \f$i\f$ to the value \c t
 	/// \param i index of the element
 	/// \param t reference to the value to be set
-	reference insert_element(index_type i, const_reference t) {
+	reference insert_element(size_type i, const_reference t) {
 		return(*this)[i] = t;
 	}
 
 	/// \brief Set element \f$i\f$ to the \e zero value
 	/// \param i index of the element
-	void erase_element(index_type i) {
+	void erase_element(size_type i) {
 		(*this)[i] = value_type/*zero*/();
 	}
 		
@@ -427,7 +424,7 @@ public:
 	}
 	
 	//insertion and erasing of elements
-	iterator set_element(iterator pos, index_type index, value_type value) {
+	iterator set_element(iterator pos, size_type index, value_type value) {
 		SIZE_CHECK(pos.index() == index);
 		(*this)(index) = value;
 		return pos;
@@ -450,8 +447,8 @@ public:
 	}
 private:
 	T* m_values;
-	index_type m_size;
-	index_type m_stride;
+	size_type m_size;
+	size_type m_stride;
 };
 
 template<class T,class I>
@@ -460,16 +457,15 @@ class sparse_vector_adaptor: public vector_expression<sparse_vector_adaptor<T,I>
 public:
 
 	//std::container types
-	typedef typename boost::remove_const<I>::type index_type;
+	typedef typename boost::remove_const<I>::type size_type;
 	typedef typename boost::remove_const<T>::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef const_reference reference;
 	
-	typedef sparse_vector_adaptor<value_type const,index_type const> const_closure_type;
+	typedef sparse_vector_adaptor<value_type const,size_type const> const_closure_type;
 	typedef sparse_vector_adaptor closure_type;
 	typedef sparse_vector_storage<T const,I const> storage_type;
-	typedef sparse_vector_storage<value_type const,index_type const> const_storage_type;
+	typedef sparse_vector_storage<value_type const,size_type const> const_storage_type;
 	typedef elementwise<sparse_tag> evaluation_category;
 
 	// Construction and destruction
@@ -494,17 +490,17 @@ public:
 	/// \param indices the block of memory used to store the indices
 	/// \param memoryLength length of the strip of memory
 	sparse_vector_adaptor(
-		index_type size, 
+		size_type size, 
 		value_type const* values,
-		index_type const* indices, 
-		index_type memoryLength
+		size_type const* indices, 
+		size_type memoryLength
 	): m_nonZeros(memoryLength)
 	, m_indices(indices)
 	, m_values(values)
 	, m_size(size){}
 	
 	/// \brief Return the size of the vector
-	index_type size() const {
+	size_type size() const {
 		return m_size;
 	}
 	
@@ -515,9 +511,9 @@ public:
 
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
-	value_type operator()(index_type i) const {
+	value_type operator()(size_type i) const {
 		SIZE_CHECK(i < m_size);
-		index_type const* pos = std::lower_bound(m_indices,m_indices+m_nonZeros, i);
+		size_type const* pos = std::lower_bound(m_indices,m_indices+m_nonZeros, i);
 		std::ptrdiff_t diff = pos-m_indices;
 		if(diff == (std::ptrdiff_t) m_nonZeros || *pos != i)
 			return value_type();
@@ -526,7 +522,7 @@ public:
 
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
-	value_type operator[](index_type i) const {
+	value_type operator[](size_type i) const {
 		return (*this)(i);
 	}
 
@@ -534,7 +530,7 @@ public:
 	// ITERATORS
 	// --------------
 	
-	typedef compressed_storage_iterator<value_type const, index_type const> const_iterator;
+	typedef compressed_storage_iterator<value_type const, size_type const> const_iterator;
 	typedef const_iterator iterator;
 
 	/// \brief return an iterator behind the last non-zero element of the vector
@@ -548,7 +544,7 @@ public:
 	}
 private:
 	std::size_t m_nonZeros;
-	index_type const* m_indices;
+	size_type const* m_indices;
 	value_type const* m_values;
 
 	std::size_t m_size;

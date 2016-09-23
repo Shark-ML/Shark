@@ -39,12 +39,11 @@ namespace blas {
 template<class E>
 class vector_scalar_multiply:public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
 private:
-	typedef functors::scalar_multiply1<typename E::scalar_type> functor_type;
+	typedef functors::scalar_multiply1<typename E::value_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
-	typedef typename E::index_type index_type;
+	typedef typename E::size_type size_type;
 	typedef typename std::result_of<functor_type(typename E::value_type) >::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 
@@ -57,11 +56,11 @@ public:
 
 	// Construction and destruction
 	// May be used as mutable expression.
-	vector_scalar_multiply(expression_closure_type const& e, scalar_type scalar):
+	vector_scalar_multiply(expression_closure_type const& e, value_type scalar):
 		m_expression(e), m_scalar(scalar) {}
 
 	// Accessors
-	index_type size() const {
+	size_type size() const {
 		return m_expression.size();
 	}
 
@@ -70,33 +69,33 @@ public:
 		return m_expression;
 	}
 	
-	scalar_type scalar()const{
+	value_type scalar()const{
 		return m_scalar;
 	}
 
 public:
 	// Element access
-	const_reference operator()(index_type i) const {
+	const_reference operator()(size_type i) const {
 		return m_scalar * m_expression(i);
 	}
 
-	const_reference operator[](index_type i) const {
+	const_reference operator[](size_type i) const {
 		return m_scalar * m_expression(i);
 	}
 	
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		m_expression.assign_to(x,alpha*m_scalar);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		m_expression.plus_assign_to(x,alpha*m_scalar);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		m_expression.minus_assign_to(x,alpha*m_scalar);
 	}
 
@@ -113,16 +112,15 @@ public:
 	}
 private:
 	expression_closure_type m_expression;
-	scalar_type m_scalar;
+	value_type m_scalar;
 };
 
 /// \brief Vector expression representing a constant valued vector.
 template<class T>
 class scalar_vector:public vector_expression<scalar_vector<T>, cpu_tag > {
 public:
-	typedef std::size_t index_type;
+	typedef std::size_t size_type;
 	typedef T value_type;
-	typedef T scalar_type;
 	typedef const T& const_reference;
 	typedef const_reference reference;
 
@@ -135,22 +133,22 @@ public:
 	// Construction and destruction
 	scalar_vector()
 	:m_size(0), m_value() {}
-	explicit scalar_vector(index_type size, value_type value)
+	explicit scalar_vector(size_type size, value_type value)
 	:m_size(size), m_value(value) {}
 	scalar_vector(const scalar_vector& v)
 	:m_size(v.m_size), m_value(v.m_value) {}
 
 	// Accessors
-	index_type size() const {
+	size_type size() const {
 		return m_size;
 	}
 
 	// Element access
-	const_reference operator()(index_type /*i*/) const {
+	const_reference operator()(size_type /*i*/) const {
 		return m_value;
 	}
 
-	const_reference operator [](index_type /*i*/) const {
+	const_reference operator [](size_type /*i*/) const {
 		return m_value;
 	}
 
@@ -166,7 +164,7 @@ public:
 	}
 
 private:
-	index_type m_size;
+	size_type m_size;
 	value_type m_value;
 };
 
@@ -180,9 +178,8 @@ class vector_unary: public vector_expression<vector_unary<E, F>, typename E::dev
 public:
 	typedef F functor_type;
 	typedef typename E::const_closure_type expression_closure_type;
-	typedef typename E::index_type index_type;
+	typedef typename E::size_type size_type;
 	typedef typename std::result_of<F(typename E::value_type) >::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 	typedef vector_unary const_closure_type;
@@ -197,7 +194,7 @@ public:
 		m_expression(e), m_functor(functor) {}
 
 	// Accessors
-	index_type size() const {
+	size_type size() const {
 		return m_expression.size();
 	}
 
@@ -212,26 +209,26 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x,eval_block(m_expression), -alpha);
 	}
 
 	// Element access
-	const_reference operator()(index_type i) const {
+	const_reference operator()(size_type i) const {
 		return m_functor(m_expression(i));
 	}
 
-	const_reference operator[](index_type i) const {
+	const_reference operator[](size_type i) const {
 		return m_functor(m_expression[i]);
 	}
 
@@ -250,7 +247,7 @@ private:
 	void plus_assign_to(
 		vector_expression<VecX, device_type>& x,
 		vector_expression<VecV, device_type> const& v,
-		scalar_type alpha
+		value_type alpha
 	)const{
 		vector_unary<VecV, F> e(v(), m_functor);
 		vector_scalar_multiply<vector_unary<VecV,F> > e1(e,alpha);
@@ -267,10 +264,9 @@ private:
 	typedef functors::scalar_binary_plus functor_type;
 public:
 	typedef typename std::result_of<functor_type(typename E1::value_type,typename E2::value_type) >::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef typename E1::index_type index_type;
+	typedef typename E1::size_type size_type;
 
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
@@ -291,7 +287,7 @@ public:
 	}
 
 	// Accessors
-	index_type size() const {
+	size_type size() const {
 		return m_lhs.size();
 	}
 
@@ -304,30 +300,30 @@ public:
 	}
 
 	// Element access
-	const_reference operator() (index_type i) const {
+	const_reference operator() (size_type i) const {
 		SIZE_CHECK(i < size());
 		return m_lhs(i) + m_rhs(i);
 	}
 
-	const_reference operator[] (index_type i) const {
+	const_reference operator[] (size_type i) const {
 		SIZE_CHECK(i < size());
 		return m_lhs(i) + m_rhs(i);
 	}
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		assign(x,alpha*m_lhs);
 		plus_assign(x,alpha*m_rhs);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign(x,alpha*m_lhs);
 		plus_assign(x,alpha*m_rhs);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		minus_assign(x,alpha*m_lhs);
 		minus_assign(x,alpha*m_rhs);
 	}
@@ -365,8 +361,7 @@ class vector_binary:public vector_expression<vector_binary<E1,E2, F>,typename E1
 public:
 	typedef F functor_type;
 	typedef typename std::result_of<F(typename E1::value_type, typename E2::value_type)>::type value_type;
-	typedef typename E1::index_type index_type;
-	typedef value_type scalar_type;
+	typedef typename E1::size_type size_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 	
@@ -386,7 +381,7 @@ public:
 	}
 
 	// Accessors
-	index_type size() const {
+	size_type size() const {
 		return m_lhs.size ();
 	}
 
@@ -403,28 +398,28 @@ public:
 	}
 
 	// Element access
-	const_reference operator() (index_type i) const {
+	const_reference operator() (size_type i) const {
 		SIZE_CHECK(i < size());
 		return m_functor(m_lhs(i),m_rhs(i));
 	}
 
-	const_reference operator[] (index_type i) const {
+	const_reference operator[] (size_type i) const {
 		SIZE_CHECK(i < size());
 		return m_functor(m_lhs(i),m_rhs(i));
 	}
 	
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
@@ -461,7 +456,7 @@ private:
 	void plus_assign_to(
 		vector_expression<VecX, device_type>& x,
 		vector_expression<LHS, device_type> const& lhs, vector_expression<RHS, device_type> const& rhs,
-		scalar_type alpha
+		value_type alpha
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
 		vector_binary<LHS,RHS, F> e(lhs(),rhs(), m_functor);

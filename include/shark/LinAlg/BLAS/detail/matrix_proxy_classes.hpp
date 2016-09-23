@@ -38,9 +38,8 @@ namespace blas {
 template<class M>
 class matrix_reference:public matrix_expression<matrix_reference<M>, typename M::device_type > {
 public:
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 
@@ -66,11 +65,11 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	index_type size1() const {
+	size_type size1() const {
 		return m_expression->size1();
 	}
 	///\brief Returns the number of columns of the matrix.
-	index_type size2() const {
+	size_type size2() const {
 		return m_expression->size2();
 	}
 	
@@ -81,11 +80,11 @@ public:
 
 
 	// Element access
-	reference operator()(index_type i, index_type j) const {
+	reference operator()(size_type i, size_type j) const {
 		return (*m_expression)(i, j);
 	}
 	
-	void set_element(index_type i, index_type j,value_type t){
+	void set_element(size_type i, size_type j,value_type t){
 		m_expression->set_element(i,j,t);
 	}
 
@@ -104,33 +103,33 @@ public:
 	typedef column_iterator const_column_iterator;
 
 	// Iterators are the iterators of the referenced expression.
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return m_expression->row_begin(i);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return m_expression->row_end(i);
 	}
-	row_iterator row_begin(index_type i){
+	row_iterator row_begin(size_type i){
 		return m_expression->row_begin(i);
 	}
-	row_iterator row_end(index_type i){
+	row_iterator row_end(size_type i){
 		return m_expression->row_end(i);
 	}
 	
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		return m_expression->column_begin(j);
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		return m_expression->column_end(j);
 	}
-	column_iterator column_begin(index_type j){
+	column_iterator column_begin(size_type j){
 		return m_expression->column_begin(j);
 	}
-	column_iterator column_end(index_type j){
+	column_iterator column_end(size_type j){
 		return m_expression->column_end(j);
 	}
 	
-	row_iterator set_element(row_iterator pos, index_type index, value_type value) {
+	row_iterator set_element(row_iterator pos, size_type index, value_type value) {
 		return m_expression->set_element(pos,index,value);
 	}
 	
@@ -146,15 +145,15 @@ public:
 		m_expression->clear();
 	}
 	
-	void reserve(index_type non_zeros) {
+	void reserve(size_type non_zeros) {
 		m_expression->reserve(non_zeros);
 	}
 	
-	void reserve_row(index_type row, index_type non_zeros) {
+	void reserve_row(size_type row, size_type non_zeros) {
 		m_expression->reserve_row(row,non_zeros);
 	}
 	
-	void reserve_column(index_type column, index_type non_zeros) {
+	void reserve_column(size_type column, size_type non_zeros) {
 		m_expression->reserve_column(column,non_zeros);
 	}
 	
@@ -167,11 +166,11 @@ public:
 		m1.swap(m2);
 	}
 	
-	void swap_rows(index_type i, index_type j){
+	void swap_rows(size_type i, size_type j){
 		m_expression->swap_rows(i,j);
 	}
 	
-	void swap_columns(index_type i, index_type j){
+	void swap_columns(size_type i, size_type j){
 		m_expression->swap_columns(i,j);
 	}
 private:
@@ -184,9 +183,8 @@ class matrix_transpose: public matrix_expression<matrix_transpose<M>, typename M
 private:
 	typedef typename closure<M>::type matrix_closure_type;
 public:
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 
@@ -222,11 +220,11 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	index_type size1() const {
+	size_type size1() const {
 		return expression().size2();
 	}
 	///\brief Returns the number of columns of the matrix.
-	index_type size2() const {
+	size_type size2() const {
 		return expression().size1();
 	}
 	
@@ -240,11 +238,11 @@ public:
 	// ---------
 
 	// Element access
-	reference operator()(index_type i, index_type j)const{
+	reference operator()(size_type i, size_type j)const{
 		return expression()(j, i);
 	}
 	
-	void set_element(index_type i, index_type j,value_type t){
+	void set_element(size_type i, size_type j,value_type t){
 		expression().set_element(j,i,t);
 	}
 
@@ -254,35 +252,35 @@ public:
 	typedef typename matrix_closure_type::row_iterator column_iterator;
 
 	//iterators
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return expression().column_begin(i);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return expression().column_end(i);
 	}
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		return expression().row_begin(j);
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		return expression().row_end(j);
 	}
 
-	row_iterator row_begin(index_type i) {
+	row_iterator row_begin(size_type i) {
 		return expression().column_begin(i);
 	}
-	row_iterator row_end(index_type i) {
+	row_iterator row_end(size_type i) {
 		return expression().column_end(i);
 	}
-	column_iterator column_begin(index_type j) {
+	column_iterator column_begin(size_type j) {
 		return expression().row_begin(j);
 	}
-	column_iterator column_end(index_type j) {
+	column_iterator column_end(size_type j) {
 		return expression().row_end(j);
 	}
 	
 	typedef typename major_iterator<matrix_transpose<M> >::type major_iterator;
 	
-	major_iterator set_element(major_iterator pos, index_type index, value_type value){
+	major_iterator set_element(major_iterator pos, size_type index, value_type value){
 		return expression().set_element(pos,index,value);
 	}
 	
@@ -298,14 +296,14 @@ public:
 		expression().clear();
 	}
 	
-	void reserve(index_type non_zeros) {
+	void reserve(size_type non_zeros) {
 		expression().reserve(non_zeros);
 	}
 	
-	void reserve_row(index_type row, index_type non_zeros) {
+	void reserve_row(size_type row, size_type non_zeros) {
 		expression().reserve_row(row,non_zeros);
 	}
-	void reserve_column(index_type column, index_type non_zeros) {
+	void reserve_column(size_type column, size_type non_zeros) {
 		expression().reserve_column(column,non_zeros);
 	}
 	
@@ -333,10 +331,9 @@ private:
 			"Can not get row of sparse column major matrix");
 public:
 	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 
 	typedef matrix_row<M> closure_type;
 	typedef matrix_row<typename const_expression<M>::type> const_closure_type;
@@ -345,7 +342,7 @@ public:
 	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
-	matrix_row(matrix_closure_type const& expression, index_type i):m_expression(expression), m_i(i) {
+	matrix_row(matrix_closure_type const& expression, size_type i):m_expression(expression), m_i(i) {
 		SIZE_CHECK (i < expression.size1());
 	}
 	
@@ -360,12 +357,12 @@ public:
 		return m_expression;
 	}
 	
-	index_type index() const {
+	size_type index() const {
 		return m_i;
 	}
 	
 	///\brief Returns the size of the vector
-	index_type size() const {
+	size_type size() const {
 		return expression().size2();
 	}
 	
@@ -379,14 +376,14 @@ public:
 	// ---------
 	
 	// Element access
-	reference operator()(index_type j) const {
+	reference operator()(size_type j) const {
 		return m_expression(m_i, j);
 	}
-	reference operator [](index_type j) const {
+	reference operator [](size_type j) const {
 		return (*this)(j);
 	}
 	
-	void set_element(index_type j,value_type t){
+	void set_element(size_type j,value_type t){
 		expression().set_element(m_i,j,t);
 	}
 
@@ -417,7 +414,7 @@ public:
 		return expression().row_end(m_i);
 	}
 	
-	iterator set_element(iterator pos, index_type index, value_type value) {
+	iterator set_element(iterator pos, size_type index, value_type value) {
 		return set_element(pos, index, value, typename M::orientation());
 	}
 	
@@ -433,14 +430,14 @@ public:
 		clear_range(begin(),end());
 	}
 	
-	void reserve(index_type non_zeros) {
+	void reserve(size_type non_zeros) {
 		expression().reserve_row(m_i,non_zeros);
 	}
 	
 private:
 	
 	//row major case is trivial
-	iterator set_element(iterator pos, index_type index, value_type value, row_major) {
+	iterator set_element(iterator pos, size_type index, value_type value, row_major) {
 		return expression().set_element(pos,index,value);
 	}
 	iterator clear_range(iterator start, iterator end, row_major) {
@@ -450,7 +447,7 @@ private:
 		return expression().clear_element(pos);
 	}
 	//dense row major case
-	iterator set_element(iterator pos, index_type index, value_type value, column_major ) {
+	iterator set_element(iterator pos, size_type index, value_type value, column_major ) {
 		RANGE_CHECK(pos.index() == index);
 		*pos = value;
 		return pos;
@@ -466,7 +463,7 @@ private:
 	}
 
 	matrix_closure_type m_expression;
-	index_type m_i;
+	size_type m_i;
 };
 
 // Matrix based vector range class representing (off-)diagonals of a matrix.
@@ -476,10 +473,9 @@ private:
 	typedef typename closure<M>::type matrix_closure_type;
 public:
 	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 
 	typedef matrix_vector_range<M> closure_type;
 	typedef matrix_vector_range<typename const_expression<M>::type> const_closure_type;
@@ -488,7 +484,7 @@ public:
 	typedef typename M::evaluation_category evaluation_category;
 
 	// Construction and destruction
-	matrix_vector_range(matrix_closure_type expression, index_type start1, index_type end1, index_type start2, index_type end2)
+	matrix_vector_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
 	:m_expression(expression), m_start1(start1), m_start2(start2), m_size(end1-start1){
 		SIZE_CHECK(start1 <= expression.size1());
 		SIZE_CHECK(end1 <= expression.size1());
@@ -504,10 +500,10 @@ public:
 	, m_start2(other.start2()), m_size(other.size()){}
 	
 	// Accessors
-	index_type start1() const {
+	size_type start1() const {
 		return m_start1;
 	}
-	index_type start2() const {
+	size_type start2() const {
 		return m_start2;
 	}
 	
@@ -519,7 +515,7 @@ public:
 	}
 	
 	///\brief Returns the size of the vector
-	index_type size() const {
+	size_type size() const {
 		return m_size;
 	}
 	
@@ -533,14 +529,14 @@ public:
 	// ---------
 
 	// Element access
-	reference operator()(index_type i) const {
+	reference operator()(size_type i) const {
 		return m_expression(start1()+i,start2()+i);
 	}
-	reference operator [](index_type i) const {
+	reference operator [](size_type i) const {
 		return (*this)(i);
 	}
 	
-	void set_element(index_type i,value_type t){
+	void set_element(size_type i,value_type t){
 		expression().set_element(start1()+i,start2()+i,t);
 	}
 
@@ -570,14 +566,14 @@ public:
 	}
 	
 	void reserve(){}
-	void reserve_row(index_type, index_type) {}
-	void reserve_column(index_type, index_type ){}
+	void reserve_row(size_type, size_type) {}
+	void reserve_column(size_type, size_type ){}
 
 private:
 	matrix_closure_type m_expression;
-	index_type m_start1;
-	index_type m_start2;
-	index_type m_size;
+	size_type m_start1;
+	size_type m_start2;
+	size_type m_size;
 };
 
 // Matrix based range class
@@ -587,10 +583,9 @@ private:
 	typedef typename closure<M>::type matrix_closure_type;
 public:
 	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 	
 	typedef matrix_range<M> closure_type;
 	typedef matrix_range<typename const_expression<M>::type> const_closure_type;
@@ -601,7 +596,7 @@ public:
 
 	// Construction and destruction
 
-	matrix_range(matrix_closure_type expression, index_type start1, index_type end1, index_type start2, index_type end2)
+	matrix_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
 	:m_expression(expression), m_start1(start1), m_size1(end1-start1), m_start2(start2), m_size2(end2-start2){
 		SIZE_CHECK(start1 <= expression.size1());
 		SIZE_CHECK(end1 <= expression.size1());
@@ -623,10 +618,10 @@ public:
 	, m_start2(other.start2()), m_size2(other.size2()){}
 		
 	// Accessors
-	index_type start1() const {
+	size_type start1() const {
 		return m_start1;
 	}
-	index_type start2() const {
+	size_type start2() const {
 		return m_start2;
 	}
 
@@ -638,11 +633,11 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	index_type size1() const {
+	size_type size1() const {
 		return m_size1;
 	}
 	///\brief Returns the number of columns of the matrix.
-	index_type size2() const {
+	size_type size2() const {
 		return m_size2;
 	}
 	
@@ -657,7 +652,7 @@ public:
 	
 
 	// Element access
-	reference operator()(index_type i, index_type j)const{
+	reference operator()(size_type i, size_type j)const{
 		return m_expression(start1() +i, start2() + j);
 	}
 
@@ -678,49 +673,49 @@ public:
 	typedef subrange_iterator<typename M::const_column_iterator> const_column_iterator;
 
 	// Element lookup
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(
 			expression().row_begin(i+start1()),expression().row_end(i+start1()),
 			start2(),start2()
 		);
 	}
-	row_iterator row_begin(index_type i){
+	row_iterator row_begin(size_type i){
 		return row_iterator(
 			expression().row_begin(i+start1()),expression().row_end(i+start1()),
 			start2(),start2()
 		);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(
 			expression().row_begin(i+start1()),expression().row_end(i+start1()),
 			start2()+size2(),start2()
 		);
 	}
-	row_iterator row_end(index_type i){
+	row_iterator row_end(size_type i){
 		return row_iterator(
 			expression().row_begin(i+start1()),expression().row_end(i+start1()),
 			start2()+size2(),start2()
 		);
 	}
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		return const_column_iterator(
 			expression().column_begin(j+start2()),expression().column_end(j+start2()),
 			start1(),start1()
 		);
 	}
-	column_iterator column_begin(index_type j) {
+	column_iterator column_begin(size_type j) {
 		return column_iterator(
 			expression().column_begin(j+start2()),expression().column_end(j+start2()),
 			start1(),start1()
 		);
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		return const_column_iterator(
 			expression().column_begin(j+start2()),expression().column_end(j+start2()),
 			start1()+size1(),start1()
 		);
 	}
-	column_iterator column_end(index_type j) {
+	column_iterator column_end(size_type j) {
 		return column_iterator(
 			expression().column_begin(j+start2()),expression().column_end(j+start2()),
 			start1()+size1(),start1()
@@ -728,7 +723,7 @@ public:
 	}
 	typedef typename major_iterator<matrix_range<M> >::type major_iterator;
 	
-	major_iterator set_element(major_iterator pos, index_type index, value_type value) {
+	major_iterator set_element(major_iterator pos, size_type index, value_type value) {
 		return expression().set_element(pos.inner(),index+orientation::index_m(start1(),start2()),value);
 	}
 	
@@ -741,28 +736,27 @@ public:
 	}
 	
 	void clear(){
-		for(index_type i = 0; i != orientation::index_M(size1(),size2()); ++i)
+		for(size_type i = 0; i != orientation::index_M(size1(),size2()); ++i)
 			clear_range(major_begin(*this,i),major_end(*this,i));
 	}
 	
-	void reserve(index_type){}
-	void reserve_row(index_type, index_type) {}
-	void reserve_column(index_type, index_type ){}
+	void reserve(size_type){}
+	void reserve_row(size_type, size_type) {}
+	void reserve_column(size_type, size_type ){}
 private:
 	matrix_closure_type m_expression;
-	index_type m_start1;
-	index_type m_size1;
-	index_type m_start2;
-	index_type m_size2;
+	size_type m_start1;
+	size_type m_size1;
+	size_type m_start2;
+	size_type m_size2;
 };
 
 template<class T,class Orientation=row_major>
 class dense_matrix_adaptor: public matrix_expression<dense_matrix_adaptor<T,Orientation>, cpu_tag > {
 	typedef dense_matrix_adaptor<T,Orientation> self_type;
 public:
-	typedef std::size_t index_type;
+	typedef std::size_t size_type;
 	typedef typename boost::remove_const<T>::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const& const_reference;
 	typedef T& reference;
 
@@ -823,8 +817,8 @@ public:
  	/// \param stride2 distance in 2nd direction between elements of the self_type in memory
 	dense_matrix_adaptor(
 		T* values, 
-		index_type size1, index_type size2,
-		index_type stride1 = 0, index_type stride2 = 0 
+		size_type size1, size_type size2,
+		size_type stride1 = 0, size_type stride2 = 0 
 	)
 	: m_values(values)
 	, m_size1(size1)
@@ -843,11 +837,11 @@ public:
 	// ---------
 		
 	/// \brief Return the number of rows of the matrix
-	index_type size1() const {
+	size_type size1() const {
 		return m_size1;
 	}
 	/// \brief Return the number of columns of the matrix
-	index_type size2() const {
+	size_type size2() const {
 		return m_size2;
 	}
 	
@@ -880,13 +874,13 @@ public:
 	// Element access
 	// --------------
 	
-	const_reference operator() (index_type i, index_type j) const {
+	const_reference operator() (size_type i, size_type j) const {
 		return m_values[i*m_stride1+j*m_stride2];
         }
-        reference operator() (index_type i, index_type j) {
+        reference operator() (size_type i, size_type j) {
 		return m_values[i*m_stride1+j*m_stride2];
         }
-	void set_element(index_type i, index_type j,value_type t){
+	void set_element(size_type i, size_type j,value_type t){
 		m_values[i*m_stride1+j*m_stride2]  = t;
 	}
 
@@ -899,35 +893,35 @@ public:
 	typedef dense_storage_iterator<value_type const> const_row_iterator;
 	typedef dense_storage_iterator<value_type const> const_column_iterator;
 
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_values+i*m_stride1,0,m_stride2);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(m_values+i*m_stride1+size2()*m_stride2,size2(),m_stride2);
 	}
-	row_iterator row_begin(index_type i){
+	row_iterator row_begin(size_type i){
 		return row_iterator(m_values+i*m_stride1,0,m_stride2);
 	}
-	row_iterator row_end(index_type i){
+	row_iterator row_end(size_type i){
 		return row_iterator(m_values+i*m_stride1+size2()*m_stride2,size2(),m_stride2);
 	}
 	
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		return const_column_iterator(m_values+j*m_stride2,0,m_stride1);
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		return const_column_iterator(m_values+j*m_stride2+size1()*m_stride1,size1(),m_stride1);
 	}
-	column_iterator column_begin(index_type j){
+	column_iterator column_begin(size_type j){
 		return column_iterator(m_values+j*m_stride2,0,m_stride1);
 	}
-	column_iterator column_end(index_type j){
+	column_iterator column_end(size_type j){
 		return column_iterator(m_values+j*m_stride2+size1()*m_stride1,size1(),m_stride1);
 	}
 	
 	typedef typename major_iterator<self_type>::type major_iterator;
 	
-	major_iterator set_element(major_iterator pos, index_type index, value_type value) {
+	major_iterator set_element(major_iterator pos, size_type index, value_type value) {
 		RANGE_CHECK(pos.index() == index);
 		*pos=value;
 		return pos;
@@ -945,18 +939,18 @@ public:
 	
 		
 	void clear(){
-		for(index_type i = 0; i != size1(); ++i){
-			for(index_type j = 0; j != size2(); ++j){
+		for(size_type i = 0; i != size1(); ++i){
+			for(size_type j = 0; j != size2(); ++j){
 				(*this)(i,j) = value_type();
 			}
 		}
 	}
 private:
 	T* m_values;
-	index_type m_size1;
-	index_type m_size2;
-	index_type m_stride1;
-	index_type m_stride2;
+	size_type m_size1;
+	size_type m_size2;
+	size_type m_stride1;
+	size_type m_stride2;
 };
 
 

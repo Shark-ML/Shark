@@ -31,6 +31,10 @@
 #include "../detail/functional.hpp"
 #include "../expression_types.hpp"
 
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/vector_assign.hpp"
+#endif
+
 namespace shark {namespace blas {namespace kernels {
 
 template<class F, class V>
@@ -55,7 +59,6 @@ void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	dense_tag, dense_tag
 ) {
-	SIZE_CHECK(v().size() == e().size());
 	for(std::size_t i = 0; i != v().size(); ++i){
 		v()(i) = static_cast<typename V::value_type>(e()(i));
 	}
@@ -66,9 +69,8 @@ void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	dense_tag, packed_tag
 ) {
-	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
-	typedef typename V::scalar_type scalar_type;
+	typedef typename V::value_type value_type;
 	EIterator eiter = e.begin();
 	EIterator eend = e.end();
 	//special case:
@@ -82,7 +84,7 @@ void vector_assign(
 	
 	//set the first elements to zero
 	for(;viter.index() != eiter.index(); ++viter){
-		*viter= scalar_type/*zero*/();
+		*viter= value_type/*zero*/();
 	}
 	//copy contents of right-hand side
 	for(;eiter != eend; ++eiter,++viter){
@@ -90,7 +92,7 @@ void vector_assign(
 	}
 	
 	for(;viter!= vend; ++viter){
-		*viter= scalar_type/*zero*/();
+		*viter= value_type/*zero*/();
 	}
 }
 
@@ -100,7 +102,6 @@ void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	packed_tag, packed_tag
 ) {
-	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
 	EIterator eiter = e.begin();
 	EIterator eend = e.end();
@@ -177,8 +178,8 @@ void vector_assign(
 }
 
 //dispatcher
-template< class V, class E>
-void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag> &e) {
+template< class V, class E, class Device>
+void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> &e) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;
@@ -198,7 +199,6 @@ void vector_assign(
 	F f,
 	dense_tag, dense_tag
 ) {
-	SIZE_CHECK(v().size() == e().size());
 	for(std::size_t i = 0; i != v().size(); ++i){
 		f(v()(i),e()(i));
 	}
@@ -212,10 +212,9 @@ void vector_assign(
 	F f,
 	dense_tag, packed_tag
 ) {
-	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
 	typedef typename V::const_iterator VIterator;
-	typedef typename V::scalar_type scalar_type;
+	typedef typename V::value_type value_type;
 	EIterator eiter = e().begin();
 	EIterator eend = e().end();
 	VIterator viter = v().begin();
@@ -224,7 +223,7 @@ void vector_assign(
 	if(eiter != eend){
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
 		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){
-			f(*viter,scalar_type/*zero*/());
+			f(*viter,value_type/*zero*/());
 		}
 		//copy contents of right-hand side
 		for(;eiter != eend; ++eiter,++viter){
@@ -233,7 +232,7 @@ void vector_assign(
 	}
 	//apply f to the last elements for which the right hand side is 0, unless f is the identity
 	for(;viter!= vend &&!F::right_zero_identity; ++viter){
-		*viter= scalar_type/*zero*/();
+		*viter= value_type/*zero*/();
 	}
 }
 
@@ -245,10 +244,9 @@ void vector_assign(
 	F f,
 	packed_tag, packed_tag
 ) {
-	SIZE_CHECK(v().size() == e().size());
 	typedef typename E::const_iterator EIterator;
 	typedef typename V::const_iterator VIterator;
-	typedef typename V::scalar_type scalar_type;
+	typedef typename V::value_type value_type;
 	EIterator eiter = e().begin();
 	EIterator eend = e().end();
 	VIterator viter = v().begin();
@@ -265,7 +263,7 @@ void vector_assign(
 		
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
 		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){
-			f(*viter,scalar_type/*zero*/());
+			f(*viter,value_type/*zero*/());
 		}
 		//copy contents of right-hand side
 		for(;eiter != eend; ++eiter,++viter){
@@ -274,7 +272,7 @@ void vector_assign(
 	}
 	//apply f to the last elements for which the right hand side is 0, unless f is the identity
 	for(;viter!= vend &&!F::right_zero_identity; ++viter){
-		*viter= scalar_type/*zero*/();
+		*viter= value_type/*zero*/();
 	}
 }
 
@@ -302,12 +300,12 @@ void vector_assign(
 	sparse_tag tag, dense_tag
 ){	
 	typedef typename V::value_type value_type;
-	typedef typename V::index_type index_type;
+	typedef typename V::size_type size_type;
 	value_type zero = value_type();
-	index_type size = e().size();
+	size_type size = e().size();
 	
 	typename V::iterator it = v().begin();
-	for(index_type i = 0; i != size; ++i,++it){
+	for(size_type i = 0; i != size; ++i,++it){
 		if(it == v().end() || it.index() != i){//insert missing elements
 			it = v().set_element(it,i,zero); 
 		}
@@ -332,15 +330,15 @@ void assign_sparse(
 	F f
 ){	
 	typedef typename V::value_type value_type;
-	typedef typename V::index_type index_type;
+	typedef typename V::size_type size_type;
 	value_type zero = value_type();
 
 	typename V::iterator it = v().begin();
 	typename E::const_iterator ite = e().begin();
 	typename E::const_iterator ite_end = e().end();
 	while(it != v().end() && ite != ite_end) {
-		index_type it_index = it.index();
-		index_type ite_index = ite.index();
+		size_type it_index = it.index();
+		size_type ite_index = ite.index();
 		if (it_index == ite_index) {
 			f(*it, *ite);
 			++ ite;
@@ -412,8 +410,8 @@ void vector_assign(
 }
 
 // Dispatcher
-template<class F, class V, class E>
-void assign(vector_expression<V, cpu_tag>& v, const vector_expression<E, cpu_tag> &e) {
+template<class F, class V, class E, class Device>
+void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> &e) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;

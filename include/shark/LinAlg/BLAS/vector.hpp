@@ -52,10 +52,9 @@ class vector: public vector_container<vector<T>, cpu_tag > {
 	typedef boost::container::vector<T> array_type;
 public:
 	typedef T value_type;
-	typedef value_type scalar_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
-	typedef typename array_type::size_type index_type;
+	typedef typename array_type::size_type size_type;
 
 	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
@@ -72,12 +71,12 @@ public:
 	/// \brief Constructor of a vector with a predefined size
 	/// By default, its elements are initialized to 0.
 	/// \param size initial size of the vector
-	explicit vector(index_type size):m_storage(size) {}
+	explicit vector(size_type size):m_storage(size) {}
 
 	/// \brief Constructor of a vector with a predefined size and a unique initial value
 	/// \param size of the vector
 	/// \param init value to assign to each element of the vector
-	vector(index_type size, const value_type& init):m_storage(size, init) {}
+	vector(size_type size, const value_type& init):m_storage(size, init) {}
 
 	/// \brief Copy-constructor of a vector
 	/// \param v is the vector to be duplicated
@@ -146,7 +145,7 @@ public:
 	// ---------
 	
 	/// \brief Return the size of the vector.
-	index_type size() const {
+	size_type size() const {
 		return m_storage.size();
 	}
 	
@@ -166,7 +165,7 @@ public:
 
 	/// \brief Return the maximum size of the data container.
 	/// Return the upper bound (maximum size) on the data container. Depending on the container, it can be bigger than the current size of the vector.
-	index_type max_size() const {
+	size_type max_size() const {
 		return m_storage.max_size();
 	}
 
@@ -178,7 +177,7 @@ public:
 
 	/// \brief Resize the vector
 	/// \param size new size of the vector
-	void resize(index_type size) {
+	void resize(size_type size) {
 		m_storage.resize(size);
 	}
 
@@ -189,7 +188,7 @@ public:
 	/// \brief Return a const reference to the element \f$i\f$
 	/// Return a const reference to the element \f$i\f$. With some compilers, this notation will be faster than \c operator[]
 	/// \param i index of the element
-	const_reference operator()(index_type i) const {
+	const_reference operator()(size_type i) const {
 		RANGE_CHECK(i < size());
 		return m_storage[i];
 	}
@@ -197,21 +196,21 @@ public:
 	/// \brief Return a reference to the element \f$i\f$
 	/// Return a reference to the element \f$i\f$. With some compilers, this notation will be faster than \c operator[]
 	/// \param i index of the element
-	reference operator()(index_type i) {
+	reference operator()(size_type i) {
 		RANGE_CHECK(i < size());
 		return m_storage[i];
 	}
 
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
-	const_reference operator [](index_type i) const {
+	const_reference operator [](size_type i) const {
 		RANGE_CHECK(i < size());
 		return m_storage[i];
 	}
 
 	/// \brief Return a reference to the element \f$i\f$
 	/// \param i index of the element
-	reference operator [](index_type i) {
+	reference operator [](size_type i) {
 		RANGE_CHECK(i < size());
 		return m_storage[i];
 	}
@@ -278,7 +277,7 @@ public:
 	}
 	
 	/////////////////sparse interface///////////////////////////////
-	iterator set_element(iterator pos, index_type index, value_type value) {
+	iterator set_element(iterator pos, size_type index, value_type value) {
 		SIZE_CHECK(pos.index() == index);
 		(*this)(index) = value;
 		
@@ -299,7 +298,7 @@ public:
 		return end;
 	}
 	
-	void reserve(index_type) {}
+	void reserve(size_type) {}
 	
 	/// \brief Swap the content of two vectors
 	/// \param v1 is the first vector. It takes values from v2
@@ -348,9 +347,9 @@ struct vector_temporary_type<T,dense_tag, cpu_tag>{
 	//~ typedef std::array<T,N> array_type;
 //~ public:
 	
-	//~ typedef typename array_type::index_type index_type;
+	//~ typedef typename array_type::size_type size_type;
 	//~ typedef typename array_type::value_type value_type;
-	//~ typedef value_type scalar_type;
+	//~ typedef value_type value_type;
 	//~ typedef typename array_type::const_reference const_reference;
 	//~ typedef typename array_type::reference reference;
 
@@ -377,7 +376,7 @@ struct vector_temporary_type<T,dense_tag, cpu_tag>{
 	//~ }
 	
 	//~ /// \brief Return the size of the vector.
-	//~ index_type size() const {
+	//~ size_type size() const {
 		//~ return m_storage.size();
 	//~ }
 	
@@ -404,7 +403,7 @@ struct vector_temporary_type<T,dense_tag, cpu_tag>{
 	//~ /// \brief Return a const reference to the element \f$i\f$
 	//~ /// Return a const reference to the element \f$i\f$.
 	//~ /// \param i index of the element
-	//~ const_reference operator()(index_type i) const {
+	//~ const_reference operator()(size_type i) const {
 		//~ RANGE_CHECK(i < size());
 		//~ return m_storage[i];
 	//~ }
@@ -412,21 +411,21 @@ struct vector_temporary_type<T,dense_tag, cpu_tag>{
 	//~ /// \brief Return a reference to the element \f$i\f$
 	//~ /// Return a reference to the element \f$i\f$.
 	//~ /// \param i index of the element
-	//~ reference operator()(index_type i) {
+	//~ reference operator()(size_type i) {
 		//~ RANGE_CHECK(i < size());
 		//~ return m_storage[i];
 	//~ }
 
 	//~ /// \brief Return a const reference to the element \f$i\f$
 	//~ /// \param i index of the element
-	//~ const_reference operator [](index_type i) const {
+	//~ const_reference operator [](size_type i) const {
 		//~ RANGE_CHECK(i < size());
 		//~ return (*this)(i);
 	//~ }
 
 	//~ /// \brief Return a reference to the element \f$i\f$
 	//~ /// \param i index of the element
-	//~ reference operator [](index_type i) {
+	//~ reference operator [](size_type i) {
 		//~ RANGE_CHECK(i < size());
 		//~ return (*this)(i);
 	//~ }
@@ -521,7 +520,7 @@ struct vector_temporary_type<T,dense_tag, cpu_tag>{
 	//~ }
 	
 	//~ /////////////////sparse interface///////////////////////////////
-	//~ iterator set_element(iterator pos, index_type index, value_type value) {
+	//~ iterator set_element(iterator pos, size_type index, value_type value) {
 		//~ SIZE_CHECK(pos.index() == index);
 		//~ (*this)(index) = value;
 		
@@ -542,7 +541,7 @@ struct vector_temporary_type<T,dense_tag, cpu_tag>{
 		//~ return end;
 	//~ }
 	
-	//~ void reserve(index_type) {}
+	//~ void reserve(size_type) {}
 	
 	//~ /// \brief Swap the content of two vectors
 	//~ /// \param v1 is the first vector. It takes values from v2

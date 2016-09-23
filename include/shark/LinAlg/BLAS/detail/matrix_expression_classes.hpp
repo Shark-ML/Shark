@@ -43,15 +43,14 @@ namespace blas {
 template<class E>
 class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E>, typename E::device_type > {
 private:
-	typedef functors::scalar_multiply1<typename E::scalar_type> functor_type;
+	typedef functors::scalar_multiply1<typename E::value_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
 
 	typedef typename std::result_of<functor_type(typename E::value_type) >::type value_type;
-	typedef typename E::scalar_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef typename E::index_type index_type;
+	typedef typename E::size_type size_type;
 
 	typedef matrix_scalar_multiply const_closure_type;
 	typedef const_closure_type closure_type;
@@ -62,23 +61,23 @@ public:
 	typedef typename E::device_type device_type;
 
 	// Construction and destruction
-	explicit matrix_scalar_multiply(expression_closure_type const& e, scalar_type scalar):
+	explicit matrix_scalar_multiply(expression_closure_type const& e, value_type scalar):
 		m_expression(e), m_scalar(scalar){}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_expression.size1();
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_expression.size2();
 	}
 
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		return m_scalar * m_expression(i, j);
 	}
 	
-	scalar_type scalar()const{
+	value_type scalar()const{
 		return m_scalar;
 	}
 	expression_closure_type const& expression() const{
@@ -87,16 +86,16 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		m_expression.assign_to(X,alpha*m_scalar);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		m_expression.plus_assign_to(X,alpha*m_scalar);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		m_expression.minus_assign_to(X,alpha*m_scalar);
 	}
 
@@ -106,23 +105,23 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_expression.row_begin(i),functor_type(m_scalar));
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(m_expression.row_end(i),functor_type(m_scalar));
 	}
 
-	const_column_iterator column_begin(index_type i) const {
+	const_column_iterator column_begin(size_type i) const {
 		return const_row_iterator(m_expression.column_begin(i),functor_type(m_scalar));
 	}
-	const_column_iterator column_end(index_type i) const {
+	const_column_iterator column_end(size_type i) const {
 		return const_row_iterator(m_expression.column_end(i),functor_type(m_scalar));
 	}
 
 private:
 	expression_closure_type m_expression;
-	scalar_type m_scalar;
+	value_type m_scalar;
 };	
 	
 template<class E1, class E2>
@@ -133,9 +132,8 @@ private:
 	typedef typename E2::const_closure_type rhs_closure_type;
 public:
 
-	typedef typename E1::index_type index_type;
+	typedef typename E1::size_type size_type;
 	typedef decltype(typename E1::value_type() + typename E2::value_type()) value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
@@ -164,10 +162,10 @@ public:
 	): m_lhs (e1), m_rhs (e2){}
 
         // Accessors
-        index_type size1 () const {
+        size_type size1 () const {
 		return m_lhs.size1 ();
         }
-        index_type size2 () const {
+        size_type size2 () const {
 		return m_lhs.size2 ();
         }
 	
@@ -179,24 +177,24 @@ public:
 		return m_rhs;
 	}
 
-        const_reference operator () (index_type i, index_type j) const {
+        const_reference operator () (size_type i, size_type j) const {
 		return m_lhs(i, j) + m_rhs(i,j);
         }
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		assign(X, matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
 		plus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		plus_assign(X,matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
 		plus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		minus_assign(X,matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
 		minus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
 	}
@@ -215,26 +213,26 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator (functor_type(),
 			m_lhs.row_begin(i),m_lhs.row_end(i),
 			m_rhs.row_begin(i),m_rhs.row_end(i)
 		);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator (functor_type(),
 			m_lhs.row_end(i),m_lhs.row_end(i),
 			m_rhs.row_end(i),m_rhs.row_end(i)
 		);
 	}
 
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		return const_column_iterator (functor_type(),
 			m_lhs.column_begin(j),m_lhs.column_end(j),
 			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		return const_column_iterator (functor_type(),
 			m_lhs.column_end(j),m_lhs.column_end(j),
 			m_rhs.column_end(j),m_rhs.column_end(j)
@@ -251,9 +249,8 @@ template<class V>
 class vector_repeater:public blas::matrix_expression<vector_repeater<V>, typename V::device_type > {
 public:
 	typedef typename V::const_closure_type expression_closure_type;
-	typedef typename V::index_type index_type;
+	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
@@ -265,14 +262,14 @@ public:
 	typedef typename V::evaluation_category evaluation_category;
 
 	// Construction and destruction
-	explicit vector_repeater (expression_closure_type const& e, index_type rows):
+	explicit vector_repeater (expression_closure_type const& e, size_type rows):
 	m_vector(e), m_rows(rows) {}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_rows;
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_vector.size();
 	}
 
@@ -282,7 +279,7 @@ public:
 	}
 
 	// Element access
-	const_reference operator() (index_type i, index_type j) const {
+	const_reference operator() (size_type i, size_type j) const {
 		return m_vector(j);
 	}
 
@@ -294,26 +291,26 @@ public:
 
 	// Element lookup
 	
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		RANGE_CHECK( i < size1());
 		return m_vector.begin();
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		RANGE_CHECK( i < size1());
 		return m_vector.end();
 	}
 	
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		RANGE_CHECK( j < size2());
 		return const_column_iterator(0,m_vector(j));
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		RANGE_CHECK( j < size2());
 		return const_column_iterator(size1(),m_vector(j));
 	}
 private:
 	expression_closure_type m_vector;
-	index_type m_rows;
+	size_type m_rows;
 };
 
 /// \brief A matrix with all values of type \c T equal to the same value
@@ -322,11 +319,10 @@ private:
 template<class T>
 class scalar_matrix:public matrix_container<scalar_matrix<T>, cpu_tag > {
 public:
-	typedef std::size_t index_type;
+	typedef std::size_t size_type;
 	typedef T value_type;
 	typedef const T& const_reference;
 	typedef const_reference reference;
-	typedef value_type scalar_type;
 
 	typedef scalar_matrix const_closure_type;
 	typedef scalar_matrix closure_type;
@@ -338,21 +334,21 @@ public:
 	// Construction and destruction
 	scalar_matrix():
 		m_size1(0), m_size2(0), m_value() {}
-	scalar_matrix(index_type size1, index_type size2, const value_type& value = value_type(1)):
+	scalar_matrix(size_type size1, size_type size2, const value_type& value = value_type(1)):
 		m_size1(size1), m_size2(size2), m_value(value) {}
 	scalar_matrix(const scalar_matrix& m):
 		m_size1(m.m_size1), m_size2(m.m_size2), m_value(m.m_value) {}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_size1;
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_size2;
 	}
 
 	// Element access
-	const_reference operator()(index_type /*i*/, index_type /*j*/) const {
+	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
 		return m_value;
 	}
 	
@@ -362,22 +358,22 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(0, m_value);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(size2(), m_value);
 	}
 	
-	const_row_iterator column_begin(index_type j) const {
+	const_row_iterator column_begin(size_type j) const {
 		return const_row_iterator(0, m_value);
 	}
-	const_row_iterator column_end(index_type j) const {
+	const_row_iterator column_end(size_type j) const {
 		return const_row_iterator(size1(), m_value);
 	}
 private:
-	index_type m_size1;
-	index_type m_size2;
+	size_type m_size1;
+	size_type m_size2;
 	value_type m_value;
 };
 
@@ -395,10 +391,9 @@ public:
 
 	typedef F functor_type;
 	typedef typename std::result_of<F(typename E::value_type)>::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef typename E::index_type index_type;
+	typedef typename E::size_type size_type;
 
 	typedef matrix_unary const_closure_type;
 	typedef const_closure_type closure_type;
@@ -413,10 +408,10 @@ public:
 		m_expression(e), m_functor(functor) {}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_expression.size1();
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_expression.size2();
 	}
 	
@@ -431,22 +426,22 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) ) const {
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
 		X().clear();
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) ) const {
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) ) const {
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
 		plus_assign_to(X,eval_block(m_expression), -alpha);
 	}
 
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		return m_functor(m_expression(i, j));
 	}
 
@@ -456,17 +451,17 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_expression.row_begin(i),m_functor);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(m_expression.row_end(i),m_functor);
 	}
 
-	const_column_iterator column_begin(index_type i) const {
+	const_column_iterator column_begin(size_type i) const {
 		return const_row_iterator(m_expression.column_begin(i),m_functor);
 	}
-	const_column_iterator column_end(index_type i) const {
+	const_column_iterator column_end(size_type i) const {
 		return const_row_iterator(m_expression.column_end(i),m_functor);
 	}
 
@@ -478,7 +473,7 @@ private:
 	void plus_assign_to(
 		matrix_expression<MatX, device_type>& X,
 		matrix_expression<MatA, device_type> const& m,
-		scalar_type alpha
+		value_type alpha
 	)const{
 		matrix_unary<MatA, F> e(m(), m_functor);
 		matrix_scalar_multiply<matrix_unary<MatA,F> > e1(e,alpha);
@@ -494,9 +489,8 @@ public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 
-	typedef typename E1::index_type index_type;
+	typedef typename E1::size_type size_type;
 	typedef typename std::result_of<F(typename E1::value_type, typename E2::value_type)>::type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
@@ -521,10 +515,10 @@ public:
 	): m_lhs (e1), m_rhs (e2),m_functor(functor) {}
 
         // Accessors
-        index_type size1 () const {
+        size_type size1 () const {
 		return m_lhs.size1 ();
         }
-        index_type size2 () const {
+        size_type size2 () const {
 		return m_lhs.size2 ();
         }
 	
@@ -538,22 +532,22 @@ public:
 		return m_functor;
 	}
 
-        const_reference operator () (index_type i, index_type j) const {
+        const_reference operator () (size_type i, size_type j) const {
 		return m_functor( m_lhs (i, j), m_rhs(i,j));
         }
 	
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		X().clear();
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
@@ -566,26 +560,26 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator (m_functor,
 			m_lhs.row_begin(i),m_lhs.row_end(i),
 			m_rhs.row_begin(i),m_rhs.row_end(i)
 		);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator (m_functor,
 			m_lhs.row_end(i),m_lhs.row_end(i),
 			m_rhs.row_end(i),m_rhs.row_end(i)
 		);
 	}
 
-	const_column_iterator column_begin(index_type j) const {
+	const_column_iterator column_begin(size_type j) const {
 		return const_column_iterator (m_functor,
 			m_lhs.column_begin(j),m_lhs.column_end(j),
 			m_rhs.column_begin(j),m_rhs.column_end(j)
 		);
 	}
-	const_column_iterator column_end(index_type j) const {
+	const_column_iterator column_end(size_type j) const {
 		return const_column_iterator (m_functor,
 			m_lhs.column_begin(j),m_lhs.column_end(j),
 			m_rhs.column_begin(j),m_rhs.column_end(j)
@@ -602,7 +596,7 @@ private:
 		matrix_expression<MatX, device_type>& X,
 		matrix_expression<LHS, device_type> const& lhs,
 		matrix_expression<RHS, device_type> const& rhs,
-		scalar_type alpha
+		value_type alpha
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
 		matrix_binary<LHS,RHS,F> e(lhs(),rhs(), m_functor);
@@ -620,10 +614,9 @@ public:
 
 	
 	typedef decltype(typename E1::value_type() * typename E2::value_type()) value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef typename E1::index_type index_type;
+	typedef typename E1::size_type size_type;
 
 	typedef outer_product const_closure_type;
 	typedef outer_product closure_type;
@@ -638,10 +631,10 @@ public:
 	:m_lhs(e1), m_rhs(e2){}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_lhs.size();
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_rhs.size();
 	}
 
@@ -653,7 +646,7 @@ public:
 		return m_rhs;
 	}
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		return m_lhs(i) * m_rhs(j);
 	}
 
@@ -662,23 +655,23 @@ public:
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_rhs.begin(),
 			functor_type(m_lhs(i))
 		);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(m_rhs.end(),
 			functor_type(m_lhs(i))
 		);
 	}
 
-	const_column_iterator column_begin(index_type i) const {
+	const_column_iterator column_begin(size_type i) const {
 		return const_column_iterator(m_lhs.begin(),
 			functor_type(m_rhs(i))
 		);
 	}
-	const_column_iterator column_end(index_type i) const {
+	const_column_iterator column_end(size_type i) const {
 		return const_column_iterator(m_lhs.end(),
 			functor_type(m_rhs(i))
 		);
@@ -695,10 +688,9 @@ public:
 	typedef typename VecV::const_closure_type vector_closure_type;
 public:
 	typedef decltype(
-		typename MatA::scalar_type() * typename VecV::scalar_type()
-	) scalar_type;
-	typedef scalar_type value_type;
-	typedef typename MatA::index_type index_type;
+		typename MatA::value_type() * typename VecV::value_type()
+	) value_type;
+	typedef typename MatA::size_type size_type;
 	typedef value_type const& const_reference;
 	typedef const_reference reference;
 
@@ -724,7 +716,7 @@ public:
 		vector_closure_type const& vector
 	):m_matrix(matrix), m_vector(vector) {}
 
-	index_type size() const {
+	size_type size() const {
 		return m_matrix.size1();
 	}
 	
@@ -737,38 +729,38 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	
 private:
 	//gemv
 	template<class VecX, class Category>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, linear_structure, Category c)const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha, linear_structure, Category c)const{
 		x().clear();
 		plus_assign_to(x,alpha, linear_structure(), c);
 	}
 	template<class VecX, class Category>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, linear_structure, Category )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha, linear_structure, Category )const{
 		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, alpha);
 	}
 	//tpmv
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, packed_tag )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, packed_tag )const{
 		noalias(x) = eval_block(alpha * m_vector);
 		kernels::tpmv(eval_block(m_matrix), x);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, packed_tag )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, packed_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
 		kernels::tpmv(eval_block(m_matrix), temp);
@@ -776,12 +768,12 @@ private:
 	}
 	//trmv
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, dense_tag )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, dense_tag )const{
 		noalias(x) = eval_block(alpha * m_vector);
 		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), x);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha, triangular_structure, dense_tag )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, dense_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
 		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), temp);
@@ -797,9 +789,8 @@ class sum_matrix_rows:public vector_expression<sum_matrix_rows<MatA>, typename M
 public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 public:
-	typedef typename MatA::scalar_type scalar_type;
-	typedef scalar_type value_type;
-	typedef typename MatA::index_type index_type;
+	typedef typename MatA::value_type value_type;
+	typedef typename MatA::size_type size_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
@@ -818,7 +809,7 @@ public:
 		matrix_closure_type const& matrix
 	):m_matrix(matrix){}
 
-	index_type size() const {
+	size_type size() const {
 		return m_matrix.size2();
 	}
 	
@@ -827,7 +818,7 @@ public:
 	}
 
 	// Element access for elementwise case
-	const_reference operator() (index_type i) const {
+	const_reference operator() (size_type i) const {
 		SIZE_CHECK(i < size());
 		return sum(column(m_matrix,i));
 	}
@@ -844,17 +835,17 @@ public:
 
 	//dispatcher to computation kernels for blockwise case
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		x().clear();
 		plus_assign_to(x,alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		kernels::sum_rows(eval_block(m_matrix), x, alpha);
 	}
 	
 	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
 		plus_assign_to(x,-alpha);
 	}
 private:
@@ -868,9 +859,8 @@ class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M,
 public:
 	static_assert(std::is_same<typename M::storage_type::storage_tag, dense_tag>::value, "Can only create triangular proxies of dense matrices");
 
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 	typedef typename M::value_type value_type;
-	typedef typename M::scalar_type scalar_type;
 	typedef typename M::const_reference const_reference;
 	typedef typename reference<M>::type reference;
 	typedef dense_triangular_proxy<typename const_expression<M>::type,TriangularType> const_closure_type;
@@ -895,10 +885,10 @@ public:
 		return m_expression;
 	}
 	
-	 index_type size1 () const {
+	 size_type size1 () const {
 		return expression().size1 ();
         }
-        index_type size2 () const {
+        size_type size2 () const {
 		return expression().size2 ();
         }
 	
@@ -924,10 +914,9 @@ public:
 	typedef typename MatB::const_closure_type matrix_closure_typeB;
 public:
 	typedef decltype(
-		typename MatA::scalar_type() * typename MatB::scalar_type()
-	) scalar_type;
-	typedef scalar_type value_type;
-	typedef typename MatA::index_type index_type;
+		typename MatA::value_type() * typename MatB::value_type()
+	) value_type;
+	typedef typename MatA::size_type size_type;
 	typedef value_type const& const_reference;
 	typedef const_reference reference;
 
@@ -955,10 +944,10 @@ public:
 		matrix_closure_typeB const& rhs
 	):m_lhs(lhs), m_rhs(rhs) {}
 
-	index_type size1() const {
+	size_type size1() const {
 		return m_lhs.size1();
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_rhs.size2();
 	}
 	
@@ -971,38 +960,38 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha = scalar_type(1) )const{
+	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
 		plus_assign_to(X, -alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:
 	//gemm
 	template<class MatX, class Category>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, linear_structure, Category c )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, linear_structure, Category c )const{
 		X().clear();
 		plus_assign_to(X,alpha, linear_structure(), c);
 	}
 	template<class MatX, class Category>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, linear_structure, Category )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, linear_structure, Category )const{
 		kernels::gemm(eval_block(m_lhs), eval_block(m_rhs), X, alpha);
 	}
 	//trmv
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, triangular_structure, dense_tag)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, triangular_structure, dense_tag)const{
 		noalias(X) = eval_block(alpha * m_rhs);
 		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_lhs.expression(), X);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, scalar_type alpha, triangular_structure, dense_tag )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, triangular_structure, dense_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename matrix_temporary<MatX>::type temp( eval_block(alpha * m_rhs));
 		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_lhs.expression(), temp);
@@ -1020,9 +1009,8 @@ template<class VectorType>
 class diagonal_matrix: public matrix_expression<diagonal_matrix< VectorType >, typename VectorType::device_type > {
 	typedef typename VectorType::const_closure_type vector_closure_type;
 public:
-	typedef typename VectorType::index_type index_type;
+	typedef typename VectorType::size_type size_type;
 	typedef typename VectorType::value_type value_type;
-	typedef typename VectorType::scalar_type scalar_type;
 	typedef value_type  const_reference;
 	typedef value_type reference;
 
@@ -1037,22 +1025,22 @@ public:
 	diagonal_matrix(vector_closure_type const& diagonal):m_diagonal(diagonal){}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_diagonal.size();
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_diagonal.size();
 	}
 	
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		if (i == j)
 			return m_diagonal(i);
 		else
 			return value_type();
 	}
 
-	void set_element(index_type i, index_type j,value_type t){
+	void set_element(size_type i, size_type j,value_type t){
 		RANGE_CHECK(i == j);
 		m_diagonal(i) = t;
 	}
@@ -1082,7 +1070,7 @@ public:
 
 		// Construction and destruction
 		const_row_iterator(){}
-		const_row_iterator(index_type index, value_type value, bool isEnd)
+		const_row_iterator(size_type index, value_type value, bool isEnd)
 			:m_index(index),m_value(value),m_isEnd(isEnd){}
 
 		// Arithmetic
@@ -1101,7 +1089,7 @@ public:
 		}
 
 		// Indices
-		index_type index() const{
+		size_type index() const{
 			return m_index;
 		}
 
@@ -1118,7 +1106,7 @@ public:
 		}
 
 	private:
-		index_type m_index;
+		size_type m_index;
 		value_type m_value;
 		bool m_isEnd;
 	};
@@ -1127,16 +1115,16 @@ public:
 	typedef const_column_iterator column_iterator;
 
 	
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		return row_iterator(i, m_diagonal(i),false);
 	}
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		return const_row_iterator(i, value_type(),true);
 	}
-	const_column_iterator column_begin(index_type i) const {
+	const_column_iterator column_begin(size_type i) const {
 		return column_iterator(i, m_diagonal(i),false);
 	}
-	const_column_iterator column_end(index_type i) const {
+	const_column_iterator column_end(size_type i) const {
 		return const_column_iterator(i, value_type(),true);
 	}
 

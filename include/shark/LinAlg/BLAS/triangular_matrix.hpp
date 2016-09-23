@@ -46,10 +46,9 @@ class triangular_matrix:public matrix_container<triangular_matrix<T,Orientation,
 	typedef std::vector<T> array_type;
 public:
 	typedef typename array_type::value_type value_type;
-	typedef value_type scalar_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
-	typedef std::size_t index_type;
+	typedef std::size_t size_type;
 
 	typedef const matrix_reference<const self_type> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
@@ -66,13 +65,13 @@ public:
 	/** Packed matrix constructor with defined size
 	 * \param size number of rows and columns
 	 */
-	triangular_matrix(index_type size):m_size(size),m_data(size * (size+1)/2) {}
+	triangular_matrix(size_type size):m_size(size),m_data(size * (size+1)/2) {}
 
 	/** Packed matrix constructor with defined size and an initial value for all triangular matrix elements
 	 * \param size number of rows and columns
 	 * \param init initial value of the non-zero elements
 	 */
-	triangular_matrix(index_type size, scalar_type init):m_size(size),m_data(size * (size+1)/2,init) {}
+	triangular_matrix(size_type size, value_type init):m_size(size),m_data(size * (size+1)/2,init) {}
 
 	/** Copy-constructor of a dense matrix
 	 * \param m is a dense matrix
@@ -90,11 +89,11 @@ public:
 	}
 	
 	///\brief Returns the number of rows of the matrix.
-	index_type size1() const {
+	size_type size1() const {
 		return m_size;
 	}
 	///\brief Returns the number of columns of the matrix.
-	index_type size2() const {
+	size_type size2() const {
 		return m_size;
 	}
 	
@@ -111,12 +110,12 @@ public:
 	/** Resize a matrix to new dimensions. If resizing is performed, the data is not preserved.
 	 * \param size the new number of rows and columns
 	 */
-	void resize(index_type size) {
+	void resize(size_type size) {
 		m_data.resize(size*(size+1)/2);
 		m_size = size;
 	}
 	
-	void resize(index_type size1, index_type size2) {
+	void resize(size_type size1, size_type size2) {
 		SIZE_CHECK(size1 == size2);
 		resize(size1);
 		(void)size2;
@@ -127,7 +126,7 @@ public:
 	}
 
 	// Element access read only
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		if(!orientation::non_zero(i,j)) 
@@ -137,14 +136,14 @@ public:
 	}
 	
 	// separate write access
-	void set_element(index_type i,index_type j, value_type t){
+	void set_element(size_type i,size_type j, value_type t){
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		SIZE_CHECK(orientation::non_zero(i,j));
 		m_data [orientation::element(i,j,size1(),packed_tag())] = t;
 	}
 	
-	bool non_zero(index_type i,index_type j)const{
+	bool non_zero(size_type i,size_type j)const{
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		return orientation::non_zero(i,j);
@@ -187,8 +186,8 @@ public:
 		packed_random_access_iterator_tag
 	>{
 	private:
-		index_type offset(index_type n)const{
-			index_type k = m_index;
+		size_type offset(size_type n)const{
+			size_type k = m_index;
 			if(n >= 0){
 				return (n*(2*k+n+1))/2;
 			}else{
@@ -204,7 +203,7 @@ public:
 
 		// Construction
 		major1_iterator() {}
-		major1_iterator(pointer arrayBegin, index_type index, index_type /*size*/)
+		major1_iterator(pointer arrayBegin, size_type index, size_type /*size*/)
 		:m_pos(arrayBegin), m_index(index){}
 		
 		template<class U>
@@ -229,18 +228,18 @@ public:
 			--m_index;
 			return *this;
 		}
-		major1_iterator& operator += (index_type n) {
+		major1_iterator& operator += (size_type n) {
 			m_pos += offset(n);
 			m_index += n;
 			return *this;
 		}
-		major1_iterator& operator -= (index_type n) {
+		major1_iterator& operator -= (size_type n) {
 			m_pos += offset(-n);
 			m_index -= n;
 			return *this;
 		}
 		template<class U>
-		index_type operator - (major1_iterator<U> const& it) const {
+		size_type operator - (major1_iterator<U> const& it) const {
 			return m_index - it.m_index;
 		}
 
@@ -248,12 +247,12 @@ public:
 		reference operator*() const {
 			return *m_pos;
 		}
-		reference operator [](index_type n) const {
+		reference operator [](size_type n) const {
 			return m_pos[offset(n)];
 		}
 
 		// Index
-		index_type index() const {
+		size_type index() const {
 			return m_index;
 		}
 
@@ -269,7 +268,7 @@ public:
 
 	private:
 		pointer m_pos;
-		index_type m_index;
+		size_type m_index;
 		template<class> friend class major1_iterator;
 	};
 	
@@ -281,8 +280,8 @@ public:
 		packed_random_access_iterator_tag
 	>{
 	private:
-		index_type offset(index_type n)const{
-			index_type k = m_size-m_index-1;
+		size_type offset(size_type n)const{
+			size_type k = m_size-m_index-1;
 			if(n >= 0){
 				return (2*k*n-n*n+n)/2;
 			}else{
@@ -298,7 +297,7 @@ public:
 
 		// Construction
 		major2_iterator() {}
-		major2_iterator(pointer arrayBegin, index_type index, index_type size)
+		major2_iterator(pointer arrayBegin, size_type index, size_type size)
 		:m_pos(arrayBegin), m_index(index), m_size(size){}
 		
 		template<class U>
@@ -324,12 +323,12 @@ public:
 			--m_index;
 			return *this;
 		}
-		major2_iterator& operator += (index_type n) {
+		major2_iterator& operator += (size_type n) {
 			m_pos += offset(n);
 			m_index += n;
 			return *this;
 		}
-		major2_iterator& operator -= (index_type n) {
+		major2_iterator& operator -= (size_type n) {
 			m_pos += offset(-n);
 			m_index -= n;
 			return *this;
@@ -343,12 +342,12 @@ public:
 		reference operator*() const {
 			return *m_pos;
 		}
-		reference operator [](index_type n) const {
+		reference operator [](size_type n) const {
 			return m_pos[offset(n)];
 		}
 
 		// Index
-		index_type index() const {
+		size_type index() const {
 			return m_index;
 		}
 
@@ -364,8 +363,8 @@ public:
 
 	private:
 		pointer m_pos;
-		index_type m_index;
-		index_type m_size;
+		size_type m_index;
+		size_type m_size;
 		template<class> friend class major2_iterator;
 	};
 	
@@ -409,32 +408,32 @@ public:
 	
 public:
 
-	const_row_iterator row_begin(index_type i) const {
-		index_type index = TriangularType::is_upper?i:0;
+	const_row_iterator row_begin(size_type i) const {
+		size_type index = TriangularType::is_upper?i:0;
 		return const_row_iterator(
 			m_data.data()+orientation::element(i,index,size1(),packed_tag())
 			,index
 			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
-	const_row_iterator row_end(index_type i) const {
-		index_type index = TriangularType::is_upper?size2():i+1;
+	const_row_iterator row_end(size_type i) const {
+		size_type index = TriangularType::is_upper?size2():i+1;
 		return const_row_iterator(
 			m_data.data() + orientation::element(i, index, size1(),packed_tag())
 			,index
 			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
-	row_iterator row_begin(index_type i){
-		index_type index = TriangularType::is_upper?i:0;
+	row_iterator row_begin(size_type i){
+		size_type index = TriangularType::is_upper?i:0;
 		return row_iterator(
 			m_data.data() + orientation::element(i, index, size1(),packed_tag())
 			,index
 			,orientation::orientation::stride2(size1(),size2())//1 if row_major, size2() otherwise
 		);
 	}
-	row_iterator row_end(index_type i){
-		index_type index = TriangularType::is_upper?size2():i+1;
+	row_iterator row_end(size_type i){
+		size_type index = TriangularType::is_upper?size2():i+1;
 		return row_iterator(
 			m_data.data() + orientation::element(i, index, size1(),packed_tag())
 			,index
@@ -442,32 +441,32 @@ public:
 		);
 	}
 	
-	const_column_iterator column_begin(index_type i) const {
-		index_type index = TriangularType::is_upper?0:i;
+	const_column_iterator column_begin(size_type i) const {
+		size_type index = TriangularType::is_upper?0:i;
 		return const_column_iterator(
 			m_data.data() + orientation::element(index, i, size1(),packed_tag())
 			,index
 			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
-	const_column_iterator column_end(index_type i) const {
-		index_type index = TriangularType::is_upper?i+1:size2();
+	const_column_iterator column_end(size_type i) const {
+		size_type index = TriangularType::is_upper?i+1:size2();
 		return const_column_iterator(
 			m_data.data() + orientation::element(index, i, size1(),packed_tag())
 			,index
 			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
-	column_iterator column_begin(index_type i){
-		index_type index = TriangularType::is_upper?0:i;
+	column_iterator column_begin(size_type i){
+		size_type index = TriangularType::is_upper?0:i;
 		return column_iterator(
 			m_data.data() + orientation::element(index, i, size1(),packed_tag())
 			,index
 			,orientation::orientation::stride1(size1(),size2())//size1() if row_major, 1 otherwise
 		);
 	}
-	column_iterator column_end(index_type i){
-		index_type index = TriangularType::is_upper?i+1:size2();
+	column_iterator column_end(size_type i){
+		size_type index = TriangularType::is_upper?i+1:size2();
 		return column_iterator(
 			m_data.data() + orientation::element(index, i, size1(),packed_tag())
 			,index
@@ -491,7 +490,7 @@ public:
 	}
 
 private:
-	index_type m_size;
+	size_type m_size;
 	array_type m_data;
 };
 

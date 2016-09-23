@@ -394,8 +394,7 @@ class compressed_storage_iterator:
 	>{
 public:
 	typedef typename std::remove_const<T>::type value_type;
-	typedef typename std::remove_const<I>::type index_type;
-	typedef std::size_t size_type;
+	typedef typename std::remove_const<I>::type size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef T& reference;
 	typedef T* pointer;
@@ -404,7 +403,7 @@ public:
 	compressed_storage_iterator() {}
 	compressed_storage_iterator(
 		T* value_array, I* index_array, 
-		size_type position, index_type row = 0
+		size_type position, size_type row = 0
 	)
 	: m_values(value_array),m_indices(index_array)
 	, m_position(position), m_row(row){}
@@ -441,7 +440,7 @@ public:
 	reference operator* () const {
 		return m_values[m_position];
 	}
-	index_type index() const {
+	size_type index() const {
 		return m_indices[m_position];
 	}
 	

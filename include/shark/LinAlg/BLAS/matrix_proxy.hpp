@@ -87,18 +87,18 @@ trans(temporary_proxy<M> m){
 /// row(A,1) = (4,5,6)
 template<class M, class Device>
 temporary_proxy<typename detail::matrix_row_optimizer<M>::type>
-row(matrix_expression<M, Device>& expression, typename M::index_type i){
+row(matrix_expression<M, Device>& expression, typename M::size_type i){
 	return detail::matrix_row_optimizer<M>::create(expression(), i);
 }
 template<class M, class Device>
 typename detail::matrix_row_optimizer<typename const_expression<M>::type>::type
-row(matrix_expression<M, Device> const& expression, typename M::index_type i){
+row(matrix_expression<M, Device> const& expression, typename M::size_type i){
 	return detail::matrix_row_optimizer<typename const_expression<M>::type>::create(expression(), i);
 }
 
 template<class M>
 temporary_proxy<typename detail::matrix_row_optimizer<M>::type>
-row(temporary_proxy<M> expression, typename M::index_type i){
+row(temporary_proxy<M> expression, typename M::size_type i){
 	return row(static_cast<M&>(expression), i);
 }
 
@@ -112,16 +112,16 @@ row(temporary_proxy<M> expression, typename M::index_type i){
 /// the column(A,1) operation results in
 /// column(A,1) = (2,5,8)
 template<class M, class Device>
-auto column(matrix_expression<M, Device>& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
+auto column(matrix_expression<M, Device>& expression, typename M::size_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(expression),j);
 }
 template<class M, class Device>
-auto column(matrix_expression<M, Device> const& expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
+auto column(matrix_expression<M, Device> const& expression, typename M::size_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(expression),j);
 }
 
 template<class M, class Device>
-auto column(temporary_proxy<M> expression, typename M::index_type j) -> decltype(row(trans(expression),j)){
+auto column(temporary_proxy<M> expression, typename M::size_type j) -> decltype(row(trans(expression),j)){
 	return row(trans(static_cast<M&>(expression)),j);
 }
 
@@ -238,7 +238,7 @@ auto rows(
 template<class M, class Device>
 auto columns(
 	matrix_expression<M, Device>& expression, 
-	typename M::index_type start, typename M::index_type stop
+	typename M::size_type start, typename M::size_type stop
 ) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size2());
@@ -248,7 +248,7 @@ auto columns(
 template<class M, class Device>
 auto columns(
 	matrix_expression<M, Device> const& expression, 
-	typename M::index_type start, typename M::index_type stop
+	typename M::size_type start, typename M::size_type stop
 ) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
 	RANGE_CHECK(start <= stop);
 	SIZE_CHECK(stop <= expression().size2());

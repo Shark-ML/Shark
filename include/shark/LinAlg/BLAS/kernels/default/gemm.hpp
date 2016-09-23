@@ -168,11 +168,11 @@ void gemm_impl(
 	typedef typename matrix_temporary<M>::type BlockStorage;
 	BlockStorage blockStorage(blockSize,blockSize);
 	
-	typedef typename M::index_type index_type;
-	index_type size1 = m().size1();
-	index_type size2 = m().size2();
-	for (index_type i = 0; i < size1; i+= blockSize){
-		for (index_type j = 0; j < size2; j+= blockSize){
+	typedef typename M::size_type size_type;
+	size_type size1 = m().size1();
+	size_type size2 = m().size2();
+	for (size_type i = 0; i < size1; i+= blockSize){
+		for (size_type j = 0; j < size2; j+= blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-i);
 			std::size_t blockSizej = std::min(blockSize,size2-j);
 			auto transBlock=subrange(blockStorage,0,blockSizej,0,blockSizei);

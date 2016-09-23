@@ -64,10 +64,9 @@ class compressed_vector:public vector_container<compressed_vector<T, I>, cpu_tag
 	typedef compressed_vector<T, I> self_type;
 public:
 	typedef T value_type;
-	typedef value_type scalar_type;
 	typedef const T& const_reference;
 
-	typedef I index_type;
+	typedef I size_type;
 	
 	class reference {
 	private:
@@ -77,9 +76,9 @@ public:
 		}
 		value_type& ref() const {
 			//find position of the index in the array
-			index_type const* start = m_vector.m_indices.data();
-			index_type const* end = start + m_vector.nnz();
-			index_type const *pos = std::lower_bound(start,end,m_i);
+			size_type const* start = m_vector.m_indices.data();
+			size_type const* end = start + m_vector.nnz();
+			size_type const *pos = std::lower_bound(start,end,m_i);
 
 			if (pos != end&& *pos == m_i)
 				return m_vector.m_values[pos-start];
@@ -92,7 +91,7 @@ public:
 
 	public:
 		// Construction and destruction
-		reference(self_type& m, index_type i):
+		reference(self_type& m, size_type i):
 			m_vector(m), m_i(i) {}
 
 		// Assignment
@@ -130,38 +129,38 @@ public:
 		}
 	private:
 		self_type& m_vector;
-		index_type m_i;
+		size_type m_i;
 	};
 
 	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
 	typedef sparse_vector_storage<T,I> storage_type;
-	typedef sparse_vector_storage<value_type const,index_type const> const_storage_type;
+	typedef sparse_vector_storage<value_type const,size_type const> const_storage_type;
 	typedef elementwise<sparse_tag> evaluation_category;
 
 	// Construction and destruction
 	compressed_vector():m_size(0), m_nnz(0),m_indices(1,0),m_zero(0){}
-	explicit compressed_vector(index_type size, value_type value = value_type(), index_type non_zeros = 0)
+	explicit compressed_vector(size_type size, value_type value = value_type(), size_type non_zeros = 0)
 	:m_size(size), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0){}
 	template<class AE>
-	compressed_vector(vector_expression<AE, cpu_tag> const& ae, index_type non_zeros = 0)
+	compressed_vector(vector_expression<AE, cpu_tag> const& ae, size_type non_zeros = 0)
 	:m_size(ae().size()), m_nnz(0), m_indices(non_zeros,0), m_values(non_zeros),m_zero(0)
 	{
 		assign(*this, ae);
 	}
 
 	// Accessors
-	index_type size() const {
+	size_type size() const {
 		return m_size;
 	}
-	index_type nnz_capacity() const {
+	size_type nnz_capacity() const {
 		return m_indices.size();
 	}
-	index_type nnz() const {
+	size_type nnz() const {
 		return m_nnz;
 	}
 
-	void set_filled(index_type filled) {
+	void set_filled(size_type filled) {
 		SIZE_CHECK(filled <= nnz_capacity());
 		m_nnz = filled;
 	}
@@ -176,11 +175,11 @@ public:
 		return {m_values.data(), m_indices.data(), m_nnz};
 	}
 
-	void resize(index_type size) {
+	void resize(size_type size) {
 		m_size = size;
 		m_nnz = 0;
 	}
-	void reserve(index_type non_zeros) {
+	void reserve(size_type non_zeros) {
 		if(non_zeros <= nnz_capacity()) return;
 		non_zeros = std::min(size(),non_zeros);
 		m_indices.resize(non_zeros);
@@ -188,22 +187,22 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(index_type i) const {
+	const_reference operator()(size_type i) const {
 		SIZE_CHECK(i < m_size);
 		std::size_t pos = lower_bound(i);
 		if (pos == nnz() || m_indices[pos] != i)
 			return m_zero;
 		return m_values [pos];
 	}
-	reference operator()(index_type i) {
+	reference operator()(size_type i) {
 		return reference(*this,i);
 	}
 
 
-	const_reference operator [](index_type i) const {
+	const_reference operator [](size_type i) const {
 		return (*this)(i);
 	}
-	reference operator [](index_type i) {
+	reference operator [](size_type i) {
 		return (*this)(i);
 	}
 
@@ -246,8 +245,8 @@ public:
 	}
 
 	// Iterator types
-	typedef compressed_storage_iterator<value_type const, index_type const> const_iterator;
-	typedef compressed_storage_iterator<value_type, index_type const> iterator;
+	typedef compressed_storage_iterator<value_type const, size_type const> const_iterator;
+	typedef compressed_storage_iterator<value_type, size_type const> iterator;
 
 	const_iterator begin() const {
 		return const_iterator(m_values.data(),m_indices.data(),0);
@@ -266,8 +265,8 @@ public:
 	}
 	
 	// Element assignment
-	iterator set_element(iterator pos, index_type index, value_type value) {
-		RANGE_CHECK(index_type(pos - begin()) <=m_size);
+	iterator set_element(iterator pos, size_type index, value_type value) {
+		RANGE_CHECK(size_type(pos - begin()) <=m_size);
 		
 		if(pos != end() && pos.index() == index){
 			*pos = value;
@@ -345,15 +344,15 @@ public:
 	}
 
 private:
-	std::size_t lower_bound( index_type t)const{
-		index_type const* begin = m_indices.data();
-		index_type const* end = m_indices.data()+nnz();
+	std::size_t lower_bound( size_type t)const{
+		size_type const* begin = m_indices.data();
+		size_type const* end = m_indices.data()+nnz();
 		return std::lower_bound(begin, end, t)-begin;
 	}
 
-	index_type m_size;
-	index_type m_nnz;
-	std::vector<index_type> m_indices;
+	size_type m_size;
+	size_type m_nnz;
+	std::vector<size_type> m_indices;
 	std::vector<value_type> m_values;
 	value_type m_zero;
 };

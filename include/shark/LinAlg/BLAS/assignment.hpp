@@ -315,7 +315,7 @@ VecX& operator/=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 ///
 /// Performs the operation x_i += t for all elements.
 template<class VecX, class Device>
-VecX& operator+=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
+VecX& operator+=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
 	kernels::assign<functors::scalar_plus_assign> (x, t);
 	return x();
 }
@@ -324,7 +324,7 @@ VecX& operator+=(vector_expression<VecX, Device>& x, typename VecX::scalar_type 
 ///
 /// Performs the operation x_i += t for all elements.
 template<class VecX, class Device>
-VecX& operator-=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
+VecX& operator-=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
 	kernels::assign<functors::scalar_minus_assign> (x, t);
 	return x();
 }
@@ -333,7 +333,7 @@ VecX& operator-=(vector_expression<VecX, Device>& x, typename VecX::scalar_type 
 ///
 /// Performs the operation x_i *= t for all elements.
 template<class VecX, class Device>
-VecX& operator*=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
+VecX& operator*=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
 	kernels::assign<functors::scalar_multiply_assign> (x, t);
 	return x();
 }
@@ -342,7 +342,7 @@ VecX& operator*=(vector_expression<VecX, Device>& x, typename VecX::scalar_type 
 ///
 /// Performs the operation x_i /= t for all elements.
 template<class VecX, class Device>
-VecX& operator/=(vector_expression<VecX, Device>& x, typename VecX::scalar_type t){
+VecX& operator/=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
 	kernels::assign<functors::scalar_divide_assign> (x, t);
 	return x();
 }
@@ -413,7 +413,7 @@ MatA& operator/=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 ///
 /// Performs the operation A_ij += t for all elements.
 template<class MatA, class Device>
-MatA& operator+=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
+MatA& operator+=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
 	kernels::assign<functors::scalar_plus_assign> (A, t);
 	return A();
 }
@@ -422,7 +422,7 @@ MatA& operator+=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type 
 ///
 /// Performs the operation A_ij -= t for all elements.
 template<class MatA, class Device>
-MatA& operator-=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
+MatA& operator-=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
 	kernels::assign<functors::scalar_minus_assign> (A, t);
 	return A();
 }
@@ -431,7 +431,7 @@ MatA& operator-=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type 
 ///
 /// Performs the operation A_ij *= t for all elements.
 template<class MatA, class Device>
-MatA& operator*=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
+MatA& operator*=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
 	kernels::assign<functors::scalar_multiply_assign> (A, t);
 	return A();
 }
@@ -440,7 +440,7 @@ MatA& operator*=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type 
 ///
 /// Performs the operation A_ij /= t for all elements.
 template<class MatA, class Device>
-MatA& operator /=(matrix_expression<MatA, Device>& A, typename MatA::scalar_type t){
+MatA& operator /=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
 	kernels::assign<functors::scalar_divide_assign> (A, t);
 	return A();
 }
@@ -481,7 +481,7 @@ template<class C>
 class noalias_proxy{
 public:
 	typedef typename C::closure_type closure_type;
-	typedef typename C::scalar_type scalar_type;
+	typedef typename C::value_type value_type;
 
 	noalias_proxy(C &lval): m_lval(lval) {}
 
@@ -513,22 +513,22 @@ public:
 	}
 	
 	//this is not needed, but prevents errors when for example doing noalias(x)+=2;
-	closure_type &operator+= (scalar_type t) {
+	closure_type &operator+= (value_type t) {
 		return m_lval += t;
 	}
 
 	//this is not needed, but prevents errors when for example doing noalias(x)-=2;
-	closure_type &operator-= (scalar_type t) {
+	closure_type &operator-= (value_type t) {
 		return m_lval -= t;
 	}
 	
 	//this is not needed, but prevents errors when for example doing noalias(x)*=2;
-	closure_type &operator*= (scalar_type t) {
+	closure_type &operator*= (value_type t) {
 		return m_lval *= t;
 	}
 
 	//this is not needed, but prevents errors when for example doing noalias(x)/=2;
-	closure_type &operator/= (scalar_type t) {
+	closure_type &operator/= (value_type t) {
 		return m_lval /= t;
 	}
 

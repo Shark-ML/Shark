@@ -82,11 +82,11 @@ repeat(T scalar, std::size_t rows, std::size_t columns){
 /// \f$ (A*t)_{ij} = e_{ij}*t \f$
 template<class MatA, class T, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename MatA::scalar_type >,
+	std::is_convertible<T, typename MatA::value_type >,
         matrix_scalar_multiply<MatA> 
 >::type
 operator* (matrix_expression<MatA, Device> const& A, T scalar){
-	return matrix_scalar_multiply<MatA>(A(), typename MatA::scalar_type(scalar));
+	return matrix_scalar_multiply<MatA>(A(), typename MatA::value_type(scalar));
 }
 
 /// \brief Computes the multiplication of a matrix-expression A with a scalar t.
@@ -94,11 +94,11 @@ operator* (matrix_expression<MatA, Device> const& A, T scalar){
 /// \f$ (t*A)_{ij} = t*e_{ij} \f$
 template<class T, class MatA, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename MatA::scalar_type >,
+	std::is_convertible<T, typename MatA::value_type >,
         matrix_scalar_multiply<MatA> 
 >::type
 operator* (T scalar, matrix_expression<MatA, Device> const& A){
-	return matrix_scalar_multiply<MatA>(A(), typename MatA::scalar_type(scalar));
+	return matrix_scalar_multiply<MatA>(A(), typename MatA::value_type(scalar));
 }
 
 /// \brief Negates the matrix-expression A.
@@ -106,7 +106,7 @@ operator* (T scalar, matrix_expression<MatA, Device> const& A){
 /// \f$ (-A)_{ij} = - e_{ij} \f$
 template<class MatA, class Device>
 matrix_scalar_multiply<MatA> operator-(matrix_expression<MatA, Device> const& A){
-	return matrix_scalar_multiply<MatA>(A(), typename MatA::scalar_type(-1));
+	return matrix_scalar_multiply<MatA>(A(), typename MatA::value_type(-1));
 }
 
 #define SHARK_UNARY_MATRIX_TRANSFORMATION(name, F)\
@@ -151,7 +151,7 @@ matrix_addition<MatA, matrix_scalar_multiply<MatB> > operator- (
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename MatA::scalar_type>, 
+	std::is_convertible<T, typename MatA::value_type>, 
 	matrix_addition<MatA, scalar_matrix<T> >
 >::type operator+ (
 	matrix_expression<MatA, Device> const& A,
@@ -163,7 +163,7 @@ typename boost::enable_if<
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class T, class MatA, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename MatA::scalar_type>,
+	std::is_convertible<T, typename MatA::value_type>,
 	matrix_addition<MatA, scalar_matrix<T> >
 >::type operator+ (
 	T t,
@@ -175,7 +175,7 @@ typename boost::enable_if<
 ///\brief Subtracts a scalar which is interpreted as a constant matrix from a matrix.
 template<class MatA, class T, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename MatA::scalar_type> ,
+	std::is_convertible<T, typename MatA::value_type> ,
 	matrix_addition<MatA, matrix_scalar_multiply<scalar_matrix<T> > >
 >::type operator- (
 	matrix_expression<MatA, Device> const& A,
@@ -187,7 +187,7 @@ typename boost::enable_if<
 ///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
 typename boost::enable_if<
-	std::is_convertible<T, typename MatA::scalar_type>,
+	std::is_convertible<T, typename MatA::value_type>,
 	matrix_addition<scalar_matrix<T>, matrix_scalar_multiply<MatA> >
 >::type operator- (
 	T t,
@@ -344,8 +344,8 @@ namespace detail{
 	//TODO: This is cpu-specific. has to be moved to kernels
 	
 	template<class MatA>
-	typename MatA::scalar_type sum_impl(MatA const& A, column_major){
-		typename MatA::scalar_type totalSum = 0;
+	typename MatA::value_type sum_impl(MatA const& A, column_major){
+		typename MatA::value_type totalSum = 0;
 		for(std::size_t j = 0; j != A.size2(); ++j){
 			totalSum += sum(column(A,j));
 		}
@@ -353,8 +353,8 @@ namespace detail{
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type sum_impl(MatA const& A, row_major){
-		typename MatA::scalar_type totalSum = 0;
+	typename MatA::value_type sum_impl(MatA const& A, row_major){
+		typename MatA::value_type totalSum = 0;
 		for(std::size_t i = 0; i != A.size1(); ++i){
 			totalSum += sum(row(A,i));
 		}
@@ -362,26 +362,26 @@ namespace detail{
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type sum_impl(MatA const& A, unknown_orientation){
+	typename MatA::value_type sum_impl(MatA const& A, unknown_orientation){
 		return sum_impl(A,row_major());
 	}
 
 
 	//dispatcher for triangular matrix
 	template<class MatA,class Orientation,class Triangular>
-	typename MatA::scalar_type sum_impl(MatA const& A, triangular<Orientation,Triangular>){
+	typename MatA::value_type sum_impl(MatA const& A, triangular<Orientation,Triangular>){
 		return sum_impl(A,Orientation());
 	}
 
 	//dispatcher
 	template<class MatA>
-	typename MatA::scalar_type sum_impl(MatA const& A){
+	typename MatA::value_type sum_impl(MatA const& A){
 		return sum_impl(A,typename MatA::orientation());
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type max_impl(MatA const& A, column_major){
-		typename MatA::scalar_type maximum = 0;
+	typename MatA::value_type max_impl(MatA const& A, column_major){
+		typename MatA::value_type maximum = 0;
 		for(std::size_t j = 0; j != A.size2(); ++j){
 			maximum = std::max(maximum, max(column(A,j)));
 		}
@@ -389,8 +389,8 @@ namespace detail{
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type max_impl(MatA const& A, row_major){
-		typename MatA::scalar_type maximum = 0;
+	typename MatA::value_type max_impl(MatA const& A, row_major){
+		typename MatA::value_type maximum = 0;
 		for(std::size_t i = 0; i != A.size1(); ++i){
 			maximum= std::max(maximum, max(row(A,i)));
 		}
@@ -398,25 +398,25 @@ namespace detail{
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type max_impl(MatA const& A, unknown_orientation){
+	typename MatA::value_type max_impl(MatA const& A, unknown_orientation){
 		return max_impl(A,row_major());
 	}
 
 	//dispatcher for triangular matrix
 	template<class MatA,class Orientation,class Triangular>
-	typename MatA::scalar_type max_impl(MatA const& A, triangular<Orientation, Triangular>){
+	typename MatA::value_type max_impl(MatA const& A, triangular<Orientation, Triangular>){
 		return std::max(max_impl(A,Orientation()),0.0);
 	}
 
 	//dispatcher
 	template<class MatA>
-	typename MatA::scalar_type max_impl(MatA const& A){
+	typename MatA::value_type max_impl(MatA const& A){
 		return max_impl(A,typename MatA::orientation());
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type min_impl(MatA const& A, column_major){
-		typename MatA::scalar_type minimum = 0;
+	typename MatA::value_type min_impl(MatA const& A, column_major){
+		typename MatA::value_type minimum = 0;
 		for(std::size_t j = 0; j != A.size2(); ++j){
 			minimum= std::min(minimum, min(column(A,j)));
 		}
@@ -424,8 +424,8 @@ namespace detail{
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type min_impl(MatA const& A, row_major){
-		typename MatA::scalar_type minimum = 0;
+	typename MatA::value_type min_impl(MatA const& A, row_major){
+		typename MatA::value_type minimum = 0;
 		for(std::size_t i = 0; i != A.size1(); ++i){
 			minimum= std::min(minimum, min(row(A,i)));
 		}
@@ -433,19 +433,19 @@ namespace detail{
 	}
 
 	template<class MatA>
-	typename MatA::scalar_type min_impl(MatA const& A, unknown_orientation){
+	typename MatA::value_type min_impl(MatA const& A, unknown_orientation){
 		return min_impl(A,row_major());
 	}
 
 	//dispatcher for triangular matrix
 	template<class MatA,class Orientation,class Triangular>
-	typename MatA::scalar_type min_impl(MatA const& A, triangular<Orientation,Triangular>){
+	typename MatA::value_type min_impl(MatA const& A, triangular<Orientation,Triangular>){
 		return std::min(min_impl(A,Orientation()),0.0);
 	}
 
 	//dispatcher
 	template<class MatA>
-	typename MatA::scalar_type min_impl(MatA const& A){
+	typename MatA::value_type min_impl(MatA const& A){
 		return min_impl(A,typename MatA::orientation());
 	}
 
@@ -466,17 +466,17 @@ sum_columns(matrix_expression<MatA, Device> const& A){
 
 
 template<class MatA, class Device>
-typename MatA::scalar_type sum(matrix_expression<MatA, Device> const& A){
+typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
 	return detail::sum_impl(eval_block(A));
 }
 
 template<class MatA, class Device>
-typename MatA::scalar_type max(matrix_expression<MatA, Device> const& A){
+typename MatA::value_type max(matrix_expression<MatA, Device> const& A){
 	return detail::max_impl(eval_block(A));
 }
 
 template<class MatA, class Device>
-typename MatA::scalar_type min(matrix_expression<MatA, Device> const& A){
+typename MatA::value_type min(matrix_expression<MatA, Device> const& A){
 	return detail::min_impl(eval_block(A));
 }
 
@@ -485,7 +485,7 @@ typename MatA::scalar_type min(matrix_expression<MatA, Device> const& A){
 ///The frobenius inner product is defined as \f$ <A,B>_F=\sum_{ij} A_ij*B_{ij} \f$. It induces the
 /// Frobenius norm \f$ ||A||_F = \sqrt{<A,A>_F} \f$
 template<class MatA, class MatB, class Device>
-decltype(typename MatA::scalar_type() * typename MatB::scalar_type())
+decltype(typename MatA::value_type() * typename MatB::value_type())
 frobenius_prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
@@ -499,7 +499,7 @@ frobenius_prod(
 /// 
 /// It is defined as \f$ \max_i \sum_j |A_{ij}| \f$ 
 template<class MatA, class Device>
-typename real_traits<typename MatA::scalar_type>::type
+typename real_traits<typename MatA::value_type>::type
 norm_1(matrix_expression<MatA, Device> const& A) {
 	return max(sum_rows(abs(A)));
 }
@@ -508,7 +508,7 @@ norm_1(matrix_expression<MatA, Device> const& A) {
 ///
 /// It is defined as \f$ \sqrt{Tr(A^TA)}=\sqrt{\sum_{ij} A_{ij}^2} \f$
 template<class MatA, class Device>
-typename real_traits<typename MatA::scalar_type>::type
+typename real_traits<typename MatA::value_type>::type
 norm_frobenius(matrix_expression<MatA, Device> const& A) {
 	using std::sqrt;
 	return sqrt(sum(sqr(eval_block(A))));
@@ -518,7 +518,7 @@ norm_frobenius(matrix_expression<MatA, Device> const& A) {
 /// 
 /// It is defined as \f$ \max_i \sum_j |A_{ij}| \f$ 
 template<class MatA, class Device>
-typename real_traits<typename MatA::scalar_type>::type
+typename real_traits<typename MatA::value_type>::type
 norm_inf(matrix_expression<MatA, Device> const& A) {
 	return max(sum_columns(abs(A)));
 }
@@ -531,7 +531,7 @@ norm_inf(matrix_expression<MatA, Device> const& A) {
 /// \param  A square matrix
 /// \return the sum of the values at the diagonal of \em A
 template < class MatA, class Device>
-typename MatA::scalar_type trace(matrix_expression<MatA, Device> const& A)
+typename MatA::value_type trace(matrix_expression<MatA, Device> const& A)
 {
 	SIZE_CHECK(A().size1() == A().size2());
 	return sum(diag(A));

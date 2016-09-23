@@ -76,7 +76,7 @@ template <class M, class V>
 void sum_rows(
 	matrix_expression<M, cpu_tag> const & A, 
 	vector_expression<V, cpu_tag>& b,
-	typename M::scalar_type alpha
+	typename M::value_type alpha
 ){
 	SIZE_CHECK(A().size2() == b().size());
 	

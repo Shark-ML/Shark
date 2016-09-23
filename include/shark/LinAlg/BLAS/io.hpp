@@ -62,8 +62,8 @@ namespace shark{ namespace blas{
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
                                            const vector_expression<VE, cpu_tag> &v) {
-        typedef typename VE::index_type index_type;
-        index_type size = v ().size ();
+        typedef typename VE::size_type size_type;
+        size_type size = v ().size ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
         s.flags (os.flags ());
         s.imbue (os.getloc ());
@@ -71,7 +71,7 @@ namespace shark{ namespace blas{
         s << '[' << size << "](";
         if (size > 0)
             s << v () (0);
-        for (index_type i = 1; i < size; ++ i)
+        for (size_type i = 1; i < size; ++ i)
             s << ',' << v () (i);
         s << ')';
         return os << s.str ().c_str ();
@@ -104,9 +104,9 @@ namespace shark{ namespace blas{
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
                                            const matrix_expression<ME, cpu_tag> &m) {
-        typedef typename ME::index_type index_type;
-        index_type size1 = m ().size1 ();
-        index_type size2 = m ().size2 ();
+        typedef typename ME::size_type size_type;
+        size_type size1 = m ().size1 ();
+        size_type size2 = m ().size2 ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
         s.flags (os.flags ());
         s.imbue (os.getloc ());
@@ -116,15 +116,15 @@ namespace shark{ namespace blas{
             s << '(' ;
             if (size2 > 0)
                 s << m () (0, 0);
-            for (index_type j = 1; j < size2; ++ j)
+            for (size_type j = 1; j < size2; ++ j)
                 s << ',' << m () (0, j);
             s << ')';
         }
-        for (index_type i = 1; i < size1; ++ i) {
+        for (size_type i = 1; i < size1; ++ i) {
             s << ",(" ;
             if (size2 > 0)
                 s << m () (i, 0);
-            for (index_type j = 1; j < size2; ++ j)
+            for (size_type j = 1; j < size2; ++ j)
                 s << ',' << m () (i, j);
             s << ')';
         }

@@ -38,9 +38,8 @@ template<class T, class I=std::size_t>
 class compressed_matrix:public matrix_container<compressed_matrix<T, I>, cpu_tag > {
 	typedef compressed_matrix<T, I> self_type;
 public:
-	typedef I index_type;
+	typedef I size_type;
 	typedef T value_type;
-	typedef value_type scalar_type;
 	
 
 	typedef T const& const_reference;
@@ -51,10 +50,10 @@ public:
 		}
 		value_type& ref() const {
 			//get array bounds
-			index_type const *start = m_matrix.m_indices.data() + m_matrix.m_rowStart[m_i];
-			index_type const *end = m_matrix.m_indices.data() + m_matrix.m_rowEnd[m_i];
+			size_type const *start = m_matrix.m_indices.data() + m_matrix.m_rowStart[m_i];
+			size_type const *end = m_matrix.m_indices.data() + m_matrix.m_rowEnd[m_i];
 			//find position of the index in the array
-			index_type const *pos = std::lower_bound(start,end,m_j);
+			size_type const *pos = std::lower_bound(start,end,m_j);
 
 			if (pos != end && *pos == m_j)
 				return m_matrix.m_values[(pos-start)+m_matrix.m_rowStart[m_i]];
@@ -72,7 +71,7 @@ public:
 
 	public:
 		// Construction and destruction
-		reference(compressed_matrix &m, index_type i, index_type j):
+		reference(compressed_matrix &m, size_type i, size_type j):
 			m_matrix(m), m_i(i), m_j(j) {}
 
 		// Assignment
@@ -100,14 +99,14 @@ public:
 		}
 	private:
 		compressed_matrix& m_matrix;
-		index_type m_i;
-		index_type m_j;
+		size_type m_i;
+		size_type m_j;
 	};
 
 	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
 	typedef sparse_matrix_storage<T,I> storage_type;
-	typedef sparse_matrix_storage<value_type const,index_type const> const_storage_type;
+	typedef sparse_matrix_storage<value_type const,size_type const> const_storage_type;
 	typedef elementwise<sparse_tag> evaluation_category;
 	typedef row_major orientation;
 
@@ -116,14 +115,14 @@ public:
 		: m_size1(0), m_size2(0), m_nnz(0)
 		, m_rowStart(1,0), m_indices(0), m_values(0), m_zero(0) {}
 
-	compressed_matrix(index_type size1, index_type size2, index_type non_zeros = 0)
+	compressed_matrix(size_type size1, size_type size2, size_type non_zeros = 0)
 		: m_size1(size1), m_size2(size2), m_nnz(0)
 		, m_rowStart(size1 + 1,0)
 		, m_rowEnd(size1,0)
 		, m_indices(non_zeros), m_values(non_zeros), m_zero(0) {}
 
 	template<class E>
-	compressed_matrix(matrix_expression<E, cpu_tag> const& e, index_type non_zeros = 0)
+	compressed_matrix(matrix_expression<E, cpu_tag> const& e, size_type non_zeros = 0)
 		: m_size1(e().size1()), m_size2(e().size2()), m_nnz(0)
 		, m_rowStart(e().size1() + 1, 0)
 		, m_rowEnd(e().size1(), 0)
@@ -132,24 +131,24 @@ public:
 	}
 
 	// Accessors
-	index_type size1() const {
+	size_type size1() const {
 		return m_size1;
 	}
-	index_type size2() const {
+	size_type size2() const {
 		return m_size2;
 	}
 
 	std::size_t nnz_capacity() const {
 		return m_values.size();
 	}
-	std::size_t row_capacity(index_type row)const {
+	std::size_t row_capacity(size_type row)const {
 		RANGE_CHECK(row < size1());
 		return m_rowStart[row+1] - m_rowStart[row];
 	}
 	std::size_t nnz() const {
 		return m_nnz;
 	}
-	std::size_t inner_nnz(index_type row) const {
+	std::size_t inner_nnz(size_type row) const {
 		return m_rowEnd[row] - m_rowStart[row];
 	}
 	
@@ -167,7 +166,7 @@ public:
 		m_nnz = non_zeros;
 	}
 	
-	void set_row_filled(index_type i,std::size_t non_zeros) {
+	void set_row_filled(size_type i,std::size_t non_zeros) {
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(non_zeros <=row_capacity(i));
 		
@@ -177,7 +176,7 @@ public:
 			m_rowStart[size1()] = m_rowEnd[i];
 	}
 
-	void resize(index_type size1, index_type size2) {
+	void resize(size_type size1, size_type size2) {
 		m_size1 = size1;
 		m_size2 = size2;
 		m_nnz = 0;
@@ -194,7 +193,7 @@ public:
 		m_values.resize(non_zeros);
 	}
 
-	void reserve_row(index_type row, std::size_t non_zeros) {
+	void reserve_row(size_type row, std::size_t non_zeros) {
 		RANGE_CHECK(row < size1());
 		non_zeros = std::min(m_size2,non_zeros);
 		if (non_zeros <= row_capacity(row)) return;
@@ -205,11 +204,11 @@ public:
 			reserve(nnz_capacity()+std::max<std::size_t>(nnz_capacity(),2*spaceDifference));
 		}
 		//move the elements of the next rows to make room for the reserved space
-		for (index_type i = size1()-1; i != row; --i) {
+		for (size_type i = size1()-1; i != row; --i) {
 			value_type* values = m_values.data() + m_rowStart[i];
 			value_type* valueRowEnd = m_values.data() + m_rowEnd[i];
-			index_type* indices = m_indices.data() + m_rowStart[i];
-			index_type* indicesEnd = m_indices.data() + m_rowEnd[i];
+			size_type* indices = m_indices.data() + m_rowStart[i];
+			size_type* indicesEnd = m_indices.data() + m_rowEnd[i];
 			std::copy_backward(values,valueRowEnd, valueRowEnd+spaceDifference);
 			std::copy_backward(indices,indicesEnd, indicesEnd+spaceDifference);
 			m_rowStart[i]+=spaceDifference;
@@ -225,14 +224,14 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(index_type i, index_type j) const {
+	const_reference operator()(size_type i, size_type j) const {
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		//get array bounds
-		index_type const *start = m_indices.data() + m_rowStart[i];
-		index_type const *end = m_indices.data() + m_rowEnd[i];
+		size_type const *start = m_indices.data() + m_rowStart[i];
+		size_type const *end = m_indices.data() + m_rowEnd[i];
 		//find position of the index in the array
-		index_type const *pos = std::lower_bound(start,end,j);
+		size_type const *pos = std::lower_bound(start,end,j);
 
 		if (pos != end && *pos == j)
 			return m_values[(pos-start)+m_rowStart[i]];
@@ -240,7 +239,7 @@ public:
 			return m_zero;
 	}
 
-	reference operator()(index_type i, index_type j) {
+	reference operator()(size_type i, size_type j) {
 		SIZE_CHECK(i < size1());
 		SIZE_CHECK(j < size2());
 		return reference(*this,i,j);
@@ -275,7 +274,7 @@ public:
 		m1.swap(m2);
 	}
 
-	friend void swap_rows(compressed_matrix& a, index_type i, compressed_matrix& b, index_type j) {
+	friend void swap_rows(compressed_matrix& a, size_type i, compressed_matrix& b, size_type j) {
 		SIZE_CHECK(i < a.size1());
 		SIZE_CHECK(j < b.size1());
 		SIZE_CHECK(a.size2() == b.size2());
@@ -294,8 +293,8 @@ public:
 		SIZE_CHECK(b.row_capacity(j) >= nnzi);
 		SIZE_CHECK(a.row_capacity(i) >= nnzj);
 		
-		index_type* indicesi = a.m_indices.data() + a.m_rowStart[i];
-		index_type* indicesj = b.m_indices.data() + b.m_rowStart[j];
+		size_type* indicesi = a.m_indices.data() + a.m_rowStart[i];
+		size_type* indicesj = b.m_indices.data() + b.m_rowStart[j];
 		value_type* valuesi = a.m_values.data() + a.m_rowStart[i];
 		value_type* valuesj = b.m_values.data() + b.m_rowStart[j];
 		
@@ -312,45 +311,45 @@ public:
 		b.set_row_filled(j,nnzi);
 	}
 	
-	friend void swap_rows(compressed_matrix& a, index_type i, index_type j) {
+	friend void swap_rows(compressed_matrix& a, size_type i, size_type j) {
 		if(i == j) return;
 		swap_rows(a,i,a,j);
 	}
 	
-	typedef compressed_storage_iterator<value_type const, index_type const> const_row_iterator;
-	typedef compressed_storage_iterator<value_type, index_type const> row_iterator;
+	typedef compressed_storage_iterator<value_type const, size_type const> const_row_iterator;
+	typedef compressed_storage_iterator<value_type, size_type const> row_iterator;
 
-	const_row_iterator row_begin(index_type i) const {
+	const_row_iterator row_begin(size_type i) const {
 		SIZE_CHECK(i < size1());
 		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return const_row_iterator(m_values.data(), m_indices.data(), m_rowStart[i],i);
 	}
 
-	const_row_iterator row_end(index_type i) const {
+	const_row_iterator row_end(size_type i) const {
 		SIZE_CHECK(i < size1());
 		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return const_row_iterator(m_values.data(), m_indices.data(), m_rowEnd[i],i);
 	}
 
-	row_iterator row_begin(index_type i) {
+	row_iterator row_begin(size_type i) {
 		SIZE_CHECK(i < size1());
 		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return row_iterator(m_values.data(), m_indices.data(), m_rowStart[i],i);
 	}
 
-	row_iterator row_end(index_type i) {
+	row_iterator row_end(size_type i) {
 		SIZE_CHECK(i < size1());
 		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return row_iterator(m_values.data(), m_indices.data(), m_rowEnd[i],i);
 	}
 	
-	typedef compressed_storage_iterator<value_type const, index_type const> const_column_iterator;
-	typedef compressed_storage_iterator<value_type, index_type const> column_iterator;
+	typedef compressed_storage_iterator<value_type const, size_type const> const_column_iterator;
+	typedef compressed_storage_iterator<value_type, size_type const> column_iterator;
 	
-	row_iterator set_element(row_iterator pos, index_type index, value_type value) {
+	row_iterator set_element(row_iterator pos, size_type index, value_type value) {
 		std::size_t row = pos.row();
 		RANGE_CHECK(row < size1());
-		RANGE_CHECK(index_type(row_end(row) - pos) <= row_capacity(row));
+		RANGE_CHECK(size_type(row_end(row) - pos) <= row_capacity(row));
 		//todo: check in debug, that iterator position is valid
 
 		//shortcut: element already exists.
@@ -390,10 +389,10 @@ public:
 		std::size_t row = start.row();
 		RANGE_CHECK(row == end.row());
 		//get position of the elements in the array.
-		index_type rowEndPos = m_rowEnd[row];
-		index_type rowStartPos = m_rowStart[row];
-		index_type rangeStartPos = start - row_begin(row)+rowStartPos;
-		index_type rangeEndPos = end - row_begin(row)+rowStartPos;
+		size_type rowEndPos = m_rowEnd[row];
+		size_type rowStartPos = m_rowStart[row];
+		size_type rangeStartPos = start - row_begin(row)+rowStartPos;
+		size_type rangeEndPos = end - row_begin(row)+rowStartPos;
 		std::ptrdiff_t rangeSize = end - start;
 
 		//remove the elements in the range
@@ -426,12 +425,12 @@ public:
 	}
 
 private:
-	index_type m_size1;
-	index_type m_size2;
-	index_type m_nnz;
-	std::vector<index_type> m_rowStart;
-	std::vector<index_type> m_rowEnd;
-	std::vector<index_type> m_indices;
+	size_type m_size1;
+	size_type m_size2;
+	size_type m_nnz;
+	std::vector<size_type> m_rowStart;
+	std::vector<size_type> m_rowEnd;
+	std::vector<size_type> m_indices;
 	std::vector<value_type> m_values;
 	value_type m_zero;
 };

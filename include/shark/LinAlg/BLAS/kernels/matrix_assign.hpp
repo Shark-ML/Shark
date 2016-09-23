@@ -120,24 +120,24 @@ void matrix_assign(
 	std::size_t const blockSize = 16;
 	typename M::value_type blockStorage[blockSize][blockSize];
 	
-	typedef typename M::index_type index_type;
-	index_type size1 = m().size1();
-	index_type size2 = m().size2();
-	for (index_type iblock = 0; iblock < size1; iblock += blockSize){
-		for (index_type jblock = 0; jblock < size2; jblock += blockSize){
+	typedef typename M::size_type size_type;
+	size_type size1 = m().size1();
+	size_type size2 = m().size2();
+	for (size_type iblock = 0; iblock < size1; iblock += blockSize){
+		for (size_type jblock = 0; jblock < size2; jblock += blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-iblock);
 			std::size_t blockSizej = std::min(blockSize,size2-jblock);
 			
 			//compute block values
-			for (index_type j = 0; j < blockSizej; ++j){
-				for (index_type i = 0; i < blockSizei; ++i){
+			for (size_type j = 0; j < blockSizej; ++j){
+				for (size_type i = 0; i < blockSizei; ++i){
 					blockStorage[i][j] = e()(iblock+i,jblock+j);
 				}
 			}
 			
 			//copy block in a different order to m
-			for (index_type i = 0; i < blockSizei; ++i){
-				for (index_type j = 0; j < blockSizej; ++j){
+			for (size_type i = 0; i < blockSizei; ++i){
+				for (size_type j = 0; j < blockSizej; ++j){
 					m()(iblock+i,jblock+j) = blockStorage[i][j];
 				}
 			}
@@ -184,13 +184,13 @@ void matrix_assign(
 	//this gives this algorithm a run time of  O(eval(e)+k*log(k))
 	//where eval(e) is the time to evaluate and k*log(k) the number of non-zero elements
 	typedef typename M::value_type value_type;
-	typedef typename M::index_type index_type;
+	typedef typename M::size_type size_type;
 	typedef row_major::sparse_element<value_type> Element;
 	std::vector<Element> elements;
 	
-	index_type size2 = m().size2();
-	index_type size1 = m().size1();
-	for(index_type j = 0; j != size2; ++j){
+	size_type size2 = m().size2();
+	size_type size1 = m().size1();
+	for(size_type j = 0; j != size2; ++j){
 		typename E::const_column_iterator pos_e = e().column_begin(j);
 		typename E::const_column_iterator end_e = e().column_end(j);
 		for(; pos_e != end_e; ++pos_e){
@@ -205,10 +205,10 @@ void matrix_assign(
 	//fill m with the contents
 	m().clear();
 	m().reserve(elements.size());//reserve a bit of space
-	for(index_type current = 0; current != elements.size();){
+	for(size_type current = 0; current != elements.size();){
 		//count elements in row and reserve enough space for it
-		index_type row = elements[current].i;
-		index_type row_end = current;
+		size_type row = elements[current].i;
+		size_type row_end = current;
 		while(row_end != elements.size() && elements[row_end].i == row) 
 			++ row_end;
 		m().reserve_row(row,row_end - current);
@@ -353,24 +353,24 @@ void matrix_assign_functor(
 	std::size_t const blockSize = 16;
 	typename M::value_type blockStorage[blockSize][blockSize];
 	
-	typedef typename M::index_type index_type;
-	index_type size1 = m().size1();
-	index_type size2 = m().size2();
-	for (index_type iblock = 0; iblock < size1; iblock += blockSize){
-		for (index_type jblock = 0; jblock < size2; jblock += blockSize){
+	typedef typename M::size_type size_type;
+	size_type size1 = m().size1();
+	size_type size2 = m().size2();
+	for (size_type iblock = 0; iblock < size1; iblock += blockSize){
+		for (size_type jblock = 0; jblock < size2; jblock += blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-iblock);
 			std::size_t blockSizej = std::min(blockSize,size2-jblock);
 			
 			//fill the block with the values of e
-			for (index_type j = 0; j < blockSizej; ++j){
-				for (index_type i = 0; i < blockSizei; ++i){
+			for (size_type j = 0; j < blockSizej; ++j){
+				for (size_type i = 0; i < blockSizei; ++i){
 					blockStorage[i][j] = e()(iblock+i,jblock+j);
 				}
 			}
 			
 			//compute block values and store in m
-			for (index_type i = 0; i < blockSizei; ++i){
-				for (index_type j = 0; j < blockSizej; ++j){
+			for (size_type i = 0; i < blockSizei; ++i){
+				for (size_type j = 0; j < blockSizej; ++j){
 					f(m()(iblock+i,jblock+j), blockStorage[i][j]);
 				}
 			}
@@ -419,13 +419,13 @@ void matrix_assign_functor(
 	//~ //this gives this algorithm a run time of  O(eval(e)+k*log(k))
 	//~ //where eval(e) is the time to evaluate and k*log(k) the number of non-zero elements
 	//~ typedef typename M::value_type value_type;
-	//~ typedef typename M::index_type index_type;
+	//~ typedef typename M::size_type size_type;
 	//~ typedef row_major::sparse_element<value_type> Element;
 	//~ std::vector<Element> elements;
 	
-	//~ index_type size2 = m().size2();
-	//~ index_type size1 = m().size1();
-	//~ for(index_type j = 0; j != size2; ++j){
+	//~ size_type size2 = m().size2();
+	//~ size_type size1 = m().size1();
+	//~ for(size_type j = 0; j != size2; ++j){
 		//~ typename E::const_column_iterator pos_e = e().column_begin(j);
 		//~ typename E::const_column_iterator end_e = e().column_end(j);
 		//~ for(; pos_e != end_e; ++pos_e){
@@ -445,13 +445,13 @@ void matrix_assign_functor(
 	//~ std::vector<Element>::const_iterator elem = elements.begin();
 	//~ std::vector<Element>::const_iterator elem_end = elements.end();
 	//~ value_type zero = value_type();
-	//~ for(index_type row = 0; row != m().size2(); ++row){
+	//~ for(size_type row = 0; row != m().size2(); ++row){
 		//~ //todo pre-reserve enough space in the row of m()
 		//~ //merge both rows with f as functor
 		//~ typename M::row_iterator it = m().row_begin(row);
 		//~ while(it != m().row_end(row) && elem != elem_end && elem->i == row) {
-			//~ index_type it_index = it.index();
-			//~ index_type elem_index = elem->j;
+			//~ size_type it_index = it.index();
+			//~ size_type elem_index = elem->j;
 			//~ if (it_index == elem_index) {
 				//~ f(*it, *elem);
 				//~ ++ elem;
