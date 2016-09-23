@@ -728,11 +728,11 @@ public:
 	}
 	
 	major_iterator clear_element(major_iterator elem) {
-		return major_iterator(expression().clear_element(elem.inner()),orientation::size_m(start1(),start2()));
+		return major_iterator(expression().clear_element(elem.inner()),orientation::index_m(start1(),start2()));
 	}
 	
 	major_iterator clear_range(major_iterator start, major_iterator end) {
-		return major_iterator(expression().clear_range(start.inner(),end.inner()),orientation::size_m(start1(),start2()));
+		return major_iterator(expression().clear_range(start.inner(),end.inner()),orientation::index_m(start1(),start2()));
 	}
 	
 	void clear(){

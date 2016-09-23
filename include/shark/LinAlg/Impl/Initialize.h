@@ -151,7 +151,7 @@ public:
 	MatrixExpression(Matrix& matrix):m_matrix(matrix){}
 	template<class Iter>
 	void init(Iter& pos)const{
-		std::size_t major = Matrix::orientation::size_M(m_matrix.size1(), m_matrix.size2());
+		std::size_t major = Matrix::orientation::index_M(m_matrix.size1(), m_matrix.size2());
 		for(std::size_t i = 0; i != major; ++i){
 			major_iterator end = major_end(m_matrix,i);
 			for(major_iterator it = major_begin(m_matrix,i);it != end; ++it,++pos){
@@ -161,7 +161,7 @@ public:
 	}
 	template<class Iter>
 	void split(Iter& pos){
-		std::size_t major = Matrix::orientation::size_M(m_matrix.size1(), m_matrix.size2());
+		std::size_t major = Matrix::orientation::index_M(m_matrix.size1(), m_matrix.size2());
 		for(std::size_t i = 0; i != major; ++i){
 			major_iterator end = major_end(m_matrix,i);
 			for(major_iterator it = major_begin(m_matrix,i);it != end; ++it,++pos){
@@ -171,7 +171,7 @@ public:
 	}
 	std::size_t size()const{
 		std::size_t elements = 0;
-		std::size_t major = Matrix::orientation::size_M(m_matrix.size1(), m_matrix.size2());
+		std::size_t major = Matrix::orientation::index_M(m_matrix.size1(), m_matrix.size2());
 		for(std::size_t i = 0; i != major; ++i){
 			elements += std::distance(major_begin(m_matrix,i),major_end(m_matrix,i));
 		}
