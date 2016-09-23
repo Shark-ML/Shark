@@ -43,7 +43,7 @@ void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
 	typedef typename V::iterator iterator;
 	iterator end = v().end();
 	for (iterator it = v().begin(); it != end; ++it){
-		f(*it, t);
+		*it = f(*it, t);
 	}
 }
 
@@ -200,7 +200,7 @@ void vector_assign(
 	dense_tag, dense_tag
 ) {
 	for(std::size_t i = 0; i != v().size(); ++i){
-		f(v()(i),e()(i));
+		v()(i) = f(v()(i),e()(i));
 	}
 }
 
@@ -223,11 +223,11 @@ void vector_assign(
 	if(eiter != eend){
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
 		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){
-			f(*viter,value_type/*zero*/());
+			*viter = f(*viter,value_type/*zero*/());
 		}
 		//copy contents of right-hand side
 		for(;eiter != eend; ++eiter,++viter){
-			f(*viter,*eiter);
+			*viter = f(*viter,*eiter);
 		}
 	}
 	//apply f to the last elements for which the right hand side is 0, unless f is the identity
@@ -263,16 +263,16 @@ void vector_assign(
 		
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
 		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){
-			f(*viter,value_type/*zero*/());
+			*viter = f(*viter,value_type/*zero*/());
 		}
 		//copy contents of right-hand side
 		for(;eiter != eend; ++eiter,++viter){
-			f(*viter,*eiter);
+			*viter = f(*viter,*eiter);
 		}
 	}
 	//apply f to the last elements for which the right hand side is 0, unless f is the identity
 	for(;viter!= vend &&!F::right_zero_identity; ++viter){
-		*viter= value_type/*zero*/();
+		*viter= f(*viter,value_type/*zero*/());
 	}
 }
 
@@ -287,7 +287,7 @@ void vector_assign(
 	typedef typename E::const_iterator iterator;
 	iterator end = e().end();
 	for(iterator it = e().begin(); it != end; ++it){
-		f(v()(it.index()),*it);
+		v()(it.index()) = f(v()(it.index()),*it);
 	}
 }
 
@@ -309,7 +309,7 @@ void vector_assign(
 		if(it == v().end() || it.index() != i){//insert missing elements
 			it = v().set_element(it,i,zero); 
 		}
-		f(*it, e()(i));
+		*it = f(*it, e()(i));
 	}
 }
 
@@ -340,25 +340,25 @@ void assign_sparse(
 		size_type it_index = it.index();
 		size_type ite_index = ite.index();
 		if (it_index == ite_index) {
-			f(*it, *ite);
+			*it = f(*it, *ite);
 			++ ite;
 		} else if (it_index < ite_index) {
-			f(*it, zero);
+			*it = f(*it, zero);
 		} else{//it_index > ite_index so insert new element in v()
 			it = v().set_element(it,ite_index,zero); 
-			f(*it, *ite);
+			*it = f(*it, *ite);
 			++ite;
 		}
 		++it;
 	}
 	//apply zero transformation on elements which are not transformed yet
 	for(;it != v().end();++it) {
-		f(*it, zero);
+		*it = f(*it, zero);
 	}
 	//add missing elements
 	for(;ite != ite_end;++it,++ite) {
 		it = v().set_element(it,ite.index(),zero); 
-		f(*it, *ite);
+		*it = f(*it, *ite);
 	}
 }
 //as long as one argument is not a proxy, we are in the good case.

@@ -55,7 +55,7 @@ namespace detail{
 	}
 	template<class VecX, class VecV, class Device>
 	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<functors::scalar_plus_assign> (x, v);
+		kernels::assign<functors::scalar_binary_plus> (x, v);
 	}
 	template<class VecX, class VecV, class Device>
 	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
@@ -63,7 +63,7 @@ namespace detail{
 	}
 	template<class VecX, class VecV, class Device>
 	void minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<functors::scalar_minus_assign> (x, v);
+		kernels::assign<functors::scalar_binary_minus> (x, v);
 	}
 	template<class VecX, class VecV, class Device>
 	void minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
@@ -71,21 +71,21 @@ namespace detail{
 	}
 	template<class VecX, class VecV, class Device>
 	void multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<functors::scalar_multiply_assign> (x, v);
+		kernels::assign<functors::scalar_binary_multiply> (x, v);
 	}
 	template<class VecX, class VecV, class Device>
 	void multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		typename vector_temporary<VecX>::type temporary(v);
-		kernels::assign<functors::scalar_multiply_assign> (x, temporary);
+		kernels::assign<functors::scalar_binary_multiply> (x, temporary);
 	}
 	template<class VecX, class VecV, class Device>
 	void divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<functors::scalar_divide_assign> (x, v);
+		kernels::assign<functors::scalar_binary_divide> (x, v);
 	}
 	template<class VecX, class VecV, class Device>
 	void divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
 		typename vector_temporary<VecX>::type temporary(v);
-		kernels::assign<functors::scalar_divide_assign> (x, temporary);
+		kernels::assign<functors::scalar_binary_divide> (x, temporary);
 	}
 }
 	
@@ -160,7 +160,7 @@ namespace detail{
 	}
 	template<class MatA, class MatB, class Device>
 	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<functors::scalar_plus_assign> (A, B);
+		kernels::assign<functors::scalar_binary_plus> (A, B);
 	}
 	template<class MatA, class MatB, class Device>
 	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
@@ -168,7 +168,7 @@ namespace detail{
 	}
 	template<class MatA, class MatB, class Device>
 	void minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<functors::scalar_minus_assign> (A, B);
+		kernels::assign<functors::scalar_binary_minus> (A, B);
 	}
 	template<class MatA, class MatB, class Device>
 	void minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
@@ -176,21 +176,21 @@ namespace detail{
 	}
 	template<class MatA, class MatB, class Device>
 	void multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<functors::scalar_multiply_assign> (A, B);
+		kernels::assign<functors::scalar_binary_multiply> (A, B);
 	}
 	template<class MatA, class MatB, class Device>
 	void multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		typename matrix_temporary<MatA>::type temporary(B);
-		kernels::assign<functors::scalar_multiply_assign> (A, B);
+		kernels::assign<functors::scalar_binary_multiply> (A, B);
 	}
 	template<class MatA, class MatB, class Device>
 	void divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<functors::scalar_divide_assign> (A, B);
+		kernels::assign<functors::scalar_binary_divide> (A, B);
 	}
 	template<class MatA, class MatB, class Device>
 	void divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
 		typename matrix_temporary<MatA>::type temporary(B);
-		kernels::assign<functors::scalar_divide_assign> (A, B);
+		kernels::assign<functors::scalar_binary_divide> (A, B);
 	}
 }
 	
@@ -316,7 +316,7 @@ VecX& operator/=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 /// Performs the operation x_i += t for all elements.
 template<class VecX, class Device>
 VecX& operator+=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
-	kernels::assign<functors::scalar_plus_assign> (x, t);
+	kernels::assign<functors::scalar_binary_plus> (x, t);
 	return x();
 }
 
@@ -325,7 +325,7 @@ VecX& operator+=(vector_expression<VecX, Device>& x, typename VecX::value_type t
 /// Performs the operation x_i += t for all elements.
 template<class VecX, class Device>
 VecX& operator-=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
-	kernels::assign<functors::scalar_minus_assign> (x, t);
+	kernels::assign<functors::scalar_binary_minus> (x, t);
 	return x();
 }
 
@@ -334,7 +334,7 @@ VecX& operator-=(vector_expression<VecX, Device>& x, typename VecX::value_type t
 /// Performs the operation x_i *= t for all elements.
 template<class VecX, class Device>
 VecX& operator*=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
-	kernels::assign<functors::scalar_multiply_assign> (x, t);
+	kernels::assign<functors::scalar_binary_multiply> (x, t);
 	return x();
 }
 
@@ -343,7 +343,7 @@ VecX& operator*=(vector_expression<VecX, Device>& x, typename VecX::value_type t
 /// Performs the operation x_i /= t for all elements.
 template<class VecX, class Device>
 VecX& operator/=(vector_expression<VecX, Device>& x, typename VecX::value_type t){
-	kernels::assign<functors::scalar_divide_assign> (x, t);
+	kernels::assign<functors::scalar_binary_divide> (x, t);
 	return x();
 }
 
@@ -414,7 +414,7 @@ MatA& operator/=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 /// Performs the operation A_ij += t for all elements.
 template<class MatA, class Device>
 MatA& operator+=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
-	kernels::assign<functors::scalar_plus_assign> (A, t);
+	kernels::assign<functors::scalar_binary_plus> (A, t);
 	return A();
 }
 
@@ -423,7 +423,7 @@ MatA& operator+=(matrix_expression<MatA, Device>& A, typename MatA::value_type t
 /// Performs the operation A_ij -= t for all elements.
 template<class MatA, class Device>
 MatA& operator-=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
-	kernels::assign<functors::scalar_minus_assign> (A, t);
+	kernels::assign<functors::scalar_binary_minus> (A, t);
 	return A();
 }
 
@@ -432,7 +432,7 @@ MatA& operator-=(matrix_expression<MatA, Device>& A, typename MatA::value_type t
 /// Performs the operation A_ij *= t for all elements.
 template<class MatA, class Device>
 MatA& operator*=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
-	kernels::assign<functors::scalar_multiply_assign> (A, t);
+	kernels::assign<functors::scalar_binary_multiply> (A, t);
 	return A();
 }
 
@@ -441,7 +441,7 @@ MatA& operator*=(matrix_expression<MatA, Device>& A, typename MatA::value_type t
 /// Performs the operation A_ij /= t for all elements.
 template<class MatA, class Device>
 MatA& operator /=(matrix_expression<MatA, Device>& A, typename MatA::value_type t){
-	kernels::assign<functors::scalar_divide_assign> (A, t);
+	kernels::assign<functors::scalar_binary_divide> (A, t);
 	return A();
 }
 

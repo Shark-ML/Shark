@@ -208,15 +208,29 @@ struct scalar_not_equal{
 struct scalar_binary_plus {
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
+	static const bool right_zero_identity = true;
+	static const bool left_zero_identity = false;
 	template<class T1, class T2>
 	auto operator()(T1 x, T2 y)const -> decltype(T1() + T2()) {
 		return x+y;
+	}
+};
+struct scalar_binary_minus {
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
+	static const bool right_zero_identity = true;
+	static const bool left_zero_identity = false;
+	template<class T1, class T2>
+	auto operator()(T1 x, T2 y)const -> decltype(T1() + T2()) {
+		return x-y;
 	}
 };
 
 struct scalar_binary_multiply {
 	static const bool left_zero_remains =  true;
 	static const bool right_zero_remains =  true;
+	static const bool right_zero_identity = false;
+	static const bool left_zero_identity = true;
 	template<class T1, class T2>
 	auto operator()(T1 x, T2 y)const -> decltype(T1() * T2()) {
 		return x*y;
@@ -226,6 +240,8 @@ struct scalar_binary_multiply {
 struct scalar_binary_divide {
 	static const bool left_zero_remains =  true;
 	static const bool right_zero_remains =  false;
+	static const bool right_zero_identity = false;
+	static const bool left_zero_identity = true;
 	template<class T1, class T2>
 	auto operator()(T1 x, T2 y)const -> decltype(T1() / T2()) {
 		return x/y;
@@ -277,44 +293,6 @@ struct scalar_binary_max{
 		using std::max;
 		//convert to the bigger type to prevent std::max conversion errors.
 		return max(result_type(x),result_type(y));
-	}
-};
-
-
-
-///////////////////BINARY ASSIGNMENT/////////////////////////////////
-struct scalar_plus_assign{
-	static const bool right_zero_identity = true;
-	static const bool left_zero_identity = false;
-	template<class T1, class T2>
-	void operator()(T1&& t1, T2 t2 ) {
-		t1 += static_cast<typename std::decay<T1>::type const>(t2);
-	}
-};
-
-struct scalar_minus_assign{
-	static const bool right_zero_identity = true;
-	static const bool left_zero_identity = false;
-	template<class T1, class T2>
-	void operator()(T1&& t1, T2 t2 ) {
-		t1 -= static_cast<typename std::decay<T1>::type const>(t2);
-	}
-};
-
-struct scalar_multiply_assign{
-	static const bool right_zero_identity = false;
-	static const bool left_zero_identity = true;
-	template<class T1, class T2>
-	void operator()(T1&& t1, T2 t2 ) {
-		t1 *= t2;
-	}
-};
-struct scalar_divide_assign{
-	static const bool right_zero_identity = false;
-	static const bool left_zero_identity = true;
-	template<class T1, class T2>
-	void operator()(T1&& t1, T2 t2 ) {
-		t1 /= t2;
 	}
 };
 

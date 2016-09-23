@@ -371,7 +371,7 @@ void matrix_assign_functor(
 			//compute block values and store in m
 			for (size_type i = 0; i < blockSizei; ++i){
 				for (size_type j = 0; j < blockSizej; ++j){
-					f(m()(iblock+i,jblock+j), blockStorage[i][j]);
+					m()(iblock+i,jblock+j) = f(m()(iblock+i,jblock+j), blockStorage[i][j]);
 				}
 			}
 		}
@@ -497,7 +497,7 @@ void matrix_assign_functor(
 		MIter mend = m().row_end(i);
 		SIZE_CHECK(mpos.index() == epos.index());
 		for(; mpos!=mend; ++mpos,++epos){
-			f(*mpos,*epos);
+			*mpos = f(*mpos,*epos);
 		}
 	}
 }
@@ -519,7 +519,7 @@ void matrix_assign_functor(
 		MIter mpos = m().row_begin(i);
 		MIter mend = m().row_end(i);
 		for(; mpos!=mend; ++mpos){
-			f(*mpos,e()(i,mpos.index()));
+			*mpos = f(*mpos,e()(i,mpos.index()));
 		}
 	}
 }
