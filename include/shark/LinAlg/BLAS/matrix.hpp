@@ -265,10 +265,10 @@ public:
 	}
 
 	//Iterators
-	typedef dense_storage_iterator<value_type> row_iterator;
-	typedef dense_storage_iterator<value_type> column_iterator;
-	typedef dense_storage_iterator<value_type const> const_row_iterator;
-	typedef dense_storage_iterator<value_type const> const_column_iterator;
+	typedef iterators::dense_storage_iterator<value_type> row_iterator;
+	typedef iterators::dense_storage_iterator<value_type> column_iterator;
+	typedef iterators::dense_storage_iterator<value_type const> const_row_iterator;
+	typedef iterators::dense_storage_iterator<value_type const> const_column_iterator;
 
 	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_data.data() + i*stride1(),0,stride2());

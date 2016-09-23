@@ -100,8 +100,12 @@ public:
 	}
 
 	// Iterator types
-	typedef transform_iterator<typename E::const_row_iterator, functor_type> const_row_iterator;
-	typedef transform_iterator<typename E::const_column_iterator, functor_type> const_column_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<
+		typename E::const_row_iterator, functor_type
+	> const_row_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<
+		typename E::const_column_iterator, functor_type
+	> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
@@ -200,12 +204,12 @@ public:
 	}
 
 public:
-	typedef binary_transform_iterator<
+	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename E1::const_row_iterator,
 		typename E2::const_row_iterator,
 		functor_type
 	> const_row_iterator;
-	typedef binary_transform_iterator<
+	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename E1::const_column_iterator,
 		typename E2::const_column_iterator,
 		functor_type
@@ -286,7 +290,7 @@ public:
 	// Iterator types
 	typedef typename V::const_iterator const_row_iterator;
 	typedef const_row_iterator row_iterator;
-	typedef blas::constant_iterator<value_type>  const_column_iterator;
+	typedef typename device_traits<typename V::device_type>:: template constant_iterator<value_type>  const_column_iterator;
 	typedef const_column_iterator column_iterator;
 
 	// Element lookup
@@ -353,8 +357,8 @@ public:
 	}
 	
 	//Iterators
-	typedef constant_iterator<value_type> const_row_iterator;
-	typedef constant_iterator<value_type> const_column_iterator;
+	typedef typename device_traits<cpu_tag>:: template constant_iterator<value_type> const_row_iterator;
+	typedef typename device_traits<cpu_tag>:: template constant_iterator<value_type> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 
@@ -446,8 +450,8 @@ public:
 	}
 
 	// Iterator types
-	typedef transform_iterator<typename E::const_row_iterator, F> const_row_iterator;
-	typedef transform_iterator<typename E::const_column_iterator, F> const_column_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<typename E::const_row_iterator, F> const_row_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<typename E::const_column_iterator, F> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
@@ -551,10 +555,10 @@ public:
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
-	typedef binary_transform_iterator<
+	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename E1::const_row_iterator,typename E2::const_row_iterator,functor_type
 	> const_row_iterator;
-	typedef binary_transform_iterator<
+	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename E1::const_column_iterator,typename E2::const_column_iterator,functor_type
 	> const_column_iterator;
 	typedef const_row_iterator row_iterator;
@@ -624,7 +628,7 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef unknown_orientation orientation;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
-
+	typedef typename E1::device_type device_type;
 	// Construction and destruction
 	
 	explicit outer_product(lhs_closure_type const& e1, rhs_closure_type const& e2)
@@ -650,8 +654,8 @@ public:
 		return m_lhs(i) * m_rhs(j);
 	}
 
-	typedef transform_iterator<typename E2::const_iterator,functor_type> const_row_iterator;
-	typedef transform_iterator<typename E1::const_iterator,functor_type> const_column_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<typename E2::const_iterator,functor_type> const_row_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<typename E1::const_iterator,functor_type> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 	
@@ -823,7 +827,7 @@ public:
 		return sum(column(m_matrix,i));
 	}
 	
-	typedef indexed_iterator<const_closure_type> const_iterator;
+	typedef typename device_traits<device_type>:: template indexed_iterator<const_closure_type> const_iterator;
 	typedef const_iterator iterator;
 
 	const_iterator begin() const {
@@ -897,9 +901,9 @@ public:
 		return expression().raw_storage_type();
 	}
 	
-	typedef typename row_iterator<M>::type row_iterator;
+	typedef typename M::const_row_iterator row_iterator;
 	typedef row_iterator const_row_iterator;
-	typedef typename column_iterator<M>::type column_iterator;
+	typedef typename M::const_column_iterator column_iterator;
 	typedef column_iterator const_column_iterator;
 private:
 	matrix_closure_type m_expression;
@@ -1005,12 +1009,12 @@ private:
 /// \brief An diagonal matrix with values stored inside a diagonal vector
 ///
 /// the matrix stores a Vector representing the diagonal.
-template<class VectorType>
-class diagonal_matrix: public matrix_expression<diagonal_matrix< VectorType >, typename VectorType::device_type > {
-	typedef typename VectorType::const_closure_type vector_closure_type;
+template<class V>
+class diagonal_matrix: public matrix_expression<diagonal_matrix< V >, typename V::device_type > {
+	typedef typename V::const_closure_type vector_closure_type;
 public:
-	typedef typename VectorType::size_type size_type;
-	typedef typename VectorType::value_type value_type;
+	typedef typename V::size_type size_type;
+	typedef typename V::value_type value_type;
 	typedef value_type  const_reference;
 	typedef value_type reference;
 
@@ -1020,6 +1024,7 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 	typedef unknown_orientation orientation;
+	typedef typename V::device_type device_type;
 
 	// Construction and destruction
 	diagonal_matrix(vector_closure_type const& diagonal):m_diagonal(diagonal){}
@@ -1060,56 +1065,7 @@ public:
 	}
 	
 	//Iterators
-	
-	class const_row_iterator:public bidirectional_iterator_base<const_row_iterator, value_type> {
-	public:
-		typedef typename diagonal_matrix::value_type value_type;
-		typedef std::ptrdiff_t difference_type;
-		typedef typename diagonal_matrix::const_reference reference;
-		typedef value_type const* pointer;
-
-		// Construction and destruction
-		const_row_iterator(){}
-		const_row_iterator(size_type index, value_type value, bool isEnd)
-			:m_index(index),m_value(value),m_isEnd(isEnd){}
-
-		// Arithmetic
-		const_row_iterator& operator ++ () {
-			m_isEnd = true;
-			return *this;
-		}
-		const_row_iterator& operator -- () {
-			m_isEnd = false;
-			return *this;
-		}
-
-		// Dereference
-		const_reference operator*() const {
-			return m_value;
-		}
-
-		// Indices
-		size_type index() const{
-			return m_index;
-		}
-
-		// Assignment
-		const_row_iterator& operator = (const_row_iterator const& it) {
-			m_index = it.m_index;
-			return *this;
-		}
-
-		// Comparison
-		bool operator == (const_row_iterator const& it) const {
-			RANGE_CHECK(m_index == it.m_index);
-			return m_isEnd == it.m_isEnd;
-		}
-
-	private:
-		size_type m_index;
-		value_type m_value;
-		bool m_isEnd;
-	};
+	typedef typename device_traits<device_type>:: template one_hot_iterator<value_type const> const_row_iterator;
 	typedef const_row_iterator const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;

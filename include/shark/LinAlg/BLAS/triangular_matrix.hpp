@@ -180,10 +180,10 @@ public:
 	///////////iterators
 	template<class TIter>
 	class major1_iterator:
-	public random_access_iterator_base<
+	public iterators::random_access_iterator_base<
 		major1_iterator<TIter>,
 		typename boost::remove_const<T>::type,
-		packed_random_access_iterator_tag
+		iterators::packed_random_access_iterator_tag
 	>{
 	private:
 		size_type offset(size_type n)const{
@@ -274,10 +274,10 @@ public:
 	
 	template<class TIter>
 	class major2_iterator:
-	public random_access_iterator_base<
+	public iterators::random_access_iterator_base<
 		major2_iterator<TIter>,
 		typename boost::remove_const<T>::type,
-		packed_random_access_iterator_tag
+		iterators::packed_random_access_iterator_tag
 	>{
 	private:
 		size_type offset(size_type n)const{
@@ -370,7 +370,7 @@ public:
 	
 	typedef typename boost::mpl::if_<
 		boost::is_same<Orientation,row_major>,
-		dense_storage_iterator<value_type,packed_random_access_iterator_tag>,
+		iterators::dense_storage_iterator<value_type,iterators::packed_random_access_iterator_tag>,
 		typename boost::mpl::if_c<
 			TriangularType::is_upper,
 			major1_iterator<value_type>,
@@ -384,12 +384,12 @@ public:
 			major2_iterator<value_type>,
 			major1_iterator<value_type>
 		>::type,
-		dense_storage_iterator<value_type,packed_random_access_iterator_tag>
+		iterators::dense_storage_iterator<value_type,iterators::packed_random_access_iterator_tag>
 	>::type column_iterator;
 	
 	typedef typename boost::mpl::if_<
 		boost::is_same<Orientation,row_major>,
-		dense_storage_iterator<value_type const,packed_random_access_iterator_tag>,
+		iterators::dense_storage_iterator<value_type const,iterators::packed_random_access_iterator_tag>,
 		typename boost::mpl::if_c<
 			TriangularType::is_upper,
 			major1_iterator<value_type const>,
@@ -403,7 +403,7 @@ public:
 			major2_iterator<value_type const>,
 			major1_iterator<value_type const>
 		>::type,
-		dense_storage_iterator<value_type const,packed_random_access_iterator_tag>
+		iterators::dense_storage_iterator<value_type const,iterators::packed_random_access_iterator_tag>
 	>::type const_column_iterator;
 	
 public:

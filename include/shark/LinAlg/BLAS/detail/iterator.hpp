@@ -34,8 +34,7 @@
 #include <type_traits>
 
 
-namespace shark {
-namespace blas {
+namespace shark {namespace blas { namespace iterators{
 
 // Iterator tags -- hierarchical definition of storage characteristics
 struct sparse_bidirectional_iterator_tag: public std::bidirectional_iterator_tag{};
@@ -667,7 +666,7 @@ private:
 
 template<class BaseIterator, class F>
 class transform_iterator:
-	public blas::iterator_base_traits<typename BaseIterator::iterator_category>::template
+	public iterator_base_traits<typename BaseIterator::iterator_category>::template
 		iterator_base<transform_iterator<BaseIterator,F>, typename BaseIterator::value_type>::type {
 public:
 	typedef typename BaseIterator::iterator_category iterator_category;
@@ -735,6 +734,60 @@ public:
 private:
 	BaseIterator m_position;
 	F m_functor;
+};
+
+template<class T>
+class one_hot_iterator:public bidirectional_iterator_base<one_hot_iterator<T>, T> {
+public:
+	typedef T value_type;
+	typedef std::ptrdiff_t difference_type;
+	typedef std::size_t size_type;
+	typedef T& reference;
+	typedef T const& const_reference;
+	typedef value_type const* pointer;
+
+	// Construction and destruction
+	one_hot_iterator(){}
+	one_hot_iterator(size_type index, value_type value, bool isEnd)
+		:m_index(index),m_value(value),m_isEnd(isEnd){}
+
+	// Arithmetic
+	one_hot_iterator& operator ++ () {
+		m_isEnd = true;
+		return *this;
+	}
+	one_hot_iterator& operator -- () {
+		m_isEnd = false;
+		return *this;
+	}
+
+	// Dereference
+	reference operator*() const {
+		return m_value;
+	}
+
+	// Indices
+	size_type index() const{
+		return m_index;
+	}
+
+	// Assignment
+	one_hot_iterator& operator = (one_hot_iterator const& it) {
+		m_index = it.m_index;
+		m_value = it.m_value;
+		return *this;
+	}
+
+	// Comparison
+	bool operator == (one_hot_iterator const& it) const {
+		RANGE_CHECK(m_index == it.m_index);
+		return m_isEnd == it.m_isEnd;
+	}
+
+private:
+	size_type m_index;
+	value_type m_value;
+	bool m_isEnd;
 };
 
 
@@ -1151,7 +1204,6 @@ private:
 	F m_functor;
 };
 
-}
-}
+}}}
 
 #endif

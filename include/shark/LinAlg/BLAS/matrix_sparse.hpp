@@ -316,8 +316,8 @@ public:
 		swap_rows(a,i,a,j);
 	}
 	
-	typedef compressed_storage_iterator<value_type const, size_type const> const_row_iterator;
-	typedef compressed_storage_iterator<value_type, size_type const> row_iterator;
+	typedef iterators::compressed_storage_iterator<value_type const, size_type const> const_row_iterator;
+	typedef iterators::compressed_storage_iterator<value_type, size_type const> row_iterator;
 
 	const_row_iterator row_begin(size_type i) const {
 		SIZE_CHECK(i < size1());
@@ -343,8 +343,8 @@ public:
 		return row_iterator(m_values.data(), m_indices.data(), m_rowEnd[i],i);
 	}
 	
-	typedef compressed_storage_iterator<value_type const, size_type const> const_column_iterator;
-	typedef compressed_storage_iterator<value_type, size_type const> column_iterator;
+	typedef iterators::compressed_storage_iterator<value_type const, size_type const> const_column_iterator;
+	typedef iterators::compressed_storage_iterator<value_type, size_type const> column_iterator;
 	
 	row_iterator set_element(row_iterator pos, size_type index, value_type value) {
 		std::size_t row = pos.row();

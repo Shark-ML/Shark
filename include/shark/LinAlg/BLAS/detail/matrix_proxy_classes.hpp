@@ -547,8 +547,8 @@ public:
 		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 
-	typedef indexed_iterator<closure_type> iterator;
-	typedef indexed_iterator<const_closure_type> const_iterator;
+	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<closure_type> iterator;
+	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<const_closure_type> const_iterator;
 
 	// Element lookup
 	const_iterator begin()const{
@@ -667,10 +667,10 @@ public:
 	}
 
 	// Iterator types
-	typedef subrange_iterator<typename row_iterator<M>::type> row_iterator;
-	typedef subrange_iterator<typename column_iterator<M>::type> column_iterator;
-	typedef subrange_iterator<typename M::const_row_iterator> const_row_iterator;
-	typedef subrange_iterator<typename M::const_column_iterator> const_column_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename row_iterator<M>::type> row_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename column_iterator<M>::type> column_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename M::const_row_iterator> const_row_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename M::const_column_iterator> const_column_iterator;
 
 	// Element lookup
 	const_row_iterator row_begin(size_type i) const {
@@ -888,10 +888,10 @@ public:
 	// ITERATORS
 	// --------------
 
-	typedef dense_storage_iterator<T> row_iterator;
-	typedef dense_storage_iterator<T> column_iterator;
-	typedef dense_storage_iterator<value_type const> const_row_iterator;
-	typedef dense_storage_iterator<value_type const> const_column_iterator;
+	typedef iterators::dense_storage_iterator<T> row_iterator;
+	typedef iterators::dense_storage_iterator<T> column_iterator;
+	typedef iterators::dense_storage_iterator<value_type const> const_row_iterator;
+	typedef iterators::dense_storage_iterator<value_type const> const_column_iterator;
 
 	const_row_iterator row_begin(size_type i) const {
 		return const_row_iterator(m_values+i*m_stride1,0,m_stride2);

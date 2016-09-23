@@ -101,7 +101,7 @@ public:
 
 	
 	//iterators
-	typedef transform_iterator<typename E::const_iterator,functor_type > const_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<typename E::const_iterator,functor_type > const_iterator;
 	typedef const_iterator iterator;
 	
 	const_iterator begin() const {
@@ -153,8 +153,8 @@ public:
 	}
 
 public:
-	typedef constant_iterator<T> iterator;
-	typedef constant_iterator<T> const_iterator;
+	typedef typename device_traits<cpu_tag>:: template constant_iterator<T> iterator;
+	typedef typename device_traits<cpu_tag>:: template constant_iterator<T> const_iterator;
 
 	const_iterator begin() const {
 		return const_iterator(0,m_value);
@@ -232,7 +232,10 @@ public:
 		return m_functor(m_expression[i]);
 	}
 
-	typedef transform_iterator<typename E::const_iterator,functor_type> const_iterator;
+	typedef typename device_traits<device_type>:: template transform_iterator<
+		typename E::const_iterator,
+		functor_type
+	> const_iterator;
 	typedef const_iterator iterator;
 
 	// Element lookup
@@ -329,7 +332,7 @@ public:
 	}
 
 	// Iterator types
-	typedef binary_transform_iterator<
+	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename E1::const_iterator,
 		typename E2::const_iterator,
 		functor_type
@@ -427,7 +430,7 @@ public:
 	
 	// Iterator enhances the iterator of the referenced expressions
 	// with the unary functor.
-	typedef binary_transform_iterator<
+	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename E1::const_iterator,
 		typename E2::const_iterator,
 		functor_type

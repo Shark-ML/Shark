@@ -245,8 +245,8 @@ public:
 	}
 
 	// Iterator types
-	typedef compressed_storage_iterator<value_type const, size_type const> const_iterator;
-	typedef compressed_storage_iterator<value_type, size_type const> iterator;
+	typedef iterators::compressed_storage_iterator<value_type const, size_type const> const_iterator;
+	typedef iterators::compressed_storage_iterator<value_type, size_type const> iterator;
 
 	const_iterator begin() const {
 		return const_iterator(m_values.data(),m_indices.data(),0);

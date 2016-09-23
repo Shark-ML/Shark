@@ -107,7 +107,6 @@ struct major_iterator:public boost::mpl::if_<
 	typename row_iterator<Matrix>::type
 >{};	
 	
-	
 namespace detail{
 	template<class M>
 	typename column_iterator<M>::type major_begin(M& m,std::size_t i, column_major){
@@ -218,7 +217,31 @@ void ensure_size(vector_expression<Vector, Device>& vec,std::size_t size){
 	detail::ensure_size(vec(),size);
 }
 
-}
-}
+
+template<class Device>
+struct device_traits;
+
+template<>
+struct device_traits<cpu_tag>{
+	template <class Iterator, class Functor>
+	using transform_iterator = shark::blas::iterators::transform_iterator<Iterator, Functor>;
+
+	template <class Iterator>
+	using subrange_iterator = shark::blas::iterators::subrange_iterator<Iterator>;
+	
+	template<class Iterator1, class Iterator2, class Functor>
+	using binary_transform_iterator = shark::blas::iterators::binary_transform_iterator<Iterator1,Iterator2, Functor>;
+	
+	template<class T>
+	using constant_iterator = shark::blas::iterators::constant_iterator<T>;
+	
+	template<class T>
+	using one_hot_iterator = shark::blas::iterators::one_hot_iterator<T>;
+	
+	template<class Closure>
+	using indexed_iterator = shark::blas::iterators::indexed_iterator<Closure>;
+};
+
+}}
 
 #endif

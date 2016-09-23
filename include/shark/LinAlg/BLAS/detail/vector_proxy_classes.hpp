@@ -222,8 +222,10 @@ public:
 		return assign(*this, typename vector_temporary<E>::type(e));
 	}
 
-	typedef subrange_iterator< typename vector_closure_type::iterator> iterator;
-	typedef subrange_iterator< typename vector_closure_type::const_iterator> const_iterator;
+	typedef typename device_traits<typename V::device_type>:: 
+		template subrange_iterator< typename vector_closure_type::iterator> iterator;
+	typedef typename device_traits<typename V::device_type>:: 
+		template subrange_iterator< typename vector_closure_type::const_iterator> const_iterator;
 
 	const_iterator begin() const{
 		return const_iterator(
@@ -400,8 +402,8 @@ public:
 	// --------------
 	
 
-	typedef dense_storage_iterator<T> iterator;
-	typedef dense_storage_iterator<value_type const> const_iterator;
+	typedef iterators::dense_storage_iterator<T> iterator;
+	typedef iterators::dense_storage_iterator<value_type const> const_iterator;
 
 	/// \brief return an iterator on the first element of the vector
 	const_iterator begin() const {
@@ -530,7 +532,7 @@ public:
 	// ITERATORS
 	// --------------
 	
-	typedef compressed_storage_iterator<value_type const, size_type const> const_iterator;
+	typedef iterators::compressed_storage_iterator<value_type const, size_type const> const_iterator;
 	typedef const_iterator iterator;
 
 	/// \brief return an iterator behind the last non-zero element of the vector

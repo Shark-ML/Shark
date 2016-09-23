@@ -243,8 +243,8 @@ public:
 	}
 	
 	// Iterator types
-	typedef dense_storage_iterator<value_type> iterator;
-	typedef dense_storage_iterator<value_type const> const_iterator;
+	typedef iterators::dense_storage_iterator<value_type> iterator;
+	typedef iterators::dense_storage_iterator<value_type const> const_iterator;
 	
 	/// \brief return an iterator on the first element of the vector
 	const_iterator cbegin() const {

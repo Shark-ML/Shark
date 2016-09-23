@@ -315,7 +315,7 @@ struct vector_fold{
 		vector_expression<E, cpu_tag> const& v,
 		T seed
 	) {
-		return apply(v(),seed, typename E::const_iterator::iterator_category());
+		return apply(v(),seed, typename E::evaluation_category::tag());
 	}
 private:
 	//Dense Case
@@ -323,7 +323,7 @@ private:
 	T apply(
 		E const& v,
 		T seed,
-		dense_random_access_iterator_tag
+		dense_tag
 	) {
 		std::size_t size = v.size();
 		T result = seed;
@@ -337,7 +337,7 @@ private:
 	T apply(
 		E const& v,
 		T seed,
-		sparse_bidirectional_iterator_tag
+		sparse_tag
 	) {
 		typename E::const_iterator iter=v.begin();
 		typename E::const_iterator end=v.end();
