@@ -170,7 +170,7 @@ protected:
 	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector>& labels, std::size_t from, std::size_t to, RealVector const& sumLabel);
 
 	/// Generate random table indices.
-	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndicies(Rng::rng_type& rng) const;
+	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type& rng) const;
 
 	/// Reset the training to its default parameters.
 	SHARK_EXPORT_SYMBOL void setDefaults();

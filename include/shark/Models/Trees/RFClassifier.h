@@ -36,7 +36,9 @@
 #define SHARK_MODELS_TREES_RFCLASSIFIER_H
 
 #include <shark/Models/Trees/CARTClassifier.h>
+#include <shark/Models/Trees/General.h>
 #include <shark/Models/MeanModel.h>
+#include <shark/Data/DataView.h>
 
 namespace shark {
 
@@ -62,15 +64,20 @@ public:
 	std::string name() const
 	{ return "RFClassifier"; }
 
+	void computeOOBerror(){} // TODO: delete
+
 	// compute the oob error for the forest
-	void computeOOBerror(){
-		std::size_t n_trees = numberOfModels();
-		m_OOBerror = 0;
-		for(std::size_t j=0;j!=n_trees;++j){
-			m_OOBerror += m_models[j].OOBerror();
-		}
-		m_OOBerror /= n_trees;
+	void computeOOBerror(
+			UIntMatrix const& oobClassTally,
+			DataView<ClassificationDataset const>& elements){
+		auto n_elements = elements.size();
+		m_OOBerror = detail::cart::sum<double>(n_elements, [&](size_t i){
+									 auto y = elements[i].label;
+									 auto z = detail::cart::argmax(oobClassTally.row_begin(i),oobClassTally.row_end(i));
+									 return y!=z;
+        })/n_elements;
 	}
+
 
 	// compute the feature importances for the forest
 	void computeFeatureImportances(){
@@ -147,7 +154,7 @@ protected:
 	std::size_t m_inputDimension;
 
 	// oob error for the forest
-	double m_OOBerror;
+	double m_OOBerror = 0.;
 
 	// feature importances for the forest
 	RealVector m_featureImportances;
