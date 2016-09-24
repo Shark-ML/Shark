@@ -81,6 +81,12 @@ class RFTrainer
 {
 
 public:
+	using ModelType = RFClassifier;
+	using LabelType = RealVector;
+	using SubmodelType = CARTClassifier<LabelType>;
+	using CARTType = SubmodelType;
+	using TreeType = CARTType::TreeType;
+	using NodeInfo = CARTType::NodeInfo;
 	/// Construct and compute feature importances when training or not
 	SHARK_EXPORT_SYMBOL RFTrainer(bool computeFeatureImportances = false, bool computeOOBerror = false);
 
@@ -136,6 +142,7 @@ protected:
 
 	/// ClassVector
 	using ClassVector = UIntVector;
+	using LabelVector = std::vector<LabelType>;
 
 	/// Create attribute tables from a data set, and in the process create a count vector (cAbove).
 	/// A dataset with m features results in m attribute tables.
@@ -149,25 +156,25 @@ protected:
 	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// comparison function for sorting an attributeTable
 	SHARK_EXPORT_SYMBOL static bool tableSort(RFAttribute const& v1, RFAttribute const& v2);
 
 	/// Generate a histogram from the count vector.
-	SHARK_EXPORT_SYMBOL RealVector hist(ClassVector const& countVector) const;
+	SHARK_EXPORT_SYMBOL LabelType hist(ClassVector const& countVector) const;
 
 	/// Average label over a vector.
-	SHARK_EXPORT_SYMBOL RealVector average(std::vector<RealVector> const& labels);
+	SHARK_EXPORT_SYMBOL LabelType average(LabelVector const& labels);
 
 	/// Calculate the Gini impurity of the countVector
 	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
 
 	/// Total Sum Of Squares
-	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector>& labels, std::size_t from, std::size_t to, RealVector const& sumLabel);
+	SHARK_EXPORT_SYMBOL double totalSumOfSquares(LabelVector const& labels, std::size_t from, std::size_t to, RealVector const& sumLabel) const;
 
 	/// Generate random table indices.
 	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type& rng) const;

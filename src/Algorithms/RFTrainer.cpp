@@ -133,8 +133,8 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 			labels.push_back(dataTrain.element(i).label);
 		}
 
-		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, labels, 0, rng);
-		CARTClassifier<RealVector> cart(tree, m_inputDimension);
+		TreeType tree = buildTree(tables, dataTrain, labels, 0, rng);
+		CARTType cart(tree, m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
@@ -209,8 +209,8 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		createAttributeTables(dataTrain.inputs(), tables);
 		auto cAbove = createCountVector(dataTrain);
 
-		CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, cAbove, 0, rng);
-		CARTClassifier<RealVector> cart(tree, m_inputDimension);
+		TreeType tree = buildTree(tables, dataTrain, cAbove, 0, rng);
+		CARTType cart(tree, m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
@@ -264,15 +264,15 @@ void RFTrainer::setOOBratio(double ratio){
 
 
 
-CARTClassifier<RealVector>::TreeType RFTrainer::
+TreeType RFTrainer::
 buildTree(AttributeTables& tables,
 		  ClassificationDataset const& dataset,
 		  ClassVector& cAbove, std::size_t nodeId,
 		  Rng::rng_type& rng){
 
 	//Construct tree
-	CARTClassifier<RealVector>::TreeType lTree, rTree;
-	CARTClassifier<RealVector>::NodeInfo nodeInfo{nodeId};
+	TreeType lTree, rTree, tree;
+	NodeInfo nodeInfo{nodeId};
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
@@ -347,8 +347,6 @@ buildTree(AttributeTables& tables,
 	}
 
 	//Store entry in the tree table
-	CARTClassifier<RealVector>::TreeType tree;
-
 	if(isLeaf){
 		nodeInfo.label = hist(cAbove);
 		tree.push_back(nodeInfo);
@@ -362,9 +360,9 @@ buildTree(AttributeTables& tables,
 	return tree;
 }
 
-RealVector RFTrainer::hist(ClassVector const& countVector) const {
+RFTrainer::LabelType RFTrainer::hist(ClassVector const& countVector) const {
 
-	RealVector histogram(m_labelCardinality,0.0);
+	LabelType histogram(m_labelCardinality,0.0);
 
 	std::size_t totalElements = 0;
 
@@ -377,15 +375,15 @@ RealVector RFTrainer::hist(ClassVector const& countVector) const {
 	return histogram;
 }
 
-CARTClassifier<RealVector>::TreeType RFTrainer::
+TreeType RFTrainer::
 buildTree(AttributeTables& tables,
 		  RegressionDataset const& dataset,
-		  std::vector<RealVector> const& labels,
+		  LabelVector const& labels,
 		  std::size_t nodeId, Rng::rng_type& rng){
 
 	//Construct tree
-	CARTClassifier<RealVector>::TreeType lTree, rTree, tree;
-	CARTClassifier<RealVector>::NodeInfo nodeInfo{nodeId,average(labels)};
+	TreeType lTree, rTree, tree;
+	NodeInfo nodeInfo{nodeId,average(labels)};
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
@@ -395,7 +393,7 @@ buildTree(AttributeTables& tables,
 		isLeaf = true;
 	}else{
 		//label vectors
-		std::vector<RealVector> bestLabels, tmpLabels;
+		LabelVector bestLabels, tmpLabels;
 		RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);
 
 		//Randomly select the attributes to test for split
@@ -456,7 +454,7 @@ buildTree(AttributeTables& tables,
 			tables.clear();//save memory
 
 			//Split the labels
-			std::vector<RealVector> lLabels, rLabels;
+			LabelVector lLabels, rLabels;
 			for(std::size_t i = 0; i <= bestAttributeValIndex; i++){
 				lLabels.push_back(bestLabels[i]);
 			}
@@ -506,7 +504,10 @@ RealVector RFTrainer::average(std::vector<RealVector> const& labels){
 	return avg/labels.size();
 }
 
-double RFTrainer::totalSumOfSquares(std::vector<RealVector>& labels, std::size_t start, std::size_t length, const RealVector& sumLabel){
+double RFTrainer::totalSumOfSquares(
+		LabelVector const& labels,
+		std::size_t start, std::size_t length,
+		RealVector const& sumLabel) const{
 	if (length < 1)
 		throw SHARKEXCEPTION("[RFTrainer::totalSumOfSquares] length < 1");
 	if (start+length > labels.size())

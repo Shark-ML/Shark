@@ -112,6 +112,7 @@ protected:
 
 	// LabelVector
 	using ClassVector = UIntVector;
+	using LabelVector = std::vector<RealVector>;
 
 	///Number of attributes in the dataset
 	std::size_t m_inputDimension;
