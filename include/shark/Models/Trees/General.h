@@ -38,6 +38,7 @@ namespace shark {
 namespace detail {
 namespace cart {
 // Helper functions
+#define DEBUG(msg) std::cout << msg << std::endl
 template<class Iterator>
 inline std::size_t argmax(Iterator begin, Iterator end) {
 	std::size_t maxIndex = 0;
@@ -55,6 +56,16 @@ inline std::size_t argmax(Container c) {
 	return argmax(std::begin(c),std::end(c));
 }
 
+template<class Container,class F> static
+inline void generate_i(Container & v, F&& f){
+	for(std::size_t i, s = v.size(); i<s; ++i) v[i] = f(i);
+};
+template<class Container, class F> static
+inline void generate_i(std::size_t length, Container & v, F&& f){
+	v.clear();
+	for(std::size_t i=0; i<length; ++i) v.push_back(f(i));
+}
+
 template<class T, class F>
 inline T sum(std::size_t i, std::size_t n, F&& f) {
 	if(i>=n) return T{};
@@ -65,6 +76,15 @@ inline T sum(std::size_t i, std::size_t n, F&& f) {
 template<class T, class F>
 inline T sum(std::size_t n, F&& f) {
 	return sum<T>(0,n,std::forward<F>(f));
+}
+template<class T, class Container, class F> static
+inline T sum(Container const& v, F&& f) {
+	auto iter = std::begin(v);
+	auto end = std::end(v);
+	if(!(iter!=end)) return T{};
+	auto out = T{f(*iter)};
+	for(++iter;iter != end; ++iter) out += f(*iter);
+	return out;
 }
 //END Helper functions
 

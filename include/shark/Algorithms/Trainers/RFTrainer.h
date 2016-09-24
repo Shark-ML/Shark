@@ -147,19 +147,20 @@ protected:
 	/// Create attribute tables from a data set, and in the process create a count vector (cAbove).
 	/// A dataset with m features results in m attribute tables.
 	/// [attribute | class/value | row id ]
-	SHARK_EXPORT_SYMBOL void createAttributeTables(Data<RealVector> const& dataset, AttributeTables& tables);
+	template<class Dataset>
+	SHARK_EXPORT_SYMBOL void createAttributeTables(DataView<Dataset const> const& elements, AttributeTables& tables);
 
-	/// Create a count vector as used in the classification case.
-	SHARK_EXPORT_SYMBOL RFTrainer::ClassVector createCountVector(ClassificationDataset const& dataset) const;
+	/// Create a count matrix as used in the classification case.
+	SHARK_EXPORT_SYMBOL RFTrainer::ClassVector createCountVector(DataView<ClassificationDataset const> const &elements) const;
 
 	// Split attribute tables into left and right parts.
 	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cAbove, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, DataView<RegressionDataset const> const& elements, LabelType const& labelAvg, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// comparison function for sorting an attributeTable
 	SHARK_EXPORT_SYMBOL static bool tableSort(RFAttribute const& v1, RFAttribute const& v2);
@@ -168,7 +169,7 @@ protected:
 	SHARK_EXPORT_SYMBOL LabelType hist(ClassVector const& countVector) const;
 
 	/// Average label over a vector.
-	SHARK_EXPORT_SYMBOL LabelType average(LabelVector const& labels);
+	SHARK_EXPORT_SYMBOL LabelType average(LabelVector const& labels) const;
 
 	/// Calculate the Gini impurity of the countVector
 	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;

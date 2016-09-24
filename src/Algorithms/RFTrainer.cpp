@@ -97,12 +97,13 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 
 	model.setInputDimension(m_inputDimension);
 	model.setLabelDimension(m_labelDimension);
+	auto const n_elements = dataset.numberOfElements();
 
 	m_regressionLearner = true;
 	setDefaults();
 	
-	//we need direct element access sicne we need to generate elementwise subsets
-	std::size_t subsetSize = static_cast<std::size_t>(dataset.numberOfElements()*m_OOBratio);
+	//we need direct element access since we need to generate elementwise subsets
+	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 	DataView<RegressionDataset const> elements(dataset);
 
 	auto seed = static_cast<unsigned>(Rng::discrete(0,(unsigned)-1));
@@ -112,34 +113,34 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		Rng::rng_type rng{seed + b};
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
-		std::vector<std::size_t> subsetIndices(dataset.numberOfElements());
-		std::iota(subsetIndices.begin(),subsetIndices.end(),0);
-		std::random_shuffle(subsetIndices.begin(),subsetIndices.end(),DiscreteUniform<>{rng});
+		std::vector<std::size_t> trainIndices(n_elements);
+		std::iota(trainIndices.begin(),trainIndices.end(),0);
+		std::random_shuffle(trainIndices.begin(),trainIndices.end(),DiscreteUniform<>{rng});
 
 		// create oob indices
-		std::vector<std::size_t>::iterator oobStart = subsetIndices.begin() + subsetSize;
-		std::vector<std::size_t>::iterator oobEnd   = subsetIndices.end();
+		auto oobStart = trainIndices.begin() + subsetSize;
+		auto oobEnd   = trainIndices.end();
+
+		auto oobIndices = std::vector<std::size_t>(oobStart, oobEnd);
 		
 		//generate the dataset by copying (TODO: this is a quick fix!
-		subsetIndices.erase(oobStart, oobEnd);
-		RegressionDataset dataTrain = toDataset(subset(elements,subsetIndices));
+		trainIndices.erase(oobStart, oobEnd);
+		auto trainDataView = subset(elements,trainIndices);
 
+		//Create attribute tables
 		AttributeTables tables;
-		createAttributeTables(dataTrain.inputs(), tables);
+		createAttributeTables(trainDataView, tables);
 
-		std::size_t dataTrainSize = dataTrain.numberOfElements();
-		std::vector<RealVector> labels;
-		for(std::size_t i = 0; i < dataTrainSize; i++){
-			labels.push_back(dataTrain.element(i).label);
-		}
+		auto n_trainData = trainDataView.size();
+		auto pickLabel = [&](std::size_t i){return trainDataView[i].label;};
+		auto labelAvg = detail::cart::sum<RealVector>(n_trainData, pickLabel) / n_trainData;
 
-		TreeType tree = buildTree(tables, dataTrain, labels, 0, rng);
+		TreeType tree = buildTree(tables, trainDataView, labelAvg, 0, rng);
 		CARTType cart(tree, m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
-			std::vector<std::size_t> subsetIndicesOOB(oobStart, oobEnd);
-			RegressionDataset dataOOB = toDataset(subset(elements, subsetIndicesOOB));
+			RegressionDataset dataOOB = toDataset(subset(elements, oobIndices));
 
 			// if importances should be computed, oob errors are computed implicitly
 			if(m_computeFeatureImportances){
@@ -195,21 +196,21 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		std::random_shuffle(trainIndices.begin(),trainIndices.end(),DiscreteUniform<>{rng});
 
 		// create oob indices
-		std::vector<std::size_t>::iterator oobStart = trainIndices.begin() + subsetSize;
-		std::vector<std::size_t>::iterator oobEnd   = trainIndices.end();
+		auto oobStart = trainIndices.begin() + subsetSize;
+		auto oobEnd   = trainIndices.end();
 
-		std::vector<std::size_t> oobIndices(oobStart, oobEnd);
+		auto oobIndices = std::vector<std::size_t>(oobStart, oobEnd);
 
 		//generate the dataset by copying (TODO: this is a quick fix!
 		trainIndices.erase(oobStart, oobEnd);
-		ClassificationDataset dataTrain = toDataset(subset(elements,trainIndices));
+		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
 		AttributeTables tables;
-		createAttributeTables(dataTrain.inputs(), tables);
-		auto cAbove = createCountVector(dataTrain);
+		createAttributeTables(trainDataView, tables);
+		auto cAbove = createCountVector(trainDataView);
 
-		TreeType tree = buildTree(tables, dataTrain, cAbove, 0, rng);
+		TreeType tree = buildTree(tables, trainDataView, cAbove, 0, rng);
 		CARTType cart(tree, m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
@@ -218,7 +219,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 
 			// if importances should be computed, oob errors are computed implicitly
 			if(m_computeFeatureImportances){
-				cart.computeFeatureImportances(dataOOB,rng);
+				cart.computeFeatureImportances(dataOOB, rng);
 			} // if importances should not be computed, only compute the oob errors
 			else{
 				cart.computeOOBerror(dataOOB);
@@ -266,7 +267,7 @@ void RFTrainer::setOOBratio(double ratio){
 
 TreeType RFTrainer::
 buildTree(AttributeTables& tables,
-		  ClassificationDataset const& dataset,
+		  DataView<ClassificationDataset const> const& elements,
 		  ClassVector& cAbove, std::size_t nodeId,
 		  Rng::rng_type& rng){
 
@@ -289,56 +290,51 @@ buildTree(AttributeTables& tables,
 		auto tableIndices = generateRandomTableIndices(rng);
 
 		//Index of attributes
-		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;
+		std::size_t bestAttributeValIndex = 0;
 
 		//Attribute values
-		double bestAttributeVal;
-		double bestImpurity = n+1.0;
+		constexpr double worstImpurity = std::numeric_limits<double>::max();
+		double bestImpurity = worstImpurity; //old: n+1.0;
 
 		for (std::size_t attributeIndex : tableIndices){
+			auto const& attributeTable = tables[attributeIndex];
 			auto cTmpAbove = cAbove;
 			std::fill(cBelow.begin(),cBelow.end(),0);
-			for(std::size_t i=1; i<n; ++i){
-				std::size_t prev = i-1;
+			for(std::size_t prev=0,i=1; i<n; prev=i++){
+				auto const& label = elements[attributeTable[prev].id].label;
+				// Update the count of the label
+				++cBelow[label];
+				--cTmpAbove[label];
+				if(attributeTable[prev].value == attributeTable[i].value) continue;
 
-				//Update the count of the label
-				++cBelow[dataset.element(tables[attributeIndex][prev].id).label];
-				--cTmpAbove[dataset.element(tables[attributeIndex][prev].id).label];
+				// n1/n2 = Number of cases to the left/right of child node
+				std::size_t n1 = i,    n2 = n-i;
 
-				if(tables[attributeIndex][prev].value!=tables[attributeIndex][i].value){
-					//n1 = Number of cases to the left child node
-					//n2 = number of cases to the right child node
-					std::size_t n1 = i;
-					std::size_t n2 = n-n1;
-
-					//Calculate the Gini impurity of the split
-					double impurity = n1*gini(cBelow,n1)+n2*gini(cTmpAbove,n2);
-					if(impurity<bestImpurity){
-						//Found a more pure split, store the attribute index and value
-						bestImpurity = impurity;
-						bestAttributeIndex = attributeIndex;
-						bestAttributeValIndex = prev;
-						bestAttributeVal = tables[attributeIndex][bestAttributeValIndex].value;
-						cBestAbove = cTmpAbove;
-						cBestBelow = cBelow;
-					}
+				//Calculate the Gini impurity of the split
+				double impurity = n1*gini(cBelow,n1)+n2*gini(cTmpAbove,n2);
+				if(impurity<bestImpurity){
+					//Found a more pure split, store the attribute index and value
+					nodeInfo.attributeIndex = attributeIndex;
+					nodeInfo.attributeValue = attributeTable[prev].value;
+					bestAttributeValIndex = prev;
+					bestImpurity = impurity;
+					cBestAbove = cTmpAbove;
+					cBestBelow = cBelow;
 				}
 			}
 		}
 
-		if(bestImpurity<n+1){
+		if(bestImpurity<worstImpurity){
 			AttributeTables rTables, lTables;
-			splitAttributeTables(tables, bestAttributeIndex, bestAttributeValIndex, lTables, rTables);
+			splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
 			tables.clear();
 			//Continue recursively
 
-			nodeInfo.attributeIndex = bestAttributeIndex;
-			nodeInfo.attributeValue = bestAttributeVal;
-			nodeInfo.leftNodeId = 2*nodeId+1;
-			nodeInfo.rightNodeId = 2*nodeId+2;
+			nodeInfo.leftNodeId  = (nodeId<<1)+1;
+			nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-			lTree = buildTree(lTables, dataset, cBestBelow, nodeInfo.leftNodeId, rng);
-			rTree = buildTree(rTables, dataset, cBestAbove, nodeInfo.rightNodeId, rng);
+			lTree = buildTree(lTables, elements, cBestBelow, nodeInfo.leftNodeId, rng);
+			rTree = buildTree(rTables, elements, cBestAbove, nodeInfo.rightNodeId, rng);
 		}else{
 			//Leaf node
 			isLeaf = true;
@@ -349,11 +345,11 @@ buildTree(AttributeTables& tables,
 	//Store entry in the tree table
 	if(isLeaf){
 		nodeInfo.label = hist(cAbove);
-		tree.push_back(nodeInfo);
+		tree.push_back(std::move(nodeInfo));
 		return tree;
 	}
 
-	tree.push_back(nodeInfo);
+	tree.push_back(std::move(nodeInfo));
 	tree.insert(tree.end(), lTree.begin(), lTree.end());
 	tree.insert(tree.end(), rTree.begin(), rTree.end());
 
@@ -377,13 +373,13 @@ RFTrainer::LabelType RFTrainer::hist(ClassVector const& countVector) const {
 
 TreeType RFTrainer::
 buildTree(AttributeTables& tables,
-		  RegressionDataset const& dataset,
-		  LabelVector const& labels,
+		  DataView<RegressionDataset const> const& elements,
+		  LabelType const& labelAvg,
 		  std::size_t nodeId, Rng::rng_type& rng){
 
 	//Construct tree
 	TreeType lTree, rTree, tree;
-	NodeInfo nodeInfo{nodeId,average(labels)};
+	NodeInfo nodeInfo{nodeId,labelAvg};
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
@@ -393,83 +389,69 @@ buildTree(AttributeTables& tables,
 		isLeaf = true;
 	}else{
 		//label vectors
-		LabelVector bestLabels, tmpLabels;
+		LabelVector tmpLabels;
+		LabelType bestAvgAbove,bestAvgBelow;
 		RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);
 
 		//Randomly select the attributes to test for split
 		auto tableIndices = generateRandomTableIndices(rng);
 
 		//Index of attributes
-		std::size_t bestAttributeIndex = 0, bestAttributeValIndex = 0;
+		std::size_t bestAttributeValIndex = 0;
 
 		//Attribute values
-		double bestAttributeVal;
-		double bestImpurity = -1;
+		constexpr double worstImpurity = std::numeric_limits<double>::max();
+		double bestImpurity = worstImpurity;
 
-		std::size_t prev;
-		bool doSplit = false;
 		for (std::size_t attributeIndex : tableIndices){
+			auto const& attributeTable = tables[attributeIndex];
 
 			labelSumBelow.clear();
 			labelSumAbove.clear();
 			tmpLabels.clear();
 
 			//Create a labels table, that corresponds to the sorted attribute
-			for(std::size_t k=0; k<tables[attributeIndex].size(); k++){
-				tmpLabels.push_back(dataset.element(tables[attributeIndex][k].id).label);
-				labelSumBelow += dataset.element(tables[attributeIndex][k].id).label;
+			for(auto const& el : attributeTable){
+				auto const& label = elements[el.id].label;
+				tmpLabels.push_back(label);
+				labelSumBelow += label;
 			}
-			labelSumAbove += tmpLabels[0];
-			labelSumBelow -= tmpLabels[0];
 
-			for(std::size_t i=1; i<n; i++){
-				prev = i-1;
-				if(tables[attributeIndex][prev].value!=tables[attributeIndex][i].value){
-					std::size_t n1=i;
-					std::size_t n2 = n-n1;
-					//Calculate the squared error of the split
-					double impurity = (n1*totalSumOfSquares(tmpLabels,0,n1,labelSumAbove)+n2*totalSumOfSquares(tmpLabels,n1,n2,labelSumBelow))/(double)(n);
+			for(std::size_t prev=0,i=1; i<n; prev=i++){
+				labelSumAbove += tmpLabels[prev];
+				labelSumBelow -= tmpLabels[prev];
+				if(attributeTable[prev].value == attributeTable[i].value) continue;
 
-					if(impurity<bestImpurity || bestImpurity<0){
-						//Found a more pure split, store the attribute index and value
-						doSplit = true;
-						bestImpurity = impurity;
-						bestAttributeIndex = attributeIndex;
-						bestAttributeValIndex = prev;
-						bestAttributeVal = tables[attributeIndex][bestAttributeValIndex].value;
-						bestLabels = tmpLabels;
-					}
+				std::size_t n1=i,    n2 = n-i;
+
+				//Calculate the squared error of the split
+				auto avgAbove = labelSumAbove/n1,   avgBelow = labelSumBelow/n2;
+				double impurity = (n1*totalSumOfSquares(tmpLabels,0,n1,avgAbove)
+								   +n2*totalSumOfSquares(tmpLabels,n1,n2,avgBelow))/n;
+				if(impurity<bestImpurity){
+					//Found a more pure split, store the attribute index and value
+					nodeInfo.attributeIndex = attributeIndex;
+					nodeInfo.attributeValue = attributeTable[prev].value;
+					bestAttributeValIndex = prev;
+					bestImpurity = impurity;
+					bestAvgAbove = avgAbove;
+					bestAvgBelow = avgBelow;
 				}
-
-				labelSumAbove += tmpLabels[i];
-				labelSumBelow -= tmpLabels[i];
 			}
 		}
 
-		if(doSplit){
-
+		if(bestImpurity<worstImpurity){
 			//Split the attribute tables
 			AttributeTables rTables, lTables;
-			splitAttributeTables(tables, bestAttributeIndex, bestAttributeValIndex, lTables, rTables);
+			splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
 			tables.clear();//save memory
 
-			//Split the labels
-			LabelVector lLabels, rLabels;
-			for(std::size_t i = 0; i <= bestAttributeValIndex; i++){
-				lLabels.push_back(bestLabels[i]);
-			}
-			for(std::size_t i = bestAttributeValIndex+1; i < bestLabels.size(); i++){
-				rLabels.push_back(bestLabels[i]);
-			}
-
 			//Continue recursively
-			nodeInfo.attributeIndex = bestAttributeIndex;
-			nodeInfo.attributeValue = bestAttributeVal;
-			nodeInfo.leftNodeId = 2*nodeId+1;
-			nodeInfo.rightNodeId = 2*nodeId+2;
+			nodeInfo.leftNodeId = (nodeId<<1)+1;
+			nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-			lTree = buildTree(lTables, dataset, lLabels, nodeInfo.leftNodeId, rng);
-			rTree = buildTree(rTables, dataset, rLabels, nodeInfo.rightNodeId, rng);
+			lTree = buildTree(lTables, elements, bestAvgAbove, nodeInfo.leftNodeId, rng);
+			rTree = buildTree(rTables, elements, bestAvgBelow, nodeInfo.rightNodeId, rng);
 		}else{
 			//Leaf node
 			isLeaf = true;
@@ -478,11 +460,11 @@ buildTree(AttributeTables& tables,
 	}
 
 	if(isLeaf){
-		tree.push_back(nodeInfo);
+		tree.push_back(std::move(nodeInfo));
 		return tree;
 	}
 
-	tree.push_back(nodeInfo);
+	tree.push_back(std::move(nodeInfo));
 	tree.insert(tree.end(), lTree.begin(), lTree.end());
 	tree.insert(tree.end(), rTree.begin(), rTree.end());
 
@@ -496,32 +478,25 @@ buildTree(AttributeTables& tables,
 /**
  * Returns the average vector of a vector of real vectors
  */
-RealVector RFTrainer::average(std::vector<RealVector> const& labels){
-	RealVector avg(labels[0]);
-	for(std::size_t i = 1; i < labels.size(); i++){
-		avg += labels[i];
-	}
+RealVector RFTrainer::average(LabelVector const& labels) const {
+	RealVector avg(labels[0].size());
+	for(auto const& label : labels) avg += label;
 	return avg/labels.size();
 }
 
 double RFTrainer::totalSumOfSquares(
 		LabelVector const& labels,
 		std::size_t start, std::size_t length,
-		RealVector const& sumLabel) const{
+		LabelType const& labelAvg) const{
 	if (length < 1)
 		throw SHARKEXCEPTION("[RFTrainer::totalSumOfSquares] length < 1");
 	if (start+length > labels.size())
 		throw SHARKEXCEPTION("[RFTrainer::totalSumOfSquares] start+length > labels.size()");
 
-	RealVector labelAvg(sumLabel);
-	labelAvg /= length;
-
-	double sumOfSquares = 0;
-
-	for(std::size_t i = 0; i < length; i++){
-		sumOfSquares += norm_sqr(labels[start+i]-labelAvg);
-	}
-	return sumOfSquares;
+	return detail::cart::sum<double>(start, start+length,
+					   [&](std::size_t const i){
+						   return distanceSqr(labels[i],labelAvg);
+					   });
 }
 
 /**
@@ -569,12 +544,12 @@ set<std::size_t> RFTrainer::generateRandomTableIndices(Rng::rng_type& rng) const
 ///1-sum_j p(j|t)^2
 ///i.e the 1 minus the sum of the squared probability of observing class j in node t
 double RFTrainer::gini(ClassVector const& countVector, std::size_t n) const{
+	if(!n) return 1;
+
 	double res = 0.;
-	if(n){
-		n = n*n;
-		for(auto const& i: countVector){
-			res += sqr(i)/ static_cast<double>(n);
-		}
+	n *= n;
+	for(auto const& i: countVector){
+		res += sqr(i)/ static_cast<double>(n);
 	}
 	return 1-res;
 }
@@ -583,20 +558,17 @@ double RFTrainer::gini(ClassVector const& countVector, std::size_t n) const{
 /// Creates the attribute tables, and in the process creates a count vector (cAbove).
 /// A dataset consisting of m input variables has m attribute tables.
 /// [attribute | class/value | rid ]
-void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, AttributeTables& tables){
-	std::size_t elements = dataset.numberOfElements();
+template<class Dataset>
+void RFTrainer::createAttributeTables(DataView<Dataset const> const& elements, AttributeTables& tables){
+	std::size_t n_elements = elements.size();
 	//Each entry in the outer vector is an attribute table
 	AttributeTable table;
-	RFAttribute a;
 	//For each column
 	for(std::size_t j=0; j<m_inputDimension; j++){
 		table.clear();
-		//For each row
-		for(std::size_t i=0; i<elements; i++){
-			//Store Attribute value, class and rid
-			a.value = dataset.element(i)[j];
-			a.id = i;
-			table.push_back(a);
+		//For each row, store Attribute value, class and rowId
+		for(std::size_t i=0; i<n_elements; i++){
+			table.push_back(RFAttribute{elements[i].input[j], i});
 		}
 		std::sort(table.begin(), table.end(), tableSort);
 		//Store this attributes attribute table
@@ -606,11 +578,10 @@ void RFTrainer::createAttributeTables(Data<RealVector> const& dataset, Attribute
 
 
 RFTrainer::ClassVector RFTrainer::
-createCountVector(ClassificationDataset const& dataset) const {
+createCountVector(DataView<ClassificationDataset const> const& elements) const {
 	ClassVector cAbove = ClassVector(m_labelCardinality);
-	std::size_t elements = dataset.numberOfElements();
-	for(std::size_t i = 0 ; i < elements; i++){
-		++cAbove[dataset.element(i).label];
+	for(std::size_t i = 0, s = elements.size(); i<s; ++i){
+		++cAbove[elements[i].label];
 	}
 	return cAbove;
 }
