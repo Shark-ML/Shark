@@ -78,11 +78,13 @@ public:
 	// ---------
 	
 	// Element access
-	reference operator()(size_type i) const{
+	template <class IndexExpression>
+	auto operator()(IndexExpression const& i) const -> decltype(expression()(i)){
 		return expression()(i);
 	}
-	reference operator [](size_type i) const{
-		return expression() [i];
+	template <class IndexExpression>
+	auto operator[](IndexExpression const& i) const -> decltype(expression()(i)){
+		return expression()(i);
 	}
 	
 	vector_reference& operator = (vector_reference const& v){
@@ -208,8 +210,9 @@ public:
 	// ---------
 
 	// Element access
-	reference operator()(size_type i) const{
-		return m_expression(m_start +i);
+	template <class IndexExpression>
+	auto operator()(IndexExpression const& i) const -> decltype(expression()(start() + i)){
+		return m_expression(m_start + i);
 	}
 
 	// Assignment operators 

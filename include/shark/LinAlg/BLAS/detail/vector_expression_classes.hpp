@@ -65,24 +65,23 @@ public:
 	}
 
 	// Expression accessors
-	expression_closure_type const &expression() const {
+	expression_closure_type const& expression() const {
 		return m_expression;
 	}
 	
 	value_type scalar()const{
 		return m_scalar;
 	}
+	functor_type functor()const{
+		return functor_type(m_scalar);
+	}
 
-public:
 	// Element access
-	const_reference operator()(size_type i) const {
-		return m_scalar * m_expression(i);
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(functor()(expression()(i))){
+		functor_type f(m_scalar);
+		return f(m_expression(i));
 	}
-
-	const_reference operator[](size_type i) const {
-		return m_scalar * m_expression(i);
-	}
-	
 	
 	//computation kernels
 	template<class VecX>
@@ -144,11 +143,8 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(size_type /*i*/) const {
-		return m_value;
-	}
-
-	const_reference operator [](size_type /*i*/) const {
+	template<class IndexExpr>
+	const_reference operator()(IndexExpr const& /*i*/) const {
 		return m_value;
 	}
 
@@ -224,12 +220,9 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(size_type i) const {
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(functor()(expression()(i))){
 		return m_functor(m_expression(i));
-	}
-
-	const_reference operator[](size_type i) const {
-		return m_functor(m_expression[i]);
 	}
 
 	typedef typename device_traits<device_type>:: template transform_iterator<
@@ -303,14 +296,10 @@ public:
 	}
 
 	// Element access
-	const_reference operator() (size_type i) const {
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(functor_type()(lhs()(i),rhs()(i))){
 		SIZE_CHECK(i < size());
-		return m_lhs(i) + m_rhs(i);
-	}
-
-	const_reference operator[] (size_type i) const {
-		SIZE_CHECK(i < size());
-		return m_lhs(i) + m_rhs(i);
+		return functor_type()(m_lhs(i),m_rhs(i));
 	}
 	
 	//computation kernels
@@ -401,12 +390,8 @@ public:
 	}
 
 	// Element access
-	const_reference operator() (size_type i) const {
-		SIZE_CHECK(i < size());
-		return m_functor(m_lhs(i),m_rhs(i));
-	}
-
-	const_reference operator[] (size_type i) const {
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(functor()(lhs()(i),rhs()(i))){
 		SIZE_CHECK(i < size());
 		return m_functor(m_lhs(i),m_rhs(i));
 	}

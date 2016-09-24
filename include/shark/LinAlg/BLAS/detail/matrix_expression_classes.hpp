@@ -72,9 +72,8 @@ public:
 		return m_expression.size2();
 	}
 
-	// Element access
-	const_reference operator()(size_type i, size_type j) const {
-		return m_scalar * m_expression(i, j);
+	functor_type functor()const{
+		return functor_type(m_scalar);
 	}
 	
 	value_type scalar()const{
@@ -83,6 +82,12 @@ public:
 	expression_closure_type const& expression() const{
 		return m_expression;
 	};
+
+	// Element access
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor()(expression()(i,j))){
+		return functor()(m_expression(i,j));
+	}
 	
 	//computation kernels
 	template<class MatX>
@@ -181,9 +186,11 @@ public:
 		return m_rhs;
 	}
 
-        const_reference operator () (size_type i, size_type j) const {
-		return m_lhs(i, j) + m_rhs(i,j);
-        }
+        // Element access
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type()(lhs()(i,j),rhs()(i,j))){
+		return functor_type()(lhs()(i,j),rhs()(i,j));
+	}
 	
 	//computation kernels
 	template<class MatX>
@@ -278,12 +285,13 @@ public:
 	}
 
 	// Expression accessors
-	const expression_closure_type& expression () const {
+	const expression_closure_type& expression() const {
 		return m_vector;
 	}
 
 	// Element access
-	const_reference operator() (size_type i, size_type j) const {
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& /*i*/, IndexExpr2 const& j) const -> decltype(expression()(j)){
 		return m_vector(j);
 	}
 
@@ -352,7 +360,8 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(size_type /*i*/, size_type /*j*/) const {
+	template <class IndexExpr1, class IndexExpr2>
+	value_type operator()(IndexExpr1 const&, IndexExpr2 const&) const{
 		return m_value;
 	}
 	
@@ -427,7 +436,6 @@ public:
 		return m_functor;
 	}
 	
-	
 	//computation kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
@@ -445,8 +453,9 @@ public:
 	}
 
 	// Element access
-	const_reference operator()(size_type i, size_type j) const {
-		return m_functor(m_expression(i, j));
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor()(expression()(i,j))){
+		return functor()(m_expression(i,j));
 	}
 
 	// Iterator types
@@ -536,9 +545,11 @@ public:
 		return m_functor;
 	}
 
-        const_reference operator () (size_type i, size_type j) const {
-		return m_functor( m_lhs (i, j), m_rhs(i,j));
-        }
+	// Element access
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor()(lhs()(i,j),rhs()(i,j))){
+		return functor()(lhs()(i,j),rhs()(i,j));
+	}
 	
 	template<class MatX>
 	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
@@ -612,6 +623,7 @@ private:
 template<class E1, class E2>
 class outer_product:public matrix_expression<outer_product<E1, E2>, typename E1::device_type > {
 	typedef functors::scalar_multiply1<typename E1::value_type> functor_type;
+	typedef functors::scalar_binary_multiply functor_type_op;
 public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
@@ -650,8 +662,9 @@ public:
 		return m_rhs;
 	}
 	// Element access
-	const_reference operator()(size_type i, size_type j) const {
-		return m_lhs(i) * m_rhs(j);
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type_op()(lhs()(i),rhs()(j))){
+		return functor_type_op()(lhs()(i),rhs()(j));
 	}
 
 	typedef typename device_traits<device_type>:: template transform_iterator<typename E2::const_iterator,functor_type> const_row_iterator;
@@ -822,7 +835,8 @@ public:
 	}
 
 	// Element access for elementwise case
-	const_reference operator() (size_type i) const {
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(sum(column(matrix(),i))){
 		SIZE_CHECK(i < size());
 		return sum(column(m_matrix,i));
 	}
