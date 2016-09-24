@@ -452,28 +452,22 @@ double RFTrainer::sumOfSquares(
  * Returns two attribute tables: LAttrbuteTables and RAttrbuteTables
  * Calculated from splitting tables at (index, valIndex)
  */
-void RFTrainer::splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables){
-	AttributeTable table;
+void RFTrainer::splitAttributeTables(AttributeTables & tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables){
 
 	//Build a hash table for fast lookup
 	std::unordered_map<std::size_t, bool> hash;
-	for(std::size_t i = 0; i< tables[index].size(); i++){
+	for(std::size_t i = 0, s = tables[index].size(); i<s; ++i) {
 		hash[tables[index][i].id] = (i<=valIndex);
 	}
 
-	for(std::size_t i = 0; i < tables.size(); i++){
-		//For each attribute table
-		LAttributeTables.push_back(table);
-		RAttributeTables.push_back(table);
-		for(std::size_t j = 0; j < tables[i].size(); j++){
-			if(hash[tables[i][j].id]){
-				//Left
-				LAttributeTables[i].push_back(tables[i][j]);
-			}else{
-				//Right
-				RAttributeTables[i].push_back(tables[i][j]);
-			}
-		}
+	for(auto && table : tables) {
+		auto begin = table.begin(), end = table.end();
+		auto middle = std::stable_partition(begin,end,[&hash](RFAttribute const& entry){
+			return hash[entry.id];
+		});
+		RAttributeTables.emplace_back(AttributeTable{middle,end});
+		table.resize(std::distance(begin,middle));
+		LAttributeTables.emplace_back(std::move(table));
 	}
 }
 
@@ -511,17 +505,17 @@ template<class Dataset>
 void RFTrainer::createAttributeTables(DataView<Dataset const> const& elements, AttributeTables& tables){
 	std::size_t n_elements = elements.size();
 	//Each entry in the outer vector is an attribute table
-	AttributeTable table;
 	//For each column
 	for(std::size_t j=0; j<m_inputDimension; j++){
-		table.clear();
+		tables.push_back(AttributeTable{});
+		auto& table = tables[j];
+		table.reserve(n_elements);
+
 		//For each row, store Attribute value, class and rowId
 		for(std::size_t i=0; i<n_elements; i++){
 			table.push_back(RFAttribute{elements[i].input[j], i});
 		}
-		std::sort(table.begin(), table.end(), tableSort);
-		//Store this attributes attribute table
-		tables.push_back(table);
+		std::sort(table.begin(), table.end());
 	}
 }
 
@@ -535,6 +529,3 @@ createCountVector(DataView<ClassificationDataset const> const& elements) const {
 	return cAbove;
 }
 
-bool RFTrainer::tableSort(RFAttribute const& v1, RFAttribute const& v2) {
-	return v1.value < v2.value;
-}

@@ -150,6 +150,9 @@ protected:
 	struct RFAttribute {
 		double value;
 		std::size_t id;
+		friend bool operator<(RFAttribute const& v, RFAttribute const& w){
+			return v.value < w.value;
+		}
 	};
 
 	/// attribute table
@@ -183,7 +186,7 @@ protected:
 	SHARK_EXPORT_SYMBOL RFTrainer::ClassVector createCountVector(DataView<ClassificationDataset const> const &elements) const;
 
 	// Split attribute tables into left and right parts.
-	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
+	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables & tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
 	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
@@ -191,8 +194,6 @@ protected:
 	/// Builds a decision tree for regression
 	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, DataView<RegressionDataset const> const& elements, LabelType const& labelAvg, std::size_t nodeId, Rng::rng_type& rng);
 
-	/// comparison function for sorting an attributeTable
-	SHARK_EXPORT_SYMBOL static bool tableSort(RFAttribute const& v1, RFAttribute const& v2);
 
 	/// Generate a histogram from the count vector.
 	SHARK_EXPORT_SYMBOL LabelType hist(ClassVector const& countVector) const;
