@@ -40,7 +40,6 @@
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Models/Trees/RFClassifier.h>
 
-#include <boost/unordered_map.hpp>
 #include <set>
 
 namespace shark {
@@ -101,18 +100,36 @@ public:
 	SHARK_EXPORT_SYMBOL void train(RFClassifier& model, RegressionDataset const& dataset);
 
 	/// Set the number of random attributes to investigate at each node.
-	SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry);
+	inline SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry)
+	{
+		m_try = mtry;
+	}
+
 
 	/// Set the number of trees to grow.
-	SHARK_EXPORT_SYMBOL void setNTrees(std::size_t nTrees);
+	inline SHARK_EXPORT_SYMBOL void setNTrees(std::size_t nTrees)
+	{
+		m_B = nTrees;
+	}
+
 
 	/// Controls when a node is considered pure. If set to 1, a node is pure
 	/// when it only consists of a single node.
-	SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nTrees);
+	inline SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nodeSize)
+	{
+		m_nodeSize = nodeSize;
+	}
 
 	/// Set the fraction of the original training dataset to use as the
 	/// out of bag sample. The default value is 0.66.
-	SHARK_EXPORT_SYMBOL void setOOBratio(double ratio);
+	inline SHARK_EXPORT_SYMBOL void setOOBratio(double ratio)
+	{
+		if(m_OOBratio <= 0 || m_OOBratio>1){
+			throw SHARKEXCEPTION("[RFTrainer::setOOBratio] OOBratio should be in the interval (0,1]");
+		}
+		m_OOBratio = ratio;
+	}
+
 
 	/// Return the parameter vector.
 	RealVector parameterVector() const

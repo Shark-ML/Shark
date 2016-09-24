@@ -45,11 +45,11 @@ using namespace std;
 
 
 //Constructor
-RFTrainer::RFTrainer(bool computeFeatureImportances, bool computeOOBerror){
+RFTrainer::RFTrainer(bool computeFeatureImportances, bool computeOOBerror)
+: m_B{100}, m_OOBratio{0.66}
+{
 	m_try = 0;
-	m_B = 0;
 	m_nodeSize = 0;
-	m_OOBratio = 0;
 	m_regressionLearner = false;
 	m_computeFeatureImportances = computeFeatureImportances;
 	m_computeOOBerror = computeOOBerror;
@@ -61,24 +61,13 @@ void RFTrainer::setDefaults(){
 		if(m_regressionLearner){
 			setMTry(static_cast<std::size_t>(std::ceil(m_inputDimension/3.0)));
 		}else{
-			setMTry(static_cast<std::size_t>(std::ceil(std::sqrt((double)m_inputDimension))));
+			setMTry(static_cast<std::size_t>(std::ceil(std::sqrt(m_inputDimension))));
 		}
-	}
-
-	if(!m_B){
-		setNTrees(100);
 	}
 
 	if(!m_nodeSize){
-		if(m_regressionLearner){
-			setNodeSize(5);
-		}else{
-			setNodeSize(1);
-		}
-	}
-
-	if(m_OOBratio <= 0 || m_OOBratio>1){
-		setOOBratio(0.66);
+		if(m_regressionLearner) setNodeSize(5);
+		else setNodeSize(1);
 	}
 }
 
@@ -244,24 +233,6 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		model.computeFeatureImportances();
 	}
 }
-
-void RFTrainer::setMTry(std::size_t mtry){
-	m_try = mtry;
-}
-
-void RFTrainer::setNTrees(std::size_t nTrees){
-	m_B = nTrees;
-}
-
-void RFTrainer::setNodeSize(std::size_t nodeSize){
-	m_nodeSize = nodeSize;
-}
-
-void RFTrainer::setOOBratio(double ratio){
-	m_OOBratio = ratio;
-}
-
-
 
 TreeType RFTrainer::
 buildTree(AttributeTables& tables,
