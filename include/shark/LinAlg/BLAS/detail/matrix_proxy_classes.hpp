@@ -379,11 +379,11 @@ public:
 	
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& j) const -> decltype(this->expression()(index(),j)){
+	auto operator()(IndexExpr const& j) const -> decltype(this->expression()(this->index(),j)){
 		return expression()(index(), j);
 	}
 	template <class IndexExpr>
-	auto operator[](IndexExpr const& j) const -> decltype(this->expression()(index(),j)){
+	auto operator[](IndexExpr const& j) const -> decltype(this->expression()(this->index(),j)){
 		return (*this)(j);
 	}
 	
