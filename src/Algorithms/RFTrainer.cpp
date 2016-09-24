@@ -228,7 +228,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 
 		SHARK_CRITICAL_REGION{
 			model.addModel(cart);
-			for(auto i : oobIndices){
+			for(auto const i : oobIndices){
 				auto histogram = cart(elements[i].input);
 				auto j = detail::cart::argmax(histogram);
 				++oobClassTally(i,j);
@@ -268,91 +268,82 @@ void RFTrainer::setOOBratio(double ratio){
 TreeType RFTrainer::
 buildTree(AttributeTables& tables,
 		  DataView<ClassificationDataset const> const& elements,
-		  ClassVector& cAbove, std::size_t nodeId,
+		  ClassVector& cFull, std::size_t nodeId,
 		  Rng::rng_type& rng){
 
 	//Construct tree
 	TreeType lTree, rTree, tree;
-	NodeInfo nodeInfo{nodeId};
+	tree.push_back(NodeInfo{nodeId});
+	NodeInfo& nodeInfo = tree[0];
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
-
-	bool isLeaf = false;
-	if(gini(cAbove,tables[0].size())==0 || n <= m_nodeSize){
-		isLeaf = true;
-	}else{
-		//Count vectors
-		ClassVector cBelow(m_labelCardinality),cBestBelow(m_labelCardinality),
-				cBestAbove(m_labelCardinality);
-
-		//Randomly select the attributes to test for split
-		auto tableIndices = generateRandomTableIndices(rng);
-
-		//Index of attributes
-		std::size_t bestAttributeValIndex = 0;
-
-		//Attribute values
-		constexpr double worstImpurity = std::numeric_limits<double>::max();
-		double bestImpurity = worstImpurity; //old: n+1.0;
-
-		for (std::size_t attributeIndex : tableIndices){
-			auto const& attributeTable = tables[attributeIndex];
-			auto cTmpAbove = cAbove;
-			std::fill(cBelow.begin(),cBelow.end(),0);
-			for(std::size_t prev=0,i=1; i<n; prev=i++){
-				auto const& label = elements[attributeTable[prev].id].label;
-				// Update the count of the label
-				++cBelow[label];
-				--cTmpAbove[label];
-				if(attributeTable[prev].value == attributeTable[i].value) continue;
-
-				// n1/n2 = Number of cases to the left/right of child node
-				std::size_t n1 = i,    n2 = n-i;
-
-				//Calculate the Gini impurity of the split
-				double impurity = n1*gini(cBelow,n1)+n2*gini(cTmpAbove,n2);
-				if(impurity<bestImpurity){
-					//Found a more pure split, store the attribute index and value
-					nodeInfo.attributeIndex = attributeIndex;
-					nodeInfo.attributeValue = attributeTable[prev].value;
-					bestAttributeValIndex = prev;
-					bestImpurity = impurity;
-					cBestAbove = cTmpAbove;
-					cBestBelow = cBelow;
-				}
-			}
-		}
-
-		if(bestImpurity<worstImpurity){
-			AttributeTables rTables, lTables;
-			splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
-			tables.clear();
-			//Continue recursively
-
-			nodeInfo.leftNodeId  = (nodeId<<1)+1;
-			nodeInfo.rightNodeId = (nodeId<<1)+2;
-
-			lTree = buildTree(lTables, elements, cBestBelow, nodeInfo.leftNodeId, rng);
-			rTree = buildTree(rTables, elements, cBestAbove, nodeInfo.rightNodeId, rng);
-		}else{
-			//Leaf node
-			isLeaf = true;
-		}
-
-	}
-
-	//Store entry in the tree table
-	if(isLeaf){
-		nodeInfo.label = hist(cAbove);
-		tree.push_back(std::move(nodeInfo));
+	if(gini(cFull,n)==0.0 || n <= m_nodeSize) {
+		nodeInfo.label = hist(cFull);
 		return tree;
 	}
 
-	tree.push_back(std::move(nodeInfo));
-	tree.insert(tree.end(), lTree.begin(), lTree.end());
-	tree.insert(tree.end(), rTree.begin(), rTree.end());
+	//Count matrices
+	ClassVector cBestBelow, cBestAbove;
 
+	//Randomly select the attributes to test for split
+	auto tableIndices = generateRandomTableIndices(rng);
+
+	//Index of attributes
+	std::size_t bestAttributeValIndex = 0;
+
+	//Attribute values
+	constexpr double worstImpurity = std::numeric_limits<double>::max();
+	double bestImpurity = worstImpurity; //old: n+1.0;
+
+	for (std::size_t attributeIndex : tableIndices){
+		auto const& attributeTable = tables[attributeIndex];
+		auto cAbove = cFull;
+		auto cBelow = ClassVector(m_labelCardinality);
+		std::fill(cBelow.begin(),cBelow.end(),0);
+		for(std::size_t prev=0,i=1; i<n; prev=i++){
+			auto const& label = elements[attributeTable[prev].id].label;
+			// Pass the label down
+			--cAbove[label];    ++cBelow[label];
+			if(attributeTable[prev].value == attributeTable[i].value) continue;
+
+			// n1/n2 = Number of cases to the left/right of child node
+			std::size_t n1 = i,    n2 = n-i;
+
+			//Calculate the Gini impurity of the split
+			double impurity = n1*gini(cBelow,n1)+n2*gini(cAbove,n2);
+			if(impurity<bestImpurity){
+				//Found a more pure split, store the attribute index and value
+				nodeInfo.attributeIndex = attributeIndex;
+				nodeInfo.attributeValue = attributeTable[prev].value;
+				bestAttributeValIndex = prev;
+				bestImpurity = impurity;
+				cBestAbove = cAbove;
+				cBestBelow = cBelow;
+			}
+		}
+	}
+
+	// only if impurity has improved, is this not a leaf.
+	if(bestImpurity<worstImpurity){
+		AttributeTables rTables, lTables;
+		splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
+		tables.clear();
+		//Continue recursively
+
+		nodeInfo.leftNodeId  = (nodeId<<1)+1;
+		nodeInfo.rightNodeId = (nodeId<<1)+2;
+
+		lTree = buildTree(lTables, elements, cBestBelow, nodeInfo.leftNodeId, rng);
+		rTree = buildTree(rTables, elements, cBestAbove, nodeInfo.rightNodeId, rng);
+
+		tree.insert(tree.end(), lTree.begin(), lTree.end());
+		tree.insert(tree.end(), rTree.begin(), rTree.end());
+		return tree;
+	}
+	//Store entry in the tree table
+	// TODO(jwrigley): Why is hist only applied to leaves, when average is applied to all nodes
+	nodeInfo.label = hist(cFull);
 	return tree;
 }
 
@@ -379,98 +370,84 @@ buildTree(AttributeTables& tables,
 
 	//Construct tree
 	TreeType lTree, rTree, tree;
-	NodeInfo nodeInfo{nodeId,labelAvg};
+	// TODO(jwrigley): Why is average assigned to all nodes, when hist is only applied to leaves?
+	tree.push_back(NodeInfo{nodeId,labelAvg});
+	NodeInfo& nodeInfo = tree[0];
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
+	if(n <= m_nodeSize) return tree; // Must be leaf
 
-	bool isLeaf = false;
-	if(n <= m_nodeSize){
-		isLeaf = true;
-	}else{
-		//label vectors
-		LabelVector tmpLabels;
-		LabelType bestAvgAbove,bestAvgBelow;
-		RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);
+	//label vectors
+	LabelVector tmpLabels;
+	LabelType bestAvgAbove,bestAvgBelow;
+	RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);
 
-		//Randomly select the attributes to test for split
-		auto tableIndices = generateRandomTableIndices(rng);
+	//Randomly select the attributes to test for split
+	auto tableIndices = generateRandomTableIndices(rng);
 
-		//Index of attributes
-		std::size_t bestAttributeValIndex = 0;
+	//Index of attributes
+	std::size_t bestAttributeValIndex = 0;
 
-		//Attribute values
-		constexpr double worstImpurity = std::numeric_limits<double>::max();
-		double bestImpurity = worstImpurity;
+	//Attribute values
+	constexpr double worstImpurity = std::numeric_limits<double>::max();
+	double bestImpurity = worstImpurity;
 
-		for (std::size_t attributeIndex : tableIndices){
-			auto const& attributeTable = tables[attributeIndex];
+	for (std::size_t const attributeIndex : tableIndices){
+		auto const& attributeTable = tables[attributeIndex];
 
-			labelSumBelow.clear();
-			labelSumAbove.clear();
-			tmpLabels.clear();
+		labelSumBelow.clear();
+		labelSumAbove.clear();
+		tmpLabels.clear();
 
-			//Create a labels table, that corresponds to the sorted attribute
-			for(auto const& el : attributeTable){
-				auto const& label = elements[el.id].label;
-				tmpLabels.push_back(label);
-				labelSumBelow += label;
-			}
-
-			for(std::size_t prev=0,i=1; i<n; prev=i++){
-				labelSumAbove += tmpLabels[prev];
-				labelSumBelow -= tmpLabels[prev];
-				if(attributeTable[prev].value == attributeTable[i].value) continue;
-
-				std::size_t n1=i,    n2 = n-i;
-
-				//Calculate the squared error of the split
-				auto avgAbove = labelSumAbove/n1,   avgBelow = labelSumBelow/n2;
-				double impurity = (n1*totalSumOfSquares(tmpLabels,0,n1,avgAbove)
-								   +n2*totalSumOfSquares(tmpLabels,n1,n2,avgBelow))/n;
-				if(impurity<bestImpurity){
-					//Found a more pure split, store the attribute index and value
-					nodeInfo.attributeIndex = attributeIndex;
-					nodeInfo.attributeValue = attributeTable[prev].value;
-					bestAttributeValIndex = prev;
-					bestImpurity = impurity;
-					bestAvgAbove = avgAbove;
-					bestAvgBelow = avgBelow;
-				}
-			}
+		//Create a labels table, that corresponds to the sorted attribute
+		for(auto const& el : attributeTable){
+			auto const& label = elements[el.id].label;
+			tmpLabels.push_back(label);
+			labelSumBelow += label;
 		}
 
-		if(bestImpurity<worstImpurity){
-			//Split the attribute tables
-			AttributeTables rTables, lTables;
-			splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
-			tables.clear();//save memory
+		for(std::size_t prev=0,i=1; i<n; prev=i++){
+			labelSumAbove += tmpLabels[prev];
+			labelSumBelow -= tmpLabels[prev];
+			if(attributeTable[prev].value == attributeTable[i].value) continue;
 
-			//Continue recursively
-			nodeInfo.leftNodeId = (nodeId<<1)+1;
-			nodeInfo.rightNodeId = (nodeId<<1)+2;
+			std::size_t n1=i,    n2 = n-i;
 
-			lTree = buildTree(lTables, elements, bestAvgAbove, nodeInfo.leftNodeId, rng);
-			rTree = buildTree(rTables, elements, bestAvgBelow, nodeInfo.rightNodeId, rng);
-		}else{
-			//Leaf node
-			isLeaf = true;
+			//Calculate the squared error of the split
+			RealVector avgAbove = labelSumAbove/n1,   avgBelow = labelSumBelow/n2;
+			double impurity = (n1*totalSumOfSquares(tmpLabels,0,n1,avgAbove)
+							   +n2*totalSumOfSquares(tmpLabels,n1,n2,avgBelow))/n;
+			if(impurity<bestImpurity){
+				//Found a more pure split, store the attribute index and value
+				nodeInfo.attributeIndex = attributeIndex;
+				nodeInfo.attributeValue = attributeTable[prev].value;
+				bestAttributeValIndex = prev;
+				bestImpurity = impurity;
+				bestAvgAbove = avgAbove;
+				bestAvgBelow = avgBelow;
+			}
 		}
-
 	}
 
-	if(isLeaf){
-		tree.push_back(std::move(nodeInfo));
-		return tree;
+	// only if impurity has improved, is this not a leaf.
+	if(bestImpurity<worstImpurity){
+		//Split the attribute tables
+		AttributeTables rTables, lTables;
+		splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
+		tables.clear();//save memory
+
+		//Continue recursively
+		nodeInfo.leftNodeId = (nodeId<<1)+1;
+		nodeInfo.rightNodeId = (nodeId<<1)+2;
+
+		lTree = buildTree(lTables, elements, bestAvgAbove, nodeInfo.leftNodeId, rng);
+		rTree = buildTree(rTables, elements, bestAvgBelow, nodeInfo.rightNodeId, rng);
+
+		tree.insert(tree.end(), lTree.begin(), lTree.end());
+		tree.insert(tree.end(), rTree.begin(), rTree.end());
 	}
-
-	tree.push_back(std::move(nodeInfo));
-	tree.insert(tree.end(), lTree.begin(), lTree.end());
-	tree.insert(tree.end(), rTree.begin(), rTree.end());
-
-	//Store entry in the tree
 	return tree;
-
 }
 
 
