@@ -132,8 +132,9 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		createAttributeTables(trainDataView, tables);
 
 		auto n_trainData = trainDataView.size();
-		auto pickLabel = [&](std::size_t i){return trainDataView[i].label;};
-		auto labelAvg = detail::cart::sum<RealVector>(n_trainData, pickLabel) / n_trainData;
+		auto labelAvg = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
+			return trainDataView[i].label;
+		}) / n_trainData;
 
 		TreeType tree = buildTree(tables, trainDataView, labelAvg, 0, rng);
 		CARTType cart(std::move(tree), m_inputDimension);
@@ -142,13 +143,10 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		if(m_computeOOBerror || m_computeFeatureImportances){
 			RegressionDataset dataOOB = toDataset(subset(elements, oobIndices));
 
-			// if importances should be computed, oob errors are computed implicitly
+			// cart oob errors are computed implicitly whenever importances are
 			if(m_computeFeatureImportances){
 				cart.computeFeatureImportances(dataOOB, rng);
-			} // if importances should not be computed, only compute the oob errors
-			else{
-				cart.computeOOBerror(dataOOB);
-			}
+			} else cart.computeOOBerror(dataOOB);
 		}
 
 		SHARK_CRITICAL_REGION{
@@ -283,19 +281,45 @@ buildTree(AttributeTables& tables,
 		return tree;
 	}
 
-	//Count matrices
-	ClassVector cBestBelow, cBestAbove;
-
 	//Randomly select the attributes to test for split
 	auto tableIndices = generateRandomTableIndices(rng);
 
-	//Index of attributes
-	std::size_t bestAttributeValIndex = 0;
+	auto split = findSplit(tables,cFull,elements,tableIndices);
 
-	//Attribute values
-	constexpr double worstImpurity = std::numeric_limits<double>::max();
-	double bestImpurity = worstImpurity; //old: n+1.0;
+	// if the purity hasn't improved, this is a leaf.
+	if(split.impurity==WORST_IMPURITY) {
+		// this shouldn't really happen: leaves ought to be cought by previous check
+		// TODO(jwrigley): Why is hist only applied to leaves, when average is applied to all nodes
+		nodeInfo.label = hist(cFull);
+		return tree;
+	}
+	nodeInfo <<= split;
+	AttributeTables rTables, lTables;
+	splitAttributeTables(tables, split.splitAttribute, split.splitRow, lTables, rTables);
+	tables.clear(); tables.shrink_to_fit();
+	//Continue recursively
 
+	nodeInfo.leftNodeId  = (nodeId<<1)+1;   nodeInfo.rightNodeId = (nodeId<<1)+2;
+
+	lTree = buildTree(lTables, elements, split.cBelow, nodeInfo.leftNodeId, rng);
+	rTree = buildTree(rTables, elements, split.cAbove, nodeInfo.rightNodeId, rng);
+
+//	tree.insert(tree.end(), std::make_move_iterator(lTree.begin()), std::make_move_iterator(lTree.end()));
+//	tree.insert(tree.end(), std::make_move_iterator(rTree.begin()), std::make_move_iterator(rTree.end()));
+	tree.reserve(tree.size()+lTree.size()+rTree.size());
+	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
+	std::move(rTree.begin(),rTree.end(),std::back_inserter(tree));
+	return tree;
+}
+
+RFTrainer::Split RFTrainer::findSplit(
+		RFTrainer::AttributeTables const& tables,
+		RFTrainer::ClassVector const& cFull,
+		DataView<ClassificationDataset const> const& elements,
+		set<size_t> const& tableIndices) const
+{
+	auto n = tables[0].size();
+	Split best;
 	for (std::size_t attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
 		auto cAbove = cFull;
@@ -312,39 +336,18 @@ buildTree(AttributeTables& tables,
 
 			//Calculate the Gini impurity of the split
 			double impurity = n1*gini(cBelow,n1)+n2*gini(cAbove,n2);
-			if(impurity<bestImpurity){
+			if(impurity<best.impurity){
 				//Found a more pure split, store the attribute index and value
-				nodeInfo.attributeIndex = attributeIndex;
-				nodeInfo.attributeValue = attributeTable[prev].value;
-				bestAttributeValIndex = prev;
-				bestImpurity = impurity;
-				cBestAbove = cAbove;
-				cBestBelow = cBelow;
+				best.splitAttribute = attributeIndex;
+				best.splitRow = prev;
+				best.splitValue = attributeTable[prev].value;
+				best.impurity = impurity;
+				best.cAbove = cAbove;
+				best.cBelow = cBelow;
 			}
 		}
 	}
-
-	// only if impurity has improved, is this not a leaf.
-	if(bestImpurity<worstImpurity){
-		AttributeTables rTables, lTables;
-		splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
-		tables.clear();
-		//Continue recursively
-
-		nodeInfo.leftNodeId  = (nodeId<<1)+1;
-		nodeInfo.rightNodeId = (nodeId<<1)+2;
-
-		lTree = buildTree(lTables, elements, cBestBelow, nodeInfo.leftNodeId, rng);
-		rTree = buildTree(rTables, elements, cBestAbove, nodeInfo.rightNodeId, rng);
-
-		tree.insert(tree.end(), lTree.begin(), lTree.end());
-		tree.insert(tree.end(), rTree.begin(), rTree.end());
-		return tree;
-	}
-	//Store entry in the tree table
-	// TODO(jwrigley): Why is hist only applied to leaves, when average is applied to all nodes
-	nodeInfo.label = hist(cFull);
-	return tree;
+	return best;
 }
 
 RFTrainer::LabelType RFTrainer::hist(ClassVector const& countVector) const {
@@ -375,81 +378,80 @@ buildTree(AttributeTables& tables,
 	NodeInfo& nodeInfo = tree[0];
 
 	//n = Total number of cases in the dataset
-	std::size_t n = tables[0].size();
+	auto n = tables[0].size();
 	if(n <= m_nodeSize) return tree; // Must be leaf
-
-	//label vectors
-	LabelVector tmpLabels;
-	LabelType bestAvgAbove,bestAvgBelow;
-	RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);
 
 	//Randomly select the attributes to test for split
 	auto tableIndices = generateRandomTableIndices(rng);
 
-	//Index of attributes
-	std::size_t bestAttributeValIndex = 0;
+	auto split = findSplit(tables,elements,tableIndices);
 
-	//Attribute values
-	constexpr double worstImpurity = std::numeric_limits<double>::max();
-	double bestImpurity = worstImpurity;
+	// if the purity hasn't improved, this is a leaf.
+	if(split.impurity==WORST_IMPURITY) return tree;
+	nodeInfo <<= split;
 
+	//Split the attribute tables
+	AttributeTables rTables, lTables;
+	splitAttributeTables(tables, split.splitAttribute, split.splitRow, lTables, rTables);
+	tables.clear();tables.shrink_to_fit();//save memory
+
+	//Continue recursively
+	nodeInfo.leftNodeId = (nodeId<<1)+1;
+	nodeInfo.rightNodeId = (nodeId<<1)+2;
+
+	lTree = buildTree(lTables, elements, split.avgAbove, nodeInfo.leftNodeId, rng);
+	rTree = buildTree(rTables, elements, split.avgBelow, nodeInfo.rightNodeId, rng);
+
+//	tree.insert(tree.end(), std::make_move_iterator(lTree.begin()), std::make_move_iterator(lTree.end()));
+//	tree.insert(tree.end(), std::make_move_iterator(rTree.begin()), std::make_move_iterator(rTree.end()));
+	tree.reserve(tree.size()+lTree.size()+rTree.size());
+	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
+	std::move(rTree.begin(),rTree.end(),std::back_inserter(tree));
+	return tree;
+}
+
+RFTrainer::Split RFTrainer::findSplit (
+        RFTrainer::AttributeTables const &tables,
+        DataView<RegressionDataset const> const &elements,
+        set<size_t> const &tableIndices) const
+{
+	auto n = tables[0].size();
+	Split best{};
+	RealVector sumAbove(m_labelDimension), sumBelow(m_labelDimension);
+	RealVector avgAbove(m_labelDimension), avgBelow(m_labelDimension);
+	LabelVector tmp;
 	for (std::size_t const attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
-
-		labelSumBelow.clear();
-		labelSumAbove.clear();
-		tmpLabels.clear();
-
+		sumBelow.clear(); sumAbove.clear(); tmp.clear();
 		//Create a labels table, that corresponds to the sorted attribute
-		detail::cart::generate_i(n,tmpLabels,[&](std::size_t i){
+		tmp = detail::cart::generate_i<LabelVector>(n,[&](std::size_t i){
 			auto const& label = elements[attributeTable[i].id].label;
-			labelSumBelow += label;
+			sumBelow += label;
 			return label;
 		});
 
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
-			labelSumAbove += tmpLabels[prev];
-			labelSumBelow -= tmpLabels[prev];
+			sumAbove += tmp[prev]; sumBelow -= tmp[prev];
 			if(attributeTable[prev].value == attributeTable[i].value) continue;
 
 			std::size_t n1=i,    n2 = n-i;
-
 			//Calculate the squared error of the split
-			RealVector avgAbove = labelSumAbove/n1,   avgBelow = labelSumBelow/n2;
-			double impurity = (n1*totalSumOfSquares(tmpLabels,0,n1,avgAbove)
-							   +n2*totalSumOfSquares(tmpLabels,n1,n2,avgBelow))/n;
-			if(impurity<bestImpurity){
+			noalias(avgAbove) = sumAbove/n1;     noalias(avgBelow) = sumBelow/n2;
+			double impurity = (n1* sumOfSquares(tmp, 0, n1, avgAbove)
+							   +n2*sumOfSquares(tmp,n1, n2, avgBelow))/n;
+			if(impurity<best.impurity){
 				//Found a more pure split, store the attribute index and value
-				nodeInfo.attributeIndex = attributeIndex;
-				nodeInfo.attributeValue = attributeTable[prev].value;
-				bestAttributeValIndex = prev;
-				bestImpurity = impurity;
-				bestAvgAbove = avgAbove;
-				bestAvgBelow = avgBelow;
+				best.splitAttribute = attributeIndex;
+				best.splitRow = prev;
+				best.splitValue = attributeTable[prev].value;
+				best.impurity = impurity;
+				best.avgAbove = avgAbove;
+				best.avgBelow = avgBelow;
 			}
 		}
 	}
-
-	// only if impurity has improved, is this not a leaf.
-	if(bestImpurity<worstImpurity){
-		//Split the attribute tables
-		AttributeTables rTables, lTables;
-		splitAttributeTables(tables, nodeInfo.attributeIndex, bestAttributeValIndex, lTables, rTables);
-		tables.clear();//save memory
-
-		//Continue recursively
-		nodeInfo.leftNodeId = (nodeId<<1)+1;
-		nodeInfo.rightNodeId = (nodeId<<1)+2;
-
-		lTree = buildTree(lTables, elements, bestAvgAbove, nodeInfo.leftNodeId, rng);
-		rTree = buildTree(rTables, elements, bestAvgBelow, nodeInfo.rightNodeId, rng);
-
-		tree.insert(tree.end(), lTree.begin(), lTree.end());
-		tree.insert(tree.end(), rTree.begin(), rTree.end());
-	}
-	return tree;
+	return best;
 }
-
 
 
 /**
@@ -461,19 +463,18 @@ RealVector RFTrainer::average(LabelVector const& labels) const {
 	return avg/labels.size();
 }
 
-double RFTrainer::totalSumOfSquares(
-		LabelVector const& labels,
+double RFTrainer::sumOfSquares(
+		LabelVector const &labels,
 		std::size_t start, std::size_t length,
-		LabelType const& labelAvg) const{
-	if (length < 1)
-		throw SHARKEXCEPTION("[RFTrainer::totalSumOfSquares] length < 1");
-	if (start+length > labels.size())
-		throw SHARKEXCEPTION("[RFTrainer::totalSumOfSquares] start+length > labels.size()");
+		LabelType const &labelAvg) const{
+	auto&& end = start+length;
+	if (length < 1) throw SHARKEXCEPTION("[RFTrainer::sumOfSquares] length < 1");
+	if (end > labels.size())
+		throw SHARKEXCEPTION("[RFTrainer::sumOfSquares] start+length > labels.size()");
 
-	return detail::cart::sum<double>(start, start+length,
-					   [&](std::size_t const i){
-						   return distanceSqr(labels[i],labelAvg);
-					   });
+	return detail::cart::sum<double>(start, end, [&](std::size_t const i){
+		return distanceSqr(labels[i],labelAvg);
+	});
 }
 
 /**
@@ -507,7 +508,7 @@ void RFTrainer::splitAttributeTables(AttributeTables const& tables, std::size_t 
 
 
 ///Generates a random set of indices
-set<std::size_t> RFTrainer::generateRandomTableIndices(Rng::rng_type& rng) const {
+set<std::size_t> RFTrainer::generateRandomTableIndices(Rng::rng_type &rng) const {
 	set<std::size_t> tableIndices;
 	DiscreteUniform<> discrete{rng,0,m_inputDimension-1};
 	//Draw the m_try Generate the random attributes to search for the split

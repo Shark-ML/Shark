@@ -34,10 +34,14 @@
 
 #ifndef SHARK_MODELS_TREES_GENERAL_H
 #define SHARK_MODELS_TREES_GENERAL_H
+#include <memory>
+template<class T> class TD;
+#define typeof(param) TD<decltype(param)>{}
 namespace shark {
 namespace detail {
 namespace cart {
 // Helper functions
+struct fail_fast{std::string msg;};
 #define DEBUG(msg) std::cout << msg << std::endl
 template<class Iterator>
 inline std::size_t argmax(Iterator begin, Iterator end) {
@@ -56,15 +60,21 @@ inline std::size_t argmax(Container c) {
 	return argmax(std::begin(c),std::end(c));
 }
 
-template<class Container,class F> static
+template<class Container,class F>
 inline void fill_fn(Container &v, F &&f){
 	for(std::size_t i=0, s = v.size(); i<s; ++i) v[i] = f(i);
 };
 
-template<class Container, class F> static
+template<class Container, class F>
 inline void generate_i(std::size_t length, Container & v, F&& f){
 	v.clear();
 	for(std::size_t i=0; i<length; ++i) v.push_back(f(i));
+}
+template<class Container, class F>
+inline Container generate_i(std::size_t const length, F&& f){
+	Container v(length);
+	for(std::size_t i=0; i<length; ++i) v[i] = f(i);
+	return v;
 }
 
 template<class T, class F>
@@ -87,7 +97,7 @@ template<class T, class F>
 inline T sum(std::size_t n, F&& f) {
 	return sum<T>(0,n,std::forward<F>(f));
 }
-template<class T, class Container, class F> static
+template<class T, class Container, class F>
 inline T sum(Container const& v, F&& f) {
 	auto iter = std::begin(v);
 	auto end = std::end(v);

@@ -143,6 +143,18 @@ protected:
 	/// ClassVector
 	using ClassVector = UIntVector;
 	using LabelVector = std::vector<LabelType>;
+	struct Split{
+		std::size_t splitAttribute = 0, splitRow = 0;
+		double splitValue=0;
+		double impurity = WORST_IMPURITY;
+		RealVector avgAbove, avgBelow; // for regression
+		ClassVector cAbove, cBelow;    // for classification
+		inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
+			node.attributeIndex = split.splitAttribute;
+			node.attributeValue = split.splitValue;
+			return node;
+		}
+	};
 
 	/// Create attribute tables from a data set, and in the process create a count vector (cAbove).
 	/// A dataset with m features results in m attribute tables.
@@ -175,10 +187,13 @@ protected:
 	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
 
 	/// Total Sum Of Squares
-	SHARK_EXPORT_SYMBOL double totalSumOfSquares(LabelVector const& labels, std::size_t from, std::size_t to, RealVector const& sumLabel) const;
+	SHARK_EXPORT_SYMBOL double sumOfSquares(LabelVector const& labels, std::size_t from, std::size_t to, RealVector const& sumLabel) const;
+
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, DataView<RegressionDataset const> const& elements, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, ClassVector const& cFull, DataView<ClassificationDataset const> const& elements, std::set<size_t> const& tableIndices) const;
 
 	/// Generate random table indices.
-	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type& rng) const;
+	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type &rng) const;
 
 	/// Reset the training to its default parameters.
 	SHARK_EXPORT_SYMBOL void setDefaults();
@@ -212,6 +227,7 @@ protected:
 
 	// true if OOB error should be computed
 	bool m_computeOOBerror;
+	static constexpr double WORST_IMPURITY = std::numeric_limits<double>::max();
 };
 }
 #endif
