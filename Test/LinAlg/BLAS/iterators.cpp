@@ -15,9 +15,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Dense_Storage_Iterator)
 	
 	//reading
 	{
-		dense_storage_iterator<const double> iter(values+2,1,2);
-		dense_storage_iterator<const double> start=iter;
-		dense_storage_iterator<const double> end(values+6,3,2);
+		iterators::dense_storage_iterator<const double> iter(values+2,1,2);
+		iterators::dense_storage_iterator<const double> start=iter;
+		iterators::dense_storage_iterator<const double> end(values+6,3,2);
 		BOOST_REQUIRE_EQUAL(end-start, 2);
 		BOOST_REQUIRE_EQUAL(start-iter, 0);
 		BOOST_REQUIRE(start == iter);
@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE( BLAS_Dense_Storage_Iterator)
 	
 	//writing
 	{
-		dense_storage_iterator<double> iter(values,0,2);
-		dense_storage_iterator<double> end(values,3,2);
+		iterators::dense_storage_iterator<double> iter(values,0,2);
+		iterators::dense_storage_iterator<double> end(values,3,2);
 		std::size_t k = 0;
 		while(iter != end){
 			*iter = k;
@@ -64,9 +64,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Compressed_Storage_Iterator)
 	
 	//reading
 	{
-		compressed_storage_iterator<const double,const std::size_t> iter(values,indizes,1,2);
-		compressed_storage_iterator<const double,const std::size_t> start=iter;
-		compressed_storage_iterator<const double,const std::size_t> end(values,indizes,5,2);
+		iterators::compressed_storage_iterator<const double,const std::size_t> iter(values,indizes,1,2);
+		iterators::compressed_storage_iterator<const double,const std::size_t> start=iter;
+		iterators::compressed_storage_iterator<const double,const std::size_t> end(values,indizes,5,2);
 		BOOST_REQUIRE_EQUAL(start.row(), 2);
 		BOOST_REQUIRE_EQUAL(start-iter, 0);
 		BOOST_REQUIRE_EQUAL(end-start, 4);
@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE( BLAS_Compressed_Storage_Iterator)
 	}
 	//writing
 	{
-		compressed_storage_iterator<double,const std::size_t> iter(values,indizes,1,2);
-		compressed_storage_iterator<double,const std::size_t> end(values,indizes,5,2);
+		iterators::compressed_storage_iterator<double,const std::size_t> iter(values,indizes,1,2);
+		iterators::compressed_storage_iterator<double,const std::size_t> end(values,indizes,5,2);
 		std::size_t k = 1;
 		while(iter != end){
 			*iter = 2*k;
@@ -154,9 +154,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Indexed_Iterator)
 	//reading
 	{
 		ConstIndexedMocup mocup(values,6);
-		indexed_iterator<const ConstIndexedMocup> iter(mocup,1);
-		indexed_iterator<const ConstIndexedMocup> start=iter;
-		indexed_iterator<const ConstIndexedMocup> end(mocup,5);
+		iterators::indexed_iterator<const ConstIndexedMocup> iter(mocup,1);
+		iterators::indexed_iterator<const ConstIndexedMocup> start=iter;
+		iterators::indexed_iterator<const ConstIndexedMocup> end(mocup,5);
 		BOOST_REQUIRE_EQUAL(end-start, 4);
 		BOOST_REQUIRE_EQUAL(start-iter, 0);
 		BOOST_REQUIRE(start == iter);
@@ -181,8 +181,8 @@ BOOST_AUTO_TEST_CASE( BLAS_Indexed_Iterator)
 	//writing
 	{
 		IndexedMocup mocup(values,6);
-		indexed_iterator<IndexedMocup> iter(mocup,1);
-		indexed_iterator<IndexedMocup> end(mocup,5);
+		iterators::indexed_iterator<IndexedMocup> iter(mocup,1);
+		iterators::indexed_iterator<IndexedMocup> end(mocup,5);
 		std::size_t k = 1;
 		while(iter != end){
 			*iter = 2*k;
@@ -199,9 +199,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Indexed_Iterator)
 
 BOOST_AUTO_TEST_CASE( BLAS_Constant_Iterator)
 {
-	constant_iterator<double> iter(3,4.0);
-	constant_iterator<double> start =iter;
-	constant_iterator<double> end(10,4.0);
+	iterators::constant_iterator<double> iter(3,4.0);
+	iterators::constant_iterator<double> start =iter;
+	iterators::constant_iterator<double> end(10,4.0);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
 	BOOST_REQUIRE_EQUAL(end-start, 7);
 	BOOST_REQUIRE(start == iter);
@@ -224,12 +224,12 @@ BOOST_AUTO_TEST_CASE( BLAS_Subrange_Iterator_Dense)
 	double values[]={0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0};
 	//reading
 	{
-		typedef dense_storage_iterator<const double> iterator;
+		typedef iterators::dense_storage_iterator<const double> iterator;
 		iterator inner_iter(values,0);
 		iterator inner_end(values,10);
-		subrange_iterator<iterator> iter(inner_iter,inner_end,2,2);
-		subrange_iterator<iterator> start = iter;
-		subrange_iterator<iterator> end(inner_iter,inner_end,8,2);
+		iterators::subrange_iterator<iterator> iter(inner_iter,inner_end,2,2);
+		iterators::subrange_iterator<iterator> start = iter;
+		iterators::subrange_iterator<iterator> end(inner_iter,inner_end,8,2);
 		BOOST_REQUIRE(start == iter);
 		BOOST_REQUIRE(end != start);
 		BOOST_REQUIRE(start < end);
@@ -250,11 +250,11 @@ BOOST_AUTO_TEST_CASE( BLAS_Subrange_Iterator_Dense)
 	
 	//reading full range
 	{
-		typedef dense_storage_iterator<double> iterator;
+		typedef iterators::dense_storage_iterator<double> iterator;
 		iterator inner_iter(values,0);
 		iterator inner_end(values,10);
-		subrange_iterator<iterator> iter(inner_iter,inner_end,0,0);
-		subrange_iterator<iterator> end(inner_end,0);
+		iterators::subrange_iterator<iterator> iter(inner_iter,inner_end,0,0);
+		iterators::subrange_iterator<iterator> end(inner_end,0);
 		std::size_t k = 0;
 		while(iter != end){
 			BOOST_CHECK_EQUAL(iter.index(),k);
@@ -270,11 +270,11 @@ BOOST_AUTO_TEST_CASE( BLAS_Subrange_Iterator_Dense)
 	
 	//writing
 	{
-		typedef dense_storage_iterator<double> iterator;
+		typedef iterators::dense_storage_iterator<double> iterator;
 		iterator inner_iter(values,0);
 		iterator inner_end(values,10);
-		subrange_iterator<iterator> iter(inner_iter,inner_end,2,2);
-		subrange_iterator<iterator> end(inner_iter,inner_end,8,2);
+		iterators::subrange_iterator<iterator> iter(inner_iter,inner_end,2,2);
+		iterators::subrange_iterator<iterator> end(inner_iter,inner_end,8,2);
 		std::size_t k = 2;
 		while(iter != end){
 			*iter = 2*k;
@@ -294,11 +294,11 @@ BOOST_AUTO_TEST_CASE( BLAS_Subrange_Iterator_Compressed)
 	std::size_t indizes[]={3,8,11,12,15,16,18,20,23,30};
 	//reading full range (but starting from different startIndex)
 	{
-		typedef compressed_storage_iterator<const double,const std::size_t> iterator;
+		typedef iterators::compressed_storage_iterator<const double,const std::size_t> iterator;
 		iterator inner_iter(values,indizes,0);
 		iterator inner_end(values,indizes,10);
-		subrange_iterator<iterator> iter(inner_iter,3);
-		subrange_iterator<iterator> end(inner_end,3);
+		iterators::subrange_iterator<iterator> iter(inner_iter,3);
+		iterators::subrange_iterator<iterator> end(inner_end,3);
 		std::size_t k = 0;
 		while(iter != end){
 			BOOST_CHECK_EQUAL(iter.index(),indizes[k]-3);
@@ -313,12 +313,12 @@ BOOST_AUTO_TEST_CASE( BLAS_Subrange_Iterator_Compressed)
 	
 	//reading full range (but starting from different startIndex)
 	{
-		typedef compressed_storage_iterator<const double,const std::size_t> iterator;
+		typedef iterators::compressed_storage_iterator<const double,const std::size_t> iterator;
 		iterator inner_iter(values,indizes,0);
 		iterator inner_end(values,indizes,10);
 		iterator inner_iter_test(values,indizes,4);
-		subrange_iterator<iterator> iter(inner_iter,inner_end,13,10);
-		subrange_iterator<iterator> end(inner_iter,inner_end,23,10);
+		iterators::subrange_iterator<iterator> iter(inner_iter,inner_end,13,10);
+		iterators::subrange_iterator<iterator> end(inner_iter,inner_end,23,10);
 		//check that we got to the correct array positions
 		BOOST_REQUIRE_EQUAL(iter.inner().index(),15);
 		BOOST_REQUIRE_EQUAL(end.inner().index(),23);
@@ -337,12 +337,12 @@ BOOST_AUTO_TEST_CASE( BLAS_Subrange_Iterator_Compressed)
 	
 	//writing
 	{
-		typedef compressed_storage_iterator<double,const std::size_t> iterator;
+		typedef iterators::compressed_storage_iterator<double,const std::size_t> iterator;
 		iterator inner_iter(values,indizes,0);
 		iterator inner_end(values,indizes,10);
 		iterator inner_iter_test(values,indizes,4);
-		subrange_iterator<iterator> iter(inner_iter,inner_end,13,10);
-		subrange_iterator<iterator> end(inner_iter,inner_end,23,10);
+		iterators::subrange_iterator<iterator> iter(inner_iter,inner_end,13,10);
+		iterators::subrange_iterator<iterator> end(inner_iter,inner_end,23,10);
 		//check that we got to the correct array positions
 		BOOST_REQUIRE_EQUAL(iter.inner().index(),15);
 		BOOST_REQUIRE_EQUAL(end.inner().index(),23);
@@ -364,12 +364,12 @@ BOOST_AUTO_TEST_CASE( BLAS_Transform_Iterator_Dense)
 {
 	double values[]={0.1,0.2,0.3,0.4,0.5,0.6};
 
-	typedef dense_storage_iterator<const double> iterator;
+	typedef iterators::dense_storage_iterator<const double> iterator;
 	iterator dense_iter(values,0);
 	iterator dense_end(values,6);
-	transform_iterator<iterator,functors::scalar_sqr > iter(dense_iter,functors::scalar_sqr());
-	transform_iterator<iterator,functors::scalar_sqr > start = iter;
-	transform_iterator<iterator,functors::scalar_sqr > end(dense_end,functors::scalar_sqr());
+	iterators::transform_iterator<iterator,functors::scalar_sqr > iter(dense_iter,functors::scalar_sqr());
+	iterators::transform_iterator<iterator,functors::scalar_sqr > start = iter;
+	iterators::transform_iterator<iterator,functors::scalar_sqr > end(dense_end,functors::scalar_sqr());
 	
 	BOOST_REQUIRE_EQUAL(end-start, 6);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
@@ -397,12 +397,12 @@ BOOST_AUTO_TEST_CASE( BLAS_Transform_Iterator_Compressed)
 	double values[]={0.1,0.2,0.3,0.4,0.5,0.6};
 	std::size_t indizes[]={3,8,11,12,15,16};
 	
-	typedef compressed_storage_iterator<const double,const std::size_t> iterator;
+	typedef iterators::compressed_storage_iterator<const double,const std::size_t> iterator;
 	iterator compressed_iter(values,indizes,0);
 	iterator compressed_end(values,indizes,6);
-	transform_iterator<iterator,functors::scalar_sqr > iter(compressed_iter,functors::scalar_sqr());
-	transform_iterator<iterator,functors::scalar_sqr > start = iter;
-	transform_iterator<iterator,functors::scalar_sqr > end(compressed_end,functors::scalar_sqr());
+	iterators::transform_iterator<iterator,functors::scalar_sqr > iter(compressed_iter,functors::scalar_sqr());
+	iterators::transform_iterator<iterator,functors::scalar_sqr > start = iter;
+	iterators::transform_iterator<iterator,functors::scalar_sqr > end(compressed_end,functors::scalar_sqr());
 	
 	BOOST_REQUIRE_EQUAL(end-start, 6);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
@@ -426,13 +426,13 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Dense)
 	double values2[]={0.3,0.5,0.7,0.9,1.1,1.3};
 	
 
-	typedef dense_storage_iterator<const double> iterator;
+	typedef iterators::dense_storage_iterator<const double> iterator;
 	iterator dense_iter1(values1,0);
 	iterator dense_end1(values1,6);
 	iterator dense_iter2(values2,0);
 	iterator dense_end2(values2,6);
 	
-	typedef binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus > transform_iterator;
+	typedef iterators::binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus > transform_iterator;
 	
 	transform_iterator iter(functors::scalar_binary_plus(),dense_iter1,dense_end1,dense_iter2,dense_end2);
 	transform_iterator start = iter;
@@ -471,8 +471,8 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Compressed)
 	std::size_t indizesResult[]={3,5,8,11,12,14,17,18};
 	
 
-	typedef compressed_storage_iterator<const double,const std::size_t> iterator;
-	typedef binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus > transform_iterator;
+	typedef iterators::compressed_storage_iterator<const double,const std::size_t> iterator;
+	typedef iterators::binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus > transform_iterator;
 	
 	//a+b
 	{
