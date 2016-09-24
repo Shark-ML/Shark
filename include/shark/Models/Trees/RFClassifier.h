@@ -60,6 +60,7 @@ typedef std::vector<TreeType> ForestInfo;
 class RFClassifier : public MeanModel<CARTClassifier<RealVector> >
 {
 public:
+	using SubmodelType = CARTClassifier<RealVector>;
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
@@ -140,7 +141,7 @@ public:
 			throw SHARKEXCEPTION("Weights must be the same number as trees");
 
 		for (std::size_t i=0; i<n_tree; ++i){
-			m_models[i]=finfo[i];
+			m_models[i]=SubmodelType{finfo[i]};
 			m_weight.push_back(we[i]);
 			m_weightSum+=we[i];
 		}

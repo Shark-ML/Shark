@@ -57,9 +57,10 @@ inline std::size_t argmax(Container c) {
 }
 
 template<class Container,class F> static
-inline void generate_i(Container & v, F&& f){
-	for(std::size_t i, s = v.size(); i<s; ++i) v[i] = f(i);
+inline void fill_fn(Container &v, F &&f){
+	for(std::size_t i=0, s = v.size(); i<s; ++i) v[i] = f(i);
 };
+
 template<class Container, class F> static
 inline void generate_i(std::size_t length, Container & v, F&& f){
 	v.clear();
@@ -67,7 +68,16 @@ inline void generate_i(std::size_t length, Container & v, F&& f){
 }
 
 template<class T, class F>
+inline T stable_sum(std::size_t i, std::size_t n, F&& f) {
+	if(i>=n) return T{};
+	auto d = n - i;
+	if(d == 1) return f(i);
+	if(d == 2) return f(i) + f(i+1);
+	return stable_sum<T>(i, i + d/2, f) + stable_sum<T>(i + d/2, n, f);
+}
+template<class T, class F>
 inline T sum(std::size_t i, std::size_t n, F&& f) {
+	return stable_sum<T>(i, n, std::forward<F>(f));
 	if(i>=n) return T{};
 	T out = f(i);
 	for(++i;i<n;++i) out += f(i);

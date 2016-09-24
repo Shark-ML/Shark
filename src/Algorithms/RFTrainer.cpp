@@ -124,7 +124,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		auto oobIndices = std::vector<std::size_t>(oobStart, oobEnd);
 		
 		//generate the dataset by copying (TODO: this is a quick fix!
-		trainIndices.erase(oobStart, oobEnd);
+		trainIndices.resize(subsetSize);
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
@@ -136,7 +136,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		auto labelAvg = detail::cart::sum<RealVector>(n_trainData, pickLabel) / n_trainData;
 
 		TreeType tree = buildTree(tables, trainDataView, labelAvg, 0, rng);
-		CARTType cart(tree, m_inputDimension);
+		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
@@ -202,7 +202,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		auto oobIndices = std::vector<std::size_t>(oobStart, oobEnd);
 
 		//generate the dataset by copying (TODO: this is a quick fix!
-		trainIndices.erase(oobStart, oobEnd);
+		trainIndices.resize(subsetSize);
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
@@ -211,7 +211,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		auto cAbove = createCountVector(trainDataView);
 
 		TreeType tree = buildTree(tables, trainDataView, cAbove, 0, rng);
-		CARTType cart(tree, m_inputDimension);
+		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
 		if(m_computeOOBerror || m_computeFeatureImportances){
@@ -401,11 +401,11 @@ buildTree(AttributeTables& tables,
 		tmpLabels.clear();
 
 		//Create a labels table, that corresponds to the sorted attribute
-		for(auto const& el : attributeTable){
-			auto const& label = elements[el.id].label;
-			tmpLabels.push_back(label);
+		detail::cart::generate_i(n,tmpLabels,[&](std::size_t i){
+			auto const& label = elements[attributeTable[i].id].label;
 			labelSumBelow += label;
-		}
+			return label;
+		});
 
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
 			labelSumAbove += tmpLabels[prev];

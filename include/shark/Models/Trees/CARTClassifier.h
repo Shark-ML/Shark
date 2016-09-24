@@ -107,10 +107,12 @@ public:
 	{}
 
 	/// Constructor taking the tree as argument
-	CARTClassifier(TreeType const& tree)
-	{
-		m_tree=tree;
-	}
+	explicit CARTClassifier(TreeType const& tree)
+			: m_tree(tree)
+	{ }
+	explicit CARTClassifier(TreeType&& tree)
+			: m_tree(std::move(tree))
+	{ }
 
 	/// Constructor taking the tree as argument and optimize it if requested
 	CARTClassifier(TreeType const& tree, bool optimize)
@@ -123,9 +125,15 @@ public:
 
 	/// Constructor taking the tree as argument as well as maximum number of attributes
 	CARTClassifier(TreeType const& tree, std::size_t d)
+			: m_tree{tree}, m_inputDimension{d}
 	{
-		setTree(tree);
-		m_inputDimension = d;
+		optimizeTree(m_tree);
+	}
+
+	CARTClassifier(TreeType&& tree, std::size_t d) noexcept
+			: m_tree{std::move(tree)}, m_inputDimension{d}
+	{
+		optimizeTree(m_tree);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -367,13 +375,13 @@ protected:
 
 
 	///Number of attributes (set by trainer)
-	std::size_t m_inputDimension;
+	std::size_t m_inputDimension = 0;
 
 	// feature importances
 	RealVector m_featureImportances;
 
 	// oob error
-	double m_OOBerror;
+	double m_OOBerror = 0.;
 };
 
 
