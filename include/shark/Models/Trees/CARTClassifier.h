@@ -64,15 +64,15 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 //	Information about a single split. misclassProp, r and g are variables used in the cost complexity step
 	struct NodeInfo {
-		std::size_t nodeId;
-		std::size_t attributeIndex;
-		double attributeValue;
-		std::size_t leftNodeId;
-		std::size_t rightNodeId;
+		std::size_t nodeId = 0;
+		std::size_t attributeIndex = 0;
+		double attributeValue = 0.;
+		std::size_t leftNodeId = 0;
+		std::size_t rightNodeId = 0;
 		LabelType label;
-		double misclassProp;//TODO: remove this
-		std::size_t r;//TODO: remove this
-		double g;//TODO: remove this
+		double misclassProp = 0.;//TODO: remove this
+		std::size_t r = 0;//TODO: remove this
+		double g = 0.;//TODO: remove this
 
 	   template<class Archive>
 	   void serialize(Archive & ar, const unsigned int version){
@@ -86,6 +86,15 @@ public:
 			ar & r;
 			ar & g;
 		}
+		NodeInfo() {}
+		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId) {}
+		NodeInfo(std::size_t nodeId, LabelType const& label) : nodeId(nodeId), label(label) {}
+		NodeInfo(std::size_t nodeId, LabelType && label)
+				: nodeId(nodeId), label(std::move(label)) {}
+		NodeInfo(NodeInfo const&) = default;
+		NodeInfo(NodeInfo &&) = default;
+		NodeInfo& operator=(NodeInfo const&) = default;
+		NodeInfo& operator=(NodeInfo &&) = default;
 	};
 
 	/// Vector of structs that contains the splitting information and the labels.

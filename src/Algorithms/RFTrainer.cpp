@@ -269,19 +269,10 @@ buildTree(AttributeTables& tables,
 		  ClassificationDataset const& dataset,
 		  ClassVector& cAbove, std::size_t nodeId,
 		  Rng::rng_type& rng){
-	CARTClassifier<RealVector>::TreeType lTree, rTree;
 
 	//Construct tree
-	CARTClassifier<RealVector>::NodeInfo nodeInfo;
-
-	nodeInfo.nodeId = nodeId;
-	nodeInfo.attributeIndex = 0;
-	nodeInfo.attributeValue = 0.0;
-	nodeInfo.leftNodeId = 0;
-	nodeInfo.rightNodeId = 0;
-	nodeInfo.misclassProp = 0.0;
-	nodeInfo.r = 0;
-	nodeInfo.g = 0.0;
+	CARTClassifier<RealVector>::TreeType lTree, rTree;
+	CARTClassifier<RealVector>::NodeInfo nodeInfo{nodeId};
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
@@ -393,27 +384,16 @@ buildTree(AttributeTables& tables,
 		  std::size_t nodeId, Rng::rng_type& rng){
 
 	//Construct tree
-	CARTClassifier<RealVector>::NodeInfo nodeInfo;
-
-	nodeInfo.nodeId = nodeId;
-	nodeInfo.attributeIndex = 0;
-	nodeInfo.attributeValue = 0.0;
-	nodeInfo.leftNodeId = 0;
-	nodeInfo.rightNodeId = 0;
-	nodeInfo.label = average(labels);
-	nodeInfo.misclassProp = 0.0;
-	nodeInfo.r = 0;
-	nodeInfo.g = 0.0;
-
-	CARTClassifier<RealVector>::TreeType tree, lTree, rTree;
+	CARTClassifier<RealVector>::TreeType lTree, rTree, tree;
+	CARTClassifier<RealVector>::NodeInfo nodeInfo{nodeId,average(labels)};
 
 	//n = Total number of cases in the dataset
 	std::size_t n = tables[0].size();
+
 	bool isLeaf = false;
 	if(n <= m_nodeSize){
 		isLeaf = true;
 	}else{
-
 		//label vectors
 		std::vector<RealVector> bestLabels, tmpLabels;
 		RealVector labelSumAbove(m_labelDimension), labelSumBelow(m_labelDimension);

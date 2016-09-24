@@ -248,14 +248,11 @@ CARTTrainer::TreeType CARTTrainer::
 buildTree(AttributeTables const &tables,
 		  ClassificationDataset const &dataset,
 		  ClassVector &cAbove, std::size_t nodeId) {
-    //Construct tree
-	ModelType::NodeInfo nodeInfo;
-	nodeInfo.nodeId = nodeId;
-	nodeInfo.leftNodeId = 0;
-	nodeInfo.rightNodeId = 0;
+    //Construct tree, and
 	// calculate the label of the node, which is the propability of class c
 	// given all points in this split for every class
-	nodeInfo.label = hist(cAbove);
+	ModelType::NodeInfo nodeInfo{nodeId,hist(cAbove)};
+
 	// calculate the misclassification propability,
 	// 1-p(j*|t) where j* is the class the node t is most likely to belong to;
 	nodeInfo.misclassProp = 1- *std::max_element(nodeInfo.label.begin(), nodeInfo.label.end());
@@ -358,12 +355,7 @@ buildTree(AttributeTables const& tables,
 		  std::size_t nodeId, std::size_t trainSize){
 
 	//Construct tree
-	CARTClassifier<RealVector>::NodeInfo nodeInfo;
-
-	nodeInfo.nodeId = nodeId;
-	nodeInfo.label = mean(labels);
-	nodeInfo.leftNodeId = 0;
-	nodeInfo.rightNodeId = 0;
+	ModelType::NodeInfo nodeInfo{nodeId,mean(labels)};
 
 	//Store the Total Sum of Squares (TSS)
 	RealVector labelSum = labels[0];
