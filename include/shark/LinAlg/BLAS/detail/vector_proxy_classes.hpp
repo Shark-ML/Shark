@@ -79,11 +79,11 @@ public:
 	
 	// Element access
 	template <class IndexExpression>
-	auto operator()(IndexExpression const& i) const -> decltype(expression()(i)){
+	auto operator()(IndexExpression const& i) const -> decltype(this->expression()(i)){
 		return expression()(i);
 	}
 	template <class IndexExpression>
-	auto operator[](IndexExpression const& i) const -> decltype(expression()(i)){
+	auto operator[](IndexExpression const& i) const -> decltype(this->expression()(i)){
 		return expression()(i);
 	}
 	
@@ -211,7 +211,7 @@ public:
 
 	// Element access
 	template <class IndexExpression>
-	auto operator()(IndexExpression const& i) const -> decltype(expression()(start() + i)){
+	auto operator()(IndexExpression const& i) const -> decltype(this->expression()(this->start() + i)){
 		return m_expression(m_start + i);
 	}
 

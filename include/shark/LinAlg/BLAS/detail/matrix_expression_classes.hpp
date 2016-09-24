@@ -85,7 +85,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor()(expression()(i,j))){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->functor()(this->expression()(i,j))){
 		return functor()(m_expression(i,j));
 	}
 	
@@ -188,7 +188,7 @@ public:
 
         // Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type()(lhs()(i,j),rhs()(i,j))){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type()(this->lhs()(i,j),this->rhs()(i,j))){
 		return functor_type()(lhs()(i,j),rhs()(i,j));
 	}
 	
@@ -291,7 +291,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& /*i*/, IndexExpr2 const& j) const -> decltype(expression()(j)){
+	auto operator()(IndexExpr1 const& /*i*/, IndexExpr2 const& j) const -> decltype(this->expression()(j)){
 		return m_vector(j);
 	}
 
@@ -454,7 +454,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor()(expression()(i,j))){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->functor()(this->expression()(i,j))){
 		return functor()(m_expression(i,j));
 	}
 
@@ -547,7 +547,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor()(lhs()(i,j),rhs()(i,j))){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->functor()(this->lhs()(i,j),this->rhs()(i,j))){
 		return functor()(lhs()(i,j),rhs()(i,j));
 	}
 	
@@ -663,7 +663,7 @@ public:
 	}
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type_op()(lhs()(i),rhs()(j))){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type_op()(this->lhs()(i),this->rhs()(j))){
 		return functor_type_op()(lhs()(i),rhs()(j));
 	}
 
@@ -836,7 +836,7 @@ public:
 
 	// Element access for elementwise case
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(sum(column(matrix(),i))){
+	auto operator()(IndexExpr const& i) const -> decltype(sum(column(this->matrix(),i))){
 		SIZE_CHECK(i < size());
 		return sum(column(m_matrix,i));
 	}

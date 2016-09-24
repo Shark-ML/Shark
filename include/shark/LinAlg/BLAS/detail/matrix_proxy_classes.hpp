@@ -81,7 +81,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(expression()(i,j)){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(i,j)){
 		return (*m_expression)(i, j);
 	}
 	
@@ -240,7 +240,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(expression()(j,i)){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(j,i)){
 		return expression()(j, i);
 	}
 	
@@ -379,11 +379,11 @@ public:
 	
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& j) const -> decltype(expression()(index(),j)){
+	auto operator()(IndexExpr const& j) const -> decltype(this->expression()(index(),j)){
 		return expression()(index(), j);
 	}
 	template <class IndexExpr>
-	auto operator[](IndexExpr const& j) const -> decltype(expression()(index(),j)){
+	auto operator[](IndexExpr const& j) const -> decltype(this->expression()(index(),j)){
 		return (*this)(j);
 	}
 	
@@ -534,7 +534,7 @@ public:
 
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(expression()(start1()+i,start2()+i)){
+	auto operator()(IndexExpr const& i) const -> decltype(this->expression()(this->start1()+i,this->start2()+i)){
 		return m_expression(start1()+i,start2()+i);
 	}
 	reference operator [](size_type i) const {
@@ -658,7 +658,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(expression()(start1()+i, start2()+j)){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(this->start1()+i, this->start2()+j)){
 		return m_expression(start1() +i, start2() + j);
 	}
 
