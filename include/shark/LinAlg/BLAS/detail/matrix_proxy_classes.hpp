@@ -29,6 +29,9 @@
 #define SHARK_LINALG_BLAS_MATRIX_PROXY_CLASSES_HPP
 
 #include "../assignment.hpp"
+#ifdef SHARK_USE_CLBLAS
+#include <boost/compute/command_queue.hpp>
+#endif
 
 namespace shark {
 namespace blas {
@@ -77,7 +80,11 @@ public:
 	storage_type raw_storage()const{
 		return m_expression->raw_storage();
 	}
-
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression->queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
@@ -233,6 +240,11 @@ public:
 	storage_type raw_storage()const{
 		return m_expression.raw_storage();
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 
 	// ---------
 	// High level interface
@@ -372,6 +384,11 @@ public:
 	storage_type raw_storage()const{
 		return m_expression.raw_storage().row(m_i, typename M::orientation());
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 	
 	// ---------
 	// High level interface
@@ -527,7 +544,11 @@ public:
 	storage_type raw_storage()const{
 		return m_expression.raw_storage().diag();
 	}
-	
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 	// ---------
 	// High level interface
 	// ---------
@@ -650,7 +671,11 @@ public:
 	storage_type raw_storage()const{
 		return m_expression.raw_storage().sub_region(m_start1, m_start2, typename M::orientation());
 	}
-	
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 	// ---------
 	// High level interface
 	// ---------

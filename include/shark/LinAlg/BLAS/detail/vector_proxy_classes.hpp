@@ -30,6 +30,9 @@
 
 #include "iterator.hpp"
 #include "traits.hpp"
+#ifdef SHARK_USE_CLBLAS
+#include <boost/compute/command_queue.hpp>
+#endif
 
 namespace shark {
 namespace blas {
@@ -72,6 +75,11 @@ public:
 	storage_type raw_storage()const{
 		return expression().raw_storage();
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression->queue();
+	}
+#endif
 	
 	// ---------
 	// High level interface
@@ -204,6 +212,11 @@ public:
 	storage_type raw_storage()const{
 		return expression().raw_storage().sub_region(start());
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 	
 	// ---------
 	// High level interface
