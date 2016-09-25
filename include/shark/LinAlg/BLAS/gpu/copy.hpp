@@ -335,9 +335,10 @@ private:
 			buffer, CL_MAP_READ, storageE.offset, buffer.size()
 		);
 		//adapt host memory buffer to matrix and assign
-		std::size_t stride1 = MatE::orientation::index_M(storageE.leading_dimension,1);
-		std::size_t stride2 = MatE::orientation::index_m(storageE.leading_dimension,1);
-		typedef dense_matrix_adaptor<typename MatE::value_type> AdaptE;
+		typedef typename MatE::orientation EOrientation;
+		std::size_t stride1 = EOrientation::index_M(storageE.leading_dimension,1);
+		std::size_t stride2 = EOrientation::index_m(storageE.leading_dimension,1);
+		typedef dense_matrix_adaptor<typename MatE::value_type, EOrientation> AdaptE;
 		AdaptE adaptE(p,size1(), size2(), stride1,stride2);
 		
 		assign(X, matrix_scalar_multiply<AdaptE >( adaptE, alpha));
@@ -358,9 +359,10 @@ private:
 			buffer, CL_MAP_READ, storageE.offset, buffer.size()
 		);
 		//adapt host memory buffer to matrix and assign
-		std::size_t stride1 = MatE::orientation::index_M(storageE.leading_dimension,1);
-		std::size_t stride2 = MatE::orientation::index_m(storageE.leading_dimension,1);
-		typedef dense_matrix_adaptor<typename MatE::value_type> AdaptE;
+		typedef typename MatE::orientation EOrientation;
+		std::size_t stride1 = EOrientation::index_M(storageE.leading_dimension,1);
+		std::size_t stride2 = EOrientation::index_m(storageE.leading_dimension,1);
+		typedef dense_matrix_adaptor<typename MatE::value_type, EOrientation> AdaptE;
 		AdaptE adaptE(p,size1(), size2(), stride1,stride2);
 		
 		plus_assign(X,matrix_scalar_multiply<AdaptE >( adaptE, alpha));
