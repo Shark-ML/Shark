@@ -100,6 +100,11 @@ struct DynamicLibraryTag{
  */
 #cmakedefine SHARK_USE_CBLAS
 
+/**
+ * \brief Tags whether CLBLAS has been enabled.
+ */
+#cmakedefine SHARK_USE_CLBLAS
+
  /**
  * \brief Tags whether full LAPACK is available
  */
