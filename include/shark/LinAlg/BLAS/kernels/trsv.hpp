@@ -64,4 +64,8 @@ void trsv(
 
 }}}
 
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/trsv.hpp"
+#endif
+
 #endif

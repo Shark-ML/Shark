@@ -72,4 +72,8 @@ void gemm(
 
 }}}
 
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/gemm.hpp"
+#endif
+
 #endif

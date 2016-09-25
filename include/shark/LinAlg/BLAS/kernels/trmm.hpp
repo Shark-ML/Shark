@@ -63,4 +63,8 @@ void trmm(
 
 }}}
 
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/trmm.hpp"
+#endif
+
 #endif

@@ -70,4 +70,9 @@ void gemv(
 }
 
 }}}
+
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/gemv.hpp"
+#endif
+
 #endif

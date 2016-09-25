@@ -31,6 +31,9 @@
 #define SHARK_LINALG_BLAS_KERNELS_DOT_HPP
 
 #include "default/dot.hpp"
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/dot.hpp"
+#endif
 	
 namespace shark { namespace blas {namespace kernels{
 	
@@ -54,9 +57,6 @@ void dot(
 		boost::mpl::false_()
 	);
 }
-#ifdef SHARK_USE_CLBLAS
-#include "clblas/dot.hpp"
-#endif
 
 }}}
 #endif

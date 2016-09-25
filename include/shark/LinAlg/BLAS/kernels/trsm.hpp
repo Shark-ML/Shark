@@ -64,4 +64,8 @@ void trsm(
 
 }}}
 
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/trsm.hpp"
+#endif
+
 #endif
