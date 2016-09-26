@@ -166,15 +166,19 @@ protected:
 	struct Split{
 		std::size_t splitAttribute = 0, splitRow = 0;
 		double splitValue=0;
+
+		static constexpr double WORST_IMPURITY = std::numeric_limits<double>::max();
 		double impurity = WORST_IMPURITY;
 		double purity = 0;
-		RealVector avgAbove, avgBelow; // for regression
-		RealVector sumAbove, sumBelow; // for regression
+		LabelType sumAbove, sumBelow; // for regression
 		ClassVector cAbove, cBelow;    // for classification
 		inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
 			node.attributeIndex = split.splitAttribute;
 			node.attributeValue = split.splitValue;
 			return node;
+		}
+		inline operator bool(){
+			return impurity < WORST_IMPURITY || purity > 0;
 		}
 	};
 
@@ -241,7 +245,6 @@ protected:
 
 	// true if OOB error should be computed
 	bool m_computeOOBerror;
-	static constexpr double WORST_IMPURITY = std::numeric_limits<double>::max();
 };
 }
 #endif

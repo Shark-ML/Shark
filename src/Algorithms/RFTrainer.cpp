@@ -259,7 +259,7 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	auto split = findSplit(tables,elements,cFull,tableIndices);
 
 	// if the purity hasn't improved, this is a leaf.
-	if(split.impurity==WORST_IMPURITY) {
+	if(!split) {
 		// this shouldn't really happen: leaves ought to be cought by previous check
 		// TODO(jwrigley): Why is hist only applied to leaves, when average is applied to all nodes
 		nodeInfo.label = hist(cFull);
@@ -359,7 +359,7 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 
 	// if the purity hasn't improved, this is a leaf.
 	//if(split.impurity==WORST_IMPURITY) return tree;
-	if(split.purity == 0) return tree;
+	if(!split) return tree;
 	nodeInfo <<= split;
 
 	//Split the attribute tables
