@@ -41,6 +41,7 @@ namespace shark {
 namespace detail {
 namespace cart {
 // Helper functions
+template<class T> using sink = T;
 struct fail_fast{std::string msg;};
 #define DEBUG(msg) std::cout << msg << std::endl
 template<class Iterator>

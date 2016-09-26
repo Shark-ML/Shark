@@ -235,7 +235,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 }
 
 TreeType RFTrainer::
-buildTree(AttributeTables& tables,
+buildTree(detail::cart::sink<AttributeTables&> tables,
 		  DataView<ClassificationDataset const> const& elements,
 		  ClassVector& cFull, std::size_t nodeId,
 		  Rng::rng_type& rng){
@@ -267,7 +267,6 @@ buildTree(AttributeTables& tables,
 	nodeInfo <<= split;
 	AttributeTables rTables, lTables;
 	splitAttributeTables(tables, split.splitAttribute, split.splitRow, lTables, rTables);
-	tables.clear(); tables.shrink_to_fit();
 	//Continue recursively
 
 	nodeInfo.leftNodeId  = (nodeId<<1)+1;   nodeInfo.rightNodeId = (nodeId<<1)+2;
@@ -337,7 +336,7 @@ RFTrainer::LabelType RFTrainer::hist(ClassVector const& countVector) const {
 }
 
 TreeType RFTrainer::
-buildTree(AttributeTables& tables,
+buildTree(detail::cart::sink<AttributeTables&> tables,
 		  DataView<RegressionDataset const> const& elements,
 		  LabelType const& labelAvg,
 		  std::size_t nodeId, Rng::rng_type& rng){
@@ -364,7 +363,6 @@ buildTree(AttributeTables& tables,
 	//Split the attribute tables
 	AttributeTables rTables, lTables;
 	splitAttributeTables(tables, split.splitAttribute, split.splitRow, lTables, rTables);
-	tables.clear();tables.shrink_to_fit();//save memory
 
 	//Continue recursively
 	nodeInfo.leftNodeId = (nodeId<<1)+1;
@@ -452,7 +450,12 @@ double RFTrainer::sumOfSquares(
  * Returns two attribute tables: LAttrbuteTables and RAttrbuteTables
  * Calculated from splitting tables at (index, valIndex)
  */
-void RFTrainer::splitAttributeTables(AttributeTables & tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables){
+void RFTrainer::splitAttributeTables(
+		detail::cart::sink<AttributeTables &> tables,
+		std::size_t index, std::size_t valIndex,
+		AttributeTables& LAttributeTables,
+		AttributeTables& RAttributeTables)
+{
 
 	//Build a hash table for fast lookup
 	std::unordered_map<std::size_t, bool> hash;
@@ -469,6 +472,7 @@ void RFTrainer::splitAttributeTables(AttributeTables & tables, std::size_t index
 		table.resize(std::distance(begin,middle));
 		LAttributeTables.emplace_back(std::move(table));
 	}
+	tables.clear(); tables.shrink_to_fit();
 }
 
 

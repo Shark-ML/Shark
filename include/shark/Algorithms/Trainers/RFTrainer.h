@@ -186,13 +186,13 @@ protected:
 	SHARK_EXPORT_SYMBOL RFTrainer::ClassVector createCountVector(DataView<ClassificationDataset const> const &elements) const;
 
 	// Split attribute tables into left and right parts.
-	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables & tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
+	SHARK_EXPORT_SYMBOL void splitAttributeTables(detail::cart::sink<AttributeTables &> tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables& tables, DataView<RegressionDataset const> const& elements, LabelType const& labelAvg, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<RegressionDataset const> const& elements, LabelType const& labelAvg, std::size_t nodeId, Rng::rng_type& rng);
 
 
 	/// Generate a histogram from the count vector.
