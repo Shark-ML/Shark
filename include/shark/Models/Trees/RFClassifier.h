@@ -65,18 +65,24 @@ public:
 	std::string name() const
 	{ return "RFClassifier"; }
 
-	void computeOOBerror(){} // TODO: delete
-
 	// compute the oob error for the forest
 	void computeOOBerror(
 			UIntMatrix const& oobClassTally,
 			DataView<ClassificationDataset const>& elements){
 		auto n_elements = elements.size();
 		m_OOBerror = detail::cart::sum<double>(n_elements, [&](size_t i){
-									 auto y = elements[i].label;
-									 auto z = detail::cart::argmax(oobClassTally.row_begin(i),oobClassTally.row_end(i));
-									 return y!=z;
-        })/n_elements;
+			auto y = elements[i].label;
+			auto z = detail::cart::argmax(row(oobClassTally,i));
+			return y!=z;
+		})/n_elements;
+	}
+	void computeOOBerror(
+			RealMatrix const& oobTally,
+			DataView<RegressionDataset const>& elements){
+		auto n_elements = elements.size();
+		m_OOBerror = detail::cart::sum<double>(n_elements,[&](size_t i){
+			return distanceSqr(elements[i].label,row(oobTally,i));
+		})/n_elements;
 	}
 
 

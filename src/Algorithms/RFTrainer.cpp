@@ -97,6 +97,9 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 
 	auto seed = static_cast<unsigned>(Rng::discrete(0,(unsigned)-1));
 
+	auto oobPredictions = RealMatrix{n_elements,m_labelDimension};
+	std::vector<std::size_t> n_predictions(n_elements);
+
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(std::uint32_t b = 0; b < m_B; ++b){
 		Rng::rng_type rng{seed + b};
@@ -141,11 +144,18 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 
 		SHARK_CRITICAL_REGION{
 			model.addModel(cart);
+			for(auto const i : oobIndices){
+				row(oobPredictions,i) += cart(elements[i].input);
+				++n_predictions[i];
+			}
 		}
 	}
 
 	if(m_computeOOBerror){
-		model.computeOOBerror();
+		for(std::size_t i=0; i<n_elements; ++i){
+			row(oobPredictions,i)/=n_predictions[i];
+		}
+		model.computeOOBerror(oobPredictions,elements);
 	}
 
 	if(m_computeFeatureImportances){
