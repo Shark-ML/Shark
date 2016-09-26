@@ -167,7 +167,9 @@ protected:
 		std::size_t splitAttribute = 0, splitRow = 0;
 		double splitValue=0;
 		double impurity = WORST_IMPURITY;
+		double purity = 0;
 		RealVector avgAbove, avgBelow; // for regression
+		RealVector sumAbove, sumBelow; // for regression
 		ClassVector cAbove, cBelow;    // for classification
 		inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
 			node.attributeIndex = split.splitAttribute;
@@ -192,23 +194,17 @@ protected:
 	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<RegressionDataset const> const& elements, LabelType const& labelAvg, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
 
 
 	/// Generate a histogram from the count vector.
 	SHARK_EXPORT_SYMBOL LabelType hist(ClassVector const& countVector) const;
 
-	/// Average label over a vector.
-	SHARK_EXPORT_SYMBOL LabelType average(LabelVector const& labels) const;
-
 	/// Calculate the Gini impurity of the countVector
 	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
 
-	/// Total Sum Of Squares
-	SHARK_EXPORT_SYMBOL double sumOfSquares(LabelVector const& labels, std::size_t from, std::size_t to, RealVector const& sumLabel) const;
-
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, DataView<RegressionDataset const> const& elements, std::set<size_t> const& tableIndices) const;
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, ClassVector const& cFull, DataView<ClassificationDataset const> const& elements, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
 
 	/// Generate random table indices.
 	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type &rng) const;

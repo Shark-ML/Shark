@@ -121,11 +121,12 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		createAttributeTables(trainDataView, tables);
 
 		auto n_trainData = trainDataView.size();
-		auto labelAvg = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
+		auto labelSum = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
 			return trainDataView[i].label;
-		}) / n_trainData;
+		});
 
-		TreeType tree = buildTree(tables, trainDataView, labelAvg, 0, rng);
+		TreeType tree = buildTree(tables, trainDataView, labelSum, 0, rng);
+		//TreeType tree = build(trainDataView,labelAvg,rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
@@ -171,7 +172,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 
 	auto seed = static_cast<unsigned>(Rng::discrete(0,(unsigned)-1));
 
-	auto oobClassTally = UIntMatrix{n_elements,m_labelCardinality};
+	UIntMatrix oobClassTally = UIntMatrix(n_elements,m_labelCardinality);
 
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(std::uint32_t b = 0; b < m_B; ++b){
@@ -255,7 +256,7 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	//Randomly select the attributes to test for split
 	auto tableIndices = generateRandomTableIndices(rng);
 
-	auto split = findSplit(tables,cFull,elements,tableIndices);
+	auto split = findSplit(tables,elements,cFull,tableIndices);
 
 	// if the purity hasn't improved, this is a leaf.
 	if(split.impurity==WORST_IMPURITY) {
@@ -284,8 +285,8 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 
 RFTrainer::Split RFTrainer::findSplit(
 		RFTrainer::AttributeTables const& tables,
-		RFTrainer::ClassVector const& cFull,
 		DataView<ClassificationDataset const> const& elements,
+		ClassVector const& cFull,
 		set<size_t> const& tableIndices) const
 {
 	auto n = tables[0].size();
@@ -338,26 +339,27 @@ RFTrainer::LabelType RFTrainer::hist(ClassVector const& countVector) const {
 TreeType RFTrainer::
 buildTree(detail::cart::sink<AttributeTables&> tables,
 		  DataView<RegressionDataset const> const& elements,
-		  LabelType const& labelAvg,
+		  LabelType const& sumFull,
 		  std::size_t nodeId, Rng::rng_type& rng){
 
 	//Construct tree
 	TreeType lTree, rTree, tree;
+	auto n = tables[0].size();
 	// TODO(jwrigley): Why is average assigned to all nodes, when hist is only applied to leaves?
-	tree.push_back(NodeInfo{nodeId,labelAvg});
+	tree.push_back(NodeInfo{nodeId,sumFull/n});
 	NodeInfo& nodeInfo = tree[0];
 
 	//n = Total number of cases in the dataset
-	auto n = tables[0].size();
 	if(n <= m_nodeSize) return tree; // Must be leaf
 
 	//Randomly select the attributes to test for split
 	auto tableIndices = generateRandomTableIndices(rng);
 
-	auto split = findSplit(tables,elements,tableIndices);
+	auto split = findSplit(tables, elements, sumFull,tableIndices);
 
 	// if the purity hasn't improved, this is a leaf.
-	if(split.impurity==WORST_IMPURITY) return tree;
+	//if(split.impurity==WORST_IMPURITY) return tree;
+	if(split.purity == 0) return tree;
 	nodeInfo <<= split;
 
 	//Split the attribute tables
@@ -368,8 +370,8 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	nodeInfo.leftNodeId = (nodeId<<1)+1;
 	nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-	lTree = buildTree(lTables, elements, split.avgAbove, nodeInfo.leftNodeId, rng);
-	rTree = buildTree(rTables, elements, split.avgBelow, nodeInfo.rightNodeId, rng);
+	lTree = buildTree(lTables, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
+	rTree = buildTree(rTables, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
 
 //	tree.insert(tree.end(), std::make_move_iterator(lTree.begin()), std::make_move_iterator(lTree.end()));
 //	tree.insert(tree.end(), std::make_move_iterator(rTree.begin()), std::make_move_iterator(rTree.end()));
@@ -380,23 +382,21 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 }
 
 RFTrainer::Split RFTrainer::findSplit (
-        RFTrainer::AttributeTables const &tables,
-        DataView<RegressionDataset const> const &elements,
-        set<size_t> const &tableIndices) const
+		RFTrainer::AttributeTables const &tables,
+		DataView<RegressionDataset const> const &elements,
+		RealVector const& sumFull,
+		set<size_t> const &tableIndices) const
 {
 	auto n = tables[0].size();
 	Split best{};
-	RealVector sumAbove(m_labelDimension), sumBelow(m_labelDimension);
-	RealVector avgAbove(m_labelDimension), avgBelow(m_labelDimension);
-	LabelVector tmp;
+	LabelType const sumEmpty(m_labelDimension,0);
+	LabelVector tmp(n);
 	for (std::size_t const attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
-		sumBelow.clear(); sumAbove.clear(); tmp.clear();
+		auto sumBelow = sumFull, sumAbove = sumEmpty;
 		//Create a labels table, that corresponds to the sorted attribute
-		tmp = detail::cart::generate_i<LabelVector>(n,[&](std::size_t i){
-			auto const& label = elements[attributeTable[i].id].label;
-			sumBelow += label;
-			return label;
+		detail::cart::fill_fn(tmp,[&](std::size_t i){
+			return elements[attributeTable[i].id].label;
 		});
 
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
@@ -405,45 +405,22 @@ RFTrainer::Split RFTrainer::findSplit (
 
 			std::size_t n1=i,    n2 = n-i;
 			//Calculate the squared error of the split
-			noalias(avgAbove) = sumAbove/n1;     noalias(avgBelow) = sumBelow/n2;
-			double impurity = (n1* sumOfSquares(tmp, 0, n1, avgAbove)
-							   +n2*sumOfSquares(tmp,n1, n2, avgBelow))/n;
-			if(impurity<best.impurity){
+			double sumSqAbove = norm_sqr(sumAbove), sumSqBelow = norm_sqr(sumBelow);
+			double purity =  sumSqAbove/n1 + sumSqBelow/n2;
+			if(purity>best.purity){
 				//Found a more pure split, store the attribute index and value
 				best.splitAttribute = attributeIndex;
 				best.splitRow = prev;
-				best.splitValue = attributeTable[prev].value;
-				best.impurity = impurity;
-				best.avgAbove = avgAbove;
-				best.avgBelow = avgBelow;
+				best.splitValue = (attributeTable[prev].value + attributeTable[i].value)/2.0;
+				// Somewhat faster, but probably less accurate
+				//best.splitValue = attributeTable[prev].value;
+				best.purity = purity;
+				best.sumAbove = sumAbove;
+				best.sumBelow = sumBelow;
 			}
 		}
 	}
 	return best;
-}
-
-
-/**
- * Returns the average vector of a vector of real vectors
- */
-RealVector RFTrainer::average(LabelVector const& labels) const {
-	RealVector avg(labels[0].size());
-	for(auto const& label : labels) avg += label;
-	return avg/labels.size();
-}
-
-double RFTrainer::sumOfSquares(
-		LabelVector const &labels,
-		std::size_t start, std::size_t length,
-		LabelType const &labelAvg) const{
-	auto&& end = start+length;
-	if (length < 1) throw SHARKEXCEPTION("[RFTrainer::sumOfSquares] length < 1");
-	if (end > labels.size())
-		throw SHARKEXCEPTION("[RFTrainer::sumOfSquares] start+length > labels.size()");
-
-	return detail::cart::sum<double>(start, end, [&](std::size_t const i){
-		return distanceSqr(labels[i],labelAvg);
-	});
 }
 
 /**

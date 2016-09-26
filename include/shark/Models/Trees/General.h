@@ -88,6 +88,7 @@ inline T stable_sum(std::size_t i, std::size_t n, F&& f) {
 }
 template<class T, class F>
 inline T sum(std::size_t i, std::size_t n, F&& f) {
+	// stable_sum is slower, but more accurate
 	return stable_sum<T>(i, n, std::forward<F>(f));
 	if(i>=n) return T{};
 	T out = f(i);
