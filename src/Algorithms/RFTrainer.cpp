@@ -390,17 +390,13 @@ RFTrainer::Split RFTrainer::findSplit (
 	auto n = tables[0].size();
 	Split best{};
 	LabelType const sumEmpty(m_labelDimension,0);
-	LabelVector tmp(n);
 	for (std::size_t const attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
 		auto sumBelow = sumFull, sumAbove = sumEmpty;
-		//Create a labels table, that corresponds to the sorted attribute
-		detail::cart::fill_fn(tmp,[&](std::size_t i){
-			return elements[attributeTable[i].id].label;
-		});
 
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
-			sumAbove += tmp[prev]; sumBelow -= tmp[prev];
+			auto const& label = elements[attributeTable[prev].id].label;
+			sumAbove += label; sumBelow -= label;
 			if(attributeTable[prev].value == attributeTable[i].value) continue;
 
 			std::size_t n1=i,    n2 = n-i;
