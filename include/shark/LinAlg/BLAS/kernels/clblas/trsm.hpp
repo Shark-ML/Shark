@@ -96,7 +96,7 @@ void trsm(
 	trsm(stor_ord, clblasLeft, uplo, transA, diag, n, nrhs,
 		storageA.buffer, storageA.offset, storageA.leading_dimension,
 		storageB.buffer, storageB.offset, storageB.leading_dimension,
-		1, &(B().queue()),
+		1, &(B().queue().get()),
 		0, nullptr, nullptr
 	);
 }

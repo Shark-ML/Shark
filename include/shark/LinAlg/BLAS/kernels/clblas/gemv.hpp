@@ -102,12 +102,12 @@ void gemv(
 	auto storageA = A().raw_storage();
 	auto storagex = x().raw_storage();
 	auto storagey = y().raw_storage();
-	bindings::gemv(stor_ord, clblasNoTrans, m, n, alpha.get(),
+	bindings::gemv(stor_ord, clblasNoTrans, m, n, alpha,
 		storageA.buffer, storageA.offset, storageA.leading_dimension,
 		storagex.buffer, storagex.offset, storagex.stride,
 		typename VectorY::value_type(1),
 		storagey.buffer, storagey.offset, storagey.stride,
-		1, &(y().queue()),
+		1, &(y().queue().get()),
 		0, nullptr, nullptr
 	);
 }

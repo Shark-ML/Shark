@@ -111,9 +111,9 @@ matrix_scalar_multiply<MatA> operator-(matrix_expression<MatA, Device> const& A)
 
 #define SHARK_UNARY_MATRIX_TRANSFORMATION(name, F)\
 template<class MatA, class Device>\
-matrix_unary<MatA,F >\
+matrix_unary<MatA,F<typename MatA::value_type> >\
 name(matrix_expression<MatA, Device> const& v){\
-	return matrix_unary<MatA, F>(v(), F());\
+	return matrix_unary<MatA, F<typename MatA::value_type> >(v(), F<typename MatA::value_type>());\
 }
 SHARK_UNARY_MATRIX_TRANSFORMATION(abs, functors::scalar_abs)
 SHARK_UNARY_MATRIX_TRANSFORMATION(log, functors::scalar_log)
@@ -198,11 +198,12 @@ typename boost::enable_if<
 
 #define SHARK_BINARY_MATRIX_EXPRESSION(name, F)\
 template<class MatA, class MatB, class Device>\
-matrix_binary<MatA, MatB, F >\
+matrix_binary<MatA, MatB, F<typename common_value_type<MatA,MatB>::type> >\
 name(matrix_expression<MatA, Device> const& m1, matrix_expression<MatB, Device> const& m2){\
 	SIZE_CHECK(m1().size1() == m2().size1());\
 	SIZE_CHECK(m1().size2() == m2().size2());\
-	return matrix_binary<MatA, MatB, F>(m1(),m2(), F());\
+	typedef typename common_value_type<MatA,MatB>::type type;\
+	return matrix_binary<MatA, MatB, F<type> >(m1(),m2(), F<type>());\
 }
 SHARK_BINARY_MATRIX_EXPRESSION(operator*, functors::scalar_binary_multiply)
 SHARK_BINARY_MATRIX_EXPRESSION(element_prod, functors::scalar_binary_multiply)
@@ -215,10 +216,11 @@ SHARK_BINARY_MATRIX_EXPRESSION(element_div, functors::scalar_binary_divide)
 template<class T, class MatA, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename MatA::value_type >,\
-        matrix_binary<MatA, scalar_matrix<T>, F> \
+        matrix_binary<MatA, scalar_matrix<T>, F<typename std::common_type<typename MatA::value_type,T>::type> > \
 >::type \
 name (matrix_expression<MatA, Device> const& m, T t){ \
-	return matrix_binary<MatA, scalar_matrix<T>, F>(m(), scalar_matrix<T>(m().size1(), m().size2(), t) ,F()); \
+	typedef typename std::common_type<typename MatA::value_type,T>::type type;\
+	return matrix_binary<MatA, scalar_matrix<T>, F<type> >(m(), scalar_matrix<T>(m().size1(), m().size2(), t) ,F<type>()); \
 }
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, functors::scalar_binary_divide)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, functors::scalar_less_than)
@@ -237,10 +239,11 @@ SHARK_MATRIX_SCALAR_TRANSFORMATION(pow, functors::scalar_binary_pow)
 template<class T, class MatA, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename MatA::value_type >,\
-	matrix_binary<scalar_matrix<T>, MatA, F> \
+	matrix_binary<scalar_matrix<T>, MatA, F<typename std::common_type<typename MatA::value_type,T>::type> > \
 >::type \
 name (T t, matrix_expression<MatA, Device> const& m){ \
-	return  matrix_binary<scalar_matrix<T>, MatA, F>(scalar_matrix<T>(m().size1(), m().size2(), t), m(), F()); \
+	typedef typename std::common_type<typename MatA::value_type,T>::type type;\
+	return  matrix_binary<scalar_matrix<T>, MatA, F<type> >(scalar_matrix<T>(m().size1(), m().size2(), t), m(), F<type>()); \
 }
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, functors::scalar_binary_min)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, functors::scalar_binary_max)
@@ -248,16 +251,16 @@ SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, functors::scalar_binary_max)
 
 template<class MatA, class MatB, class Device>
 matrix_binary<MatA, MatB, 
-	functors::scalar_binary_safe_divide<decltype(typename MatA::value_type() * typename MatB::value_type()) > 
+	functors::scalar_binary_safe_divide<typename common_value_type<MatA,MatB>::type> 
 >
 safe_div(
 	matrix_expression<MatA, Device> const& A, 
 	matrix_expression<MatB, Device> const& B, 
-	decltype(typename MatA::value_type()/typename MatB::value_type()) defaultValue
+	typename common_value_type<MatA,MatB>::type defaultValue
 ){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
-	typedef decltype(typename MatA::value_type() * typename MatB::value_type()) result_type;
+	typedef typename common_value_type<MatA,MatB>::type result_type;
 	typedef functors::scalar_binary_safe_divide<result_type> functor_type;
 	return matrix_binary<MatA, MatB, functor_type>(A(),B(), functor_type(defaultValue));
 }

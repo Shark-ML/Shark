@@ -42,11 +42,11 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Matrix_Constant_Functor_Assign ){
 	}
 
 	std::cout<<"testing row-major"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_row_major, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_row_major, t);
 	checkMatrixEqual(target,input_row_major);
 	
 	std::cout<<"testing column-major"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_column_major, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_column_major, t);
 	checkMatrixEqual(target,input_column_major);
 	
 	std::cout<<"\n";
@@ -78,19 +78,19 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Packed_Matrix_Constant_Functor_Assign ){
 	}
 
 	std::cout<<"testing row-major lower"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_row_lower, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_row_lower, t);
 	checkMatrixEqual(target_lower,input_row_lower);
 	
 	std::cout<<"testing column-major lower"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_column_lower, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_column_lower, t);
 	checkMatrixEqual(target_lower,input_column_lower);
 	
 	std::cout<<"testing row-major upper"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_row_upper, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_row_upper, t);
 	checkMatrixEqual(target_upper,input_row_upper);
 	
 	std::cout<<"testing column-major upper"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_column_upper, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_column_upper, t);
 	checkMatrixEqual(target_upper,input_column_upper);
 	
 	std::cout<<"\n";
@@ -115,11 +115,11 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Matrix_Constant_Functor_Assign ){
 	}
 
 	std::cout<<"testing row-major"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_row_major, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_row_major, t);
 	checkMatrixEqual(target_row_major,input_row_major);
 	
 	std::cout<<"testing column-major"<<std::endl;
-	blas::kernels::assign<blas::functors::scalar_binary_multiply> (input_column_major, t);
+	blas::kernels::assign<blas::functors::scalar_binary_multiply<unsigned int> > (input_column_major, t);
 	checkMatrixEqual(target_column_major,input_column_major);
 	
 	std::cout<<"\n";
@@ -624,28 +624,28 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Dense_Matrix_Plus_Assign ){
 	{
 		blas::matrix<unsigned int,blas::row_major> target = preinit;
 		std::cout<<"testing row-row"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_row_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_row_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::row_major> target = preinit;
 		std::cout<<"testing row-column"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_column_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_column_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target = preinit;
 		std::cout<<"testing column-row"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_row_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_row_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target = preinit;
 		std::cout<<"testing column-column"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_column_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_column_major);
 		checkMatrixEqual(target,result);
 	}
 }
@@ -676,28 +676,28 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Dense_Sparse_Matrix_Plus_Assign ){
 	{
 		blas::matrix<unsigned int,blas::row_major> target = preinit;
 		std::cout<<"testing row-row"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_row_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_row_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::row_major> target = preinit;
 		std::cout<<"testing row-column"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_column_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_column_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target = preinit;
 		std::cout<<"testing column-row"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_row_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_row_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::column_major> target = preinit;
 		std::cout<<"testing column-column"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_column_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_column_major);
 		checkMatrixEqual(target,result);
 	}
 }
@@ -736,14 +736,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Plus_Assign ){
 	{
 		blas::compressed_matrix<unsigned int> target = preinit;
 		std::cout<<"testing row-row"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_row_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_row_major);
 		checkMatrixEqual(target,result);
 	}
 	
 	{
 		blas::matrix<unsigned int,blas::row_major> target = preinit;
 		std::cout<<"testing row-column"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_column_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_column_major);
 		checkMatrixEqual(target,result);
 	}
 	{
@@ -751,7 +751,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Plus_Assign ){
 		blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target(target_base);
 		target = preinit;
 		std::cout<<"testing column-row"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_row_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_row_major);
 		checkMatrixEqual(target,result);
 	}
 	
@@ -760,7 +760,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Sparse_Sparse_Matrix_Plus_Assign ){
 		blas::matrix_transpose<blas::compressed_matrix<unsigned int> > target(target_base);
 		target = preinit;
 		std::cout<<"testing column-column"<<std::endl;
-		blas::kernels::assign<blas::functors::scalar_binary_plus>(target,source_column_major);
+		blas::kernels::assign<blas::functors::scalar_binary_plus<unsigned int> >(target,source_column_major);
 		checkMatrixEqual(target,result);
 	}
 }

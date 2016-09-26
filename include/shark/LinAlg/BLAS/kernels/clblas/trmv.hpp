@@ -72,7 +72,7 @@ inline void trmv(
 
 }
 
-namespace trmv{
+namespace kernels{
 
 template <bool upper, bool unit, typename MatA, typename VectorX>
 void trmv(
@@ -87,10 +87,10 @@ void trmv(
 	
 	auto storageA = A().raw_storage();
 	auto storagex = x().raw_storage();
-	trsv(stor_ord, uplo, clblasNoTrans,diag, A().size1(),
+	bindings::trmv(stor_ord, uplo, clblasNoTrans,diag, A().size1(),
 	        storageA.buffer, storageA.offset, storageA.leading_dimension,
 		storagex.buffer, storagex.offset, storagex.stride,
-		1, &(x().queue()),
+		1, &(x().queue().get()),
 		0, nullptr, nullptr
 	);
 }

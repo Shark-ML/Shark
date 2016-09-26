@@ -73,9 +73,9 @@ repeat(T scalar, std::size_t elements){
 
 #define SHARK_UNARY_VECTOR_TRANSFORMATION(name, F)\
 template<class VecV, class Device>\
-vector_unary<VecV,F >\
+vector_unary<VecV,F<typename VecV::value_type> >\
 name(vector_expression<VecV, Device> const& v){\
-	return vector_unary<VecV, F>(v(), F());\
+	return vector_unary<VecV, F<typename VecV::value_type> >(v(), F<typename VecV::value_type>());\
 }
 SHARK_UNARY_VECTOR_TRANSFORMATION(abs, functors::scalar_abs)
 SHARK_UNARY_VECTOR_TRANSFORMATION(log, functors::scalar_log)
@@ -157,10 +157,11 @@ typename boost::enable_if<
 
 #define SHARK_BINARY_VECTOR_EXPRESSION(name, F)\
 template<class VecV1, class VecV2, class Device>\
-vector_binary<VecV1, VecV2, F >\
+vector_binary<VecV1, VecV2, F<typename common_value_type<VecV1,VecV2>::type> >\
 name(vector_expression<VecV1, Device> const& v1, vector_expression<VecV2, Device> const& v2){\
 	SIZE_CHECK(v1().size() == v2().size());\
-	return vector_binary<VecV1, VecV2, F>(v1(),v2(), F());\
+	typedef typename common_value_type<VecV1,VecV2>::type type;\
+	return vector_binary<VecV1, VecV2, F<type> >(v1(),v2(), F<type>());\
 }
 SHARK_BINARY_VECTOR_EXPRESSION(operator*, functors::scalar_binary_multiply)
 SHARK_BINARY_VECTOR_EXPRESSION(element_prod, functors::scalar_binary_multiply)
@@ -176,10 +177,11 @@ SHARK_BINARY_VECTOR_EXPRESSION(max, functors::scalar_binary_max)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-        vector_binary<VecV, scalar_vector<T>, F> \
+        vector_binary<VecV, scalar_vector<T>, F<typename std::common_type<typename VecV::value_type,T>::type> > \
 >::type \
 name (vector_expression<VecV, Device> const& v, T t){ \
-	return  vector_binary<VecV, scalar_vector<T>, F>(v(), scalar_vector<T>(v().size(),t) ,F()); \
+	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
+	return  vector_binary<VecV, scalar_vector<T>, F<type> >(v(), scalar_vector<T>(v().size(),t) ,F<type>()); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, functors::scalar_binary_divide)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, functors::scalar_less_than)
@@ -198,10 +200,11 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, functors::scalar_binary_pow)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-         vector_binary<scalar_vector<T>, VecV, F> \
+         vector_binary<scalar_vector<T>, VecV, F<typename std::common_type<typename VecV::value_type,T>::type> > \
 >::type \
 name (T t, vector_expression<VecV, Device> const& v){ \
-	return  vector_binary<scalar_vector<T>, VecV, F>(scalar_vector<T>(v().size(),t), v() ,F()); \
+	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
+	return  vector_binary<scalar_vector<T>, VecV, F<type> >(scalar_vector<T>(v().size(),t), v() ,F<type>()); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, functors::scalar_binary_min)
 SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, functors::scalar_binary_max)
@@ -209,17 +212,15 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, functors::scalar_binary_max)
 
 template<class VecV1, class VecV2, class Device>
 vector_binary<VecV1, VecV2, 
-	functors::scalar_binary_safe_divide<decltype(typename VecV1::value_type() * typename VecV2::value_type()) > 
+	functors::scalar_binary_safe_divide<typename common_value_type<VecV1,VecV2>::type > 
 >
 safe_div(
 	vector_expression<VecV1, Device> const& v1, 
 	vector_expression<VecV2, Device> const& v2, 
-	decltype(
-		typename VecV1::value_type() * typename VecV2::value_type()
-	) defaultValue
+	typename common_value_type<VecV1,VecV2>::type defaultValue
 ){
 	SIZE_CHECK(v1().size() == v2().size());
-	typedef decltype(typename VecV1::value_type() * typename VecV2::value_type()) result_type;
+	typedef typename common_value_type<VecV1,VecV2>::type result_type;
 	
 	typedef functors::scalar_binary_safe_divide<result_type> functor_type;
 	return vector_binary<VecV1, VecV2, functor_type>(v1(),v2(), functor_type(defaultValue));
@@ -232,7 +233,7 @@ template<class VecV, class Device>
 typename VecV::value_type
 sum(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
-	vector_fold<functors::scalar_binary_plus > kernel;
+	vector_fold<functors::scalar_binary_plus<typename VecV::value_type> > kernel;
 	return kernel(eval_block(v),value_type());
 }
 
@@ -241,7 +242,7 @@ template<class VecV, class Device>
 typename VecV::value_type
 max(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
-	vector_fold<functors::scalar_binary_max > kernel;
+	vector_fold<functors::scalar_binary_max<typename VecV::value_type> > kernel;
 	auto const& elem_result = eval_block(v);
 	return kernel(elem_result,elem_result(0));
 }
@@ -251,7 +252,7 @@ template<class VecV, class Device>
 typename VecV::value_type
 min(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
-	vector_fold<functors::scalar_binary_min > kernel;
+	vector_fold<functors::scalar_binary_min<typename VecV::value_type> > kernel;
 	auto const& elem_result = eval_block(v);
 	return kernel(elem_result,elem_result(0));
 }

@@ -40,97 +40,96 @@ namespace functors{
 	
 //////UNARY SCALAR OPRATIONS////////////////
 
+template<class T>
 struct scalar_negate {
 	static const bool zero_identity = true;
 
-	template<class T>
 	T operator()(T x)const {
 		return -x;
 	}
 };
 
+template<class T>
 struct scalar_inverse {
 	static const bool zero_identity = false;
 
-	template<class T>
 	T operator()(T x)const {
 		return T(1)/x;
 	}
 };
 
-
+template<class T>
 struct scalar_abs{
 	static const bool zero_identity = true;
 
-	template<class T>
 	T operator()(T x)const {
 		using std::abs;
 		return abs(x);
 	}
 };
 
+template<class T>
 struct scalar_sqr{
 	static const bool zero_identity = true;
 
-	template<class T>
 	T operator()(T x)const {
 		return x*x;
 	}
 };
 
+template<class T>
 struct scalar_sqrt{
 	static const bool zero_identity = true;
 
-	template<class T>
 	T operator()(T x)const {
 		using std::sqrt;
 		return sqrt(x);
 	}
 };
 
+template<class T>
 struct scalar_exp{
 	static const bool zero_identity = false;
 
-	template<class T>
 	T operator()(T x)const {
 		using std::exp;
 		return exp(x);
 	}
 };
 
+template<class T>
 struct scalar_log {
 	static const bool zero_identity = false;
 
-	template<class T>
 	T operator()(T x)const {
 		using std::log;
 		return log(x);
 	}
 };
 
+template<class T>
 struct scalar_tanh{
 	static const bool zero_identity = true;
 
-	template<class T>
 	T operator()(T x)const {
 		using std::tanh;
 		return tanh(x);
 	}
 };
 
+template<class T>
 struct scalar_soft_plus {
 	static const bool zero_identity = false;
 
-	template<class T>
 	T operator()(T x)const {
 		return shark::softPlus(x);
 	}
 };
 
+template<class T>
 struct scalar_sigmoid {
 	static const bool zero_identity = false;
 
-	template<class T>
 	T operator()(T x)const {
 		using std::tanh;
 		return (tanh(x/T(2)) + T(1))/T(2);
@@ -151,99 +150,100 @@ private:
 //////BINARY SCALAR OPRATIONS////////////////
 
 
+template<class T>
 struct scalar_less_than{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	int operator()(T1 x1, T2 x2)const {
+	int operator()(T x1, T x2)const {
 		return x1 < x2;
 	}
 };
-
+template<class T>
 struct scalar_less_equal_than{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	int operator()(T1 x1, T2 x2)const {
+	int operator()(T x1, T x2)const {
 		return x1 <= x2;
 	}
 };
 
+template<class T>
 struct scalar_bigger_than{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	int operator()(T1 x1, T2 x2)const {
+	int operator()(T x1, T x2)const {
 		return x1 > x2;
 	}
 };
 
+template<class T>
 struct scalar_bigger_equal_than{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	int operator()(T1 x1, T2 x2)const {
+	int operator()(T x1, T x2)const {
 		return x1 >= x2;
 	}
 };
 
+template<class T>
 struct scalar_equal{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	int operator()(T1 x1, T2 x2)const {
+	int operator()(T x1, T x2)const {
 		return x1 ==  x2;
 	}
 };
 
+template<class T>
 struct scalar_not_equal{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	int operator()(T1 x1, T2 x2)const {
+	int operator()(T x1, T x2)const {
 		return x1 !=  x2;
 	}
 };
 
+template<class T>
 struct scalar_binary_plus {
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
 	static const bool right_zero_identity = true;
 	static const bool left_zero_identity = false;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const -> decltype(T1() + T2()) {
+	T operator()(T x, T y)const{
 		return x+y;
 	}
 };
+template<class T>
 struct scalar_binary_minus {
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
 	static const bool right_zero_identity = true;
 	static const bool left_zero_identity = false;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const -> decltype(T1() + T2()) {
+	T operator()(T x, T y)const{
 		return x-y;
 	}
 };
 
+template<class T>
 struct scalar_binary_multiply {
 	static const bool left_zero_remains =  true;
 	static const bool right_zero_remains =  true;
 	static const bool right_zero_identity = false;
 	static const bool left_zero_identity = true;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const -> decltype(T1() * T2()) {
+
+	T operator()(T x, T y)const{
 		return x*y;
 	}
 };
 
+template<class T>
 struct scalar_binary_divide {
 	static const bool left_zero_remains =  true;
 	static const bool right_zero_remains =  false;
 	static const bool right_zero_identity = false;
 	static const bool left_zero_identity = true;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const -> decltype(T1() / T2()) {
+
+	T operator()(T x, T y)const{
 		return x/y;
 	}
 };
@@ -253,46 +253,44 @@ struct scalar_binary_safe_divide {
 	static const bool left_zero_remains =  true;
 	static const bool right_zero_remains =  false;
 	scalar_binary_safe_divide(T defaultValue):m_defaultValue(defaultValue) {}
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const -> decltype(T1() / T2()) {
-		typedef decltype(T1() / T2()) result_type;
-		return y == T2()? static_cast<result_type>(m_defaultValue) : x/y;
+
+	T operator()(T x, T y)const{
+		return y == T()? m_defaultValue : x/y;
 	}
 private:
 	T m_defaultValue;
 };
 
+template<class T>
 struct scalar_binary_pow {
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const -> decltype(T1() * T2()) {
+
+	T operator()(T x, T y)const {
 		using std::pow;
 		return pow(x,y);
 	}
 };
 
+template<class T> 
 struct scalar_binary_min{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const->decltype(T1() + T2()) {
-		typedef decltype(T1() + T2()) result_type;
+
+	T operator()(T x, T y)const{
 		using std::min;
-		//convert to the bigger type to prevent std::min conversion errors.
-		return min(result_type(x),result_type(y));
+		return min(x,y);
 	}
 };
 
+template<class T> 
 struct scalar_binary_max{
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;
-	template<class T1, class T2>
-	auto operator()(T1 x, T2 y)const->decltype(T1() + T2()) {
-		typedef decltype(T1() + T2()) result_type;
+
+	T operator()(T x, T y)const{
 		using std::max;
-		//convert to the bigger type to prevent std::max conversion errors.
-		return max(result_type(x),result_type(y));
+		return max(x,y);
 	}
 };
 

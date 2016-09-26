@@ -242,6 +242,13 @@ struct device_traits<cpu_tag>{
 	using indexed_iterator = shark::blas::iterators::indexed_iterator<Closure>;
 };
 
+template<class E1, class E2>
+struct common_value_type
+: public std::common_type<
+	typename E1::value_type,
+	typename E2::value_type
+>{};
+
 }}
 
 #endif

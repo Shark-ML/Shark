@@ -82,6 +82,11 @@ public:
 	expression_closure_type const& expression() const{
 		return m_expression;
 	};
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
@@ -136,7 +141,7 @@ private:
 template<class E1, class E2>
 class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2>, typename E1::device_type > {
 private:
-	typedef functors::scalar_binary_plus functor_type;
+	typedef functors::scalar_binary_plus<typename common_value_type<E1,E2>::type> functor_type;
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 public:
@@ -185,6 +190,11 @@ public:
 	rhs_closure_type const& rhs()const{
 		return m_rhs;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_lhs.queue();
+	}
+#endif
 
         // Element access
 	template <class IndexExpr1, class IndexExpr2>
@@ -294,6 +304,11 @@ public:
 	auto operator()(IndexExpr1 const& /*i*/, IndexExpr2 const& j) const -> decltype(this->expression()(j)){
 		return m_vector(j);
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_vector.queue();
+	}
+#endif
 
 	// Iterator types
 	typedef typename V::const_iterator const_row_iterator;
@@ -358,6 +373,11 @@ public:
 	size_type size2() const {
 		return m_size2;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return boost::compute::system::default_queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
@@ -435,6 +455,11 @@ public:
 	functor_type const& functor() const {
 		return m_functor;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 	
 	//computation kernels
 	template<class MatX>
@@ -544,6 +569,11 @@ public:
 	functor_type const& functor() const {
 		return m_functor;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_lhs.queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
@@ -622,8 +652,8 @@ private:
 
 template<class E1, class E2>
 class outer_product:public matrix_expression<outer_product<E1, E2>, typename E1::device_type > {
-	typedef functors::scalar_multiply1<typename E1::value_type> functor_type;
-	typedef functors::scalar_binary_multiply functor_type_op;
+	typedef functors::scalar_multiply1<typename common_value_type<E1,E2>::type> functor_type;
+	typedef functors::scalar_binary_multiply<typename common_value_type<E1,E2>::type> functor_type_op;
 public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
@@ -661,6 +691,11 @@ public:
 	rhs_closure_type const& rhs() const {
 		return m_rhs;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_lhs.queue();
+	}
+#endif
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
 	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type_op()(this->lhs()(i),this->rhs()(j))){
@@ -743,7 +778,12 @@ public:
 	vector_closure_type const& vector() const {
 		return m_vector;
 	}
-	
+
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_matrix.queue();
+	}
+#endif	
 	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
@@ -833,6 +873,11 @@ public:
 	matrix_closure_type const& matrix() const {
 		return m_matrix;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_matrix.queue();
+	}
+#endif
 
 	// Element access for elementwise case
 	template <class IndexExpr>
@@ -975,6 +1020,11 @@ public:
 	matrix_closure_typeB const& rhs() const {
 		return m_rhs;
 	}
+	#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_lhs.queue();
+	}
+#endif
 	
 	//dispatcher to computation kernels
 	template<class MatX>
@@ -1050,6 +1100,11 @@ public:
 	size_type size2() const {
 		return m_diagonal.size();
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_diagonal.queue();
+	}
+#endif
 	
 	// Element access
 	const_reference operator()(size_type i, size_type j) const {
@@ -1057,25 +1112,6 @@ public:
 			return m_diagonal(i);
 		else
 			return value_type();
-	}
-
-	void set_element(size_type i, size_type j,value_type t){
-		RANGE_CHECK(i == j);
-		m_diagonal(i) = t;
-	}
-
-	// Assignment
-	diagonal_matrix& operator = (diagonal_matrix const& m) {
-		m_diagonal = m.m_diagonal;
-		return *this;
-	}
-
-	// Swapping
-	void swap(diagonal_matrix& m) {
-		swap(m_diagonal,m.m_diagonal);
-	}
-	friend void swap(diagonal_matrix& m1, diagonal_matrix& m2) {
-		m1.swap(m2);
 	}
 	
 	//Iterators

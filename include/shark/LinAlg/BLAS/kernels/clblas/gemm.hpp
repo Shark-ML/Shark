@@ -108,12 +108,12 @@ void gemm(
 	auto storageA = A().raw_storage();
 	auto storageB = B().raw_storage();
 	auto storageC = C().raw_storage();
-	bindings::gemm(stor_ord, transA, transB, m, n, k, alpha.get(),
+	bindings::gemm(stor_ord, transA, transB, m, n, k, alpha,
 		storageA.buffer, storageA.offset, storageA.leading_dimension,
 		storageB.buffer, storageB.offset, storageB.leading_dimension,
 		typename MatC::value_type(1),
 		storageC.buffer, storageC.offset, storageC.leading_dimension,
-		1, &(C().queue()),
+		1, &(C().queue().get()),
 		0, nullptr, nullptr
 	);
 }

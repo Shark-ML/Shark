@@ -367,9 +367,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Transform_Iterator_Dense)
 	typedef iterators::dense_storage_iterator<const double> iterator;
 	iterator dense_iter(values,0);
 	iterator dense_end(values,6);
-	iterators::transform_iterator<iterator,functors::scalar_sqr > iter(dense_iter,functors::scalar_sqr());
-	iterators::transform_iterator<iterator,functors::scalar_sqr > start = iter;
-	iterators::transform_iterator<iterator,functors::scalar_sqr > end(dense_end,functors::scalar_sqr());
+	iterators::transform_iterator<iterator,functors::scalar_sqr<double> > iter(dense_iter,functors::scalar_sqr<double>());
+	iterators::transform_iterator<iterator,functors::scalar_sqr<double> > start = iter;
+	iterators::transform_iterator<iterator,functors::scalar_sqr<double> > end(dense_end,functors::scalar_sqr<double>());
 	
 	BOOST_REQUIRE_EQUAL(end-start, 6);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
@@ -400,9 +400,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Transform_Iterator_Compressed)
 	typedef iterators::compressed_storage_iterator<const double,const std::size_t> iterator;
 	iterator compressed_iter(values,indizes,0);
 	iterator compressed_end(values,indizes,6);
-	iterators::transform_iterator<iterator,functors::scalar_sqr > iter(compressed_iter,functors::scalar_sqr());
-	iterators::transform_iterator<iterator,functors::scalar_sqr > start = iter;
-	iterators::transform_iterator<iterator,functors::scalar_sqr > end(compressed_end,functors::scalar_sqr());
+	iterators::transform_iterator<iterator,functors::scalar_sqr<double> > iter(compressed_iter,functors::scalar_sqr<double>());
+	iterators::transform_iterator<iterator,functors::scalar_sqr<double> > start = iter;
+	iterators::transform_iterator<iterator,functors::scalar_sqr<double> > end(compressed_end,functors::scalar_sqr<double>());
 	
 	BOOST_REQUIRE_EQUAL(end-start, 6);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
@@ -432,11 +432,11 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Dense)
 	iterator dense_iter2(values2,0);
 	iterator dense_end2(values2,6);
 	
-	typedef iterators::binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus > transform_iterator;
+	typedef iterators::binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus<double> > transform_iterator;
 	
-	transform_iterator iter(functors::scalar_binary_plus(),dense_iter1,dense_end1,dense_iter2,dense_end2);
+	transform_iterator iter(functors::scalar_binary_plus<double>(),dense_iter1,dense_end1,dense_iter2,dense_end2);
 	transform_iterator start = iter;
-	transform_iterator end(functors::scalar_binary_plus(),dense_end1,dense_end1,dense_end2,dense_end2);
+	transform_iterator end(functors::scalar_binary_plus<double>(),dense_end1,dense_end1,dense_end2,dense_end2);
 	
 	BOOST_REQUIRE_EQUAL(end-start, 6);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
@@ -472,7 +472,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Compressed)
 	
 
 	typedef iterators::compressed_storage_iterator<const double,const std::size_t> iterator;
-	typedef iterators::binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus > transform_iterator;
+	typedef iterators::binary_transform_iterator<iterator,iterator,functors::scalar_binary_plus<double> > transform_iterator;
 	
 	//a+b
 	{
@@ -480,9 +480,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Compressed)
 		iterator end1(values1,indizes1,6);
 		iterator iter2(values2,indizes2,0);
 		iterator end2(values2,indizes2,4);
-		transform_iterator iter(functors::scalar_binary_plus(),iter1,end1,iter2,end2);
+		transform_iterator iter(functors::scalar_binary_plus<double>(),iter1,end1,iter2,end2);
 		transform_iterator start = iter;
-		transform_iterator end(functors::scalar_binary_plus(),end1,end1,end2,end2);
+		transform_iterator end(functors::scalar_binary_plus<double>(),end1,end1,end2,end2);
 		
 		BOOST_REQUIRE(start == iter);
 		BOOST_REQUIRE(start != end);
@@ -502,9 +502,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Binary_Transform_Iterator_Compressed)
 		iterator end2(values1,indizes1,6);
 		iterator iter1(values2,indizes2,0);
 		iterator end1(values2,indizes2,4);
-		transform_iterator iter(functors::scalar_binary_plus(),iter1,end1,iter2,end2);
+		transform_iterator iter(functors::scalar_binary_plus<double>(),iter1,end1,iter2,end2);
 		transform_iterator start = iter;
-		transform_iterator end(functors::scalar_binary_plus(),end1,end1,end2,end2);
+		transform_iterator end(functors::scalar_binary_plus<double>(),end1,end1,end2,end2);
 		
 		BOOST_REQUIRE(start == iter);
 		BOOST_REQUIRE(start != end);

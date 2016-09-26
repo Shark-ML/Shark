@@ -93,7 +93,7 @@ void trsv(
 	trsv(stor_ord, uplo, clblasNoTrans,diag, A().size1(),
 	        storageA.buffer, storageA.offset, storageA.leading_dimension,
 		storageb.buffer, storageb.offset, storageb.stride,
-		1, &(b().queue()),
+		1, &(b().queue().get()),
 		0, nullptr, nullptr
 	);
 }

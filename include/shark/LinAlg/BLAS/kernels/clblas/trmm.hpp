@@ -40,7 +40,7 @@ inline void trmm(
 	clblasOrder order, clblasSide side, clblasUplo uplo, clblasTranspose transA, clblasDiag diag,
 	std::size_t M, std::size_t N,
 	boost::compute::vector<float> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<float>& B, std::size_t offB, std::size_t ldb,
+	boost::compute::vector<float> const& B, std::size_t offB, std::size_t ldb,
 	std::size_t numCommandQueues, cl_command_queue* commandQueues,
 	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
 ){
@@ -57,7 +57,7 @@ inline void trmm(
 	clblasOrder order, clblasSide side, clblasUplo uplo, clblasTranspose transA, clblasDiag diag,
 	std::size_t M, std::size_t N,
 	boost::compute::vector<double> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<double>& B, std::size_t offB, std::size_t ldb,
+	boost::compute::vector<double> const& B, std::size_t offB, std::size_t ldb,
 	std::size_t numCommandQueues, cl_command_queue* commandQueues,
 	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
 ){
@@ -72,12 +72,12 @@ inline void trmm(
 
 }
 
-namespace trmm{
+namespace kernels{
 
 template <bool upper, bool unit, typename MatA, typename MatB>
 void trmm(
-	matrix_expression<MatA, cpu_tag> const& A,
-	matrix_expression<MatB, cpu_tag>& B
+	matrix_expression<MatA, gpu_tag> const& A,
+	matrix_expression<MatB, gpu_tag>& B
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == B().size1());
@@ -99,10 +99,10 @@ void trmm(
 	
 	auto storageA = A().raw_storage();
 	auto storageB = B().raw_storage();
-	trmm(stor_ordB, clblasLeft, uplo, trans, diag, m, n,
+	bindings::trmm(stor_ordB, clblasLeft, uplo, trans, diag, m, n,
 		storageA.buffer, storageA.offset, storageA.leading_dimension,
 		storageB.buffer, storageB.offset, storageB.leading_dimension,
-		1, &(B().queue()),
+		1, &(B().queue().get()),
 		0, nullptr, nullptr
 	);
 }

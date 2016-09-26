@@ -34,7 +34,9 @@
 #define SHARK_LINALG_BLAS_GPU_DETAIL_TRAITS_HPP
 
 #include "../detail/traits.hpp"
+#include "../detail/functional.hpp"
 #include <boost/compute/core.hpp>
+#include <tuple>
 
 namespace shark{namespace blas{namespace gpu{
 	
@@ -75,6 +77,37 @@ struct dense_matrix_storage{
 	}
 };
 
-}}}
+}
+
+template<class ArgumentType>
+struct functor_mapper{
+private:
+	
+public:
+};
+
+template<>
+struct device_traits<gpu_tag>{
+	template <class Iterator, class Functor>
+	//~ using transform_iterator = boost::compute::transform_iterator<Iterator, typename Functor::compute<typename Iterator::result>>;
+	using transform_iterator = boost::compute::transform_iterator<Iterator, Functor>;
+
+	//~ template <class Iterator>
+	//~ using subrange_iterator = shark::blas::iterators::subrange_iterator<Iterator>;
+	
+	//~ template<class Iterator1, class Iterator2, class Functor>
+	//~ using binary_transform_iterator = shark::blas::iterators::binary_transform_iterator<Iterator1,Iterator2, Functor>;
+	
+	//~ template<class T>
+	//~ using constant_iterator = shark::blas::iterators::constant_iterator<T>;
+	
+	//~ template<class T>
+	//~ using one_hot_iterator = shark::blas::iterators::one_hot_iterator<T>;
+	
+	//~ template<class Closure>
+	//~ using indexed_iterator = shark::blas::iterators::indexed_iterator<Closure>;
+};
+
+}}
 
 #endif

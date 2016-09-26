@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_UnaryTransformation_Sparse_Vector ){
     compressed(10) = 2;
     compressed(50) = 3;
     {
-		typedef blas::vector_unary<CompressedRealVector, blas::functors::scalar_sqr > SqrExpression;
+		typedef blas::vector_unary<CompressedRealVector, blas::functors::scalar_sqr<double> > SqrExpression;
 		SqrExpression sqrexpr = sqr(compressed);
 	
 		SqrExpression::const_iterator iter = sqrexpr.begin();
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_UnaryTransformation_Sparse_Matrix ){
 	compressed(8,2) = 3;
 	compressed(8,5) = 5;
 	{
-		typedef blas::matrix_unary<CompressedIntMatrix, blas::functors::scalar_sqr > SqrExpression;
+		typedef blas::matrix_unary<CompressedIntMatrix, blas::functors::scalar_sqr<int> > SqrExpression;
 		SqrExpression sqrexpr = sqr(compressed);
 	    
 		BOOST_CHECK_EQUAL(sqrexpr.size1(),10);

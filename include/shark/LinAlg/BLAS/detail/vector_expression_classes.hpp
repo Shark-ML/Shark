@@ -31,6 +31,9 @@
 #include "../assignment.hpp"
 #include "iterator.hpp"
 #include "traits.hpp"
+#ifdef SHARK_USE_CLBLAS
+#include <boost/compute/command_queue.hpp>
+#endif
 
 namespace shark {
 namespace blas {
@@ -75,6 +78,11 @@ public:
 	functor_type functor()const{
 		return functor_type(m_scalar);
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr>
@@ -147,7 +155,11 @@ public:
 	const_reference operator()(IndexExpr const& /*i*/) const {
 		return m_value;
 	}
-
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return boost::compute::system::default_queue();
+	}
+#endif
 public:
 	typedef typename device_traits<cpu_tag>:: template constant_iterator<T> iterator;
 	typedef typename device_traits<cpu_tag>:: template constant_iterator<T> const_iterator;
@@ -202,6 +214,11 @@ public:
 	functor_type const& functor()const{
 		return m_functor;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
 	
 	//computation kernels
 	template<class VecX>
@@ -257,7 +274,7 @@ private:
 template<class E1, class E2>
 class vector_addition: public vector_expression<vector_addition<E1,E2>, typename E1::device_type > {
 private:
-	typedef functors::scalar_binary_plus functor_type;
+	typedef functors::scalar_binary_plus<typename common_value_type<E1,E2>::type> functor_type;
 public:
 	typedef typename std::result_of<functor_type(typename E1::value_type,typename E2::value_type) >::type value_type;
 	typedef value_type const_reference;
@@ -294,6 +311,11 @@ public:
 	rhs_closure_type const& rhs() const {
 		return m_rhs;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_lhs.queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr>
@@ -388,6 +410,11 @@ public:
 	functor_type const& functor()const{
 		return m_functor;
 	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_lhs.queue();
+	}
+#endif
 
 	// Element access
 	template <class IndexExpr>
