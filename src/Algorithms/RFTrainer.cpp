@@ -272,11 +272,9 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 
 	nodeInfo.leftNodeId  = (nodeId<<1)+1;   nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-	lTree = buildTree(lTables, elements, split.cBelow, nodeInfo.leftNodeId, rng);
-	rTree = buildTree(rTables, elements, split.cAbove, nodeInfo.rightNodeId, rng);
+	lTree = buildTree(lTables, elements, split.cAbove, nodeInfo.leftNodeId, rng);
+	rTree = buildTree(rTables, elements, split.cBelow, nodeInfo.rightNodeId, rng);
 
-//	tree.insert(tree.end(), std::make_move_iterator(lTree.begin()), std::make_move_iterator(lTree.end()));
-//	tree.insert(tree.end(), std::make_move_iterator(rTree.begin()), std::make_move_iterator(rTree.end()));
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
 	std::move(rTree.begin(),rTree.end(),std::back_inserter(tree));
@@ -291,22 +289,22 @@ RFTrainer::Split RFTrainer::findSplit(
 {
 	auto n = tables[0].size();
 	Split best;
+	auto const cEmpty = ClassVector(m_labelCardinality);
 	for (std::size_t attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
-		auto cAbove = cFull;
-		auto cBelow = ClassVector(m_labelCardinality);
-		std::fill(cBelow.begin(),cBelow.end(),0);
+		auto cAbove = cEmpty, cBelow = cFull;
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
 			auto const& label = elements[attributeTable[prev].id].label;
-			// Pass the label down
-			--cAbove[label];    ++cBelow[label];
+
+			// Pass the label
+			++cAbove[label];    --cBelow[label];
 			if(attributeTable[prev].value == attributeTable[i].value) continue;
 
 			// n1/n2 = Number of cases to the left/right of child node
 			std::size_t n1 = i,    n2 = n-i;
 
 			//Calculate the Gini impurity of the split
-			double impurity = n1*gini(cBelow,n1)+n2*gini(cAbove,n2);
+			double impurity = n1*gini(cAbove,n1)+n2*gini(cBelow,n2);
 			if(impurity<best.impurity){
 				//Found a more pure split, store the attribute index and value
 				best.splitAttribute = attributeIndex;
@@ -343,7 +341,7 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 		  std::size_t nodeId, Rng::rng_type& rng){
 
 	//Construct tree
-	TreeType lTree, rTree, tree;
+	TreeType tree;
 	auto n = tables[0].size();
 	// TODO(jwrigley): Why is average assigned to all nodes, when hist is only applied to leaves?
 	tree.push_back(NodeInfo{nodeId,sumFull/n});
@@ -370,11 +368,9 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	nodeInfo.leftNodeId = (nodeId<<1)+1;
 	nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-	lTree = buildTree(lTables, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
-	rTree = buildTree(rTables, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
+	TreeType&& lTree = buildTree(lTables, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
+	TreeType&& rTree = buildTree(rTables, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
 
-//	tree.insert(tree.end(), std::make_move_iterator(lTree.begin()), std::make_move_iterator(lTree.end()));
-//	tree.insert(tree.end(), std::make_move_iterator(rTree.begin()), std::make_move_iterator(rTree.end()));
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
 	std::move(rTree.begin(),rTree.end(),std::back_inserter(tree));
