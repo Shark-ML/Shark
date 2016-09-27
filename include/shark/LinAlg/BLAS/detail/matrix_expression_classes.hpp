@@ -43,14 +43,13 @@ namespace blas {
 template<class E>
 class matrix_scalar_multiply:public blas::matrix_expression<matrix_scalar_multiply<E>, typename E::device_type > {
 private:
-	typedef functors::scalar_multiply1<typename E::value_type> functor_type;
+	typedef typename device_traits<typename E::device_type>:: template multiply_scalar<typename E::value_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
-
-	typedef typename std::result_of<functor_type(typename E::value_type) >::type value_type;
+	typedef typename E::size_type size_type;
+	typedef typename E::value_type value_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
-	typedef typename E::size_type size_type;
 
 	typedef matrix_scalar_multiply const_closure_type;
 	typedef const_closure_type closure_type;
@@ -141,7 +140,7 @@ private:
 template<class E1, class E2>
 class matrix_addition: public blas::matrix_expression<matrix_addition<E1, E2>, typename E1::device_type > {
 private:
-	typedef functors::scalar_binary_plus<typename common_value_type<E1,E2>::type> functor_type;
+	typedef typename device_traits<typename E1::device_type>:: template add<typename E1::value_type> functor_type;
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 public:
@@ -423,7 +422,7 @@ public:
 	typedef typename E::const_closure_type expression_closure_type;
 
 	typedef F functor_type;
-	typedef typename std::result_of<F(typename E::value_type)>::type value_type;
+	typedef typename F::result_type value_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef typename E::size_type size_type;
@@ -528,7 +527,7 @@ public:
 	typedef typename E2::const_closure_type rhs_closure_type;
 
 	typedef typename E1::size_type size_type;
-	typedef typename std::result_of<F(typename E1::value_type, typename E2::value_type)>::type value_type;
+	typedef typename F::result_type value_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
@@ -652,14 +651,15 @@ private:
 
 template<class E1, class E2>
 class outer_product:public matrix_expression<outer_product<E1, E2>, typename E1::device_type > {
-	typedef functors::scalar_multiply1<typename common_value_type<E1,E2>::type> functor_type;
-	typedef functors::scalar_binary_multiply<typename common_value_type<E1,E2>::type> functor_type_op;
+	typedef typename common_value_type<E1,E2>::type common_arg;
+	typedef typename device_traits< typename E1::device_type>:: template multiply_scalar<common_arg> functor_type;
+	typedef typename device_traits< typename E1::device_type>:: template multiply<common_arg> functor_type_op;
 public:
 	typedef typename E1::const_closure_type lhs_closure_type;
 	typedef typename E2::const_closure_type rhs_closure_type;
 
 	
-	typedef decltype(typename E1::value_type() * typename E2::value_type()) value_type;
+	typedef common_arg value_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 	typedef typename E1::size_type size_type;
@@ -1020,7 +1020,7 @@ public:
 	matrix_closure_typeB const& rhs() const {
 		return m_rhs;
 	}
-	#ifdef SHARK_USE_CLBLAS
+#ifdef SHARK_USE_CLBLAS
 	boost::compute::command_queue& queue()const{
 		return m_lhs.queue();
 	}

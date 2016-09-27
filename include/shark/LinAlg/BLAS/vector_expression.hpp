@@ -34,6 +34,63 @@
 
 namespace shark {
 namespace blas {
+	
+///////////////////VECTOR REDUCTION FUNCTORS/////////////////////////
+
+//Functor implementing reduction of the form f(v_n,f(v_{n-1},f(....f(v_0,seed))))
+// we assume for sparse vectors that the following holds:
+// f(0,0) = 0 and f(v,f(0,w))=f(f(v,w),0)
+//second argument to the function is the default value(seed).
+template<class F>
+struct vector_fold{
+	
+	vector_fold(F const& f):m_functor(f){}
+	vector_fold(){}
+	
+	template<class E, class T>
+	T operator()(
+		vector_expression<E, cpu_tag> const& v,
+		T seed
+	) {
+		return apply(v(),seed, typename E::evaluation_category::tag());
+	}
+private:
+	//Dense Case
+	template<class E, class T>
+	T apply(
+		E const& v,
+		T seed,
+		dense_tag
+	) {
+		std::size_t size = v.size();
+		T result = seed;
+		for(std::size_t i = 0; i != size; ++i){
+			result = m_functor(result,v(i));
+		}
+		return result;
+	}
+	//Sparse Case
+	template<class E, class T>
+	T apply(
+		E const& v,
+		T seed,
+		sparse_tag
+	) {
+		typename E::const_iterator iter=v.begin();
+		typename E::const_iterator end=v.end();
+		
+		T result = seed;
+		std::size_t nnz = 0;
+		for(;iter != end;++iter,++nnz){
+			result = m_functor(result,*iter);
+		}
+		//apply final operator f(0,v)
+		if(nnz != v.size())
+			result = m_functor(result,*iter);
+		return result;
+	}
+	F m_functor;
+};
 
 template<class T, class VecV, class Device>
 typename boost::enable_if<

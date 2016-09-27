@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign ){
 
 	//test all 4 combinations
 	{
-		blas::compressed_vector<unsigned int> target_dense(10);
+		blas::vector<unsigned int> target_dense(10);
 		for(std::size_t i = 0; i != 10; ++i){
 			target_dense(i) = 3*i+2;
 		}

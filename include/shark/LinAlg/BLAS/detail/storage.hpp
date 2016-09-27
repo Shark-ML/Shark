@@ -78,7 +78,7 @@ struct dense_matrix_storage{
 	
 	template<class Orientation>
 	row_storage row(std::size_t i, Orientation){
-		return {values + i * Orientation::index_M(leading_dimension,1), Orientation::index_m(leading_dimension,1)};
+		return {values + i * Orientation::index_M(leading_dimension,(std::size_t)1), Orientation::index_m(leading_dimension,(std::size_t)1)};
 	}
 	template<class Orientation>
 	row_storage diag(){

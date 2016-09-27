@@ -1,8 +1,8 @@
 /*!
- * \brief       Kernels for matrix-expression assignments
+ * \brief       Kernels for matrix-expression assignments on the gpu
  * 
  * \author      O. Krause
- * \date        2013
+ * \date        2016
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -25,8 +25,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_LINALG_BLAS_KERNELS_MATRIX_ASSIGN_HPP
-#define SHARK_LINALG_BLAS_KERNELS_MATRIX_ASSIGN_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_ASSIGN_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_ASSIGN_HPP
 
 #include <boost/compute/detail/meta_kernel.hpp>
 
@@ -43,20 +43,20 @@ void matrix_assign(
 	typename M::value_type t, 
 	row_major, dense_tag
 ){
-	typedef M::value_type value_type;
+	typedef typename M::value_type value_type;
 	boost::compute::detail::meta_kernel k("blas_matrix_assign_constant");
 	std::size_t t_index = k.add_arg<value_type>('t');
 	
 	//create source
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
 	auto exprCol=k.expr<cl_uint>("get_global_id(1)");
-	k<< m()(exprRow,exprCol) <<'=' << F(m()(exprRow,exprCol), k.var<value_type>('t'))<<";"
+	k<< m()(exprRow,exprCol) <<'=' << F(m()(exprRow,exprCol), k.var<value_type>('t'))<<";";
 	
-	boost::compute::kernel kernel = k.compile(queue.get_context());
+	boost::compute::kernel kernel = k.compile(m().queue().get_context());
 	//enqueue kernel
-	k.set_arg(t_index, t);
-	std::size_t global_work_size[2] = {rows, cols};
-	m().queue().enqueue_nd_rnge_kernel(kernel, 2,nullptr, global_work_size, nullptr);
+	kernel.set_arg(t_index, t);
+	std::size_t global_work_size[2] = {m().size1(), m().size2()};
+	m().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, nullptr);
 }
 
 
@@ -76,11 +76,11 @@ void matrix_assign_functor(
 	boost::compute::detail::meta_kernel k("blas_matrix_assign_row_row");
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
 	auto exprCol=k.expr<cl_uint>("get_global_id(1)");
-	k<< m()(exprRow,exprCol) <<'=' << f(m()(exprRow,exprCol),e()(exprRow,exprCol))<<";"
+	k<< m()(exprRow,exprCol) <<'=' << f(m()(exprRow,exprCol),e()(exprRow,exprCol))<<";";
 	//enqueue kernel
-	boost::compute::kernel kernel = k.compile(queue.get_context());
-	std::size_t global_work_size[2] = {rows, cols};
-	m().queue().enqueue_nd_rnge_kernel(kernel, 2,nullptr, global_work_size, nullptr);
+	boost::compute::kernel kernel = k.compile(m().queue().get_context());
+	std::size_t global_work_size[2] = {m().size1(), m().size2()};
+	m().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, nullptr);
 }
 
 //dense-dense case row-major, column-major
@@ -91,17 +91,15 @@ void matrix_assign_functor(
 	row_major, column_major,dense_tag, dense_tag
 ) {
 	//Kernel is based on boost/compute/examples/matrix_transpose.cpp
-	typedef M::value_type value_type;
+	typedef typename M::value_type value_type;
 	F f;
 	std::size_t TILE_DIM = 32;
+	char const* options ="-DTILE_DIM = 32";
 	//There are usually not enough parallel worker threads in a local group
 	//to fill a tile. Therefore every parallel threads reads several elements.
 	//BLOCK_COLS are the number of parallel threads reading a column
 	//and must be a divisor of TILE_DIM
 	std::size_t BLOCK_COLS = 8; 
-	//this kernel only works for matrix sizes that are divisable by TILE_DIM
-	SIZE_CHECK(m().size1() % TILE_DIM == 0);
-	SIZE_CHECK(m().size2() % TILE_DIM == 0);
 	
 	
 	//create source
@@ -121,18 +119,18 @@ void matrix_assign_functor(
 	k << '}';
 	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with copying
 	k << "for(uint i = 0 ; i < TILE_DIM ; i += get_local_size(1)){"; // write output from local memory
-	auto target = m()(k.expr<cl_uint>("base_row + get_local_id(0)"), k.expr<cl_uint>("base_col + get_local_id(1)+i"))
-	k << target << " = "f(target, k.expr<cl_uint>("tile[get_local_id(0)][get_local_id(1)+i];");
+	auto target = m()(k.expr<cl_uint>("base_row + get_local_id(0)"), k.expr<cl_uint>("base_col + get_local_id(1)+i"));
+	k << target << " = " <<f(target, k.expr<cl_uint>("tile[get_local_id(0)][get_local_id(1)+i];"));
 	k << '}';
 	
 	//compile kernel
-	char const* options ="-DTILE_DIM = 32";
-	boost::compute::kernel kernel = k.compile(queue.get_context(), options);
+	
+	boost::compute::kernel kernel = k.compile(m().queue().get_context(), options);
 	
 	//enqueue kernel
-	std::size_t global_work_size[2] = {rows, cols * BLOCK_COLS / TILE_DIM};
+	std::size_t global_work_size[2] = {m().size1(), (m().size1()+TILE_DIM-1) * BLOCK_COLS / TILE_DIM};
 	std::size_t local_work_size[2] = {TILE_DIM, BLOCK_COLS};
-	m().queue().enqueue_nd_rnge_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
+	m().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }
 
 /////////////////////////////////////////////////////////////////

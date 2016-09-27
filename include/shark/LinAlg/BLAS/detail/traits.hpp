@@ -37,6 +37,7 @@
 #include "evaluation_tags.hpp"
 #include "structure.hpp"
 #include "storage.hpp"
+#include "functional.hpp"
 #include "../expression_types.hpp"
 
 #include <boost/mpl/eval_if.hpp>
@@ -240,6 +241,18 @@ struct device_traits<cpu_tag>{
 	
 	template<class Closure>
 	using indexed_iterator = shark::blas::iterators::indexed_iterator<Closure>;
+	
+	//functors
+	template<class T>
+	using add = shark::blas::functors::scalar_binary_plus<T>;
+	template<class T>
+	using subtract = shark::blas::functors::scalar_binary_minus<T>;
+	template<class T>
+	using multiply = shark::blas::functors::scalar_binary_multiply<T>;
+	template<class T>
+	using divide = shark::blas::functors::scalar_binary_divide<T>;
+	template<class T>
+	using multiply_scalar = shark::blas::functors::scalar_multiply1<T>;
 };
 
 template<class E1, class E2>
@@ -248,7 +261,6 @@ struct common_value_type
 	typename E1::value_type,
 	typename E2::value_type
 >{};
-
 }}
 
 #endif

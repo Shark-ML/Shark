@@ -72,8 +72,10 @@ shark_add_test( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 
 #BLAS gpu tests
 if(clBLAS_FOUND)
+shark_add_test( LinAlg/BLAS/gpu_vector_assign.cpp BLAS_GPU_Vector_Assign)
 shark_add_test( LinAlg/BLAS/gpu_copy.cpp BLAS_GPU_Copy)
-#marking tests as gpu
+shark_add_test( LinAlg/BLAS/gpu_prod.cpp BLAS_GPU_Prod)
+shark_add_test( LinAlg/BLAS/gpu_triangular_prod.cpp BLAS_GPU_Triangular_Prod)
 endif()
 
 # LinAlg Tests

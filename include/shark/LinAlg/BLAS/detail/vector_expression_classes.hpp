@@ -42,11 +42,11 @@ namespace blas {
 template<class E>
 class vector_scalar_multiply:public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
 private:
-	typedef functors::scalar_multiply1<typename E::value_type> functor_type;
+	typedef typename device_traits<typename E::device_type>:: template multiply_scalar<typename E::value_type> functor_type;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
 	typedef typename E::size_type size_type;
-	typedef typename std::result_of<functor_type(typename E::value_type) >::type value_type;
+	typedef typename E::value_type value_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 
@@ -274,7 +274,7 @@ private:
 template<class E1, class E2>
 class vector_addition: public vector_expression<vector_addition<E1,E2>, typename E1::device_type > {
 private:
-	typedef functors::scalar_binary_plus<typename common_value_type<E1,E2>::type> functor_type;
+	typedef typename device_traits<typename E1::device_type>:: template multiply<typename E1::value_type> functor_type;
 public:
 	typedef typename std::result_of<functor_type(typename E1::value_type,typename E2::value_type) >::type value_type;
 	typedef value_type const_reference;

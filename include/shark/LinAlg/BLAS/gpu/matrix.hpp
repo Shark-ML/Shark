@@ -35,6 +35,24 @@
 #include <boost/compute/iterator/strided_iterator.hpp>
 
 namespace shark {namespace blas { namespace gpu{
+	
+namespace detail{
+template<class Arg1, class Arg2>
+struct induced_matrix_element{
+	typedef std::size_t result_type;
+	Arg1 arg1;
+	Arg2 arg2;
+	std::size_t leading_dimension;
+};
+
+template<class Arg1, class Arg2>
+boost::compute::detail::meta_kernel& operator<< (
+	boost::compute::detail::meta_kernel& k, 
+	induced_matrix_element<Arg1, Arg2> const& e
+){
+	return k<<'('<<e.arg1 <<'*'<<e.leading_dimension<<'+'<< e.arg2<<')';
+}
+}
 
 /// \brief A dense matrix of values of type \c T stored on the gpu
 ///
@@ -49,6 +67,21 @@ namespace shark {namespace blas { namespace gpu{
 /// \tparam L the storage organization. It can be either \c row_major or \c column_major. Default is \c row_major
 template<class T, class L = blas::row_major>
 class matrix: public matrix_container<matrix<T>, gpu_tag > {
+private:
+	template<class IndexExpr1, class IndexExpr2>
+	detail::induced_matrix_element<IndexExpr1, IndexExpr2> make_index(
+		IndexExpr1 const& expr1,IndexExpr2 const& expr2,
+		row_major
+	)const{
+		return {expr1, expr2,orientation::index_m(m_size1,m_size2)};
+	}
+	template<class IndexExpr1, class IndexExpr2>
+	detail::induced_matrix_element<IndexExpr2, IndexExpr1> make_index(
+		IndexExpr1 const& expr1,IndexExpr2 const& expr2,
+		column_major
+	)const{
+		return {expr2, expr1,orientation::index_m(m_size1,m_size2)};
+	}
 public:
 	typedef T value_type;
 	//~ typedef scalar<T> value_type;
@@ -187,6 +220,15 @@ public:
 	const_storage_type raw_storage() const{
 		return {m_storage,0,orientation::index_m(m_size1,m_size2)};
 	}
+	
+	// Element access
+	template <class IndexExpr1, class IndexExpr2>
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(
+		std::declval<boost::compute::vector<T> >().begin()[this->make_index(i,j,orientation())]
+	){
+		return m_storage.begin()[this->make_index(i,j,orientation())];
+	}
+	
 	
 	/// \brief Resize the matrix
 	///
