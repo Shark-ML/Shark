@@ -38,7 +38,9 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Data/DataView.h>
 #include <shark/Models/Trees/RFClassifier.h>
+#include <shark/Algorithms/Trainers/CARTcommon.h>
 
 #include <set>
 
@@ -100,25 +102,16 @@ public:
 	SHARK_EXPORT_SYMBOL void train(RFClassifier& model, RegressionDataset const& dataset);
 
 	/// Set the number of random attributes to investigate at each node.
-	inline SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry)
-	{
-		m_try = mtry;
-	}
+	inline SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry) { m_try = mtry; }
 
 
 	/// Set the number of trees to grow.
-	inline SHARK_EXPORT_SYMBOL void setNTrees(std::size_t nTrees)
-	{
-		m_B = nTrees;
-	}
+	inline SHARK_EXPORT_SYMBOL void setNTrees(std::size_t nTrees) { m_B = nTrees; }
 
 
 	/// Controls when a node is considered pure. If set to 1, a node is pure
 	/// when it only consists of a single node.
-	inline SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nodeSize)
-	{
-		m_nodeSize = nodeSize;
-	}
+	inline SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nodeSize) { m_nodeSize = nodeSize; }
 
 	/// Set the fraction of the original training dataset to use as the
 	/// out of bag sample. The default value is 0.66.
@@ -147,22 +140,10 @@ public:
 	}
 
 protected:
-	struct RFAttribute {
-		double value;
-		std::size_t id;
-		friend bool operator<(RFAttribute const& v, RFAttribute const& w){
-			return v.value < w.value;
-		}
-	};
-
-	/// attribute table
-	typedef std::vector < RFAttribute > AttributeTable;
-	/// collecting of attribute tables
-	typedef std::vector < AttributeTable > AttributeTables;
-
 	/// ClassVector
 	using ClassVector = UIntVector;
 	using LabelVector = std::vector<LabelType>;
+
 	struct Split{
 		std::size_t splitAttribute = 0, splitRow = 0;
 		double splitValue=0;
@@ -182,33 +163,15 @@ protected:
 		}
 	};
 
-	/// Create attribute tables from a data set, and in the process create a count vector (cAbove).
-	/// A dataset with m features results in m attribute tables.
-	/// [attribute | class/value | row id ]
-	template<class Dataset>
-	SHARK_EXPORT_SYMBOL void createAttributeTables(DataView<Dataset const> const& elements, AttributeTables& tables);
-
-	/// Create a count matrix as used in the classification case.
-	SHARK_EXPORT_SYMBOL RFTrainer::ClassVector createCountVector(DataView<ClassificationDataset const> const &elements) const;
-
-	// Split attribute tables into left and right parts.
-	SHARK_EXPORT_SYMBOL void splitAttributeTables(detail::cart::sink<AttributeTables &> tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
-
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::Index&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<AttributeTables&> tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::Index&> tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
 
 
-	/// Generate a histogram from the count vector.
-	SHARK_EXPORT_SYMBOL LabelType hist(ClassVector const& countVector) const;
-
-	/// Calculate the Gini impurity of the countVector
-	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
-
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(AttributeTables const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::Index const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::Index const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
 
 	/// Generate random table indices.
 	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type &rng) const;

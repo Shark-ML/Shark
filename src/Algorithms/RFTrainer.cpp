@@ -34,14 +34,12 @@
 #define SHARK_COMPILE_DLL
 
 #include <shark/Algorithms/Trainers/RFTrainer.h>
-#include <shark/Models/Trees/RFClassifier.h>
-#include <shark/Data/DataView.h>
-#include <set>
 #include <unordered_map>
 #include <shark/Core/OpenMP.h>
 
 using namespace shark;
-using namespace std;
+using std::set;
+using detail::cart::Index;
 
 
 //Constructor
@@ -120,10 +118,9 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
-		AttributeTables tables;
-		createAttributeTables(trainDataView, tables);
+		auto tables = Index{trainDataView};
 
-		auto n_trainData = trainDataView.size();
+		auto n_trainData = tables.size().n_elements;
 		auto labelSum = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
 			return trainDataView[i].label;
 		});
@@ -204,11 +201,10 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
-		AttributeTables tables;
-		createAttributeTables(trainDataView, tables);
-		auto cAbove = createCountVector(trainDataView);
+		auto tables = Index{trainDataView};
+		auto&& cFull = detail::cart::createCountVector(trainDataView,m_labelCardinality);
 
-		TreeType tree = buildTree(tables, trainDataView, cAbove, 0, rng);
+		TreeType tree = buildTree(tables, trainDataView, cFull, 0, rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
@@ -246,7 +242,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 }
 
 TreeType RFTrainer::
-buildTree(detail::cart::sink<AttributeTables&> tables,
+buildTree(detail::cart::sink<Index&> tables,
 		  DataView<ClassificationDataset const> const& elements,
 		  ClassVector& cFull, std::size_t nodeId,
 		  Rng::rng_type& rng){
@@ -257,9 +253,10 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	NodeInfo& nodeInfo = tree[0];
 
 	//n = Total number of cases in the dataset
-	std::size_t n = tables[0].size();
-	if(gini(cFull,n)==0.0 || n <= m_nodeSize) {
-		nodeInfo.label = hist(cFull);
+	std::size_t n = tables.size().n_elements;
+
+	if(detail::cart::gini(cFull,n)==0.0 || n <= m_nodeSize) {
+		nodeInfo.label = detail::cart::hist(cFull);
 		return tree;
 	}
 
@@ -272,18 +269,17 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	if(!split) {
 		// this shouldn't really happen: leaves ought to be cought by previous check
 		// TODO(jwrigley): Why is hist only applied to leaves, when average is applied to all nodes
-		nodeInfo.label = hist(cFull);
+		nodeInfo.label = detail::cart::hist(cFull);
 		return tree;
 	}
 	nodeInfo <<= split;
-	AttributeTables rTables, lTables;
-	splitAttributeTables(tables, split.splitAttribute, split.splitRow, lTables, rTables);
+	auto lrTables = tables.split(split.splitAttribute, split.splitRow);
 	//Continue recursively
 
 	nodeInfo.leftNodeId  = (nodeId<<1)+1;   nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-	lTree = buildTree(lTables, elements, split.cAbove, nodeInfo.leftNodeId, rng);
-	rTree = buildTree(rTables, elements, split.cBelow, nodeInfo.rightNodeId, rng);
+	lTree = buildTree(lrTables.first, elements, split.cAbove, nodeInfo.leftNodeId, rng);
+	rTree = buildTree(lrTables.second, elements, split.cBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
@@ -292,12 +288,12 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 }
 
 RFTrainer::Split RFTrainer::findSplit(
-		RFTrainer::AttributeTables const& tables,
+		Index const& tables,
 		DataView<ClassificationDataset const> const& elements,
 		ClassVector const& cFull,
 		set<size_t> const& tableIndices) const
 {
-	auto n = tables[0].size();
+	auto n = tables.size().n_elements;
 	Split best;
 	auto const cEmpty = ClassVector(m_labelCardinality);
 	for (std::size_t attributeIndex : tableIndices){
@@ -314,7 +310,8 @@ RFTrainer::Split RFTrainer::findSplit(
 			std::size_t n1 = i,    n2 = n-i;
 
 			//Calculate the Gini impurity of the split
-			double impurity = n1*gini(cAbove,n1)+n2*gini(cBelow,n2);
+			double impurity = n1*detail::cart::gini(cAbove,n1)+
+							  n2*detail::cart::gini(cBelow,n2);
 			if(impurity<best.impurity){
 				//Found a more pure split, store the attribute index and value
 				best.splitAttribute = attributeIndex;
@@ -329,30 +326,15 @@ RFTrainer::Split RFTrainer::findSplit(
 	return best;
 }
 
-RFTrainer::LabelType RFTrainer::hist(ClassVector const& countVector) const {
-
-	LabelType histogram(m_labelCardinality,0.0);
-
-	std::size_t totalElements = 0;
-
-	for (std::size_t i = 0, s = countVector.size(); i<s; ++i){
-		histogram(i) = countVector[i];
-		totalElements += countVector[i];
-	}
-	histogram /= totalElements;
-
-	return histogram;
-}
-
 TreeType RFTrainer::
-buildTree(detail::cart::sink<AttributeTables&> tables,
+buildTree(detail::cart::sink<Index&> tables,
 		  DataView<RegressionDataset const> const& elements,
 		  LabelType const& sumFull,
 		  std::size_t nodeId, Rng::rng_type& rng){
 
 	//Construct tree
 	TreeType tree;
-	auto n = tables[0].size();
+	auto n = tables.size().n_elements;
 	// TODO(jwrigley): Why is average assigned to all nodes, when hist is only applied to leaves?
 	tree.push_back(NodeInfo{nodeId,sumFull/n});
 	NodeInfo& nodeInfo = tree[0];
@@ -371,15 +353,14 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 	nodeInfo <<= split;
 
 	//Split the attribute tables
-	AttributeTables rTables, lTables;
-	splitAttributeTables(tables, split.splitAttribute, split.splitRow, lTables, rTables);
+	auto lrTables = tables.split(split.splitAttribute, split.splitRow);
 
 	//Continue recursively
 	nodeInfo.leftNodeId = (nodeId<<1)+1;
 	nodeInfo.rightNodeId = (nodeId<<1)+2;
 
-	TreeType&& lTree = buildTree(lTables, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
-	TreeType&& rTree = buildTree(rTables, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
+	TreeType&& lTree = buildTree(lrTables.first, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
+	TreeType&& rTree = buildTree(lrTables.second, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
@@ -388,12 +369,12 @@ buildTree(detail::cart::sink<AttributeTables&> tables,
 }
 
 RFTrainer::Split RFTrainer::findSplit (
-		RFTrainer::AttributeTables const &tables,
+		Index const& tables,
 		DataView<RegressionDataset const> const &elements,
 		RealVector const& sumFull,
 		set<size_t> const &tableIndices) const
 {
-	auto n = tables[0].size();
+	auto n = tables.size().n_elements;
 	Split best{};
 	LabelType const sumEmpty(m_labelDimension,0);
 	for (std::size_t const attributeIndex : tableIndices){
@@ -425,35 +406,6 @@ RFTrainer::Split RFTrainer::findSplit (
 	return best;
 }
 
-/**
- * Returns two attribute tables: LAttrbuteTables and RAttrbuteTables
- * Calculated from splitting tables at (index, valIndex)
- */
-void RFTrainer::splitAttributeTables(
-		detail::cart::sink<AttributeTables &> tables,
-		std::size_t index, std::size_t valIndex,
-		AttributeTables& LAttributeTables,
-		AttributeTables& RAttributeTables)
-{
-
-	//Build a hash table for fast lookup
-	std::unordered_map<std::size_t, bool> hash;
-	for(std::size_t i = 0, s = tables[index].size(); i<s; ++i) {
-		hash[tables[index][i].id] = (i<=valIndex);
-	}
-
-	for(auto && table : tables) {
-		auto begin = table.begin(), end = table.end();
-		auto middle = std::stable_partition(begin,end,[&hash](RFAttribute const& entry){
-			return hash[entry.id];
-		});
-		RAttributeTables.emplace_back(AttributeTable{middle,end});
-		table.resize(std::distance(begin,middle));
-		LAttributeTables.emplace_back(std::move(table));
-	}
-	tables.clear(); tables.shrink_to_fit();
-}
-
 
 ///Generates a random set of indices
 set<std::size_t> RFTrainer::generateRandomTableIndices(Rng::rng_type &rng) const {
@@ -466,49 +418,4 @@ set<std::size_t> RFTrainer::generateRandomTableIndices(Rng::rng_type &rng) const
 	return tableIndices;
 }
 
-///Calculates the Gini impurity of a node. The impurity is defined as
-///1-sum_j p(j|t)^2
-///i.e the 1 minus the sum of the squared probability of observing class j in node t
-double RFTrainer::gini(ClassVector const& countVector, std::size_t n) const{
-	if(!n) return 1;
-
-	double res = 0.;
-	n *= n;
-	for(auto const& i: countVector){
-		res += sqr(i)/ static_cast<double>(n);
-	}
-	return 1-res;
-}
-
-
-/// Creates the attribute tables, and in the process creates a count vector (cAbove).
-/// A dataset consisting of m input variables has m attribute tables.
-/// [attribute | class/value | rid ]
-template<class Dataset>
-void RFTrainer::createAttributeTables(DataView<Dataset const> const& elements, AttributeTables& tables){
-	std::size_t n_elements = elements.size();
-	//Each entry in the outer vector is an attribute table
-	//For each column
-	for(std::size_t j=0; j<m_inputDimension; j++){
-		tables.push_back(AttributeTable{});
-		auto& table = tables[j];
-		table.reserve(n_elements);
-
-		//For each row, store Attribute value, class and rowId
-		for(std::size_t i=0; i<n_elements; i++){
-			table.push_back(RFAttribute{elements[i].input[j], i});
-		}
-		std::sort(table.begin(), table.end());
-	}
-}
-
-
-RFTrainer::ClassVector RFTrainer::
-createCountVector(DataView<ClassificationDataset const> const& elements) const {
-	ClassVector cAbove = ClassVector(m_labelCardinality);
-	for(std::size_t i = 0, s = elements.size(); i<s; ++i){
-		++cAbove[elements[i].label];
-	}
-	return cAbove;
-}
 
