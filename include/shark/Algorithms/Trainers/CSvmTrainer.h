@@ -142,7 +142,6 @@ public:
 			if (f.basis() == dataset.inputs() && f.kernel() == base_type::m_kernel && f.alpha().size1() == ell && f.alpha().size2() == 1) {
 				// warm start, keep the alphas (possibly clipped)
 				if (this->m_trainOffset) f.offset() = RealVector(1);
-				else f.offset() = RealVector();
 			}
 			else {
 				f.setStructure(base_type::m_kernel, dataset.inputs(), this->m_trainOffset);
