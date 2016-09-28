@@ -280,30 +280,30 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Safe_Div )
 ///////////Vector Reductions///////////
 /////////////////////////////////////////////////////
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_Max )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ float result = 1;
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Max )
+{
+	vector<float> x_cpu(Dimensions); 
+	float result = 1;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = exp(-(i-5.0)*(i-5.0));//max at i = 5
-		//~ result = std::max(result,x_cpu(i));
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(max(x),result,1.e-10);
-//~ }
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_Min )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ float result = -1;
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = exp(-(i-5.0)*(i-5.0));//max at i = 5
+		result = std::max(result,x_cpu(i));
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_CLOSE(max(x),result,1.e-10);
+}
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Min )
+{
+	vector<float> x_cpu(Dimensions); 
+	float result = -1;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = -std::exp(-(i-5.0)*(i-5.0));//min at i = 5
-		//~ result = std::min(result,x_cpu(i));
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(min(x),result,1.e-10);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = -std::exp(-(i-5.0)*(i-5.0));//min at i = 5
+		result = std::min(result,x_cpu(i));
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_CLOSE(min(x),result,1.e-10);
+}
 
 //~ BOOST_AUTO_TEST_CASE( BLAS_Vector_Arg_Max )
 //~ {
@@ -329,67 +329,67 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Safe_Div )
 	//~ BOOST_CHECK_EQUAL(arg_min(x),result);
 //~ }
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_Sum )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ float result = 0;
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Sum )
+{
+	vector<float> x_cpu(Dimensions); 
+	float result = 0;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = 2*i-5;
-		//~ result +=x_cpu(i);
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(sum(x),result,1.e-10);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = 2*i-5;
+		result +=x_cpu(i);
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_CLOSE(sum(x),result,1.e-10);
+}
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_1 )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ float result = 0;
+BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_1 )
+{
+	vector<float> x_cpu(Dimensions); 
+	float result = 0;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = 2*i-5;
-		//~ result +=std::abs(x_cpu(i));
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(norm_1(x),result,1.e-10);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = 2*i-5;
+		result +=std::abs(x_cpu(i));
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_CLOSE(norm_1(x),result,1.e-10);
+}
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_sqr )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ float result = 0;
+BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_sqr )
+{
+	vector<float> x_cpu(Dimensions); 
+	float result = 0;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = 2*i-5;
-		//~ result +=x_cpu(i)*x_cpu(i);
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(norm_sqr(x),result,1.e-10);
-//~ }
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_2 )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ float result = 0;
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = 2*i-5;
+		result +=x_cpu(i)*x_cpu(i);
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_CLOSE(norm_sqr(x),result,1.e-10);
+}
+BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_2 )
+{
+	vector<float> x_cpu(Dimensions); 
+	float result = 0;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = 2*i-5;
-		//~ result +=x_cpu(i)*x_cpu(i);
-	//~ }
-	//~ result = std::sqrt(result);
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(norm_2(x),result,1.e-10);
-//~ }
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_inf )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = exp(-(i-5.0)*(i-5.0));
-	//~ }
-	//~ x(8)=-2;
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_EQUAL(norm_inf(x),2.0);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = 2*i-5;
+		result +=x_cpu(i)*x_cpu(i);
+	}
+	result = std::sqrt(result);
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_CLOSE(norm_2(x),result,1.e-10);
+}
+BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_inf )
+{
+	vector<float> x_cpu(Dimensions); 
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = exp(-(i-5.0)*(i-5.0));
+	}
+	x_cpu(8)=-2;
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_EQUAL(norm_inf(x),2.0);
+}
 //~ BOOST_AUTO_TEST_CASE( BLAS_Vector_index_norm_inf )
 //~ {
 	//~ vector<float> x_cpu(Dimensions); 
@@ -397,23 +397,24 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Safe_Div )
 	//~ for (size_t i = 0; i < Dimensions; i++){
 		//~ x_cpu(i) = exp(-(i-5.0)*(i-5.0));
 	//~ }
-	//~ x(8)=-2;
+	//~ x_cpu(8)=-2;
 	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
 	//~ BOOST_CHECK_EQUAL(index_norm_inf(x),8);
 //~ }
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_inner_prod )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ vector<float> y_cpu(Dimensions); 
+BOOST_AUTO_TEST_CASE( BLAS_Vector_inner_prod )
+{
+	vector<float> x_cpu(Dimensions); 
+	vector<float> y_cpu(Dimensions); 
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = exp(-(i-5.0)*(i-5.0));
-		//~ y_cpu(i) = exp((i-5.0)*(i-5.0));
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_CLOSE(inner_prod(x,y),(float)Dimensions,1.e-5);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = exp(-(i-5.0)*(i-5.0));
+		y_cpu(i) = exp((i-5.0)*(i-5.0));
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	gpu::vector<float> y = gpu::copy_to_gpu(y_cpu);
+	BOOST_CHECK_CLOSE(inner_prod(x,y),(float)Dimensions,1.e-5);
+}
 
 
 BOOST_AUTO_TEST_SUITE_END()

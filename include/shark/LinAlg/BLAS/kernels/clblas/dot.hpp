@@ -45,7 +45,7 @@ void dot(
 	dense_tag,
 	dense_tag
 ){
-	result = boost::compute::inner_product(x().begin(),x.end(),y.begin(), VectorX::value_type(0), x.queue());
+	result = boost::compute::inner_product(x().begin(),x().end(),y().begin(), typename VectorX::value_type(0), x().queue());
 }
 
 }
@@ -59,7 +59,7 @@ void dot(
 ){
 	SIZE_CHECK(x().size() == y().size());
 
-	bindings::dot(x,y,typename VectorX::evaluation_category::tag());
+	bindings::dot(x,y, result, typename VectorX::evaluation_category::tag(), typename VectorY::evaluation_category::tag());
 }
 
 }}}

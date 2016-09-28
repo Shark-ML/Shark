@@ -30,67 +30,11 @@
 
 #include "detail/expression_optimizers.hpp"
 #include "kernels/dot.hpp"
+#include "kernels/vector_fold.hpp"
 #include <boost/utility/enable_if.hpp>
 
 namespace shark {
 namespace blas {
-	
-///////////////////VECTOR REDUCTION FUNCTORS/////////////////////////
-
-//Functor implementing reduction of the form f(v_n,f(v_{n-1},f(....f(v_0,seed))))
-// we assume for sparse vectors that the following holds:
-// f(0,0) = 0 and f(v,f(0,w))=f(f(v,w),0)
-//second argument to the function is the default value(seed).
-template<class F>
-struct vector_fold{
-	
-	vector_fold(F const& f):m_functor(f){}
-	vector_fold(){}
-	
-	template<class E, class T>
-	T operator()(
-		vector_expression<E, cpu_tag> const& v,
-		T seed
-	) {
-		return apply(v(),seed, typename E::evaluation_category::tag());
-	}
-private:
-	//Dense Case
-	template<class E, class T>
-	T apply(
-		E const& v,
-		T seed,
-		dense_tag
-	) {
-		std::size_t size = v.size();
-		T result = seed;
-		for(std::size_t i = 0; i != size; ++i){
-			result = m_functor(result,v(i));
-		}
-		return result;
-	}
-	//Sparse Case
-	template<class E, class T>
-	T apply(
-		E const& v,
-		T seed,
-		sparse_tag
-	) {
-		typename E::const_iterator iter=v.begin();
-		typename E::const_iterator end=v.end();
-		
-		T result = seed;
-		std::size_t nnz = 0;
-		for(;iter != end;++iter,++nnz){
-			result = m_functor(result,*iter);
-		}
-		//apply final operator f(0,v)
-		if(nnz != v.size())
-			result = m_functor(result,*iter);
-		return result;
-	}
-	F m_functor;
-};
 
 template<class T, class VecV, class Device>
 typename boost::enable_if<
@@ -295,8 +239,9 @@ template<class VecV, class Device>
 typename VecV::value_type
 sum(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
-	vector_fold<functors::scalar_binary_plus<typename VecV::value_type> > kernel;
-	return kernel(eval_block(v),value_type());
+	typedef typename device_traits<Device>:: template add<value_type> functor_type;
+	auto const& elem_result = eval_block(v);
+	return kernels::vector_fold<functor_type>(elem_result,value_type(0));
 }
 
 /// \brief max v = max_i v_i
@@ -304,9 +249,9 @@ template<class VecV, class Device>
 typename VecV::value_type
 max(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
-	vector_fold<functors::scalar_binary_max<typename VecV::value_type> > kernel;
+	typedef typename device_traits<Device>:: template max<value_type> functor_type;
 	auto const& elem_result = eval_block(v);
-	return kernel(elem_result,elem_result(0));
+	return kernels::vector_fold<functor_type>(elem_result,-std::numeric_limits<value_type>::lowest());
 }
 
 /// \brief min v = min_i v_i
@@ -314,9 +259,9 @@ template<class VecV, class Device>
 typename VecV::value_type
 min(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
-	vector_fold<functors::scalar_binary_min<typename VecV::value_type> > kernel;
+	typedef typename device_traits<Device>:: template min<value_type> functor_type;
 	auto const& elem_result = eval_block(v);
-	return kernel(elem_result,elem_result(0));
+	return kernels::vector_fold<functor_type>(elem_result,std::numeric_limits<value_type>::max());
 }
 
 /// \brief arg_max v = arg max_i v_i
