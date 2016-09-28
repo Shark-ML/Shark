@@ -37,6 +37,9 @@
 #include "../detail/functional.hpp"
 #include <boost/compute/core.hpp>
 #include <boost/compute/functional/operator.hpp>
+#include <boost/compute/iterator/zip_iterator.hpp>
+#include <boost/compute/iterator/constant_iterator.hpp>
+#include <boost/compute/iterator/transform_iterator.hpp>
 #include <tuple>
 
 namespace shark{namespace blas{namespace gpu{
@@ -78,8 +81,6 @@ struct dense_matrix_storage{
 	}
 };
 
-}
-
 
 namespace detail{
 template<class Arg1, class T>
@@ -117,6 +118,7 @@ struct invoked_safe_div{
 	typedef T result_type;
 	Arg1 arg1;
 	Arg2 arg2;
+	T default_value;
 };
 
 
@@ -143,9 +145,30 @@ boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_ker
 
 template<class Arg1, class Arg2, class T>
 boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_safe_div<Arg1,Arg2,T> const& e){
-	return k << "(("<<e.arg2<<"!=0)?"<<e.arg1/e.arg2<<':'<<e.default_value<<')';
+	return k << "(("<<e.arg2<<"!=0)?"<<e.arg1<<'/'<<e.arg2<<':'<<e.default_value<<')';
 }
+
+
+template<class Iterator1, class Iterator2, class Functor>
+struct binary_transform_iterator
+: public boost::compute::transform_iterator<
+	boost::compute::zip_iterator<boost::tuple<Iterator1, Iterator2> >,
+	boost::compute::detail::unpacked<Functor>
+>{
+	typedef boost::compute::transform_iterator<
+		boost::compute::zip_iterator<boost::tuple<Iterator1, Iterator2> >,
+		boost::compute::detail::unpacked<Functor>
+	> self_type;
+	binary_transform_iterator(){}
+	binary_transform_iterator(
+		Functor const& f,
+		Iterator1 const& iter1, Iterator1 const& iter1_end,
+		Iterator2 const& iter2, Iterator2 const& iter2_end
+	): self_type(boost::compute::make_zip_iterator(boost::make_tuple(iter1,iter2)), boost::compute::detail::unpack(f)){}
+};
+
 }//End namespace detail
+}//End namespace gpu
 
 template<>
 struct device_traits<gpu_tag>{
@@ -155,11 +178,12 @@ struct device_traits<gpu_tag>{
 	//~ template <class Iterator>
 	//~ using subrange_iterator = shark::blas::iterators::subrange_iterator<Iterator>;
 	
-	//~ template<class Iterator1, class Iterator2, class Functor>
-	//~ using binary_transform_iterator = shark::blas::iterators::binary_transform_iterator<Iterator1,Iterator2, Functor>;
+	//TODO: this is going to cause pain...
+	template<class Iterator1, class Iterator2, class Functor>
+	using binary_transform_iterator = shark::blas::gpu::detail::binary_transform_iterator<Iterator1, Iterator2, Functor>;
 	
-	//~ template<class T>
-	//~ using constant_iterator = shark::blas::iterators::constant_iterator<T>;
+	template<class T>
+	using constant_iterator = boost::compute::constant_iterator<T>;
 	
 	//~ template<class T>
 	//~ using one_hot_iterator = shark::blas::iterators::one_hot_iterator<T>;
@@ -186,9 +210,9 @@ struct device_traits<gpu_tag>{
 		safe_divide(T default_value) : boost::compute::function<T (T, T)>("safe_divide"), default_value(default_value) { }
 		
 		template<class Arg1, class Arg2>
-		detail::invoked_safe_div<Arg1,Arg2, T> operator()(const Arg1 &x, const Arg2& y) const
+		gpu::detail::invoked_safe_div<Arg1,Arg2, T> operator()(const Arg1 &x, const Arg2& y) const
 		{
-			return {x,y};
+			return {x,y,default_value};
 		}
 		T default_value;
 	};
@@ -198,7 +222,7 @@ struct device_traits<gpu_tag>{
 		multiply_scalar(T scalar) : boost::compute::function<T (T)>("multiply_scalar"), m_scalar(scalar) { }
 		
 		template<class Arg1>
-		detail::invoked_multiply_scalar<Arg1,T> operator()(const Arg1 &x) const
+		gpu::detail::invoked_multiply_scalar<Arg1,T> operator()(const Arg1 &x) const
 		{
 			return {x, m_scalar};
 		}
@@ -224,7 +248,7 @@ struct device_traits<gpu_tag>{
 		sqr() : boost::compute::function<T (T)>("sqr") { }
 		
 		template<class Arg1>
-		detail::invoked_sqr<Arg1,T> operator()(const Arg1 &x) const
+		gpu::detail::invoked_sqr<Arg1,T> operator()(const Arg1 &x) const
 		{
 			return {x};
 		}
@@ -235,7 +259,7 @@ struct device_traits<gpu_tag>{
 		soft_plus() : boost::compute::function<T (T)>("soft_plus") { }
 		
 		template<class Arg1>
-		detail::invoked_soft_plus<Arg1,T> operator()(const Arg1 &x) const
+		gpu::detail::invoked_soft_plus<Arg1,T> operator()(const Arg1 &x) const
 		{
 			return {x};
 		}
@@ -246,7 +270,7 @@ struct device_traits<gpu_tag>{
 		sigmoid() : boost::compute::function<T (T)>("sigmoid") { }
 		
 		template<class Arg1>
-		detail::invoked_sigmoid<Arg1,T> operator()(const Arg1 &x) const
+		gpu::detail::invoked_sigmoid<Arg1,T> operator()(const Arg1 &x) const
 		{
 			return {x};
 		}
@@ -257,7 +281,7 @@ struct device_traits<gpu_tag>{
 		inv() : boost::compute::function<T (T)>("inv") { }
 		
 		template<class Arg1>
-		detail::invoked_inv<Arg1,T> operator()(const Arg1 &x) const
+		gpu::detail::invoked_inv<Arg1,T> operator()(const Arg1 &x) const
 		{
 			return {x};
 		}
@@ -274,6 +298,11 @@ struct device_traits<gpu_tag>{
 	
 };
 
+}}
+
+namespace boost{namespace compute{
+template<class I1, class I2, class F>
+struct is_device_iterator<shark::blas::gpu::detail::binary_transform_iterator<I1,I2, F> > : boost::true_type {};
 }}
 
 #endif

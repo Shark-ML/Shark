@@ -41,16 +41,16 @@ template<class F, class M>
 void matrix_assign(
 	matrix_expression<M, gpu_tag> &m, 
 	typename M::value_type t, 
-	row_major, dense_tag
+	row_major
 ){
 	typedef typename M::value_type value_type;
 	boost::compute::detail::meta_kernel k("blas_matrix_assign_constant");
-	std::size_t t_index = k.add_arg<value_type>('t');
+	std::size_t t_index = k.add_arg<value_type>("t");
 	
 	//create source
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
 	auto exprCol=k.expr<cl_uint>("get_global_id(1)");
-	k<< m()(exprRow,exprCol) <<'=' << F(m()(exprRow,exprCol), k.var<value_type>('t'))<<";";
+	k<< m()(exprRow,exprCol) <<'=' << F()(m()(exprRow,exprCol), k.var<value_type>("t"))<<";";
 	
 	boost::compute::kernel kernel = k.compile(m().queue().get_context());
 	//enqueue kernel
@@ -76,7 +76,7 @@ void matrix_assign_functor(
 	boost::compute::detail::meta_kernel k("blas_matrix_assign_row_row");
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
 	auto exprCol=k.expr<cl_uint>("get_global_id(1)");
-	k<< m()(exprRow,exprCol) <<'=' << f(m()(exprRow,exprCol),e()(exprRow,exprCol))<<";";
+	k<< m()(exprRow,exprCol) << '=' << f(m()(exprRow,exprCol),e()(exprRow,exprCol))<<";";
 	//enqueue kernel
 	boost::compute::kernel kernel = k.compile(m().queue().get_context());
 	std::size_t global_work_size[2] = {m().size1(), m().size2()};
@@ -112,13 +112,19 @@ void matrix_assign_functor(
 	k << "uint base_row = get_group_id(0) * TILE_DIM;";
 	k << "uint base_col = get_group_id(1) * TILE_DIM;";
 	//copy indices, into local memory, note the change of direction
-	k << "for(uint i = 0 ; i < TILE_DIM; i += get_local_size(1)){";
+	//also note that if we are on the boundary, the tile
+	// might be largerthan the amount of values to read
+	k << "uint maxDim1 = min(size1-base_row,TILE_DIM);";
+	k << "uint maxDim2 = min(size2-base_col,TILE_DIM);";
+	k << "for(uint i = 0 ; i < maxDim1 && get_local_id(0) < maxDim2; i += get_local_size(1)){";
 	auto row_exp = k.expr<cl_uint>("base_row+get_local_id(1)+i");
-	auto col_exp = k.expr<cl_uint>("base_row+get_local_id(1)+i");
+	auto col_exp = k.expr<cl_uint>("base_col+get_local_id(0)");
 	k << "    tile[get_local_id(1)+i][get_local_id(0)] =" << e()(row_exp, col_exp)<<';';
 	k << '}';
 	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with copying
-	k << "for(uint i = 0 ; i < TILE_DIM ; i += get_local_size(1)){"; // write output from local memory
+	// write output from local memory, again be sure that 
+	// we do not write outside the feasible area
+	k << "for(uint i = 0 ; i < maxDim2 && get_local_id(1) < maxDim0; i += get_local_size(1)){"; 
 	auto target = m()(k.expr<cl_uint>("base_row + get_local_id(0)"), k.expr<cl_uint>("base_col + get_local_id(1)+i"));
 	k << target << " = " <<f(target, k.expr<cl_uint>("tile[get_local_id(0)][get_local_id(1)+i];"));
 	k << '}';

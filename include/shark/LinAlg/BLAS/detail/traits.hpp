@@ -252,7 +252,51 @@ struct device_traits<cpu_tag>{
 	template<class T>
 	using divide = shark::blas::functors::scalar_binary_divide<T>;
 	template<class T>
+	using pow = shark::blas::functors::scalar_binary_pow<T>;
+	template<class T>
 	using multiply_scalar = shark::blas::functors::scalar_multiply1<T>;
+	template<class T>
+	using safe_divide = shark::blas::functors::scalar_binary_safe_divide<T>;
+	
+	//math unary functions
+	template<class T>
+	using log = shark::blas::functors::scalar_log<T>;
+	template<class T>
+	using exp = shark::blas::functors::scalar_exp<T>;
+	template<class T>
+	using tanh = shark::blas::functors::scalar_tanh<T>;
+	template<class T>
+	using sqrt = shark::blas::functors::scalar_sqrt<T>;
+	template<class T>
+	using abs = shark::blas::functors::scalar_abs<T>;
+	template<class T>
+	using sqr = shark::blas::functors::scalar_sqr<T>;
+	template<class T>
+	using soft_plus = shark::blas::functors::scalar_soft_plus<T>;
+	template<class T>
+	using sigmoid = shark::blas::functors::scalar_sigmoid<T>;
+	template<class T>
+	using inv = shark::blas::functors::scalar_inverse<T>;
+	
+	//min/max
+	template<class T>
+	using min = shark::blas::functors::scalar_binary_min<T>;
+	template<class T>
+	using max = shark::blas::functors::scalar_binary_max<T>;
+	
+	//comparison
+	template<class T>
+	using less = shark::blas::functors::scalar_less_than<T>;
+	template<class T>
+	using less_equal = shark::blas::functors::scalar_less_equal_than<T>;
+	template<class T>
+	using bigger = shark::blas::functors::scalar_bigger_than<T>;
+	template<class T>
+	using bigger_equal = shark::blas::functors::scalar_bigger_equal_than<T>;
+	template<class T>
+	using equal = shark::blas::functors::scalar_equal<T>;
+	template<class T>
+	using not_equal = shark::blas::functors::scalar_not_equal<T>;
 };
 
 template<class E1, class E2>

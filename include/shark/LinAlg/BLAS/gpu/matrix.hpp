@@ -310,11 +310,11 @@ public:
 	
 	
 private:
-	size_type stride1() const {
-		return orientation::stride1(m_size1, m_size2);
+	std::ptrdiff_t stride1() const {
+		return (std::ptrdiff_t) orientation::stride1(m_size1, m_size2);
 	}
-	size_type stride2() const {
-		return orientation::stride2(m_size1, m_size2);
+	std::ptrdiff_t stride2() const {
+		return (std::ptrdiff_t) orientation::stride2(m_size1, m_size2);
 	}
 	
 	boost::compute::vector<T> m_storage;

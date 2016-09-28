@@ -191,7 +191,7 @@ namespace detail{
 		Result& result
 	){
 		typedef typename Result::value_type value_type;
-		scalar_vector< value_type > one(op2.size(),static_cast<value_type>(1.0));
+		scalar_vector< value_type, cpu_tag > one(op2.size(),static_cast<value_type>(1.0));
 		for(std::size_t i = 0; i != operands.size1(); ++i){
 			result(i) = diagonalMahalanobisDistanceSqr(
 				row(operands,i),op2,one,
@@ -309,7 +309,7 @@ typename VectorT::value_type distanceSqr(
 ){
 	SIZE_CHECK(op1().size()==op2().size());
 	typedef typename VectorT::value_type value_type;
-	scalar_vector< value_type > one(op1().size(),static_cast<value_type>(1.0));
+	scalar_vector< value_type, cpu_tag > one(op1().size(),static_cast<value_type>(1.0));
 	return diagonalMahalanobisDistanceSqr(op1,op2,one);
 }
 

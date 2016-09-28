@@ -342,8 +342,8 @@ private:
 /// \brief A matrix with all values of type \c T equal to the same value
 ///
 /// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
-template<class T>
-class scalar_matrix:public matrix_container<scalar_matrix<T>, cpu_tag > {
+template<class T, class Device>
+class scalar_matrix:public matrix_container<scalar_matrix<T, Device>, Device > {
 public:
 	typedef std::size_t size_type;
 	typedef T value_type;
@@ -385,8 +385,8 @@ public:
 	}
 	
 	//Iterators
-	typedef typename device_traits<cpu_tag>:: template constant_iterator<value_type> const_row_iterator;
-	typedef typename device_traits<cpu_tag>:: template constant_iterator<value_type> const_column_iterator;
+	typedef typename device_traits<Device>:: template constant_iterator<value_type> const_row_iterator;
+	typedef typename device_traits<Device>:: template constant_iterator<value_type> const_column_iterator;
 	typedef const_row_iterator row_iterator;
 	typedef const_column_iterator column_iterator;
 

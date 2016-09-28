@@ -122,27 +122,28 @@ vector_scalar_multiply<VecV> operator-(vector_expression<VecV, Device> const& v)
 ///@param scalar the value which is repeated
 ///@param elements the size of the resulting vector
 template<class T>
-typename boost::enable_if<std::is_arithmetic<T>, scalar_vector<T> >::type
+typename boost::enable_if<std::is_arithmetic<T>, scalar_vector<T, cpu_tag> >::type
 repeat(T scalar, std::size_t elements){
-	return scalar_vector<T>(elements,scalar);
+	return scalar_vector<T, cpu_tag>(elements,scalar);
 }
 
 
 #define SHARK_UNARY_VECTOR_TRANSFORMATION(name, F)\
 template<class VecV, class Device>\
-vector_unary<VecV,F<typename VecV::value_type> >\
+vector_unary<VecV,typename device_traits<Device>:: template F<typename VecV::value_type> >\
 name(vector_expression<VecV, Device> const& v){\
-	return vector_unary<VecV, F<typename VecV::value_type> >(v(), F<typename VecV::value_type>());\
+	typedef typename device_traits<Device>:: template F<typename VecV::value_type> functor_type;\
+	return vector_unary<VecV, functor_type >(v(), functor_type());\
 }
-SHARK_UNARY_VECTOR_TRANSFORMATION(abs, functors::scalar_abs)
-SHARK_UNARY_VECTOR_TRANSFORMATION(log, functors::scalar_log)
-SHARK_UNARY_VECTOR_TRANSFORMATION(exp, functors::scalar_exp)
-SHARK_UNARY_VECTOR_TRANSFORMATION(tanh,functors::scalar_tanh)
-SHARK_UNARY_VECTOR_TRANSFORMATION(sqr, functors::scalar_sqr)
-SHARK_UNARY_VECTOR_TRANSFORMATION(sqrt, functors::scalar_sqrt)
-SHARK_UNARY_VECTOR_TRANSFORMATION(sigmoid, functors::scalar_sigmoid)
-SHARK_UNARY_VECTOR_TRANSFORMATION(softPlus, functors::scalar_soft_plus)
-SHARK_UNARY_VECTOR_TRANSFORMATION(elem_inv, functors::scalar_inverse)
+SHARK_UNARY_VECTOR_TRANSFORMATION(abs, abs)
+SHARK_UNARY_VECTOR_TRANSFORMATION(log, log)
+SHARK_UNARY_VECTOR_TRANSFORMATION(exp, exp)
+SHARK_UNARY_VECTOR_TRANSFORMATION(tanh,tanh)
+SHARK_UNARY_VECTOR_TRANSFORMATION(sqr, sqr)
+SHARK_UNARY_VECTOR_TRANSFORMATION(sqrt, sqrt)
+SHARK_UNARY_VECTOR_TRANSFORMATION(sigmoid, sigmoid)
+SHARK_UNARY_VECTOR_TRANSFORMATION(softPlus, soft_plus)
+SHARK_UNARY_VECTOR_TRANSFORMATION(elem_inv, inv)
 #undef SHARK_UNARY_VECTOR_TRANSFORMATION
 
 ///\brief Adds two vectors
@@ -168,64 +169,66 @@ vector_addition<VecV1, vector_scalar_multiply<VecV2> > operator- (
 template<class VecV, class T, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type>, 
-	vector_addition<VecV, scalar_vector<T> >
+	vector_addition<VecV, scalar_vector<T, Device> >
 >::type operator+ (
 	vector_expression<VecV, Device> const& v,
 	T t
 ){
-	return v + scalar_vector<T>(v().size(),t);
+	return v + scalar_vector<T, Device>(v().size(),t);
 }
 
 ///\brief Adds a vector plus a scalar which is interpreted as a constant vector
 template<class T, class VecV, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type>,
-	vector_addition<VecV, scalar_vector<T> >
+	vector_addition<VecV, scalar_vector<T, Device> >
 >::type operator+ (
 	T t,
 	vector_expression<VecV, Device> const& v
 ){
-	return v + scalar_vector<T>(v().size(),t);
+	return v + scalar_vector<T, Device>(v().size(),t);
 }
 
 ///\brief Subtracts a scalar which is interpreted as a constant vector.
 template<class VecV, class T, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type> ,
-	vector_addition<VecV, vector_scalar_multiply<scalar_vector<T> > >
+	vector_addition<VecV, vector_scalar_multiply<scalar_vector<T, Device> > >
 >::type operator- (
 	vector_expression<VecV, Device> const& v,
 	T t
 ){
-	return v - scalar_vector<T>(v().size(),t);
+	return v - scalar_vector<T, Device>(v().size(),t);
 }
 
 ///\brief Subtracts a vector from a scalar which is interpreted as a constant vector
 template<class VecV, class T, class Device>
 typename boost::enable_if<
 	std::is_convertible<T, typename VecV::value_type>,
-	vector_addition<scalar_vector<T>, vector_scalar_multiply<VecV> >
+	vector_addition<scalar_vector<T, Device>, vector_scalar_multiply<VecV> >
 >::type operator- (
 	T t,
 	vector_expression<VecV, Device> const& v
 ){
-	return scalar_vector<T>(v().size(),t) - v;
+	return scalar_vector<T, Device>(v().size(),t) - v;
 }
 
 #define SHARK_BINARY_VECTOR_EXPRESSION(name, F)\
 template<class VecV1, class VecV2, class Device>\
-vector_binary<VecV1, VecV2, F<typename common_value_type<VecV1,VecV2>::type> >\
+vector_binary<VecV1, VecV2, typename device_traits<Device>:: template F<typename common_value_type<VecV1,VecV2>::type> >\
 name(vector_expression<VecV1, Device> const& v1, vector_expression<VecV2, Device> const& v2){\
 	SIZE_CHECK(v1().size() == v2().size());\
 	typedef typename common_value_type<VecV1,VecV2>::type type;\
-	return vector_binary<VecV1, VecV2, F<type> >(v1(),v2(), F<type>());\
+	typedef typename device_traits<Device>:: template F<type> functor_type;\
+	return vector_binary<VecV1, VecV2, functor_type >(v1(),v2(), functor_type());\
 }
-SHARK_BINARY_VECTOR_EXPRESSION(operator*, functors::scalar_binary_multiply)
-SHARK_BINARY_VECTOR_EXPRESSION(element_prod, functors::scalar_binary_multiply)
-SHARK_BINARY_VECTOR_EXPRESSION(operator/, functors::scalar_binary_divide)
-SHARK_BINARY_VECTOR_EXPRESSION(element_div, functors::scalar_binary_divide)
-SHARK_BINARY_VECTOR_EXPRESSION(min, functors::scalar_binary_min)
-SHARK_BINARY_VECTOR_EXPRESSION(max, functors::scalar_binary_max)
+SHARK_BINARY_VECTOR_EXPRESSION(operator*, multiply)
+SHARK_BINARY_VECTOR_EXPRESSION(element_prod, multiply)
+SHARK_BINARY_VECTOR_EXPRESSION(operator/, divide)
+SHARK_BINARY_VECTOR_EXPRESSION(element_div, divide)
+SHARK_BINARY_VECTOR_EXPRESSION(pow, pow)
+SHARK_BINARY_VECTOR_EXPRESSION(min, min)
+SHARK_BINARY_VECTOR_EXPRESSION(max, max)
 #undef SHARK_BINARY_VECTOR_EXPRESSION
 
 
@@ -234,22 +237,23 @@ SHARK_BINARY_VECTOR_EXPRESSION(max, functors::scalar_binary_max)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-        vector_binary<VecV, scalar_vector<T>, F<typename std::common_type<typename VecV::value_type,T>::type> > \
+        vector_binary<VecV, scalar_vector<T, Device>, typename device_traits<Device>:: template F<typename std::common_type<typename VecV::value_type,T>::type> > \
 >::type \
 name (vector_expression<VecV, Device> const& v, T t){ \
 	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
-	return  vector_binary<VecV, scalar_vector<T>, F<type> >(v(), scalar_vector<T>(v().size(),t) ,F<type>()); \
+	typedef typename device_traits<Device>:: template F<type> functor_type;\
+	return  vector_binary<VecV, scalar_vector<T, Device>, functor_type >(v(), scalar_vector<T, Device>(v().size(),t), functor_type()); \
 }
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, functors::scalar_binary_divide)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, functors::scalar_less_than)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<=, functors::scalar_less_equal_than)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>, functors::scalar_bigger_than)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>=, functors::scalar_bigger_equal_than)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator==, functors::scalar_equal)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(operator!=, functors::scalar_not_equal)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(min, functors::scalar_binary_min)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(max, functors::scalar_binary_max)
-SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, functors::scalar_binary_pow)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, divide)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, less_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<=, less_equal_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>, bigger_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator>=, bigger_equal_than)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator==, equal)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(operator!=, not_equal)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(min, min)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(max, max)
+SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, pow)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION
 
 // operations of the form op(t,v)[i] = op(t,v[i])
@@ -257,19 +261,20 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, functors::scalar_binary_pow)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-         vector_binary<scalar_vector<T>, VecV, F<typename std::common_type<typename VecV::value_type,T>::type> > \
+         vector_binary<scalar_vector<T, Device>, VecV, typename device_traits<Device>:: template F<typename std::common_type<typename VecV::value_type,T>::type> > \
 >::type \
 name (T t, vector_expression<VecV, Device> const& v){ \
 	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
-	return  vector_binary<scalar_vector<T>, VecV, F<type> >(scalar_vector<T>(v().size(),t), v() ,F<type>()); \
+	typedef typename device_traits<Device>:: template F<type> functor_type;\
+	return  vector_binary<scalar_vector<T, Device>, VecV, functor_type >(scalar_vector<T, Device>(v().size(),t), v() ,functor_type()); \
 }
-SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, functors::scalar_binary_min)
-SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, functors::scalar_binary_max)
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(min, min)
+SHARK_VECTOR_SCALAR_TRANSFORMATION_2(max, max)
 #undef SHARK_VECTOR_SCALAR_TRANSFORMATION_2
 
 template<class VecV1, class VecV2, class Device>
 vector_binary<VecV1, VecV2, 
-	functors::scalar_binary_safe_divide<typename common_value_type<VecV1,VecV2>::type > 
+	typename device_traits<Device>:: template safe_divide<typename common_value_type<VecV1,VecV2>::type > 
 >
 safe_div(
 	vector_expression<VecV1, Device> const& v1, 
@@ -279,7 +284,7 @@ safe_div(
 	SIZE_CHECK(v1().size() == v2().size());
 	typedef typename common_value_type<VecV1,VecV2>::type result_type;
 	
-	typedef functors::scalar_binary_safe_divide<result_type> functor_type;
+	typedef typename device_traits<Device>:: template safe_divide<result_type> functor_type;
 	return vector_binary<VecV1, VecV2, functor_type>(v1(),v2(), functor_type(defaultValue));
 }
 

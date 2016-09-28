@@ -123,8 +123,8 @@ private:
 };
 
 /// \brief Vector expression representing a constant valued vector.
-template<class T>
-class scalar_vector:public vector_expression<scalar_vector<T>, cpu_tag > {
+template<class T, class Device>
+class scalar_vector:public vector_expression<scalar_vector<T, Device>, Device > {
 public:
 	typedef std::size_t size_type;
 	typedef T value_type;
@@ -161,8 +161,8 @@ public:
 	}
 #endif
 public:
-	typedef typename device_traits<cpu_tag>:: template constant_iterator<T> iterator;
-	typedef typename device_traits<cpu_tag>:: template constant_iterator<T> const_iterator;
+	typedef typename device_traits<Device>:: template constant_iterator<T> iterator;
+	typedef typename device_traits<Device>:: template constant_iterator<T> const_iterator;
 
 	const_iterator begin() const {
 		return const_iterator(0,m_value);
@@ -187,7 +187,7 @@ public:
 	typedef F functor_type;
 	typedef typename E::const_closure_type expression_closure_type;
 	typedef typename E::size_type size_type;
-	typedef typename std::result_of<F(typename E::value_type) >::type value_type;
+	typedef typename F::result_type value_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 	typedef vector_unary const_closure_type;
@@ -276,7 +276,7 @@ class vector_addition: public vector_expression<vector_addition<E1,E2>, typename
 private:
 	typedef typename device_traits<typename E1::device_type>:: template multiply<typename E1::value_type> functor_type;
 public:
-	typedef typename std::result_of<functor_type(typename E1::value_type,typename E2::value_type) >::type value_type;
+	typedef typename common_value_type<E1,E2>::type value_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 	typedef typename E1::size_type size_type;
@@ -374,7 +374,7 @@ class vector_binary:public vector_expression<vector_binary<E1,E2, F>,typename E1
 	typedef typename E2::const_closure_type rhs_closure_type;
 public:
 	typedef F functor_type;
-	typedef typename std::result_of<F(typename E1::value_type, typename E2::value_type)>::type value_type;
+	typedef typename F::result_type value_type;
 	typedef typename E1::size_type size_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
