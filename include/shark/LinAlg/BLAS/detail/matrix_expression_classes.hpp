@@ -855,12 +855,15 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef typename boost::mpl::if_<
-		boost::is_same<typename MatA::orientation::orientation, row_major>,
-		blockwise<typename MatA::evaluation_category::tag>,
-		typename MatA::evaluation_category
-	>::type evaluation_category;
 	typedef typename MatA::device_type device_type;
+	//~ typedef typename boost::mpl::if_c<//if we are on the cpu and the matrix is row-major we can evaluate elementwise
+		//~ std::is_same<typename MatA::orientation::orientation, row_major>::value
+		//~ && std::is_same<device_type, cpu_tag>::value,
+		//~ typename MatA::evaluation_category,
+		//~ blockwise<typename MatA::evaluation_category::tag>
+	//~ >::type evaluation_category;
+	typedef blockwise<typename MatA::evaluation_category::tag> evaluation_category;
+	
 
 	explicit sum_matrix_rows(
 		matrix_closure_type const& matrix
@@ -879,22 +882,25 @@ public:
 	}
 #endif
 
-	// Element access for elementwise case
-	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(sum(column(this->matrix(),i))){
-		SIZE_CHECK(i < size());
-		return sum(column(m_matrix,i));
-	}
+	//~ // Element access for elementwise case
+	//~ template <class IndexExpr>
+	//~ auto operator()(IndexExpr const& i) const -> decltype(sum(column(this->matrix(),i))){
+		//~ SIZE_CHECK(i < size());
+		//~ return sum(column(m_matrix,i));
+	//~ }
 	
-	typedef typename device_traits<device_type>:: template indexed_iterator<const_closure_type> const_iterator;
-	typedef const_iterator iterator;
+	//~ typedef typename device_traits<device_type>:: template indexed_iterator<const_closure_type> const_iterator;
+	//~ typedef const_iterator iterator;
 
-	const_iterator begin() const {
-		return const_iterator(*this,0);
-	}
-	const_iterator end() const {
-		return const_iterator(*this,size());
-	}
+	//~ const_iterator begin() const {
+		//~ return const_iterator(*this,0);
+	//~ }
+	//~ const_iterator end() const {
+		//~ return const_iterator(*this,size());
+	//~ }
+	
+	typedef typename MatA::const_row_iterator const_iterator;
+	typedef const_iterator iterator;
 
 	//dispatcher to computation kernels for blockwise case
 	template<class VecX>

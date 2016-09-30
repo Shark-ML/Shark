@@ -305,29 +305,29 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Min )
 	BOOST_CHECK_CLOSE(min(x),result,1.e-10);
 }
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_Arg_Max )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ unsigned int result = 5;
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Arg_Max )
+{
+	vector<float> x_cpu(Dimensions); 
+	unsigned int result = 5;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = exp(-(i-5.0)*(i-5.0));//max at i = 5
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_EQUAL(arg_max(x),result);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = exp(-(i-5.0)*(i-5.0));//max at i = 5
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_EQUAL(arg_max(x),result);
+}
 
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_Arg_Min )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
-	//~ unsigned int result = 5;
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Arg_Min )
+{
+	vector<float> x_cpu(Dimensions); 
+	unsigned int result = 5;
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = -exp(-(i-5.0)*(i-5.0));//min at i = 5
-	//~ }
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_EQUAL(arg_min(x),result);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = -exp(-(i-5.0)*(i-5.0));//min at i = 5
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_EQUAL(arg_min(x),result);
+}
 
 BOOST_AUTO_TEST_CASE( BLAS_Vector_Sum )
 {
@@ -390,17 +390,17 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_inf )
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
 	BOOST_CHECK_EQUAL(norm_inf(x),2.0);
 }
-//~ BOOST_AUTO_TEST_CASE( BLAS_Vector_index_norm_inf )
-//~ {
-	//~ vector<float> x_cpu(Dimensions); 
+BOOST_AUTO_TEST_CASE( BLAS_Vector_index_norm_inf )
+{
+	vector<float> x_cpu(Dimensions); 
 	
-	//~ for (size_t i = 0; i < Dimensions; i++){
-		//~ x_cpu(i) = exp(-(i-5.0)*(i-5.0));
-	//~ }
-	//~ x_cpu(8)=-2;
-	//~ gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	//~ BOOST_CHECK_EQUAL(index_norm_inf(x),8);
-//~ }
+	for (size_t i = 0; i < Dimensions; i++){
+		x_cpu(i) = exp(-(i-5.0)*(i-5.0));
+	}
+	x_cpu(8)=-2;
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	BOOST_CHECK_EQUAL(index_norm_inf(x),8);
+}
 
 BOOST_AUTO_TEST_CASE( BLAS_Vector_inner_prod )
 {

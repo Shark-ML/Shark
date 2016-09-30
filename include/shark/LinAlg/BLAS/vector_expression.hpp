@@ -31,6 +31,7 @@
 #include "detail/expression_optimizers.hpp"
 #include "kernels/dot.hpp"
 #include "kernels/vector_fold.hpp"
+#include "kernels/vector_max.hpp"
 #include <boost/utility/enable_if.hpp>
 
 namespace shark {
@@ -269,7 +270,7 @@ template<class VecV, class Device>
 std::size_t arg_max(vector_expression<VecV, Device> const& v) {
 	SIZE_CHECK(v().size() > 0);
 	auto const& elem_result = eval_block(v);
-	return std::max_element(elem_result.begin(),elem_result.end()).index();
+	return kernels::vector_max(elem_result);
 }
 
 /// \brief arg_min v = arg min_i v_i
@@ -290,7 +291,8 @@ template<class VecV, class Device>
 typename VecV::value_type
 soft_max(vector_expression<VecV, Device> const& v) {
 	typename VecV::value_type maximum = max(v);
-	return std::log(sum(exp(v - maximum))) + maximum;
+	using std::log;
+	return log(sum(exp(v - maximum))) + maximum;
 }
 
 

@@ -37,7 +37,7 @@ namespace shark { namespace blas {namespace bindings{
 
 // Dense case
 template<class E1, class E2, class result_type>
-static void dot_impl(
+void dot(
 	vector_expression<E1, cpu_tag> const& v1,
 	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
@@ -52,7 +52,7 @@ static void dot_impl(
 }
 // Sparse case
 template<class E1, class E2, class result_type>
-static void dot_impl(
+void dot(
 	vector_expression<E1, cpu_tag> const& v1,
 	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
@@ -85,7 +85,7 @@ static void dot_impl(
 
 // Dense-Sparse case
 template<class E1, class E2, class result_type>
-static void dot_impl(
+void dot(
 	vector_expression<E1, cpu_tag> const& v1,
 	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
@@ -101,7 +101,7 @@ static void dot_impl(
 }
 //Sparse-Dense case is reduced to Dense-Sparse using symmetry.
 template<class E1, class E2, class result_type>
-static void dot_impl(
+void dot(
 	vector_expression<E1, cpu_tag> const& v1,
 	vector_expression<E2, cpu_tag> const& v2,
 	result_type& result,
@@ -109,22 +109,7 @@ static void dot_impl(
 	dense_tag t2
 ) {
 	//use commutativity!
-	dot_impl(v2,v1,result,t2,t1);
-}
-	
-///\brief Implements the dot or inner product kernel s = x^Ty.
-template<class E1, class E2,class result_type>
-void dot(
-	vector_expression<E1, cpu_tag> const& v1,
-	vector_expression<E2, cpu_tag> const& v2,
-	result_type& result,
-	boost::mpl::false_
-) {
-	SIZE_CHECK(v1().size()==v2().size());
-	return dot_impl(v1,v2,result,
-		typename E1::evaluation_category::tag(),
-		typename E2::evaluation_category::tag()
-	);
+	dot(v2,v1,result,t2,t1);
 }
 
 }}}

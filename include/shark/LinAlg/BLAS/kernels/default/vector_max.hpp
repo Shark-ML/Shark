@@ -1,11 +1,10 @@
-//===========================================================================
 /*!
  * 
  *
  * \brief       -
  *
  * \author      O. Krause
- * \date        2016
+ * \date        2012
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -28,25 +27,18 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-//===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_DOT_HPP
-#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_DOT_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_VECTOR_MAX_HPP
+#define SHARK_LINALG_BLAS_KERNELS_DEFAULT_VECTOR_MAX_HPP
 
-#include "clblas_inc.hpp"
-#include <boost/compute/algorithm/inner_product.hpp>
+#include "../../detail/traits.hpp"
+#include <algorithm>
+namespace shark { namespace blas {namespace bindings{
 
-namespace shark {namespace blas {namespace bindings {
-
-template <typename VectorX, typename VectorY, class result_type>
-void dot(
-	vector_expression<VectorX, gpu_tag> const& x,
-        vector_expression<VectorY, gpu_tag> const& y,
-	result_type& result,
-	dense_tag,
-	dense_tag
-){
-	result = boost::compute::inner_product(x().begin(),x().end(),y().begin(), typename VectorX::value_type(0), x().queue());
+template<class E, class Tag>
+std::size_t vector_max(vector_expression<E, cpu_tag> const& v,Tag) {
+	return std::max_element(v().begin(),v().end()).index();
 }
+
 
 }}}
 #endif

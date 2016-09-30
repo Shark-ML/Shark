@@ -44,17 +44,16 @@ namespace shark { namespace blas {namespace kernels{
 /// otherwise default/dot.h is used which is fully implemented for all dense/sparse combinations.
 /// if a combination is optimized, bindings::has_optimized_dot<E1,E2,R>::type evaluates to boost::mpl::true_
 /// The kernels themselves are implemented in blas::bindings::dot.
-template<class E1, class E2,class result_type>
+template<class E1, class E2, class result_type, class Device>
 void dot(
-	vector_expression<E1, cpu_tag> const& e1,
-	vector_expression<E2, cpu_tag> const& e2,
+	vector_expression<E1, Device> const& e1,
+	vector_expression<E2, Device> const& e2,
 	result_type& result
 ) {
 	SIZE_CHECK(e1().size() == e2().size());
 	
-	bindings::dot(
-		e1, e2,result,
-		boost::mpl::false_()
+	blas::bindings::dot(
+		e1, e2,result,typename E1::evaluation_category::tag(), typename E2::evaluation_category::tag()
 	);
 }
 

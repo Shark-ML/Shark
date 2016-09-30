@@ -1,8 +1,7 @@
-//===========================================================================
 /*!
  * 
  *
- * \brief       -
+ * \brief       Kernel for calculating the maximum element of a vector
  *
  * \author      O. Krause
  * \date        2016
@@ -28,24 +27,23 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-//===========================================================================
-#ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_DOT_HPP
-#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_DOT_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_VECTOR_MAX_HPP
+#define SHARK_LINALG_BLAS_KERNELS_VECTOR_MAX_HPP
 
-#include "clblas_inc.hpp"
-#include <boost/compute/algorithm/inner_product.hpp>
-
-namespace shark {namespace blas {namespace bindings {
-
-template <typename VectorX, typename VectorY, class result_type>
-void dot(
-	vector_expression<VectorX, gpu_tag> const& x,
-        vector_expression<VectorY, gpu_tag> const& y,
-	result_type& result,
-	dense_tag,
-	dense_tag
-){
-	result = boost::compute::inner_product(x().begin(),x().end(),y().begin(), typename VectorX::value_type(0), x().queue());
+#include "default/vector_max.hpp"
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/vector_max.hpp"
+#endif
+	
+namespace shark { namespace blas {namespace kernels{
+	
+///\brief Computes the index of the maximum element of a vector
+template<class E, class Device>
+std::size_t vector_max(
+	vector_expression<E, Device> const& e
+) {
+	SIZE_CHECK(e().size() == e().size());
+	bindings::vector_max(e,typename E::evaluation_category::tag());
 }
 
 }}}

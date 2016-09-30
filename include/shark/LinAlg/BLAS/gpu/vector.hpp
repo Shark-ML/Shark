@@ -99,6 +99,12 @@ public:
 		assign(*this, e);
 	}
 	
+	// Element access
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(std::declval<boost::compute::vector<T> >().begin()[i]){
+		return m_storage.begin()[i];
+	}
+	
 	// -------------------
 	// Assignment operators
 	// -------------------

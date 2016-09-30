@@ -67,6 +67,7 @@ vector_repeater<VecV> repeat(vector_expression<VecV, Device> const& vector, std:
 
 /// \brief Repeats a single element to form a matrix  of size rows x columns.
 ///
+///TODO: cpu only!
 ///@param scalar the value which is repeated
 ///@param rows the number of rows of the resulting vector
 ///@param columns the number of columns of the resulting vector
@@ -267,7 +268,7 @@ safe_div(
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	typedef typename common_value_type<MatA,MatB>::type result_type;
-	typedef typename device_traits<Device>:: template  safe_divide<result_type> functor_type;
+	typedef typename device_traits<Device>:: template safe_divide<result_type> functor_type;
 	return matrix_binary<MatA, MatB, functor_type>(A(),B(), functor_type(defaultValue));
 }
 

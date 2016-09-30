@@ -13,26 +13,26 @@ using namespace blas;
 
 template<class Operation, class Result>
 void checkDenseExpressionEquality(
-	Operation op_gpu, Result const& result
+	matrix_expression<Operation, gpu_tag> const& op_gpu, Result const& result
 ){
-	BOOST_REQUIRE_EQUAL(op_gpu.size1(), result.size1());
-	BOOST_REQUIRE_EQUAL(op_gpu.size2(), result.size2());
+	BOOST_REQUIRE_EQUAL(op_gpu().size1(), result.size1());
+	BOOST_REQUIRE_EQUAL(op_gpu().size2(), result.size2());
 	
 	//check that matrix assignment using op() works(implicit test)
-	blas::matrix<float> op = copy_to_cpu(op_gpu);
+	blas::matrix<float> op = copy_to_cpu(op_gpu());
 	for(std::size_t i = 0; i != op.size1(); ++i){
 		for(std::size_t j = 0; j != op.size2(); ++j){
 			BOOST_CHECK_CLOSE(result(i,j), op(i,j),1.e-8);
 		}
 	}
-	blas::gpu::vector<float> op_row_gpu(op_gpu.size2());
-	blas::gpu::vector<float> op_col_gpu(op_gpu.size1());
-	blas::vector<float> op_row(op_gpu.size2());
-	blas::vector<float> op_col(op_gpu.size2());
+	blas::gpu::vector<float> op_row_gpu(op_gpu().size2());
+	blas::gpu::vector<float> op_col_gpu(op_gpu().size1());
+	blas::vector<float> op_row(op_gpu().size2());
+	blas::vector<float> op_col(op_gpu().size2());
 	//check that row iterator work
 	for(std::size_t i = 0; i != op.size1(); ++i){
 		
-		boost::compute::copy(op_gpu.row_begin(i), op_gpu.row_end(i), op_row_gpu.begin());
+		boost::compute::copy(op_gpu().row_begin(i), op_gpu().row_end(i), op_row_gpu.begin());
 		boost::compute::copy(op_row_gpu.begin(), op_row_gpu.end(), op_row.begin());
 		
 		for(std::size_t j = 0; j != op.size2(); ++j){
@@ -42,7 +42,7 @@ void checkDenseExpressionEquality(
 	
 	//check that column iterator work
 	for(std::size_t j = 0; j != op.size2(); ++j){
-		boost::compute::copy(op_gpu.column_begin(j), op_gpu.column_end(j), op_col_gpu.begin());
+		boost::compute::copy(op_gpu().column_begin(j), op_gpu().column_end(j), op_col_gpu.begin());
 		boost::compute::copy(op_col_gpu.begin(), op_col_gpu.end(), op_col.begin());
 		for(std::size_t i = 0; i != op.size1(); ++i){
 			BOOST_CHECK_CLOSE(result(i,j), op_col(i),1.e-8);
@@ -50,15 +50,71 @@ void checkDenseExpressionEquality(
 	}
 }
 
+
+template<class Operation, class Result>
+void checkDenseExpressionEquality(
+	vector_expression<Operation, gpu_tag> const& op_gpu, Result const& result
+){
+	BOOST_REQUIRE_EQUAL(op_gpu().size(), result.size());
+	
+	blas::vector<float> op = copy_to_cpu(op_gpu());
+	for(std::size_t i = 0; i != op.size(); ++i){
+		BOOST_CHECK_CLOSE(result(i), op(i),1.e-8);
+	}
+}
+
+
+
 std::size_t Dimension1 = 50;
 std::size_t Dimension2 = 100;
 
 
+
+BOOST_AUTO_TEST_SUITE (BLAS_GPU_matrix_expression)
+
+/////////////////////////////////////////////////////////////
+//////Vector->Matrix expansions///////
+////////////////////////////////////////////////////////////
+
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Outer_Prod ){
+	vector<float> x_cpu(Dimension1); 
+	vector<float> y_cpu(Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++)
+		x_cpu(i) = i-3.0;
+	for (size_t j = 0; j < Dimension2; j++)
+		y_cpu(j) = 2*j;
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			result(i,j)= x_cpu(i)*y_cpu(j);
+		}
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	gpu::vector<float> y = gpu::copy_to_gpu(y_cpu);
+	checkDenseExpressionEquality(outer_prod(x,y),result);
+}
+
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Vector_Repeater){
+	vector<float> x_cpu(Dimension1); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++)
+		x_cpu(i) = i-3.0;
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			result(i,j)= x_cpu(i);
+		}
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(blas::repeat(x,Dimension2),result);
+}
+
 /////////////////////////////////////////////////////////////
 //////UNARY TRANSFORMATIONS///////
 ////////////////////////////////////////////////////////////
-BOOST_AUTO_TEST_SUITE (BLAS_GPU_matrix_expression)
-
 BOOST_AUTO_TEST_CASE( BLAS_matrix_Unary_Minus )
 {
 	matrix<float> x_cpu(Dimension1, Dimension2); 
@@ -88,6 +144,38 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_Multiply )
 	checkDenseExpressionEquality(5.0*x,result);
 	checkDenseExpressionEquality(x*5.0,result);
 }
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_Add )
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-3.0+j;
+			result(i,j)= 5.0 + x_cpu(i,j);
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(5.0+x,result);
+	checkDenseExpressionEquality(x+5.0,result);
+}
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_Subtract )
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> result1(Dimension1, Dimension2);
+	matrix<float> result2(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-3.0+j;
+			result1(i,j)= 5.0 - x_cpu(i,j);
+			result2(i,j)= x_cpu(i,j) - 5.0;
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(5.0- x,result1);
+	checkDenseExpressionEquality(x - 5.0,result2);
+}
 BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_Div )
 {
 	matrix<float> x_cpu(Dimension1, Dimension2); 
@@ -101,6 +189,20 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_Div )
 	}
 	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
 	checkDenseExpressionEquality(x/5.0f,result);
+}
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_elem_inv)
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-3.0+j;
+			result(i,j)= 1.0/x_cpu(i,j);
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(elem_inv(x),result);
 }
 BOOST_AUTO_TEST_CASE( BLAS_matrix_Abs )
 {
@@ -229,6 +331,37 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Pow )
 	checkDenseExpressionEquality(pow(x,3.2),result);
 }
 
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Unary_Min)
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-j;
+			result(i,j)= std::min(x_cpu(i,j),5.0f);
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(min(x,5.0f),result);
+	checkDenseExpressionEquality(min(5.0f,x),result);
+}
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Unary_Max)
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-j;
+			result(i,j)= std::min(x_cpu(i,j),5.0f);
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(max(x,5.0f),result);
+	checkDenseExpressionEquality(max(5.0f,x),result);
+}
+
 /////////////////////////////////////////////////////
 ///////BINARY OPERATIONS//////////
 /////////////////////////////////////////////////////
@@ -322,5 +455,94 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Safe_Div )
 	gpu::matrix<float> y = gpu::copy_to_gpu(y_cpu);
 	checkDenseExpressionEquality(safe_div(x,y,2.0),result);
 }
+
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Pow)
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> y_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = 0.1*(i+j+1);
+			y_cpu(i,j) = 0.0001*(i+j-3);
+			result(i,j)= std::pow(x_cpu(i,j),y_cpu(i,j));
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	gpu::matrix<float> y = gpu::copy_to_gpu(y_cpu);
+	checkDenseExpressionEquality(pow(x,y),result);
+}
+
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Max)
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> y_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = 50.0+i-j;
+			y_cpu(i,j) = i+j+1;
+			result(i,j)= std::max(x_cpu(i,j),y_cpu(i,j));
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	gpu::matrix<float> y = gpu::copy_to_gpu(y_cpu);
+	checkDenseExpressionEquality(max(x,y),result);
+}
+BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Min)
+{
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	matrix<float> y_cpu(Dimension1, Dimension2); 
+	matrix<float> result(Dimension1, Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = 50.0+i-j;
+			y_cpu(i,j) = i+j+1;
+			result(i,j)= std::min(x_cpu(i,j),y_cpu(i,j));
+		}
+	}
+	gpu::matrix<float> x = gpu::copy_to_gpu(x_cpu);
+	gpu::matrix<float> y = gpu::copy_to_gpu(y_cpu);
+	checkDenseExpressionEquality(min(x,y),result);
+}
+
+
+////////////////////////////////////////////////////////////////////////
+////////////ROW-WISE REDUCTIONS
+////////////////////////////////////////////////////////////////////////
+BOOST_AUTO_TEST_CASE( BLAS_sum_rows){
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	vector<float> result(Dimension1);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-3.0-j;
+			result(i) += x_cpu(i,j);
+		}
+	}
+	gpu::matrix<float,row_major> x_row = gpu::copy_to_gpu(x_cpu);
+	gpu::matrix<float,column_major> x_col = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(sum_rows(x_row),result);
+	checkDenseExpressionEquality(sum_rows(x_col),result);
+}
+BOOST_AUTO_TEST_CASE( BLAS_sum_columns){
+	matrix<float> x_cpu(Dimension1, Dimension2); 
+	vector<float> result(Dimension2);
+	
+	for (size_t i = 0; i < Dimension1; i++){
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = i-3.0-j;
+			result(j) += x_cpu(i,j);
+		}
+	}
+	gpu::matrix<float,row_major> x_row = gpu::copy_to_gpu(x_cpu);
+	gpu::matrix<float,column_major> x_col = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(sum_columns(x_row),result);
+	checkDenseExpressionEquality(sum_columns(x_col),result);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

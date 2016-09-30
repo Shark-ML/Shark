@@ -31,56 +31,39 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_SUM_ROWS_HPP
 #define SHARK_LINALG_BLAS_KERNELS_SUM_ROWS_HPP
 
-#include "../assignment.hpp"
+#include "default/sum_rows.hpp"
+#ifdef SHARK_USE_CLBLAS
+#include "clblas/sum_rows.hpp"
+#endif
 
-namespace shark { namespace blas {namespace kernels{
-	
-namespace detail{
-	template<class M,class V, class T>
-	void sum_rows_impl(M const& A, V& v, T alpha, column_major){
-		for(std::size_t i = 0; i != A.size2(); ++i){
-			typename V::value_type sum = 0;
-			auto end = A.column_end(i);
-			for(auto pos = A.column_begin(i); pos != end; ++pos)
-				sum += *pos;
-			v(i) = alpha * sum;
-		}
-	}
-
-	template<class M,class V, class T>
-	void sum_rows_impl(M const& A, V& v, T alpha, row_major){
-		for(std::size_t i = 0; i != A.size1(); ++i){
-			auto end = A.row_end(i);
-			for(auto pos = A.row_begin(i); pos != end; ++pos)
-				v(pos.index()) += alpha * (*pos);
-		}
-	}
-
-	template<class M,class V, class T>
-	void sum_rows_impl(M const& A, V& v, T alpha, unknown_orientation){
-		sum_rows_impl(A,v,alpha,row_major());
-	}
-
-	//dispatcher for triangular matrix
-	template<class M,class V, class T,class Orientation,class Triangular>
-	void sum_rows_impl(M const& A, V& v, T alpha, triangular<Orientation,Triangular>){
-		sum_rows_impl(A,v,alpha,Orientation());
-	}
-
+namespace shark { namespace blas {
+namespace bindings{
+template<class M,class V, class Device, class Tag1, class Tag2>
+void sum_rows(
+	matrix_expression<M, Device> const & A, 
+	vector_expression<V, Device>& b,
+	typename V::value_type alpha,
+	unknown_orientation,
+	Tag1, Tag2
+){
+	sum_rows(A,b,alpha,row_major(), Tag1(), Tag2());
+}
 }
 	
+namespace kernels{
 ///\brief Sums the rows of a row-major or column major matrix.
 ///
 /// This is equivalent to the operation v=1^TA where 1 is the vector of all-ones
-template <class M, class V>
+template <class M, class V, class Device>
 void sum_rows(
-	matrix_expression<M, cpu_tag> const & A, 
-	vector_expression<V, cpu_tag>& b,
-	typename M::value_type alpha
+	matrix_expression<M, Device> const & A, 
+	vector_expression<V, Device>& b,
+	typename V::value_type alpha
 ){
 	SIZE_CHECK(A().size2() == b().size());
 	
-	detail::sum_rows_impl(A(),b(),alpha,typename M::orientation());
+	bindings::sum_rows(A,b,alpha,typename M::orientation(),
+	typename M::evaluation_category::tag(), typename V::evaluation_category::tag());
 }
 
 }}}

@@ -28,6 +28,7 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_ASSIGN_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_ASSIGN_HPP
 
+#include "../../detail/traits.hpp"
 #include <boost/compute/detail/meta_kernel.hpp>
 
 namespace shark {namespace blas {namespace bindings{
@@ -108,7 +109,9 @@ void matrix_assign_functor(
 	// memory which gets the orientation right. Then we copy the tile
 	//to the target
 	// TILE_DIM+1 is here to avoid bank conflicts in local memory
-	k << "__local" <<k.decl<value_type>("tile")<< "[TILE_DIM][TILE_DIM+1]";
+	std::size_t size1_index = k.add_arg<std::size_t>("size1");
+	std::size_t size2_index = k.add_arg<std::size_t>("size2");
+	k << "__local" <<k.decl<value_type>("tile")<< "[TILE_DIM][TILE_DIM+1];";
 	k << "uint base_row = get_group_id(0) * TILE_DIM;";
 	k << "uint base_col = get_group_id(1) * TILE_DIM;";
 	//copy indices, into local memory, note the change of direction
@@ -134,6 +137,8 @@ void matrix_assign_functor(
 	boost::compute::kernel kernel = k.compile(m().queue().get_context(), options);
 	
 	//enqueue kernel
+	kernel.set_arg(size1_index, m().size1());
+	kernel.set_arg(size2_index, m().size2());
 	std::size_t global_work_size[2] = {m().size1(), (m().size1()+TILE_DIM-1) * BLOCK_COLS / TILE_DIM};
 	std::size_t local_work_size[2] = {TILE_DIM, BLOCK_COLS};
 	m().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
