@@ -64,7 +64,7 @@ public:
 	///note that for all operations for which vector is on the left hand side,
 	///the kernels are enqueued on the supplied queue in case of a multi-queue setup.
 	vector(boost::compute::command_queue& queue = boost::compute::system::default_queue())
-	:m_storage(queue.get_context()), m_queue(queue){}
+	:m_storage(queue.get_context()), m_queue(&queue){}
 
 	/// \brief Constructor of a vector with a predefined size
 	/// By default, its elements are uninitialized.
@@ -96,6 +96,16 @@ public:
 	vector(vector_expression<E, gpu_tag> const& e)
 	: m_storage(e().size(), e().queue().get_context())
 	, m_queue(&e().queue()){
+		assign(*this, e);
+	}
+	
+	/// \brief Copy-constructor of a vector from a vector_expression on a given queue
+	/// \param e the vector_expression whose values will be duplicated into the vector
+	/// \param queue the queue which should perform the task
+	template<class E>
+	vector(vector_expression<E, gpu_tag> const& e, boost::compute::command_queue& queue)
+	: m_storage(e().size(), queue.get_context())
+	, m_queue(&queue){
 		assign(*this, e);
 	}
 	
@@ -196,6 +206,15 @@ public:
 		return m_storage.empty();
 	}
 	
+	/// \brief Swap the content of two vectors
+	/// \param v1 is the first vector. It takes values from v2
+	/// \param v2 is the second vector It takes values from v1
+	friend void swap(vector& v1, vector& v2) {
+		using std::swap;
+		swap(v1.m_storage,v2.m_storage);
+		std::swap(v2.m_queue,v2.m_queue);
+	}
+	
 	// Iterator types
 	typedef typename boost::compute::vector<T>::iterator iterator;
 	typedef typename boost::compute::vector<T>::const_iterator const_iterator;
@@ -229,16 +248,6 @@ public:
 	iterator end(){
 		return m_storage.end();
 	}
-
-	
-	/// \brief Swap the content of two vectors
-	/// \param v1 is the first vector. It takes values from v2
-	/// \param v2 is the second vector It takes values from v1
-	friend void swap(vector& v1, vector& v2) {
-		swap(v1.m_storage,v2.m_storage);
-		std::swap(v1.m_queue,v2.m_queue);
-	}
-	
 	
 private:
 	boost::compute::vector<T> m_storage;

@@ -9,16 +9,25 @@
 using namespace shark;
 using namespace blas;
 
-
 template<class Operation, class Result>
 void checkDenseExpressionEquality(
 	Operation op_gpu, Result const& result
 ){
 	BOOST_REQUIRE_EQUAL(op_gpu.size(), result.size());
 	
+	//test copy to cpu, this tests the buffer
 	blas::vector<float> op = copy_to_cpu(op_gpu);
 	for(std::size_t i = 0; i != op.size(); ++i){
 		BOOST_CHECK_CLOSE(result(i), op(i),1.e-8);
+	}
+	
+	//test iterators
+	BOOST_REQUIRE_EQUAL(op_gpu.end() - op_gpu.begin(), op.size());
+	blas::gpu::vector<float> opcopy_gpu(op.size());
+	boost::compute::copy(op_gpu.begin(),op_gpu.end(),opcopy_gpu.begin());
+	blas::vector<float> opcopy = copy_to_cpu(opcopy_gpu);
+	for(std::size_t i = 0; i != result.size(); ++i){
+		BOOST_CHECK_CLOSE(result(i), opcopy(i),1.e-8);
 	}
 }
 

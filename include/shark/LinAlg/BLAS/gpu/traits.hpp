@@ -175,6 +175,7 @@ class indexed_iterator : public boost::iterator_facade<
 	typename Closure::value_type
 >{
 public:
+	indexed_iterator() = default;
 	indexed_iterator(Closure const& closure, std::size_t index)
 	: m_closure(closure)
 	, m_index(index){}
@@ -248,6 +249,84 @@ private:
 	template<class> friend class indexed_iterator;
 };
 
+
+template<class Iterator>
+class subrange_iterator : public boost::iterator_facade<
+	subrange_iterator<Iterator>,
+        typename Iterator::value_type,
+        std::random_access_iterator_tag,
+	typename Iterator::value_type
+>{
+public:
+	subrange_iterator() = default;
+	subrange_iterator(Iterator const &it, Iterator const& /*end*/, std::size_t startIterIndex,std::size_t /*startIndex*/)
+	: m_iterator(it+startIterIndex){}
+		
+	template<class I>
+	subrange_iterator(subrange_iterator<I> other):m_iterator(other.m_iterator){}
+
+	template<class I>
+	subrange_iterator& operator=(subrange_iterator<I> const& other){
+		m_iterator = other.m_iterator;
+		return *this;
+	}
+
+	size_t get_index() const{
+		return m_iterator.index();
+	}
+
+	/// \internal_
+	template<class Expr>
+	auto operator[](Expr const& expr) const-> decltype(std::declval<Iterator>()[expr]){
+		return m_iterator[expr];
+	}
+
+private:
+	friend class ::boost::iterator_core_access;
+
+	/// \internal_
+	typename Iterator::value_type dereference() const
+	{
+		return typename Iterator::value_type();
+	}
+
+	/// \internal_
+	template<class I>
+	bool equal(subrange_iterator<I> const& other) const
+	{
+		return m_iterator == other.m_iterator;
+	}
+
+	/// \internal_
+	void increment()
+	{
+		++m_iterator;
+	}
+
+	/// \internal_
+	void decrement()
+	{
+		--m_iterator;
+	}
+
+	/// \internal_
+	void advance(std::ptrdiff_t n)
+	{
+		m_iterator +=n;
+	}
+
+	/// \internal_
+	template<class I>
+	std::ptrdiff_t distance_to(subrange_iterator<I> const& other) const
+	{
+		return static_cast<std::ptrdiff_t>(other.m_iterator - m_iterator);
+	}
+
+private:
+	Iterator m_iterator;
+	template<class> friend class subrange_iterator;
+};
+
 }//End namespace detail
 }//End namespace gpu
 
@@ -259,14 +338,12 @@ struct device_traits<gpu_tag>{
 		return boost::compute::plus<std::size_t>()(expr1,expr2);
 	}
 	
-	
 	template <class Iterator, class Functor>
 	using transform_iterator = boost::compute::transform_iterator<Iterator, Functor>;
 
-	//~ template <class Iterator>
-	//~ using subrange_iterator = shark::blas::iterators::subrange_iterator<Iterator>;
+	template <class Iterator>
+	using subrange_iterator = shark::blas::gpu::detail::subrange_iterator<Iterator>;
 	
-	//TODO: this is going to cause pain...
 	template<class Iterator1, class Iterator2, class Functor>
 	using binary_transform_iterator = shark::blas::gpu::detail::binary_transform_iterator<Iterator1, Iterator2, Functor>;
 	
@@ -391,6 +468,10 @@ struct device_traits<gpu_tag>{
 namespace boost{namespace compute{
 template<class I1, class I2, class F>
 struct is_device_iterator<shark::blas::gpu::detail::binary_transform_iterator<I1,I2, F> > : boost::true_type {};
+template<class Closure>
+struct is_device_iterator<shark::blas::gpu::detail::indexed_iterator<Closure> > : boost::true_type {};
+template<class Iterator>
+struct is_device_iterator<shark::blas::gpu::detail::subrange_iterator<Iterator> > : boost::true_type {};
 }}
 
 #endif
