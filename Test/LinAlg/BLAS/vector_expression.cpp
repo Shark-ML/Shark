@@ -293,8 +293,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Arg_Max )
 	unsigned int result = 5;
 	
 	for (size_t i = 0; i < Dimensions; i++){
-		x(i) = exp(-(i-5.0)*(i-5.0));//max at i = 5
+		x(i) = -abs(5.0-i);//max at i = 5
 	}
+	std::cout<<x<<std::endl;
 	BOOST_CHECK_EQUAL(arg_max(x),result);
 }
 

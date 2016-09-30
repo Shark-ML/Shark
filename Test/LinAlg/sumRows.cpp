@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_sum_rows){
 			A(i,j) = Rng::uni(0,1);
 		}
 	}
-	RealMatrix Atrans = trans(A);
+	blas::matrix<double, blas::column_major> Acol = A;
 
 	//test implementation
 	for(std::size_t i = 0; i != rows; ++i){
@@ -34,9 +34,19 @@ BOOST_AUTO_TEST_CASE( LinAlg_sum_rows){
 	BOOST_CHECK_SMALL(error,1.e-15);
 	
 	//sum_rows with column major argument
-	RealVector test2 = sum_rows(trans(Atrans));
+	RealVector test2 = sum_rows(Acol);
 	error = norm_2(testResult-test2);
 	BOOST_CHECK_SMALL(error,1.e-15);
+	
+	//directly testing the kernel
+	RealVector test3(columns,1.0);
+	blas::kernels::sum_rows(A,test3,2.0);
+	error = norm_2((testResult*2+1)-test3);
+	BOOST_CHECK_SMALL(error,1.e-14);
+	RealVector test4(columns,1.0);
+	blas::kernels::sum_rows(Acol,test4,2.0);
+	error = norm_2((testResult*2+1)-test4);
+	BOOST_CHECK_SMALL(error,1.e-14);
 }
 BOOST_AUTO_TEST_CASE( LinAlg_sum_columns){
 	std::size_t rows = 101;
@@ -49,7 +59,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_sum_columns){
 			A(i,j) = Rng::uni(0,1);
 		} 
 	}
-	RealMatrix Atrans = trans(A);
+	blas::matrix<double, blas::column_major> Acol = A;
 
 	//test implementation
 	for(std::size_t i = 0; i != columns; ++i){
@@ -62,7 +72,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_sum_columns){
 	BOOST_CHECK_SMALL(error,1.e-15);
 	
 	//sum_rows with column major argument
-	RealVector test2 = sum_columns(trans(Atrans));
+	RealVector test2 = sum_columns(Acol);
 	error = norm_2(testResult-test2);
 	BOOST_CHECK_SMALL(error,1.e-15);
 }

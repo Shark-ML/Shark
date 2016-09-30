@@ -167,11 +167,99 @@ struct binary_transform_iterator
 	): self_type(boost::compute::make_zip_iterator(boost::make_tuple(iter1,iter2)), boost::compute::detail::unpack(f)){}
 };
 
+template<class Closure>
+class indexed_iterator : public boost::iterator_facade<
+	indexed_iterator<Closure>,
+        typename Closure::value_type,
+        std::random_access_iterator_tag,
+	typename Closure::value_type
+>{
+public:
+	indexed_iterator(Closure const& closure, std::size_t index)
+	: m_closure(closure)
+	, m_index(index){}
+		
+	template<class C>
+	indexed_iterator(indexed_iterator<C> const& other)
+	: m_closure (other.m_closure)
+	, m_index(other.m_index){}
+
+	template<class C>
+	indexed_iterator& operator=(indexed_iterator<C> const& other){
+		m_closure = other.m_closure;
+		m_index = other.m_index;
+		return *this;
+	}
+
+	size_t get_index() const{
+		return m_index;
+	}
+
+	/// \internal_
+	template<class Expr>
+	auto operator[](Expr const& expr) const-> decltype(std::declval<Closure>()(expr)){
+		return m_closure(expr);
+	}
+
+private:
+	friend class ::boost::iterator_core_access;
+
+	/// \internal_
+	typename Closure::value_type dereference() const
+	{
+		return typename Closure::value_type();
+	}
+
+	/// \internal_
+	template<class C>
+	bool equal(indexed_iterator<C> const& other) const
+	{
+		return m_index == other.m_index;
+	}
+
+	/// \internal_
+	void increment()
+	{
+		m_index++;
+	}
+
+	/// \internal_
+	void decrement()
+	{
+		m_index--;
+	}
+
+	/// \internal_
+	void advance(std::ptrdiff_t n)
+	{
+		m_index = static_cast<size_t>(static_cast<std::ptrdiff_t>(m_index) + n);
+	}
+
+	/// \internal_
+	template<class C>
+	std::ptrdiff_t distance_to(indexed_iterator<C> const& other) const
+	{
+		return static_cast<std::ptrdiff_t>(other.m_index - m_index);
+	}
+
+private:
+	Closure m_closure;
+	std::size_t m_index;
+	template<class> friend class indexed_iterator;
+};
+
 }//End namespace detail
 }//End namespace gpu
 
 template<>
 struct device_traits<gpu_tag>{
+	//adding of indices
+	template<class Expr1, class Expr2>
+	static auto index_add(Expr1 const& expr1, Expr2 const& expr2) -> decltype(boost::compute::plus<std::size_t>()(expr1,expr2)){
+		return boost::compute::plus<std::size_t>()(expr1,expr2);
+	}
+	
+	
 	template <class Iterator, class Functor>
 	using transform_iterator = boost::compute::transform_iterator<Iterator, Functor>;
 
@@ -188,8 +276,8 @@ struct device_traits<gpu_tag>{
 	//~ template<class T>
 	//~ using one_hot_iterator = shark::blas::iterators::one_hot_iterator<T>;
 	
-	//~ template<class Closure>
-	//~ using indexed_iterator = shark::blas::iterators::indexed_iterator<Closure>;
+	template<class Closure>
+	using indexed_iterator = shark::blas::gpu::detail::indexed_iterator<Closure>;
 	
 	//functors
 	

@@ -43,11 +43,12 @@ void sum_rows(
 	column_major, Tag1, Tag2
 ){
 	for(std::size_t i = 0; i != A().size2(); ++i){
-		typename V::value_type sum = 0;
+		typename V::value_type s = 0;
 		auto end = A().column_end(i);
-		for(auto pos = A().column_begin(i); pos != end; ++pos)
-			sum += *pos;
-		v()(i) += alpha * sum;
+		for(auto pos = A().column_begin(i); pos != end; ++pos){
+			s += *pos;
+		}
+		v()(i) += alpha * s;
 	}
 }
 

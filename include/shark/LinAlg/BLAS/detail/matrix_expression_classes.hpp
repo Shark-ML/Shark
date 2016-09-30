@@ -625,8 +625,8 @@ public:
 	}
 	const_column_iterator column_end(size_type j) const {
 		return const_column_iterator (m_functor,
-			m_lhs.column_begin(j),m_lhs.column_end(j),
-			m_rhs.column_begin(j),m_rhs.column_end(j)
+			m_lhs.column_end(j),m_lhs.column_end(j),
+			m_rhs.column_end(j),m_rhs.column_end(j)
 		);
 	}
 

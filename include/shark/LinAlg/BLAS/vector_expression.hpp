@@ -206,7 +206,7 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, pow)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-         vector_binary<scalar_vector<T, Device>, VecV, typename device_traits<Device>:: template F<typename std::common_type<typename VecV::value_type,T>::type> > \
+	vector_binary<scalar_vector<T, Device>, VecV, typename device_traits<Device>:: template F<typename std::common_type<typename VecV::value_type,T>::type> > \
 >::type \
 name (T t, vector_expression<VecV, Device> const& v){ \
 	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
@@ -242,7 +242,9 @@ sum(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
 	typedef typename device_traits<Device>:: template add<value_type> functor_type;
 	auto const& elem_result = eval_block(v);
-	return kernels::vector_fold<functor_type>(elem_result,value_type(0));
+	value_type result = 0;
+	kernels::vector_fold<functor_type>(elem_result,result);
+	return result;
 }
 
 /// \brief max v = max_i v_i
@@ -252,7 +254,9 @@ max(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
 	typedef typename device_traits<Device>:: template max<value_type> functor_type;
 	auto const& elem_result = eval_block(v);
-	return kernels::vector_fold<functor_type>(elem_result,-std::numeric_limits<value_type>::lowest());
+	value_type result = std::numeric_limits<value_type>::lowest();
+	kernels::vector_fold<functor_type>(elem_result,result);
+	return result;
 }
 
 /// \brief min v = min_i v_i
@@ -262,7 +266,9 @@ min(vector_expression<VecV, Device> const& v) {
 	typedef typename VecV::value_type value_type;
 	typedef typename device_traits<Device>:: template min<value_type> functor_type;
 	auto const& elem_result = eval_block(v);
-	return kernels::vector_fold<functor_type>(elem_result,std::numeric_limits<value_type>::max());
+	value_type result = std::numeric_limits<value_type>::max();
+	kernels::vector_fold<functor_type>(elem_result,result);
+	return result;
 }
 
 /// \brief arg_max v = arg max_i v_i

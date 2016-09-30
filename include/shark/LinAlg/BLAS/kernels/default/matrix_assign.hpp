@@ -437,7 +437,6 @@ void matrix_assign_functor(
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>
 ) {
 	typedef typename M::row_iterator MIter;
-	typedef typename E::const_row_iterator EIter;
 	//there is nothing we can do, if F does not leave the non-stored elements 0
 	static_assert(F::left_zero_identity, "cannot handle the given packed matrix assignment function");
 	

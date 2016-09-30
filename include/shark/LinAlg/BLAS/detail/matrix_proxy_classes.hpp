@@ -106,9 +106,9 @@ public:
 
 	// Iterator types
 	typedef typename row_iterator<M>::type row_iterator;
-	typedef row_iterator const_row_iterator;
+	typedef typename M::const_row_iterator const_row_iterator;
 	typedef typename column_iterator<M>::type column_iterator;
-	typedef column_iterator const_column_iterator;
+	typedef typename M::const_column_iterator const_column_iterator;
 
 	// Iterators are the iterators of the referenced expression.
 	const_row_iterator row_begin(size_type i) const {
@@ -555,8 +555,14 @@ public:
 
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(this->expression()(this->start1()+i,this->start2()+i)){
-		return m_expression(start1()+i,start2()+i);
+	auto operator()(IndexExpr const& i) const -> decltype(this->expression()(
+		device_traits<typename M::device_type>::index_add(this->start1(),i),
+		device_traits<typename M::device_type>::index_add(this->start2(),i)
+	)){
+		return m_expression(
+			device_traits<typename M::device_type>::index_add(start1(),i),
+			device_traits<typename M::device_type>::index_add(start2(),i)
+		);
 	}
 	reference operator [](size_type i) const {
 		return (*this)(i);
@@ -683,8 +689,14 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(this->start1()+i, this->start2()+j)){
-		return m_expression(start1() +i, start2() + j);
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(
+		device_traits<typename M::device_type>::index_add(this->start1(),i),
+		device_traits<typename M::device_type>::index_add(this->start2(),j)
+	)){
+		return m_expression(
+			device_traits<typename M::device_type>::index_add(start1(),i),
+			device_traits<typename M::device_type>::index_add(start2(),j)
+		);
 	}
 
 	// Assignment

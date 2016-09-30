@@ -1,8 +1,6 @@
 /*!
+ * \brief       kernels for folding matrices with openCL
  * 
- *
- * \brief       Kernel for calculating the maximum element of a vector
- *
  * \author      O. Krause
  * \date        2016
  *
@@ -27,24 +25,20 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_LINALG_BLAS_KERNELS_VECTOR_MAX_HPP
-#define SHARK_LINALG_BLAS_KERNELS_VECTOR_MAX_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_FOLD_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_VECTOR_FOLD_HPP
 
-#include "default/vector_max.hpp"
-#ifdef SHARK_USE_CLBLAS
-#include "clblas/vector_max.hpp"
-#endif
-	
-namespace shark { namespace blas {namespace kernels{
-	
-///\brief Computes the index of the maximum element of a vector
-template<class E, class Device>
-std::size_t vector_max(
-	vector_expression<E, Device> const& e
-) {
-	SIZE_CHECK(e().size() == e().size());
-	return bindings::vector_max(e,typename E::evaluation_category::tag());
+#include "../../detail/traits.hpp"
+namespace shark{namespace blas {namespace bindings{
+
+template<class F, class M, class Orientation>
+void matrix_fold(matrix_expression<M, gpu_tag> const& m, typename F::result_type& value, Orientation, dense_tag) {
+	//~ boost::compute::array<typename F::result_type,1> val;
+	//~ val[0] = value;
+	//~ boost::compute::reduce(v().begin(), v().end(),  val.begin(), F(), v().queue());
+	//~ value = val[0];
 }
+
 
 }}}
 #endif

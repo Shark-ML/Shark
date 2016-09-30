@@ -1,8 +1,6 @@
 /*!
+ * \brief       Algorithm to reduce a vector to a scalar value
  * 
- *
- * \brief       Kernel for calculating the maximum element of a vector
- *
  * \author      O. Krause
  * \date        2016
  *
@@ -27,23 +25,27 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_LINALG_BLAS_KERNELS_VECTOR_MAX_HPP
-#define SHARK_LINALG_BLAS_KERNELS_VECTOR_MAX_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_MATRIX_FOLD_HPP
+#define SHARK_LINALG_BLAS_KERNELS_MATRIX_FOLD_HPP
 
-#include "default/vector_max.hpp"
+#include "../detail/traits.hpp"
+#include "default/matrix_fold.hpp"
 #ifdef SHARK_USE_CLBLAS
-#include "clblas/vector_max.hpp"
+#include "clblas/matrix_fold.hpp"
 #endif
-	
-namespace shark { namespace blas {namespace kernels{
-	
-///\brief Computes the index of the maximum element of a vector
-template<class E, class Device>
-std::size_t vector_max(
-	vector_expression<E, Device> const& e
-) {
-	SIZE_CHECK(e().size() == e().size());
-	return bindings::vector_max(e,typename E::evaluation_category::tag());
+
+namespace shark {namespace blas {namespace kernels {
+
+
+///\brief Applies F in any order to the elements of v and seed.
+///
+/// result is the same as value =f(v_1,f(v_2,...f(v_n,value))) assuming f is commutative
+/// and associative.
+template<class F, class M, class Device>
+void matrix_fold(matrix_expression<M, Device> const& m, typename F::result_type& value) {
+	typedef typename M::evaluation_category::tag Tag;
+	typedef typename M::orientation Orientation;
+	bindings::matrix_fold<F>(m, value, Orientation(), Tag());
 }
 
 }}}

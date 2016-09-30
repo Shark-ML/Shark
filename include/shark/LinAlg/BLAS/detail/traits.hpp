@@ -118,6 +118,10 @@ namespace detail{
 		return m.row_begin(i);
 	}
 	template<class M>
+	typename row_iterator<M>::type major_begin(M& m,std::size_t i, unknown_orientation){
+		return m.row_begin(i);
+	}
+	template<class M>
 	typename column_iterator<M>::type major_end(M& m,std::size_t i, column_major){
 		return m.column_end(i);
 	}
@@ -125,23 +129,27 @@ namespace detail{
 	typename row_iterator<M>::type major_end(M& m,std::size_t i, row_major){
 		return m.row_end(i);
 	}
+	template<class M>
+	typename row_iterator<M>::type major_end(M& m,std::size_t i, unknown_orientation){
+		return m.row_end(i);
+	}
 }
 
 template<class M, class Device>
 typename major_iterator<M const>::type major_begin(matrix_expression<M, Device> const& m, std::size_t i){
-	return detail::major_begin(m(),i, typename M::orientation());
+	return detail::major_begin(m(),i, typename M::orientation::orientation());
 }
 template<class M, class Device>
 typename major_iterator<M const>::type major_end(matrix_expression<M, Device> const& m, std::size_t i){
-	return detail::major_end(m(),i, typename M::orientation());
+	return detail::major_end(m(),i, typename M::orientation::orientation());
 }
 template<class M, class Device>
 typename major_iterator<M>::type major_begin(matrix_expression<M, Device>& m, std::size_t i){
-	return detail::major_begin(m(),i, typename M::orientation());
+	return detail::major_begin(m(),i, typename M::orientation::orientation());
 }
 template<class M, class Device>
 typename major_iterator<M>::type major_end(matrix_expression<M, Device>& m, std::size_t i){
-	return detail::major_end(m(),i, typename M::orientation());
+	return detail::major_end(m(),i, typename M::orientation::orientation());
 }
 
 ///\brief Determines a good vector type storing an expression returning values of type T having a certain evaluation category on a specific device.
@@ -224,6 +232,11 @@ struct device_traits;
 
 template<>
 struct device_traits<cpu_tag>{
+	//adding of indices
+	static std::size_t index_add(std::size_t i, std::size_t j){
+		return i+j;
+	}
+	
 	template <class Iterator, class Functor>
 	using transform_iterator = shark::blas::iterators::transform_iterator<Iterator, Functor>;
 

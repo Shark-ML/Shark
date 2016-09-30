@@ -274,7 +274,7 @@ private:
 template<class E1, class E2>
 class vector_addition: public vector_expression<vector_addition<E1,E2>, typename E1::device_type > {
 private:
-	typedef typename device_traits<typename E1::device_type>:: template multiply<typename E1::value_type> functor_type;
+	typedef typename device_traits<typename E1::device_type>:: template add<typename E1::value_type> functor_type;
 public:
 	typedef typename common_value_type<E1,E2>::type value_type;
 	typedef value_type const_reference;

@@ -37,16 +37,14 @@
 namespace shark {namespace blas {namespace kernels {
 
 
-///\brief Appliues F in any order to the elements of v and seed.
+///\brief Appliuees F in any order to the elements of v and a given initial value.
 ///
-/// result is the same as f(v_1,f(v_2,...f(v_n,seed))) assuming f is commutative
+/// result is the same as value = f(v_1,f(v_2,...f(v_n,value))) assuming f is commutative
 /// and associative.
 template<class F, class V, class Device>
-typename F::result_type vector_fold(vector_expression<V, Device> const& v, typename F::result_type seed) {
+void vector_fold(vector_expression<V, Device> const& v, typename F::result_type& value) {
 	typedef typename V::evaluation_category::tag TagV;
-	typename F::result_type value = seed;
 	bindings::vector_fold<F>(v(), value, TagV());
-	return value;
 }
 
 }}}

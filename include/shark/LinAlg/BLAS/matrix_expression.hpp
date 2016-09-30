@@ -30,7 +30,7 @@
 
 #include "detail/expression_optimizers.hpp"
 #include <boost/utility/enable_if.hpp>
-
+#include "kernels/matrix_fold.hpp"
 
 namespace shark {
 namespace blas {
@@ -349,119 +349,6 @@ triangular_prod(
 	return matrix_matrix_prod<Wrapper ,MatB>(Wrapper(A()), B());
 }
 
-namespace detail{
-
-	//TODO: This is cpu-specific. has to be moved to kernels
-	
-	template<class MatA>
-	typename MatA::value_type sum_impl(MatA const& A, column_major){
-		typename MatA::value_type totalSum = 0;
-		for(std::size_t j = 0; j != A.size2(); ++j){
-			totalSum += sum(column(A,j));
-		}
-		return totalSum;
-	}
-
-	template<class MatA>
-	typename MatA::value_type sum_impl(MatA const& A, row_major){
-		typename MatA::value_type totalSum = 0;
-		for(std::size_t i = 0; i != A.size1(); ++i){
-			totalSum += sum(row(A,i));
-		}
-		return totalSum;
-	}
-
-	template<class MatA>
-	typename MatA::value_type sum_impl(MatA const& A, unknown_orientation){
-		return sum_impl(A,row_major());
-	}
-
-
-	//dispatcher for triangular matrix
-	template<class MatA,class Orientation,class Triangular>
-	typename MatA::value_type sum_impl(MatA const& A, triangular<Orientation,Triangular>){
-		return sum_impl(A,Orientation());
-	}
-
-	//dispatcher
-	template<class MatA>
-	typename MatA::value_type sum_impl(MatA const& A){
-		return sum_impl(A,typename MatA::orientation());
-	}
-
-	template<class MatA>
-	typename MatA::value_type max_impl(MatA const& A, column_major){
-		typename MatA::value_type maximum = 0;
-		for(std::size_t j = 0; j != A.size2(); ++j){
-			maximum = std::max(maximum, max(column(A,j)));
-		}
-		return maximum;
-	}
-
-	template<class MatA>
-	typename MatA::value_type max_impl(MatA const& A, row_major){
-		typename MatA::value_type maximum = 0;
-		for(std::size_t i = 0; i != A.size1(); ++i){
-			maximum= std::max(maximum, max(row(A,i)));
-		}
-		return maximum;
-	}
-
-	template<class MatA>
-	typename MatA::value_type max_impl(MatA const& A, unknown_orientation){
-		return max_impl(A,row_major());
-	}
-
-	//dispatcher for triangular matrix
-	template<class MatA,class Orientation,class Triangular>
-	typename MatA::value_type max_impl(MatA const& A, triangular<Orientation, Triangular>){
-		return std::max(max_impl(A,Orientation()),0.0);
-	}
-
-	//dispatcher
-	template<class MatA>
-	typename MatA::value_type max_impl(MatA const& A){
-		return max_impl(A,typename MatA::orientation());
-	}
-
-	template<class MatA>
-	typename MatA::value_type min_impl(MatA const& A, column_major){
-		typename MatA::value_type minimum = 0;
-		for(std::size_t j = 0; j != A.size2(); ++j){
-			minimum= std::min(minimum, min(column(A,j)));
-		}
-		return minimum;
-	}
-
-	template<class MatA>
-	typename MatA::value_type min_impl(MatA const& A, row_major){
-		typename MatA::value_type minimum = 0;
-		for(std::size_t i = 0; i != A.size1(); ++i){
-			minimum= std::min(minimum, min(row(A,i)));
-		}
-		return minimum;
-	}
-
-	template<class MatA>
-	typename MatA::value_type min_impl(MatA const& A, unknown_orientation){
-		return min_impl(A,row_major());
-	}
-
-	//dispatcher for triangular matrix
-	template<class MatA,class Orientation,class Triangular>
-	typename MatA::value_type min_impl(MatA const& A, triangular<Orientation,Triangular>){
-		return std::min(min_impl(A,Orientation()),0.0);
-	}
-
-	//dispatcher
-	template<class MatA>
-	typename MatA::value_type min_impl(MatA const& A){
-		return min_impl(A,typename MatA::orientation());
-	}
-
-}//end detail, END TODO: has to be moved to kernels
-
-
 template<class MatA, class Device>
 sum_matrix_rows<MatA>
 sum_rows(matrix_expression<MatA, Device> const& A){
@@ -469,25 +356,39 @@ sum_rows(matrix_expression<MatA, Device> const& A){
 }
 
 template<class MatA, class Device>
-sum_matrix_rows<typename detail::matrix_transpose_optimizer<typename const_expression<MatA>::type >::type >
-sum_columns(matrix_expression<MatA, Device> const& A){
+auto sum_columns(matrix_expression<MatA, Device> const& A)->decltype(sum_rows(trans(A))){
 	return sum_rows(trans(A));
 }
 
 
 template<class MatA, class Device>
 typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
-	return detail::sum_impl(eval_block(A));
+	typedef typename MatA::value_type value_type;
+	typedef typename device_traits<Device>:: template add<value_type> functor_type;
+	auto const& elem_result = eval_block(A);
+	value_type result = 0;
+	kernels::matrix_fold<functor_type>(elem_result,result);
+	return result;
 }
 
 template<class MatA, class Device>
 typename MatA::value_type max(matrix_expression<MatA, Device> const& A){
-	return detail::max_impl(eval_block(A));
+	typedef typename MatA::value_type value_type;
+	typedef typename device_traits<Device>:: template max<value_type> functor_type;
+	auto const& elem_result = eval_block(A);
+	value_type result = 0;
+	kernels::matrix_fold<functor_type>(elem_result,result);
+	return result;
 }
 
 template<class MatA, class Device>
 typename MatA::value_type min(matrix_expression<MatA, Device> const& A){
-	return detail::min_impl(eval_block(A));
+	typedef typename MatA::value_type value_type;
+	typedef typename device_traits<Device>:: template min<value_type> functor_type;
+	auto const& elem_result = eval_block(A);
+	value_type result = 0;
+	kernels::matrix_fold<functor_type>(elem_result,result);
+	return result;
 }
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and B.

@@ -222,10 +222,14 @@ public:
 	// High level interface
 	// ---------
 
-	// Element access
-	template <class IndexExpression>
-	auto operator()(IndexExpression const& i) const -> decltype(this->expression()(this->start() + i)){
-		return m_expression(m_start + i);
+	// Element access	
+	template <class IndexExpr>
+	auto operator()(IndexExpr const& i) const -> decltype(this->expression()(
+		device_traits<typename V::device_type>::index_add(this->start(),i)
+	)){
+		return m_expression(
+			device_traits<typename V::device_type>::index_add(start(),i)
+		);
 	}
 
 	// Assignment operators 
