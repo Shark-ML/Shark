@@ -120,7 +120,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		//Create attribute tables
 		auto tables = Index{trainDataView};
 
-		auto n_trainData = tables.size().n_elements;
+		auto n_trainData = tables.noRows();
 		auto labelSum = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
 			return trainDataView[i].label;
 		});
@@ -253,7 +253,7 @@ buildTree(detail::cart::sink<Index&> tables,
 	NodeInfo& nodeInfo = tree[0];
 
 	//n = Total number of cases in the dataset
-	std::size_t n = tables.size().n_elements;
+	std::size_t n = tables.noRows();
 
 	if(detail::cart::gini(cFull,n)==0.0 || n <= m_nodeSize) {
 		nodeInfo.label = detail::cart::hist(cFull);
@@ -293,7 +293,7 @@ RFTrainer::Split RFTrainer::findSplit(
 		ClassVector const& cFull,
 		set<size_t> const& tableIndices) const
 {
-	auto n = tables.size().n_elements;
+	auto n = tables.noRows();
 	Split best;
 	auto const cEmpty = ClassVector(m_labelCardinality);
 	for (std::size_t attributeIndex : tableIndices){
@@ -334,7 +334,7 @@ buildTree(detail::cart::sink<Index&> tables,
 
 	//Construct tree
 	TreeType tree;
-	auto n = tables.size().n_elements;
+	auto n = tables.noRows();
 	// TODO(jwrigley): Why is average assigned to all nodes, when hist is only applied to leaves?
 	tree.push_back(NodeInfo{nodeId,sumFull/n});
 	NodeInfo& nodeInfo = tree[0];
@@ -374,7 +374,7 @@ RFTrainer::Split RFTrainer::findSplit (
 		RealVector const& sumFull,
 		set<size_t> const &tableIndices) const
 {
-	auto n = tables.size().n_elements;
+	auto n = tables.noRows();
 	Split best{};
 	LabelType const sumEmpty(m_labelDimension,0);
 	for (std::size_t const attributeIndex : tableIndices){

@@ -55,14 +55,16 @@ struct Attribute {
 	}
 };
 
-
+/**
+ * An Index of a dataset providing fast sorted-order lookup of each attribute.
+ */
 class Index {
 /// attribute table
 	using AttributeTable = std::vector<Attribute>;
-/// collecting of attribute tables
+/// collection of attribute tables
 	using AttributeTables = std::vector<AttributeTable>;
 
-	std::size_t m_noInputDimensions, m_noElements;
+	std::size_t m_noElements, m_noInputDimensions;
 	AttributeTables m_tables;
 
 	explicit Index(AttributeTables &&tables)
@@ -71,14 +73,6 @@ class Index {
 			  m_tables(std::move(tables))
 	{}
 public:
-	struct size_pair{
-		std::size_t n_inputDimensions, n_elements;
-		size_pair(std::size_t n_inputDimensions, std::size_t n_elements)
-				: n_inputDimensions(n_inputDimensions),
-				  n_elements(n_elements)
-		{}
-	};
-
 /** Creates an index of the dataset
  *  A dataset consisting of m input variables has m sorted attribute tables.
  *  [attribute | rid ]
@@ -93,7 +87,6 @@ public:
 		//Each entry in the outer vector is an attribute table
 		//For each column
 		for (std::size_t j = 0; j < m_noInputDimensions; j++) {
-			//m_tables.push_back({});
 			auto &table = m_tables[j];
 			table.reserve(n_elements);
 
@@ -131,9 +124,9 @@ public:
 							  Index{std::move(RAttributeTables)});
 	}
 
-	inline size_pair size() const {
-		return {m_noInputDimensions,m_noElements};
-	}
+	std::size_t noTables() const { return m_noInputDimensions; }
+	std::size_t noRows() const { return m_noElements; }
+	std::size_t size() const { return noTables(); }
 	inline AttributeTable const& operator[](std::size_t i) const {
 		return m_tables[i];
 	}
@@ -148,7 +141,7 @@ double gini(ClassVector const& countVector, std::size_t n);
 double misclassificationError(ClassVector const& countVector, std::size_t n);
 double crossEntropy(ClassVector const& countVector, std::size_t n);
 
-/// Create a count matrix as used in the classification case.
+/// Create a count vector as used in the classification case.
 ClassVector createCountVector(DataView<ClassificationDataset const> const& elements, std::size_t labelCardinality);
 
 }}} // namespace shark::detail::cart
