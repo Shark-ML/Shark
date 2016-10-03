@@ -296,10 +296,10 @@ RFTrainer::Split RFTrainer::findSplit(
 {
 	auto n = tables.noRows();
 	Split best;
-	auto const cEmpty = ClassVector(m_labelCardinality);
+	ClassVector cAbove(m_labelCardinality);
 	for (std::size_t attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
-		auto cAbove = cEmpty, cBelow = cFull;
+		auto cBelow = cFull; cAbove.clear();
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
 			auto const& label = elements[attributeTable[prev].id].label;
 
@@ -377,10 +377,10 @@ RFTrainer::Split RFTrainer::findSplit (
 {
 	auto n = tables.noRows();
 	Split best{};
-	LabelType const sumEmpty(m_labelDimension,0);
+	LabelType sumAbove(m_labelDimension);
 	for (std::size_t const attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
-		auto sumBelow = sumFull, sumAbove = sumEmpty;
+		auto sumBelow = sumFull; sumAbove.clear();
 
 		for(std::size_t prev=0,i=1; i<n; prev=i++){
 			auto const& label = elements[attributeTable[prev].id].label;

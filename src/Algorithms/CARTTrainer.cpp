@@ -275,7 +275,7 @@ buildTree(AttributeTables const &tables,
 		for (std::size_t attributeIndex=0; attributeIndex < m_inputDimension; ++attributeIndex){
 			AttributeTable const& table = tables[attributeIndex];
 			auto cTmpAbove = cAbove;
-			std::fill(cBelow.begin(),cBelow.end(),0);
+			cBelow.clear();
 			for(std::size_t i=0; i<n-1; ++i){//go through all possible splits
 				//Update the count classes of both splits after element i moved to the left split
 				unsigned int label = dataset.element(table[i].id).label;
