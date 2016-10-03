@@ -133,7 +133,10 @@ public:
 };
 
 /// Generate a histogram from the count vector.
-RealVector hist(ClassVector const& countVector);
+inline RealVector hist(ClassVector const& countVector) {
+	return countVector/double(sum(countVector));
+}
+
 using ImpurityMeasure = double (*)(ClassVector const& countVector, std::size_t n);
 
 /// Calculate the Gini impurity of the countVector
