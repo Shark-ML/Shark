@@ -93,14 +93,14 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 	DataView<RegressionDataset const> elements(dataset);
 
-	auto seed = static_cast<unsigned>(Rng::discrete(0,(unsigned)-1));
+	auto seed = Rng::discrete(0,(unsigned)-1);
 
 	auto oobPredictions = RealMatrix{n_elements,m_labelDimension};
 	std::vector<std::size_t> n_predictions(n_elements);
 
 	//Generate m_B trees
-	SHARK_PARALLEL_FOR(std::uint32_t b = 0; b < m_B; ++b){
-		Rng::rng_type rng{seed + b};
+	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
+		Rng::rng_type rng{static_cast<unsigned>(seed + b)};
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
 		std::vector<std::size_t> trainIndices(n_elements);
@@ -177,13 +177,13 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 	DataView<ClassificationDataset const> elements(dataset);
 
-	auto seed = static_cast<unsigned>(Rng::discrete(0,(unsigned)-1));
+	auto seed = Rng::discrete(0,(unsigned)-1);
 
 	UIntMatrix oobClassTally = UIntMatrix(n_elements,m_labelCardinality);
 
 	//Generate m_B trees
-	SHARK_PARALLEL_FOR(std::uint32_t b = 0; b < m_B; ++b){
-		Rng::rng_type rng{seed + b};
+	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
+		Rng::rng_type rng{static_cast<unsigned>(seed + b)};
 		//For each tree generate a subset of the dataset
 		//generate indices of the dataset (pick k out of n elements)
 		std::vector<std::size_t> trainIndices(n_elements);

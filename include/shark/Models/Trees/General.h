@@ -34,26 +34,14 @@
 
 #ifndef SHARK_MODELS_TREES_GENERAL_H
 #define SHARK_MODELS_TREES_GENERAL_H
+#include <iterator>
 #include <memory>
-template<class T> class TD;
-#define typeof(param) TD<decltype(param)>{}
 namespace shark {
 namespace detail {
 namespace cart {
 // Helper functions
 template<class T> using sink = T;
-struct fail_fast:std::runtime_error{
-	explicit fail_fast(char const* const msg) :std::runtime_error(msg) {}
-};
-#define  CART_STRINGIFY_DETAIL(num) #num
-#define CART_STRINGIFY(num) CART_STRINGIFY_DETAIL(num)
-#define CART_Expects(cond) \
-	if(!cond){ \
-		throw shark::detail::cart::fail_fast{"expectation failed at " \
-        __FILE__ ": " CART_STRINGIFY(__LINE__)}; \
-	}
 
-#define DEBUG(msg) std::cout << msg << std::endl
 template<class Iterator>
 inline std::size_t argmax(Iterator begin, Iterator end) {
 	std::size_t maxIndex = 0;

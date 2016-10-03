@@ -141,7 +141,7 @@ public:
 
 /// Generate a histogram from the count vector.
 RealVector hist(ClassVector const& countVector);
-using ImpurityMeasure = double (ClassVector const& countVector, std::size_t n);
+using ImpurityMeasure = double (*)(ClassVector const& countVector, std::size_t n);
 
 /// Calculate the Gini impurity of the countVector
 double gini(ClassVector const& countVector, std::size_t n);

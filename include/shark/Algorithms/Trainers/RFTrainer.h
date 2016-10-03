@@ -102,20 +102,23 @@ public:
 	SHARK_EXPORT_SYMBOL void train(RFClassifier& model, RegressionDataset const& dataset);
 
 	/// Set the number of random attributes to investigate at each node.
-	inline SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry) { m_try = mtry; }
+	SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry) { m_try = mtry; }
 
 
 	/// Set the number of trees to grow.
-	inline SHARK_EXPORT_SYMBOL void setNTrees(std::size_t nTrees) { m_B = nTrees; }
+	SHARK_EXPORT_SYMBOL void setNTrees(long nTrees) {
+		if(nTrees<1) throw SHARKEXCEPTION("[RFTrainer::setNTree] nTrees should be a positive number");
+		m_B = nTrees;
+	}
 
 
 	/// Controls when a node is considered pure. If set to 1, a node is pure
 	/// when it only consists of a single node.
-	inline SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nodeSize) { m_nodeSize = nodeSize; }
+	SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nodeSize) { m_nodeSize = nodeSize; }
 
 	/// Set the fraction of the original training dataset to use as the
 	/// out of bag sample. The default value is 0.66.
-	inline SHARK_EXPORT_SYMBOL void setOOBratio(double ratio)
+	SHARK_EXPORT_SYMBOL void setOOBratio(double ratio)
 	{
 		if(m_OOBratio <= 0 || m_OOBratio>1){
 			throw SHARKEXCEPTION("[RFTrainer::setOOBratio] OOBratio should be in the interval (0,1]");
@@ -136,7 +139,7 @@ public:
 	void setParameterVector(RealVector const& newParameters)
 	{
 		SHARK_ASSERT(newParameters.size() == numberOfParameters());
-		setNTrees((size_t) newParameters[0]);
+		setNTrees(static_cast<long>(newParameters[0]));
 	}
 
 protected:
@@ -148,7 +151,8 @@ protected:
 		std::size_t splitAttribute = 0, splitRow = 0;
 		double splitValue=0;
 
-		static constexpr double WORST_IMPURITY = std::numeric_limits<double>::max();
+		//static constexpr
+		double WORST_IMPURITY = std::numeric_limits<double>::max();
 		double impurity = WORST_IMPURITY;
 		double purity = 0;
 		LabelType sumAbove, sumBelow; // for regression
@@ -177,7 +181,7 @@ protected:
 	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type &rng) const;
 
 	/// Reset the training to its default parameters.
-	SHARK_EXPORT_SYMBOL void setDefaults();
+	void setDefaults();
 
 	/// Number of attributes in the dataset
 	std::size_t m_inputDimension;
@@ -191,7 +195,7 @@ protected:
 	std::size_t m_try;
 
 	/// number of trees in the forest
-	std::uint32_t m_B;
+	long m_B;
 
 	/// number of samples in the terminal nodes
 	std::size_t m_nodeSize;

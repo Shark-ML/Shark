@@ -246,8 +246,8 @@ void CARTTrainer::measureStrength(TreeType & tree, std::size_t nodeId, std::size
 //Classification case
 CARTTrainer::TreeType CARTTrainer::
 buildTree(AttributeTables const &tables,
-		  ClassificationDataset const &dataset,
-		  ClassVector &cAbove, std::size_t nodeId) {
+          ClassificationDataset const &dataset,
+          ClassVector &cAbove, std::size_t nodeId) {
     //Construct tree, and
 	// calculate the label of the node, which is the propability of class c
 	// given all points in this split for every class
@@ -334,7 +334,7 @@ buildTree(AttributeTables const &tables,
 RealVector CARTTrainer::hist(ClassVector const& countVector) const {
 
 	//create a normed histogram
-	std::size_t totalElements = 0;
+	unsigned totalElements = 0;
 	RealVector normedHistogram(m_labelCardinality);
 	normedHistogram.clear();
 	for (std::size_t i=0, s=countVector.size(); i<s; ++i){

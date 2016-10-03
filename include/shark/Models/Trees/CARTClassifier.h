@@ -88,13 +88,28 @@ public:
 		}
 		NodeInfo() {}
 		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId) {}
-		NodeInfo(std::size_t nodeId, LabelType const& label) : nodeId(nodeId), label(label) {}
-		NodeInfo(std::size_t nodeId, LabelType && label)
-				: nodeId(nodeId), label(std::move(label)) {}
+		NodeInfo(std::size_t nodeId, LabelType label) : nodeId(nodeId), label(std::move(label)) {}
 		NodeInfo(NodeInfo const&) = default;
-		NodeInfo(NodeInfo &&) = default;
 		NodeInfo& operator=(NodeInfo const&) = default;
-		NodeInfo& operator=(NodeInfo &&) = default;
+		NodeInfo(NodeInfo &&n) BOOST_NOEXCEPT_IF(std::is_nothrow_constructible<LabelType>::value)
+				: nodeId{n.nodeId}, attributeIndex{n.attributeIndex},
+				  attributeValue{n.attributeValue}, leftNodeId{n.leftNodeId},
+				  rightNodeId{n.rightNodeId}, label(std::move(n.label)),
+				  misclassProp{n.misclassProp}, r{n.r}, g{n.g}
+		{}
+		NodeInfo& operator=(NodeInfo &&n) BOOST_NOEXCEPT_IF((std::is_nothrow_assignable<LabelType,LabelType>::value))
+		{
+			nodeId = n.nodeId;
+			attributeIndex = n.attributeIndex;
+			attributeValue = n.attributeValue;
+			leftNodeId = n.leftNodeId;
+			rightNodeId = n.rightNodeId;
+			label = std::move(n.label);
+			misclassProp = n.misclassProp;
+			r = n.r;
+			g = n.g;
+			return *this;
+		}
 	};
 
 	/// Vector of structs that contains the splitting information and the labels.
@@ -130,8 +145,8 @@ public:
 		optimizeTree(m_tree);
 	}
 
-	CARTClassifier(TreeType&& tree, std::size_t d) noexcept
-			: m_tree{std::move(tree)}, m_inputDimension{d}
+	CARTClassifier(TreeType&& tree, std::size_t d) BOOST_NOEXCEPT_IF((std::is_nothrow_constructible<TreeType,TreeType>::value))
+			: m_tree(std::move(tree)), m_inputDimension{d}
 	{
 		optimizeTree(m_tree);
 	}
