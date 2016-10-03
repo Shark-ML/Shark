@@ -276,9 +276,10 @@ buildTree(detail::cart::sink<Index&> tables,
 	auto lrTables = tables.split(split.splitAttribute, split.splitRow);
 	//Continue recursively
 
-	nodeInfo.leftNodeId  = (nodeId<<1)+1;   nodeInfo.rightNodeId = (nodeId<<1)+2;
-
+	nodeInfo.leftNodeId = nodeId+1;
 	lTree = buildTree(lrTables.first, elements, split.cAbove, nodeInfo.leftNodeId, rng);
+
+	nodeInfo.rightNodeId = nodeInfo.leftNodeId + lTree.size();
 	rTree = buildTree(lrTables.second, elements, split.cBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
@@ -356,10 +357,10 @@ buildTree(detail::cart::sink<Index&> tables,
 	auto lrTables = tables.split(split.splitAttribute, split.splitRow);
 
 	//Continue recursively
-	nodeInfo.leftNodeId = (nodeId<<1)+1;
-	nodeInfo.rightNodeId = (nodeId<<1)+2;
-
+	nodeInfo.leftNodeId = nodeId+1;
 	TreeType&& lTree = buildTree(lrTables.first, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
+
+	nodeInfo.rightNodeId = nodeInfo.leftNodeId + lTree.size();
 	TreeType&& rTree = buildTree(lrTables.second, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
