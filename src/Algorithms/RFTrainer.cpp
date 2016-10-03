@@ -125,7 +125,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 			return trainDataView[i].label;
 		});
 
-		TreeType tree = buildTree(tables, trainDataView, labelSum, 0, rng);
+		TreeType tree = buildTree(std::move(tables), trainDataView, labelSum, 0, rng);
 		//TreeType tree = build(trainDataView,labelAvg,rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
@@ -204,7 +204,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		auto tables = SortedIndex{trainDataView};
 		auto&& cFull = detail::cart::createCountVector(trainDataView,m_labelCardinality);
 
-		TreeType tree = buildTree(tables, trainDataView, cFull, 0, rng);
+		TreeType tree = buildTree(std::move(tables), trainDataView, cFull, 0, rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
@@ -242,7 +242,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 }
 
 TreeType RFTrainer::
-buildTree(detail::cart::sink<SortedIndex&> tables,
+buildTree(SortedIndex&& tables,
 		  DataView<ClassificationDataset const> const& elements,
 		  ClassVector& cFull, std::size_t nodeId,
 		  Rng::rng_type& rng){
@@ -277,10 +277,10 @@ buildTree(detail::cart::sink<SortedIndex&> tables,
 	//Continue recursively
 
 	nodeInfo.leftNodeId = nodeId+1;
-	lTree = buildTree(lrTables.first, elements, split.cAbove, nodeInfo.leftNodeId, rng);
+	lTree = buildTree(std::move(lrTables.first), elements, split.cAbove, nodeInfo.leftNodeId, rng);
 
 	nodeInfo.rightNodeId = nodeInfo.leftNodeId + lTree.size();
-	rTree = buildTree(lrTables.second, elements, split.cBelow, nodeInfo.rightNodeId, rng);
+	rTree = buildTree(std::move(lrTables.second), elements, split.cBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
@@ -328,7 +328,7 @@ RFTrainer::Split RFTrainer::findSplit(
 }
 
 TreeType RFTrainer::
-buildTree(detail::cart::sink<SortedIndex&> tables,
+buildTree(SortedIndex&& tables,
 		  DataView<RegressionDataset const> const& elements,
 		  LabelType const& sumFull,
 		  std::size_t nodeId, Rng::rng_type& rng){
@@ -358,10 +358,10 @@ buildTree(detail::cart::sink<SortedIndex&> tables,
 
 	//Continue recursively
 	nodeInfo.leftNodeId = nodeId+1;
-	TreeType&& lTree = buildTree(lrTables.first, elements, split.sumAbove, nodeInfo.leftNodeId, rng);
+	TreeType&& lTree = buildTree(std::move(lrTables.first), elements, split.sumAbove, nodeInfo.leftNodeId, rng);
 
 	nodeInfo.rightNodeId = nodeInfo.leftNodeId + lTree.size();
-	TreeType&& rTree = buildTree(lrTables.second, elements, split.sumBelow, nodeInfo.rightNodeId, rng);
+	TreeType&& rTree = buildTree(std::move(lrTables.second), elements, split.sumBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));

@@ -168,10 +168,10 @@ protected:
 	};
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::SortedIndex&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::SortedIndex&> tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
 
 
 	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;

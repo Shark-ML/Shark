@@ -39,8 +39,6 @@ namespace shark {
 namespace detail {
 namespace cart {
 // Helper functions
-template<class T> using sink = T;
-
 template<class T, class F>
 inline T sum(std::size_t i, std::size_t n, F&& f) {
 	if(i>=n) return T{};
