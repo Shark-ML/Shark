@@ -8,7 +8,7 @@
 using namespace shark;
 
 template<class Operation, class Result>
-void checkDenseExpressionEquality(
+void checkDenseVectorEquality(
 	Operation op_gpu, Result const& result
 ){
 	BOOST_REQUIRE_EQUAL(op_gpu.size(), result.size());
@@ -33,9 +33,9 @@ std::size_t Dimensions = 50;
 struct VectorProxyFixture
 {
 	blas::gpu::vector<float> denseData;
+	blas::vector<float> denseData_cpu;
 	
-	VectorProxyFixture(){
-		blas::vector<float> denseData_cpu(Dimensions);
+	VectorProxyFixture():denseData_cpu(Dimensions){
 		for(std::size_t i = 0; i!= Dimensions;++i){
 			denseData_cpu(i) = i+5;
 		}
@@ -54,16 +54,16 @@ BOOST_AUTO_TEST_CASE( LinAlg_Dense_Subrange ){
 			std::size_t size=rangeEnd-rangeBegin;
 			blas::vector<float> vTest(size);
 			for(std::size_t i = 0; i != size; ++i){
-				vTest(i) = denseData(i+rangeBegin);
+				vTest(i) = denseData_cpu(i+rangeBegin);
 			}
-			checkDenseExpressionEquality(subrange(denseData,rangeBegin,rangeEnd),vTest);
+			checkDenseVectorEquality(subrange(denseData,rangeBegin,rangeEnd),vTest);
 			
 			//now test whether we can assign to a range like this.
 			blas::gpu::vector<float> newData(Dimensions,1.0);
 			auto rangeTest = subrange(newData,rangeBegin,rangeEnd);
 			noalias(rangeTest) = subrange(denseData,rangeBegin,rangeEnd);
 			//check that the assignment has been carried out correctly
-			checkDenseExpressionEquality(rangeTest,vTest);
+			checkDenseVectorEquality(rangeTest,vTest);
 
 			//check that after assignment all elements outside the range are still intact
 			blas::vector<float> data = copy_to_cpu(newData);

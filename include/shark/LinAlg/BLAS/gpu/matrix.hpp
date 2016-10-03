@@ -104,7 +104,7 @@ public:
 	///the kernels are enqueued on the supplied queue in case of a multi-queue setup.
 	matrix(boost::compute::command_queue& queue = boost::compute::system::default_queue())
 	: m_storage(queue.get_context())
-	, m_queue(queue),m_size1(0), m_size2(0){}
+	, m_queue(&queue),m_size1(0), m_size2(0){}
 
 	/// \brief Constructor of a matrix with a predefined size
 	/// By default, its elements are uninitialized

@@ -500,7 +500,7 @@ public:
 
 	typedef matrix_vector_range<M> closure_type;
 	typedef matrix_vector_range<typename const_expression<M>::type> const_closure_type;
-	typedef typename storage<M>::type storage_type;
+	typedef typename storage<M>::type::row_storage storage_type;
 	typedef typename M::const_storage_type const_storage_type;
 	typedef typename M::evaluation_category evaluation_category;
 
