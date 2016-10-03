@@ -328,11 +328,11 @@ public:
 	
 	const_column_iterator column_begin(size_type j) const {
 		RANGE_CHECK( j < size2());
-		return const_column_iterator(0,m_vector(j));
+		return const_column_iterator(m_vector(j),0);
 	}
 	const_column_iterator column_end(size_type j) const {
 		RANGE_CHECK( j < size2());
-		return const_column_iterator(size1(),m_vector(j));
+		return const_column_iterator(m_vector(j),size1());
 	}
 private:
 	expression_closure_type m_vector;
@@ -391,17 +391,17 @@ public:
 	typedef const_column_iterator column_iterator;
 
 	const_row_iterator row_begin(size_type i) const {
-		return const_row_iterator(0, m_value);
+		return const_row_iterator(m_value, 0);
 	}
 	const_row_iterator row_end(size_type i) const {
-		return const_row_iterator(size2(), m_value);
+		return const_row_iterator(m_value, size2());
 	}
 	
 	const_row_iterator column_begin(size_type j) const {
-		return const_row_iterator(0, m_value);
+		return const_row_iterator(m_value, 0);
 	}
 	const_row_iterator column_end(size_type j) const {
-		return const_row_iterator(size1(), m_value);
+		return const_row_iterator(m_value, size1());
 	}
 private:
 	size_type m_size1;

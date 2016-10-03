@@ -165,10 +165,10 @@ public:
 	typedef typename device_traits<Device>:: template constant_iterator<T> const_iterator;
 
 	const_iterator begin() const {
-		return const_iterator(0,m_value);
+		return const_iterator(m_value,0);
 	}
 	const_iterator end() const {
-		return const_iterator(m_size,m_value);
+		return const_iterator(m_value,m_size);
 	}
 
 private:

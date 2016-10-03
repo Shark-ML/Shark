@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Dense ){
 		source_cpu(i) = 2*i+1;
 		target_cpu(i) = 3*i+2;
 		result_add_cpu(i) = source_cpu(i) + target_cpu(i);
-		result_add_scalar_cpu(i) = source_cpu(i) + scalar;
+		result_add_scalar_cpu(i) = target_cpu(i) + scalar;
 	}
 	blas::gpu::vector<unsigned int> source = blas::gpu::copy_to_gpu(source_cpu);
 	blas::gpu::vector<unsigned int> result_add = blas::gpu::copy_to_gpu(result_add_cpu);
@@ -46,14 +46,12 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Assign_Dense ){
 	{
 		std::cout<<"testing functor assignment"<<std::endl;
 		blas::gpu::vector<unsigned int> target = blas::gpu::copy_to_gpu(target_cpu);
-		std::cout<<"testing dense-dense"<<std::endl;
 		blas::kernels::assign<blas::device_traits<blas::gpu_tag>::add<unsigned int> >(target,source);
 		checkVectorEqual(target,result_add);
 	}
 	{
 		std::cout<<"testing functor scalar assignment"<<std::endl;
 		blas::gpu::vector<unsigned int> target = blas::gpu::copy_to_gpu(target_cpu);
-		std::cout<<"testing dense-dense"<<std::endl;
 		blas::kernels::assign<blas::device_traits<blas::gpu_tag>::add<unsigned int> >(target,scalar);
 		checkVectorEqual(target,result_add_scalar);
 	}

@@ -18,7 +18,7 @@ void checkDenseExpressionEquality(
 	//test copy to cpu, this tests the buffer
 	blas::vector<float> op = copy_to_cpu(op_gpu);
 	for(std::size_t i = 0; i != op.size(); ++i){
-		BOOST_CHECK_CLOSE(result(i), op(i),1.e-8);
+		BOOST_CHECK_CLOSE(result(i), op(i),1.e-3);
 	}
 	
 	//test iterators
@@ -27,7 +27,7 @@ void checkDenseExpressionEquality(
 	boost::compute::copy(op_gpu.begin(),op_gpu.end(),opcopy_gpu.begin());
 	blas::vector<float> opcopy = copy_to_cpu(opcopy_gpu);
 	for(std::size_t i = 0; i != result.size(); ++i){
-		BOOST_CHECK_CLOSE(result(i), opcopy(i),1.e-8);
+		BOOST_CHECK_CLOSE(result(i), opcopy(i),1.e-3);
 	}
 }
 
@@ -51,6 +51,20 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Unary_Minus )
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
 	checkDenseExpressionEquality(-x,result);
 }
+BOOST_AUTO_TEST_CASE( BLAS_Vector_Scalar_Add )
+{
+	vector<float> x_cpu(Dimensions); 
+	vector<float> result(Dimensions);
+	
+	for (size_t i = 0; i < Dimensions; i++)
+	{
+		x_cpu(i) = i-3.0;
+		result(i)= 5.0+x_cpu(i);
+	}
+	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
+	checkDenseExpressionEquality(5.0 + x,result);
+	checkDenseExpressionEquality(x + 5.0,result);
+}
 BOOST_AUTO_TEST_CASE( BLAS_Vector_Scalar_Multiply )
 {
 	vector<float> x_cpu(Dimensions); 
@@ -72,7 +86,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Scalar_Div )
 	
 	for (size_t i = 0; i < Dimensions; i++)
 	{
-		x_cpu(i) = i-3.0;
+		x_cpu(i) = 2*i+1.0;
 		result(i)= x_cpu(i)/5.0;
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -85,7 +99,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Abs )
 	
 	for (size_t i = 0; i < Dimensions; i++)
 	{
-		x_cpu(i) = -i+3.0;
+		x_cpu(i) = 3.0-1;
 		result(i)= std::abs(x_cpu(i));
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -98,7 +112,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Sqr )
 	
 	for (size_t i = 0; i < Dimensions; i++)
 	{
-		x_cpu(i) = -i+3.0;
+		x_cpu(i) = 3.0-i;
 		result(i)= x_cpu(i)*x_cpu(i);
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -124,7 +138,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Exp )
 	
 	for (size_t i = 0; i < Dimensions; i++)
 	{
-		x_cpu(i) = i;
+		x_cpu(i) = 0.01*i;
 		result(i)=std::exp(x_cpu(i));
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -175,7 +189,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_SoftPlus )
 	
 	for (size_t i = 0; i < Dimensions; i++)
 	{
-		x_cpu(i) = i;
+		x_cpu(i) = 0.02*i;
 		result(i) = shark::softPlus(x_cpu(i));
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -344,7 +358,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_Sum )
 	float result = 0;
 	
 	for (size_t i = 0; i < Dimensions; i++){
-		x_cpu(i) = 2*i-5;
+		x_cpu(i) = 2*i-5.0;
 		result +=x_cpu(i);
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -357,7 +371,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_1 )
 	float result = 0;
 	
 	for (size_t i = 0; i < Dimensions; i++){
-		x_cpu(i) = 2*i-5;
+		x_cpu(i) = 2*i-5.0;
 		result +=std::abs(x_cpu(i));
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -370,7 +384,7 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_sqr )
 	float result = 0;
 	
 	for (size_t i = 0; i < Dimensions; i++){
-		x_cpu(i) = 2*i-5;
+		x_cpu(i) = 0.1*(2*i-5.0);
 		result +=x_cpu(i)*x_cpu(i);
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -380,10 +394,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_norm_2 )
 {
 	vector<float> x_cpu(Dimensions); 
 	float result = 0;
-	
 	for (size_t i = 0; i < Dimensions; i++){
-		x_cpu(i) = 2*i-5;
-		result +=x_cpu(i)*x_cpu(i);
+		x_cpu(i) = 0.1*(2*i-5.0);
+		result += x_cpu(i)*x_cpu(i);
 	}
 	result = std::sqrt(result);
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
@@ -415,14 +428,15 @@ BOOST_AUTO_TEST_CASE( BLAS_Vector_inner_prod )
 {
 	vector<float> x_cpu(Dimensions); 
 	vector<float> y_cpu(Dimensions); 
-	
+	double result = 0;
 	for (size_t i = 0; i < Dimensions; i++){
-		x_cpu(i) = exp(-(i-5.0)*(i-5.0));
-		y_cpu(i) = exp((i-5.0)*(i-5.0));
+		x_cpu(i) = 0.1*i+3.0;
+		y_cpu(i) = i+1.0;
+		result += x_cpu(i) * y_cpu(i);
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
 	gpu::vector<float> y = gpu::copy_to_gpu(y_cpu);
-	BOOST_CHECK_CLOSE(inner_prod(x,y),(float)Dimensions,1.e-5);
+	BOOST_CHECK_CLOSE(inner_prod(x,y),result,1.e-4);
 }
 
 

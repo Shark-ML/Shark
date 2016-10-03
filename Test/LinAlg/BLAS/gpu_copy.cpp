@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Vector_Copy_Plus_Assign ){
 	blas::vector<float> target_cpu(100,-2.0);
 	noalias(target_cpu) += copy_to_cpu(target_gpu);
 	
-	BOOST_CHECK_SMALL(norm_inf(source - target_cpu+1), 1.e-10f);	
+	BOOST_CHECK_SMALL(norm_inf(source - target_cpu-1), 1.e-10f);	
 }
 
 BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Matrix_Copy ){
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Matrix_Copy_Plus_Assign ){
 	blas::matrix<float> target_cpu(32,16,-2.0);
 	noalias(target_cpu) += copy_to_cpu(target_gpu);
 	
-	BOOST_CHECK_SMALL(norm_inf(source - target_cpu), 1.e-10f);	
+	BOOST_CHECK_SMALL(norm_inf(source - target_cpu-1), 1.e-10f);	
 }
 
 BOOST_AUTO_TEST_SUITE_END()

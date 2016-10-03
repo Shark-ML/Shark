@@ -182,12 +182,13 @@ SHARK_BINARY_VECTOR_EXPRESSION(max, max)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-        vector_binary<VecV, scalar_vector<T, Device>, typename device_traits<Device>:: template F<typename std::common_type<typename VecV::value_type,T>::type> > \
+        vector_binary<VecV, scalar_vector<typename VecV::value_type, Device>, \
+	typename device_traits<Device>:: template F<typename VecV::value_type> > \
 >::type \
 name (vector_expression<VecV, Device> const& v, T t){ \
-	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
+	typedef typename VecV::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
-	return  vector_binary<VecV, scalar_vector<T, Device>, functor_type >(v(), scalar_vector<T, Device>(v().size(),t), functor_type()); \
+	return  vector_binary<VecV, scalar_vector<type, Device>, functor_type >(v(), scalar_vector<type, Device>(v().size(),(type)t), functor_type()); \
 }
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator/, divide)
 SHARK_VECTOR_SCALAR_TRANSFORMATION(operator<, less_than)
@@ -206,10 +207,10 @@ SHARK_VECTOR_SCALAR_TRANSFORMATION(pow, pow)
 template<class T, class VecV, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename VecV::value_type >,\
-	vector_binary<scalar_vector<T, Device>, VecV, typename device_traits<Device>:: template F<typename std::common_type<typename VecV::value_type,T>::type> > \
+	vector_binary<scalar_vector<typename VecV::value_type, Device>, VecV, typename device_traits<Device>:: template F<typename VecV::value_type> > \
 >::type \
 name (T t, vector_expression<VecV, Device> const& v){ \
-	typedef typename std::common_type<typename VecV::value_type,T>::type type;\
+	typedef typename VecV::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
 	return  vector_binary<scalar_vector<T, Device>, VecV, functor_type >(scalar_vector<T, Device>(v().size(),t), v() ,functor_type()); \
 }

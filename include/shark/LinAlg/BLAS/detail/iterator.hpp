@@ -607,7 +607,7 @@ public:
 
 	// Construction and destruction
 	constant_iterator() {}
-	constant_iterator(size_type position, value_type value)
+	constant_iterator(value_type value, size_type position)
 		:m_position(position),m_value(value) {}
 
 	// Arithmetic

@@ -69,8 +69,8 @@ void vector_assign_functor(
 	F f,
 	dense_tag, dense_tag
 ) {
-	auto zip_begin = boost::compute::make_zip_iterator(boost::make_tuple(e().begin(), e().begin()));
-	auto zip_end = boost::compute::make_zip_iterator(boost::make_tuple(e().end(), e().end()));
+	auto zip_begin = boost::compute::make_zip_iterator(boost::make_tuple(v().begin(), e().begin()));
+	auto zip_end = boost::compute::make_zip_iterator(boost::make_tuple(v().end(), e().end()));
 	boost::compute::transform( zip_begin,zip_end, v().begin(), boost::compute::detail::unpack(f), v().queue());
 }
 

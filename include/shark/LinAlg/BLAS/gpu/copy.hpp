@@ -104,12 +104,11 @@ private:
 		auto& buffer = storageE.buffer.get_buffer();
 		//map buffer to host memory
 		typename VecE::value_type* p = (typename VecE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, storageE.offset, buffer.size()
+			buffer, CL_MAP_READ, 0, buffer.size()
 		);
 		//adapt host memory buffer to vector and assign
 		typedef dense_vector_adaptor<typename VecE::value_type> AdaptE;
-		AdaptE adaptE(p,size(), storageE.stride);
-		
+		AdaptE adaptE(p + storageE.offset,size(), storageE.stride);
 		assign(x, vector_scalar_multiply<AdaptE >( adaptE, alpha));
 		
 		//unmap memory
@@ -125,11 +124,11 @@ private:
 		auto& buffer = storageE.buffer.get_buffer();
 		//map buffer to host memory
 		typename VecE::value_type* p = (typename VecE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, storageE.offset, buffer.size()
+			buffer, CL_MAP_READ, 0, buffer.size()
 		);
 		//adapt host memory buffer to vector and assign
 		typedef dense_vector_adaptor<typename VecE::value_type> AdaptE;
-		AdaptE adaptE(p,size(), storageE.stride);
+		AdaptE adaptE(p + storageE.offset,size(), storageE.stride);
 		
 		plus_assign(x,vector_scalar_multiply<AdaptE >( adaptE, alpha));
 		
@@ -227,10 +226,10 @@ private:
 		auto& buffer = storagex.buffer.get_buffer();
 		//map buffer to host memory
 		typename VecX::value_type* p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
-			buffer, CL_MAP_WRITE, storagex.offset, buffer.size()
+			buffer, CL_MAP_WRITE, 0, buffer.size()
 		);
 		//adapt host memory buffer to vector and assign
-		dense_vector_adaptor<typename VecX::value_type> adaptX(p,size(), storagex.stride);
+		dense_vector_adaptor<typename VecX::value_type> adaptX(p + storagex.offset,size(), storagex.stride);
 		assign(adaptX,vector_scalar_multiply<expression_closure_type>(m_expression,alpha));
 		
 		//unmap memory
@@ -246,7 +245,7 @@ private:
 		auto& buffer = storagex.buffer.get_buffer();
 		//map buffer to host memory
 		typename VecX::value_type* p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
-			buffer, CL_MAP_WRITE, storagex.offset, buffer.size()
+			buffer, CL_MAP_WRITE, storagex.offset, buffer.size() - storagex.offset
 		);
 		//adapt host memory buffer to vector and assign
 		dense_vector_adaptor<typename VecX::value_type> adaptX(p,size(), storagex.stride);
@@ -332,14 +331,14 @@ private:
 		auto& buffer = storageE.buffer.get_buffer();
 		//map buffer to host memory
 		typename MatE::value_type* p = (typename MatE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, storageE.offset, buffer.size()
+			buffer, CL_MAP_READ, 0, buffer.size()
 		);
 		//adapt host memory buffer to matrix and assign
 		typedef typename MatE::orientation EOrientation;
 		std::size_t stride1 = EOrientation::index_M(storageE.leading_dimension,1);
 		std::size_t stride2 = EOrientation::index_m(storageE.leading_dimension,1);
 		typedef dense_matrix_adaptor<typename MatE::value_type, EOrientation> AdaptE;
-		AdaptE adaptE(p,size1(), size2(), stride1,stride2);
+		AdaptE adaptE(p + storageE.offset,size1(), size2(), stride1,stride2);
 		
 		assign(X, matrix_scalar_multiply<AdaptE >( adaptE, alpha));
 		
@@ -356,14 +355,14 @@ private:
 		auto& buffer = storageE.buffer.get_buffer();
 		//map buffer to host memory
 		typename MatE::value_type* p = (typename MatE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, storageE.offset, buffer.size()
+			buffer, CL_MAP_READ, 0, buffer.size()
 		);
 		//adapt host memory buffer to matrix and assign
 		typedef typename MatE::orientation EOrientation;
 		std::size_t stride1 = EOrientation::index_M(storageE.leading_dimension,1);
 		std::size_t stride2 = EOrientation::index_m(storageE.leading_dimension,1);
 		typedef dense_matrix_adaptor<typename MatE::value_type, EOrientation> AdaptE;
-		AdaptE adaptE(p,size1(), size2(), stride1,stride2);
+		AdaptE adaptE(p + storageE.offset, size1(), size2(), stride1,stride2);
 		
 		plus_assign(X,matrix_scalar_multiply<AdaptE >( adaptE, alpha));
 		
@@ -467,7 +466,7 @@ private:
 		auto& buffer = storageX.buffer.get_buffer();
 		//map buffer to host memory
 		typename MatX::value_type* p = (typename MatX::value_type*) X().queue().enqueue_map_buffer(
-			buffer, CL_MAP_WRITE, storageX.offset, buffer.size()
+			buffer, CL_MAP_WRITE, 0, buffer.size()
 		);
 		//adapt host memory buffer to vector and assign
 		typedef typename MatX::orientation XOrientation;
@@ -489,14 +488,14 @@ private:
 		auto& buffer = storageX.buffer.get_buffer();
 		//map buffer to host memory
 		typename MatX::value_type* p = (typename MatX::value_type*) X().queue().enqueue_map_buffer(
-			buffer, CL_MAP_WRITE, storageX.offset, buffer.size()
+			buffer, CL_MAP_WRITE, 0, buffer.size()
 		);
 		//adapt host memory buffer to matrix and assign
 		typedef typename MatX::orientation XOrientation;
 		std::size_t stride1 = XOrientation::index_M(storageX.leading_dimension, 1);
 		std::size_t stride2 = XOrientation::index_m(storageX.leading_dimension, 1);
 		typedef dense_matrix_adaptor<typename MatX::value_type, XOrientation> AdaptX;
-		AdaptX adaptX(p, size1(), size2(), stride1, stride2);
+		AdaptX adaptX(p + storageX.offset, size1(), size2(), stride1, stride2);
 		
 		plus_assign(adaptX,matrix_scalar_multiply<MatE >( e(), alpha));
 		

@@ -29,7 +29,7 @@ void checkDenseVectorEquality(
 	}
 }
 
-std::size_t Dimensions = 50;
+std::size_t Dimensions = 20;
 struct VectorProxyFixture
 {
 	blas::gpu::vector<float> denseData;
