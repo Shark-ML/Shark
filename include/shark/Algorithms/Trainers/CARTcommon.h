@@ -58,7 +58,7 @@ struct Attribute {
 /**
  * An Index of a dataset providing fast sorted-order lookup of each attribute.
  */
-class Index {
+class SortedIndex {
 /// attribute table
 	using AttributeTable = std::vector<Attribute>;
 /// collection of attribute tables
@@ -67,7 +67,7 @@ class Index {
 	std::size_t m_noElements, m_noInputDimensions;
 	AttributeTables m_tables;
 
-	explicit Index(AttributeTables &&tables)
+	explicit SortedIndex(AttributeTables &&tables)
 			: m_noElements(tables[0].size()),
 			  m_noInputDimensions(tables.size()),
 			  m_tables(std::move(tables))
@@ -78,7 +78,7 @@ public:
  *  [attribute | rid ]
  */
 	template<class Dataset>
-	explicit Index(DataView<Dataset const> const &elements)
+	explicit SortedIndex(DataView<Dataset const> const &elements)
 			: m_noElements{elements.size()},
 			  m_noInputDimensions{elements[0].input.size()},
 			  m_tables(m_noInputDimensions)
@@ -102,7 +102,7 @@ public:
  * Returns two Indices: left and right
  * Calculated from splitting tables at (index, valIndex)
  */
-	std::pair<Index, Index> split(std::size_t index, std::size_t valIndex) {
+	std::pair<SortedIndex, SortedIndex> split(std::size_t index, std::size_t valIndex) {
 		//Build a hash table for fast lookup
 		std::unordered_map<std::size_t, bool> hash;
 		for(std::size_t i = 0, s = m_tables[index].size(); i<s; ++i) {
@@ -120,8 +120,8 @@ public:
 			LAttributeTables.emplace_back(std::move(table));
 		}
 		m_tables.clear(); m_tables.shrink_to_fit();
-		return std::make_pair(Index{std::move(LAttributeTables)},
-							  Index{std::move(RAttributeTables)});
+		return std::make_pair(SortedIndex{std::move(LAttributeTables)},
+							  SortedIndex{std::move(RAttributeTables)});
 	}
 
 	std::size_t noTables() const { return m_noInputDimensions; }

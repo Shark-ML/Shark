@@ -168,14 +168,14 @@ protected:
 	};
 
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::Index&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::SortedIndex&> tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::Index&> tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::sink<detail::cart::SortedIndex&> tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
 
 
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::Index const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::Index const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
 
 	/// Generate random table indices.
 	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type &rng) const;

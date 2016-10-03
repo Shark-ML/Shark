@@ -39,7 +39,7 @@
 
 using namespace shark;
 using std::set;
-using detail::cart::Index;
+using detail::cart::SortedIndex;
 
 
 //Constructor
@@ -118,7 +118,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
-		auto tables = Index{trainDataView};
+		auto tables = SortedIndex{trainDataView};
 
 		auto n_trainData = tables.noRows();
 		auto labelSum = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
@@ -201,7 +201,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
-		auto tables = Index{trainDataView};
+		auto tables = SortedIndex{trainDataView};
 		auto&& cFull = detail::cart::createCountVector(trainDataView,m_labelCardinality);
 
 		TreeType tree = buildTree(tables, trainDataView, cFull, 0, rng);
@@ -242,7 +242,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 }
 
 TreeType RFTrainer::
-buildTree(detail::cart::sink<Index&> tables,
+buildTree(detail::cart::sink<SortedIndex&> tables,
 		  DataView<ClassificationDataset const> const& elements,
 		  ClassVector& cFull, std::size_t nodeId,
 		  Rng::rng_type& rng){
@@ -289,7 +289,7 @@ buildTree(detail::cart::sink<Index&> tables,
 }
 
 RFTrainer::Split RFTrainer::findSplit(
-		Index const& tables,
+		SortedIndex const& tables,
 		DataView<ClassificationDataset const> const& elements,
 		ClassVector const& cFull,
 		set<size_t> const& tableIndices) const
@@ -328,7 +328,7 @@ RFTrainer::Split RFTrainer::findSplit(
 }
 
 TreeType RFTrainer::
-buildTree(detail::cart::sink<Index&> tables,
+buildTree(detail::cart::sink<SortedIndex&> tables,
 		  DataView<RegressionDataset const> const& elements,
 		  LabelType const& sumFull,
 		  std::size_t nodeId, Rng::rng_type& rng){
@@ -370,7 +370,7 @@ buildTree(detail::cart::sink<Index&> tables,
 }
 
 RFTrainer::Split RFTrainer::findSplit (
-		Index const& tables,
+		SortedIndex const& tables,
 		DataView<RegressionDataset const> const &elements,
 		RealVector const& sumFull,
 		set<size_t> const &tableIndices) const
