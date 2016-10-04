@@ -179,7 +179,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 
 	auto seed = Rng::discrete(0,(unsigned)-1);
 
-	UIntMatrix oobClassTally = UIntMatrix(n_elements,m_labelCardinality);
+	UIntMatrix oobClassTally(n_elements,m_labelCardinality);
 
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
@@ -201,10 +201,9 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 		auto trainDataView = subset(elements,trainIndices);
 
 		//Create attribute tables
-		auto tables = SortedIndex{trainDataView};
 		auto&& cFull = detail::cart::createCountVector(trainDataView,m_labelCardinality);
 
-		TreeType tree = buildTree(std::move(tables), trainDataView, cFull, 0, rng);
+		TreeType tree = buildTree(SortedIndex{trainDataView}, trainDataView, cFull, 0, rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
@@ -248,7 +247,7 @@ buildTree(SortedIndex&& tables,
 		  Rng::rng_type& rng){
 
 	//Construct tree
-	TreeType lTree, rTree, tree;
+	TreeType tree;
 	tree.push_back(NodeInfo{nodeId});
 	NodeInfo& nodeInfo = tree[0];
 
@@ -277,10 +276,10 @@ buildTree(SortedIndex&& tables,
 	//Continue recursively
 
 	nodeInfo.leftNodeId = nodeId+1;
-	lTree = buildTree(std::move(lrTables.first), elements, split.cAbove, nodeInfo.leftNodeId, rng);
+	TreeType lTree = buildTree(std::move(lrTables.first), elements, split.cAbove, nodeInfo.leftNodeId, rng);
 
 	nodeInfo.rightNodeId = nodeInfo.leftNodeId + lTree.size();
-	rTree = buildTree(std::move(lrTables.second), elements, split.cBelow, nodeInfo.rightNodeId, rng);
+	TreeType rTree = buildTree(std::move(lrTables.second), elements, split.cBelow, nodeInfo.rightNodeId, rng);
 
 	tree.reserve(tree.size()+lTree.size()+rTree.size());
 	std::move(lTree.begin(),lTree.end(),std::back_inserter(tree));
@@ -317,13 +316,13 @@ RFTrainer::Split RFTrainer::findSplit(
 				//Found a more pure split, store the attribute index and value
 				best.splitAttribute = attributeIndex;
 				best.splitRow = prev;
-				best.splitValue = attributeTable[prev].value;
 				best.impurity = impurity;
 				best.cAbove = cAbove;
 				best.cBelow = cBelow;
 			}
 		}
 	}
+	best.splitValue = tables[best.splitAttribute][best.splitRow].value;
 	return best;
 }
 

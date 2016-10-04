@@ -36,6 +36,7 @@
 
 #include <shark/Models/Trees/General.h>
 #include <shark/Data/DataView.h>
+#include <shark/Models/Trees/CARTClassifier.h>
 #include <vector>
 #include <utility>
 namespace shark {
@@ -43,6 +44,28 @@ namespace detail {
 namespace cart {
 /// ClassVector
 using ClassVector = UIntVector;
+
+class Split{
+	using NodeInfo = CARTClassifier<RealVector>::NodeInfo;
+public:
+	std::size_t splitAttribute = 0, splitRow = 0;
+	double splitValue=0;
+
+	//static constexpr
+	double WORST_IMPURITY = std::numeric_limits<double>::max();
+	double impurity = WORST_IMPURITY;
+	double purity = 0;
+	RealVector sumAbove, sumBelow; // for regression
+	ClassVector cAbove, cBelow;    // for classification
+	inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
+		node.attributeIndex = split.splitAttribute;
+		node.attributeValue = split.splitValue;
+		return node;
+	}
+	inline operator bool(){
+		return impurity < WORST_IMPURITY || purity > 0;
+	}
+};
 
 
 struct Attribute {
@@ -102,6 +125,29 @@ public:
 			std::sort(table.begin(), table.end());
 		}
 	}
+	template<class Dataset>
+	explicit SortedIndex(Dataset const &elements)
+			: m_noElements{elements.numberOfElements()},
+			  m_totalElements{m_noElements},
+			  m_noInputDimensions{inputDimension(elements)},
+			  m_tables(m_noInputDimensions),
+			  m_hash(bit_vector(m_noElements))
+	{
+		std::size_t n_elements = m_noElements;
+		//Each entry in the outer vector is an attribute table
+		//For each column
+		for (std::size_t j = 0; j < m_noInputDimensions; j++) {
+			auto &table = m_tables[j];
+			table.reserve(n_elements);
+
+			//For each row, store Attribute value, class and rowId
+			std::size_t i = 0;
+			for(auto const& element: elements.elements()){
+				table.push_back(Attribute{element.input[j], i++});
+			}
+			std::sort(table.begin(), table.end());
+		}
+	}
 
 /**
  * Returns two Indices: left and right
@@ -153,6 +199,7 @@ double crossEntropy(ClassVector const& countVector, std::size_t n);
 
 /// Create a count vector as used in the classification case.
 ClassVector createCountVector(DataView<ClassificationDataset const> const& elements, std::size_t labelCardinality);
+ClassVector createCountVector(ClassificationDataset const& dataset, std::size_t labelCardinality);
 
 }}} // namespace shark::detail::cart
 

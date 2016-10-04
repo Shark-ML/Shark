@@ -146,26 +146,7 @@ protected:
 	/// ClassVector
 	using ClassVector = UIntVector;
 	using LabelVector = std::vector<LabelType>;
-
-	struct Split{
-		std::size_t splitAttribute = 0, splitRow = 0;
-		double splitValue=0;
-
-		//static constexpr
-		double WORST_IMPURITY = std::numeric_limits<double>::max();
-		double impurity = WORST_IMPURITY;
-		double purity = 0;
-		LabelType sumAbove, sumBelow; // for regression
-		ClassVector cAbove, cBelow;    // for classification
-		inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
-			node.attributeIndex = split.splitAttribute;
-			node.attributeValue = split.splitValue;
-			return node;
-		}
-		inline operator bool(){
-			return impurity < WORST_IMPURITY || purity > 0;
-		}
-	};
+	using Split = detail::cart::Split;
 
 	/// Build a decision tree for classification
 	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);

@@ -42,7 +42,7 @@ namespace cart {
 template<class T, class F>
 inline T sum(std::size_t i, std::size_t n, F&& f) {
 	if(i>=n) return T{};
-	T out = f(i);
+	T out(f(i));
 	for(++i;i<n;++i) out += f(i);
 	return out;
 }
