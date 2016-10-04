@@ -52,7 +52,6 @@ void matrix_assign(
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
 	auto exprCol=k.expr<cl_uint>("get_global_id(1)");
 	k<< m()(exprRow,exprCol) <<'=' << F()(m()(exprRow,exprCol), k.var<value_type>("t"))<<";";
-	
 	boost::compute::kernel kernel = k.compile(m().queue().get_context());
 	//enqueue kernel
 	kernel.set_arg(t_index, t);

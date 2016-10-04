@@ -22,32 +22,32 @@ void checkDenseExpressionEquality(
 	blas::matrix<float> op = copy_to_cpu(op_gpu());
 	for(std::size_t i = 0; i != op.size1(); ++i){
 		for(std::size_t j = 0; j != op.size2(); ++j){
-			BOOST_CHECK_CLOSE(result(i,j), op(i,j),1.e-8);
+			BOOST_CHECK_CLOSE(result(i,j), op(i,j),1.e-4);
 		}
 	}
 	blas::gpu::vector<float> op_row_gpu(op_gpu().size2());
 	blas::gpu::vector<float> op_col_gpu(op_gpu().size1());
 	blas::vector<float> op_row(op_gpu().size2());
 	blas::vector<float> op_col(op_gpu().size2());
-	//check that row iterator work
-	for(std::size_t i = 0; i != op.size1(); ++i){
+	//~ //check that row iterator work
+	//~ for(std::size_t i = 0; i != op.size1(); ++i){
 		
-		boost::compute::copy(op_gpu().row_begin(i), op_gpu().row_end(i), op_row_gpu.begin());
-		boost::compute::copy(op_row_gpu.begin(), op_row_gpu.end(), op_row.begin());
+		//~ boost::compute::copy(op_gpu().row_begin(i), op_gpu().row_end(i), op_row_gpu.begin());
+		//~ boost::compute::copy(op_row_gpu.begin(), op_row_gpu.end(), op_row.begin());
 		
-		for(std::size_t j = 0; j != op.size2(); ++j){
-			BOOST_CHECK_CLOSE(result(i,j), op_row(j),1.e-8);
-		}
-	}
+		//~ for(std::size_t j = 0; j != op.size2(); ++j){
+			//~ BOOST_CHECK_CLOSE(result(i,j), op_row(j),1.e-8);
+		//~ }
+	//~ }
 	
-	//check that column iterator work
-	for(std::size_t j = 0; j != op.size2(); ++j){
-		boost::compute::copy(op_gpu().column_begin(j), op_gpu().column_end(j), op_col_gpu.begin());
-		boost::compute::copy(op_col_gpu.begin(), op_col_gpu.end(), op_col.begin());
-		for(std::size_t i = 0; i != op.size1(); ++i){
-			BOOST_CHECK_CLOSE(result(i,j), op_col(i),1.e-8);
-		}
-	}
+	//~ //check that column iterator work
+	//~ for(std::size_t j = 0; j != op.size2(); ++j){
+		//~ boost::compute::copy(op_gpu().column_begin(j), op_gpu().column_end(j), op_col_gpu.begin());
+		//~ boost::compute::copy(op_col_gpu.begin(), op_col_gpu.end(), op_col.begin());
+		//~ for(std::size_t i = 0; i != op.size1(); ++i){
+			//~ BOOST_CHECK_CLOSE(result(i,j), op_col(i),1.e-8);
+		//~ }
+	//~ }
 }
 
 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Vector_Repeater){
 		}
 	}
 	gpu::vector<float> x = gpu::copy_to_gpu(x_cpu);
-	checkDenseExpressionEquality(blas::repeat(x,Dimension2),result);
+	checkDenseExpressionEquality(blas::repeat(x,Dimension1),result);
 }
 
 /////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Unary_Minus )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0+j;
+			x_cpu(i,j) = -3.0+i+j;
 			result(i,j)= -x_cpu(i,j);
 		}
 	}
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Scalar_Multiply )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0+j;
+			x_cpu(i,j) = -3.0+i+j;
 			result(i,j)= 5.0* x_cpu(i,j);
 		}
 	}
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Abs )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			result(i,j)= std::abs(x_cpu(i,j));
 		}
 	}
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Sqr )
 	matrix<float> result(Dimension1, Dimension2);
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			result(i,j)= x_cpu(i,j) * x_cpu(i,j);
 		}
 	}
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Exp )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			result(i,j)= std::exp(x_cpu(i,j));
 		}
 	}
@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Tanh )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			result(i,j)= std::tanh(x_cpu(i,j));
 		}
 	}
@@ -295,7 +295,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Sigmoid )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = 0.01*(i-3.0-j);
+			x_cpu(i,j) = 0.01*(-3.0+i-j);
 			result(i,j)= 1.0/(1.0+std::exp(-x_cpu(i,j)));
 		}
 	}
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_SoftPlus )
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			result(i,j)= shark::softPlus(x_cpu(i,j));
 		}
 	}
@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Plus)
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			y_cpu(i,j) = i+j+Dimension1;
 			result(i,j)= x_cpu(i,j)+y_cpu(i,j);
 		}
@@ -391,7 +391,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Minus)
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			y_cpu(i,j) = i+j+Dimension1;
 			result(i,j)= x_cpu(i,j)-y_cpu(i,j);
 		}
@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Multiply)
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			y_cpu(i,j) = i+j+Dimension1;
 			result(i,j)= x_cpu(i,j)*y_cpu(i,j);
 		}
@@ -428,7 +428,7 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Div)
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
+			x_cpu(i,j) = -3.0+i-j;
 			y_cpu(i,j) = i+j+1;
 			result(i,j)= x_cpu(i,j)/y_cpu(i,j);
 		}
@@ -515,14 +515,13 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Binary_Min)
 ////////////////////////////////////////////////////////////////////////
 BOOST_AUTO_TEST_CASE( BLAS_sum_rows){
 	matrix<float> x_cpu(Dimension1, Dimension2,0.0); 
-	vector<float> result(Dimension2,0.0);
 	
 	for (size_t i = 0; i < Dimension1; i++){
-		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = i-3.0-j;
-			result(j) += x_cpu(i,j);
+		for (size_t j = 0; j < Dimension2; j++){
+			x_cpu(i,j) = -3.0+i-j;
 		}
 	}
+	vector<float> result = sum_rows(x_cpu);
 	gpu::matrix<float,row_major> x_row = gpu::copy_to_gpu(x_cpu);
 	gpu::matrix<float,column_major> x_col = gpu::copy_to_gpu(x_cpu);
 	checkDenseExpressionEquality(sum_rows(x_row),result);
@@ -530,14 +529,13 @@ BOOST_AUTO_TEST_CASE( BLAS_sum_rows){
 }
 BOOST_AUTO_TEST_CASE( BLAS_sum_columns){
 	matrix<float> x_cpu(Dimension1, Dimension2,0.0); 
-	vector<float> result(Dimension1,0.0);
 	
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension2; j++){
-			x_cpu(i,j) = i-3.0-j;
-			result(i) += x_cpu(i,j);
+			x_cpu(i,j) = -3.0+i-j;
 		}
 	}
+	vector<float> result = sum_columns(x_cpu);
 	gpu::matrix<float,row_major> x_row = gpu::copy_to_gpu(x_cpu);
 	gpu::matrix<float,column_major> x_col = gpu::copy_to_gpu(x_cpu);
 	checkDenseExpressionEquality(sum_columns(x_row),result);
@@ -553,7 +551,7 @@ BOOST_AUTO_TEST_CASE( BLAS_trace){
 	float result = 0.0f;
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 		result += x_cpu(i,i);
 	}
@@ -567,7 +565,7 @@ BOOST_AUTO_TEST_CASE( BLAS_norm_1){
 	matrix<float> x_cpu(Dimension1, Dimension1); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 	}
 	float result = norm_1(x_cpu);
@@ -581,10 +579,10 @@ BOOST_AUTO_TEST_CASE( BLAS_norm_inf){
 	matrix<float> x_cpu(Dimension1, Dimension1); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 	}
-	float result = norm_1(x_cpu);
+	float result = norm_inf(x_cpu);
 	
 	gpu::matrix<float,row_major> x_row = gpu::copy_to_gpu(x_cpu);
 	gpu::matrix<float,column_major> x_col = gpu::copy_to_gpu(x_cpu);
@@ -596,7 +594,7 @@ BOOST_AUTO_TEST_CASE( BLAS_norm_Frobenius){
 	matrix<float> x_cpu(Dimension1, Dimension1); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 	}
 	float result = norm_frobenius(x_cpu);
@@ -611,7 +609,7 @@ BOOST_AUTO_TEST_CASE( BLAS_sum){
 	matrix<float> x_cpu(Dimension1, Dimension1); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 	}
 	float result = sum(x_cpu);
@@ -626,7 +624,7 @@ BOOST_AUTO_TEST_CASE( BLAS_max){
 	matrix<float> x_cpu(Dimension1, Dimension1); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 	}
 	float result = max(x_cpu);
@@ -641,7 +639,7 @@ BOOST_AUTO_TEST_CASE( BLAS_min){
 	matrix<float> x_cpu(Dimension1, Dimension1); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 		}
 	}
 	float result = min(x_cpu);
@@ -657,7 +655,7 @@ BOOST_AUTO_TEST_CASE( BLAS_frobenius_prod){
 	matrix<float> y_cpu(Dimension1, Dimension2); 
 	for (size_t i = 0; i < Dimension1; i++){
 		for (size_t j = 0; j < Dimension1; j++){
-			x_cpu(i,j) = 2*i-3.0-j;
+			x_cpu(i,j) = -3.0+2.0*i-j;
 			y_cpu(i,j) = i+j+1;
 		}
 	}

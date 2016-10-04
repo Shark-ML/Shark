@@ -35,6 +35,25 @@
 #include <boost/compute/algorithm/fill.hpp>
 
 namespace shark {namespace blas { namespace gpu{
+	
+namespace detail{
+template<class Arg, class T>
+struct induced_vector_element{
+	typedef T result_type;
+	Arg arg;
+	std::size_t stride;
+	boost::compute::buffer const& buffer;
+};
+
+template<class Arg,class T>
+boost::compute::detail::meta_kernel& operator<< (
+	boost::compute::detail::meta_kernel& k, 
+	induced_vector_element<Arg, T> const& e
+){
+	return k << k.get_buffer_identifier<T>(e.buffer, boost::compute::memory_object::global_memory)
+	             <<'['<<e.arg <<'*'<<e.stride<<']';
+}
+}
 
 /// \brief A dense vector of values of type \c T sored on the GPU
 ///
@@ -111,8 +130,8 @@ public:
 	
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(std::declval<boost::compute::vector<T> >().begin()[i]){
-		return m_storage.begin()[i];
+	detail::induced_vector_element<IndexExpr,T> operator()(IndexExpr const& i) const {
+		return {i,1,m_storage.get_buffer()};
 	}
 	
 	// -------------------

@@ -37,20 +37,22 @@
 namespace shark {namespace blas { namespace gpu{
 	
 namespace detail{
-template<class Arg1, class Arg2>
+template<class Arg1, class Arg2, class T>
 struct induced_matrix_element{
-	typedef std::size_t result_type;
+	typedef T result_type;
 	Arg1 arg1;
 	Arg2 arg2;
 	std::size_t leading_dimension;
+	boost::compute::buffer const& buffer;
 };
 
-template<class Arg1, class Arg2>
+template<class Arg1, class Arg2,class T>
 boost::compute::detail::meta_kernel& operator<< (
 	boost::compute::detail::meta_kernel& k, 
-	induced_matrix_element<Arg1, Arg2> const& e
+	induced_matrix_element<Arg1, Arg2, T> const& e
 ){
-	return k<<'('<<e.arg1 <<'*'<<e.leading_dimension<<'+'<< e.arg2<<')';
+	return k<< k.get_buffer_identifier<T>(e.buffer, boost::compute::memory_object::global_memory)
+		<<'['<<e.arg1 <<'*'<<e.leading_dimension<<'+'<< e.arg2<<']';
 }
 }
 
@@ -66,21 +68,21 @@ boost::compute::detail::meta_kernel& operator<< (
 /// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
 /// \tparam L the storage organization. It can be either \c row_major or \c column_major. Default is \c row_major
 template<class T, class L = blas::row_major>
-class matrix: public matrix_container<matrix<T>, gpu_tag > {
+class matrix: public matrix_container<matrix<T,L>, gpu_tag > {
 private:
 	template<class IndexExpr1, class IndexExpr2>
-	detail::induced_matrix_element<IndexExpr1, IndexExpr2> make_index(
+	detail::induced_matrix_element<IndexExpr1, IndexExpr2, T> get_element(
 		IndexExpr1 const& expr1,IndexExpr2 const& expr2,
 		row_major
 	)const{
-		return {expr1, expr2,orientation::index_m(m_size1,m_size2)};
+		return {expr1, expr2,orientation::index_m(m_size1,m_size2), m_storage.get_buffer()};
 	}
 	template<class IndexExpr1, class IndexExpr2>
-	detail::induced_matrix_element<IndexExpr2, IndexExpr1> make_index(
+	detail::induced_matrix_element<IndexExpr2, IndexExpr1,T> get_element(
 		IndexExpr1 const& expr1,IndexExpr2 const& expr2,
 		column_major
 	)const{
-		return {expr2, expr1,orientation::index_m(m_size1,m_size2)};
+		return {expr2, expr1,orientation::index_m(m_size1,m_size2), m_storage.get_buffer()};
 	}
 public:
 	typedef T value_type;
@@ -223,10 +225,8 @@ public:
 	
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(
-		std::declval<boost::compute::vector<T> >().begin()[this->make_index(i,j,orientation())]
-	){
-		return m_storage.begin()[this->make_index(i,j,orientation())];
+	detail::induced_matrix_element<IndexExpr1,IndexExpr2,T> operator()(IndexExpr1 const& i, IndexExpr2 const& j) const{
+		return this->get_element(i,j,orientation());
 	}
 	
 	
@@ -329,6 +329,10 @@ struct matrix_temporary_type<T,L,dense_tag, gpu_tag>{
 	typedef gpu::matrix<T, L> type;
 };
 
+template<class T>
+struct matrix_temporary_type<T,unknown_orientation,dense_tag, gpu_tag>{
+	typedef gpu::matrix<T, row_major> type;
+};
 }}
 
 #endif

@@ -221,12 +221,12 @@ SHARK_BINARY_MATRIX_EXPRESSION(max,max)
 template<class T, class MatA, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename MatA::value_type >,\
-        matrix_binary<MatA, scalar_matrix<T,Device>,typename device_traits<Device>:: template  F<typename std::common_type<typename MatA::value_type,T>::type> > \
+        matrix_binary<MatA, scalar_matrix<typename MatA::value_type,Device>,typename device_traits<Device>:: template  F<typename MatA::value_type> > \
 >::type \
 name (matrix_expression<MatA, Device> const& m, T t){ \
-	typedef typename std::common_type<typename MatA::value_type,T>::type type;\
+	typedef typename MatA::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
-	return matrix_binary<MatA, scalar_matrix<T,Device>, functor_type >(m(), scalar_matrix<T,Device>(m().size1(), m().size2(), t) ,functor_type()); \
+	return matrix_binary<MatA, scalar_matrix<type,Device>, functor_type >(m(), scalar_matrix<type,Device>(m().size1(), m().size2(), t) ,functor_type()); \
 }
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator/, divide)
 SHARK_MATRIX_SCALAR_TRANSFORMATION(operator<, less_than)
@@ -245,12 +245,12 @@ SHARK_MATRIX_SCALAR_TRANSFORMATION(pow, pow)
 template<class T, class MatA, class Device> \
 typename boost::enable_if< \
 	std::is_convertible<T, typename MatA::value_type >,\
-	matrix_binary<scalar_matrix<T,Device>, MatA, typename device_traits<Device>:: template F<typename std::common_type<typename MatA::value_type,T>::type> > \
+	matrix_binary<scalar_matrix< typename MatA::value_type,Device>, MatA, typename device_traits<Device>:: template F< typename MatA::value_type> > \
 >::type \
 name (T t, matrix_expression<MatA, Device> const& m){ \
-	typedef typename std::common_type<typename MatA::value_type,T>::type type;\
+	typedef typename MatA::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
-	return  matrix_binary<scalar_matrix<T,Device>, MatA, functor_type >(scalar_matrix<T,Device>(m().size1(), m().size2(), t), m(), functor_type()); \
+	return  matrix_binary<scalar_matrix<type,Device>, MatA, functor_type >(scalar_matrix<type,Device>(m().size1(), m().size2(), t), m(), functor_type()); \
 }
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(min, min)
 SHARK_MATRIX_SCALAR_TRANSFORMATION_2(max, max)
