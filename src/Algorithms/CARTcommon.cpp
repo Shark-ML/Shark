@@ -63,8 +63,14 @@ double misclassificationError(ClassVector const& countVector, std::size_t n)
 double crossEntropy(ClassVector const& countVector, std::size_t n)
 {
 	if(!n) return std::numeric_limits<double>::infinity();
-	RealVector p (countVector/double(n));
-	return -sum(p*blas::log(p));
+
+	// eliminate zero counts
+	ClassVector c(countVector);
+	auto pivot = std::partition(c.begin(),c.end(),[&](unsigned value){return value!=0;});
+	c.resize(pivot.index());
+
+	RealVector p (c/double(n));
+	return -sum(p*log(p));
 }
 
 

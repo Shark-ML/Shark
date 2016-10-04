@@ -72,8 +72,8 @@ public:
 		auto n_elements = elements.size();
 		m_OOBerror = detail::cart::sum<double>(n_elements, [&](size_t i){
 			auto y = elements[i].label;
-			auto z = blas::arg_max(row(oobClassTally,i));
-			return y!=z;
+			auto z = arg_max(row(oobClassTally,i));
+			return static_cast<double>(y!=z);
 		})/n_elements;
 	}
 	void computeOOBerror(

@@ -224,7 +224,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 			model.addModel(cart);
 			for(auto const i : oobIndices){
 				auto histogram = cart(elements[i].input);
-				auto j = blas::arg_max(histogram);
+				auto j = arg_max(histogram);
 				++oobClassTally(i,j);
 			}
 		}
