@@ -37,7 +37,6 @@
 #include <shark/Models/Trees/General.h>
 #include <shark/Data/DataView.h>
 #include <vector>
-#include <unordered_map>
 #include <utility>
 namespace shark {
 namespace detail {
@@ -63,14 +62,18 @@ class SortedIndex {
 	using AttributeTable = std::vector<Attribute>;
 /// collection of attribute tables
 	using AttributeTables = std::vector<AttributeTable>;
+	using bit_vector = std::vector<bool>;
 
-	std::size_t m_noElements, m_noInputDimensions;
+	std::size_t const m_noElements, m_totalElements, m_noInputDimensions;
 	AttributeTables m_tables;
+	bit_vector m_hash;
 
-	explicit SortedIndex(AttributeTables &&tables)
+	explicit SortedIndex(AttributeTables &&tables, bit_vector &&hash)
 			: m_noElements(tables[0].size()),
+			  m_totalElements{hash.size()},
 			  m_noInputDimensions(tables.size()),
-			  m_tables(std::move(tables))
+			  m_tables(std::move(tables)),
+			  m_hash(std::move(hash))
 	{}
 public:
 /** Creates an index of the dataset
@@ -80,8 +83,10 @@ public:
 	template<class Dataset>
 	explicit SortedIndex(DataView<Dataset const> const &elements)
 			: m_noElements{elements.size()},
+			  m_totalElements{m_noElements},
 			  m_noInputDimensions{elements[0].input.size()},
-			  m_tables(m_noInputDimensions)
+			  m_tables(m_noInputDimensions),
+	          m_hash(bit_vector(m_noElements))
 	{
 		std::size_t n_elements = m_noElements;
 		//Each entry in the outer vector is an attribute table
@@ -104,24 +109,26 @@ public:
  */
 	std::pair<SortedIndex, SortedIndex> split(std::size_t index, std::size_t valIndex) {
 		//Build a hash table for fast lookup
-		std::unordered_map<std::size_t, bool> hash;
 		for(std::size_t i = 0, s = m_tables[index].size(); i<s; ++i) {
-			hash[m_tables[index][i].id] = (i<=valIndex);
+			m_hash[m_tables[index][i].id] = (i<=valIndex);
 		}
 
 		AttributeTables RAttributeTables, LAttributeTables;
 		for(auto && table : m_tables) {
 			auto begin = table.begin(), end = table.end();
-			auto middle = std::stable_partition(begin,end,[&hash](Attribute const& entry){
-				return hash[entry.id];
+			auto middle = std::stable_partition(begin,end,[this](Attribute const& entry){
+				return m_hash[entry.id];
 			});
 			RAttributeTables.emplace_back(AttributeTable{middle,end});
 			table.resize(std::distance(begin,middle));
 			LAttributeTables.emplace_back(std::move(table));
 		}
 		m_tables.clear(); m_tables.shrink_to_fit();
-		return std::make_pair(SortedIndex{std::move(LAttributeTables)},
-							  SortedIndex{std::move(RAttributeTables)});
+		if(valIndex > m_noElements/2)
+			return std::make_pair(SortedIndex{std::move(LAttributeTables), std::move(m_hash)},
+			                      SortedIndex(std::move(RAttributeTables), bit_vector(m_totalElements)));
+		return std::make_pair(SortedIndex{std::move(LAttributeTables), bit_vector(m_totalElements)},
+		                      SortedIndex{std::move(RAttributeTables), std::move(m_hash)});
 	}
 
 	std::size_t noTables() const { return m_noInputDimensions; }
