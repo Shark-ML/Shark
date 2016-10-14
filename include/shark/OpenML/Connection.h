@@ -75,9 +75,9 @@ public:
 	/// semantic value, but required by the OpenML REST API.
 	///
 	/// A parameter of a POST request is marked as a file upload by
-	/// specifying a name of the form "name|mine-type", e.g.,
+	/// specifying a name of the form "name|mime-type", e.g.,
 	/// "file|text/plain". The filename can be specified with the syntax
-	/// "name|mine-type|filename", e.g., "file|text/plain|hello.txt".
+	/// "name|mime-type|filename", e.g., "file|text/plain|hello.txt".
 	typedef std::vector< std::pair<std::string, std::string> > ParamType;
 
 	/// \brief Construct an HTTP connection to the OpenML service.

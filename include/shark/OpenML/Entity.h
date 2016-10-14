@@ -58,8 +58,15 @@ public:
 
 	/// \brief Construct an entity with a given ID.
 	Entity(IDType id)
-	: m_id(id)
+	: m_id(invalidID)
+	{
+		setID(id);   // go through the virtual function interface
+	}
+
+	/// \brief Virtual destructor.
+	virtual ~Entity()
 	{ }
+
 
 	/// \brief Obtain the ID of the entity.
 	IDType id() const
@@ -92,8 +99,8 @@ public:
 	}
 
 protected:
-	/// \brief Set the ID of a default-constructed entity.
-	void setID(IDType id)
+	/// \brief Set the ID of the object.
+	virtual void setID(IDType id)
 	{
 		if (m_id != invalidID) throw SHARKEXCEPTION("The entity already has a valid ID.");
 		m_id = id;

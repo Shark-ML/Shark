@@ -113,7 +113,7 @@ public:
 	template <typename ValueType>
 	void setHyperparameterValue(std::string const& name, ValueType const& value)
 	{
-		if (id() != invalidID) throw SHARKEXCEPTION("[Rub::setHyperparameterValue] Cannot set hyperparameter value on an already existing run.");
+		if (id() != invalidID) throw SHARKEXCEPTION("[Rub::setHyperparameterValue] Cannot set hyperparameter value for a committed run.");
 		m_hyperparameterValue[m_flow->hyperparameterIndex(name)] = boost::lexical_cast<std::string>(value);
 	}
 
@@ -122,6 +122,8 @@ public:
 	void predictions(std::size_t repetition, std::size_t fold, ContainerType& predictions) const
 	{
 		load();
+		RANGE_CHECK(repetition < m_predictions.size());
+		SHARK_ASSERT(m_predictions.size() == m_task->repetitions());
 		std::vector<double> const& p = m_predictions[repetition];
 		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
 		SHARK_ASSERT(p.size() == split.size());
@@ -137,13 +139,20 @@ public:
 	void predictions(std::size_t repetition, std::size_t fold, Data<VectorType>& predictions) const
 	{
 		load();
+		RANGE_CHECK(repetition < m_predictions.size());
+		SHARK_ASSERT(m_predictions.size() == m_task->repetitions());
 		std::vector<double> const& p = m_predictions[repetition];
 		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
 		SHARK_ASSERT(p.size() == split.size());
-		std::vector<RealVector> tmp;
+		std::vector<VectorType> tmp;
+		VectorType v(1);
 		for (std::size_t i=0; i<p.size(); i++)
 		{
-			if (split[i] == fold) tmp.push_back(RealVector(1, p[i]));
+			if (split[i] == fold)
+			{
+				v[0] = p[i];
+				tmp.push_back(v);
+			}
 		}
 		predictions = createDataFromRange(tmp);
 	}
@@ -152,10 +161,12 @@ public:
 	inline void predictions(std::size_t repetition, std::size_t fold, Data<unsigned int>& predictions) const
 	{
 		load();
+		RANGE_CHECK(repetition < m_predictions.size());
+		SHARK_ASSERT(m_predictions.size() == m_task->repetitions());
 		std::vector<double> const& p = m_predictions[repetition];
 		std::vector<std::size_t> const& split = m_task->splitIndices(repetition);
 		SHARK_ASSERT(p.size() == split.size());
-		std::vector<unsigned int> tmp(p.size());
+		std::vector<unsigned int> tmp;
 		for (std::size_t i=0; i<p.size(); i++)
 		{
 			if (split[i] == fold) tmp.push_back(static_cast<unsigned int>(p[i]));
@@ -171,7 +182,7 @@ public:
 	template <typename ContainerType>
 	void setPredictions(std::size_t repetition, std::size_t fold, ContainerType const& predictions)
 	{
-		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set predictions for a committed run.");
 
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
@@ -184,6 +195,7 @@ public:
 		{
 			while (split[j] != fold) j++;
 			pred[j] = predictions[i];
+			SHARK_ASSERT(j < pred.size());
 			j++;
 		}
 	}
@@ -196,7 +208,7 @@ public:
 	template <typename LabelType>
 	void setPredictions(std::size_t repetition, std::size_t fold, Data<LabelType> const& predictions)
 	{
-		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set hyperparameter value on an already existing run.");
+		if (id() != invalidID) throw SHARKEXCEPTION("Cannot set predictions for a committed run.");
 
 		SHARK_ASSERT(repetition < m_task->repetitions());
 		SHARK_ASSERT(fold < m_task->folds());
@@ -215,6 +227,7 @@ public:
 				while (split[j] != fold) j++;
 				typename Data<LabelType>::const_element_reference element = shark::get(batch, i);
 				pred[j] = arff::detail::label2double<LabelType>(element);
+				SHARK_ASSERT(j < pred.size());
 				j++;
 			}
 		}

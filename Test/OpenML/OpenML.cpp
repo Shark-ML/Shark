@@ -118,7 +118,10 @@ BOOST_AUTO_TEST_CASE(OpenML_Flow)
 	std::vector<Hyperparameter> hyperparameters;
 	hyperparameters.push_back(Hyperparameter("a", "first dummy parameter", "numeric"));
 	hyperparameters.push_back(Hyperparameter("b", "second dummy parameter", "integer"));
-	std::shared_ptr<Flow> flow = Flow::get("Shark_unit_test_flow", "This flow is for unit testing only, please ignore.", hyperparameters);
+	IDType flowID = getFlow("Shark_unit_test_flow", Flow::sharkVersion());
+	std::shared_ptr<Flow> flow = (flowID == invalidID)
+			? Flow::create("Shark_unit_test_flow", "This flow is for unit testing only, please ignore.", hyperparameters)
+			: Flow::get(flowID);
 
 	// basic getters
 	BOOST_CHECK_EQUAL(flow->name(), "Shark_unit_test_flow");
@@ -136,7 +139,7 @@ BOOST_AUTO_TEST_CASE(OpenML_Flow)
 	BOOST_CHECK_EQUAL(flow->hyperparameterIndex("b"), 1);
 }
 
-BOOST_AUTO_TEST_CASE(OpenML_Run)
+BOOST_AUTO_TEST_CASE(OpenML_Run, * boost::unit_test::depends_on("OpenML_OpenML/OpenML_Task") * boost::unit_test::depends_on("OpenML_OpenML/OpenML_Flow"))
 {
 	// prepare connection to the test server
 	connection.enableTestMode();
@@ -160,15 +163,18 @@ BOOST_AUTO_TEST_CASE(OpenML_Run)
 
 	// obtain data splits from the task
 	ClassificationDataset data;
-	CVFolds<ClassificationDataset> folds;
 	task->loadData(data);
-	task->split(0, data);
+	BOOST_CHECK_EQUAL(task->repetitions(), 1);
+	BOOST_CHECK_EQUAL(task->folds(), 10);
+	CVFolds<ClassificationDataset> folds = task->split(0, data);
+	BOOST_CHECK_EQUAL(folds.size(), 10);
 
 	// store test labels as predictions
 	// (in terms of machine learning this is cheating! but it is a useful unit test)
 	for (std::size_t f=0; f<10; f++)
 	{
-		run.setPredictions(0, f, folds.validation(f).labels());
+		auto labels = folds.validation(f).labels();
+		run.setPredictions(0, f, labels);
 	}
 
 	// store the "predictions" in OpenML
@@ -208,7 +214,7 @@ BOOST_AUTO_TEST_CASE(OpenML_Run)
 		run2.predictions(0, f, p2);
 
 		// check that number of predictions per fold match
-		BOOST_CHECK_EQUAL(p1.numberOfElements(), p2.numberOfElements());
+		BOOST_REQUIRE_EQUAL(p1.numberOfElements(), p2.numberOfElements());
 
 		// check that individual predictions match
 		Elements e1 = p1.elements();

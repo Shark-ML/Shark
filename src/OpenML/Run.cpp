@@ -311,8 +311,8 @@ void Run::commit()
 	description += "</oml:run>";
 
 	Connection::ParamType param;
-	param.push_back(std::make_pair("description|application/xml", description));
-	param.push_back(std::make_pair("predictions|application/octet-stream", predictions));
+	param.push_back(std::make_pair("description|application/xml|description.xml", description));
+	param.push_back(std::make_pair("predictions|application/octet-stream|predictions.arff", predictions));
 //	param.push_back(std::make_pair("model_readable|text/plain", ""));
 //	param.push_back(std::make_pair("model_serialized|application/octet-stream", ""));
 	detail::Json result = connection.post("/run", param);

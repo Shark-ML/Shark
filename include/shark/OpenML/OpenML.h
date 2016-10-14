@@ -58,13 +58,43 @@ namespace openML {
 // query functions for data sets, tasks, flows, and runs
 //
 
+SHARK_EXPORT_SYMBOL enum class DatasetProperty
+{
+	tag = 0,
+	status = 1,
+	limit = 2,
+	offset = 3,
+	data_name = 4,
+	number_instances = 5,
+	number_features = 6,
+	number_classes = 7,
+	number_missing_values = 8,
+};
+
+SHARK_EXPORT_SYMBOL enum class RunProperty
+{
+	task = 0,
+	setup = 1,
+	flow = 2,
+	uploader = 3,
+	run = 4,
+	tag = 5,
+	limit = 6,
+	offset = 7,
+};
+
+
 SHARK_EXPORT_SYMBOL QueryResult allDatasets();                               ///< \brief Obtain the list of all data sets from OpenMP.
 SHARK_EXPORT_SYMBOL QueryResult taggedDatasets(std::string const& tagname);  ///< \brief Obtain the list of all data sets with the given tag.
+SHARK_EXPORT_SYMBOL QueryResult datasetsByProperties(
+				std::map<DatasetProperty, std::string> const& properties);   ///< \brief Obtain data sets filtered by properties.
 
 SHARK_EXPORT_SYMBOL QueryResult allTasks();                                  ///< \brief Obtain the list of all taska from OpenMP.
 SHARK_EXPORT_SYMBOL QueryResult supervisedClassificationTasks();             ///< \brief Obtain the list of all supervised classification tasks.
 SHARK_EXPORT_SYMBOL QueryResult supervisedRegressionTasks();                 ///< \brief Obtain the list of all supervised regression tasks.
 SHARK_EXPORT_SYMBOL QueryResult taggedTasks(std::string const& tagname);     ///< \brief Obtain the list of all task with the given tag.
+SHARK_EXPORT_SYMBOL QueryResult tasksByProperties(
+				std::map<DatasetProperty, std::string> const& properties);   ///< \brief Obtain task filtered by properties of the underlying data set.
 
 SHARK_EXPORT_SYMBOL QueryResult allFlows();                                  ///< \brief Obtain the list of all flow from OpenML.
 SHARK_EXPORT_SYMBOL QueryResult taggedFlows(std::string const& tagname);     ///< \brief Obtain the list of all flow with the given tag.
@@ -76,6 +106,8 @@ SHARK_EXPORT_SYMBOL QueryResult runsByTask(IDType taskID);                   ///
 SHARK_EXPORT_SYMBOL QueryResult runsByTask(Task const& task);                ///< \brief Obtain the list of all run associated with the given task.
 SHARK_EXPORT_SYMBOL QueryResult runsByFlow(IDType flowID);                   ///< \brief Obtain the list of all run associated with the given flow.
 SHARK_EXPORT_SYMBOL QueryResult runsByFlow(Flow const& flow);                ///< \brief Obtain the list of all run associated with the given flow.
+SHARK_EXPORT_SYMBOL QueryResult runsByProperties(
+				std::map<RunProperty, std::string> const& properties);       ///< \brief Obtain runs filtered by properties.
 
 /// \brief Filter an existing query result set by applying a set of conditions.
 ///

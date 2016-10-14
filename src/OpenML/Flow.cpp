@@ -53,30 +53,57 @@ Flow::Flow(IDType id)
 Flow::Flow(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
 : PooledEntity<Flow>()
 {
-	create(name, description, hyperparameters, properties);
+	std::string version = sharkVersion();
+
+	// check whether the flow already exists
+	SHARK_ASSERT(getFlow(name, version) == invalidID);
+
+	// upload a new flow
+	std::string xml = "<oml:flow xmlns:oml=\"http://openml.org/openml\">"
+			"<oml:name>" + detail::xmlencode(name) + "</oml:name>"
+			"<oml:external_version>" + detail::xmlencode(version) + "</oml:external_version>"
+			"<oml:description>" + detail::xmlencode(description) + "</oml:description>"
+			"<oml:language>English</oml:language>"
+			"<oml:dependencies>Shark machine learning library</oml:dependencies>";
+	for (std::size_t i=0; i<hyperparameters.size(); i++)
+	{
+		Hyperparameter const& p = hyperparameters[i];
+		xml += "<oml:parameter>"
+				"<oml:name>" + detail::xmlencode(p.name) + "</oml:name>"
+				"<oml:data_type>" + detail::xmlencode(p.datatype) + "</oml:data_type>"
+				"<oml:default_value>" + detail::xmlencode(p.defaultValue) + "</oml:default_value>"
+				"<oml:description>" + detail::xmlencode(p.description) + "</oml:description>"
+				"</oml:parameter>";
+	}
+	xml += "</oml:flow>";
+
+
+	Connection::ParamType param;
+	param.push_back(std::make_pair("description|application/xml", xml));
+	detail::Json result = connection.post("/flow", param);
+	IDType id = detail::json2number<IDType>(result["upload_flow"]["id"]);
+
+	setID(id);
+
+	// obtain the flow data back from the server
+	obtainFromServer();
 }
 
-Flow::Flow(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
-: PooledEntity<Flow>()
-{
-	create("shark." + method.name(), description, hyperparameters, properties);
-}
-
-//static
-std::shared_ptr<Flow> Flow::get(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
-{
-	Flow* flow = new Flow(name, description, hyperparameters, properties);
-	registerObject(flow);
-	return std::shared_ptr<Flow>(flow);
-}
-
-//static
-std::shared_ptr<Flow> Flow::get(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
-{
-	Flow* flow = new Flow(method, description, hyperparameters, properties);
-	registerObject(flow);
-	return std::shared_ptr<Flow>(flow);
-}
+////static
+//std::shared_ptr<Flow> Flow::getOrCreate(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
+//{
+//	IDType id = getFlow(name, sharkVersion());
+//	if (id == invalidID) return create(method, description, hyperparameters, properties);
+//	else return get(id);
+//}
+//
+////static
+//std::shared_ptr<Flow> Flow::getOrCreate(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
+//{
+//	IDType id = getFlow(name, sharkVersion());
+//	if (id == invalidID) return create("shark." + method.name(), description, hyperparameters, properties);
+//	else return get(id);
+//}
 
 //static
 std::string Flow::sharkVersion()
@@ -123,48 +150,6 @@ void Flow::print(std::ostream& os) const
 		Hyperparameter const& p = m_hyperparameter[i];
 		os << "  parameter " << i << ": " << p.name << "; " << p.description << " (" << p.datatype << ") default: " << p.defaultValue << std::endl;
 	}
-}
-
-void Flow::create(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
-{
-	std::string version = sharkVersion();
-
-	// check whether the flow already exists
-	IDType id = getFlow(name, version);
-	if (id == invalidID)
-	{
-		// upload a new flow
-		std::string xml = "<oml:flow xmlns:oml=\"http://openml.org/openml\">"
-				"<oml:name>" + detail::xmlencode(name) + "</oml:name>"
-				"<oml:external_version>" + detail::xmlencode(version) + "</oml:external_version>"
-				"<oml:description>" + detail::xmlencode(description) + "</oml:description>"
-				"<oml:language>English</oml:language>"
-				"<oml:dependencies>Shark machine learning library</oml:dependencies>";
-		for (std::size_t i=0; i<hyperparameters.size(); i++)
-		{
-			Hyperparameter const& p = hyperparameters[i];
-			xml += "<oml:parameter>"
-					"<oml:name>" + detail::xmlencode(p.name) + "</oml:name>"
-					"<oml:data_type>" + detail::xmlencode(p.datatype) + "</oml:data_type>"
-					"<oml:default_value>" + detail::xmlencode(p.defaultValue) + "</oml:default_value>"
-					"<oml:description>" + detail::xmlencode(p.description) + "</oml:description>"
-					"</oml:parameter>";
-		}
-		xml += "</oml:flow>";
-
-		// TODO: check for properties compatible with the XML spec!
-
-		Connection::ParamType param;
-		param.push_back(std::make_pair("description|application/xml", xml));
-//		param.push_back(std::make_pair("flow|text/plain", ""));   // no source file or similar
-		detail::Json result = connection.post("/flow", param);
-		id = detail::json2number<IDType>(result["upload_flow"]["id"]);
-	}
-
-	setID(id);
-
-	// obtain the flow data from the server
-	obtainFromServer();
 }
 
 void Flow::obtainFromServer()

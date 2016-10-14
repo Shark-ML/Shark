@@ -46,6 +46,27 @@ namespace openML {
 ////////////////////////////////////////////////////////////
 
 
+const std::vector<std::string> dataset_property_name {
+		"data_id",
+		"data_name",
+		"number_instances",
+		"number_features",
+		"number_classes",
+		"number_missing_values",
+	};
+
+const std::vector<std::string> run_property_name {
+		"task",
+		"setup",
+		"flow",
+		"uploader",
+		"run",
+		"tag",
+		"limit",
+		"offset"
+	};
+
+
 void fillTaggedValueArray(QueryEntry& entry, detail::Json json)
 {
 	SHARK_ASSERT(json.isArray());
@@ -114,6 +135,11 @@ QueryResult taggedDatasets(std::string const& tagname)
 	return getIDs("/data/list/tag/" + detail::urlencode(tagname), "data", "dataset", "did");
 }
 
+QueryResult datasetsByProperties(std::map<DatasetProperty, std::string> const& properties)
+{
+	throw std::runtime_error("[datasetsByProperties] not implemented yet");
+}
+
 QueryResult allTasks()
 {
 	return getIDs("/task/list", "tasks", "task", "task_id");
@@ -132,6 +158,11 @@ QueryResult supervisedRegressionTasks()
 QueryResult taggedTasks(std::string const& tagname)
 {
 	return getIDs("/task/list/tag/" + detail::urlencode(tagname), "tasks", "task", "task_id");
+}
+
+QueryResult tasksByProperties(std::map<DatasetProperty, std::string> const& properties)
+{
+	throw std::runtime_error("[tasksByProperties] not implemented yet");
 }
 
 
@@ -192,6 +223,11 @@ QueryResult runsByFlow(IDType flowID)
 QueryResult runsByFlow(Flow const& flow)
 {
 	return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flow.id()), "runs", "run", "run_id");
+}
+
+QueryResult runsByProperties(std::map<RunProperty, std::string> const& properties)
+{
+	throw std::runtime_error("[runsByProperties] not implemented yet");
 }
 
 

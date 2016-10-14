@@ -62,17 +62,9 @@ private:
 	/// \brief Construct a new OpenML flow.
 	Flow(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
 
-	/// \brief Construct a new OpenML flow named after a Shark object (usually a trainer).
-	Flow(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
-
 public:
 	using PooledEntity<Flow>::get;
-
-	/// \brief Construct a new OpenML flow.
-	static std::shared_ptr<Flow> get(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
-
-	/// \brief Construct a new OpenML flow named after a Shark object (usually a trainer).
-	static std::shared_ptr<Flow> get(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+	using PooledEntity<Flow>::create;
 
 	/// \brief Obtain the version string used for creating new flows.
 	static std::string sharkVersion();
@@ -117,9 +109,6 @@ public:
 	}
 
 private:
-	/// \brief Create the flow on the OpenML server.
-	void create(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
-
 	/// \brief Obtain an existing flow from the OpenML server.
 	void obtainFromServer();
 
