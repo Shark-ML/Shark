@@ -64,15 +64,15 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 //	Information about a single split. misclassProp, r and g are variables used in the cost complexity step
 	struct NodeInfo {
-		std::size_t nodeId;
-		std::size_t attributeIndex;
-		double attributeValue;
-		std::size_t leftNodeId;
-		std::size_t rightNodeId;
+		std::size_t nodeId = 0;
+		std::size_t attributeIndex = 0;
+		double attributeValue = 0.;
+		std::size_t leftNodeId = 0;
+		std::size_t rightNodeId = 0;
 		LabelType label;
-		double misclassProp;//TODO: remove this
-		std::size_t r;//TODO: remove this
-		double g;//TODO: remove this
+		double misclassProp = 0.;//TODO: remove this
+		std::size_t r = 0;//TODO: remove this
+		double g = 0.;//TODO: remove this
 
 	   template<class Archive>
 	   void serialize(Archive & ar, const unsigned int version){
@@ -86,6 +86,30 @@ public:
 			ar & r;
 			ar & g;
 		}
+		NodeInfo() {}
+		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId) {}
+		NodeInfo(std::size_t nodeId, LabelType label) : nodeId(nodeId), label(std::move(label)) {}
+		NodeInfo(NodeInfo const&) = default;
+		NodeInfo& operator=(NodeInfo const&) = default;
+		NodeInfo(NodeInfo &&n) BOOST_NOEXCEPT_IF(std::is_nothrow_constructible<LabelType>::value)
+				: nodeId{n.nodeId}, attributeIndex{n.attributeIndex},
+				  attributeValue{n.attributeValue}, leftNodeId{n.leftNodeId},
+				  rightNodeId{n.rightNodeId}, label(std::move(n.label)),
+				  misclassProp{n.misclassProp}, r{n.r}, g{n.g}
+		{}
+		NodeInfo& operator=(NodeInfo &&n) BOOST_NOEXCEPT_IF((std::is_nothrow_assignable<LabelType,LabelType>::value))
+		{
+			nodeId = n.nodeId;
+			attributeIndex = n.attributeIndex;
+			attributeValue = n.attributeValue;
+			leftNodeId = n.leftNodeId;
+			rightNodeId = n.rightNodeId;
+			label = std::move(n.label);
+			misclassProp = n.misclassProp;
+			r = n.r;
+			g = n.g;
+			return *this;
+		}
 	};
 
 	/// Vector of structs that contains the splitting information and the labels.
@@ -98,10 +122,12 @@ public:
 	{}
 
 	/// Constructor taking the tree as argument
-	CARTClassifier(TreeType const& tree)
-	{
-		m_tree=tree;
-	}
+	explicit CARTClassifier(TreeType const& tree)
+			: m_tree(tree)
+	{ }
+	explicit CARTClassifier(TreeType&& tree)
+			: m_tree(std::move(tree))
+	{ }
 
 	/// Constructor taking the tree as argument and optimize it if requested
 	CARTClassifier(TreeType const& tree, bool optimize)
@@ -114,9 +140,15 @@ public:
 
 	/// Constructor taking the tree as argument as well as maximum number of attributes
 	CARTClassifier(TreeType const& tree, std::size_t d)
+			: m_tree{tree}, m_inputDimension{d}
 	{
-		setTree(tree);
-		m_inputDimension = d;
+		optimizeTree(m_tree);
+	}
+
+	CARTClassifier(TreeType&& tree, std::size_t d) BOOST_NOEXCEPT_IF((std::is_nothrow_constructible<TreeType,TreeType>::value))
+			: m_tree(std::move(tree)), m_inputDimension{d}
+	{
+		optimizeTree(m_tree);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -156,7 +188,7 @@ public:
 		optimizeTree(m_tree);
 	}
 	
-	/// Get the model split matrix.
+	/// Get the model tree.
 	TreeType getTree() const {
 		return m_tree;
 	}
@@ -246,7 +278,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Classification)
-	void computeFeatureImportances(ClassificationDataset const& dataOOB){
+	void computeFeatureImportances(ClassificationDataset const& dataOOB, Rng::rng_type& rng){
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -266,7 +298,7 @@ public:
 
 			// permute current dimension
 			RealVector v = getColumn(pDataOOB.inputs(), i);
-			std::random_shuffle(v.begin(), v.end());
+			std::random_shuffle(v.begin(), v.end(), DiscreteUniform<>{rng});
 			setColumn(pDataOOB.inputs(), i, v);
 
 			// evaluate the data set for which one feature dimension was permuted with this tree
@@ -281,7 +313,7 @@ public:
 	}
 
 	/// Compute feature importances, given an oob dataset (Regression)
-	void computeFeatureImportances(RegressionDataset const& dataOOB){
+	void computeFeatureImportances(RegressionDataset const& dataOOB, Rng::rng_type& rng){
 		m_featureImportances.resize(m_inputDimension);
 
 		// define loss
@@ -301,7 +333,7 @@ public:
 
 			// permute current dimension
 			RealVector v = getColumn(pDataOOB.inputs(), i);
-			std::random_shuffle(v.begin(), v.end());
+			std::random_shuffle(v.begin(), v.end(), DiscreteUniform<>{rng});
 			setColumn(pDataOOB.inputs(), i, v);
 
 			// evaluate the data set for which one feature dimension was permuted with this tree
@@ -358,13 +390,13 @@ protected:
 
 
 	///Number of attributes (set by trainer)
-	std::size_t m_inputDimension;
+	std::size_t m_inputDimension = 0;
 
 	// feature importances
 	RealVector m_featureImportances;
 
 	// oob error
-	double m_OOBerror;
+	double m_OOBerror = 0.;
 };
 
 

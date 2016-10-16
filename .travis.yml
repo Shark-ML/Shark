@@ -33,7 +33,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-program-options1.55-dev; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-random1.55-dev libboost-regex1.55-dev libboost-serialization1.55-dev; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-system1.55-dev libboost-test1.55-dev libboost-thread1.55-dev; fi
-  - if [ "$TRAVIS_OS_NAME" != "linux" ]; then brew update && brew unlink cmake && brew install cmake; fi
+  - if [ "$TRAVIS_OS_NAME" != "linux" ]; then brew update && brew unlink cmake && brew install cmake; brew link cmake; fi
   
 before_script:  
   - mkdir build

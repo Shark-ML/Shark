@@ -38,9 +38,10 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Data/DataView.h>
 #include <shark/Models/Trees/RFClassifier.h>
+#include <shark/Algorithms/Trainers/CARTcommon.h>
 
-#include <boost/unordered_map.hpp>
 #include <set>
 
 namespace shark {
@@ -81,6 +82,12 @@ class RFTrainer
 {
 
 public:
+	using ModelType = RFClassifier;
+	using LabelType = RealVector;
+	using SubmodelType = CARTClassifier<LabelType>;
+	using CARTType = SubmodelType;
+	using TreeType = CARTType::TreeType;
+	using NodeInfo = CARTType::NodeInfo;
 	/// Construct and compute feature importances when training or not
 	SHARK_EXPORT_SYMBOL RFTrainer(bool computeFeatureImportances = false, bool computeOOBerror = false);
 
@@ -95,18 +102,30 @@ public:
 	SHARK_EXPORT_SYMBOL void train(RFClassifier& model, RegressionDataset const& dataset);
 
 	/// Set the number of random attributes to investigate at each node.
-	SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry);
+	SHARK_EXPORT_SYMBOL void setMTry(std::size_t mtry) { m_try = mtry; }
+
 
 	/// Set the number of trees to grow.
-	SHARK_EXPORT_SYMBOL void setNTrees(std::size_t nTrees);
+	SHARK_EXPORT_SYMBOL void setNTrees(long nTrees) {
+		if(nTrees<1) throw SHARKEXCEPTION("[RFTrainer::setNTree] nTrees should be a positive number");
+		m_B = nTrees;
+	}
+
 
 	/// Controls when a node is considered pure. If set to 1, a node is pure
 	/// when it only consists of a single node.
-	SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nTrees);
+	SHARK_EXPORT_SYMBOL void setNodeSize(std::size_t nodeSize) { m_nodeSize = nodeSize; }
 
 	/// Set the fraction of the original training dataset to use as the
 	/// out of bag sample. The default value is 0.66.
-	SHARK_EXPORT_SYMBOL void setOOBratio(double ratio);
+	SHARK_EXPORT_SYMBOL void setOOBratio(double ratio)
+	{
+		if(m_OOBratio <= 0 || m_OOBratio>1){
+			throw SHARKEXCEPTION("[RFTrainer::setOOBratio] OOBratio should be in the interval (0,1]");
+		}
+		m_OOBratio = ratio;
+	}
+
 
 	/// Return the parameter vector.
 	RealVector parameterVector() const
@@ -120,73 +139,63 @@ public:
 	void setParameterVector(RealVector const& newParameters)
 	{
 		SHARK_ASSERT(newParameters.size() == numberOfParameters());
-		setNTrees((size_t) newParameters[0]);
+		setNTrees(static_cast<long>(newParameters[0]));
 	}
 
 protected:
-	struct RFAttribute {
-		double value;
-		std::size_t id;
+	/// ClassVector
+	using ClassVector = UIntVector;
+	using LabelVector = std::vector<LabelType>;
+
+	struct Split{
+		std::size_t splitAttribute = 0, splitRow = 0;
+		double splitValue=0;
+
+		//static constexpr
+		double WORST_IMPURITY = std::numeric_limits<double>::max();
+		double impurity = WORST_IMPURITY;
+		double purity = 0;
+		LabelType sumAbove, sumBelow; // for regression
+		ClassVector cAbove, cBelow;    // for classification
+		inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
+			node.attributeIndex = split.splitAttribute;
+			node.attributeValue = split.splitValue;
+			return node;
+		}
+		inline operator bool(){
+			return impurity < WORST_IMPURITY || purity > 0;
+		}
 	};
 
-	/// attribute table
-	typedef std::vector < RFAttribute > AttributeTable;
-	/// collecting of attribute tables
-	typedef std::vector < AttributeTable > AttributeTables;
-
-	/// Create attribute tables from a data set, and in the process create a count matrix (cAbove).
-	/// A dataset with m features results in m attribute tables.
-	/// [attribute | class/value | row id ]
-	SHARK_EXPORT_SYMBOL void createAttributeTables(Data<RealVector> const& dataset, AttributeTables& tables);
-
-	/// Create a count matrix as used in the classification case.
-	SHARK_EXPORT_SYMBOL void createCountMatrix(ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove);
-
-	// Split attribute tables into left and right parts.
-	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
-
 	/// Build a decision tree for classification
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, ClassificationDataset const& dataset, boost::unordered_map<std::size_t, std::size_t>& cAbove, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
 
 	/// Builds a decision tree for regression
-	SHARK_EXPORT_SYMBOL CARTClassifier<RealVector>::TreeType buildTree(AttributeTables& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, Rng::rng_type& rng);
 
-	/// comparison function for sorting an attributeTable
-	SHARK_EXPORT_SYMBOL static bool tableSort(RFAttribute const& v1, RFAttribute const& v2);
 
-	/// Generate a histogram from the count matrix.
-	SHARK_EXPORT_SYMBOL RealVector hist(boost::unordered_map<std::size_t, std::size_t> countMatrix);
-
-	/// Average label over a vector.
-	SHARK_EXPORT_SYMBOL RealVector average(std::vector<RealVector> const& labels);
-
-	/// Calculate the Gini impurity of the countMatrix
-	SHARK_EXPORT_SYMBOL double gini(boost::unordered_map<std::size_t, std::size_t> & countMatrix, std::size_t n);
-
-	/// Total Sum Of Squares
-	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector>& labels, std::size_t from, std::size_t to, RealVector const& sumLabel);
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
+	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
 
 	/// Generate random table indices.
-	SHARK_EXPORT_SYMBOL void generateRandomTableIndicies(std::set<std::size_t>& tableIndicies);
+	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(Rng::rng_type &rng) const;
 
 	/// Reset the training to its default parameters.
-	SHARK_EXPORT_SYMBOL void setDefaults();
+	void setDefaults();
 
 	/// Number of attributes in the dataset
 	std::size_t m_inputDimension;
 
-	/// size of labels
+	/// Dimension of a label. Used in Regression
 	std::size_t m_labelDimension;
-
-	/// maximum size of the histogram;
-	/// classification case: maximum number of classes
-	unsigned int m_maxLabel;
+	/// Holds the number of distinct labels. Used in Classification
+	std::size_t m_labelCardinality;
 
 	/// number of attributes to randomly test at each inner node
 	std::size_t m_try;
 
 	/// number of trees in the forest
-	std::size_t m_B;
+	long m_B;
 
 	/// number of samples in the terminal nodes
 	std::size_t m_nodeSize;

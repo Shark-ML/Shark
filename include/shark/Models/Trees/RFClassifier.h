@@ -36,7 +36,9 @@
 #define SHARK_MODELS_TREES_RFCLASSIFIER_H
 
 #include <shark/Models/Trees/CARTClassifier.h>
+#include <shark/Models/Trees/General.h>
 #include <shark/Models/MeanModel.h>
+#include <shark/Data/DataView.h>
 
 namespace shark {
 
@@ -58,19 +60,31 @@ typedef std::vector<TreeType> ForestInfo;
 class RFClassifier : public MeanModel<CARTClassifier<RealVector> >
 {
 public:
+	using SubmodelType = CARTClassifier<RealVector>;
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
 
 	// compute the oob error for the forest
-	void computeOOBerror(){
-		std::size_t n_trees = numberOfModels();
-		m_OOBerror = 0;
-		for(std::size_t j=0;j!=n_trees;++j){
-			m_OOBerror += m_models[j].OOBerror();
-		}
-		m_OOBerror /= n_trees;
+	void computeOOBerror(
+			UIntMatrix const& oobClassTally,
+			DataView<ClassificationDataset const>& elements){
+		auto n_elements = elements.size();
+		m_OOBerror = detail::cart::sum<double>(n_elements, [&](size_t i){
+			auto y = elements[i].label;
+			auto z = arg_max(row(oobClassTally,i));
+			return static_cast<double>(y!=z);
+		})/n_elements;
 	}
+	void computeOOBerror(
+			RealMatrix const& oobTally,
+			DataView<RegressionDataset const>& elements){
+		auto n_elements = elements.size();
+		m_OOBerror = detail::cart::sum<double>(n_elements,[&](size_t i){
+			return distanceSqr(elements[i].label,row(oobTally,i));
+		})/n_elements;
+	}
+
 
 	// compute the feature importances for the forest
 	void computeFeatureImportances(){
@@ -133,7 +147,7 @@ public:
 			throw SHARKEXCEPTION("Weights must be the same number as trees");
 
 		for (std::size_t i=0; i<n_tree; ++i){
-			m_models[i]=finfo[i];
+			m_models[i]=SubmodelType{finfo[i]};
 			m_weight.push_back(we[i]);
 			m_weightSum+=we[i];
 		}
@@ -147,7 +161,7 @@ protected:
 	std::size_t m_inputDimension;
 
 	// oob error for the forest
-	double m_OOBerror;
+	double m_OOBerror = 0.;
 
 	// feature importances for the forest
 	RealVector m_featureImportances;
