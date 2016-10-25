@@ -1,4 +1,5 @@
 #define BOOST_TEST_MODULE BLAS_gpu_prod
+#define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -138,14 +139,14 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(BLAS_prod_gpu_matrix_dense_dense, Orientation,resu
 	matrix<float,column_major> arg1cm_cpu(rows,middle);
 	for(std::size_t i = 0; i != rows; ++i){
 		for(std::size_t j = 0; j != middle; ++j){
-			arg1rm_cpu(i,j) = arg1cm_cpu(i,j) = i*middle+0.2*j;
+			arg1rm_cpu(i,j) = arg1cm_cpu(i,j) = 0.1*i*middle+0.2*j;
 		}
 	}
 	matrix<float,row_major> arg2rm_cpu(middle,columns);
 	matrix<float,column_major> arg2cm_cpu(middle,columns);
 	for(std::size_t i = 0; i != middle; ++i){
 		for(std::size_t j = 0; j != columns; ++j){
-			arg2rm_cpu(i,j) = arg2cm_cpu(i,j) = i*columns+1.5*j;
+			arg2rm_cpu(i,j) = arg2cm_cpu(i,j) = 0.1*i*columns+1.5*j;
 		}
 	}
 	

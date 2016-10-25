@@ -34,57 +34,7 @@
 
 #include "clblas_inc.hpp"
 
-namespace shark { namespace blas { namespace bindings {
-
-inline void gemm(
-	clblasOrder order, clblasTranspose transA, clblasTranspose transB,
-	std::size_t M, std::size_t N, std::size_t K, float alpha,
-	boost::compute::vector<float> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<float> const& B, std::size_t offB, std::size_t ldb,
-	float beta,
-	boost::compute::vector<float> const& C, std::size_t offC, std::size_t ldc,
-	std::size_t numCommandQueues, cl_command_queue* commandQueues,
-	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
-){
-	clblasSgemm(
-		order, transA, transB,
-		M, N, K,
-		alpha,
-		A.get_buffer().get(), offA, lda,
-		B.get_buffer().get(), offB, ldb,
-		beta,
-		C.get_buffer().get(), offC, ldc,
-		numCommandQueues, commandQueues,
-		numEventsInWaitList, eventWaitList, events
-	);
-}
-
-inline void gemm(
-	clblasOrder order, clblasTranspose transA, clblasTranspose transB,
-	std::size_t M, std::size_t N, std::size_t K, double alpha,
-	boost::compute::vector<double> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<double> const& B, std::size_t offB, std::size_t ldb,
-	double beta,
-	boost::compute::vector<double> const& C, std::size_t offC, std::size_t ldc,
-	std::size_t numCommandQueues, cl_command_queue* commandQueues,
-	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
-){
-	clblasDgemm(
-		order, transA, transB,
-		M, N, K,
-		alpha,
-		A.get_buffer().get(), offA, lda,
-		B.get_buffer().get(), offB, ldb,
-		beta,
-		C.get_buffer().get(), offC, ldc,
-		numCommandQueues, commandQueues,
-		numEventsInWaitList, eventWaitList, events
-	);
-}
-
-}
-
-namespace kernels{
+namespace shark { namespace blas { namespace kernels{
 
 // C <- alpha * A * B + beta * C
 template <typename MatA, typename MatB, typename MatC>
@@ -98,24 +48,115 @@ void gemm(
 	SIZE_CHECK(B().size2() == C().size2());
 	SIZE_CHECK(A().size2()== B().size1());
 	
-	clblasTranspose transA = std::is_same<typename MatA::orientation,typename MatC::orientation>::value?clblasNoTrans:clblasTrans;
-	clblasTranspose transB = std::is_same<typename MatB::orientation,typename MatC::orientation>::value?clblasNoTrans:clblasTrans;
-	std::size_t m = C().size1();
-	std::size_t n = C().size2();
-	std::size_t k = A().size2();
-	clblasOrder stor_ord = (clblasOrder) clblas::storage_order<typename MatC::orientation >::value;
+	// TUNING VARIABLES:
+	// TILE_SIZE: width and height of a tile computed in C
+	// TILE_SIZE_K: length of Tile loaded from A and C, i.e A and C are loaded as (TILE_SIZE, TILE_SIZE_K) matrices
+	// BLOCK_SIZE: size of a subblock computed by a single work item (must divide TILE_SIZE)
+	// it holds TILE_SIZE = get_local_size(i) * BLOCK_SIZE for i=0,1
+	// note that BLOCK_SIZE increases the number of registers needed per thread.
+	// roughly O(BLOCK_SIZE^2) registers are needed per thread (+ overhead). Note that register spill might be deadly to performance.
+	// local memory is TILE_SIZE*TILE_SIZE_K*2*sizeof(MatC::value_type)
+	// increasing TILE_SIZE improves the trade-off "computations per memory access"
+	std::size_t BLOCK_SIZE = 4;
+	std::size_t TILE_SIZE = 32;
+	std::size_t NUM_WORKERS = TILE_SIZE / BLOCK_SIZE;
+	//~ std::size_t TILE_SIZE_K = 16;
+	char const* options ="-DTILE_SIZE=32ul -DBLOCK_SIZE=4ul -DTILE_SIZE_K=16ul";
+	typedef typename MatC::value_type value_type;
+	
+	boost::compute::detail::meta_kernel k("blas_gemm");
+	std::size_t M_index = k.add_arg<std::size_t>("M");
+	std::size_t N_index = k.add_arg<std::size_t>("N");
+	std::size_t K_index = k.add_arg<std::size_t>("K");
+	std::size_t alpha_index = k.add_arg<value_type>("alpha");
+	// Local memory to fit a tile of A and B
+	// we transpose A locally in memory
+	k << "__local " <<k.decl<value_type>("Asub")<< "[TILE_SIZE_K][TILE_SIZE+2];\n";//+2 to avoid bank conflicts
+	k << "__local " <<k.decl<value_type>("Bsub")<< "[TILE_SIZE_K][TILE_SIZE+2];\n";//+2 to avoid bank conflicts
+	k << "	const ulong numWorkers = get_local_size(0);\n";
+	// Initialise the accumulation registers
+	// here the subblock of C for this thread is stored
+	// blocks ae not continuous but strided so that
+	// coalesced write to C is possible
+	// e.g. with 8x8 threads and BLOCK_SIZE 2x2 thread 1 has local tile elements
+	//(0,0) (0,8) (8,0), (8,8). all other blocks are calculated
+	// by adding (local_id(0), local_id(1)) to the coordinates
+	k << k.decl<value_type>("acc") <<"[BLOCK_SIZE][BLOCK_SIZE];\n";
+	k << "for (ulong wm=0; wm<BLOCK_SIZE; wm++){\n";
+	k << "	for (ulong wn=0; wn<BLOCK_SIZE; wn++){\n";
+	k << "		acc[wm][wn] = 0.0f;\n";
+	k << "	}\n";
+	k << "}\n";
+	
 
-	auto storageA = A().raw_storage();
-	auto storageB = B().raw_storage();
-	auto storageC = C().raw_storage();
-	bindings::gemm(stor_ord, transA, transB, m, n, k, alpha,
-		storageA.buffer, storageA.offset, storageA.leading_dimension,
-		storageB.buffer, storageB.offset, storageB.leading_dimension,
-		typename MatC::value_type(1),
-		storageC.buffer, storageC.offset, storageC.leading_dimension,
-		1, &(C().queue().get()),
-		0, nullptr, nullptr
-	);
+	// Loop over all tiles
+	k << "ulong numTiles = (K+TILE_SIZE_K-1)/TILE_SIZE_K;\n";
+	k << "for (ulong t=0; t<numTiles; t++){\n";
+		
+	//ensure we are not reading out of bounds in K.
+	k << "	const ulong curTileK =  min(TILE_SIZE_K, K - t*TILE_SIZE_K);\n";
+		
+	// Load one tile of A and B transposed ulongo local memory using padding
+	k << "	for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
+	k << "		for(ulong k = get_local_id(1); k < curTileK; k += numWorkers){\n";
+	k << "			ulong ktile = t * TILE_SIZE_K + k;\n";
+	k << "			Asub[k][i] ="<< A()(k.expr<cl_ulong>("min(M-1,TILE_SIZE * get_group_id(0)+i)"),k.expr<cl_ulong>("ktile"))<<";\n";
+	k << "			Bsub[k][i] ="<< B()(k.expr<cl_ulong>("ktile"),k.expr<cl_ulong>("min(N-1,TILE_SIZE * get_group_id(1)+i)"))<<";\n";
+	k << "		}\n";
+	k << "	}\n";
+
+	// Synchronise to make sure the tile is loaded
+	k << "	barrier(CLK_LOCAL_MEM_FENCE);\n";
+
+	// Loop over the values of a single tile
+	// by computing outer products ulongo the local accumulation registers acc
+	k << "	for (ulong k=0; k<curTileK; k++){\n";
+	// Cache the values of Bsub in registers to save local memory lookups
+	k <<  k.decl<value_type>("Breg")<<"[BLOCK_SIZE];\n";
+	k << "		for (ulong wn=0; wn<BLOCK_SIZE; wn++){\n";
+	k << "			Breg[wn] = Bsub[k][get_local_id(1) + wn * numWorkers];\n";
+	k << "		}\n";
+
+	// Perform the computation
+	k << "		for (ulong wm = 0; wm<BLOCK_SIZE; wm++){\n";
+	k << k.decl<value_type>("Areg") << "= Asub[k][get_local_id(0) + wm * numWorkers];\n";
+	k << "			for (ulong wn=0; wn<BLOCK_SIZE; wn++){\n";
+	k << "				acc[wm][wn] += Areg * Breg[wn];\n";
+	k << "			}\n";
+	k << "		}\n";
+	k << "	}\n";
+
+	// Synchronise before loading the next tile
+	k << "	barrier(CLK_LOCAL_MEM_FENCE);\n";
+	k << "}\n";
+
+	// Store the final results in C
+	k << "const ulong maxCi = min(TILE_SIZE, M -  get_group_id(0) * TILE_SIZE);\n";
+	k << "const ulong maxCj = min(TILE_SIZE, N -  get_group_id(1) * TILE_SIZE);\n";
+	k << "const ulong offTileCi = TILE_SIZE * get_group_id(0);\n";
+	k << "const ulong offTileCj = TILE_SIZE * get_group_id(1);\n";
+	k << "ulong wm = 0;\n";
+	k << "for (ulong i = get_local_id(0); i < maxCi; i += numWorkers, wm++){\n";
+	k << "	ulong wn = 0;\n";
+	k << "	for (ulong j =get_local_id(1); j < maxCj; j += numWorkers, wn++){\n";
+	k <<		C()(k.expr<cl_ulong>("(offTileCi + i)"), k.expr<cl_ulong>("(offTileCj + j)")) << "+= alpha * acc[wm][wn];\n";
+	k << "	}\n";
+	k << "}\n";
+	
+	boost::compute::kernel kernel = k.compile(C().queue().get_context(), options);
+	
+	//enqueue kernel with kernel args
+	kernel.set_arg(M_index, C().size1());
+	kernel.set_arg(N_index, C().size2());
+	kernel.set_arg(K_index, A().size2());
+	kernel.set_arg(alpha_index, alpha);
+	
+	std::size_t global_work_size[2] = {
+		(C().size1()+TILE_SIZE-1)/ TILE_SIZE * NUM_WORKERS,
+		(C().size2()+TILE_SIZE-1)/ TILE_SIZE * NUM_WORKERS
+	};
+	std::size_t local_work_size[2] = {NUM_WORKERS, NUM_WORKERS};
+	C().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }
 
 }}}
