@@ -41,7 +41,7 @@ void matrix_fold(matrix_expression<MatA, gpu_tag> const& A, typename F::result_t
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
 	std::size_t size2_index = k.add_arg<std::size_t>("size2");
 	boost::compute::array<value_type,1> device_result;
-	::boost::compute::copy_n(&value, 1, device_result.begin(), queue);
+	boost::compute::copy_n(&value, 1, device_result.begin(), queue);
 	device_result.front() = value;
 	F f;
 	
@@ -81,8 +81,7 @@ void matrix_fold(matrix_expression<MatA, gpu_tag> const& A, typename F::result_t
 	std::size_t global_work_size[2] = {TILE_DIM,TILE_DIM};
 	std::size_t local_work_size[2] = {TILE_DIM, TILE_DIM};
 	queue.enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
-	::boost::compute::copy_n(device_result.begin(), 1, &value, queue);
-	std::cout<<value<<std::endl;
+	boost::compute::copy_n(device_result.begin(), 1, &value, queue);
 }
 }}}
 #endif
