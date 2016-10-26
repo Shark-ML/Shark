@@ -31,64 +31,38 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
 
-#include "../../expression_types.hpp"
 #include <boost/mpl/bool.hpp>
+#include "../gemv.hpp"
 
 namespace shark{ namespace blas{ namespace bindings{
-	
-//Lower triangular(row-major) - vector
+
+// first block-kernels which compute the small triangular parts
+
+//Lower triangular - vector
 template<bool Unit, class MatA, class V>
-void trmv_impl(
+void trmv_block(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-        boost::mpl::false_, row_major
+        boost::mpl::false_ //Lower
 ){
-	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
 	std::size_t size = A().size1();
-	std::size_t const blockSize = 128;
-	std::size_t numBlocks = size/blockSize;
-	if(numBlocks*blockSize < size) ++numBlocks; 
-	
-	//this implementation partitions A into
-	//a set of panels, where a Panel is a set
-	// of columns. We start with the last panel
-	//and compute the product of it with the part of the vector
-	// and than just add the previous panel on top etc.
-	
-	//tmporary storage for subblocks of b
-	value_typeV valueStorage[blockSize];
-	
-	for(std::size_t bi = 1; bi <= numBlocks; ++bi){
-		std::size_t startbi = blockSize*(numBlocks-bi);
-		std::size_t sizebi = std::min(blockSize,size-startbi);
-		dense_vector_adaptor<value_typeA> values(valueStorage,sizebi);
-		
-		//store and save the values of b we are now changing
-		noalias(values) = subrange(b,startbi,startbi+sizebi);
-		
-		//multiply with triangular element
-		for (std::size_t i = 0; i != sizebi; ++i) {
-			std::size_t posi = startbi+i;
-			b()(posi) = 0;
-			for(std::size_t j = 0; j < i; ++j){
-				b()(posi) += A()(posi,startbi+j)*values(j);
-			}
-			b()(posi) += values(i)*(Unit? value_typeA(1):A()(posi,posi));
+	for (std::size_t n = 1; n <= size; ++n) {
+		std::size_t i = size-n;
+		value_typeV bi = b()(i);
+		if(!Unit){
+			b()(i) *= A()(i,i);
 		}
-		//now compute the remaining inner products
-		for(std::size_t posi = startbi+sizebi; posi != size; ++posi){
-			b()(posi) += inner_prod(values,subrange(row(A,posi),startbi,startbi+sizebi));
-		}
+		noalias(subrange(b,i+1,size))+= bi * subrange(column(A,i),i+1,size);
 	}
 }
 
 //upper triangular(row-major)-vector
 template<bool Unit, class MatA, class V>
-void trmv_impl(
+void trmv_block(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag>& b,
-        boost::mpl::true_, row_major
+        boost::mpl::true_ //Upper
 ){
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
@@ -99,81 +73,48 @@ void trmv_impl(
 	}
 }
 
-//Lower triangular(column-major) - vector
-template<bool Unit, class MatA, class V>
-void trmv_impl(
-	matrix_expression<MatA, cpu_tag> const& A,
-	vector_expression<V, cpu_tag> &b,
-        boost::mpl::false_, column_major
+// recursive block-based kernel
+template<bool Upper, bool Unit, class MatA, class V>
+void trmv_recursive(
+	matrix_expression<MatA, cpu_tag> const& AFull,
+	vector_expression<V, cpu_tag>& bFull,
+	std::size_t start,
+	std::size_t end
 ){
-	
-	std::size_t size = A().size1();
-	for (std::size_t n = 1; n <= size; ++n) {
-		std::size_t i = size-n;
-		double bi = b()(i);
-		if(!Unit){
-			b()(i) *= A()(i,i);
-		}
-		noalias(subrange(b,i+1,size))+= bi * subrange(column(A,i),i+1,size);
+	std::size_t const blockSize = 32;
+	auto A = subrange(AFull,start,end,start,end);
+	auto b = subrange(bFull,start,end);
+	std::size_t size = A.size1();
+	std::size_t split = A.size1()/2;
+	auto bfront = subrange(b,0,split);
+	auto bback = subrange(b,split,size);
+	//if the matrix is small enough call the computation kernel directly for the block
+	if(A.size1() < blockSize){
+		trmv_block<Unit>(A,b,boost::mpl::bool_<Upper>());
+	}
+	//otherwise run the kernel recursively
+	else if(Upper){ //Upper triangular case
+		trmv_recursive<Upper,Unit>(AFull, bFull,start,start+split);
+		kernels::gemv(subrange(A,0,split,split,size), bback, bfront, 1.0 );
+		trmv_recursive<Upper,Unit>(AFull, bFull,start+split,end);
+	}else{// Lower triangular caste
+		trmv_recursive<Upper,Unit>(AFull, bFull,start+split,end);
+		kernels::gemv(subrange(A,split,size,0,split), bfront, bback, 1.0);
+		trmv_recursive<Upper,Unit>(AFull, bFull,start,start+split);
 	}
 }
 
-//upper triangular(column-major)-vector
-template<bool Unit, class MatA, class V>
-void trmv_impl(
-	matrix_expression<MatA, cpu_tag> const& A,
-	vector_expression<V, cpu_tag>& b,
-        boost::mpl::true_, column_major
-){
-	typedef typename MatA::value_type value_typeA;
-	typedef typename V::value_type value_typeV;
-	std::size_t size = A().size1();
-	std::size_t const blockSize = 128;
-	std::size_t numBlocks = size/blockSize;
-	if(numBlocks*blockSize < size) ++numBlocks; 
-	
-	//this implementation partitions A into
-	//a set of panels, where a Panel is a set
-	// of rows. We start with the first panel
-	//and compute the product of it with the part of the vector
-	// and than just add the next panel on top etc.
-	
-	//tmporary storage for subblocks of b
-	value_typeV valueStorage[blockSize];
-	
-	for(std::size_t bj = 0; bj != numBlocks; ++bj){
-		std::size_t startbj = blockSize*bj;
-		std::size_t sizebj = std::min(blockSize,size-startbj);
-		dense_vector_adaptor<value_typeA> values(valueStorage,sizebj);
-		
-		//store and save the values of b we are now changing
-		noalias(values) = subrange(b,startbj,startbj+sizebj);
-		subrange(b,startbj,startbj+sizebj).clear();
-		//multiply with triangular element
-		for (std::size_t j = 0; j != sizebj; ++j) {
-			std::size_t posj = startbj+j;
-			for(std::size_t i = 0; i < j; ++i){
-				b()(startbj+i) += A()(startbj+i,posj)*values(j);
-			}
-			b()(posj) += values(j)*(Unit? 1.0:A()(posj,posj));
-		}
-		//now compute the remaining inner products
-		for(std::size_t posj = startbj+sizebj; posj != size; ++posj){
-			noalias(subrange(b,startbj,startbj+sizebj)) += b()(posj)*subrange(column(A,posj),startbj,startbj+sizebj);
-		}
-	}
-}
-
-//dispatcher
+//main kernel runs the kernel above recursively and calls gemv
 template <bool Upper,bool Unit,typename MatA, typename V>
 void trmv(
 	matrix_expression<MatA, cpu_tag> const& A, 
 	vector_expression<V, cpu_tag> & b,
-	boost::mpl::false_//unoptimized
+	boost::mpl::false_ //unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
-	trmv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename MatA::orientation());
+	
+	trmv_recursive<Upper,Unit>(A,b,0,A().size1());
 }
 
 }}}

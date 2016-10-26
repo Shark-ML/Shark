@@ -270,9 +270,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_vector) {
 
 
 typedef boost::mpl::list<row_major,column_major> result_orientations;
-//~ BOOST_AUTO_TEST_CASE_TEMPLATE(LinAlg_triangular_prod_matrix_matrix, Orientation,result_orientations) {
-BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_matrix) {
-	typedef row_major Orientation;
+BOOST_AUTO_TEST_CASE_TEMPLATE(LinAlg_triangular_prod_matrix_matrix, Orientation,result_orientations) {
 	std::size_t dims = 231;//chosen as not to be a multiple of the block size
 	std::size_t N = 30;
 	//initialize the arguments in both row and column major, lower and upper, unit and non-unit diagonal
