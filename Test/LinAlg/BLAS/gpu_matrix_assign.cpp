@@ -1,4 +1,5 @@
 #define BOOST_TEST_MODULE LinAlg_BLAS_GPU_MatrixAssign
+#define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -36,7 +37,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Matrix_Assign_Dense ){
 			source_cpu(i,j) = 2*i+1+0.3*j;
 			target_cpu(i,j) = 3*i+2+0.3*j;
 			result_add_cpu(i,j) = source_cpu(i,j) + target_cpu(i,j);
-			result_add_scalar_cpu(i,j) = source_cpu(i,j) + scalar;
+			result_add_scalar_cpu(i,j) = target_cpu(i,j) + scalar;
 		}
 	}
 	blas::gpu::matrix<float, blas::row_major> source = blas::gpu::copy_to_gpu(source_cpu);
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Matrix_Assign_Dense ){
 	{
 		std::cout<<"testing functor assignment row-row"<<std::endl;
 		blas::gpu::matrix<float> target = blas::gpu::copy_to_gpu(target_cpu);
-		blas::kernels::assign<blas::device_traits<blas::gpu_tag>::add<float> >(target,source_cm);
+		blas::kernels::assign<blas::device_traits<blas::gpu_tag>::add<float> >(target,source);
 		checkMatrixEqual(target,result_add);
 	}
 	{
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_BLAS_Matrix_Assign_Dense ){
 		blas::gpu::matrix<float> target = blas::gpu::copy_to_gpu(target_cpu);
 		blas::kernels::assign<blas::device_traits<blas::gpu_tag>::add<float> >(target,scalar);
 		target.queue().finish();
-		//~ checkMatrixEqual(target,result_add_scalar);
+		checkMatrixEqual(target,result_add_scalar);
 	}
 	
 }

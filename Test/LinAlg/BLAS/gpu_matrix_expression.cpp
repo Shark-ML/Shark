@@ -1,4 +1,5 @@
 #define BOOST_TEST_MODULE BLAS_GPU_Matrix_Expression
+#define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 

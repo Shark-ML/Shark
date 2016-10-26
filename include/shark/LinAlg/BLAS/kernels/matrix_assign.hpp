@@ -46,6 +46,7 @@ void assign(
 	matrix_expression<M, Device> &m, 
 	typename M::value_type t
 ){
+	if(m().size1() == 0|| m().size2() == 0) return;
 	typedef typename M::orientation orientation;
 	bindings::matrix_assign<F> (m, t, orientation());
 }
@@ -94,6 +95,7 @@ template<class M, class E, class Device>
 void assign(matrix_expression<M, Device>& m, matrix_expression<E, Device> const& e) {
 	SIZE_CHECK(m().size1() == e().size1());
 	SIZE_CHECK(m().size2() == e().size2());
+	if(m().size1() == 0|| m().size2() == 0) return;
 	typedef typename M::orientation::orientation MOrientation;
 	typedef typename E::orientation::orientation EOrientation;
 	typedef typename M::evaluation_category::tag MCategory;
@@ -147,6 +149,7 @@ template<class F, class M, class E, class Device>
 void assign(matrix_expression<M, Device> &m, const matrix_expression<E, Device> &e) {
 	SIZE_CHECK(m().size1()  == e().size1());
 	SIZE_CHECK(m().size2()  == e().size2());
+	if(m().size1() == 0|| m().size2() == 0) return;
 	typedef typename M::orientation::orientation MOrientation;
 	typedef typename E::orientation::orientation EOrientation;
 	typedef typename M::evaluation_category::tag MCategory;

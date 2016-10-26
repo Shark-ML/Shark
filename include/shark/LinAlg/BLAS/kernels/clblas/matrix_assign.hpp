@@ -73,10 +73,10 @@ void matrix_assign_functor(
 ) {
 	F f;
 	//create source
-	boost::compute::detail::meta_kernel k("blas_matrix_assign_row_row");
+	boost::compute::detail::meta_kernel k("blas_matrix_assign");
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
 	auto exprCol=k.expr<cl_uint>("get_global_id(1)");
-	k<< m()(exprRow,exprCol) << '=' << f(m()(exprRow,exprCol),e()(exprRow,exprCol))<<";";
+	k<< m()(exprRow,exprCol) << '=' << f(m()(exprRow,exprCol),e()(exprRow,exprCol))<<";\n";
 	//enqueue kernel
 	boost::compute::kernel kernel = k.compile(m().queue().get_context());
 	std::size_t global_work_size[2] = {m().size1(), m().size2()};
@@ -94,7 +94,7 @@ void matrix_assign_functor(
 	typedef typename M::value_type value_type;
 	F f;
 	std::size_t TILE_DIM = 32;
-	char const* options ="-DTILE_DIM = 32";
+	char const* options ="-DTILE_DIM=32ul";
 	//There are usually not enough parallel worker threads in a local group
 	//to fill a tile. Therefore every parallel threads reads several elements.
 	//BLOCK_COLS are the number of parallel threads reading a column
@@ -110,26 +110,26 @@ void matrix_assign_functor(
 	// TILE_DIM+1 is here to avoid bank conflicts in local memory
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
 	std::size_t size2_index = k.add_arg<std::size_t>("size2");
-	k << "__local" <<k.decl<value_type>("tile")<< "[TILE_DIM][TILE_DIM+1];";
-	k << "uint base_row = get_group_id(0) * TILE_DIM;";
-	k << "uint base_col = get_group_id(1) * TILE_DIM;";
+	k << "__local " <<k.decl<value_type>("tile")<< "[TILE_DIM][TILE_DIM+2];\n";
+	k << "uint base_row = get_group_id(0) * TILE_DIM;\n";
+	k << "uint base_col = get_group_id(1) * TILE_DIM;\n";
 	//copy indices, into local memory, note the change of direction
 	//also note that if we are on the boundary, the tile
 	// might be largerthan the amount of values to read
-	k << "uint maxDim1 = min(size1-base_row,TILE_DIM);";
-	k << "uint maxDim2 = min(size2-base_col,TILE_DIM);";
-	k << "for(uint i = 0 ; i < maxDim1 && get_local_id(0) < maxDim2; i += get_local_size(1)){";
-	auto row_exp = k.expr<cl_uint>("base_row+get_local_id(1)+i");
-	auto col_exp = k.expr<cl_uint>("base_col+get_local_id(0)");
-	k << "    tile[get_local_id(1)+i][get_local_id(0)] =" << e()(row_exp, col_exp)<<';';
-	k << '}';
-	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with copying
+	k << "uint maxDim1 = min(size1-base_row,TILE_DIM);\n";
+	k << "uint maxDim2 = min(size2-base_col,TILE_DIM);\n";
+	k << "for(uint i = get_local_id(1) ; i < maxDim2 && get_local_id(0) < maxDim1; i += get_local_size(1)){\n";
+	auto row_exp = k.expr<cl_uint>("(base_row+get_local_id(0))");
+	auto col_exp = k.expr<cl_uint>("(base_col+i)");
+	k << "    tile[get_local_id(0)][i] =" << e()(row_exp, col_exp)<<";\n";
+	k << "}\n";
+	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";//wait until all threads are done with copying
 	// write output from local memory, again be sure that 
 	// we do not write outside the feasible area
-	k << "for(uint i = 0 ; i < maxDim2 && get_local_id(1) < maxDim0; i += get_local_size(1)){"; 
-	auto target = m()(k.expr<cl_uint>("base_row + get_local_id(0)"), k.expr<cl_uint>("base_col + get_local_id(1)+i"));
-	k << target << " = " <<f(target, k.expr<cl_uint>("tile[get_local_id(0)][get_local_id(1)+i];"));
-	k << '}';
+	k << "for(uint i = get_local_id(1); i < maxDim1 && get_local_id(0) < maxDim2; i += get_local_size(1)){\n"; 
+	auto target = m()(k.expr<cl_uint>("(base_row + i)"), k.expr<cl_uint>("(base_col + get_local_id(0))"));
+	k << target << " = " <<f(target, k.expr<cl_uint>("tile[i][get_local_id(0)]"))<<";\n";
+	k << "}\n";
 	
 	//compile kernel
 	
@@ -138,7 +138,7 @@ void matrix_assign_functor(
 	//enqueue kernel
 	kernel.set_arg(size1_index, m().size1());
 	kernel.set_arg(size2_index, m().size2());
-	std::size_t global_work_size[2] = {m().size1(), (m().size1()+TILE_DIM-1) * BLOCK_COLS / TILE_DIM};
+	std::size_t global_work_size[2] = {(m().size1()+TILE_DIM-1) / TILE_DIM * TILE_DIM, (m().size2()+TILE_DIM-1) / TILE_DIM * BLOCK_COLS };
 	std::size_t local_work_size[2] = {TILE_DIM, BLOCK_COLS};
 	m().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }

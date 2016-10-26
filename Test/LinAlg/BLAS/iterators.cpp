@@ -199,9 +199,9 @@ BOOST_AUTO_TEST_CASE( BLAS_Indexed_Iterator)
 
 BOOST_AUTO_TEST_CASE( BLAS_Constant_Iterator)
 {
-	iterators::constant_iterator<double> iter(3,4.0);
+	iterators::constant_iterator<double> iter(4.0,3);
 	iterators::constant_iterator<double> start =iter;
-	iterators::constant_iterator<double> end(10,4.0);
+	iterators::constant_iterator<double> end(4.0,10);
 	BOOST_REQUIRE_EQUAL(start-iter, 0);
 	BOOST_REQUIRE_EQUAL(end-start, 7);
 	BOOST_REQUIRE(start == iter);

@@ -272,28 +272,28 @@ public:
 		return {m_storage.begin() + i * stride1(), stride2()};
 	}
 	const_row_iterator row_end(size_type i) const {
-		return {m_storage.begin() + i * stride1()+size1()*stride2(), stride2()};
+		return {m_storage.begin() + i * stride1()+size2()*stride2(), stride2()};
 	}
 	
 	const_row_iterator column_begin(size_type j) const {
 		return {m_storage.begin() + j * stride2(), stride1()};
 	}
 	const_column_iterator column_end(size_type j) const {
-		return {m_storage.begin() + j * stride2()+size2()*stride1(), stride1()};
+		return {m_storage.begin() + j * stride2()+size1()*stride1(), stride1()};
 	}
 	
 	row_iterator row_begin(size_type i){
 		return {m_storage.begin() + i * stride1(), stride2()};
 	}
 	row_iterator row_end(size_type i){
-		return {m_storage.begin() + i * stride1()+size1()*stride2(), stride2()};
+		return {m_storage.begin() + i * stride1()+size2()*stride2(), stride2()};
 	}
 	
 	row_iterator column_begin(size_type j){
 		return {m_storage.begin() + j * stride2(), stride1()};
 	}
 	column_iterator column_end(size_type j){
-		return {m_storage.begin() + j * stride2()+size2()*stride1(), stride1()};
+		return {m_storage.begin() + j * stride2()+size1()*stride1(), stride1()};
 	}
 
 	

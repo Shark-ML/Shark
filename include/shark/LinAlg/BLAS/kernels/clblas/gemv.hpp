@@ -34,84 +34,59 @@
 
 #include "clblas_inc.hpp"
 
-namespace shark { namespace blas { namespace bindings {
-	
-inline void gemv(
-	clblasOrder order, clblasTranspose transA,
-	std::size_t M, std::size_t N, float alpha,
-	boost::compute::vector<float> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<float> const& x, std::size_t offx, std::size_t incx,
-	float beta,
-	boost::compute::vector<float> const& y, std::size_t offy, std::size_t incy,
-	std::size_t numCommandQueues, cl_command_queue* commandQueues,
-	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
-){
-	clblasSgemv (
-		order, transA,M, N,alpha,
-		A.get_buffer().get(), offA, lda,
-		x.get_buffer().get(), offx, (int)incx,
-		beta,
-		y.get_buffer().get(), offy, (int)incy,
-		numCommandQueues, commandQueues,
-		numEventsInWaitList, eventWaitList, events
-	);
-}
+namespace shark { namespace blas { namespace kernels{
 
-inline void gemv(
-	clblasOrder order, clblasTranspose transA,
-	std::size_t M, std::size_t N, double alpha,
-	boost::compute::vector<double> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<double> const& x, std::size_t offx, std::size_t incx,
-	double beta,
-	boost::compute::vector<double> const& y, std::size_t offy, std::size_t incy,
-	std::size_t numCommandQueues, cl_command_queue* commandQueues,
-	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
-){
-	clblasDgemv (
-		order, transA,M, N,alpha,
-		A.get_buffer().get(), offA, lda,
-		x.get_buffer().get(), offx, (int)incx,
-		beta,
-		y.get_buffer().get(), offy, (int)incy,
-		numCommandQueues, commandQueues,
-		numEventsInWaitList, eventWaitList, events
-	);
-}
-
-}
-
-namespace kernels{
-
-// y <- alpha * op (A) * x + beta * y
-// op (A) == A || A^T || A^H
-template <typename MatA, typename VectorX, typename VectorY>
+// v <- v + alpha * A * x
+template <typename MatA, typename VecX, typename VecV>
 void gemv(
 	matrix_expression<MatA, gpu_tag> const& A,
-	vector_expression<VectorX, gpu_tag> const& x,
-        vector_expression<VectorY, gpu_tag>& y,
-	typename VectorY::value_type const& alpha
-){
-	std::size_t m = A().size1();
-	std::size_t n = A().size2();
+	vector_expression<VecX, gpu_tag> const& x,
+	vector_expression<VecV, gpu_tag>& v, 
+	typename VecV::value_type const& alpha
+) {
+	SIZE_CHECK(A().size1() == v().size());
+	SIZE_CHECK(A().size2() == x().size());
 	
-	SIZE_CHECK(x().size() == A().size2());
-	SIZE_CHECK(y().size() == A().size1());
+	typedef typename VecV::value_type value_type;
+	boost::compute::detail::meta_kernel k("blas_gemv");
+	std::size_t alpha_index = k.add_arg<value_type>("alpha");
+	std::size_t size1_index = k.add_arg<std::size_t>("size1");
+	std::size_t size2_index = k.add_arg<std::size_t>("size2");
+	//read all tiles in the assigned rows and compute the inner product
+	k << "__local " <<k.decl<value_type>("results")<< "[TILE_DIM][TILE_DIM+2];";
+	k << "uint rowid = get_global_id(0);";
+	k << "results[get_local_id(0)][get_local_id(1)]  = 0.0;";
+	k << "for(uint i = get_local_id(1) ; i < size2 && rowid < size1; i += TILE_DIM){";
+	auto exprRow = k.expr<cl_uint>("rowid");
+	auto exprCol = k.expr<cl_uint>("i");
+	k<< "    results[get_local_id(0)][get_local_id(1)] += "<< A()(exprRow,exprCol)<<"*"<<x()(exprCol) <<";";
+	k<<'}';
+	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with computing
+	//sum up the rows
+	k << "if(get_local_id(1) == 0 && rowid < size1){";
+	k << "    for(uint i = 1 ; i < TILE_DIM; ++i){";
+	k << "        results[get_local_id(0)][0] +=results[get_local_id(0)][i];";
+	k << "    }";
+	k << v()(exprRow) << "+= alpha * results[get_local_id(0)][0];";
+	k<< "}";
+	//create source
 
-	clblasOrder const stor_ord= (clblasOrder)clblas::storage_order<typename MatA::orientation>::value;
+	std::size_t TILE_DIM = 16;
+	char const* options ="-DTILE_DIM=16";
+	boost::compute::kernel kernel = k.compile(v().queue().get_context(), options);
+	//enqueue kernel
+	kernel.set_arg(alpha_index, alpha);
+	kernel.set_arg(size1_index, A().size1());
+	kernel.set_arg(size2_index, A().size2());
 	
-	auto storageA = A().raw_storage();
-	auto storagex = x().raw_storage();
-	auto storagey = y().raw_storage();
-	bindings::gemv(stor_ord, clblasNoTrans, m, n, alpha,
-		storageA.buffer, storageA.offset, storageA.leading_dimension,
-		storagex.buffer, storagex.offset, storagex.stride,
-		typename VectorY::value_type(1),
-		storagey.buffer, storagey.offset, storagey.stride,
-		1, &(y().queue().get()),
-		0, nullptr, nullptr
-	);
+	std::size_t global_work_size[2] = {
+		((A().size1()+TILE_DIM-1)/TILE_DIM) * TILE_DIM,
+		TILE_DIM
+	};
+	std::size_t local_work_size[2] = {TILE_DIM,TILE_DIM};
+	v().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }
 
-
 }}}
+
 #endif

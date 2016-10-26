@@ -1,5 +1,4 @@
 #define BOOST_TEST_MODULE BLAS_gpu_prod
-#define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -25,7 +24,7 @@ void checkMatrixVectorMultiply(M const& arg1_gpu, V const& arg2_gpu, Result cons
 		for(std::size_t k = 0; k != arg1.size2(); ++k){
 			test_result += factor * arg1(i,k)*arg2(k);
 		}
-		BOOST_CHECK_CLOSE(result(i), test_result,1.e-10);
+		BOOST_CHECK_CLOSE(result(i), test_result,1.e-4);
 	}
 }
 
@@ -33,7 +32,7 @@ BOOST_AUTO_TEST_SUITE (BLAS_gpu_prod)
 
 BOOST_AUTO_TEST_CASE( BLAS_gpu_prod_vector_dense ){
 	std::size_t rows = 50;
-	std::size_t columns = 80;
+	std::size_t columns = 40;
 	//initialize the arguments in both row and column major as well as transposed
 	matrix<float,row_major> arg1rm_cpu(rows,columns);
 	matrix<float,column_major> arg1cm_cpu(rows,columns);
@@ -41,13 +40,13 @@ BOOST_AUTO_TEST_CASE( BLAS_gpu_prod_vector_dense ){
 	matrix<float,column_major> arg1cmt_cpu(columns,rows);
 	for(std::size_t i = 0; i != rows; ++i){
 		for(std::size_t j = 0; j != columns; ++j){
-			arg1rm_cpu(i,j) = arg1cm_cpu(i,j) = i*columns+0.2*j;
-			arg1rmt_cpu(j,i) = arg1cmt_cpu(j,i) = i*columns+0.2*j;
+			arg1rm_cpu(i,j) = arg1cm_cpu(i,j) = 0.01*i*columns+0.1*j;
+			arg1rmt_cpu(j,i) = arg1cmt_cpu(j,i) = 0.01*i*columns+0.1*j;
 		}
 	}
 	vector<float> arg2_cpu(columns);
 	for(std::size_t j = 0; j != columns; ++j){
-		arg2_cpu(j)  = 1.5*j+2;
+		arg2_cpu(j)  = 0.1*j+0.1;
 	}
 	
 	gpu::matrix<float,row_major> arg1rm = gpu::copy_to_gpu(arg1rm_cpu);
