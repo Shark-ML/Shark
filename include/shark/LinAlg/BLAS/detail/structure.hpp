@@ -38,35 +38,21 @@
 namespace shark {
 namespace blas {
 	
-struct upper;
-struct unit_upper;
-	
-///\brief Flag indicating that the matrix is lower triangular
-struct lower{
-	static const bool is_upper = false;
-	static const bool is_unit = false;
-	typedef upper transposed_orientation;
-	
+template<bool Upper, bool Unit>
+struct triangular_tag{
+	static const bool is_upper = Upper;
+	static const bool is_unit = Unit;
+	typedef triangular_tag<!Upper,Unit> transposed_orientation;
 };
-///\brief Flag indicating that the matrix is lower triangular and diagonal elements are to be assumed as 1
-struct unit_lower{
-	static const bool is_upper = false;
-	static const bool is_unit = true;
-	typedef unit_upper transposed_orientation;
-};
-	
+
 ///\brief Flag indicating that the matrix is upper triangular
-struct upper{
-	static const bool is_upper = true;
-	static const bool is_unit = false;
-	typedef lower transposed_orientation;
-};
+typedef triangular_tag<true,false> upper;
 ///\brief Flag indicating that the matrix is upper triangular and diagonal elements are to be assumed as 1
-struct unit_upper{
-	static const bool is_upper = true;
-	static const bool is_unit = true;
-	typedef unit_lower transposed_orientation;
-};
+typedef triangular_tag<true,true> unit_upper;
+///\brief Flag indicating that the matrix is lower triangular
+typedef triangular_tag<false,false> lower;
+///\brief Flag indicating that the matrix is lower triangular and diagonal elements are to be assumed as 1
+typedef triangular_tag<false,true> unit_lower;
 	
 // forward declaration
 struct column_major;

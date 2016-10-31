@@ -21,7 +21,7 @@ void checkMatrixVectorMultiply(M const& arg1, V const& arg2_gpu, Result const& r
 	
 	for(std::size_t i = 0; i != arg1.size1(); ++i) {
 		float test_result = alpha*inner_prod(row(arg1,i),arg2)+init;
-		BOOST_CHECK_CLOSE(result(i), test_result, 1.e-10);
+		BOOST_CHECK_CLOSE(result(i), test_result, 1.e-4);
 	}
 }
 
@@ -38,7 +38,7 @@ void checkMatrixMatrixMultiply(M1 const& arg1, M2 const& arg2_gpu, Result const&
 	for(std::size_t i = 0; i != arg2.size1(); ++i) {
 		for(std::size_t j = 0; j != arg2.size2(); ++j) {
 			float test_result = alpha*inner_prod(row(arg1,i),column(arg2,j))+init;
-			BOOST_CHECK_CLOSE(result(i,j), test_result, 1.e-10);
+			BOOST_CHECK_CLOSE(result(i,j), test_result, 1.e-4);
 		}
 	}
 }
@@ -287,11 +287,9 @@ BOOST_AUTO_TEST_CASE(LinAlg_gpu_triangular_prod_matrix_vector) {
 
 
 typedef boost::mpl::list<row_major,column_major> result_orientations;
-//~ BOOST_AUTO_TEST_CASE_TEMPLATE(LinAlg_triangular_prod_gpu::matrix_gpu::matrix, Orientation,result_orientations) {
-BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_matrix) {
-	typedef row_major Orientation;
+BOOST_AUTO_TEST_CASE_TEMPLATE(LinAlg_triangular_prod_matrix_matrix, Orientation,result_orientations) {
 	std::size_t dims = 231;//chosen as not to be a multiple of the block size
-	std::size_t N = 30;
+	std::size_t N = 255;
 	//initialize the arguments in both row and column major, lower and upper, unit and non-unit diagonal
 	//we add one on the remaining elements to ensure, that triangular_prod does not tuch these elements
 	matrix<float,row_major> arg1lowerrm_cpu(dims,dims,1.0);
@@ -304,16 +302,16 @@ BOOST_AUTO_TEST_CASE(LinAlg_triangular_prod_matrix_matrix) {
 	matrix<float,row_major> arg1uppertest(dims,dims,0.0);
 	for(std::size_t i = 0; i != dims; ++i){
 		for(std::size_t j = 0; j <=i; ++j){
-			arg1lowerrm_cpu(i,j) = arg1lowercm_cpu(i,j) = i*dims+0.2*j+1;
-			arg1lowertest(i,j) = i*dims+0.2*j+1;
-			arg1upperrm_cpu(j,i) = arg1uppercm_cpu(j,i) = i*dims+0.2*j+1;
-			arg1uppertest(j,i) = i*dims+0.2*j+1;
+			arg1lowerrm_cpu(i,j) = arg1lowercm_cpu(i,j) = 0.1*i*dims+0.2*j+1;
+			arg1lowertest(i,j) = 0.1*i*dims+0.2*j+1;
+			arg1upperrm_cpu(j,i) = arg1uppercm_cpu(j,i) = 0.1*i*dims+0.2*j+1;
+			arg1uppertest(j,i) = 0.1*i*dims+0.2*j+1;
 		}
 	}
 	matrix<float> arg2_cpu(dims,N);
 	for(std::size_t i = 0; i != dims; ++i) {
 		for(std::size_t j = 0; j != N; ++j) {
-			arg2_cpu(i,j)  = 1.5 * j + 2+i;
+			arg2_cpu(i,j)  = (1.5/N) * j + 2+i;
 		}
 	}
 	
