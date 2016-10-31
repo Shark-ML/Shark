@@ -185,12 +185,10 @@ public:
 		}
 	}
 
-	double evalDerivative (
-		unsigned int const& target,
-		RealVector const& prediction,
-		RealVector& gradient,
-		RealMatrix& hessian
-	) const{
+	double evalDerivative(
+		ConstLabelReference target, ConstOutputReference prediction,
+		OutputType& gradient,MatrixType & hessian
+	) const {
 		gradient.resize(prediction.size());
 		hessian.resize(prediction.size(),prediction.size());
 		if ( prediction.size() == 1 )
