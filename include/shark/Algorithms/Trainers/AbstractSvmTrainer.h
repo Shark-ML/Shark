@@ -227,6 +227,11 @@ public:
 		SIZE_CHECK(m_regularizers.size() == 1);
 		return m_regularizers[0];
 	}
+	double& C()
+	{
+		SIZE_CHECK(m_regularizers.size() == 1);
+		return m_regularizers[0];
+	}
 	
 	RealVector const& regularizationParameters() const
 	{

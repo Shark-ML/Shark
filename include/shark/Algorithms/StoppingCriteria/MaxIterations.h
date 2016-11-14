@@ -35,7 +35,7 @@
 
 #include "AbstractStoppingCriterion.h"
 #include <shark/Core/ResultSets.h>
-
+#include <shark/LinAlg/Base.h>
 namespace shark{
 
 /// This stopping criterion stops after a fixed number of iterations

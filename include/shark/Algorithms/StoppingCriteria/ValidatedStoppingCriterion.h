@@ -35,6 +35,8 @@
 
 #include "AbstractStoppingCriterion.h"
 #include <shark/Core/ResultSets.h>
+#include <shark/LinAlg/Base.h>
+#include<shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark{
 

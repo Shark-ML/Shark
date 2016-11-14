@@ -38,7 +38,7 @@
 #include <queue>
 #include <numeric>
 #include <algorithm>
-
+#include <shark/LinAlg/Base.h>
 namespace shark{
 
 

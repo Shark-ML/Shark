@@ -37,6 +37,7 @@
 #include <shark/Core/ResultSets.h>
 #include <queue>
 #include <numeric>
+#include <shark/LinAlg/Base.h>
 namespace shark{
 
 ///  \brief This stopping criterion tracks the improvement of the error function of the training error over an interval of iterations.

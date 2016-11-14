@@ -132,7 +132,7 @@ public:
 		SHARK_ASSERT(class_zero < class_one);
 		SHARK_ASSERT(class_one < m_classes);
 		unsigned int index = class_one * (class_zero - 1) / 2 + class_zero;
-		return m_binary[index];
+		return *m_binary[index];
 	}
 
 	/// \brief Add binary classifiers for one more class to the model.

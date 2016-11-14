@@ -37,6 +37,7 @@
 #include <shark/Core/ResultSets.h>
 #include <queue>
 #include <numeric>
+#include <shark/LinAlg/Base.h>
 
 namespace shark{
 

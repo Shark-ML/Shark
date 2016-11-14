@@ -38,7 +38,7 @@
 #include <queue>
 #include <numeric>
 #include <algorithm>
-
+#include <shark/LinAlg/Base.h>
 namespace shark{
 
 /// \brief The generalization loss calculates the relative increase of the validation error compared to the minimum training error.
