@@ -121,11 +121,11 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 		auto tables = SortedIndex{trainDataView};
 
 		auto n_trainData = tables.noRows();
-		auto labelSum = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
+		auto sumFull = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
 			return trainDataView[i].label;
 		});
 
-		TreeType tree = buildTree(std::move(tables), trainDataView, labelSum, 0, rng);
+		TreeType tree = buildTree(std::move(tables), trainDataView, sumFull, 0, rng);
 		//TreeType tree = build(trainDataView,labelAvg,rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
@@ -334,12 +334,12 @@ buildTree(SortedIndex&& tables,
 
 	//Construct tree
 	TreeType tree;
+	//n = Total number of cases in the dataset
 	auto n = tables.noRows();
 	// TODO(jwrigley): Why is average assigned to all nodes, when hist is only applied to leaves?
 	tree.push_back(NodeInfo{nodeId,sumFull/n});
 	NodeInfo& nodeInfo = tree[0];
 
-	//n = Total number of cases in the dataset
 	if(n <= m_nodeSize) return tree; // Must be leaf
 
 	//Randomly select the attributes to test for split
@@ -348,7 +348,6 @@ buildTree(SortedIndex&& tables,
 	auto split = findSplit(tables, elements, sumFull,tableIndices);
 
 	// if the purity hasn't improved, this is a leaf.
-	//if(split.impurity==WORST_IMPURITY) return tree;
 	if(!split) return tree;
 	nodeInfo <<= split;
 
@@ -388,21 +387,20 @@ RFTrainer::Split RFTrainer::findSplit (
 
 			std::size_t n1=i,    n2 = n-i;
 			//Calculate the squared error of the split
-			double sumSqAbove = norm_sqr(sumAbove), sumSqBelow = norm_sqr(sumBelow);
-			double purity =  sumSqAbove/n1 + sumSqBelow/n2;
+			double purity = norm_sqr(sumAbove)/n1 + norm_sqr(sumBelow)/n2;
+
 			if(purity>best.purity){
 				//Found a more pure split, store the attribute index and value
 				best.splitAttribute = attributeIndex;
 				best.splitRow = prev;
-				best.splitValue = (attributeTable[prev].value + attributeTable[i].value)/2.0;
-				// Somewhat faster, but probably less accurate
-				//best.splitValue = attributeTable[prev].value;
 				best.purity = purity;
 				best.sumAbove = sumAbove;
 				best.sumBelow = sumBelow;
 			}
 		}
 	}
+	auto& bestTable  = tables[best.splitAttribute];
+	best.splitValue = (bestTable[best.splitRow].value + bestTable[best.splitRow+1].value)/2.0;
 	return best;
 }
 
