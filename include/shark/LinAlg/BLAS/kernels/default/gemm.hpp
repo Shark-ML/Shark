@@ -33,79 +33,360 @@
 
 #include "../gemv.hpp"
 #include "../../vector.hpp"
+#include "../../detail/matrix_proxy_classes.hpp"
 #include <boost/mpl/bool.hpp>
+#include <boost/align/aligned_allocator.hpp>
+#include <boost/align/assume_aligned.hpp>
+#include <type_traits>
+#include <vector>
 
-namespace shark { namespace blas { namespace bindings {
-
-//we dispatch gemm: A=B*C in the following like that:
-//all 	orientations of A,B,C
-//iterator category of B and C. We assume A to have a meaningful storage category
+namespace shark {namespace blas {namespace bindings {
 	
-// basic dispatching towards the kernels works in categories. 
-// We explain it here because the implementation needs to be inverted as reducing one case to another
-// requires that the resulting case has already been implemented. Thus the most general cases are at the end of the file.
+//  Block-GEMM implementation based on boost.ublas
+//  written by:
+//  Copyright (c) 2016
+//  Michael Lehn, Imre Palik
 //
-// 1. we dispatch for the orientation of the result using the relation A=B*C <=> A^T = C^T B^T
-// thus we can assume for all compute kernels that the first argument is row_major. 
-// 2. if B is row_major as well we can cast the computation in terms of matrix-vector products
-// computing A row by row (note that we use a specialised kernel for all-sparse)
-// 3. If B is column_major we can dispatch as in the following:
-// 3.1 if B is sparse, transpose B in memory. This is a bit of memory overhead but is often fast (and easy)
-// 3.2 else cast the computation in terms of an outer product if the C is row_major
-// 3.3 for B and C column major there are specialised kernels for every combination
+//  Distributed under the Boost Software License, Version 1.0. (See
+//  accompanying file LICENSE_1_0.txt or copy at
+//  http://www.boost.org/LICENSE_1_0.txt)
 	
+
+template <typename T>
+struct prod_block_size {
+	static const unsigned vector_length = 32/sizeof(T); // Number of elements in a vector register
+	static const unsigned mc = 256;
+	static const unsigned kc = 512; // stripe length
+	static const unsigned nc = (4096/(3 * vector_length)) * (3 * vector_length);
+	static const unsigned mr = 4; // stripe width for lhs
+	static const unsigned nr = 3 * vector_length; // stripe width for rhs
+	static const unsigned align = 64; // align temporary arrays to this boundary
+};
+
+template <>
+struct prod_block_size<float> {
+	static const unsigned mc = 256;
+	static const unsigned kc = 512; // stripe length
+	static const unsigned nc = 4096;
+	static const unsigned mr = 4; // stripe width for lhs
+	static const unsigned nr = 16; // stripe width for rhs
+	static const unsigned align = 64; // align temporary arrays to this boundary
+};
+
+template <>
+struct prod_block_size<long double> {
+	static const unsigned mc = 256;
+	static const unsigned kc = 512; // stripe length
+	static const unsigned nc = 4096;
+	static const unsigned mr = 1; // stripe width for lhs
+	static const unsigned nr = 4; // stripe width for rhs
+	static const unsigned align = 64; // align temporary arrays to this boundary
+};
+
+//-- Micro Kernel For Dense operations----------------------------------------------------------
+template <class block_size, class T, class TC>
+void ugemm(
+	std::size_t kc, TC alpha, T const* A, T const* B,
+	TC* C, std::size_t ldc
+){
+	BOOST_ALIGN_ASSUME_ALIGNED(A, block_size::align);
+	BOOST_ALIGN_ASSUME_ALIGNED(B, block_size::align);
+	static const std::size_t MR = block_size::mr;
+	static const std::size_t NR = block_size::nr;
+	typename std::aligned_storage<sizeof(T[MR*NR]),block_size::align>::type Pa;
+	T* P = reinterpret_cast<T*>(&Pa);
+	for (std::size_t c = 0; c < MR * NR; c++)
+		P[c] = 0;
 	
-//general case: result and first argument row_major (2.)
-//=> compute as a sequence of matrix-vector products over the rows of the first argument
-template<class M, class E1, class E2, class Orientation2,class Tag1,class Tag2>
-void gemm_impl(
-	matrix_expression<E1, cpu_tag> const& e1,
-	matrix_expression<E2, cpu_tag> const& e2,
-	matrix_expression<M, cpu_tag>& m,
-	typename M::value_type alpha,
-	row_major, row_major, Orientation2, 
-	Tag1, Tag2
-) {
-	for (std::size_t i = 0; i != e1().size1(); ++i) {
-		auto mat_row = row(m,i);
-		kernels::gemv(trans(e2),row(e1,i),mat_row,alpha);
+	// perform the matrix-matrix product as outer product 
+	// of rows of A and B
+	for (std::size_t l=0; l<kc; ++l) {
+		for (std::size_t i=0; i<MR; ++i) {
+			for (std::size_t j=0; j<NR; ++j) {
+				P[i* NR+j] += A[i]*B[j];
+			}
+		}
+		A += MR;
+		B += NR;
+	}
+	//multiply with alpha if necessary
+	if (alpha!=TC(1)) {
+		for (std::size_t i=0; i<MR; ++i) {
+			for (std::size_t j=0; j<NR; ++j) {
+				P[i*NR+j] *= alpha;
+			}
+		}
+	}
+	
+	//add result to C
+	for (std::size_t i=0; i<MR; ++i) {
+		for (std::size_t j=0; j<NR; ++j) {
+			C[i*ldc+j] += P[i*NR+j];
+		}
 	}
 }
 
-//case: sparse column_major first argument (3.1)
-//=> transpose in memory
-template<class M, class E1, class E2, class Orientation, class Tag>
+
+// Macro Kernel for two densly packed Blocks
+template <class T, class TC, class block_size>
+void mgemm(
+	std::size_t mc, std::size_t nc, std::size_t kc, TC alpha,
+	T const* A, T const* B, TC *C,
+	std::size_t ldc, block_size
+){
+	static std::size_t const MR = block_size::mr;
+	static std::size_t const NR = block_size::nr;
+	std::size_t const mp  = (mc+MR-1) / MR;
+	std::size_t const np  = (nc+NR-1) / NR;
+	
+	for (std::size_t j=0; j<np; ++j) {
+		std::size_t const nr = std::min(NR, nc - j*NR);
+
+		for (std::size_t i=0; i<mp; ++i) {
+			std::size_t const mr = std::min(MR, mc - i*MR);
+			auto CBlockStart = C+i*MR*ldc+j*NR;
+			if (mr==MR && nr==NR) {
+				ugemm<block_size>(
+					kc, alpha,
+					&A[i*kc*MR], &B[j*kc*NR],
+					CBlockStart, ldc
+				);
+			} else {
+				TC CTempBlock[MR*NR];
+				std::fill_n(CTempBlock, MR*NR, T(0));
+				ugemm<block_size>(
+					kc, alpha,
+					&A[i*kc*MR], &B[j*kc*NR],
+					CTempBlock, NR
+				);
+				
+				for (std::size_t i0=0; i0<mr; ++i0){	
+					for (std::size_t j0=0; j0<nr; ++j0) {
+						CBlockStart[i0*ldc+j0] += CTempBlock[i0*NR+j0];
+					}
+				}
+			}
+		}
+	}
+}
+
+//-- Packing blocks ------------------------------------------------------------
+template <class E, class T, class block_size>
+void pack_A(matrix_expression<E, cpu_tag> const& A, T* p, block_size)
+{
+	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::align);
+
+	std::size_t const mc = A().size1();
+	std::size_t const kc = A().size2();
+	static std::size_t const MR = block_size::mr;
+	const std::size_t mp = (mc+MR-1) / MR;
+
+	std::size_t nu = 0;
+	for (std::size_t l=0; l<mp; ++l) {
+		for (std::size_t j=0; j<kc; ++j) {
+			for (std::size_t i = l*MR; i < l*MR + MR; ++i,++nu) {
+				p[nu] = (i<mc) ? A()(i,j) : T(0);
+			}
+		}
+	}
+}
+
+
+template <class E, class T, class block_size>
+void pack_B(matrix_expression<E, cpu_tag> const& B, T* p, block_size)
+{
+        BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::align);
+
+        std::size_t const kc = B ().size1();
+        std::size_t const nc = B ().size2();
+        static std::size_t const NR = block_size::nr;
+        std::size_t const np = (nc+NR-1) / NR;
+
+	std::size_t nu = 0;
+        for (std::size_t l=0; l<np; ++l) {
+		for (std::size_t i=0; i<kc; ++i) {
+			for (std::size_t j = l*NR; j < l*NR + NR; ++j,++nu){
+				p[nu] = (j<nc) ? B()(i,j) : T(0);
+			}
+		}
+        }
+}
+
+//-- Dense gemm
+template <class E1, class E2, class Mat, class Orientation1, class Orientation2>
+void gemm_impl(
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<Mat, cpu_tag>& m,
+	typename Mat::value_type alpha,
+	row_major, Orientation1, Orientation2,
+	dense_tag, dense_tag
+){
+	typedef typename std::common_type<
+		typename E1::value_type, typename E2::value_type, typename Mat::value_type
+	>::type value_type;
+	
+	typedef prod_block_size<
+		typename std::common_type<typename E1::value_type, typename E2::value_type>::type
+	> block_size;
+	
+	static const std::size_t MC = block_size::mc;
+        static const std::size_t NC = block_size::nc;
+	static const std::size_t KC = block_size::kc;
+	
+	//obtain uninitialized aligned storage
+	boost::alignment::aligned_allocator<value_type,block_size::align> allocator;
+	value_type* A = allocator.allocate(MC * KC);
+	value_type* B = allocator.allocate(NC * KC);
+
+        const std::size_t M = m().size1();
+        const std::size_t N = m().size2();
+        const std::size_t K = e1().size2 ();
+        const std::size_t mb = (M+MC-1) / MC;
+        const std::size_t nb = (N+NC-1) / NC;
+        const std::size_t kb = (K+KC-1) / KC;
+	
+	auto storageM = m().raw_storage();
+        auto C_ = storageM.values;
+        const std::size_t ldc = storageM.leading_dimension;
+        for (std::size_t j=0; j<nb; ++j) {
+		std::size_t nc = std::min(NC, N - j*NC);
+
+		for (std::size_t l=0; l<kb; ++l) {
+			std::size_t kc = std::min(KC, K - l*KC);
+			matrix_range<typename const_expression<E2>::type> Bs(e2(), l*KC, l*KC+kc, j*NC, j*NC+nc);
+			pack_B(Bs, B, block_size());
+
+			for (std::size_t i=0; i<mb; ++i) {
+				std::size_t mc = std::min(MC, M - i*MC);
+				matrix_range<typename const_expression<E1>::type> As(e1(), i*MC, i*MC+mc, l*KC, l*KC+kc);
+				pack_A (As, A, block_size());
+
+				mgemm(
+					mc, nc, kc, alpha, A, B,
+					&C_[i*MC*ldc+j*NC], ldc , block_size()
+				);
+			}
+		}
+	}
+	//free storage
+	allocator.deallocate(A,MC * KC);
+	allocator.deallocate(B,NC * KC);
+}
+
+
+// Dense-Sparse gemm
+template <class E1, class E2, class M, class Orientation>
 void gemm_impl(
 	matrix_expression<E1, cpu_tag> const& e1,
 	matrix_expression<E2, cpu_tag> const& e2,
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
-	row_major, column_major, Orientation o,
-	sparse_tag t1, Tag t2
-) {
-	typename transposed_matrix_temporary<E1>::type e1_trans(e1);
-	gemm_impl(e1_trans,e2,m,alpha,row_major(),row_major(),o,t1,t2);
+	row_major, row_major, Orientation,
+	dense_tag, sparse_tag
+){
+	for (std::size_t i = 0; i != e1().size1(); ++i) {
+		matrix_row<M> row_m(m(),i);
+		matrix_row<typename const_expression<E1>::type> row_e1(e1(),i);
+		matrix_transpose<typename const_expression<E2>::type> trans_e2(e2());
+		kernels::gemv(trans_e2,row_e1,row_m,alpha);
+	}
 }
 
-//case: result and second argument row_major, first argument dense column major (3.2)
-//=> compute as a sequence of outer products. 
-// Note that this is likely to be slow if E2 is sparse and the result is also sparse. However choosing 
-// M as sparse is stupid in most cases.
-template<class M, class E1, class E2,class Tag>
+template <class E1, class E2, class M>
+void gemm_impl(
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
+	typename M::value_type alpha,
+	row_major, column_major, column_major,
+	dense_tag, sparse_tag
+){
+	typedef matrix_transpose<M> Trans_M;
+	typedef matrix_transpose<typename const_expression<E2>::type> Trans_E2;
+	Trans_M trans_m(m());
+	Trans_E2 trans_e2(e2());
+	for (std::size_t j = 0; j != e2().size2(); ++j) {
+		matrix_row<Trans_M> column_m(trans_m,j);
+		matrix_row<Trans_E2> column_e2(trans_e2,j);
+		kernels::gemv(e1,column_e2,column_m,alpha);
+	}
+}
+
+template <class E1, class E2, class M>
 void gemm_impl(
 	matrix_expression<E1, cpu_tag> const& e1,
 	matrix_expression<E2, cpu_tag> const& e2,
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
 	row_major, column_major, row_major,
-	dense_tag, Tag
-) {
-	for (std::size_t j = 0; j != e1().size2(); ++j) {
-		noalias(m) += alpha * outer_prod(column(e1,j),row(e2,j));
+	dense_tag, sparse_tag
+){
+	for (std::size_t k = 0; k != e1().size2(); ++k) {
+		for(std::size_t i = 0; i != e1().size1(); ++i){
+			noalias(row(m,i)) += alpha * e1()(i,k) * row(e2,k);
+		}
 	}
 }
 
-//special case of all row-major for sparse matrices
+// Sparse-Dense gemm
+template <class E1, class E2, class M, class Orientation>
+void gemm_impl(
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
+	typename M::value_type alpha,
+	row_major, row_major, Orientation,
+	sparse_tag, dense_tag
+){
+	for (std::size_t i = 0; i != e1().size1(); ++i) {
+		matrix_row<M> row_m(m(),i);
+		matrix_row<E1> row_e1(e1(),i);
+		matrix_transpose<E2> trans_e2(e2());
+		kernels::gemv(trans_e2,row_e1,row_m,alpha);
+	}
+}
+
+template <class E1, class E2, class M>
+void gemm_impl(
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
+	typename M::value_type alpha,
+	row_major, column_major, column_major,
+	sparse_tag, dense_tag
+){
+	typedef matrix_transpose<M> Trans_M;
+	typedef matrix_transpose<typename const_expression<E2>::type> Trans_E2;
+	Trans_M trans_m(m());
+	Trans_E2 trans_e2(e2());
+	for (std::size_t j = 0; j != e2().size2(); ++j) {
+		matrix_row<Trans_M> column_m(trans_m,j);
+		matrix_row<Trans_E2> column_e2(trans_e2,j);
+		kernels::gemv(e1,column_e2,column_m,alpha);
+	}
+}
+
+template <class E1, class E2, class M>
+void gemm_impl(
+	matrix_expression<E1, cpu_tag> const& e1,
+	matrix_expression<E2, cpu_tag> const& e2,
+	matrix_expression<M, cpu_tag>& m,
+	typename M::value_type alpha,
+	row_major, column_major, row_major,
+	sparse_tag, dense_tag
+){
+	for (std::size_t k = 0; k != e1().size2(); ++k) {
+		auto e1end = e1().column_end(k);
+		for(auto e1pos = e1().column_begin(k); e1pos != e1end; ++e1pos){
+			std::size_t i = e1pos.index();
+			auto val = alpha * (*e1pos);
+			noalias(row(m,i)) += val * row(e2,k);
+		}
+	}
+}
+
+// Sparse-Sparse gemm
 template<class M, class E1, class E2>
 void gemm_impl(
 	matrix_expression<E1, cpu_tag> const& e1,
@@ -129,78 +410,47 @@ void gemm_impl(
 	}
 }
 
-	
-
-
-// case 3.3
-//now we only need to handle the case that E1 and E2 are column major and M row_major. This
-// is a special case for all matrix types (except sparse column_major E1)
-
-//dense-sparse
 template<class M, class E1, class E2>
 void gemm_impl(
 	matrix_expression<E1, cpu_tag> const& e1,
 	matrix_expression<E2, cpu_tag> const& e2,
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
-	row_major, column_major, column_major,
-	dense_tag, sparse_tag
+	row_major, row_major, column_major, 
+	sparse_tag, sparse_tag
 ) {
-	//compute the product row-wise
-	for (std::size_t i = 0; i != m().size1(); ++i) {
-		auto mat_row = row(m,i);
-		kernels::gemv(trans(e2),row(e1,i),mat_row,alpha);
+	typedef matrix_transpose<M> Trans_M;
+	typedef matrix_transpose<typename const_expression<E2>::type> Trans_E2;
+	Trans_M trans_m(m());
+	Trans_E2 trans_e2(e2());
+	for (std::size_t j = 0; j != e2().size2(); ++j) {
+		matrix_row<Trans_M> column_m(trans_m,j);
+		matrix_row<Trans_E2> column_e2(trans_e2,j);
+		kernels::gemv(e1,column_e2,column_m,alpha);
 	}
 }
 
-//dense-dense
-template<class M, class E1, class E2>
+template <class E1, class E2, class M, class Orientation>
 void gemm_impl(
 	matrix_expression<E1, cpu_tag> const& e1,
 	matrix_expression<E2, cpu_tag> const& e2,
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
-	row_major r, column_major, column_major, 
-	dense_tag t, dense_tag
-) {
-	//compute blockwise and write the transposed block.
-	std::size_t blockSize = 16;
-	typedef typename matrix_temporary<M>::type BlockStorage;
-	BlockStorage blockStorage(blockSize,blockSize);
-	
-	typedef typename M::size_type size_type;
-	size_type size1 = m().size1();
-	size_type size2 = m().size2();
-	for (size_type i = 0; i < size1; i+= blockSize){
-		for (size_type j = 0; j < size2; j+= blockSize){
-			std::size_t blockSizei = std::min(blockSize,size1-i);
-			std::size_t blockSizej = std::min(blockSize,size2-j);
-			auto transBlock=subrange(blockStorage,0,blockSizej,0,blockSizei);
-			transBlock.clear();
-			//reduce to all row-major case by using
-			//A_ij=B^iC_j <=> A_ij^T = (C_j)^T (B^i)^T  
-			gemm_impl(
-				trans(columns(e2,j,j+blockSizej)),
-				trans(rows(e1,i,i+blockSizei)),
-				transBlock,alpha,
-				r,r,r,//all row-major
-				t,t //both targets are dense
-			);
-			//write transposed block to the matrix
-			noalias(subrange(m,i,i+blockSizei,j,j+blockSizej))+=trans(transBlock);
-		}
-	}
+	row_major, column_major, Orientation o,
+	sparse_tag t1, sparse_tag t2
+){
+	typename transposed_matrix_temporary<E1>::type e1_trans(e1);
+	gemm_impl(e1_trans,e2,m,alpha,row_major(),row_major(),o,t1,t2);
 }
 
-//general case: column major result case (1.0)
-//=> transformed to row_major using A=B*C <=> A^T = C^T B^T
+//column major result is transformed to row_major using A=B*C <=> A^T = C^T B^T
 template<class M, class E1, class E2, class Orientation1, class Orientation2, class Tag1, class Tag2>
 void gemm_impl(
 	matrix_expression<E1, cpu_tag> const& e1,
 	matrix_expression<E2, cpu_tag> const& e2,
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type alpha,
-	column_major, Orientation1, Orientation2, 
+	column_major, Orientation1, Orientation2,
 	Tag1, Tag2
 ){
 	matrix_transpose<M> transposedM(m());

@@ -31,6 +31,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSV_HPP
 
 #include "../../expression_types.hpp"
+#include "../../vector_proxy.hpp"
 #include <boost/mpl/bool.hpp>
 
 namespace shark {namespace blas {namespace bindings {

@@ -61,7 +61,7 @@ void trmm_block(
 				block[j][i] = B()(i,startB+j);
 			}
 		}
-		//compute trsv kernel for each row in block
+		//compute trmv kernel for each row in block
 		for(std::size_t j = 0; j != curBlockSize2; ++j){
 			for (std::size_t n = 1; n <= size; ++n) {
 				std::size_t i = size-n;
@@ -95,7 +95,7 @@ void trmm_block(
 
 	std::size_t size = A().size1();
 		
-	//compute trsv kernel for each column
+	//compute trmm kernel for each column
 	for(std::size_t j = 0; j != B().size2(); ++j){
 		for (std::size_t n = 1; n <= size; ++n) {
 			std::size_t i = size-n;
@@ -135,7 +135,7 @@ void trmm_block(
 				block[j][i] = B()(i,startB+j);
 			}
 		}
-		//compute trsv kernel for each column in block
+		//compute trmm kernel for each column in block
 		for(std::size_t j = 0; j != curBlockSize2; ++j){
 			for (std::size_t i = 0; i < size; ++ i) {
 				if(!Unit){
@@ -165,7 +165,7 @@ void trmm_block(
 ){
 	std::size_t size = A().size1();
 		
-	//compute trsv kernel for each column
+	//compute trmm kernel for each column
 	for(std::size_t j = 0; j != B().size2(); ++j){
 		for (std::size_t i = 0; i < size; ++ i) {
 			if(!Unit){
@@ -178,32 +178,33 @@ void trmm_block(
 	}
 }
 
-template <bool Upper,bool Unit,typename MatA, typename MatB>
+template <typename MatA, typename MatB, class Triangular>
 void trmm_recursive(
 	matrix_expression<MatA, cpu_tag> const& Afull, 
-	matrix_expression<MatB, cpu_tag> & BFull,
+	matrix_expression<MatB, cpu_tag> & Bfull,
 	std::size_t start,
-	std::size_t end
+	std::size_t end,
+	Triangular t
 ){
 	auto A = subrange(Afull,start,end,start,end);
-	auto B = rows(BFull,start,end);
+	auto B = rows(Bfull,start,end);
 	std::size_t size = A.size1();
 	std::size_t split = A.size1()/2;
-	auto BFront = rows(B,0,split);
+	auto Bfront = rows(B,0,split);
 	auto Bback = rows(B,split,size);
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(A.size1() < 32){
-		trmm_block<32,16,Unit>(A,B,boost::mpl::bool_<Upper>(), typename MatB::orientation());
+		trmm_block<32,16,Triangular::is_unit>(A,B,boost::mpl::bool_<Triangular::is_upper>(), typename MatB::orientation());
 	}
 	//otherwise run the kernel recursively
-	else if(Upper){ //Upper triangular case
-		trmm_recursive<Upper,Unit>(Afull, BFull,start,start+split);
-		kernels::gemm(subrange(A,0,split,split,size), Bback, BFront, 1.0);
-		trmm_recursive<Upper,Unit>(Afull, BFull,start+split,end);
+	else if(Triangular::is_upper){ //Upper triangular case
+		trmm_recursive(Afull, Bfull,start,start+split, t);
+		kernels::gemm(subrange(A,0,split,split,size), Bback, Bfront, 1.0);
+		trmm_recursive(Afull, Bfull,start+split,end, t);
 	}else{// Lower triangular caste
-		trmm_recursive<Upper,Unit>(Afull, BFull,start+split,end);
-		kernels::gemm(subrange(A,split,size,0,split), BFront, Bback, 1.0);
-		trmm_recursive<Upper,Unit>(Afull, BFull,start,start+split);
+		trmm_recursive(Afull, Bfull,start+split,end, t);
+		kernels::gemm(subrange(A,split,size,0,split), Bfront, Bback, 1.0);
+		trmm_recursive(Afull, Bfull,start,start+split, t);
 	}
 }
 //main kernel runs the kernel above recursively and calls gemv
@@ -216,9 +217,7 @@ void trmm(
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == B().size1());
 	
-	trmm_recursive<Upper,Unit>(A,B,0,A().size1());
-	
-	
+	trmm_recursive(A,B,0,A().size1(), triangular_tag<Upper,Unit>());
 }
 
 }}}

@@ -365,7 +365,7 @@ endif()
 #                       GCov Code Analysis
 #####################################################################
 option(USE_GCOV_CHECK  "GCov Coverage Check" OFF)
-mark_as_advanced(USE_GCOV_CHECK)
+
 if(USE_GCOV_CHECK)
 find_program(GCOV_CHECK gcov)
 if(CMAKE_BUILD_TYPE MATCHES "Release")
@@ -376,9 +376,9 @@ if(CMAKE_BUILD_TYPE MATCHES "Release")
 	)
 endif()
 	message(STATUS "GCov available for static code analysis. Configuring for Code Check." )
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fprofile-arcs -ftest-coverage")
-	set(CFLAGS "${CFLAGS} -g -O0 -Wall -W -fprofile-arcs -ftest-coverage")
-	set(LDFLAGS "${LDFLAGS} -fprofile-arcs -ftest-coverage")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
+	set(CFLAGS "${CFLAGS} -g -O0 -Wall -W --coverage")
+	set(LDFLAGS "${LDFLAGS} --coverage")
 endif()
 
 

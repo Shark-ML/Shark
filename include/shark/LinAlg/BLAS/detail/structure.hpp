@@ -33,7 +33,11 @@
 #ifndef SHARK_LINALG_BLAS_DETAIL_STRUCTURE_HPP
 #define SHARK_LINALG_BLAS_DETAIL_STRUCTURE_HPP
 
+#include  "evaluation_tags.hpp"
+
 #include <cstddef>
+#include <cassert>
+
 
 namespace shark {
 namespace blas {
@@ -45,14 +49,34 @@ struct triangular_tag{
 	typedef triangular_tag<!Upper,Unit> transposed_orientation;
 };
 
-///\brief Flag indicating that the matrix is upper triangular
+///\brief Tag indicating that the matrix is upper triangular
 typedef triangular_tag<true,false> upper;
-///\brief Flag indicating that the matrix is upper triangular and diagonal elements are to be assumed as 1
+///\brief Tag indicating that the matrix is upper triangular and diagonal elements are to be assumed as 1
 typedef triangular_tag<true,true> unit_upper;
-///\brief Flag indicating that the matrix is lower triangular
+///\brief Tag indicating that the matrix is lower triangular
 typedef triangular_tag<false,false> lower;
-///\brief Flag indicating that the matrix is lower triangular and diagonal elements are to be assumed as 1
+///\brief Tag indicating that the matrix is lower triangular and diagonal elements are to be assumed as 1
 typedef triangular_tag<false,true> unit_lower;
+
+///\brief Tag indicating that the matrix is a cholesky factor of a quadratic matrix
+template<class Triangular>
+struct cholesky_tag{
+	typedef Triangular triangular_tag;
+	typedef cholesky_tag<typename Triangular::transposed_orientation> transposed_orientation;
+};
+
+typedef cholesky_tag<lower> lower_cholesky;
+typedef cholesky_tag<upper> upper_cholesky;
+
+template<bool Left>
+struct system_tag{
+	static const bool is_left = Left;
+};
+
+///\brief The system of equations has form Ax=b
+typedef system_tag<true> left;
+///\brief The system of equations has form xA=b
+typedef system_tag<false> right;
 	
 // forward declaration
 struct column_major;
@@ -85,13 +109,13 @@ struct row_major:public linear_structure{
 
 	// Indexing conversion to storage element
 	static size_type element(size_type i, size_type size_i, size_type j, size_type size_j) {
-		SIZE_CHECK(i < size_i);
-		SIZE_CHECK(j < size_j);
+		assert(i < size_i);
+		assert(j < size_j);
 		return i * size_j + j;
 	}
 	static size_type address(size_type i, size_type size_i, size_type j, size_type size_j) {
-		SIZE_CHECK(i < size_i);
-		SIZE_CHECK(j < size_j);
+		assert(i < size_i);
+		assert(j < size_j);
 		return i * size_j + j;
 	}
 
@@ -135,13 +159,13 @@ struct column_major:public linear_structure{
 
 	// Indexing conversion to storage element
 	static size_type element(size_type i, size_type size_i, size_type j, size_type size_j) {
-		SIZE_CHECK(i < size_i);
-		SIZE_CHECK(j < size_j);
+		assert(i < size_i);
+		assert(j < size_j);
 		return i + j * size_i;
 	}
 	static size_type address(size_type i, size_type size_i, size_type j, size_type size_j) {
-		SIZE_CHECK(i < size_i);
-		SIZE_CHECK(j < size_j);
+		assert(i < size_i);
+		assert(j < size_j);
 		return i + j * size_i;
 	}
 
@@ -185,9 +209,9 @@ public:
 	
 	template<class StorageTag>
 	static size_type element(size_type i, size_type j, size_type size, StorageTag tag) {
-		SIZE_CHECK(i <= size);
-		SIZE_CHECK(j <= size);
-		//~ SIZE_CHECK( non_zero(i,j));//lets end iterators fail!
+		assert(i <= size);
+		assert(j <= size);
+		//~ assert( non_zero(i,j));//lets end iterators fail!
 		return triangular_index(i,j,size,TriangularType(), Orientation(), tag);
 	}
 private:

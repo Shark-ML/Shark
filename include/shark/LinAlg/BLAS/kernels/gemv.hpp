@@ -43,6 +43,8 @@ struct  has_optimized_gemv
 : public boost::mpl::false_{};
 }}}
 #endif
+
+#include <cassert>
 	
 namespace shark { namespace blas {namespace kernels{
 	
@@ -60,8 +62,8 @@ void gemv(
 	vector_expression<M, cpu_tag>& m,
 	typename M::value_type alpha
 ) {
-	SIZE_CHECK(m().size() == e1().size1());
-	SIZE_CHECK(e1().size2() == e2().size());
+	assert(m().size() == e1().size1());
+	assert(e1().size2() == e2().size());
 	
 	bindings::gemv(
 		e1, e2, m,alpha,

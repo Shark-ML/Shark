@@ -65,7 +65,9 @@ public:
 	/// CDefault Constructor; use setStructure later
 	LinearModel(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		if(std::is_same<typename InputType::storage_type::storage_tag, blas::dense_tag>::value){
+			base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		}
 	}
 	/// Constructor creating a model with given dimnsionalities and optional offset term.
 	LinearModel(std::size_t inputs, std::size_t outputs = 1, bool offset = false)
@@ -210,7 +212,7 @@ public:
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch 
 	void weightedInputDerivative(
-		BatchInputType const & patterns,
+		RealMatrix const & patterns,
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative

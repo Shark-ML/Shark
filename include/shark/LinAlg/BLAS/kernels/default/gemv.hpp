@@ -92,8 +92,6 @@ void gemv(
 	typename ResultV::value_type alpha,
 	boost::mpl::false_
 ) {
-	SIZE_CHECK(A().size1()==result().size());
-	SIZE_CHECK(A().size2()==x().size());
 	typedef typename MatA::orientation orientation;
 
 	gemv_impl(A, x, result, alpha, orientation());

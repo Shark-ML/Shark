@@ -69,6 +69,7 @@ shark_add_test( LinAlg/BLAS/prod.cpp BLAS_Prod)
 shark_add_test( LinAlg/BLAS/expression_optimizer.cpp BLAS_Expression_Optimizer)
 shark_add_test( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
 shark_add_test( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
+shark_add_test( LinAlg/BLAS/solve_triangular.cpp BLAS_Solve_Triangular)
 
 #BLAS gpu tests
 if(clBLAS_FOUND)

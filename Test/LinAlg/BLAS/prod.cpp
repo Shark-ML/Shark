@@ -332,15 +332,15 @@ void checkMatrixMatrixMultiply(Arg1 const& arg1, Arg2 const& arg2, Result const&
 		for(std::size_t j = 0; j != arg2.size2(); ++j){
 			double test_result = init;
 			for(std::size_t k = 0; k != arg1.size2(); ++k){
-				 test_result += factor * arg1(i,k)*arg2(k,j);
+				test_result += factor * arg1(i,k)*arg2(k,j);
 			}
 			BOOST_CHECK_CLOSE(result(i,j), test_result,1.e-10);
 		}
 	}
 }
 BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_dense_dense ){
-	std::size_t rows = 50;
-	std::size_t columns = 80;
+	std::size_t rows = 80;
+	std::size_t columns = 50;
 	std::size_t middle = 33;
 	//initialize the arguments in both row and column major
 	matrix<double,row_major> arg1rm(rows,middle);
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_dense_dense ){
 	}
 	
 	std::cout<<"\nchecking dense-dense matrix matrix assign multiply"<<std::endl;
-	//testexpressions of the form A=B*C
+	//test expressions of the form A=B*C
 	{
 		std::cout<<"rrr"<<std::endl;
 		matrix<double,row_major> resultrm(rows,columns,1.5);
@@ -589,7 +589,7 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_dense_sparse ){
 	}
 }
 
-//first argument sparse
+//~ //first argument sparse
 BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_sparse_dense ){
 	std::size_t rows = 50;
 	std::size_t columns = 80;
