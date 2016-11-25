@@ -220,9 +220,12 @@ endif()
 #           BLAS configuration
 #####################################################################
 
+option( ENABLE_SIMD "Use experimental SIMD feature in linear algebra" OFF )
+if( ENABLE_SIMD )
+	set( SHARK_USE_SIMD 1)
+endif()
 
 option( ENABLE_CBLAS "Use Installed Linear Algebra Library" ON )
-
 if( ENABLE_CBLAS )
 	set(CBLAS_VENDOR FALSE)
 	if( APPLE )

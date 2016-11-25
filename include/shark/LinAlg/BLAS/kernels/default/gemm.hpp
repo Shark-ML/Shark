@@ -40,6 +40,9 @@
 #include <type_traits>
 #include <vector>
 
+
+#define SHARK_BLAS_VECTOR_LENGTH 16
+
 namespace shark {namespace blas {namespace bindings {
 	
 //  Block-GEMM implementation based on boost.ublas
@@ -54,17 +57,18 @@ namespace shark {namespace blas {namespace bindings {
 
 template <typename T>
 struct prod_block_size {
-	static const unsigned vector_length = 32/sizeof(T); // Number of elements in a vector register
-	static const unsigned mc = 256;
-	static const unsigned kc = 512; // stripe length
-	static const unsigned nc = (4096/(3 * vector_length)) * (3 * vector_length);
+	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(T); // Number of elements in a vector register
 	static const unsigned mr = 4; // stripe width for lhs
 	static const unsigned nr = 3 * vector_length; // stripe width for rhs
+	static const unsigned mc = 128;
+	static const unsigned kc = 512; // stripe length
+	static const unsigned nc = (1024/nr) * nr;
 	static const unsigned align = 64; // align temporary arrays to this boundary
 };
 
 template <>
 struct prod_block_size<float> {
+	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(float); 
 	static const unsigned mc = 256;
 	static const unsigned kc = 512; // stripe length
 	static const unsigned nc = 4096;
@@ -75,6 +79,7 @@ struct prod_block_size<float> {
 
 template <>
 struct prod_block_size<long double> {
+	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(long double); 
 	static const unsigned mc = 256;
 	static const unsigned kc = 512; // stripe length
 	static const unsigned nc = 4096;
@@ -91,37 +96,51 @@ void ugemm(
 ){
 	BOOST_ALIGN_ASSUME_ALIGNED(A, block_size::align);
 	BOOST_ALIGN_ASSUME_ALIGNED(B, block_size::align);
-	static const std::size_t MR = block_size::mr;
-	static const std::size_t NR = block_size::nr;
-	typename std::aligned_storage<sizeof(T[MR*NR]),block_size::align>::type Pa;
+	
+#ifdef SHARK_USE_SIMD
+	static const std::size_t vecNR = block_size::nr/block_size::vector_length;
+#ifdef BOOST_COMP_CLANG_DETECTION
+	typedef T vx __attribute__((ext_vector_type (vector_length)));
+#else
+        typedef T vx __attribute__((vector_size (SHARK_BLAS_VECTOR_LENGTH)));
+#endif
+	vx P[block_size::mr * vecNR] = {};
+#else
+typedef T vx;
+static const std::size_t vecNR = block_size::nr;
+typename std::aligned_storage<sizeof(T[block_size::mr*vecNR]),block_size::align>::type Pa;
 	T* P = reinterpret_cast<T*>(&Pa);
-	for (std::size_t c = 0; c < MR * NR; c++)
+	for (std::size_t c = 0; c < block_size::mr*vecNR; c++)
 		P[c] = 0;
+#endif
+	
 	
 	// perform the matrix-matrix product as outer product 
 	// of rows of A and B
+	vx const* b = (vx const*)B;
 	for (std::size_t l=0; l<kc; ++l) {
-		for (std::size_t i=0; i<MR; ++i) {
-			for (std::size_t j=0; j<NR; ++j) {
-				P[i* NR+j] += A[i]*B[j];
+		for (std::size_t i=0; i<block_size::mr; ++i) {
+			for (std::size_t j=0; j<vecNR; ++j) {
+				P[i * vecNR+j] += A[i]*b[j];
 			}
 		}
-		A += MR;
-		B += NR;
+		A += block_size::mr;
+		b += vecNR;
 	}
 	//multiply with alpha if necessary
 	if (alpha!=TC(1)) {
-		for (std::size_t i=0; i<MR; ++i) {
-			for (std::size_t j=0; j<NR; ++j) {
-				P[i*NR+j] *= alpha;
+		for (std::size_t i=0; i<block_size::mr; ++i) {
+			for (std::size_t j=0; j< vecNR; ++j) {
+				P[i*vecNR+j] *= alpha;
 			}
 		}
 	}
 	
 	//add result to C
-	for (std::size_t i=0; i<MR; ++i) {
-		for (std::size_t j=0; j<NR; ++j) {
-			C[i*ldc+j] += P[i*NR+j];
+	T const* p = (T const*) P;
+	for (std::size_t i=0; i<block_size::mr; ++i) {
+		for (std::size_t j=0; j<block_size::nr; ++j) {
+			C[i*ldc+j] += p[i*block_size::nr+j];
 		}
 	}
 }

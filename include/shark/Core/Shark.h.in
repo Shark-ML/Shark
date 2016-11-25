@@ -96,6 +96,11 @@ struct DynamicLibraryTag{
 };
 
 /**
+ * \brief Tags whether SIMD has been enabled.
+ */
+#cmakedefine SHARK_USE_SIMD
+
+/**
  * \brief Tags whether BLAS has been enabled.
  */
 #cmakedefine SHARK_USE_CBLAS
