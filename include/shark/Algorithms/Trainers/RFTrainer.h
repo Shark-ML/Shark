@@ -142,6 +142,19 @@ public:
 		setNTrees(static_cast<long>(newParameters[0]));
 	}
 
+	// set true if the feature importances should be computed
+	bool m_computeFeatureImportances;
+
+	// set true if OOB error should be computed
+	bool m_computeOOBerror;
+
+	// set true if trainer should bootstrap with replacement
+	bool m_bootstrapWithReplacement;
+
+	using ImpurityMeasure = detail::cart::ImpurityMeasure;
+	// set to gini, misclassification or crossEntropy as desired
+	ImpurityMeasure m_impurityMeasure;
+
 protected:
 	/// ClassVector
 	using ClassVector = UIntVector;
@@ -188,11 +201,13 @@ protected:
 	/// true if the trainer is used for regression, false otherwise.
 	bool m_regressionLearner;
 
-	// true if the feature importances should be computed
-	bool m_computeFeatureImportances;
+	// set true if the CART OOB error should be computed for each tree
+	bool m_computeCARTOOBerror;
 
-	// true if OOB error should be computed
-	bool m_computeOOBerror;
+
+	using ImpurityMeasureFn = detail::cart::ImpurityMeasureFn;
+
+	ImpurityMeasureFn m_impurityFn;
 };
 }
 #endif

@@ -40,6 +40,10 @@
 using namespace shark;
 using std::set;
 using detail::cart::SortedIndex;
+using detail::cart::createCountVector;
+using detail::cart::hist;
+using detail::cart::Bag;
+using detail::cart::bootstrap;
 
 
 //Constructor
@@ -51,6 +55,9 @@ RFTrainer::RFTrainer(bool computeFeatureImportances, bool computeOOBerror)
 	m_regressionLearner = false;
 	m_computeFeatureImportances = computeFeatureImportances;
 	m_computeOOBerror = computeOOBerror;
+	m_computeCARTOOBerror = false;
+	m_bootstrapWithReplacement = false;
+	m_impurityMeasure = ImpurityMeasure::gini;
 }
 
 //Set trainer parameters to sensible defaults
@@ -67,6 +74,7 @@ void RFTrainer::setDefaults(){
 		if(m_regressionLearner) setNodeSize(5);
 		else setNodeSize(1);
 	}
+	m_impurityFn = setImpurityFn(m_impurityMeasure);
 }
 
 // Regression
@@ -84,14 +92,14 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 
 	model.setInputDimension(m_inputDimension);
 	model.setLabelDimension(m_labelDimension);
-	auto const n_elements = dataset.numberOfElements();
 
 	m_regressionLearner = true;
 	setDefaults();
 	
 	//we need direct element access since we need to generate elementwise subsets
-	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 	DataView<RegressionDataset const> elements(dataset);
+	auto const n_elements = elements.size();
+	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 
 	auto seed = Rng::discrete(0,(unsigned)-1);
 
@@ -101,37 +109,21 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
 		Rng::rng_type rng{static_cast<unsigned>(seed + b)};
-		//For each tree generate a subset of the dataset
-		//generate indices of the dataset (pick k out of n elements)
-		std::vector<std::size_t> trainIndices(n_elements);
-		std::iota(trainIndices.begin(),trainIndices.end(),0);
-		std::random_shuffle(trainIndices.begin(),trainIndices.end(),DiscreteUniform<>{rng});
 
-		// create oob indices
-		auto oobStart = trainIndices.begin() + subsetSize;
-		auto oobEnd   = trainIndices.end();
-
-		auto oobIndices = std::vector<std::size_t>(oobStart, oobEnd);
-		
-		//generate the dataset by copying (TODO: this is a quick fix!
-		trainIndices.resize(subsetSize);
-		auto trainDataView = subset(elements,trainIndices);
+		auto bag = bootstrap(elements, rng, subsetSize, m_bootstrapWithReplacement);
 
 		//Create attribute tables
-		auto tables = SortedIndex{trainDataView};
-
-		auto n_trainData = tables.noRows();
-		auto sumFull = detail::cart::sum<RealVector>(n_trainData, [&](std::size_t i){
-			return trainDataView[i].label;
+		auto tables = SortedIndex{bag.dataView()};
+		auto sumFull = detail::cart::sum<RealVector>(tables.noRows(), [&](std::size_t i){
+			return bag.dataView()[i].label;
 		});
 
-		TreeType tree = buildTree(std::move(tables), trainDataView, sumFull, 0, rng);
-		//TreeType tree = build(trainDataView,labelAvg,rng);
+		TreeType tree = buildTree(std::move(tables), bag.dataView(), sumFull, 0, rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
-		if(m_computeOOBerror || m_computeFeatureImportances){
-			RegressionDataset dataOOB = toDataset(subset(elements, oobIndices));
+		if(m_computeCARTOOBerror || m_computeFeatureImportances){
+			RegressionDataset dataOOB = toDataset(bag.oobDataView());
 
 			// cart oob errors are computed implicitly whenever importances are
 			if(m_computeFeatureImportances){
@@ -141,7 +133,7 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 
 		SHARK_CRITICAL_REGION{
 			model.addModel(cart);
-			for(auto const i : oobIndices){
+			for(auto const i : bag.oobIndices){
 				row(oobPredictions,i) += cart(elements[i].input);
 				++n_predictions[i];
 			}
@@ -168,14 +160,14 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 	m_inputDimension = inputDimension(dataset);
 	model.setInputDimension(m_inputDimension);
 	m_labelCardinality = numberOfClasses(dataset);
-	auto n_elements = dataset.numberOfElements();
 
 	m_regressionLearner = false;
 	setDefaults();
 
 	//we need direct element access since we need to generate element-wise subsets
-	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 	DataView<ClassificationDataset const> elements(dataset);
+	auto const n_elements = elements.size();
+	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 
 	auto seed = Rng::discrete(0,(unsigned)-1);
 
@@ -184,44 +176,29 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
 		Rng::rng_type rng{static_cast<unsigned>(seed + b)};
-		//For each tree generate a subset of the dataset
-		//generate indices of the dataset (pick k out of n elements)
-		std::vector<std::size_t> trainIndices(n_elements);
-		std::iota(trainIndices.begin(),trainIndices.end(),0);
-		std::random_shuffle(trainIndices.begin(),trainIndices.end(),DiscreteUniform<>{rng});
 
-		// create oob indices
-		auto oobStart = trainIndices.begin() + subsetSize;
-		auto oobEnd   = trainIndices.end();
-
-		auto oobIndices = std::vector<std::size_t>(oobStart, oobEnd);
-
-		//generate the dataset by copying (TODO: this is a quick fix!
-		trainIndices.resize(subsetSize);
-		auto trainDataView = subset(elements,trainIndices);
+		auto bag = bootstrap(elements, rng, subsetSize, m_bootstrapWithReplacement);
 
 		//Create attribute tables
-		auto&& cFull = detail::cart::createCountVector(trainDataView,m_labelCardinality);
+		auto tables = SortedIndex{bag.dataView()};
+		auto&& cFull = createCountVector(bag.dataView(),m_labelCardinality);
 
-		TreeType tree = buildTree(SortedIndex{trainDataView}, trainDataView, cFull, 0, rng);
+		TreeType tree = buildTree(std::move(tables), bag.dataView(), cFull, 0, rng);
 		CARTType cart(std::move(tree), m_inputDimension);
 
 		// if oob error or importances have to be computed, create an oob sample
-		if(m_computeOOBerror || m_computeFeatureImportances){
-			ClassificationDataset dataOOB = toDataset(subset(elements, oobIndices));
+		if(m_computeCARTOOBerror || m_computeFeatureImportances){
+			ClassificationDataset dataOOB = toDataset(bag.oobDataView());
 
 			// if importances should be computed, oob errors are computed implicitly
 			if(m_computeFeatureImportances){
 				cart.computeFeatureImportances(dataOOB, rng);
-			} // if importances should not be computed, only compute the oob errors
-			else{
-				cart.computeOOBerror(dataOOB);
-			}
+			} else cart.computeOOBerror(dataOOB);
 		}
 
 		SHARK_CRITICAL_REGION{
 			model.addModel(cart);
-			for(auto const i : oobIndices){
+			for(auto const i : bag.oobIndices){
 				auto histogram = cart(elements[i].input);
 				auto j = arg_max(histogram);
 				++oobClassTally(i,j);
@@ -254,8 +231,8 @@ buildTree(SortedIndex&& tables,
 	//n = Total number of cases in the dataset
 	std::size_t n = tables.noRows();
 
-	if(detail::cart::gini(cFull,n)==0.0 || n <= m_nodeSize) {
-		nodeInfo.label = detail::cart::hist(cFull);
+	if(m_impurityFn(cFull,n)==0.0 || n <= m_nodeSize) {
+		nodeInfo.label = hist(cFull);
 		return tree;
 	}
 
@@ -268,7 +245,7 @@ buildTree(SortedIndex&& tables,
 	if(!split) {
 		// this shouldn't really happen: leaves ought to be cought by previous check
 		// TODO(jwrigley): Why is hist only applied to leaves, when average is applied to all nodes
-		nodeInfo.label = detail::cart::hist(cFull);
+		nodeInfo.label = hist(cFull);
 		return tree;
 	}
 	nodeInfo <<= split;
@@ -310,8 +287,8 @@ RFTrainer::Split RFTrainer::findSplit(
 			std::size_t n1 = i,    n2 = n-i;
 
 			//Calculate the Gini impurity of the split
-			double impurity = n1*detail::cart::gini(cAbove,n1)+
-							  n2*detail::cart::gini(cBelow,n2);
+			double impurity = n1*m_impurityFn(cAbove,n1)+
+							  n2*m_impurityFn(cBelow,n2);
 			if(impurity<best.impurity){
 				//Found a more pure split, store the attribute index and value
 				best.splitAttribute = attributeIndex;

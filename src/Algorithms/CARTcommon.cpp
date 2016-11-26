@@ -92,9 +92,6 @@ ClassVector createCountVector(
 	for(auto const& element: elements){
 		++countVector[element.label];
 	}
-//	for(std::size_t i = 0, s = elements.size(); i<s; ++i){
-//		++countVector[elements[i].label];
-//	}
 	return countVector;
 }
 ClassVector createCountVector(
@@ -105,11 +102,15 @@ ClassVector createCountVector(
 	for(auto const& element: dataset.elements()){
 		++countVector[element.label];
 	}
-//	for(auto const& batch: dataset.batches()){
-//		for(auto const& element : batch){
-//			++countVector[element.label];
-//		}
-//	}
 	return countVector;
+}
+
+ImpurityMeasureFn setImpurityFn(ImpurityMeasure im){
+	switch(im) {
+		case ImpurityMeasure::gini: return gini;
+		case ImpurityMeasure::misclassification: return misclassificationError;
+		case ImpurityMeasure::crossEntropy: return crossEntropy;
+	}
+    return nullptr;
 }
 }}} // namespace shark::detail::cart
