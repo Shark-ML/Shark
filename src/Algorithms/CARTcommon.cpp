@@ -42,16 +42,21 @@ namespace detail{
 namespace cart {
 
 
-///Calculates the Gini impurity of a node. The impurity is defined as
-///1-sum_j p(j|t)^2
-///i.e the 1 minus the sum of the squared probability of observing class j in node t
+/**
+ * Calculates the Gini impurity of a node. The impurity is defined as
+ * gini = 1-sum_j p(j|t)^2
+ * i.e the 1 minus the sum of the squared probability of observing class j in node t
+ */
 double gini(ClassVector const& countVector, std::size_t n)
 {
 	if(!n) return 1.;
-	return 1.-sum(sqr(countVector/double(n)));
+	return 1.-sum(sqr(countVector/static_cast<double>(n)));
 }
 
-// ME = 1-max(count)/n
+/**
+ * Calculates the misclassification error of a node.
+ * ME = 1-max(count)/n
+ */
 double misclassificationError(ClassVector const& countVector, std::size_t n)
 {
 	if(!n) return 1.;
@@ -59,7 +64,10 @@ double misclassificationError(ClassVector const& countVector, std::size_t n)
 	return 1.-m/n;
 }
 
-// CE = - sum_j(count[j]/n * log(count[j]/n))
+/**
+ * Calculates the cross-entropy of a node.
+ * CE = - sum_j(count[j]/n * log(count[j]/n))
+ */
 double crossEntropy(ClassVector const& countVector, std::size_t n)
 {
 	if(!n) return std::numeric_limits<double>::infinity();
@@ -73,19 +81,36 @@ double crossEntropy(ClassVector const& countVector, std::size_t n)
 	return -sum(p*log(p));
 }
 
-
-/// Create a count vector as used in the classification case.
+/**
+ * Create a count vector as used in the classification case.
+ */
 ClassVector createCountVector(
 		DataView<ClassificationDataset const> const& elements,
 		std::size_t labelCardinality)
 {
-	ClassVector countVector = ClassVector(labelCardinality);
-	for(std::size_t i = 0, s = elements.size(); i<s; ++i){
-		++countVector[elements[i].label];
+	ClassVector countVector(labelCardinality);
+	for(auto const& element: elements){
+		++countVector[element.label];
+	}
+	return countVector;
+}
+ClassVector createCountVector(
+		ClassificationDataset const& dataset,
+		std::size_t labelCardinality)
+{
+	ClassVector countVector(labelCardinality);
+	for(auto const& element: dataset.elements()){
+		++countVector[element.label];
 	}
 	return countVector;
 }
 
-
-
+ImpurityMeasureFn setImpurityFn(ImpurityMeasure im){
+	switch(im) {
+		case ImpurityMeasure::gini: return gini;
+		case ImpurityMeasure::misclassification: return misclassificationError;
+		case ImpurityMeasure::crossEntropy: return crossEntropy;
+	}
+    return nullptr;
+}
 }}} // namespace shark::detail::cart

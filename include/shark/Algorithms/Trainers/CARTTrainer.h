@@ -38,8 +38,9 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Models/Trees/CARTClassifier.h>
+#include <shark/Algorithms/Trainers/CARTcommon.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 namespace shark {
 /*!
@@ -95,6 +96,7 @@ public:
 		m_numberOfFolds = folds;
 	}
 protected:
+	using Split = detail::cart::Split;
 
 	///Types frequently used
 	struct TableEntry{
@@ -131,21 +133,12 @@ protected:
 	//Classification functions
 	///Builds a single decision tree from a classification dataset
 	///The method requires the attribute tables,
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, ClassificationDataset const& dataset, ClassVector& cAbove, std::size_t nodeId );
-
-	///Calculates the Gini impurity of a node. The impurity is defined as
-	///1-sum_j p(j|t)^2
-	///i.e the 1 minus the sum of the squared probability of observing class j in node t
-	SHARK_EXPORT_SYMBOL double gini(ClassVector const& countVector, std::size_t n) const;
-	///Creates a histogram from the count vector.
-	SHARK_EXPORT_SYMBOL RealVector hist(ClassVector const& countVector) const;
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, ClassificationDataset const& dataset, ClassVector& cFull, std::size_t nodeId );
 
 	///Regression functions
-	SHARK_EXPORT_SYMBOL TreeType buildTree(AttributeTables const& tables, RegressionDataset const& dataset, std::vector<RealVector> const& labels, std::size_t nodeId, std::size_t trainSize);
+	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, RegressionDataset const& dataset, RealVector const& sumFull, std::size_t nodeId, std::size_t trainSize);
 	///Calculates the total sum of squares
 	SHARK_EXPORT_SYMBOL double totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, RealVector const& sumLabel);
-	///Calculates the mean of a vector of labels
-	SHARK_EXPORT_SYMBOL RealVector mean(std::vector<RealVector> const& labels);
 
 	///Pruning
 	///Prunes decision tree
@@ -158,14 +151,8 @@ protected:
 	///Returns the index of the node with node id in tree.
 	SHARK_EXPORT_SYMBOL std::size_t findNode(TreeType & tree, std::size_t nodeId);
 
-	///Attribute table functions
-	///Create the attribute tables used by the SPRINT algorithm
-	SHARK_EXPORT_SYMBOL AttributeTables createAttributeTables(Data<RealVector> const& dataset);
-	///Splits the attribute tables by a attribute index and value. Returns a left and a right attribute table in the variables LAttributeTables and RAttributeTables
-	SHARK_EXPORT_SYMBOL void splitAttributeTables(AttributeTables const& tables, std::size_t index, std::size_t valIndex, AttributeTables& LAttributeTables, AttributeTables& RAttributeTables);
-	///Crates count matrices from a classification dataset
-	SHARK_EXPORT_SYMBOL CARTTrainer::ClassVector createCountVector(ClassificationDataset const& dataset) const;
-
+	SHARK_EXPORT_SYMBOL Split findSplit(detail::cart::SortedIndex const& tables, ClassificationDataset const& dataset, ClassVector const& cFull) const;
+	SHARK_EXPORT_SYMBOL Split findSplit(detail::cart::SortedIndex const& tables, RegressionDataset const& dataset, RealVector const& sumFull) const;
 
 };
 
