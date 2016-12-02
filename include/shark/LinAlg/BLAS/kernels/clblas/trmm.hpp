@@ -162,7 +162,7 @@ void trmm_recursive(
 	//otherwise run the kernel recursively
 	auto A = subrange(Afull,start,end,start,end);
 	auto B = rows(Bfull,start,end);
-	std::size_t split = ((A.size1()+tileSizeA-1)/tileSizeA)/2 * tileSizeA;//split at the next multiple of the TileSize
+	std::size_t split = (A.size1()+tileSizeA-1)/tileSizeA/2*tileSizeA;//split at the next multiple of the TileSize
 	auto BFront = rows(B,0,split);
 	auto Bback = rows(B,split,size);
 	

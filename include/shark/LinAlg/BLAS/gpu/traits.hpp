@@ -34,12 +34,14 @@
 #define SHARK_LINALG_BLAS_GPU_DETAIL_TRAITS_HPP
 
 #include "../detail/traits.hpp"
-#include "../detail/functional.hpp"
 #include <boost/compute/core.hpp>
+#include <boost/compute/functional/detail/unpack.hpp>
+#include <boost/compute/container/vector.hpp>
 #include <boost/compute/functional/operator.hpp>
 #include <boost/compute/iterator/zip_iterator.hpp>
 #include <boost/compute/iterator/constant_iterator.hpp>
 #include <boost/compute/iterator/transform_iterator.hpp>
+#include <boost/compute/functional.hpp>
 #include <tuple>
 
 namespace shark{namespace blas{namespace gpu{

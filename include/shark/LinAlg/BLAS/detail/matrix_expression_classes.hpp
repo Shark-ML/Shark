@@ -961,6 +961,12 @@ public:
 		return expression().size2 ();
         }
 	
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_expression.queue();
+	}
+#endif
+	
 	///\brief Returns the underlying storage_type structure for low level access
 	storage_type raw_storage_type(){
 		return expression().raw_storage_type();

@@ -82,6 +82,7 @@ shark_add_test( LinAlg/BLAS/gpu_vector_expression.cpp BLAS_GPU_Vector_Expression
 shark_add_test( LinAlg/BLAS/gpu_matrix_expression.cpp BLAS_GPU_Matrix_Expression)
 shark_add_test( LinAlg/BLAS/gpu_prod.cpp BLAS_GPU_Prod)
 shark_add_test( LinAlg/BLAS/gpu_triangular_prod.cpp BLAS_GPU_Triangular_Prod)
+shark_add_test( LinAlg/BLAS/gpu_solve_triangular.cpp BLAS_GPU_Solve_Triangular)
 endif()
 
 # LinAlg Tests

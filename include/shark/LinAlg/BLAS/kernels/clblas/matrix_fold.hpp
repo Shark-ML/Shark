@@ -26,7 +26,7 @@
  *
  */
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_FOLD_HPP
-#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_VECTOR_FOLD_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_FOLD_HPP
 
 #include "../../detail/traits.hpp"
 #include <boost/compute/detail/meta_kernel.hpp>

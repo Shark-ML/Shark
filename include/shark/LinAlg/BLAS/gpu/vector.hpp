@@ -29,7 +29,7 @@
 #define SHARK_LINALG_BLAS_GPU_VECTOR_HPP
 
 #include "traits.hpp"
-//~ #include "scalar.hpp"
+#include "../detail/vector_proxy_classes.hpp"
 #include "../assignment.hpp"
 #include <boost/compute/container/vector.hpp>
 #include <boost/compute/algorithm/fill.hpp>

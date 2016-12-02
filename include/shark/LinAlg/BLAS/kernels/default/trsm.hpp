@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef SHARK_LINALG_BLAS_KERNELS_ATLAS_TRSM_HPP
-#define SHARK_LINALG_BLAS_KERNELS_ATLAS_TRSM_HPP
+#ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSM_HPP
+#define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSM_HPP
 
 #include "../../expression_types.hpp"
 #include "../../detail/structure.hpp"
@@ -70,8 +70,8 @@ void trsm_block(
 		
 		//copy blockB transposed in memory
 		for(std::size_t i = 0; i != size; ++i){
-			for(std::size_t j = 0; j != curBlockSize2; ++j){
-				blockB[j][i] = B()(i,startB+j);
+			for(std::size_t k = 0; k != curBlockSize2; ++k){
+				blockB[k][i] = B()(i,startB+k);
 			}
 		}
 		//compute trsv kernel for each row in blockB
@@ -234,18 +234,22 @@ void trsm_recursive(
 	std::size_t end,
 	Triangular t
 ){
+	static std::size_t const Block_Size =  32;
 	auto A = subrange(Afull,start,end,start,end);
 	auto B = rows(Bfull,start,end);
+	//if the matrix is small enough call the computation kernel directly for the block
+	if(A.size1() <= Block_Size){
+		trsm_block<Block_Size,16,Triangular::is_unit>(A,B,triangular_tag<Triangular::is_upper,false>(), typename MatB::orientation());
+		return;
+	}
 	std::size_t size = A.size1();
-	std::size_t split = A.size1()/2;
+	std::size_t numBlocks =(A.size1()+Block_Size-1)/Block_Size; 
+	std::size_t split = numBlocks/2*Block_Size;
 	auto Bfront = rows(B,0,split);
 	auto Bback = rows(B,split,size);
-	//if the matrix is small enough call the computation kernel directly for the block
-	if(A.size1() < 32){
-		trsm_block<32,16,Triangular::is_unit>(A,B,triangular_tag<Triangular::is_upper,false>(), typename MatB::orientation());
-	}
+	
 	//otherwise run the kernel recursively
-	else if(Triangular::is_upper){ //Upper triangular case
+	if(Triangular::is_upper){ //Upper triangular case
 		trsm_recursive(Afull, Bfull,start+split,end, t);
 		kernels::gemm(subrange(A,0,split,split,size), Bback, Bfront, -1.0);
 		trsm_recursive(Afull, Bfull,start,start+split, t);
@@ -265,7 +269,7 @@ void trsm(
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == B().size1());
 	
-	trsm_recursive(A,B,0,A().size1(), triangular_tag<Upper,Unit>());
+	bindings::trsm_recursive(A,B,0,A().size1(), triangular_tag<Upper,Unit>());
 }
 }}}
 #endif

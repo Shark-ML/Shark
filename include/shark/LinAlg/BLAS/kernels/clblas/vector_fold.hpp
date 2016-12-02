@@ -37,9 +37,9 @@ namespace shark{namespace blas {namespace bindings{
 template<class F, class V>
 void vector_fold(vector_expression<V, gpu_tag> const& v, typename F::result_type& value, dense_tag) { 
 	boost::compute::array<typename F::result_type,1> val;
-	val[0] = value;
+	boost::compute::copy_n(&value,1,val.begin(), v().queue());
 	boost::compute::reduce(v().begin(), v().end(),  val.begin(), F(), v().queue());
-	value = val[0];
+	boost::compute::copy_n(val.begin(),1,&value, v().queue());
 }
 
 

@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(A,testResult,blas::left(), blas::lower());
 		blas::vector<double> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - lower"<<std::endl;
 	{
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(A,testResult,blas::right(), blas::lower());
 		blas::vector<double> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	
 	std::cout<<"left - unit_lower"<<std::endl;
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(A,testResult,blas::left(), blas::unit_lower());
 		blas::vector<double> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - unit_lower"<<std::endl;
 	{
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(A,testResult,blas::right(), blas::unit_lower());
 		blas::vector<double> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	
 	std::cout<<"left - upper"<<std::endl;
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(Aupper,testResult,blas::left(), blas::upper());
 		blas::vector<double> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - upper"<<std::endl;
 	{
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(Aupper,testResult,blas::right(), blas::upper());
 		blas::vector<double> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	
 	std::cout<<"left - unit_upper"<<std::endl;
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(Aupper,testResult,blas::left(), blas::unit_upper());
 		blas::vector<double> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - unit_upper"<<std::endl;
 	{
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 		blas::solve(Aupper,testResult,blas::right(), blas::unit_upper());
 		blas::vector<double> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-b);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 }
 
@@ -110,9 +110,9 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 	blas::matrix<double,blas::row_major> A(size,size,1.0);
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j <=i; ++j){
-			A(i,j) = 0.1/size*i-0.05/(i+1.0)*j;
+			A(i,j) = 0.2/size*i-0.05/(i+1.0)*j;
 			if(i ==j)
-				A(i,j) += 0.5;
+				A(i,j) += 10;
 		}
 	}
 	blas::matrix<double,blas::row_major> Aupper = trans(A);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::left(), blas::lower());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - lower - row major"<<std::endl;
 	{
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::right(), blas::lower());
 		blas::matrix<double> result = trans(blas::matrix<double>(blas::triangular_prod<blas::upper>(Aupper,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"left - unit_lower - row major"<<std::endl;
 	{
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::left(), blas::unit_lower());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - unit_lower - row major"<<std::endl;
 	{
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::right(), blas::unit_lower());
 		blas::matrix<double,blas::row_major> result = trans(blas::matrix<double>(blas::triangular_prod<blas::unit_upper>(Aupper,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	
 	std::cout<<"left - upper - row major"<<std::endl;
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::left(), blas::upper());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - upper - row major"<<std::endl;
 	{
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::right(), blas::upper());
 		blas::matrix<double> result = trans(blas::matrix<double>(blas::triangular_prod<blas::lower>(A,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"left - unit_upper - row major"<<std::endl;
 	{
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::left(), blas::unit_upper());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - unit_upper - row major"<<std::endl;
 	{
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::right(), blas::unit_upper());
 		blas::matrix<double,blas::row_major> result = trans(blas::matrix<double>(blas::triangular_prod<blas::unit_lower>(A,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	
 	
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::left(), blas::lower());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - lower - column major"<<std::endl;
 	{
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::right(), blas::lower());
 		blas::matrix<double> result = trans(blas::matrix<double>(blas::triangular_prod<blas::upper>(Aupper,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"left - unit_lower - column major"<<std::endl;
 	{
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::left(), blas::unit_lower());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - unit_lower - column major"<<std::endl;
 	{
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(A,testResult,blas::right(), blas::unit_lower());
 		blas::matrix<double,blas::row_major> result = trans(blas::matrix<double>(blas::triangular_prod<blas::unit_upper>(Aupper,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	
 	std::cout<<"left - upper - column major"<<std::endl;
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::left(), blas::upper());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - upper - column major"<<std::endl;
 	{
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::right(), blas::upper());
 		blas::matrix<double> result = trans(blas::matrix<double>(blas::triangular_prod<blas::lower>(A,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"left - unit_upper - column major"<<std::endl;
 	{
@@ -248,7 +248,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::left(), blas::unit_upper());
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-B);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 	std::cout<<"right - unit_upper - column major"<<std::endl;
 	{
@@ -256,7 +256,7 @@ BOOST_AUTO_TEST_CASE( Solve_Matrix ){
 		blas::solve(Aupper,testResult,blas::right(), blas::unit_upper());
 		blas::matrix<double,blas::row_major> result = trans(blas::matrix<double>(blas::triangular_prod<blas::unit_lower>(A,trans(testResult))));
 		double error = norm_inf(result-Bright);
-		BOOST_CHECK_SMALL(error, 1.e-12);
+		BOOST_CHECK_SMALL(error, 1.e-11);
 	}
 }
 

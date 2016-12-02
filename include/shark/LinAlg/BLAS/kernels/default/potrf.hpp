@@ -115,12 +115,14 @@ std::size_t potrf_recursive(
 	std::size_t block_size = 32;
 	auto A = subrange(Afull,start,end,start,end);
 	std::size_t size = A.size1();
-	std::size_t split = (A.size1()+block_size-1)/2;
-	
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(size <= block_size){
 		return potrf_block(A,typename MatA::orientation(), lower());
 	}
+	std::size_t numBlocks = (A.size1()+block_size-1)/block_size;
+	std::size_t split = numBlocks/2*block_size;
+	
+	
 	//otherwise run the kernel recursively
 	std::size_t result = potrf_recursive(Afull,start,start+split,lower());
 	if(result) return result;
