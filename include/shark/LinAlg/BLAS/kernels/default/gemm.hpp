@@ -34,6 +34,7 @@
 #include "../gemv.hpp"
 #include "../../vector.hpp"
 #include "../../detail/matrix_proxy_classes.hpp"
+#include "mgemm.hpp"
 #include <boost/mpl/bool.hpp>
 #include <boost/align/aligned_allocator.hpp>
 #include <boost/align/assume_aligned.hpp>
@@ -54,9 +55,8 @@ namespace shark {namespace blas {namespace bindings {
 //  accompanying file LICENSE_1_0.txt or copy at
 //  http://www.boost.org/LICENSE_1_0.txt)
 	
-
 template <typename T>
-struct prod_block_size {
+struct gemm_block_size {
 	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(T); // Number of elements in a vector register
 	static const unsigned mr = 4; // stripe width for lhs
 	static const unsigned nr = 3 * vector_length; // stripe width for rhs
@@ -67,7 +67,7 @@ struct prod_block_size {
 };
 
 template <>
-struct prod_block_size<float> {
+struct gemm_block_size<float> {
 	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(float); 
 	static const unsigned mc = 256;
 	static const unsigned kc = 512; // stripe length
@@ -78,7 +78,7 @@ struct prod_block_size<float> {
 };
 
 template <>
-struct prod_block_size<long double> {
+struct gemm_block_size<long double> {
 	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(long double); 
 	static const unsigned mc = 256;
 	static const unsigned kc = 512; // stripe length
@@ -87,149 +87,6 @@ struct prod_block_size<long double> {
 	static const unsigned nr = 4; // stripe width for rhs
 	static const unsigned align = 64; // align temporary arrays to this boundary
 };
-
-//-- Micro Kernel For Dense operations----------------------------------------------------------
-template <class block_size, class T, class TC>
-void ugemm(
-	std::size_t kc, TC alpha, T const* A, T const* B,
-	TC* C, std::size_t ldc
-){
-	BOOST_ALIGN_ASSUME_ALIGNED(A, block_size::align);
-	BOOST_ALIGN_ASSUME_ALIGNED(B, block_size::align);
-	
-#ifdef SHARK_USE_SIMD
-	static const std::size_t vecNR = block_size::nr/block_size::vector_length;
-#ifdef BOOST_COMP_CLANG_DETECTION
-	typedef T vx __attribute__((ext_vector_type (vector_length)));
-#else
-        typedef T vx __attribute__((vector_size (SHARK_BLAS_VECTOR_LENGTH)));
-#endif
-	vx P[block_size::mr * vecNR] = {};
-#else
-typedef T vx;
-static const std::size_t vecNR = block_size::nr;
-typename std::aligned_storage<sizeof(T[block_size::mr*vecNR]),block_size::align>::type Pa;
-	T* P = reinterpret_cast<T*>(&Pa);
-	for (std::size_t c = 0; c < block_size::mr*vecNR; c++)
-		P[c] = 0;
-#endif
-	
-	
-	// perform the matrix-matrix product as outer product 
-	// of rows of A and B
-	vx const* b = (vx const*)B;
-	for (std::size_t l=0; l<kc; ++l) {
-		for (std::size_t i=0; i<block_size::mr; ++i) {
-			for (std::size_t j=0; j<vecNR; ++j) {
-				P[i * vecNR+j] += A[i]*b[j];
-			}
-		}
-		A += block_size::mr;
-		b += vecNR;
-	}
-	//multiply with alpha if necessary
-	if (alpha!=TC(1)) {
-		for (std::size_t i=0; i<block_size::mr; ++i) {
-			for (std::size_t j=0; j< vecNR; ++j) {
-				P[i*vecNR+j] *= alpha;
-			}
-		}
-	}
-	
-	//add result to C
-	T const* p = (T const*) P;
-	for (std::size_t i=0; i<block_size::mr; ++i) {
-		for (std::size_t j=0; j<block_size::nr; ++j) {
-			C[i*ldc+j] += p[i*block_size::nr+j];
-		}
-	}
-}
-
-
-// Macro Kernel for two densly packed Blocks
-template <class T, class TC, class block_size>
-void mgemm(
-	std::size_t mc, std::size_t nc, std::size_t kc, TC alpha,
-	T const* A, T const* B, TC *C,
-	std::size_t ldc, block_size
-){
-	static std::size_t const MR = block_size::mr;
-	static std::size_t const NR = block_size::nr;
-	std::size_t const mp  = (mc+MR-1) / MR;
-	std::size_t const np  = (nc+NR-1) / NR;
-	
-	for (std::size_t j=0; j<np; ++j) {
-		std::size_t const nr = std::min(NR, nc - j*NR);
-
-		for (std::size_t i=0; i<mp; ++i) {
-			std::size_t const mr = std::min(MR, mc - i*MR);
-			auto CBlockStart = C+i*MR*ldc+j*NR;
-			if (mr==MR && nr==NR) {
-				ugemm<block_size>(
-					kc, alpha,
-					&A[i*kc*MR], &B[j*kc*NR],
-					CBlockStart, ldc
-				);
-			} else {
-				TC CTempBlock[MR*NR];
-				std::fill_n(CTempBlock, MR*NR, T(0));
-				ugemm<block_size>(
-					kc, alpha,
-					&A[i*kc*MR], &B[j*kc*NR],
-					CTempBlock, NR
-				);
-				
-				for (std::size_t i0=0; i0<mr; ++i0){	
-					for (std::size_t j0=0; j0<nr; ++j0) {
-						CBlockStart[i0*ldc+j0] += CTempBlock[i0*NR+j0];
-					}
-				}
-			}
-		}
-	}
-}
-
-//-- Packing blocks ------------------------------------------------------------
-template <class E, class T, class block_size>
-void pack_A(matrix_expression<E, cpu_tag> const& A, T* p, block_size)
-{
-	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::align);
-
-	std::size_t const mc = A().size1();
-	std::size_t const kc = A().size2();
-	static std::size_t const MR = block_size::mr;
-	const std::size_t mp = (mc+MR-1) / MR;
-
-	std::size_t nu = 0;
-	for (std::size_t l=0; l<mp; ++l) {
-		for (std::size_t j=0; j<kc; ++j) {
-			for (std::size_t i = l*MR; i < l*MR + MR; ++i,++nu) {
-				p[nu] = (i<mc) ? A()(i,j) : T(0);
-			}
-		}
-	}
-}
-
-
-template <class E, class T, class block_size>
-void pack_B(matrix_expression<E, cpu_tag> const& B, T* p, block_size)
-{
-        BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::align);
-
-        std::size_t const kc = B ().size1();
-        std::size_t const nc = B ().size2();
-        static std::size_t const NR = block_size::nr;
-        std::size_t const np = (nc+NR-1) / NR;
-
-	std::size_t nu = 0;
-        for (std::size_t l=0; l<np; ++l) {
-		for (std::size_t i=0; i<kc; ++i) {
-			for (std::size_t j = l*NR; j < l*NR + NR; ++j,++nu){
-				p[nu] = (j<nc) ? B()(i,j) : T(0);
-			}
-		}
-        }
-}
 
 //-- Dense gemm
 template <class E1, class E2, class Mat, class Orientation1, class Orientation2>
@@ -245,7 +102,7 @@ void gemm_impl(
 		typename E1::value_type, typename E2::value_type, typename Mat::value_type
 	>::type value_type;
 	
-	typedef prod_block_size<
+	typedef gemm_block_size<
 		typename std::common_type<typename E1::value_type, typename E2::value_type>::type
 	> block_size;
 	
@@ -274,16 +131,16 @@ void gemm_impl(
 		for (std::size_t l=0; l<kb; ++l) {
 			std::size_t kc = std::min(KC, K - l*KC);
 			matrix_range<typename const_expression<E2>::type> Bs(e2(), l*KC, l*KC+kc, j*NC, j*NC+nc);
-			pack_B(Bs, B, block_size());
+			pack_B_dense(Bs, B, block_size());
 
 			for (std::size_t i=0; i<mb; ++i) {
 				std::size_t mc = std::min(MC, M - i*MC);
 				matrix_range<typename const_expression<E1>::type> As(e1(), i*MC, i*MC+mc, l*KC, l*KC+kc);
-				pack_A (As, A, block_size());
+				pack_A_dense(As, A, block_size());
 
 				mgemm(
 					mc, nc, kc, alpha, A, B,
-					&C_[i*MC*ldc+j*NC], ldc , block_size()
+					&C_[i*MC*ldc+j*NC], ldc , 1, block_size()
 				);
 			}
 		}

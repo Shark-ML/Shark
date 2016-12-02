@@ -32,181 +32,136 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMM_HPP
 
 #include <boost/mpl/bool.hpp>
-#include "../gemm.hpp"
+#include "mgemm.hpp"
 
 namespace shark { namespace blas { namespace bindings {
-	
 
-//Lower triangular - matrix(row-major)
-template<std::size_t maxBlockSize1,std::size_t maxBlockSize2, bool Unit, class MatA, class MatB>
-void trmm_block(
-	matrix_expression<MatA, cpu_tag> const& A,
-	matrix_expression<MatB, cpu_tag> &B,
-        boost::mpl::false_, //Lower
-	row_major // B is row-major
-){
-	SIZE_CHECK(A().size1() <= maxBlockSize1);
-	typedef typename MatB::value_type value_typeB;
+template <typename T>
+struct trmm_block_size {
+	static const unsigned vector_length = SHARK_BLAS_VECTOR_LENGTH/sizeof(T); // Number of elements in a vector register
+	static const unsigned mr = 4; // stripe width for lhs
+	static const unsigned nr = 3 * vector_length; // stripe width for rhs
+	static const unsigned lhs_block_size = 32 * mr;
+	static const unsigned rhs_column_size = (1024 / nr) * nr;
+	static const unsigned align = 64; // align temporary arrays to this boundary
+};
 
-	value_typeB block[maxBlockSize2][maxBlockSize1];
-	std::size_t numBlocks = (B().size2()+maxBlockSize2-1)/maxBlockSize2;
-	std::size_t size = A().size1();
-	for(std::size_t i = 0; i != numBlocks; ++i){
-		std::size_t startB= i*maxBlockSize2;
-		std::size_t curBlockSize2 =std::min(maxBlockSize2, B().size2() - startB);
-		
-		//copy block transposed in memory
-		for(std::size_t i = 0; i != size; ++i){
-			for(std::size_t j = 0; j != curBlockSize2; ++j){
-				block[j][i] = B()(i,startB+j);
-			}
-		}
-		//compute trmv kernel for each row in block
-		for(std::size_t j = 0; j != curBlockSize2; ++j){
-			for (std::size_t n = 1; n <= size; ++n) {
-				std::size_t i = size-n;
-				value_typeB bi = block[j][i];
-				if(!Unit){
-					block[j][i] *= A()(i,i);
-				}
-				for(std::size_t k=i+1; k != size; ++k){
-					block[j][k] += bi * A()(k,i);
-				}
-			}
-		}
-		//copy block back
-		for(std::size_t i = 0; i != size; ++i){
-			for(std::size_t j = 0; j != curBlockSize2; ++j){
-				B()(i,startB+j) = block[j][i];
+template <class E, class T, class block_size, bool unit>
+void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<false,unit>)
+{
+	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::align);
+
+	std::size_t const mc = A().size1();
+	std::size_t const kc = A().size2();
+	static std::size_t const MR = block_size::mr;
+	const std::size_t mp = (mc+MR-1) / MR;
+
+	std::size_t nu = 0;
+	for (std::size_t l=0; l<mp; ++l) {
+		for (std::size_t j=0; j<kc; ++j) {
+			for (std::size_t i = l*MR; i < l*MR + MR; ++i,++nu) {
+				if(unit && i == j)
+					p[nu] = 1.0;
+				else
+					p[nu] = ((i<mc) && (i >= j)) ? A()(i,j) : T(0);
 			}
 		}
 	}
 }
 
-//Lower triangular - matrix(column-major)
-template<std::size_t maxBlockSize1,std::size_t maxBlockSize2, bool Unit, class MatA, class MatB>
-void trmm_block(
-	matrix_expression<MatA, cpu_tag> const& A,
-	matrix_expression<MatB, cpu_tag> &B,
-        boost::mpl::false_, //Lower
-	column_major // B is column-major
-){
-	typedef typename MatB::value_type value_typeB;
+template <class E, class T, class block_size, bool unit>
+void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<true,unit>)
+{
+	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::align);
 
-	std::size_t size = A().size1();
-		
-	//compute trmm kernel for each column
-	for(std::size_t j = 0; j != B().size2(); ++j){
-		for (std::size_t n = 1; n <= size; ++n) {
-			std::size_t i = size-n;
-			value_typeB bi = B()(i,j);
-			if(!Unit){
-				B()(i,j) *= A()(i,i);
-			}
-			for(std::size_t k=i+1; k != size; ++k){
-				B()(k,j) += bi * A()(k,i);
+	std::size_t const mc = A().size1();
+	std::size_t const kc = A().size2();
+	static std::size_t const MR = block_size::mr;
+	const std::size_t mp = (mc+MR-1) / MR;
+
+	std::size_t nu = 0;
+	for (std::size_t l=0; l<mp; ++l) {
+		for (std::size_t j=0; j<kc; ++j) {
+			for (std::size_t i = l*MR; i < l*MR + MR; ++i,++nu) {
+				if(unit && i == j)
+					p[nu] = 1.0;
+				else
+					p[nu] = ((i<mc) && (i <= j)) ? A()(i,j) : T(0);
 			}
 		}
 	}
 }
 
 
-//Upper triangular - matrix(row-major)
-template<std::size_t maxBlockSize1,std::size_t maxBlockSize2, bool Unit, class MatA, class MatB>
-void trmm_block(
-	matrix_expression<MatA, cpu_tag> const& A,
-	matrix_expression<MatB, cpu_tag> &B,
-        boost::mpl::true_, //Upper
-	row_major // B is row-major
-){
-	SIZE_CHECK(A().size1() <= maxBlockSize1);
-	typedef typename MatB::value_type value_typeB;
-
-	value_typeB block[maxBlockSize2][maxBlockSize1];
-	std::size_t numBlocks = (B().size2()+maxBlockSize2-1)/maxBlockSize2;
-	std::size_t size = A().size1();
-	for(std::size_t i = 0; i != numBlocks; ++i){
-		std::size_t startB= i*maxBlockSize2;
-		std::size_t curBlockSize2 =std::min(maxBlockSize2, B().size2() - startB);
-		
-		//copy block transposed in memory
-		for(std::size_t i = 0; i != size; ++i){
-			for(std::size_t j = 0; j != curBlockSize2; ++j){
-				block[j][i] = B()(i,startB+j);
-			}
-		}
-		//compute trmm kernel for each column in block
-		for(std::size_t j = 0; j != curBlockSize2; ++j){
-			for (std::size_t i = 0; i < size; ++ i) {
-				if(!Unit){
-					block[j][i]  *= A()(i,i);
-				}
-				for(std::size_t k=i+1; k != size; ++k){
-					block[j][i]  += A()(i,k) * block[j][k];
-				}
-			}
-		}
-		//copy block back
-		for(std::size_t i = 0; i != size; ++i){
-			for(std::size_t j = 0; j != curBlockSize2; ++j){
-				B()(i,startB+j) = block[j][i];
-			}
-		}
-	}
-}
-
-//Upper triangular - matrix(column-major)
-template<std::size_t maxBlockSize1,std::size_t maxBlockSize2, bool Unit, class MatA, class MatB>
-void trmm_block(
-	matrix_expression<MatA, cpu_tag> const& A,
-	matrix_expression<MatB, cpu_tag> &B,
-        boost::mpl::true_, //Upper
-	column_major // B is column-major
-){
-	std::size_t size = A().size1();
-		
-	//compute trmm kernel for each column
-	for(std::size_t j = 0; j != B().size2(); ++j){
-		for (std::size_t i = 0; i < size; ++ i) {
-			if(!Unit){
-				B()(i,j) *= A()(i,i);
-			}
-			for(std::size_t k=i+1; k != size; ++k){
-				B()(i,j) +=A()(i,k) * B()(k,j) ;
-			}
-		}
-	}
-}
-
-template <typename MatA, typename MatB, class Triangular>
-void trmm_recursive(
-	matrix_expression<MatA, cpu_tag> const& Afull, 
-	matrix_expression<MatB, cpu_tag> & Bfull,
-	std::size_t start,
-	std::size_t end,
+template <class E1, class E2, class Triangular>
+void trmm_impl(
+	matrix_expression<E1, cpu_tag> const& e1, 
+	matrix_expression<E2, cpu_tag> & e2,
 	Triangular t
 ){
-	auto A = subrange(Afull,start,end,start,end);
-	auto B = rows(Bfull,start,end);
-	std::size_t size = A.size1();
-	std::size_t split = A.size1()/2;
-	auto Bfront = rows(B,0,split);
-	auto Bback = rows(B,split,size);
-	//if the matrix is small enough call the computation kernel directly for the block
-	if(A.size1() < 32){
-		trmm_block<32,16,Triangular::is_unit>(A,B,boost::mpl::bool_<Triangular::is_upper>(), typename MatB::orientation());
+	typedef typename std::common_type<typename E1::value_type, typename E2::value_type>::type value_type;
+	typedef trmm_block_size<value_type> block_size;
+	
+	static const std::size_t AC = block_size::lhs_block_size;
+        static const std::size_t BC = block_size::rhs_column_size;
+	
+	//obtain uninitialized aligned storage
+	boost::alignment::aligned_allocator<value_type,block_size::align> allocator;
+	value_type* A = allocator.allocate(AC * AC);
+	value_type* B = allocator.allocate(AC * BC);
+
+	//figure out number of blocks to use
+        const std::size_t  M = e1().size1();
+        const std::size_t  N = e2().size2();
+        const std::size_t Ab = (M+AC-1) / AC;
+        const std::size_t Bb = (N+BC-1) / BC;
+	
+	//get access to raw storage of B
+	auto storageB = e2().raw_storage();
+        auto Bpointer = storageB.values;
+        const std::size_t stride1 = E2::orientation::index_M(storageB.leading_dimension,1);
+        const std::size_t stride2 = E2::orientation::index_m(storageB.leading_dimension,1);
+	
+	for (std::size_t j = 0; j < Bb; ++j) {//columns of B
+		std::size_t nc = std::min(BC, N - j * BC);
+		//We have to make use of the triangular nature of B and the fact that rhs and storage are the same matrix
+		//for upper triangular matrices we can compute whole columns of A starting from the first
+		//until we reach the block on the diagonal, where we stop.
+		//for lower triangular matrices we start with the last column instead.
+		for (std::size_t k0 = 0; k0< Ab; ++k0){//row-blocks of B = column blocks of A.
+			std::size_t k = Triangular::is_upper? k0: Ab-k0-1;
+			std::size_t kc = std::min(AC, M - k * AC);
+			//read block of B 
+			matrix_range<E2> Bs(e2(), k*AC, k*AC + kc, j * BC, j * BC + nc );
+			pack_B_dense(Bs, B, block_size());
+			Bs.clear();//its going to be overwritten with the result
+			
+			//apply block of B to all blocks of A needing it. we will overwrite the real B block as a result of this.
+			//this is okay as the block is stored as argument
+			std::size_t i_start = Triangular::is_upper? 0: k;
+			std::size_t i_end = Triangular::is_upper? k+1: Ab;
+			for (std::size_t i = i_start; i < i_end; ++i) {
+				std::size_t mc = std::min(AC, M - i * AC);
+				matrix_range<typename const_expression<E1>::type> As(e1(), i * AC, i * AC + mc, k * AC, k * AC + kc);
+				if(i == k){
+					pack_A_triangular(As, A, block_size(), t);
+				}else
+					pack_A_dense(As, A, block_size());
+				
+				mgemm(
+					mc, nc, kc, value_type(1.0), A, B,
+					&Bpointer[i*AC * stride1 + j*BC * stride2], stride1, stride2, block_size()
+				);
+			}
+		}
 	}
-	//otherwise run the kernel recursively
-	else if(Triangular::is_upper){ //Upper triangular case
-		trmm_recursive(Afull, Bfull,start,start+split, t);
-		kernels::gemm(subrange(A,0,split,split,size), Bback, Bfront, 1.0);
-		trmm_recursive(Afull, Bfull,start+split,end, t);
-	}else{// Lower triangular caste
-		trmm_recursive(Afull, Bfull,start+split,end, t);
-		kernels::gemm(subrange(A,split,size,0,split), Bfront, Bback, 1.0);
-		trmm_recursive(Afull, Bfull,start,start+split, t);
-	}
+	//free storage
+	allocator.deallocate(A,AC * AC);
+	allocator.deallocate(B,AC * BC);
 }
+
+
+
 //main kernel runs the kernel above recursively and calls gemv
 template <bool Upper,bool Unit,typename MatA, typename MatB>
 void trmm(
@@ -216,8 +171,8 @@ void trmm(
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == B().size1());
-	
-	trmm_recursive(A,B,0,A().size1(), triangular_tag<Upper,Unit>());
+
+	trmm_impl(A,B, triangular_tag<Upper,Unit>());
 }
 
 }}}
