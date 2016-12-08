@@ -208,6 +208,9 @@ public:
 				simplex = true;
 				setupMcParametersMMR(nu,M, classes);
 			break;
+			case McSvm::OVA: // handle OVA is switch statement to silence compiler warning
+				throw SHARKEXCEPTION("This error cannot occur");
+			break;
 		}
 		
 		//setup linear part
