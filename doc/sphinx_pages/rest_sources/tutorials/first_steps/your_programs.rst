@@ -18,6 +18,7 @@ an input file ``HelloWorld.cpp`` is given by::
 
 	# Executable
 	add_executable(ExampleProject HelloWorld.cpp)
+        set_property(TARGET ExampleProject PROPERTY CXX_STANDARD 11)
 	target_link_libraries(ExampleProject ${SHARK_LIBRARIES})
 
 
