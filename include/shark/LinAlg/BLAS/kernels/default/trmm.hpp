@@ -33,6 +33,7 @@
 
 #include <boost/mpl/bool.hpp>
 #include "mgemm.hpp"
+#include "../../detail/matrix_proxy_classes.hpp"
 
 namespace shark { namespace blas { namespace bindings {
 

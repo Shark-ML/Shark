@@ -4,6 +4,7 @@
 #include <boost/mpl/list.hpp>
 
 #include <shark/LinAlg/BLAS/blas.h>
+#include <shark/LinAlg/BLAS/triangular_matrix.hpp>
 
 using namespace shark;
 using namespace blas;
@@ -30,6 +31,36 @@ void checkMatrixMatrixMultiply(M1 const& arg1, M2 const& arg2, Result const& res
 		for(std::size_t j = 0; j != arg2.size2(); ++j) {
 			double test_result = alpha*inner_prod(row(arg1,i),column(arg2,j))+init;
 			BOOST_CHECK_CLOSE(result(i,j), test_result, 1.e-10);
+		}
+	}
+}
+
+template<class M1, class Result>
+void checkSyrk(M1 const& arg, Result const& result,double init, double alpha, bool upper){
+	BOOST_REQUIRE_EQUAL(arg.size1(), result.size1());
+	BOOST_REQUIRE_EQUAL(result.size1(), result.size2());
+	
+	if(upper){
+		for(std::size_t i = 0; i != result.size1(); ++i) {
+			for(std::size_t j = 0; j != result.size2(); ++j) {
+				if(j < i){
+					BOOST_CHECK_CLOSE(result(i,j),init, 1.e-10);
+				}else{
+					double test_result = alpha*inner_prod(row(arg,i),row(arg,j))+init;
+					BOOST_CHECK_CLOSE(result(i,j), test_result, 1.e-10);
+				}
+			}
+		}
+	}else{
+		for(std::size_t i = 0; i != result.size1(); ++i) {
+			for(std::size_t j = 0; j != result.size2(); ++j) {
+				if(j > i){
+					BOOST_CHECK_CLOSE(result(i,j),init, 1.e-10);
+				}else{
+					double test_result = alpha*inner_prod(row(arg,i),row(arg,j))+init;
+					BOOST_CHECK_CLOSE(result(i,j), test_result, 1.e-10);
+				}
+			}
 		}
 	}
 }

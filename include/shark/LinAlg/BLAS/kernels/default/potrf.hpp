@@ -33,6 +33,7 @@
 #include "../../expression_types.hpp"
 #include "../gemm.hpp"
 #include "../trsm.hpp"
+#include "../syrk.hpp"
 
 
 namespace shark {namespace blas {namespace bindings {
@@ -129,8 +130,7 @@ std::size_t potrf_recursive(
 	auto Alr = subrange(A,split,size,split,size);
 	auto All = trans(subrange(A,split,size,0,split));
 	kernels::trsm<false,false>(subrange(A,0,split,0,split),All);
-	kernels::gemm(trans(All),All,Alr, -1.0);
-	subrange(A,0,split,split,size).clear();
+	kernels::syrk<false>(trans(All),Alr, -1.0);
 	return potrf_recursive(Afull,start+split,end,lower());
 }
 

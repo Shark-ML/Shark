@@ -16,5 +16,6 @@ macro( SHARK_ADD_BENCHMARK SRC NAME )
 endmacro()
 
 SHARK_ADD_BENCHMARK(gemm.cpp Gemm)
+SHARK_ADD_BENCHMARK(syrk.cpp Syrk)
 SHARK_ADD_BENCHMARK(trmm.cpp Trmm)
 SHARK_ADD_BENCHMARK(potrf.cpp Potrf)
