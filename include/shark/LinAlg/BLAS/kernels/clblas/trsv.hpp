@@ -33,70 +33,146 @@
 
 #include "clblas_inc.hpp"
 
-///solves systems of triangular matrices
+///solves systems of triangular matrices with one left hand side
 
-namespace shark {namespace blas{ namespace bindings {
-
-inline void trsv(
-	clblasOrder order, clblasUplo uplo, clblasTranspose transA, clblasDiag diag,
-	std::size_t N,
-	boost::compute::vector<float> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<float> const& x, std::size_t offx, std::size_t incx,
-	std::size_t numCommandQueues, cl_command_queue* commandQueues,
-	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
+namespace shark {namespace blas {namespace bindings {
+struct trsv_kernel{
+	boost::compute::kernel kernel;
+	std::size_t start_index;
+	std::size_t end_index;
+	std::size_t unit_index;
+	std::size_t upper_index;
+};
+//Lower triangular - matrix(row-major)
+template<class MatA, class VecB>
+trsv_kernel createTRSVDiagBlockKernel(
+	matrix_expression<MatA, gpu_tag> const& A,
+	vector_expression<VecB, gpu_tag> &b,
+	char const* options
 ){
-	clblasStrsv (
-		order, uplo, transA, diag, N,
-		A.get_buffer().get(), offA, lda,
-		x.get_buffer().get(), offx, (int)incx,
-		numCommandQueues, commandQueues,
-		numEventsInWaitList, eventWaitList, events
-	);
+	typedef typename MatA::value_type value_typeA;
+	typedef typename VecB::value_type value_typeB;
+	boost::compute::multiplies<value_typeB> prod;
+	
+	boost::compute::detail::meta_kernel k("blas_trsv");
+	std::size_t start_index = k.add_arg<std::size_t>("start");//start of block of A
+	std::size_t end_index = k.add_arg<std::size_t>("end");//end of Block of A
+	std::size_t unit_index = k.add_arg<std::size_t>("unit");//whether A is unit triangular
+	std::size_t upper_index = k.add_arg<std::size_t>("upper");//whether A is upper triangular
+	// Local memory to fit a tile of A and the vector B
+	k << "__local " <<k.decl<value_typeA>("Asub")<< "[TILE_SIZE][TILE_SIZE+2];\n";//+2 to avoid bank conflicts
+	k << "__local " <<k.decl<value_typeB>("Bsub")<< "[TILE_SIZE];\n";
+	k << "const ulong numWorkers = get_local_size(0);\n";
+	//ensure we are not reading out of bounds
+	k << "const ulong curTileA = end-start;\n";
+	
+	// Load tile of A into local memory
+	k << "for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
+	k << "	for(ulong j = 0; j < TILE_SIZE; j++){\n";
+	k << "		Asub[i][j] ="<< A()(k.expr<cl_ulong>("min(end-1, start + i)"),k.expr<cl_ulong>("min(end-1, start + j)"))<<";\n";
+	k << "	}\n";
+	k << "}\n";
+	
+	
+	// Load Tile of B into local memory, store columns of B as rows
+	k << "for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
+	k << "	Bsub[i] ="<< b()(k.expr<cl_ulong>("min(end-1,start + i)"))<<";\n";
+	k << "}\n";
+	// Synchronise to make sure everything is loaded
+	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";
+
+	// Loop over the values of a single tile
+	//lower-case
+	k << "if(!upper){\n";
+	k << "	for(ulong i = 0; i < TILE_SIZE && get_local_id(0) == 0; ++i){\n";
+	k << "		if(!unit){Bsub[i] /= Asub[i][i];}\n";
+	k << "		for(ulong j = i+1; j < TILE_SIZE; ++j){\n";
+	k << "			Bsub[j] -= "<< prod(k.expr<value_typeB>("Bsub[i]"), k.expr<value_typeA>("Asub[j][i]"))<<";\n";
+	k << "		}\n";
+	k << "	}\n";
+	k << "}else{\n";
+	//upper case
+	k << "	for(ulong n = curTileA; n > 0 && get_local_id(0) == 0; --n){\n";
+	k << "		ulong i = n-1;\n";
+	k << "		if(!unit ){Bsub[i] /= Asub[i][i];}\n";
+	k << "		for(ulong j = 0; j < i; j ++){\n";
+	k << "			Bsub[j] -= "<< prod(k.expr<value_typeB>("Bsub[i]"), k.expr<value_typeA>("Asub[j][i]"))<<";\n";
+	k << "		}\n";
+	k << "	}\n";
+	k << "}\n";
+	// Synchronise before continuing
+	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";
+	// Store the final results back in B
+	k << "for(ulong i = get_local_id(0); i < curTileA; i += numWorkers){\n";
+	k << b()(k.expr<cl_ulong>("(start+i)"))<<" =  Bsub[i];\n";
+	k << "}\n";
+	
+	boost::compute::kernel kernel = k.compile(b().queue().get_context(), options);
+	return {kernel,start_index,end_index,unit_index,upper_index};
 }
 
-inline void trsv(
-	clblasOrder order, clblasUplo uplo, clblasTranspose transA, clblasDiag diag,
-	std::size_t N,
-	boost::compute::vector<double> const& A, std::size_t offA, std::size_t lda,
-	boost::compute::vector<double> const& x, std::size_t offx, std::size_t incx,
-	std::size_t numCommandQueues, cl_command_queue* commandQueues,
-	std::size_t numEventsInWaitList, cl_event const*  eventWaitList, cl_event* events
+template <typename MatA, typename VecB, class Triangular>
+void trsv_recursive(
+	matrix_expression<MatA, gpu_tag> const& Afull, 
+	vector_expression<VecB, gpu_tag> & bfull,
+	trsv_kernel& kernel,
+	std::size_t start,
+	std::size_t end,
+	std::size_t tileSize,
+	std::size_t numWorkers,
+	Triangular t
 ){
-	clblasDtrsv (
-		order, uplo, transA, diag, N,
-		A.get_buffer().get(), offA, lda,
-		x.get_buffer().get(), offx, (int)incx,
-		numCommandQueues, commandQueues,
-		numEventsInWaitList, eventWaitList, events
-	);
+	auto A = subrange(Afull,start,end,start,end);
+	auto b = subrange(bfull,start,end);
+	std::size_t size = A.size1();
+	//if the matrix is small enough call the computation kernel directly for the block
+	if(size <= tileSize){
+		//enqueue kernel with kernel args
+		kernel.kernel.set_arg(kernel.start_index, start);
+		kernel.kernel.set_arg(kernel.end_index, end);
+		kernel.kernel.set_arg(kernel.unit_index, (std::size_t)Triangular::is_unit);
+		kernel.kernel.set_arg(kernel.upper_index, (std::size_t)Triangular::is_upper);
+		
+		std::size_t global_work_size[2] = {numWorkers,1};
+		std::size_t local_work_size[2] = {numWorkers, 1};
+		bfull().queue().enqueue_nd_range_kernel(kernel.kernel, 2,nullptr, global_work_size, local_work_size);
+		return;
+	}
+	std::size_t numBlocks = (A.size1()+tileSize-1)/tileSize;
+	std::size_t split = numBlocks/2 * tileSize;
+	auto bfront = subrange(b,0,split);
+	auto bback = subrange(b,split,size);
+	
+	//otherwise run the kernel recursively
+	if(Triangular::is_upper){ //Upper triangular case
+		trsv_recursive(Afull, bfull, kernel, start+split,end, tileSize, numWorkers, t);
+		kernels::gemv(subrange(A,0,split,split,size), bback, bfront, -1.0);
+		trsv_recursive(Afull, bfull, kernel, start,start+split, tileSize, numWorkers, t);
+	}else{// Lower triangular caste
+		trsv_recursive(Afull, bfull, kernel, start,start+split, tileSize, numWorkers, t);
+		kernels::gemv(subrange(A,split,size,0,split), bfront, bback, -1.0);
+		trsv_recursive(Afull, bfull, kernel, start+split,end, tileSize, numWorkers, t);
+	}
 }
-
 }
-
-namespace trsv{
-
-// trsv(): solves A system of linear equations A * x = b
-//             when A is A triangular matrix.
-template <bool Upper,bool Unit,typename MatA, typename V>
+namespace kernels{
+//main kernel runs the kernel above recursively and calls gemv
+template <bool Upper,bool Unit,typename MatA, typename VecB>
 void trsv(
 	matrix_expression<MatA, gpu_tag> const& A, 
-	vector_expression<V, gpu_tag>& b
+	vector_expression<VecB, gpu_tag>& b
 ){
 	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size1()== b().size());
-	clblasDiag diag = Unit?clblasUnit:clblasNonUnit;
-	clblasOrder stor_ord= (clblasOrder) clblas::storage_order<typename MatA::orientation>::value;
-	clblasUplo uplo = Upper?clblasUpper:clblasLower;
+	SIZE_CHECK(A().size2() == b().size());
 	
-	auto storageA = A().raw_storage();
-	auto storageb = b().raw_storage();
-	trsv(stor_ord, uplo, clblasNoTrans,diag, A().size1(),
-	        storageA.buffer, storageA.offset, storageA.leading_dimension,
-		storageb.buffer, storageb.offset, storageb.stride,
-		1, &(b().queue().get()),
-		0, nullptr, nullptr
-	);
+	std::size_t const TileSize = 32;//size of the diagonal blocks where the single kernel runs
+	std::size_t const numWorkers = TileSize; //number of workers
+	//~ std::size_t const numWorkers = 1; //number of workers
+	char const* options ="-DTILE_SIZE=32ul";
+	auto kernel = bindings::createTRSVDiagBlockKernel(A,b,options);
+	
+	
+	bindings::trsv_recursive(A,b,kernel,0,A().size1(), TileSize, numWorkers, triangular_tag<Upper,Unit>());
 }
-
 }}}
 #endif
