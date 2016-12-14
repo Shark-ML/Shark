@@ -301,6 +301,10 @@ shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 set_tests_properties( DirectSearch_HypervolumeContribution PROPERTIES LABELS "slow" )
 set_tests_properties( Models_CMAC PROPERTIES LABELS "slow" )
 set_tests_properties( ObjFunct_KernelBasisDistance PROPERTIES LABELS "slow" )
+set_tests_properties( ObjFunct_SvmLogisticInterpretation PROPERTIES LABELS "slow" )
+set_tests_properties( ObjFunct_NegativeLogLikelihood PROPERTIES LABELS "slow" )
+set_tests_properties( ObjFunct_LooErrorCSvm PROPERTIES LABELS "slow" )
+set_tests_properties( Trainers_LinearSvmTrainer PROPERTIES LABELS "slow" )
 
 
 # Copy test file

@@ -69,9 +69,9 @@ template<class F, class M, class E>
 void matrix_assign_functor(
 	matrix_expression<M, gpu_tag> &m, 
 	matrix_expression<E, gpu_tag> const& e,
+	F f,
 	row_major, row_major,dense_tag, dense_tag
 ) {
-	F f;
 	//create source
 	boost::compute::detail::meta_kernel k("blas_matrix_assign");
 	auto exprRow=k.expr<cl_uint>("get_global_id(0)");
@@ -88,11 +88,11 @@ template<class F,class M, class E>
 void matrix_assign_functor(
 	matrix_expression<M, gpu_tag> &m, 
 	matrix_expression<E, gpu_tag> const& e,
+	F f,
 	row_major, column_major,dense_tag, dense_tag
 ) {
 	//Kernel is based on boost/compute/examples/matrix_transpose.cpp
 	typedef typename M::value_type value_type;
-	F f;
 	std::size_t TILE_DIM = 32;
 	char const* options ="-DTILE_DIM=32ul";
 	//There are usually not enough parallel worker threads in a local group
@@ -164,7 +164,7 @@ void matrix_assign(
 	matrix_expression<E, gpu_tag> const& e,
 	row_major o, row_major,dense_tag t, dense_tag
 ) {
-	matrix_assign_functor<detail::assigner>(m,e,o,o,t,t);
+	matrix_assign_functor(m,e,detail::assigner(),o,o,t,t);
 }
 
 //dense-dense case
@@ -174,7 +174,7 @@ void matrix_assign(
 	matrix_expression<E, gpu_tag> const& e,
 	row_major o1, column_major o2,dense_tag t, dense_tag
 ) {
-	matrix_assign_functor<detail::assigner>(m,e,o1,o2,t,t);
+	matrix_assign_functor(m,e,detail::assigner(),o1,o2,t,t);
 }
 
 

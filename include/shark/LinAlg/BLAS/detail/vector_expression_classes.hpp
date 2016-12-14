@@ -93,19 +93,13 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		m_expression.assign_to(x,alpha*m_scalar);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		m_expression.plus_assign_to(x,alpha*m_scalar);
 	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		m_expression.minus_assign_to(x,alpha*m_scalar);
-	}
-
 	
 	//iterators
 	typedef typename device_traits<device_type>:: template transform_iterator<typename E::const_iterator,functor_type > const_iterator;
@@ -222,18 +216,13 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		plus_assign_to(x,eval_block(m_expression), alpha);
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		plus_assign_to(x,eval_block(m_expression), -alpha);
 	}
 
 	// Element access
@@ -326,20 +315,14 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		assign(x,alpha*m_lhs);
-		plus_assign(x,alpha*m_rhs);
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+		assign(x,m_lhs, alpha);
+		plus_assign(x,m_rhs, alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		plus_assign(x,alpha*m_lhs);
-		plus_assign(x,alpha*m_rhs);
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		minus_assign(x,alpha*m_lhs);
-		minus_assign(x,alpha*m_rhs);
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha )const{
+		plus_assign(x,m_lhs, alpha);
+		plus_assign(x,m_rhs, alpha);
 	}
 
 	// Iterator types
@@ -424,18 +407,13 @@ public:
 	}
 	
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
 	// Iterator types

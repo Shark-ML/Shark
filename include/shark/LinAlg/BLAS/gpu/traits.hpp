@@ -91,6 +91,14 @@ struct invoked_multiply_scalar{
 	T m_scalar;
 };
 
+template<class Arg1, class Arg2, class T>
+struct invoked_multiply_and_add{
+	typedef T result_type;
+	Arg1 arg1;
+	Arg2 arg2;
+	T m_scalar;
+};
+
 template<class Arg1, class T>
 struct invoked_soft_plus{
 	typedef T result_type;
@@ -127,6 +135,10 @@ template<class Arg1, class T>
 boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_multiply_scalar<Arg1,T> const& e){
 	return k << '('<<e.m_scalar << '*'<< e.arg1<<')';
 }
+template<class Arg1, class Arg2, class T>
+boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_multiply_and_add<Arg1,Arg2,T> const& e){
+	return k << '('<<e.arg1<<'+'<<e.m_scalar << '*'<< e.arg2<<')';
+}
 template<class Arg1, class T>
 boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_soft_plus<Arg1,T> const& e){
 	return k << "(log(1+exp("<< e.arg1<<")))";
@@ -148,7 +160,6 @@ template<class Arg1, class Arg2, class T>
 boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_safe_div<Arg1,Arg2,T> const& e){
 	return k << "(("<<e.arg2<<"!=0)?"<<e.arg1<<'/'<<e.arg2<<':'<<e.default_value<<')';
 }
-
 
 template<class Iterator1, class Iterator2, class Functor>
 struct binary_transform_iterator
@@ -383,6 +394,19 @@ struct device_traits<gpu_tag>{
 		T default_value;
 	};
 	template<class T>
+	struct multiply_and_add : public boost::compute::function<T (T,T)>{
+		typedef T result_type;
+		multiply_and_add(T scalar) : boost::compute::function<T (T,T)>("multiply_and_add"), m_scalar(scalar) { }
+		
+		template<class Arg1, class Arg2>
+		gpu::detail::invoked_multiply_and_add<Arg1,Arg2,T> operator()(const Arg1 &x, const Arg2& y) const
+		{
+			return {x,y, m_scalar};
+		}
+	private:
+		T m_scalar;
+	};
+	template<class T>
 	struct multiply_scalar : public boost::compute::function<T (T)>{
 		typedef T result_type;
 		multiply_scalar(T scalar) : boost::compute::function<T (T)>("multiply_scalar"), m_scalar(scalar) { }
@@ -391,6 +415,20 @@ struct device_traits<gpu_tag>{
 		gpu::detail::invoked_multiply_scalar<Arg1,T> operator()(const Arg1 &x) const
 		{
 			return {x, m_scalar};
+		}
+	private:
+		T m_scalar;
+	};
+	
+	template<class T>
+	struct multiply_assign : public boost::compute::function<T (T,T)>{
+		typedef T result_type;
+		multiply_assign(T scalar) : boost::compute::function<T (T,T)>("multiply_assign"), m_scalar(scalar) { }
+		
+		template<class Arg1, class Arg2>
+		gpu::detail::invoked_multiply_scalar<Arg2,T> operator()(const Arg1&, const Arg2& y) const
+		{
+			return {y, m_scalar};
 		}
 	private:
 		T m_scalar;

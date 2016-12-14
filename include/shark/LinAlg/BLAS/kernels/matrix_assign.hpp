@@ -115,6 +115,7 @@ template<class F, class M, class E, class EOrientation, class TagE, class TagM, 
 void matrix_assign_functor(
 	matrix_expression<M, Device> &m, 
 	matrix_expression<E, Device> const& e,
+	F f,
 	row_major, EOrientation ,TagE tagE, TagM tagM
 ) {
 	typedef typename boost::mpl::if_<
@@ -122,7 +123,7 @@ void matrix_assign_functor(
 		row_major,
 		typename E::orientation
 	>::type Orientation;
-	bindings::matrix_assign_functor<F>(m,e,typename M::orientation(),Orientation(),tagE,tagM);
+	bindings::matrix_assign_functor(m,e,f,typename M::orientation(),Orientation(),tagE,tagM);
 }
 
 //general dispatcher: if the first argument is column major, we transpose the whole expression
@@ -131,6 +132,7 @@ template<class F, class M, class E,class EOrientation, class TagE, class TagM, c
 void matrix_assign_functor(
 	matrix_expression<M, Device> &m, 
 	matrix_expression<E, Device> const& e,
+	F f,
 	column_major, EOrientation,TagE tagE, TagM tagM
 ) {
 	typedef typename M::orientation::transposed_orientation::orientation TMOrientation;
@@ -138,7 +140,7 @@ void matrix_assign_functor(
 	
 	auto transM = trans(m);
 	auto transE = trans(e);
-	matrix_assign_functor<F>(transM,transE,TMOrientation(),TEOrientation(),tagE,tagM);
+	matrix_assign_functor(transM,transE,f,TMOrientation(),TEOrientation(),tagE,tagM);
 }
 
 }
@@ -146,7 +148,7 @@ void matrix_assign_functor(
 
 //First Level Dispatcher, dispatches by orientation
 template<class F, class M, class E, class Device>
-void assign(matrix_expression<M, Device> &m, const matrix_expression<E, Device> &e) {
+void assign(matrix_expression<M, Device> &m, const matrix_expression<E, Device> &e, F f = F()) {
 	SIZE_CHECK(m().size1()  == e().size1());
 	SIZE_CHECK(m().size2()  == e().size2());
 	if(m().size1() == 0|| m().size2() == 0) return;
@@ -154,7 +156,7 @@ void assign(matrix_expression<M, Device> &m, const matrix_expression<E, Device> 
 	typedef typename E::orientation::orientation EOrientation;
 	typedef typename M::evaluation_category::tag MCategory;
 	typedef typename E::evaluation_category::tag ECategory;
-	detail::matrix_assign_functor<F>(m, e, MOrientation(),EOrientation(), MCategory(), ECategory());
+	detail::matrix_assign_functor(m, e, f, MOrientation(),EOrientation(), MCategory(), ECategory());
 }
 
 }}}

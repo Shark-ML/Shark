@@ -61,11 +61,11 @@ void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> 
 
 // Dispatcher
 template<class F, class V, class E, class Device>
-void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> &e) {
+void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> &e, F f=F()) {
 	SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;
-	bindings::vector_assign_functor(v(), e(), F(), TagV(),TagE());
+	bindings::vector_assign_functor(v(), e(), f, TagV(),TagE());
 }
 
 }}}

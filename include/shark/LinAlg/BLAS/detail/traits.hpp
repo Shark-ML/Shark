@@ -265,6 +265,10 @@ struct device_traits<cpu_tag>{
 	template<class T>
 	using divide = shark::blas::functors::scalar_binary_divide<T>;
 	template<class T>
+	using multiply_and_add = shark::blas::functors::scalar_binary_multiply_and_add<T>;
+	template<class T>
+	using multiply_assign = shark::blas::functors::scalar_binary_multiply_assign<T>;
+	template<class T>
 	using pow = shark::blas::functors::scalar_binary_pow<T>;
 	template<class T>
 	using multiply_scalar = shark::blas::functors::scalar_multiply1<T>;

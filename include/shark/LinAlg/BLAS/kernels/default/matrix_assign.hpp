@@ -258,11 +258,12 @@ template<class F, class M, class E, class TagE, class TagM>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	row_major, row_major,TagM, TagE
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
-		kernels::assign<F>(rowM,row(e,i));
+		kernels::assign(rowM,row(e,i),f);
 	}
 }
 
@@ -273,9 +274,9 @@ template<class F,class M, class E>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	row_major, column_major,dense_tag, dense_tag
 ) {
-	F f;
 	//compute blockwise and wrelem the transposed block.
 	std::size_t const blockSize = 16;
 	typename M::value_type blockStorage[blockSize][blockSize];
@@ -310,11 +311,12 @@ template<class F,class M, class E>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	row_major, column_major,dense_tag, sparse_tag
 ) {
 	for(std::size_t j = 0; j != m().size2(); ++j){
 		auto columnM = column(m,j);
-		kernels::assign<F>(columnM,column(e,j));
+		kernels::assign(columnM,column(e,j),f);
 	}
 }
 
@@ -323,11 +325,12 @@ template<class F,class M, class E>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	row_major, column_major, sparse_tag, dense_tag
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
-		kernels::assign<F>(rowM,row(e,i));
+		kernels::assign(rowM,row(e,i),f);
 	}
 }
 
@@ -336,10 +339,11 @@ template<class F,class M, class E>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	row_major, column_major,sparse_tag t,sparse_tag
 ) {
 	typename matrix_temporary<M>::type eTrans = e;//explicit calculation of the transpose for now
-	matrix_assign_functor<F>(m,eTrans,row_major(),row_major(),t,t);
+	matrix_assign_functor(m,eTrans,f,row_major(),row_major(),t,t);
 	//~ F<typename M::iterator::reference, typename E::value_type> f;
 	//~ //first evaluate e and fill the values  togethe into a vector which 
 	//~ //is then sorted by row_major order
@@ -409,6 +413,7 @@ template<class F, class M, class E, class Triangular>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	triangular<row_major,Triangular>, triangular<row_major,Triangular>
 ) {
 	typedef typename M::row_iterator MIter;
@@ -417,7 +422,6 @@ void matrix_assign_functor(
 	//this is the case for all current assignment functors, but you never know :)
 	static_assert(F::left_zero_identity || F::right_zero_identity, "cannot handle the given packed matrix assignment function");
 
-	F f;
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		MIter mpos = m().row_begin(i);
 		EIter epos = e().row_begin(i);
@@ -434,13 +438,13 @@ template<class F, class M, class E, class Triangular>
 void matrix_assign_functor(
 	matrix_expression<M, cpu_tag> &m, 
 	matrix_expression<E, cpu_tag> const& e,
+	F f,
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>
 ) {
 	typedef typename M::row_iterator MIter;
 	//there is nothing we can do, if F does not leave the non-stored elements 0
 	static_assert(F::left_zero_identity, "cannot handle the given packed matrix assignment function");
 	
-	F f;
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		MIter mpos = m().row_begin(i);
 		MIter mend = m().row_end(i);

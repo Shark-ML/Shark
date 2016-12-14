@@ -41,6 +41,45 @@
 namespace shark {
 namespace blas {
 	
+//////////////////////////////////////////////////////////////////////
+/////Evaluate blockwise expressions
+//////////////////////////////////////////////////////////////////////
+
+///\brief conditionally evaluates a vector expression if it is a block expression
+///
+/// If the expression is a block expression, a temporary vector is created to which
+/// the expression is assigned, which is then returned, otherwise the expression itself
+/// is returned
+template<class E, class Device>
+typename boost::mpl::eval_if<
+	std::is_base_of<
+		blockwise_tag,
+		typename E::evaluation_category
+	>,
+	vector_temporary<E>,
+	boost::mpl::identity<E const&>
+>::type
+eval_block(blas::vector_expression<E, Device> const& e){
+	return e();//either casts to E const& or returns the copied expression
+}
+///\brief conditionally evaluates a matrix expression if it is a block expression
+///
+/// If the expression is a block expression, a temporary matrix is created to which
+/// the expression is assigned, which is then returned, otherwise the expression itself
+/// is returned
+template<class E, class Device>
+typename boost::mpl::eval_if<
+	std::is_base_of<
+		blockwise_tag,
+		typename E::evaluation_category
+	>,
+	matrix_temporary<E>,
+	boost::mpl::identity<E const&>
+>::type
+eval_block(blas::matrix_expression<E, Device> const& e){
+	return e();//either casts to E const& or returns the copied expression
+}
+	
 /////////////////////////////////////////////////////////////////////////////////////
 ////// Vector Assign
 ////////////////////////////////////////////////////////////////////////////////////
@@ -51,42 +90,38 @@ namespace detail{
 		kernels::assign(x,v);
 	}
 	template<class VecX, class VecV, class Device>
-	void assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
-		v().assign_to(x);
+	void assign(
+		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
+		elementwise_tag, typename VecX::value_type alpha
+	){
+		typename device_traits<Device>:: template multiply_assign<typename common_value_type<VecX,VecV>::type> f(alpha);
+		kernels::assign(x, v,f);
+	}
+	template<class VecX, class VecV, class Device>
+	void assign(
+		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
+		blockwise_tag, typename VecX::value_type alpha = 1
+	){
+		v().assign_to(x,alpha);
 	}
 	template<class VecX, class VecV, class Device>
 	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
 		kernels::assign<typename device_traits<Device>:: template add<typename common_value_type<VecX,VecV>::type> > (x, v);
 	}
 	template<class VecX, class VecV, class Device>
-	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
-		v().plus_assign_to(x);
+	void plus_assign(
+		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
+		elementwise_tag, typename  VecX::value_type alpha
+	){
+		typename device_traits<Device>:: template multiply_and_add<typename common_value_type<VecX,VecV>::type> f(alpha);
+		kernels::assign(x, v,f);
 	}
 	template<class VecX, class VecV, class Device>
-	void minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template subtract<typename common_value_type<VecX,VecV>::type>> (x, v);
-	}
-	template<class VecX, class VecV, class Device>
-	void minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
-		v().minus_assign_to(x);
-	}
-	template<class VecX, class VecV, class Device>
-	void multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<VecX,VecV>::type>> (x, v);
-	}
-	template<class VecX, class VecV, class Device>
-	void multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
-		typename vector_temporary<VecX>::type temporary(v);
-		kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<VecX,VecV>::type>> (x, temporary);
-	}
-	template<class VecX, class VecV, class Device>
-	void divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<VecX,VecV>::type>> (x, v);
-	}
-	template<class VecX, class VecV, class Device>
-	void divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,blockwise_tag){
-		typename vector_temporary<VecX>::type temporary(v);
-		kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<VecX,VecV>::type>> (x, temporary);
+	void plus_assign(
+		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
+		blockwise_tag,typename VecX::value_type alpha = 1
+	){
+		v().plus_assign_to(x,alpha);
 	}
 }
 	
@@ -102,6 +137,17 @@ VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device>
 	return x();
 }
 
+/// \brief Dispatches vector assignment on an expression level
+///
+/// This dispatcher takes care for whether the blockwise evaluation
+/// or the elementwise evaluation is called
+template<class VecX, class VecV, class Device>
+VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha){
+	SIZE_CHECK(x().size() == v().size());
+	detail::assign(x,v,typename VecV::evaluation_category(),alpha);
+	return x();
+}
+
 /// \brief Dispatches vector plus-assignment on an expression level
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
@@ -113,14 +159,14 @@ VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, De
 	return x();
 }
 
-/// \brief Dispatches vector minus-assignment on an expression level
+/// \brief Dispatches vector plus-assignment on an expression level
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
-VecX& minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
+VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha){
 	SIZE_CHECK(x().size() == v().size());
-	detail::minus_assign(x,v,typename VecV::evaluation_category());
+	detail::plus_assign(x,v,typename VecV::evaluation_category(),alpha);
 	return x();
 }
 
@@ -131,7 +177,8 @@ VecX& minus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, D
 template<class VecX, class VecV, class Device>
 VecX& multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
-	detail::multiply_assign(x,v,typename VecV::evaluation_category());
+	auto&& veval = eval_block(v);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<VecX,VecV>::type>> (x, veval);
 	return x();
 }
 
@@ -142,7 +189,8 @@ VecX& multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV
 template<class VecX, class VecV, class Device>
 VecX& divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
-	detail::divide_assign(x,v,typename VecV::evaluation_category());
+	auto&& veval = eval_block(v);
+	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<VecX,VecV>::type>> (x, veval);
 	return x();
 }
 	
@@ -156,42 +204,38 @@ namespace detail{
 		kernels::assign(A,B);
 	}
 	template<class MatA, class MatB, class Device>
-	void assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
-		B().assign_to(A);
+	void assign(
+		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
+		elementwise_tag,typename MatA::value_type alpha
+	){
+		typename device_traits<Device>:: template multiply_assign<typename common_value_type<MatA,MatB>::type> f(alpha);
+		kernels::assign(A,B,f);
+	}
+	template<class MatA, class MatB, class Device>
+	void assign(
+		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
+		blockwise_tag, typename MatA::value_type alpha = 1
+	){
+		B().assign_to(A,alpha);
 	}
 	template<class MatA, class MatB, class Device>
 	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
 		kernels::assign<typename device_traits<Device>:: template add<typename common_value_type<MatA,MatB>::type> > (A, B);
 	}
 	template<class MatA, class MatB, class Device>
-	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
-		B().plus_assign_to(A);
+	void plus_assign(
+		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
+		elementwise_tag, typename MatA::value_type alpha
+	){
+		typename device_traits<Device>:: template multiply_and_add<typename common_value_type<MatA,MatB>::type> f(alpha);
+		kernels::assign(A,B,f);
 	}
 	template<class MatA, class MatB, class Device>
-	void minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template subtract<typename common_value_type<MatA,MatB>::type> > (A, B);
-	}
-	template<class MatA, class MatB, class Device>
-	void minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
-		B().minus_assign_to(A);
-	}
-	template<class MatA, class MatB, class Device>
-	void multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, B);
-	}
-	template<class MatA, class MatB, class Device>
-	void multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
-		typename matrix_temporary<MatA>::type temporary(B);
-		kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, B);
-	}
-	template<class MatA, class MatB, class Device>
-	void divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, B);
-	}
-	template<class MatA, class MatB, class Device>
-	void divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,blockwise_tag){
-		typename matrix_temporary<MatA>::type temporary(B);
-		kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, B);
+	void plus_assign(
+		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
+		blockwise_tag, typename MatA::value_type alpha = 1
+	){
+		B().plus_assign_to(A,alpha);
 	}
 }
 	
@@ -205,6 +249,18 @@ MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device>
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	detail::assign(A,B, typename MatB::evaluation_category());
+	return A();
+}
+
+/// \brief Dispatches matrix assignment on an expression level
+///
+/// This dispatcher takes care for whether the blockwise evaluation
+/// or the elementwise evaluation is called
+template<class MatA, class MatB, class Device>
+MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha){
+	SIZE_CHECK(A().size1() == B().size1());
+	SIZE_CHECK(A().size2() == B().size2());
+	detail::assign(A,B, typename MatB::evaluation_category(),alpha);
 	return A();
 }
 
@@ -225,10 +281,10 @@ MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, De
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
-MatA& minus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
+MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
-	detail::minus_assign(A,B, typename MatB::evaluation_category());
+	detail::plus_assign(A,B, typename MatB::evaluation_category(),alpha);
 	return A();
 }
 
@@ -240,7 +296,8 @@ template<class MatA, class MatB, class Device>
 MatA& multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
-	detail::multiply_assign(A,B, typename MatB::evaluation_category());
+	auto&& Beval = eval_block(B);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, B);
 	return A();
 }
 
@@ -252,7 +309,8 @@ template<class MatA, class MatB, class Device>
 MatA& divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
-	detail::divide_assign(A,B, typename MatB::evaluation_category());
+	auto&& Beval = eval_block(B);
+	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, B);
 	return A();
 }
 
@@ -283,7 +341,7 @@ template<class VecX, class VecV, class Device>
 VecX& operator-=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
-	return minus_assign(x,temporary);
+	return plus_assign(x,temporary, typename VecX::value_type(-1.0));
 }
 
 /// \brief  Multiply-Assigns two vector expressions
@@ -379,7 +437,7 @@ MatA& operator-=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
-	return minus_assign(A,temporary);
+	return plus_assign(A,temporary, typename MatA::value_type(-1.0));
 }
 
 /// \brief  Multiply-Assigns two matrix expressions
@@ -500,7 +558,7 @@ public:
 
 	template <class E>
 	closure_type &operator-= (const E &e) {
-		return minus_assign(m_lval, e);
+		return plus_assign(m_lval, e, typename C::value_type(-1));
 	}
 	
 	template <class E>
@@ -555,48 +613,6 @@ noalias_proxy<C> noalias(vector_set_expression<C>& lvalue) {
 template <class C>
 noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
 	return noalias_proxy<C> (static_cast<C&>(lvalue));
-}
-
-
-
-
-//////////////////////////////////////////////////////////////////////
-/////Evaluate blockwise expressions
-//////////////////////////////////////////////////////////////////////
-
-///\brief conditionally evaluates a vector expression if it is a block expression
-///
-/// If the expression is a block expression, a temporary vector is created to which
-/// the expression is assigned, which is then returned, otherwise the expression itself
-/// is returned
-template<class E, class Device>
-typename boost::mpl::eval_if<
-	std::is_base_of<
-		blockwise_tag,
-		typename E::evaluation_category
-	>,
-	vector_temporary<E>,
-	boost::mpl::identity<E const&>
->::type
-eval_block(blas::vector_expression<E, Device> const& e){
-	return e();//either casts to E const& or returns the copied expression
-}
-///\brief conditionally evaluates a matrix expression if it is a block expression
-///
-/// If the expression is a block expression, a temporary matrix is created to which
-/// the expression is assigned, which is then returned, otherwise the expression itself
-/// is returned
-template<class E, class Device>
-typename boost::mpl::eval_if<
-	std::is_base_of<
-		blockwise_tag,
-		typename E::evaluation_category
-	>,
-	matrix_temporary<E>,
-	boost::mpl::identity<E const&>
->::type
-eval_block(blas::matrix_expression<E, Device> const& e){
-	return e();//either casts to E const& or returns the copied expression
 }
 
 }}

@@ -4,7 +4,7 @@
  * \brief       Implements the default implementation of the POTRF algorithm
  *
  * \author    O. Krause
- * \date        2014
+ * \date        2016
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -31,7 +31,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_POTRF_HPP
 
 #include "../../expression_types.hpp"
-#include "../gemm.hpp"
+#include "../../detail/matrix_proxy_classes.hpp"
 #include "../trsm.hpp"
 #include "../syrk.hpp"
 
@@ -102,7 +102,7 @@ std::size_t potrf_block(
     matrix_expression<MatA, cpu_tag>& A,
     column_major, Triangular
 ) {
-	auto transA = trans(A);
+	matrix_transpose<MatA> transA(A());
 	return potrf_block(transA, row_major(), typename Triangular::transposed_orientation());
 }
 
@@ -127,10 +127,14 @@ std::size_t potrf_recursive(
 	//otherwise run the kernel recursively
 	std::size_t result = potrf_recursive(Afull,start,start+split,lower());
 	if(result) return result;
-	auto Alr = subrange(A,split,size,split,size);
-	auto All = trans(subrange(A,split,size,0,split));
-	kernels::trsm<false,false>(subrange(A,0,split,0,split),All);
-	kernels::syrk<false>(trans(All),Alr, -1.0);
+	
+	typedef matrix_range<MatA> RangeA;
+	RangeA Aul(A(),0,size,0,split);
+	RangeA All(A(),split,size,0,split);
+	RangeA Alr(A(),split,size,split,size);
+	matrix_transpose<RangeA> Alltrans(All);
+	kernels::trsm<false,false>(Aul,Alltrans);
+	kernels::syrk<false>(All,Alr, -1.0);
 	return potrf_recursive(Afull,start+split,end,lower());
 }
 
@@ -141,7 +145,7 @@ std::size_t potrf_recursive(
 	std::size_t end,
 	upper
 ){
-	auto transAfull = trans(Afull);
+	matrix_transpose<MatA> transAfull(Afull());
 	return potrf_recursive(transAfull,start,end,lower());
 }
 

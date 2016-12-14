@@ -28,6 +28,7 @@
  #ifndef SHARK_LINALG_BLAS_MATRIX_PROXY_CLASSES_HPP
 #define SHARK_LINALG_BLAS_MATRIX_PROXY_CLASSES_HPP
 
+#include "../expression_types.hpp"
 #include "../assignment.hpp"
 #ifdef SHARK_USE_CLBLAS
 #include <boost/compute/command_queue.hpp>

@@ -95,17 +95,12 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
 		m_expression.assign_to(X,alpha*m_scalar);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
 		m_expression.plus_assign_to(X,alpha*m_scalar);
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
-		m_expression.minus_assign_to(X,alpha*m_scalar);
 	}
 
 	// Iterator types
@@ -203,20 +198,14 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
-		assign(X, matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
-		plus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+		assign(X, m_lhs,alpha);
+		plus_assign(X,m_rhs,alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
-		plus_assign(X,matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
-		plus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
-		minus_assign(X,matrix_scalar_multiply<lhs_closure_type>(m_lhs,alpha));
-		minus_assign(X,matrix_scalar_multiply<rhs_closure_type>(m_rhs,alpha));
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+		plus_assign(X,m_lhs,alpha);
+		plus_assign(X,m_rhs,alpha);
 	}
 
 public:
@@ -462,18 +451,13 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha) const {
 		X().clear();
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha) const {
 		plus_assign_to(X,eval_block(m_expression), alpha);
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) ) const {
-		plus_assign_to(X,eval_block(m_expression), -alpha);
 	}
 
 	// Element access
@@ -509,12 +493,11 @@ private:
 	template<class MatX, class MatA>
 	void plus_assign_to(
 		matrix_expression<MatX, device_type>& X,
-		matrix_expression<MatA, device_type> const& m,
+		matrix_expression<MatA, device_type> const& A,
 		value_type alpha
 	)const{
-		matrix_unary<MatA, F> e(m(), m_functor);
-		matrix_scalar_multiply<matrix_unary<MatA,F> > e1(e,alpha);
-		plus_assign(X,e1);
+		matrix_unary<MatA, F> e(A(), m_functor);
+		plus_assign(X,e,alpha);
 	}
 };
 
@@ -581,18 +564,13 @@ public:
 	}
 	
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha )const{
 		X().clear();
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
-		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), -alpha);
 	}
 
 	typedef typename device_traits<device_type>:: template binary_transform_iterator<
@@ -644,8 +622,7 @@ private:
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
 		matrix_binary<LHS,RHS,F> e(lhs(),rhs(), m_functor);
-		matrix_scalar_multiply<matrix_binary<LHS,RHS,F> > e1(e,alpha);
-		plus_assign(X,e1);
+		plus_assign(X,e,alpha);
 	}
 };
 
@@ -786,17 +763,12 @@ public:
 #endif	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha )const{
 		assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		plus_assign_to(x,-alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	
 private:
@@ -904,18 +876,13 @@ public:
 
 	//dispatcher to computation kernels for blockwise case
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		x().clear();
 		plus_assign_to(x,alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
 		kernels::sum_rows(eval_block(m_matrix), x, alpha);
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha = value_type(1) )const{
-		plus_assign_to(x,-alpha);
 	}
 private:
 	matrix_closure_type m_matrix;
@@ -1040,17 +1007,12 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
 		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
 		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha = value_type(1) )const{
-		plus_assign_to(X, -alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:

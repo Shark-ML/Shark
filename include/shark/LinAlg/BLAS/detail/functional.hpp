@@ -261,6 +261,36 @@ private:
 };
 
 template<class T>
+struct scalar_binary_multiply_and_add{
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
+	static const bool right_zero_identity = true;
+	static const bool left_zero_identity = false;
+	typedef T result_type;
+	scalar_binary_multiply_and_add(T scalar):scalar(scalar){}
+	T operator()(T x, T y)const{
+		return x+scalar * y;
+	}
+private:
+	T scalar;
+};
+
+template<class T>
+struct scalar_binary_multiply_assign{
+	static const bool left_zero_remains =  false;
+	static const bool right_zero_remains =  false;
+	static const bool right_zero_identity = true;
+	static const bool left_zero_identity = false;
+	typedef T result_type;
+	scalar_binary_multiply_assign(T scalar):scalar(scalar){}
+	T operator()(T, T y)const{
+		return scalar * y;
+	}
+private:
+	T scalar;
+};
+
+template<class T>
 struct scalar_binary_pow {
 	static const bool left_zero_remains =  false;
 	static const bool right_zero_remains =  false;

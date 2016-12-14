@@ -39,10 +39,7 @@
 #include <boost/align/aligned_allocator.hpp>
 #include <boost/align/assume_aligned.hpp>
 #include <type_traits>
-#include <vector>
 
-
-#define SHARK_BLAS_VECTOR_LENGTH 16
 
 namespace shark {namespace blas {namespace bindings {
 	
@@ -275,8 +272,10 @@ void gemm_impl(
 	typedef typename M::value_type value_type;
 	value_type zero = value_type();
 	typename vector_temporary<E1>::type temporary(e2().size2(), zero);
+	matrix_transpose<E2 const> e2trans(e2());
 	for (std::size_t i = 0; i != e1().size1(); ++i) {
-		kernels::gemv(trans(e2),row(e1,i),temporary,alpha);
+		matrix_row<E1 const> rowe1(e1(),i);
+		kernels::gemv(e2trans,rowe1,temporary,alpha);
 		for (std::size_t j = 0; j != temporary.size(); ++ j) {
 			if (temporary(j) != zero) {
 				m()(i, j) += temporary(j);//fixme: better use something like insert
@@ -332,7 +331,9 @@ void gemm_impl(
 	matrix_transpose<M> transposedM(m());
 	typedef typename Orientation1::transposed_orientation transpO1;
 	typedef typename Orientation2::transposed_orientation transpO2;
-	gemm_impl(trans(e2),trans(e1),transposedM,alpha,row_major(),transpO2(),transpO1(), Tag2(),Tag1());
+	matrix_transpose<E1 const> e1trans(e1());
+	matrix_transpose<E2 const> e2trans(e2());
+	gemm_impl(e2trans,e1trans,transposedM,alpha,row_major(),transpO2(),transpO1(), Tag2(),Tag1());
 }
 
 //dispatcher
