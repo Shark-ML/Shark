@@ -114,7 +114,7 @@ std::size_t potrf_recursive(
 	lower
 ){
 	std::size_t block_size = 32;
-	auto A = subrange(Afull,start,end,start,end);
+	matrix_range<MatA> A(Afull(),start,end,start,end);
 	std::size_t size = A.size1();
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(size <= block_size){
@@ -128,10 +128,10 @@ std::size_t potrf_recursive(
 	std::size_t result = potrf_recursive(Afull,start,start+split,lower());
 	if(result) return result;
 	
-	typedef matrix_range<MatA> RangeA;
-	RangeA Aul(A(),0,size,0,split);
-	RangeA All(A(),split,size,0,split);
-	RangeA Alr(A(),split,size,split,size);
+	typedef matrix_range<matrix_range<MatA> > RangeA;
+	RangeA Aul(A,0,split,0,split);
+	RangeA All(A,split,size,0,split);
+	RangeA Alr(A,split,size,split,size);
 	matrix_transpose<RangeA> Alltrans(All);
 	kernels::trsm<false,false>(Aul,Alltrans);
 	kernels::syrk<false>(All,Alr, -1.0);

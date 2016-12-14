@@ -32,6 +32,10 @@
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
 
 #include "../../expression_types.hpp"
+#include "../../detail/matrix_proxy_classes.hpp"
+#include "../../detail/vector_proxy_classes.hpp"
+#include "../gemv.hpp"
+#include "../dot.hpp"
 #include <boost/mpl/bool.hpp>
 
 namespace shark{ namespace blas{ namespace bindings{
@@ -65,9 +69,11 @@ void trmv_impl(
 		dense_vector_adaptor<value_typeA> values(valueStorage,sizebi);
 		
 		//store and save the values of b we are now changing
-		noalias(values) = subrange(b,startbi,startbi+sizebi);
+		vector_range<V> bupper(b(),startbi,startbi+sizebi);
+		vector_range<V> blower(b(),startbi+sizebi,size);
+		noalias(values) = bupper;
 		
-		//multiply with triangular element
+		//multiply with triangular part of the block
 		for (std::size_t i = 0; i != sizebi; ++i) {
 			std::size_t posi = startbi+i;
 			b()(posi) = 0;
@@ -76,10 +82,9 @@ void trmv_impl(
 			}
 			b()(posi) += values(i)*(Unit? value_typeA(1):A()(posi,posi));
 		}
-		//now compute the remaining inner products
-		for(std::size_t posi = startbi+sizebi; posi != size; ++posi){
-			b()(posi) += inner_prod(values,subrange(row(A,posi),startbi,startbi+sizebi));
-		}
+		//now compute the lower rectangular part of the current block of A
+		matrix_range<typename const_expression<MatA>::type > Alower(A(), startbi+sizebi,size,startbi,startbi+sizebi);
+		kernels::gemv(Alower,values,blower,1);
 	}
 }
 
@@ -95,7 +100,13 @@ void trmv_impl(
 		if(!Unit){
 			b()(i) *= A()(i,i);
 		}
-		b()(i) += inner_prod(subrange(row(A,i),i+1,size),subrange(b,i+1,size));
+		vector_range<V> bblock(b(),i+1,size);
+		typedef typename const_expression<MatA>::type CMatA;
+		matrix_row<CMatA> Arow(A(),i);
+		vector_range<matrix_row<CMatA> > Asubrow(Arow,i+1,size);
+		typename V::value_type result;
+		kernels::dot(Asubrow,bblock,result);
+		b()(i) += result;
 	}
 }
 
@@ -114,7 +125,8 @@ void trmv_impl(
 		if(!Unit){
 			b()(i) *= A()(i,i);
 		}
-		noalias(subrange(b,i+1,size))+= bi * subrange(column(A,i),i+1,size);
+		for(std::size_t k = i+1; k != size; ++k)
+			b()(k) += bi * A()(k,i);
 	}
 }
 
@@ -147,8 +159,10 @@ void trmv_impl(
 		dense_vector_adaptor<value_typeA> values(valueStorage,sizebj);
 		
 		//store and save the values of b we are now changing
-		noalias(values) = subrange(b,startbj,startbj+sizebj);
-		subrange(b,startbj,startbj+sizebj).clear();
+		vector_range<V> bupper(b(),startbj,startbj+sizebj);
+		vector_range<V> blower(b(),startbj+sizebj,size);
+		noalias(values) = bupper;
+		bupper.clear();
 		//multiply with triangular element
 		for (std::size_t j = 0; j != sizebj; ++j) {
 			std::size_t posj = startbj+j;
@@ -157,10 +171,9 @@ void trmv_impl(
 			}
 			b()(posj) += values(j)*(Unit? 1.0:A()(posj,posj));
 		}
-		//now compute the remaining inner products
-		for(std::size_t posj = startbj+sizebj; posj != size; ++posj){
-			noalias(subrange(b,startbj,startbj+sizebj)) += b()(posj)*subrange(column(A,posj),startbj,startbj+sizebj);
-		}
+		//now compute the right rectangular part of the current block of A
+		matrix_range<typename const_expression<MatA>::type > Aright(A(), startbj,startbj+sizebj, startbj+sizebj,size);
+		kernels::gemv(Aright,blower,bupper,1);
 	}
 }
 
