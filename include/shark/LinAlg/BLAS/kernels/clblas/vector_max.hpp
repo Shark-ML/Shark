@@ -31,6 +31,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAST_VECTOR_MAX_HPP
 
 #include "../../detail/traits.hpp"
+#include "../../expression_types.hpp"
 #include <boost/compute/algorithm/max_element.hpp>
 namespace shark { namespace blas {namespace bindings{
 

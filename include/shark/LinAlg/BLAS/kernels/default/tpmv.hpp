@@ -31,8 +31,10 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_tpmv_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_tpmv_HPP
 
-#include "../../expression_types.hpp"
-#include <boost/mpl/bool.hpp>
+#include "../../expression_types.hpp" //matrix/vector_expression
+#include "../../detail/traits.hpp" //orientations and triangular types
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+
 
 namespace shark{ namespace blas{ namespace bindings{
 	
@@ -57,7 +59,7 @@ void tpmv_impl(
 		value_type sum(0);
 		row_iterator end = A().row_end(i);
 		for(row_iterator pos = A().row_begin(i); pos != end; ++pos){
-			sum += *pos*b()(pos.index());
+			sum += *pos * b()(pos.index());
 		}
 		b()(i) = sum;
 	}
@@ -85,7 +87,7 @@ void tpmv_impl(
 		value_type sum(0);
 		row_iterator end = A().row_end(i);
 		for(row_iterator pos = A().row_begin(i); pos != end; ++pos){
-			sum += *pos*b()(pos.index());
+			sum += *pos * b()(pos.index());
 		}
 		b()(i) = sum;
 	}

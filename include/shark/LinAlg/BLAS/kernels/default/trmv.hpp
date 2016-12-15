@@ -31,11 +31,11 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMV_HPP
 
-#include "../../expression_types.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
-#include "../../detail/vector_proxy_classes.hpp"
-#include "../gemv.hpp"
-#include "../dot.hpp"
+#include "../../expression_types.hpp" //vector/matrix_expression
+#include "../../detail/matrix_proxy_classes.hpp" //matrix_range, matrix_row
+#include "../../detail/vector_proxy_classes.hpp" //vector_range, dense_vector_adaptor
+#include "../gemv.hpp" //gemv kernel
+#include "../dot.hpp" //dot kernel
 #include <boost/mpl/bool.hpp>
 
 namespace shark{ namespace blas{ namespace bindings{

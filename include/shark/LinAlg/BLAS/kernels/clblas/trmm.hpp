@@ -32,7 +32,11 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_TRMM_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_TRMM_HPP
 
-#include "clblas_inc.hpp"
+#include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
+#include <boost/compute/kernel.hpp>
+#include <boost/compute/detail/meta_kernel.hpp>
+#include <boost/compute/functional/operator.hpp> //for multiplies
 #include "../gemm.hpp"
 
 namespace shark {namespace blas {namespace bindings {
@@ -160,19 +164,21 @@ void trmm_recursive(
 		return;
 	}
 	//otherwise run the kernel recursively
-	auto A = subrange(Afull,start,end,start,end);
-	auto B = rows(Bfull,start,end);
-	std::size_t split = (A.size1()+tileSizeA-1)/tileSizeA/2*tileSizeA;//split at the next multiple of the TileSize
-	auto BFront = rows(B,0,split);
-	auto Bback = rows(B,split,size);
+	std::size_t split = (size+tileSizeA-1)/tileSizeA/2*tileSizeA;//split at the next multiple of the TileSize
+	matrix_range<MatA> Aul(Afull(),start,start+split,start,start+split);
+	matrix_range<MatB> BFront(Bfull(),start,start+split,0,Bfull().size2());
+	matrix_range<MatB> Bback(Bfull(),start+split,end,0,Bfull().size2());
 	
+
 	if(Triangular::is_upper){ //Upper triangular case
+		matrix_range<typename const_expression<MatA>::type> Aur(Afull(),start,start+split,start+split,end);
 		trmm_recursive(Afull, Bfull, kernel, start, start+split, tileSizeA, tileSizeB, numWorkers, t);
-		kernels::gemm(subrange(A, 0, split, split, size), Bback, BFront, 1.0);
+		kernels::gemm(Aur, Bback, BFront, 1.0);
 		trmm_recursive(Afull, Bfull, kernel, start+split, end, tileSizeA, tileSizeB, numWorkers, t);
 	}else{// Lower triangular caste
+		matrix_range<typename const_expression<MatA>::type> All(Afull(),start+split,end,start,start+split);
 		trmm_recursive(Afull, Bfull, kernel, start+split, end, tileSizeA, tileSizeB, numWorkers, t);
-		kernels::gemm(subrange(A, split, size, 0, split), BFront, Bback, 1.0);
+		kernels::gemm(All, BFront, Bback, 1.0);
 		trmm_recursive(Afull, Bfull, kernel, start, start+split, tileSizeA, tileSizeB, numWorkers, t);
 	}
 

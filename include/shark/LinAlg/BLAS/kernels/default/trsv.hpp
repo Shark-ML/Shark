@@ -30,9 +30,14 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSV_HPP
 
-#include "../../expression_types.hpp"
-#include "../../vector_proxy.hpp"
-#include <boost/mpl/bool.hpp>
+#include "../../expression_types.hpp" //vector/matrix_expression
+#include "../../assignment.hpp" //plus_assign
+#include "../dot.hpp" //dot kernel
+#include "../../detail/vector_proxy_classes.hpp" //vector_range
+#include "../../detail/matrix_proxy_classes.hpp" //matrix_row, matrix_transpose 
+#include "../../detail/structure.hpp" //structure tags
+#include <stdexcept> //exception when matrix is singular
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
 
 namespace shark {namespace blas {namespace bindings {
 
@@ -51,16 +56,21 @@ void trsv_impl(
 	SIZE_CHECK(A().size2() == b().size());
 	
 	typedef typename MatA::value_type value_type;
-	
+	typedef matrix_transpose<typename const_expression<MatA>::type> TransA;
+	TransA transA(A());
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n != size; ++ n) {
 		if(!Unit){
-			RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
+			if(A()(n, n) == value_type()){//matrix is singular
+				throw std::invalid_argument("[TRSV] Matrix is singular!");
+			}
 			b()(n) /= A()(n, n);
 		}
 		if (b()(n) != value_type/*zero*/()){
-			auto col = column(A(),n);
-			noalias(subrange(b(),n+1,size)) -= b()(n) * subrange(col,n+1,size);
+			matrix_row<TransA> colA = row(transA,n);
+			vector_range<V> blower(b(),n+1,size);
+			vector_range<matrix_row<TransA> > colAlower(colA,n+1,size);
+			plus_assign(blower,colAlower,-b()(n));
 		}
 	}
 }
@@ -78,11 +88,17 @@ void trsv_impl(
 	
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n < size; ++ n) {
-		auto matRow = row(A(),n);
-		b()(n) -= inner_prod(subrange(matRow,0,n),subrange(b(),0,n));
-
+		typedef matrix_row<typename const_expression<MatA>::type> RowA;
+		RowA matRow(A(),n);
+		vector_range<V> blower(b(),0,n);
+		vector_range<RowA> matRowLower(matRow,0,n);
+		value_type value;
+		kernels::dot(blower,matRowLower,value);
+		b()(n) -= value;
 		if(!Unit){
-			RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
+			if(A()(n, n) == value_type()){//matrix is singular
+				throw std::invalid_argument("[TRSV] Matrix is singular!");
+			}
 			b()(n) /= A()(n, n);
 		}
 	}
@@ -99,17 +115,22 @@ void trsv_impl(
 	SIZE_CHECK(A().size2() == b().size());
 	
 	typedef typename MatA::value_type value_type;
-	
+	typedef matrix_transpose<typename const_expression<MatA>::type> TransA;
+	TransA transA(A());
 	std::size_t size = b().size();
 	for (std::size_t i = 0; i < size; ++ i) {
 		std::size_t n = size-i-1;
 		if(!Unit){
-			RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
+			if(A()(n, n) == value_type()){//matrix is singular
+				throw std::invalid_argument("[TRSV] Matrix is singular!");
+			}
 			b()(n) /= A()(n, n);
 		}
 		if (b()(n) != value_type/*zero*/()) {
-			auto col = column(A(),n);
-			noalias(subrange(b(),0,n)) -= b()(n) * subrange(col,0,n);
+			matrix_row<TransA> colA = row(transA,n);
+			vector_range<V> blower(b(),0,n);
+			vector_range<matrix_row<TransA> > colAlower(colA,0,n);
+			plus_assign(blower,colAlower, -b()(n));
 		}
 	}
 }
@@ -128,10 +149,17 @@ void trsv_impl(
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
 		std::size_t n = size-i-1;
-		auto matRow = row(A(),n);
-		b()(n) -= inner_prod(subrange(matRow,n+1,size),subrange(b(),n+1,size));
+		typedef matrix_row<typename const_expression<MatA>::type> RowA;
+		RowA matRow(A(),n);
+		vector_range<V> blower(b(),n+1,size);
+		vector_range<RowA> matRowLower(matRow,n+1,size);
+		value_type value;
+		kernels::dot(blower,matRowLower,value);		
+		b()(n) -= value;
 		if(!Unit){
-			RANGE_CHECK(A()(n, n) != value_type());//matrix is singular
+			if(A()(n, n) == value_type()){//matrix is singular
+				throw std::invalid_argument("[TRSV] Matrix is singular!");
+			}
 			b()(n) /= A()(n, n);
 		}
 	}

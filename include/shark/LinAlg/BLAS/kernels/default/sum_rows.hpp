@@ -31,7 +31,9 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_SUM_ROWS_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_SUM_ROWS_HPP
 
-#include "../../assignment.hpp"
+#include "../../expression_types.hpp"//for vector/matrix_expression
+#include "../../detail/traits.hpp"//for orientations
+
 
 namespace shark { namespace blas {namespace bindings{
 	

@@ -30,15 +30,15 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_POTRF_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_POTRF_HPP
 
-#include "../../expression_types.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
-#include "../trsm.hpp"
-#include "../syrk.hpp"
-
+#include "../../expression_types.hpp"//for matrix_expression
+#include "../../detail/matrix_proxy_classes.hpp"//matrix_transpose, matrix_range
+#include "../trsm.hpp" //trsm kernel
+#include "../syrk.hpp" //syrk kernel
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
 
 namespace shark {namespace blas {namespace bindings {
 
-
+//diagonal block kernels
 //upper potrf(row-major)
 template<class MatA>
 std::size_t potrf_block(
@@ -105,6 +105,8 @@ std::size_t potrf_block(
 	matrix_transpose<MatA> transA(A());
 	return potrf_block(transA, row_major(), typename Triangular::transposed_orientation());
 }
+
+//main kernel for large matrices
 
 template <typename MatA>
 std::size_t potrf_recursive(

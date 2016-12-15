@@ -31,11 +31,11 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSM_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRSM_HPP
 
-#include "../../expression_types.hpp"
-#include "../../detail/structure.hpp"
-#include <boost/mpl/bool.hpp>
-#include <stdexcept>
-#include "../gemm.hpp"
+#include "../../expression_types.hpp" //matrix_expression
+#include "../../detail/structure.hpp" //structure tags
+#include <stdexcept> //exception when matrix is singular
+#include "../gemm.hpp" //gemm kernel
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
 
 namespace shark {namespace blas {namespace bindings {
 

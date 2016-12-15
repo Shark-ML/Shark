@@ -29,6 +29,8 @@
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_VECTOR_ASSIGN_HPP
 
 #include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
+#include <boost/compute/iterator/zip_iterator.hpp>
 #include <boost/compute/algorithm/copy.hpp>
 #include <boost/compute/algorithm/transform.hpp>
 #include <boost/compute/functional/bind.hpp>

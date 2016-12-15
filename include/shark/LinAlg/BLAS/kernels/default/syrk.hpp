@@ -31,9 +31,12 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_SYRK_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_SYRK_HPP
 
-#include <boost/mpl/bool.hpp>
-#include "mgemm.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
+#include "../../expression_types.hpp"//for matrix_expression
+#include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
+#include "mgemm.hpp" //block macro kernel for dense syrk
+#include <boost/align/aligned_allocator.hpp> //mgemm requires aligned allocations
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::common_type
 
 namespace shark { namespace blas { namespace bindings {
 
@@ -92,8 +95,8 @@ void syrk_impl(
 			for(std::size_t j = start_j; j < end_j; ++j){//traverse over the blocks that are to be computed
 				std::size_t mc2 = std::min(MC, M - j * MC);
 				//load block of the right E into memory
-				matrix_range<E const> E_rights(e(), j * MC, j * MC + mc2, k*EC, k*EC + kc );
-				matrix_transpose< matrix_range<E const> > E_rights_trans(E_rights); 
+				matrix_range<typename const_expression<E>::type> E_rights(e(), j * MC, j * MC + mc2, k*EC, k*EC + kc );
+				matrix_transpose<matrix_range<typename const_expression<E>::type> > E_rights_trans(E_rights); 
 				pack_B_dense(E_rights_trans, E_right, block_size());
 				
 				if(i==j){//diagonal block: we have to ensure that we only access elements on the diagonal

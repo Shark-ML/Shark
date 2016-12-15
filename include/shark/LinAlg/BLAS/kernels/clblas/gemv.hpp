@@ -32,7 +32,11 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_GEMV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_GEMV_HPP
 
-#include "clblas_inc.hpp"
+#include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
+#include <boost/compute/kernel.hpp>
+#include <boost/compute/detail/meta_kernel.hpp>
+#include <boost/compute/functional/operator.hpp> //for multiplies
 
 namespace shark { namespace blas { namespace kernels{
 
@@ -47,7 +51,9 @@ void gemv(
 	SIZE_CHECK(A().size1() == v().size());
 	SIZE_CHECK(A().size2() == x().size());
 	
+	
 	typedef typename VecV::value_type value_type;
+	boost::compute::multiplies<value_type> prod;
 	boost::compute::detail::meta_kernel k("blas_gemv");
 	std::size_t alpha_index = k.add_arg<value_type>("alpha");
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
@@ -59,7 +65,7 @@ void gemv(
 	k << "for(uint i = get_local_id(1) ; i < size2 && rowid < size1; i += TILE_DIM){";
 	auto exprRow = k.expr<cl_uint>("rowid");
 	auto exprCol = k.expr<cl_uint>("i");
-	k<< "    results[get_local_id(0)][get_local_id(1)] += "<< A()(exprRow,exprCol)<<"*"<<x()(exprCol) <<";";
+	k<< "    results[get_local_id(0)][get_local_id(1)] += "<< prod(A()(exprRow,exprCol),x()(exprCol))<<";";
 	k<<'}';
 	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with computing
 	//sum up the rows

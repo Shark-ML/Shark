@@ -32,7 +32,11 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_GEMM_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_GEMM_HPP
 
-#include "clblas_inc.hpp"
+#include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
+#include <boost/compute/kernel.hpp>
+#include <boost/compute/detail/meta_kernel.hpp>
+#include <boost/compute/functional/operator.hpp> //for multiplies
 
 namespace shark { namespace blas { namespace kernels{
 

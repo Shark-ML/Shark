@@ -31,7 +31,14 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_TRSV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_TRSV_HPP
 
-#include "clblas_inc.hpp"
+
+#include "../../detail/traits.hpp"
+#include "../../expression_types.hpp"
+#include "../../detail/matrix_proxy_classes.hpp"
+#include "../gemv.hpp"
+#include <boost/compute/kernel.hpp>
+#include <boost/compute/detail/meta_kernel.hpp>
+#include <boost/compute/functional/operator.hpp> //for multiplies
 
 ///solves systems of triangular matrices with one left hand side
 
@@ -122,9 +129,8 @@ void trsv_recursive(
 	std::size_t numWorkers,
 	Triangular t
 ){
-	auto A = subrange(Afull,start,end,start,end);
-	auto b = subrange(bfull,start,end);
-	std::size_t size = A.size1();
+	
+	std::size_t size = end-start;
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(size <= tileSize){
 		//enqueue kernel with kernel args
@@ -138,19 +144,21 @@ void trsv_recursive(
 		bfull().queue().enqueue_nd_range_kernel(kernel.kernel, 2,nullptr, global_work_size, local_work_size);
 		return;
 	}
-	std::size_t numBlocks = (A.size1()+tileSize-1)/tileSize;
+	std::size_t numBlocks = (size+tileSize-1)/tileSize;
 	std::size_t split = numBlocks/2 * tileSize;
-	auto bfront = subrange(b,0,split);
-	auto bback = subrange(b,split,size);
+	vector_range<VecB> bfront(bfull(),start,start+split);
+	vector_range<VecB> bback(bfull(),start+split,end);
 	
 	//otherwise run the kernel recursively
 	if(Triangular::is_upper){ //Upper triangular case
+		matrix_range<typename const_expression<MatA>::type > Aur(Afull(),start,start+split,start+split,end);
 		trsv_recursive(Afull, bfull, kernel, start+split,end, tileSize, numWorkers, t);
-		kernels::gemv(subrange(A,0,split,split,size), bback, bfront, -1.0);
+		kernels::gemv(Aur, bback, bfront, -1.0);
 		trsv_recursive(Afull, bfull, kernel, start,start+split, tileSize, numWorkers, t);
 	}else{// Lower triangular caste
+		matrix_range<typename const_expression<MatA>::type> All(Afull(),start+split,end,start,start+split);
 		trsv_recursive(Afull, bfull, kernel, start,start+split, tileSize, numWorkers, t);
-		kernels::gemv(subrange(A,split,size,0,split), bfront, bback, -1.0);
+		kernels::gemv(All, bfront, bback, -1.0);
 		trsv_recursive(Afull, bfull, kernel, start+split,end, tileSize, numWorkers, t);
 	}
 }

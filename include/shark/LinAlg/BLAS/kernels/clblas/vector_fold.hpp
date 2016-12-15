@@ -29,8 +29,10 @@
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_VECTOR_FOLD_HPP
 
 #include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
 #include <boost/compute/container/array.hpp>
 #include <boost/compute/algorithm/reduce.hpp>
+#include <boost/compute/algorithm/copy_n.hpp>
 
 namespace shark{namespace blas {namespace bindings{
 

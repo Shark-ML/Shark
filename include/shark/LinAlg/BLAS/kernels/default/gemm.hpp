@@ -31,19 +31,20 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_GEMM_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_GEMM_HPP
 
-#include "../gemv.hpp"
-#include "../../vector.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
-#include "mgemm.hpp"
-#include <boost/mpl/bool.hpp>
-#include <boost/align/aligned_allocator.hpp>
-#include <boost/align/assume_aligned.hpp>
-#include <type_traits>
+#include "../gemv.hpp"//for dispatching to gemv
+#include "../../assignment.hpp"//plus_assign
+#include "../../vector.hpp"//sparse gemm needs temporary vector
+#include "../../detail/matrix_proxy_classes.hpp"//matrix row,column,transpose,range
+#include "mgemm.hpp" //block macro kernel for dense gemm
+#include <boost/align/aligned_allocator.hpp> //mgemm requires aligned allocations
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+
+#include <type_traits> //std::common_type
 
 
 namespace shark {namespace blas {namespace bindings {
 	
-//  Block-GEMM implementation based on boost.ublas
+//  Dense Block-GEMM implementation based on boost.ublas
 //  written by:
 //  Copyright (c) 2016
 //  Michael Lehn, Imre Palik
@@ -197,7 +198,9 @@ void gemm_impl(
 ){
 	for (std::size_t k = 0; k != e1().size2(); ++k) {
 		for(std::size_t i = 0; i != e1().size1(); ++i){
-			noalias(row(m,i)) += alpha * e1()(i,k) * row(e2,k);
+			matrix_row<M> row_m(m(),i);
+			matrix_row<typename const_expression<E2>::type> row_e2(e2(),k);
+			plus_assign(row_m,row_e2,alpha * e1()(i,k));
 		}
 	}
 }
@@ -253,8 +256,9 @@ void gemm_impl(
 		auto e1end = e1().column_end(k);
 		for(auto e1pos = e1().column_begin(k); e1pos != e1end; ++e1pos){
 			std::size_t i = e1pos.index();
-			auto val = alpha * (*e1pos);
-			noalias(row(m,i)) += val * row(e2,k);
+			matrix_row<M> row_m(m(),i);
+			matrix_row<typename const_expression<E2>::type> row_e2(e2(),k);
+			plus_assign(row_m,row_e2,alpha * (*e1pos));
 		}
 	}
 }
@@ -271,15 +275,26 @@ void gemm_impl(
 ) {
 	typedef typename M::value_type value_type;
 	value_type zero = value_type();
-	typename vector_temporary<E1>::type temporary(e2().size2(), zero);
-	matrix_transpose<E2 const> e2trans(e2());
+	vector<value_type> temporary(e2().size2(), zero);//dense vector for quick random access
+	matrix_transpose<typename const_expression<E2>::type> e2trans(e2());
 	for (std::size_t i = 0; i != e1().size1(); ++i) {
-		matrix_row<E1 const> rowe1(e1(),i);
+		matrix_row<typename const_expression<E1>::type> rowe1(e1(),i);
 		kernels::gemv(e2trans,rowe1,temporary,alpha);
+		auto insert_pos = m().row_begin(i);
 		for (std::size_t j = 0; j != temporary.size(); ++ j) {
 			if (temporary(j) != zero) {
-				m()(i, j) += temporary(j);//fixme: better use something like insert
-				temporary(j) = zero;
+				//find element with that index
+				auto row_end = m().row_end(i);
+				while(insert_pos != row_end && insert_pos.index() < j) 
+					++insert_pos;
+				//check if element exists
+				if(insert_pos != row_end && insert_pos.index() == j){
+					*insert_pos += temporary(j);
+				}else{//create new element
+					insert_pos = m().set_element(insert_pos,j,temporary(j));
+				}
+				//~ m()(i,j) += temporary(j);
+				temporary(j) = zero; // delete element
 			}
 		}
 	}
@@ -314,6 +329,8 @@ void gemm_impl(
 	row_major, column_major, Orientation o,
 	sparse_tag t1, sparse_tag t2
 ){
+	//best way to compute this is to transpose e1 in memory. alternative would be
+	// to compute outer products, which is a no-no.
 	typename transposed_matrix_temporary<E1>::type e1_trans(e1);
 	gemm_impl(e1_trans,e2,m,alpha,row_major(),row_major(),o,t1,t2);
 }

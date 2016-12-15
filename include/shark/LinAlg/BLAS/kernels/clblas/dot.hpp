@@ -32,7 +32,8 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_DOT_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_DOT_HPP
 
-#include "clblas_inc.hpp"
+#include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
 #include <boost/compute/algorithm/inner_product.hpp>
 
 namespace shark {namespace blas {namespace bindings {

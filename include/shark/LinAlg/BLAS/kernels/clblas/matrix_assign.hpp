@@ -28,7 +28,9 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_ASSIGN_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_MATRIX_ASSIGN_HPP
 
+#include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
+#include <boost/compute/kernel.hpp>
 #include <boost/compute/detail/meta_kernel.hpp>
 
 namespace shark {namespace blas {namespace bindings{

@@ -32,7 +32,12 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_TRMV_HPP
 #define SHARK_LINALG_BLAS_KERNELS_CLBLAS_TRMV_HPP
 
-#include "clblas_inc.hpp"
+
+#include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
+#include <boost/compute/kernel.hpp>
+#include <boost/compute/detail/meta_kernel.hpp>
+#include <boost/compute/functional/operator.hpp> //for multiplies
 #include "../gemv.hpp"
 
 namespace shark {namespace blas {namespace bindings {
@@ -145,19 +150,19 @@ void trmv_recursive(
 		return;
 	}
 	//otherwise run the kernel recursively
-	auto A = subrange(Afull,start,end,start,end);
-	auto v = subrange(vfull,start,end);
-	std::size_t split = ((A.size1()+tileSizeA-1)/tileSizeA)/2 * tileSizeA;//split at the next multiple of the TileSize
-	auto vfront = subrange(v,0,split);
-	auto vback = subrange(v,split,size);
+	std::size_t split = ((size+tileSizeA-1)/tileSizeA)/2 * tileSizeA;//split at the next multiple of the TileSize
+	vector_range<VecV> vfront(vfull(),start,start+split);
+	vector_range<VecV> vback(vfull(),start+split,end);
 	
 	if(Triangular::is_upper){ //Upper triangular case
+		matrix_range<typename const_expression<MatA>::type > Aur(Afull(),start,start+split,start+split,end);
 		trmv_recursive(Afull, vfull, kernel, start, start+split, tileSizeA, t);
-		kernels::gemv(subrange(A, 0, split, split, size), vback, vfront, 1.0);
+		kernels::gemv(Aur, vback, vfront, 1.0);
 		trmv_recursive(Afull, vfull, kernel, start+split, end, tileSizeA, t);
 	}else{// Lower triangular caste
+		matrix_range<typename const_expression<MatA>::type> All(Afull(),start+split,end,start,start+split);
 		trmv_recursive(Afull, vfull, kernel, start+split, end, tileSizeA, t);
-		kernels::gemv(subrange(A, split, size, 0, split), vfront, vback, 1.0);
+		kernels::gemv(All, vfront, vback, 1.0);
 		trmv_recursive(Afull, vfull, kernel, start, start+split, tileSizeA, t);
 	}
 

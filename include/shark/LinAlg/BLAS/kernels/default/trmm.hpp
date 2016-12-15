@@ -31,10 +31,14 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMM_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_TRMM_HPP
 
-#include <boost/mpl/bool.hpp>
-#include "mgemm.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
-
+#include "../../expression_types.hpp"//for matrix_expression
+#include "../../detail/traits.hpp"//triangular_tag
+#include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
+#include "mgemm.hpp" //block macro kernel for dense syrk
+#include <boost/align/aligned_allocator.hpp> //mgemm requires aligned allocations
+#include <boost/align/assume_aligned.hpp> //pack_A_triangular can make use of it
+#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::common_type
 namespace shark { namespace blas { namespace bindings {
 
 template <typename T>
