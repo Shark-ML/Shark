@@ -28,7 +28,7 @@
  *
  */
 #ifndef SHARK_LINALG_BLAS_KERNELS_CLBLAS_VECTOR_MAX_HPP
-#define SHARK_LINALG_BLAS_KERNELS_CLBLAST_VECTOR_MAX_HPP
+#define SHARK_LINALG_BLAS_KERNELS_CLBLAS_VECTOR_MAX_HPP
 
 #include "../../detail/traits.hpp"
 #include "../../expression_types.hpp"

@@ -35,9 +35,11 @@
 #include <cstddef>//std::size_t
 #include <algorithm>//std::fill
 
-
-#define SHARK_BLAS_VECTOR_LENGTH 16
-
+#ifdef __AVX__
+	#define SHARK_BLAS_VECTOR_LENGTH 32
+#else
+	#define SHARK_BLAS_VECTOR_LENGTH 16
+#endif
 namespace shark {namespace blas {namespace bindings {
 	
 //  Block-GEMM implementation based on boost.ublas
@@ -61,7 +63,7 @@ void ugemm(
 #ifdef SHARK_USE_SIMD
 	static const std::size_t vecNR = block_size::nr/block_size::vector_length;
 #ifdef BOOST_COMP_CLANG_DETECTION
-	typedef T vx __attribute__((ext_vector_type (vector_length)));
+	typedef T vx __attribute__((ext_vector_type (block_size::vector_length)));
 #else
         typedef T vx __attribute__((vector_size (SHARK_BLAS_VECTOR_LENGTH)));
 #endif

@@ -1,3 +1,4 @@
+#define SHARK_USE_SIMD
 #include <shark/LinAlg/BLAS/blas.h>
 #include <shark/Core/Timer.h>
 #include <iostream>
@@ -23,15 +24,16 @@ int main(int argc, char **argv) {
 	std::size_t size = 100;
 	std::cout<<"Flops"<<std::endl;
 	for(std::size_t iter = 0; iter != 5; ++iter){
-		blas::matrix<double,blas::row_major> Arow(size,size);
+		std::size_t middle = size;
+		blas::matrix<double,blas::row_major> Arow(size,middle);
 		for(std::size_t i = 0; i != size; ++i){
-			for(std::size_t k = 0; k != size; ++k){
+			for(std::size_t k = 0; k != middle; ++k){
 				Arow(i,k)  = 0.1/size*i+0.1/size*k;
 			}
 		}
 		
-		blas::matrix<double,blas::row_major> Brow(size,size);
-		for(std::size_t k = 0; k != size; ++k){
+		blas::matrix<double,blas::row_major> Brow(middle,size);
+		for(std::size_t k = 0; k != middle; ++k){
 			for(std::size_t j = 0; j != size; ++j){
 				Brow(k,j) = 0.1/size*j+0.1/size*k;
 			}
