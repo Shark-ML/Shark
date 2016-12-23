@@ -125,8 +125,8 @@ public:
     /// swap two variables
     void flipColumnsAndRows(std::size_t i, std::size_t j)
     {
-        swap_rows(matrix,i, j);
-        swap_columns(matrix,i, j);
+	matrix.swap_rows(i, j);
+        matrix.swap_columns(i, j);
     }
 
     /// return the size of the quadratic matrix

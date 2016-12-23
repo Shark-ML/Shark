@@ -36,6 +36,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/BLAS/kernels/potrf.hpp>
+#include <shark/LinAlg/BLAS/kernels/pstrf.hpp>
 
 namespace shark{ namespace blas{
 
@@ -159,9 +160,11 @@ void choleskyUpdate(
  */
 template<class MatrixL>
 std::size_t pivotingCholeskyDecompositionInPlace(
-	shark::blas::matrix_expression<MatrixL, cpu_tag>& Lref,
+	shark::blas::matrix_expression<MatrixL, cpu_tag>& L,
 	PermutationMatrix& P
-);
+){
+	return kernels::pstrf<lower>(L,P);
+}
 
 /*!
  *  \brief Lower triangular Cholesky decomposition with full pivoting
@@ -201,8 +204,5 @@ std::size_t pivotingCholeskyDecomposition(
 
 /** @}*/
 }}
-
-//implementation of the template functions
-#include "Impl/Cholesky.inl"
 
 #endif 

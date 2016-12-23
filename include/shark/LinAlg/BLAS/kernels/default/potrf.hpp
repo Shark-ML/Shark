@@ -30,8 +30,7 @@
 #ifndef SHARK_LINALG_BLAS_KERNELS_DEFAULT_POTRF_HPP
 #define SHARK_LINALG_BLAS_KERNELS_DEFAULT_POTRF_HPP
 
-#include "../../expression_types.hpp"//for matrix_expression
-#include "../../detail/matrix_proxy_classes.hpp"//matrix_transpose, matrix_range
+#include "simple_proxies.hpp"
 #include "../trsm.hpp" //trsm kernel
 #include "../syrk.hpp" //syrk kernel
 #include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
@@ -102,12 +101,11 @@ std::size_t potrf_block(
     matrix_expression<MatA, cpu_tag>& A,
     column_major, Triangular
 ) {
-	matrix_transpose<MatA> transA(A());
-	return potrf_block(transA, row_major(), typename Triangular::transposed_orientation());
+	auto Atrans = simple_trans(A);
+	return potrf_block(Atrans, row_major(), typename Triangular::transposed_orientation());
 }
 
 //main kernel for large matrices
-
 template <typename MatA>
 std::size_t potrf_recursive(
 	matrix_expression<MatA, cpu_tag>& Afull,
@@ -116,7 +114,7 @@ std::size_t potrf_recursive(
 	lower
 ){
 	std::size_t block_size = 32;
-	matrix_range<MatA> A(Afull(),start,end,start,end);
+	auto A = simple_subrange(Afull,start,end,start,end);
 	std::size_t size = A.size1();
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(size <= block_size){
@@ -130,25 +128,24 @@ std::size_t potrf_recursive(
 	std::size_t result = potrf_recursive(Afull,start,start+split,lower());
 	if(result) return result;
 	
-	typedef matrix_range<matrix_range<MatA> > RangeA;
-	RangeA Aul(A,0,split,0,split);
-	RangeA All(A,split,size,0,split);
-	RangeA Alr(A,split,size,split,size);
-	matrix_transpose<RangeA> Alltrans(All);
-	kernels::trsm<false,false>(Aul,Alltrans);
+	auto Aul = simple_subrange(A,0,split,0,split);
+	auto All = simple_subrange(A,split,size,0,split);
+	auto Alr = simple_subrange(A,split,size,split,size);
+	auto Aultrans = simple_trans(All);
+	kernels::trsm<false,false>(Aul, Aultrans );
 	kernels::syrk<false>(All,Alr, -1.0);
 	return potrf_recursive(Afull,start+split,end,lower());
 }
 
 template <typename MatA>
 std::size_t potrf_recursive(
-	matrix_expression<MatA, cpu_tag>& Afull,
+	matrix_expression<MatA, cpu_tag>& A,
 	std::size_t start,
 	std::size_t end,
 	upper
 ){
-	matrix_transpose<MatA> transAfull(Afull());
-	return potrf_recursive(transAfull,start,end,lower());
+	auto Atrans = simple_trans(A);
+	return potrf_recursive(Atrans,start,end,lower());
 }
 
 //dispatcher

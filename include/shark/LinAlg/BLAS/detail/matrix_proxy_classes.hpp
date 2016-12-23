@@ -333,6 +333,15 @@ public:
 		expression() = matrix_transpose<E const>(e());
 		return *this;
 	}
+	
+	void swap_rows(size_type i, size_type j){
+		m_expression->swap_columns(i,j);
+	}
+	
+	void swap_columns(size_type i, size_type j){
+		m_expression->swap_rows(i,j);
+	}
+	
 private:
 	matrix_closure_type m_expression;
 };
@@ -787,6 +796,18 @@ public:
 	void reserve(size_type){}
 	void reserve_row(size_type, size_type) {}
 	void reserve_column(size_type, size_type ){}
+	
+	void swap_rows(size_type i, size_type j){
+		for(std::size_t k = 0; k != size2(); ++k){
+			std::swap((*this)(i,k),(*this)(j,k));
+		}
+	}
+	
+	void swap_columns(size_type i, size_type j){
+		for(std::size_t k = 0; k != size1(); ++k){
+			std::swap((*this)(k,i),(*this)(k,j));
+		}
+	}
 private:
 	matrix_closure_type m_expression;
 	size_type m_start1;
@@ -979,6 +1000,18 @@ public:
 	major_iterator clear_range(major_iterator start, major_iterator end) {
 		std::fill(start,end,value_type());
 		return end;
+	}
+	
+	void swap_rows(size_type i, size_type j){
+		for(std::size_t k = 0; k != size2(); ++k){
+			std::swap((*this)(i,k),(*this)(j,k));
+		}
+	}
+	
+	void swap_columns(size_type i, size_type j){
+		for(std::size_t k = 0; k != size1(); ++k){
+			std::swap((*this)(k,i),(*this)(k,j));
+		}
 	}
 	
 		

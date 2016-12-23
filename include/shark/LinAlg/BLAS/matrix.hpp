@@ -244,9 +244,11 @@ public:
 		}
 	}
 	
-	friend void swap_rows(matrix& a, size_type i, size_type j) {
+	void swap_rows(size_type i, size_type j) {
 		if(i == j) return;
-		swap_rows(a,i,a,j);
+		for(std::size_t k = 0; k != size2(); ++k){
+			std::swap((*this)(i,k),(*this)(j,k));
+		}
 	}
 	
 	
@@ -259,9 +261,11 @@ public:
 		}
 	}
 	
-	friend void swap_columns(matrix& a, size_type i, size_type j) {
+	void swap_columns(size_type i, size_type j) {
 		if(i == j) return;
-		swap_columns(a,i,a,j);
+		for(std::size_t k = 0; k != size1(); ++k){
+			std::swap((*this)(k,i),(*this)(k,j));
+		}
 	}
 
 	//Iterators

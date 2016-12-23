@@ -131,14 +131,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Permute_Full ){
 	}
 	//generate permutated result
 	IntMatrix APerm(A);
-	swap_rows(APerm,0,2);
-	swap_columns(APerm,0,2);
-	swap_rows(APerm,1,2);
-	swap_columns(APerm,1,2);
-	swap_rows(APerm,2,4);
-	swap_columns(APerm,2,4);
-	swap_rows(APerm,3,4);
-	swap_columns(APerm,3,4);
+	APerm.swap_rows(0,2);
+	APerm.swap_columns(0,2);
+	APerm.swap_rows(1,2);
+	APerm.swap_columns(1,2);
+	APerm.swap_rows(2,4);
+	APerm.swap_columns(2,4);
+	APerm.swap_rows(3,4);
+	APerm.swap_columns(3,4);
 	
 	swap_full(P,A);
 	

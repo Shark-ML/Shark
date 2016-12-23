@@ -51,7 +51,7 @@ struct permutation_matrix:public vector<int> {
 template<class M>
 void swap_rows(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for (std::size_t i = 0; i != P.size(); ++ i)
-		swap_rows(A(),i,P(i));
+		A().swap_rows(i,P(i));
 }
 
 ///\brief implements column pivoting of vector A using permutation P
@@ -83,7 +83,7 @@ void swap_rows_inverted(Permutation const& P, vector_expression<V, cpu_tag>& v){
 template<class M>
 void swap_columns(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = 0; i != P.size(); ++i)
-		swap_columns(A(),i,P(i));
+		A().swap_columns(i,P(i));
 }
 
 ///\brief implements the inverse row pivoting at matrix A using permutation P
@@ -92,7 +92,7 @@ void swap_columns(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A)
 template<class M>
 void swap_rows_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = P.size(); i != 0; --i){
-		swap_rows(A(),i-1,P(i-1));
+		A().swap_rows(i-1,P(i-1));
 	}
 }
 
@@ -102,7 +102,7 @@ void swap_rows_inverted(permutation_matrix const& P, matrix_expression<M, cpu_ta
 template<class M>
 void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = P.size(); i != 0; --i){
-		swap_columns(A(),i-1,P(i-1));
+		A().swap_columns(i-1,P(i-1));
 	}
 }
 
@@ -114,8 +114,8 @@ void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M, cpu
 template<class M>
 void swap_full(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = 0; i != P.size(); ++i){
-		swap_rows(A(),i,P(i));
-		swap_columns(A(),i,P(i));
+		A().swap_rows(i,P(i));
+		A().swap_columns(i,P(i));
 	}
 }
 ///\brief implements the inverse full pivoting at matrix A using permutation P
@@ -124,8 +124,8 @@ void swap_full(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 template<class M>
 void swap_full_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
 	for(std::size_t i = P.size(); i != 0; --i){
-		swap_rows(A(),i-1,P(i-1));
-		swap_columns(A(),i-1,P(i-1));
+		A().swap_rows(i-1,P(i-1));
+		A().swap_columns(i-1,P(i-1));
 	}
 }
 
