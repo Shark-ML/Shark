@@ -55,13 +55,14 @@ namespace shark{ namespace blas{
      * \endcode
      *
      * \param os is a standard basic output stream
-     * \param v is a vector expression
+     * \param vec is a vector expression
      * \return a reference to the resulting output stream
      */
     template<class E, class T, class VE>
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
-                                           const vector_expression<VE, cpu_tag> &v) {
+                                           const vector_expression<VE, cpu_tag> &vec) {
+	auto&& v = eval_block(vec);
         typedef typename VE::size_type size_type;
         size_type size = v ().size ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
@@ -97,14 +98,15 @@ namespace shark{ namespace blas{
      * \f[ \left( \begin{array}{ccc} 1 & 1 & 1\\ 1 & 1 & 1\\ 1 & 1 & 1 \end{array} \right) - \left( \begin{array}{ccc} 1 & 0 & 0\\ 0 & 1 & 0\\ 0 & 0 & 1 \end{array} \right) = \left( \begin{array}{ccc} 0 & 1 & 1\\ 1 & 0 & 1\\ 1 & 1 & 0 \end{array} \right) \f]
      *
      * \param os is a standard basic output stream
-     * \param m is a matrix expression
+     * \param mat is a matrix expression
      * \return a reference to the resulting output stream
      */
     template<class E, class T, class ME>
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
-                                           const matrix_expression<ME, cpu_tag> &m) {
-        typedef typename ME::size_type size_type;
+                                           const matrix_expression<ME, cpu_tag> &mat) {
+        auto&& m=eval_block(mat);
+	typedef typename ME::size_type size_type;
         size_type size1 = m ().size1 ();
         size_type size2 = m ().size2 ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
