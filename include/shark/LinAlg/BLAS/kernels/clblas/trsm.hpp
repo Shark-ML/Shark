@@ -179,7 +179,7 @@ void trsm_recursive(
 }
 namespace kernels{
 //main kernel runs the kernel above recursively and calls gemv
-template <bool Upper,bool Unit,typename MatA, typename MatB>
+template <class Triangular,typename MatA, typename MatB>
 void trsm(
 	matrix_expression<MatA, gpu_tag> const& A, 
 	matrix_expression<MatB, gpu_tag>& B
@@ -194,7 +194,7 @@ void trsm(
 	auto kernel = bindings::createTRSMDiagBlockKernel(A,B,options);
 	
 	
-	bindings::trsm_recursive(A,B,kernel,0,A().size1(), TileSizeA, TileSizeB, numWorkers, triangular_tag<Upper,Unit>());
+	bindings::trsm_recursive(A,B,kernel,0,A().size1(), TileSizeA, TileSizeB, numWorkers,Triangular());
 }
 }}}
 #endif

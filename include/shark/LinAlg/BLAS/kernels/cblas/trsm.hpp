@@ -32,7 +32,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_CBLAS_TRSM_HPP
 
 #include "cblas_inc.hpp"
-
+#include "../../detail/matrix_proxy_classes.hpp"
 ///solves systems of triangular matrices
 
 namespace shark {namespace blas {namespace bindings {
@@ -80,12 +80,12 @@ inline void trsm(
 }
 
 // trsm(): solves A system of linear equations A * X = B
-//             when A is A triangular matrix
-template <bool upper, bool unit,typename MatA, typename MatB>
-void trsm(
+//             when A is a triangular matrix
+template <class Triangular, typename MatA, typename MatB>
+void trsm_impl(
 	matrix_expression<MatA, cpu_tag> const &A,
 	matrix_expression<MatB, cpu_tag> &B,
-	boost::mpl::true_
+	boost::mpl::true_, left
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size1() == B().size1());
@@ -95,10 +95,8 @@ void trsm(
 	//if orientations do not match, wecan interpret this as transposing A
 	bool transposeA =  !std::is_same<typename MatA::orientation,typename MatB::orientation>::value;
 	
-	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;
-	CBLAS_UPLO cblasUplo = (upper != transposeA)?CblasUpper:CblasLower;
-	
-	
+	CBLAS_DIAG cblasUnit = Triangular::is_unit?CblasUnit:CblasNonUnit;
+	CBLAS_UPLO cblasUplo = (Triangular::is_upper != transposeA)?CblasUpper:CblasLower;
 	CBLAS_TRANSPOSE transA = transposeA?CblasTrans:CblasNoTrans;
 	
 	int m = B().size1();
@@ -111,6 +109,26 @@ void trsm(
 		storageB.values,
 	        storageB.leading_dimension
 	);
+}
+
+template <class Triangular, typename MatA, typename MatB>
+void trsm_impl(
+	matrix_expression<MatA, cpu_tag> const &A,
+	matrix_expression<MatB, cpu_tag> &B,
+	boost::mpl::true_, right
+){
+	matrix_transpose<typename const_expression<MatA>::type> transA(A());
+	matrix_transpose<MatB> transB(B());
+	trsm_impl<typename Triangular::transposed_orientation>(transA, transB, boost::mpl::true_(),  left());
+}
+
+template <class Triangular, class Side, typename MatA, typename MatB>
+void trsm(
+	matrix_expression<MatA, cpu_tag> const &A,
+	matrix_expression<MatB, cpu_tag> &B,
+	boost::mpl::true_
+){
+	trsm_impl<Triangular>(A,B, boost::mpl::true_(),  Side());
 }
 
 template<class Storage1, class Storage2, class T1, class T2>

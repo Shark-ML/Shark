@@ -131,8 +131,7 @@ std::size_t potrf_recursive(
 	auto Aul = simple_subrange(A,0,split,0,split);
 	auto All = simple_subrange(A,split,size,0,split);
 	auto Alr = simple_subrange(A,split,size,split,size);
-	auto Aultrans = simple_trans(All);
-	kernels::trsm<false,false>(Aul, Aultrans );
+	kernels::trsm<upper,right>(simple_trans(Aul), All );
 	kernels::syrk<false>(All,Alr, -1.0);
 	return potrf_recursive(Afull,start+split,end,lower());
 }

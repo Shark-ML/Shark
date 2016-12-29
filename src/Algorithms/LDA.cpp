@@ -33,7 +33,6 @@
 //===========================================================================
 #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/Trainers/LDA.h>
-#include <shark/LinAlg/solveSystem.h>
 
 using namespace shark;
 
@@ -92,8 +91,8 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	
 	// compute z = m_i^T C^-1  <=>  z C = m_i 
 	// this is the expensive step of the calculation.
-	RealMatrix transformedMeans = means;
-	blas::solveSymmSemiDefiniteSystemInPlace<blas::SolveXAB>(covariance,transformedMeans);
+	// take into account that the matrix might not have full rank
+	RealMatrix transformedMeans = solve(covariance,means,blas::symm_semi_pos_def(),blas::right());
 	
 	//compute bias terms m_i^T C^-1 m_i - log(P(i))
 	RealVector bias(classes);
@@ -161,8 +160,7 @@ void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsign
 	
 	// compute z = m_i^T C^-1  <=>  z C = m_i 
 	// this is the expensive step of the calculation.
-	RealMatrix transformedMeans = means;
-	blas::solveSymmSemiDefiniteSystemInPlace<blas::SolveXAB>(covariance,transformedMeans);
+	RealMatrix transformedMeans = solve(covariance,means,blas::symm_semi_pos_def(),blas::right());
 	
 	//compute bias terms m_i^T C^-1 m_i - log(P(i))
 	RealVector bias(classes);

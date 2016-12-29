@@ -165,7 +165,7 @@ void trsv_recursive(
 }
 namespace kernels{
 //main kernel runs the kernel above recursively and calls gemv
-template <bool Upper,bool Unit,typename MatA, typename VecB>
+template <class Triangular,typename MatA, typename VecB>
 void trsv(
 	matrix_expression<MatA, gpu_tag> const& A, 
 	vector_expression<VecB, gpu_tag>& b
@@ -180,7 +180,7 @@ void trsv(
 	auto kernel = bindings::createTRSVDiagBlockKernel(A,b,options);
 	
 	
-	bindings::trsv_recursive(A,b,kernel,0,A().size1(), TileSize, numWorkers, triangular_tag<Upper,Unit>());
+	bindings::trsv_recursive(A,b,kernel,0,A().size1(), TileSize, numWorkers, Triangular());
 }
 }}}
 #endif

@@ -60,9 +60,6 @@ public:
 
 private:
 	double m_targetVariance;
-	SHARK_EXPORT_SYMBOL RealMatrix createWhiteningMatrix(
-		RealMatrix& covariance
-	);
 };
 
 

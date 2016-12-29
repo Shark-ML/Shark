@@ -3,6 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+#include <shark/Core/Shark.h>
 #include <shark/LinAlg/BLAS/blas.h>
 #include <shark/LinAlg/BLAS/gpu/matrix.hpp>
 #include <shark/LinAlg/BLAS/gpu/vector.hpp>

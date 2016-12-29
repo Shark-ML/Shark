@@ -40,8 +40,6 @@
 #include <shark/Models/Kernels/KernelHelpers.h>
 
 #include <shark/LinAlg/Base.h>
-#include <shark/LinAlg/solveTriangular.h>
-#include <shark/LinAlg/Cholesky.h>
 namespace shark {
 
 
@@ -116,26 +114,23 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		//~ RealVector t = generateLabelVector();
 		RealVector t = column(createBatch<RealVector>(m_dataset.labels().elements()),0);
 
-		RealMatrix choleskyFactor(N,N);
-		choleskyDecomposition(M, choleskyFactor);
+		blas::cholesky_decomposition<RealMatrix> cholesky(M);
 		
 		//compute the determinant of M using the cholesky factorization M=AA^T:
 		//ln det(M) = 2 trace(ln A)
-		double logDet = 2* trace(log(choleskyFactor));
+		double logDet = 2* trace(log(cholesky.lower_factor()));
 		
 		//we need to compute t^T M^-1 t 
 		//= t^T (AA^T)^-1 t= t^T (A^-T A^-1)=||A^-1 t||^2
 		//so we will first solve the triangular System Az=t
 		//and then compute ||z||^2
-		//since we don't need t anymore after that, we solve in-place and omit z
-		blas::solveTriangularSystemInPlace<blas::SolveAXB,blas::lower>(choleskyFactor,t);
+		RealVector z = solve(cholesky.lower_factor(),t,blas::lower(), blas::left());
 
 		// equation (6.69) on page 311 in the book C.M. Bishop, Pattern Recognition and Machine Learning, Springer, 2006
 		// e = 1/2 \cdot [ -log(det(M)) - t^T M^{-1} t - N log(2 \pi) ]
-		double e = 0.5 * (-logDet - norm_sqr(t) - N * std::log(2.0 * M_PI));
+		double e = 0.5 * (-logDet - norm_sqr(z) - N * std::log(2.0 * M_PI));
 
 		// return the *negative* evidence
 		return -e;
@@ -169,12 +164,10 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		//~ RealVector t = generateLabelVector();
 		RealVector t = column(createBatch<RealVector>(m_dataset.labels().elements()),0);
-		
-		//new way to compute inverse and logDetM
-		RealMatrix choleskyFactor(N,N);
-		choleskyDecomposition(M, choleskyFactor);
+
+		//compute cholesky decomposition of M
+		blas::cholesky_decomposition<RealMatrix> cholesky(M);
 		//we dont need M anymore, so save a lot of memory by freeing the memory of M
 		M=RealMatrix();
 		
@@ -189,18 +182,17 @@ public:
 		// dE/da = sum_i sum_j W dM_ij/da
 		//this can be calculated as blockwise derivative.
 		
-		//compute inverse matrix from the cholesky dcomposition 
-		//using forward-backward substitution,
+		//compute inverse matrix from the cholesky decomposition 
 		RealMatrix W= blas::identity_matrix<double>(N);
-		blas::solveTriangularCholeskyInPlace<blas::SolveAXB>(choleskyFactor,W);
-		
+		cholesky.solve(W,blas::left());
+
 		//calculate z = Wt=M^-1 t
 		RealVector z = prod(W,t);
 		
 		// W is already initialized as the inverse of M, so we only need 
 		// to change the sign and add z. to calculate W fully
 		W*=-1;
-		W+=outer_prod(z,z);
+		noalias(W) += outer_prod(z,z);
 		
 		
 		//now calculate the derivative
@@ -223,7 +215,7 @@ public:
 
 		// compute the evidence
 		//compute determinant of M (see eval for why this works)
-		double logDetM = 2* trace(log(choleskyFactor));
+		double logDetM = 2* trace(log(cholesky.lower_factor()));
 		double e = 0.5 * (-logDetM - inner_prod(t, z) - N * std::log(2.0 * M_PI));
 		return -e;
 	}

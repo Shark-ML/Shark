@@ -297,7 +297,7 @@ MatA& multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	auto&& Beval = eval_block(B);
-	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, B);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, Beval);
 	return A();
 }
 
@@ -310,7 +310,7 @@ MatA& divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, 
 	SIZE_CHECK(A().size1() == B().size1());
 	SIZE_CHECK(A().size2() == B().size2());
 	auto&& Beval = eval_block(B);
-	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, B);
+	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, Beval);
 	return A();
 }
 

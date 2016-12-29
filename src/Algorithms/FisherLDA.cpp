@@ -34,7 +34,6 @@
 #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/Trainers/FisherLDA.h>
 #include <shark/LinAlg/eigenvalues.h>
-#include <shark/LinAlg/solveSystem.h>
 using namespace shark;
 
 
@@ -131,5 +130,5 @@ void FisherLDA::meanAndScatter(
 	}
 
 	// invert Sw
-	blas::solveSymmPosDefSystem<blas::SolveAXB>(Sw,scatter,Sb);
+	noalias(scatter) = solve(Sw,Sb, blas::symm_pos_def(), blas::left());
 }

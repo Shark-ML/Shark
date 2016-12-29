@@ -109,24 +109,21 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 
 	UnlabeledData<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsWhitening normalizer(1.5);
-	LinearModel<> map(3, 3);
+	LinearModel<> map;
 	normalizer.train(map, set);
 	Data<RealVector> transformedSet = map(set);
+	BOOST_REQUIRE_EQUAL(map.outputSize(),2);
 	
 	RealMatrix covariance;
 	meanvar(transformedSet, mean, covariance);
 	std::cout<<mean<<" "<<covariance<<std::endl;
-	for(std::size_t i = 0; i != 3;++i){
+	for(std::size_t i = 0; i != 2;++i){
 		BOOST_CHECK_SMALL(mean(i),1.e-10);
-		for(std::size_t j = 0; j != 3;++j){
-			if(j != i){
+		for(std::size_t j = 0; j != 2;++j){
+			if(j != i)
 				BOOST_CHECK_SMALL(covariance(i,j),1.e-5);
-			}
-			else if(i != 0)
-			{
+			else
 				BOOST_CHECK_SMALL(covariance(i,j)-1.5,1.e-5);
-			}else
-				BOOST_CHECK_SMALL(covariance(i,j),1.e-5);
 		}
 	}
 }

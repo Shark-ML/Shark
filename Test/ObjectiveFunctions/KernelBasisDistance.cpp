@@ -36,7 +36,7 @@
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/Data/DataDistribution.h>
 #include <shark/Rng/GlobalRng.h>
-#include <shark/LinAlg/solveSystem.h>
+#include <shark/LinAlg/BLAS/solve.hpp>
 
 #define BOOST_TEST_MODULE ObjectiveFunctions_KernelBasisDistance
 #include <boost/test/unit_test.hpp>
@@ -122,8 +122,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear )
 			//find optimal solution
 			RealMatrix K = prod(pointBatch,trans(pointBatch));
 			RealVector linear = prod(pointBatch,optimalPoint);
-			RealVector beta;
-			blas::solveSymmPosDefSystem<blas::SolveAXB>(K,beta,linear);
+			RealVector beta = solve(K,linear,blas::symm_pos_def(),blas::left());
 			RealVector optimalApproximation = prod(beta,pointBatch);
 			double errorOfApproximation = distanceSqr(optimalApproximation,optimalPoint)-norm_sqr(optimalPoint);
 			errorOfApproximation /= 2;

@@ -32,6 +32,7 @@
 #define SHARK_LINALG_BLAS_KERNELS_CBLAS_TRSV_HPP
 
 #include "cblas_inc.hpp"
+#include <boost/mpl/bool.hpp>
 
 ///solves systems of triangular matrices
 
@@ -77,17 +78,17 @@ inline void trsv(
 
 // trsv(): solves A system of linear equations A * x = b
 //             when A is A triangular matrix.
-template <bool Upper,bool Unit,typename MatA, typename V>
-void trsv(
+template <class Triangular,typename MatA, typename V>
+void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const &A, 
 	vector_expression<V, cpu_tag> &b,
-	boost::mpl::true_
+	boost::mpl::true_, left
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size1()== b().size());
-	CBLAS_DIAG cblasUnit = Unit?CblasUnit:CblasNonUnit;
+	CBLAS_DIAG cblasUnit = Triangular::is_unit?CblasUnit:CblasNonUnit;
 	CBLAS_ORDER const storOrd= (CBLAS_ORDER)storage_order<typename MatA::orientation>::value;
-	CBLAS_UPLO uplo = Upper?CblasUpper:CblasLower;
+	CBLAS_UPLO uplo = Triangular::is_upper?CblasUpper:CblasLower;
 	
 
 	int const n = A().size1();
@@ -99,6 +100,28 @@ void trsv(
 		storageb.values,
 	        storageb.stride
 	);
+}
+
+//right is mapped onto left via transposing A
+template <class Triangular,typename MatA, typename V>
+void trsv_impl(
+	matrix_expression<MatA, cpu_tag> const &A, 
+	vector_expression<V, cpu_tag> &b,
+	boost::mpl::true_, right
+){
+	matrix_transpose<typename const_expression<MatA>::type> transA(A());
+	trsv_impl<typename Triangular::transposed_orientation>(transA, b, boost::mpl::true_(),  left());
+}
+
+//dispatcher
+
+template <class Triangular, class Side,typename MatA, typename V>
+void trsv(
+	matrix_expression<MatA, cpu_tag> const& A, 
+	vector_expression<V, cpu_tag> & b,
+	boost::mpl::true_//optimized
+){
+	trsv_impl<Triangular>(A,b,boost::mpl::true_(), Side());
 }
 
 template<class Storage1, class Storage2, class T1, class T2>

@@ -41,16 +41,12 @@
 
 namespace shark {namespace blas {namespace bindings {
 
-//tag encoding
-// Upper matrix -> boost::mpl::true_
-// Lower matrix -> boost::mpl::false_
-	
 //Lower triangular(row-major) - vector
 template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-        boost::mpl::false_, column_major
+        lower, column_major, left
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
@@ -79,7 +75,7 @@ template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-        boost::mpl::false_, row_major
+        lower, row_major, left
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
@@ -109,7 +105,7 @@ template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-        boost::mpl::true_, column_major
+        upper, column_major, left
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
@@ -139,7 +135,7 @@ template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-        boost::mpl::true_, row_major
+        upper, row_major, left
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
@@ -165,15 +161,34 @@ void trsv_impl(
 	}
 }
 
-//dispatcher
 
-template <bool Upper,bool Unit,typename MatA, typename V>
+//right is mapped onto left via transposing A
+template<bool Unit, class Triangular, class Orientation, class MatA, class V>
+void trsv_impl(
+	matrix_expression<MatA, cpu_tag> const& A,
+	vector_expression<V, cpu_tag> &b,
+        Triangular, Orientation, right
+) {
+	matrix_transpose<typename const_expression<MatA>::type> transA(A());
+	trsv_impl<Unit>(
+		transA, b,
+		typename Triangular::transposed_orientation(),
+		typename Orientation::transposed_orientation(),
+		left()
+	);
+}
+
+//dispatcher
+template <class Triangular, class Side,typename MatA, typename V>
 void trsv(
 	matrix_expression<MatA, cpu_tag> const& A, 
 	vector_expression<V, cpu_tag> & b,
 	boost::mpl::false_//unoptimized
 ){
-	trsv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename MatA::orientation());
+	trsv_impl<Triangular::is_unit>(
+		A, b,
+		triangular_tag<Triangular::is_upper,false>(),
+		typename MatA::orientation(), Side());
 }
 
 }}}

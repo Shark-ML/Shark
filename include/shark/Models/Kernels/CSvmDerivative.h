@@ -45,10 +45,8 @@
 
 #include <shark/Core/INameable.h>
 #include <shark/Core/ISerializable.h>
-#include <shark/LinAlg/solveSystem.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
-
 namespace shark {
 
 
@@ -294,7 +292,11 @@ private:
 
 		
 		// initialize H and dH
-		RealMatrix H( m_noofFreeSVs+1, m_noofFreeSVs+1,0.0 );
+		//H is the the matrix 
+		//H = (K 1; 1 0)
+		// where the ones are row or column vectors and 0 is a scalar.
+		// K is the kernel matrix spanned by the free support vectors
+		RealMatrix H( m_noofFreeSVs + 1, m_noofFreeSVs + 1,0.0);
 		std::vector< RealMatrix > dH( m_nkp , RealMatrix(m_noofFreeSVs+1, m_noofFreeSVs+1));
 		for ( std::size_t i=0; i<m_noofFreeSVs; i++ ) {
 			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]); //fixed over outer loop
@@ -311,18 +313,17 @@ private:
 			// ..then fill the diagonal entries..
 			mep_k->eval( bof_xi, bof_xi, bof_results, *state );
 			H( i,i ) = bof_results(0,0);
+			H( i, m_noofFreeSVs) = H( m_noofFreeSVs, i) = 1.0;
 			mep_k->weightedParameterDerivative( bof_xi, bof_xi, unit_weights, *state, der );
 			for ( std::size_t k=0; k<m_nkp; k++ ) {
 				dH[k]( i,i ) = der(k);
 			}
 			// ..and finally the last row/column (pertaining to the offset parameter b)..
-			H( m_noofFreeSVs, i ) = H( i, m_noofFreeSVs ) = 1.0;
 			for (std::size_t k=0; k<m_nkp; k++)
 				dH[k]( m_noofFreeSVs, i ) = dH[k]( i, m_noofFreeSVs ) = 0.0;
 		}
 
 		// ..the lower-right-most entry gets set separately:
-		H( m_noofFreeSVs, m_noofFreeSVs ) = 0.0;
 		for ( std::size_t k=0; k<m_nkp; k++ ) {
 			dH[k]( m_noofFreeSVs, m_noofFreeSVs ) = 0.0;
 		}
@@ -370,12 +371,18 @@ private:
 		//lastly solve the system Hx_i = b_i 
 		// MAJOR STEP: this is the achilles heel of the current implementation, cf. keerthi 2007
 		// TODO: mtq: explore ways for speed-up..
-		blas::generalSolveSystemInPlace<blas::SolveAXB>(H,m_d_alphab_d_theta);
-		m_d_alphab_d_theta*=-1;
+		//compute via moore penrose pseudo-inverse
+		noalias(m_d_alphab_d_theta) = - solveH(H,m_d_alphab_d_theta);
 		
 		// that's all, folks; we're done.
 	}
-
+	
+	RealMatrix solveH(RealMatrix const& H, RealMatrix const& rhs){
+		//implement using moore penrose pseudo inverse
+		RealMatrix HTH=prod(trans(H),H);
+		RealMatrix result = solve(HTH,prod(H,rhs),blas::symm_semi_pos_def(),blas::left());
+		return result;
+	}
 };//class
 
 

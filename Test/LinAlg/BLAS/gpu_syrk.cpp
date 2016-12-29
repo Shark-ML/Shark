@@ -3,8 +3,9 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/mpl/list.hpp>
 
-#define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
 
+#define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
+#include <shark/Core/Shark.h>
 #include <shark/LinAlg/BLAS/blas.h>
 #include <shark/LinAlg/BLAS/io.hpp>
 #include <shark/LinAlg/BLAS/gpu/matrix.hpp>

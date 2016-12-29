@@ -4,7 +4,7 @@
  * \brief       -
  *
  * \author      O. Krause
- * \date        2012
+ * \date        2016
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -35,6 +35,7 @@
 #include "../../detail/structure.hpp" //structure tags
 #include <stdexcept> //exception when matrix is singular
 #include "../gemm.hpp" //gemm kernel
+#include "simple_proxies.hpp"
 #include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
 
 namespace shark {namespace blas {namespace bindings {
@@ -104,9 +105,6 @@ void trsm_block(
 	lower,
 	column_major // B is column-major
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
-	
 	typedef typename MatA::value_type value_type;
 	//evaluate and copy block of A
 	std::size_t size = A().size1();
@@ -197,9 +195,6 @@ void trsm_block(
 	upper,
 	column_major // B is column-major
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
-	
 	typedef typename MatA::value_type value_type;
 	//evaluate and copy block of A
 	std::size_t size = A().size1();
@@ -232,11 +227,13 @@ void trsm_recursive(
 	matrix_expression<MatB, cpu_tag> & Bfull,
 	std::size_t start,
 	std::size_t end,
-	Triangular t
+	Triangular t,
+	left l
 ){
 	static std::size_t const Block_Size =  32;
-	auto A = subrange(Afull,start,end,start,end);
-	auto B = rows(Bfull,start,end);
+	std::size_t num_rhs = Bfull().size2();
+	auto A = simple_subrange(Afull,start,end,start,end);
+	auto B = simple_subrange(Bfull,start,end,0,num_rhs);
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(A.size1() <= Block_Size){
 		trsm_block<Block_Size,16,Triangular::is_unit>(A,B,triangular_tag<Triangular::is_upper,false>(), typename MatB::orientation());
@@ -245,31 +242,44 @@ void trsm_recursive(
 	std::size_t size = A.size1();
 	std::size_t numBlocks =(A.size1()+Block_Size-1)/Block_Size; 
 	std::size_t split = numBlocks/2*Block_Size;
-	auto Bfront = rows(B,0,split);
-	auto Bback = rows(B,split,size);
+	auto Bfront = simple_subrange(B,0,split,0,num_rhs);
+	auto Bback = simple_subrange(B,split,size,0,num_rhs);
 	
 	//otherwise run the kernel recursively
 	if(Triangular::is_upper){ //Upper triangular case
-		trsm_recursive(Afull, Bfull,start+split,end, t);
-		kernels::gemm(subrange(A,0,split,split,size), Bback, Bfront, -1.0);
-		trsm_recursive(Afull, Bfull,start,start+split, t);
+		trsm_recursive(Afull, Bfull,start+split,end, t, l);
+		kernels::gemm(simple_subrange(A,0,split,split,size), Bback, Bfront, -1.0);
+		trsm_recursive(Afull, Bfull,start,start+split, t, l);
 	}else{// Lower triangular caste
-		trsm_recursive(Afull, Bfull,start,start+split, t);
-		kernels::gemm(subrange(A,split,size,0,split), Bfront, Bback, -1.0);
-		trsm_recursive(Afull, Bfull,start+split,end, t);
+		trsm_recursive(Afull, Bfull,start,start+split, t, l);
+		kernels::gemm(simple_subrange(A,split,size,0,split), Bfront, Bback, -1.0);
+		trsm_recursive(Afull, Bfull,start+split,end, t, l);
 	}
 }
+
+template <typename MatA, typename MatB, class Triangular>
+void trsm_recursive(
+	matrix_expression<MatA, cpu_tag> const& Afull, 
+	matrix_expression<MatB, cpu_tag> & Bfull,
+	std::size_t start,
+	std::size_t end,
+	Triangular,
+	right
+){
+	auto transA = simple_trans(Afull);
+	auto transB = simple_trans(Bfull);
+	trsm_recursive(transA,transB,start,end,typename Triangular::transposed_orientation(),left());
+}
+
 //main kernel runs the kernel above recursively and calls gemv
-template <bool Upper,bool Unit,typename MatA, typename MatB>
+template <class Triangular, class Side, typename MatA, typename MatB>
 void trsm(
 	matrix_expression<MatA, cpu_tag> const& A, 
 	matrix_expression<MatB, cpu_tag>& B,
 	boost::mpl::false_ //unoptimized
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
 	
-	bindings::trsm_recursive(A,B,0,A().size1(), triangular_tag<Upper,Unit>());
+	bindings::trsm_recursive(A,B,0,A().size1(), Triangular(), Side());
 }
 }}}
 #endif

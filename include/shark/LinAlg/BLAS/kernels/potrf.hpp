@@ -42,9 +42,7 @@ namespace bindings {
 template<class M>
 struct  has_optimized_potrf
 	: public boost::mpl::false_ {};
-}
-}
-}
+}}}
 #endif
 
 #include "default/potrf.hpp"

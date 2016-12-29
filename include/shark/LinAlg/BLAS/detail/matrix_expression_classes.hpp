@@ -1112,5 +1112,124 @@ private:
 	vector_closure_type m_diagonal; 
 };
 
+template<class MatA, class VecV, class SystemInfo, class Decomp>
+class matrix_vector_solve: public vector_expression<matrix_vector_solve<MatA, VecV, SystemInfo, Decomp>, typename MatA::device_type>{
+public:
+	typedef typename MatA::const_closure_type matrix_closure_type;
+	typedef typename VecV::const_closure_type vector_closure_type;
+	typedef decltype(
+		typename MatA::value_type() * typename VecV::value_type()
+	) value_type;
+	typedef typename MatA::size_type size_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+
+	typedef matrix_vector_solve<MatA, VecV, SystemInfo, Decomp> const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
+	typedef blockwise<dense_tag> evaluation_category;
+	typedef typename MatA::device_type device_type;
+
+	//FIXME: This workaround is required to be able to generate
+	// temporary matrices
+	typedef typename MatA::const_row_iterator const_iterator;
+	typedef const_iterator iterator;
+
+	size_type size() const {
+		return m_rhs.size();
+	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_rhs.queue();
+	}
+#endif
+	matrix_vector_solve(matrix_closure_type const& matrix, vector_closure_type const&rhs, SystemInfo system_info = SystemInfo())
+	:m_matrix(matrix), m_rhs(rhs), m_system_info(system_info){}
+	
+	//dispatcher to computation kernels
+	template<class VecX>
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+		assign(x,m_rhs,alpha);
+		Decomp decomposition(m_matrix);
+		decomposition.solve(x,m_system_info);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+		typename vector_temporary<VecX>::type temp(m_rhs);
+		Decomp decomposition(m_matrix);
+		decomposition.solve(temp,m_system_info);
+		plus_assign(x,temp,alpha);
+	}
+private:
+	matrix_closure_type m_matrix;
+	vector_closure_type m_rhs;
+	SystemInfo m_system_info;
+};
+
+
+template<class MatA, class MatB, class SystemInfo, class Decomp>
+class matrix_matrix_solve: public matrix_expression<matrix_matrix_solve<MatA, MatB, SystemInfo, Decomp>,
+	typename MatA::device_type>{
+public:
+	typedef typename MatA::const_closure_type matrixA_closure_type;
+	typedef typename MatB::const_closure_type matrixB_closure_type;
+	typedef decltype(
+		typename MatA::value_type() * typename MatB::value_type()
+	) value_type;
+	typedef typename MatA::size_type size_type;
+	typedef value_type const_reference;
+	typedef const_reference reference;
+
+	typedef matrix_matrix_solve<MatA, MatB, SystemInfo, Decomp> const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
+	typedef blockwise<dense_tag> evaluation_category;
+	typedef typename MatA::device_type device_type;
+	typedef unknown_orientation orientation;
+	//FIXME: This workaround is required to be able to generate
+	// temporary matrices
+	typedef typename MatA::const_row_iterator const_row_iterator;
+	typedef typename MatA::const_column_iterator const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+	
+	size_type size1() const {
+		return m_rhs.size1();
+	}
+	size_type size2() const {
+		return m_rhs.size2();
+	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return m_rhs.queue();
+	}
+#endif
+
+
+	matrix_matrix_solve(matrixA_closure_type const& matrix, matrixB_closure_type const& rhs, SystemInfo const& system_info = SystemInfo())
+	:m_matrix(matrix), m_rhs(rhs), m_system_info(system_info){}
+	
+	//dispatcher to computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+		assign(X,m_rhs,alpha);
+		Decomp decomposition(m_matrix);
+		decomposition.solve(X,m_system_info);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+		typename matrix_temporary<MatX>::type temp(m_rhs);
+		Decomp decomposition(m_matrix);
+		decomposition.solve(temp,m_system_info);
+		plus_assign(X,temp,alpha);
+	}
+private:
+	matrixA_closure_type m_matrix;
+	matrixB_closure_type m_rhs;
+	SystemInfo m_system_info;
+};
+
 }}
 #endif

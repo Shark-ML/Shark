@@ -31,6 +31,7 @@
 #include "../vector_assign.hpp"
 #include "../../detail/traits.hpp"
 #include <algorithm>
+#include <vector>
 namespace shark {namespace blas {namespace bindings{
 	
 //////////////////////////////////////////////////////

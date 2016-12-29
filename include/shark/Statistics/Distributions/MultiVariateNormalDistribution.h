@@ -33,9 +33,7 @@
 #define SHARK_STATISTICS_MULTIVARIATENORMALDISTRIBUTION_H
 
 #include <shark/LinAlg/eigenvalues.h>
-#include <shark/LinAlg/Cholesky.h>
 #include <shark/Rng/GlobalRng.h>
-#include <shark/Core/OpenMP.h>
 namespace shark {
 
 /// \brief Implements a multi-variate normal distribution with zero mean.
@@ -138,7 +136,7 @@ private:
 };
 
 /// \brief Multivariate normal distribution with zero mean using a cholesky decomposition
-class MultiVariateNormalDistributionCholesky {
+class MultiVariateNormalDistributionCholesky{
 public:
 	/// \brief Result type of a sampling operation.
 	/// 
@@ -161,39 +159,29 @@ public:
 	///\param [in] version Currently unused.
 	template<typename Archive>
 	void serialize( Archive & ar, const std::size_t version ) {
-		ar & BOOST_SERIALIZATION_NVP( m_lowerCholesky);
+		ar & BOOST_SERIALIZATION_NVP( m_cholesky);
 	}
 
 	/// \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
 	/// \param [in] size The new size of the distribution
 	void resize( std::size_t size ) {
-		m_lowerCholesky = blas::identity_matrix<double>( size );
+		m_cholesky = blas::identity_matrix<double>( size );
 	}
 	
 	/// \brief Returns the size of the created vectors
 	std::size_t size()const{
-		return m_lowerCholesky.size1();
+		return m_cholesky.lower_factor().size1();
 	}
 	
 	/// \brief Sets the new covariance matrix by computing the new cholesky dcomposition
 	void setCovarianceMatrix(RealMatrix const& matrix){
-		choleskyDecomposition(matrix,m_lowerCholesky);
+		m_cholesky.decompose(matrix);
 	}
 
-	/// \brief Returns the lower cholsky factor.
-	blas::matrix<double,blas::column_major> const& lowerCholeskyFactor() const {
-		return m_lowerCholesky;
-	}
-
-	/// \brief Returns the lower cholesky factor.
-	blas::matrix<double,blas::column_major>& lowerCholeskyFactor(){
-		return m_lowerCholesky;
-	}
-	
+	/// \brief Updates the covariance matrix of the distribution to C<- alpha*C+beta * vv^T
 	void rankOneUpdate(double alpha, double beta, RealVector const& v){
-		choleskyUpdate(m_lowerCholesky,v,alpha,beta);
+		m_cholesky.update(alpha,beta,v);
 	}
-	
 	
 	template<class RngType, class Vector1, class Vector2>
 	void generate(RngType& rng, Vector1& y, Vector2& z)const{
@@ -202,12 +190,7 @@ public:
 		for( std::size_t i = 0; i != size(); i++ ) {
 			z( i ) = gauss(rng, 0, 1 );
 		}
-		if(size() > 400){
-			y = z;
-			blas::triangular_prod<blas::lower>(m_lowerCholesky,y);
-		}else{
-			noalias(y) = prod(m_lowerCholesky,z);
-		}
+		noalias(y) = blas::triangular_prod<blas::lower>(m_cholesky.lower_factor(),z);
 	}
 
 	/// \brief Samples the distribution.
@@ -224,7 +207,7 @@ public:
 	}
 
 private:
-	blas::matrix<double,blas::column_major> m_lowerCholesky; ///< The lower cholesky factor (actually any is okay as long as it is the left)
+	blas::cholesky_decomposition<blas::matrix<double,blas::column_major> > m_cholesky; ///< The lower cholesky factor (actually any is okay as long as it is the left)
 };
 
 

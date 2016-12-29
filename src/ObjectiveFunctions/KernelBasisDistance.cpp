@@ -28,7 +28,6 @@
  */
 #define SHARK_COMPILE_DLL
 #include <shark/ObjectiveFunctions/KernelBasisDistance.h>
-#include <shark/LinAlg/solveSystem.h>
 #include <shark/Rng/GlobalRng.h>
 
 using namespace shark;
@@ -90,8 +89,7 @@ void KernelBasisDistance::setupAndSolve(RealMatrix& beta, RealVector const& inpu
 	}
 
 	//solve for the optimal combination of kernel vectors beta
-	beta = linear;
-	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(Kz,beta);
+	beta = solve(Kz,linear,blas::symm_pos_def(), blas::left());
 }
 
 double KernelBasisDistance::errorOfSolution(RealMatrix const& beta, RealMatrix const& Kz, RealMatrix const& linear)const{
@@ -148,8 +146,7 @@ KernelBasisDistance::ResultType KernelBasisDistance::evalDerivative( const Searc
 	}
 
 	//solve for the optimal combination of kernel vectors beta
-	RealMatrix beta = linear;
-	solveSymmSemiDefiniteSystemInPlace<SolveAXB>(Kz,beta);
+	RealMatrix beta = solve(Kz,linear,blas::symm_pos_def(), blas::left());
 
 	//compute derivative
 	// the derivative for z_l is given by

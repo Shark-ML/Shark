@@ -335,11 +335,11 @@ public:
 	}
 	
 	void swap_rows(size_type i, size_type j){
-		m_expression->swap_columns(i,j);
+		m_expression.swap_columns(i,j);
 	}
 	
 	void swap_columns(size_type i, size_type j){
-		m_expression->swap_rows(i,j);
+		m_expression.swap_rows(i,j);
 	}
 	
 private:

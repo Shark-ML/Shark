@@ -32,6 +32,7 @@
 #include <shark/Core/Exception.h>
 #include <iterator>
 #include <type_traits>
+#include <limits>
 
 
 namespace shark {namespace blas { namespace iterators{

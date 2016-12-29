@@ -2,6 +2,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
+#include <shark/Core/Shark.h>
 #include <shark/LinAlg/BLAS/triangular_matrix.hpp>
 #include <shark/LinAlg/BLAS/matrix_proxy.hpp>
 #include <shark/LinAlg/BLAS/matrix.hpp>

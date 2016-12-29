@@ -33,19 +33,19 @@
 #define SHARK_LINALG_BLAS_BLAS_H
 
 #include <shark/Core/Shark.h>
+
+//proxies
 #include <shark/LinAlg/BLAS/vector_proxy.hpp>
+#include <shark/LinAlg/BLAS/matrix_proxy.hpp>
+//expressions
+#include <shark/LinAlg/BLAS/vector_expression.hpp>
+#include <shark/LinAlg/BLAS/matrix_expression.hpp>
+#include <shark/LinAlg/BLAS/solve.hpp>
 //containers
 #include <shark/LinAlg/BLAS/vector.hpp>
 #include <shark/LinAlg/BLAS/vector_sparse.hpp>
 #include <shark/LinAlg/BLAS/matrix.hpp>
 #include <shark/LinAlg/BLAS/matrix_sparse.hpp>
-
-//proxies
-
-#include <shark/LinAlg/BLAS/matrix_proxy.hpp>
-//expressions
-#include <shark/LinAlg/BLAS/vector_expression.hpp>
-#include <shark/LinAlg/BLAS/matrix_expression.hpp>
 
 //misc
 #include <shark/LinAlg/BLAS/permutation.hpp>

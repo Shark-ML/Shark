@@ -3,6 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/mpl/list.hpp>
 
+#include <shark/Core/Shark.h>
 #include <shark/LinAlg/BLAS/blas.h>
 #include <shark/LinAlg/BLAS/kernels/conv2d.hpp>
 

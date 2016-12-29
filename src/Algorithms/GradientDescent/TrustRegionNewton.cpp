@@ -33,7 +33,6 @@
  */
 #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/GradientDescent/TrustRegionNewton.h>
-#include <shark/LinAlg/solveSystem.h>
 
 using namespace shark;
 
