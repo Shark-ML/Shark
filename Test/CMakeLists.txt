@@ -91,9 +91,7 @@ shark_add_test( LinAlg/BLAS/gpu_triangular_solve.cpp BLAS_GPU_Triangular_Solve)
 endif()
 
 # LinAlg Tests
-shark_add_test( LinAlg/DiagonalMatrix.cpp LinAlg_DiagonalMatrix)
 shark_add_test( LinAlg/Proxy.cpp LinAlg_Proxy )
-shark_add_test( LinAlg/repeat.cpp LinAlg_Repeat)
 shark_add_test( LinAlg/rotations.cpp LinAlg_rotations )
 shark_add_test( LinAlg/permute.cpp LinAlg_Permutations )
 shark_add_test( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )

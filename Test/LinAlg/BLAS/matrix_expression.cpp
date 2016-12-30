@@ -51,12 +51,31 @@ void checkDenseExpressionEquality(
 	}
 }
 
-
+template<class M, class D>
+void checkDiagonalMatrix(M const& diagonal, D const& diagonalElements){
+	BOOST_REQUIRE_EQUAL(diagonal.size1(),diagonalElements.size());
+	BOOST_REQUIRE_EQUAL(diagonal.size2(),diagonalElements.size());
+	for(std::size_t i = 0; i != diagonalElements.size(); ++i){
+		for(std::size_t j = 0; j != diagonalElements.size(); ++j){
+			if(i != j)
+				BOOST_CHECK_EQUAL(diagonal(i,j),0);
+			else
+				BOOST_CHECK_EQUAL(diagonal(i,i),diagonalElements(i));
+		}
+		auto row_begin = diagonal.row_begin(i);
+		auto col_begin = diagonal.column_begin(i);
+		BOOST_CHECK_EQUAL(row_begin.index(),i);
+		BOOST_CHECK_EQUAL(col_begin.index(),i);
+		BOOST_CHECK_EQUAL(std::distance(row_begin, diagonal.row_end(i)),1);
+		BOOST_CHECK_EQUAL(std::distance(col_begin, diagonal.column_end(i)),1);
+		BOOST_CHECK_EQUAL(*row_begin,diagonalElements(i));
+		BOOST_CHECK_EQUAL(*col_begin,diagonalElements(i));
+	}
+	
+}
 
 std::size_t Dimension1 = 50;
 std::size_t Dimension2 = 100;
-
-
 
 BOOST_AUTO_TEST_SUITE (BLAS_matrix_expression)
 
@@ -95,6 +114,27 @@ BOOST_AUTO_TEST_CASE( BLAS_matrix_Vector_Repeater){
 		}
 	}
 	checkDenseExpressionEquality(blas::repeat(x,Dimension1),result);
+}
+
+BOOST_AUTO_TEST_CASE( BLAS_Diagonal_Matrix ){
+	vector<double> diagonalElements(Dimension1);
+	matrix<double> result(Dimension1,Dimension2,0.0);
+	for(std::size_t i = 0; i != Dimension1; ++i){
+		diagonalElements(i) = i;
+		result(i,i) = i;
+	}
+	
+	blas::diagonal_matrix<vector<double> > diagonal(diagonalElements);
+	checkDiagonalMatrix(diagonal,diagonalElements);
+}
+
+BOOST_AUTO_TEST_CASE( BLAS_Identity_Matrix ){
+	vector<double> diagonalElements(Dimension1);
+	for(std::size_t i = 0; i != Dimension1; ++i)
+		diagonalElements(i) = 1;
+	
+	blas::identity_matrix<double > diagonal(Dimension1);
+	checkDiagonalMatrix(diagonal,diagonalElements);
 }
 
 /////////////////////////////////////////////////////////////
