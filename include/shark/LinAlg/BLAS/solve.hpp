@@ -38,6 +38,8 @@
 #include "assignment.hpp"
 #include "permutation.hpp"
 #include "matrix_expression.hpp"
+#include "vector_proxy.hpp"
+#include "vector_expression.hpp"
 
 namespace shark{namespace blas{
 template<class D, class Device>

@@ -143,44 +143,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(BLAS_Pstrf_Semi_Definite, Orientation,result_orien
 	BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(upA)));//test for nans
 }
 
-
-//~ BOOST_AUTO_TEST_CASE( LinAlg_CholeskyUpdate ){
-	//~ std::size_t NumTests = 100;
-	//~ std::size_t Dimensions = 50;
-	//~ for(std::size_t test = 0; test != NumTests; ++test){
-		//~ //first generate a suitable eigenvalue problem matrix A as well as its decompisition
-		//~ RealVector lambda(Dimensions);
-		//~ for(std::size_t i = 0; i != Dimensions; ++i){
-			//~ lambda(i) = Rng::uni(1,3.0);
-		//~ }
-		//~ RealMatrix A = createRandomMatrix(lambda,Dimensions);
-		//~ //calculate Cholesky
-		//~ RealMatrix C(Dimensions,Dimensions);
-		//~ choleskyDecomposition(A,C);
-		
-		//~ //generate proper update
-		
-		//~ double alpha = Rng::uni(0.1,1);
-		//~ double beta = Rng::uni(0.1,2)*alpha;
-		//~ RealVector v(Dimensions);
-		//~ for(std::size_t i = 0; i != Dimensions; ++i){
-			//~ v(i) = Rng::uni(-1,1);
-		//~ }
-		//~ if(beta < 0)//preserve positive definiteness
-			//~ v /= norm_2(v);
-		
-		//~ //update decomposition
-		//~ A*=alpha;
-		//~ noalias(A) += beta*outer_prod(v,v);
-		//~ RealMatrix CUpdate=C;
-		//~ choleskyDecomposition(A,CUpdate);
-		
-		//~ //Test the fast update
-		//~ choleskyUpdate(C,v,alpha,beta);
-		
-		//~ BOOST_CHECK(!(boost::math::isnan)(norm_frobenius(C)));//test for nans
-		//~ BOOST_CHECK_SMALL(max(abs(C-CUpdate)),1.e-12);
-	//~ }
-//~ }
+BOOST_AUTO_TEST_CASE_TEMPLATE(BLAS_Cholesky_Update, Orientation,result_orientations) {
+	std::size_t Dimensions = 123;
+	//first generate a suitable eigenvalue problem matrix A
+	blas::matrix<double,Orientation> A = createSymm(Dimensions);
+	blas::vector<double> v(Dimensions);
+	for(std::size_t i = 0; i != Dimensions; ++i){
+		v(i) = 0.1/Dimensions*i - 0.5;
+	}
+	double alpha = 0.1;
+	double beta = 0.5;
+	blas::matrix<double,Orientation> Aupdate = alpha * A + beta * outer_prod(v,v);
+	//check that cholesky decomposition yields the same
+	blas::cholesky_decomposition<blas::matrix<double,Orientation> > decUpdate(Aupdate);
+	blas::cholesky_decomposition<blas::matrix<double,Orientation> > dec(A);
+	dec.update(alpha,beta,v);
+	
+	for (size_t row = 0; row < Dimensions; row++){
+		for (size_t col = 0; col <= row; col++){
+			BOOST_CHECK_CLOSE(decUpdate.lower_factor()(row,col),dec.lower_factor()(row,col),1.e-11);
+		}
+	}
+}
 
 BOOST_AUTO_TEST_SUITE_END()
