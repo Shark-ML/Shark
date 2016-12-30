@@ -156,7 +156,8 @@ std::size_t pstrf(
 	vector_expression<VecP, cpu_tag>& P,
 	upper
 ){
-	return pstrf(simple_trans(A),P,lower());
+	auto transA = simple_trans(A);
+	return pstrf(transA,P,lower());
 }
 
 }}}

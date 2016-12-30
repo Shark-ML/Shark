@@ -64,16 +64,16 @@ namespace shark{ namespace blas{
                                            const vector_expression<VE, cpu_tag> &vec) {
 	auto&& v = eval_block(vec);
         typedef typename VE::size_type size_type;
-        size_type size = v ().size ();
+        size_type size = v.size ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
         s.flags (os.flags ());
         s.imbue (os.getloc ());
         s.precision (os.precision ());
         s << '[' << size << "](";
         if (size > 0)
-            s << v () (0);
+            s << v(0);
         for (size_type i = 1; i < size; ++ i)
-            s << ',' << v () (i);
+            s << ',' << v(i);
         s << ')';
         return os << s.str ().c_str ();
     }
@@ -107,8 +107,8 @@ namespace shark{ namespace blas{
                                            const matrix_expression<ME, cpu_tag> &mat) {
         auto&& m=eval_block(mat);
 	typedef typename ME::size_type size_type;
-        size_type size1 = m ().size1 ();
-        size_type size2 = m ().size2 ();
+        size_type size1 = m.size1 ();
+        size_type size2 = m.size2 ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
         s.flags (os.flags ());
         s.imbue (os.getloc ());
@@ -117,21 +117,21 @@ namespace shark{ namespace blas{
         if (size1 > 0) {
             s << '(' ;
             if (size2 > 0)
-                s << m () (0, 0);
+                s << m(0, 0);
             for (size_type j = 1; j < size2; ++ j)
-                s << ',' << m () (0, j);
+                s << ',' << m(0, j);
             s << ')';
         }
         for (size_type i = 1; i < size1; ++ i) {
             s << ",(" ;
             if (size2 > 0)
-                s << m () (i, 0);
+                s << m(i, 0);
             for (size_type j = 1; j < size2; ++ j)
-                s << ',' << m () (i, j);
+                s << ',' << m(i, j);
             s << ')';
         }
         s << ')';
-        return os << s.str ().c_str ();
+        return os << s.str().c_str ();
     }
 }}
 

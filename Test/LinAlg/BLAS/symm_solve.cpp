@@ -36,6 +36,8 @@ blas::matrix<double> createSymm(std::size_t dimensions, std::size_t rank = 0){
 	}
 	return A;
 }
+typedef boost::mpl::list<blas::row_major,blas::column_major> result_orientations;
+
 //simple test which checks for all argument combinations whether they are correctly translated
 BOOST_AUTO_TEST_SUITE (Solve_Symm)
 
@@ -78,7 +80,6 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Vector ){
 	}
 }
 
-typedef boost::mpl::list<blas::row_major,blas::column_major> result_orientations;
 BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::size_t Dimensions = 128;
 	std::size_t k = 151;
@@ -255,7 +256,6 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Rank_Deficient ){
 	}
 }
 
-typedef boost::mpl::list<blas::row_major,blas::column_major> result_orientations;
 BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Rank_Deficient, Orientation,result_orientations) {
 	std::size_t Dimensions = 128;
 	std::size_t Rank = 50;
@@ -346,7 +346,6 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Conjugate_Gradient_Vector ){
 	}
 }
 
-typedef boost::mpl::list<blas::row_major,blas::column_major> result_orientations;
 BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Conjugate_Gradient, Orientation,result_orientations) {
 	std::size_t Dimensions = 128;
 	std::size_t k = 151;
