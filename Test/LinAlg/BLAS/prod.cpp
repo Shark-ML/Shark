@@ -49,25 +49,25 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_dense ){
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) += -2*prod(arg1rm,arg2);
+		noalias(result) += -2 * arg1rm % arg2;
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) += -2*prod(arg1cm,arg2);
+		noalias(result) += -2* arg1cm % arg2;
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) += -2*prod(arg2,arg1rmt);
+		noalias(result) += -2 * arg2 % arg1rmt;
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,1.5);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) += -2*prod(arg2,arg1cmt);
+		noalias(result) += -2 * arg2 % arg1cmt;
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,1.5);
 	}
 	std::cout<<"\nchecking dense matrix vector assign multiply"<<std::endl;
@@ -75,25 +75,25 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_dense ){
 	{
 		std::cout<<"row major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) = -2*prod(arg1rm,arg2);
+		noalias(result) = -2 * arg1rm % arg2;
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major Ax"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) = -2*prod(arg1cm,arg2);
+		noalias(result) = -2 * arg1cm % arg2;
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"row major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) = -2*prod(arg2,arg1rmt);
+		noalias(result) = -2 * arg2 % arg1rmt;
 		checkMatrixVectorMultiply(arg1rm,arg2,result,-2.0,0);
 	}
 	{
 		std::cout<<"column major xA"<<std::endl;
 		vector<double> result(rows,1.5);
-		noalias(result) = -2*prod(arg2,arg1cmt);
+		noalias(result) = -2 * arg2 % arg1cmt;
 		checkMatrixVectorMultiply(arg1cm,arg2,result,-2.0,0);
 	}
 }

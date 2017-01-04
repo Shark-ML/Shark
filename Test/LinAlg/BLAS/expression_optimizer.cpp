@@ -59,6 +59,36 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_expression_optimize ){
 		BOOST_CHECK_SMALL(norm_inf(trans(m1) - e.matrix()), 1.e-10);
 		BOOST_CHECK_SMALL(norm_inf(v - e.vector()), 1.e-10);
 	}
+	//scalar product
+	{
+		M1 m1 = create_matrix(5,10);
+		V v = create_vector(10);
+		double alpha = 2;
+		vector_scalar_multiply<matrix_vector_prod<M1,V> > e = (2 * m1) % v;
+		BOOST_CHECK_SMALL(std::abs(e.scalar() - alpha), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m1 - e.expression().matrix()), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(v - e.expression().vector()), 1.e-10);
+	}
+	{
+		M1 m1 = create_matrix(5,10);
+		V v = create_vector(10);
+		double alpha = 2;
+		vector_scalar_multiply<matrix_vector_prod<M1,V> > e = m1 % (2* v);
+		BOOST_CHECK_SMALL(std::abs(e.scalar() - alpha), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m1 - e.expression().matrix()), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(v - e.expression().vector()), 1.e-10);
+	}
+	{
+		M1 m1 = create_matrix(5,10);
+		V v = create_vector(10);
+		double alpha = 4;
+		vector_scalar_multiply<matrix_vector_prod<M1,V> > e = (2 * m1) % (2* v);
+		BOOST_CHECK_SMALL(std::abs(e.scalar() - alpha), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m1 - e.expression().matrix()), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(v - e.expression().vector()), 1.e-10);
+	}
+	
+	
 	//matrix-addition
 	{
 		M1 m1 = create_matrix(5,10);
@@ -110,6 +140,41 @@ BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_vector_expression_optimize ){
 			matrix_vector_prod<matrix_transpose<M1 const>,V>
 		> e = prod(v,prod(m1,m2));
 		BOOST_CHECK_SMALL(norm_inf(e - prod(v,matrix<double>(prod(m1,m2)))), 1.e-10);
+	}
+}
+
+
+BOOST_AUTO_TEST_CASE( BLAS_prod_matrix_matrix_expression_optimize ){
+	typedef matrix<double,row_major> M1;
+	typedef matrix<double,column_major> M2;
+	
+	//scalar product
+	{
+		M1 m1 = create_matrix(5,10);
+		M2 m2 = create_matrix(10,5);
+		double alpha = 2;
+		matrix_scalar_multiply<matrix_matrix_prod<M1,M2> > e = (2 * m1) % m2;
+		BOOST_CHECK_SMALL(std::abs(e.scalar() - alpha), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m1 - e.expression().lhs()), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m2 - e.expression().rhs()), 1.e-10);
+	}
+	{
+		M1 m1 = create_matrix(5,10);
+		M2 m2 = create_matrix(10,5);
+		double alpha = 2;
+		matrix_scalar_multiply<matrix_matrix_prod<M1,M2> > e = m1 % (2* m2);
+		BOOST_CHECK_SMALL(std::abs(e.scalar() - alpha), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m1 - e.expression().lhs()), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m2 - e.expression().rhs()), 1.e-10);
+	}
+	{
+		M1 m1 = create_matrix(5,10);
+		M2 m2 = create_matrix(10,5);
+		double alpha = 4;
+		matrix_scalar_multiply<matrix_matrix_prod<M1,M2> > e = (2 * m1) % (2* m2);
+		BOOST_CHECK_SMALL(std::abs(e.scalar() - alpha), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m1 - e.expression().lhs()), 1.e-10);
+		BOOST_CHECK_SMALL(norm_inf(m2 - e.expression().rhs()), 1.e-10);
 	}
 }
 

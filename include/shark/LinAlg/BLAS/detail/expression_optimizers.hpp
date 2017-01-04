@@ -427,6 +427,28 @@ struct matrix_vector_prod_optimizer<matrix_scalar_multiply<M>,V >{
 	}
 };
 
+//M*(alpha*v) = alpha (M*v)
+template<class M, class V>
+struct matrix_vector_prod_optimizer<M,vector_scalar_multiply<V> >{
+	typedef matrix_vector_prod_optimizer<M, V> opt;
+	typedef vector_scalar_multiply<typename opt::type> type;
+	
+	static type create(typename M::const_closure_type const& m, vector_scalar_multiply<V> const& v){
+		return type(opt::create(m,v.expression()), v.scalar());
+	}
+};
+
+//(alpha M)*(beta*v) = (alpha*beta) (M*v)
+template<class M, class V>
+struct matrix_vector_prod_optimizer<matrix_scalar_multiply<M>,vector_scalar_multiply<V> >{
+	typedef matrix_vector_prod_optimizer<M, V> opt;
+	typedef vector_scalar_multiply<typename opt::type> type;
+	
+	static type create(matrix_scalar_multiply<M> const& m, vector_scalar_multiply<V>const& v){
+		return type(opt::create(m.expression(),v.expression()), v.scalar()*m.scalar());
+	}
+};
+
 //(M1*M2)*V=M1*(M2*V)
 template<class M1,class M2, class V>
 struct matrix_vector_prod_optimizer<matrix_matrix_prod<M1,M2>,V>{
@@ -483,6 +505,39 @@ struct matrix_matrix_prod_optimizer{
 	}
 };
 
+
+//(alpha M1)*B = alpha (M1*B)
+template<class M1, class M2>
+struct matrix_matrix_prod_optimizer<matrix_scalar_multiply<M1>,M2 >{
+	typedef matrix_matrix_prod_optimizer<M1, M2> opt;
+	typedef matrix_scalar_multiply<typename opt::type> type;
+	
+	static type create(matrix_scalar_multiply<M1> const& A, typename M2::const_closure_type const& B){
+		return type(opt::create(A.expression(),B), A.scalar());
+	}
+};
+
+//M1*(alpha*B) = alpha (M1*B)
+template<class M1, class M2>
+struct matrix_matrix_prod_optimizer<M1,matrix_scalar_multiply<M2> >{
+	typedef matrix_matrix_prod_optimizer<M1, M2> opt;
+	typedef matrix_scalar_multiply<typename opt::type> type;
+	
+	static type create(typename M1::const_closure_type const& A, matrix_scalar_multiply<M2> const& B){
+		return type(opt::create(A,B.expression()), B.scalar());
+	}
+};
+
+//(alpha M1)*(beta*B) = (alpha*beta) (M1*B)
+template<class M1, class M2>
+struct matrix_matrix_prod_optimizer<matrix_scalar_multiply<M1>,matrix_scalar_multiply<M2> >{
+	typedef matrix_matrix_prod_optimizer<M1, M2> opt;
+	typedef matrix_scalar_multiply<typename opt::type> type;
+	
+	static type create(matrix_scalar_multiply<M1> const& A, matrix_scalar_multiply<M2>const& B){
+		return type(opt::create(A.expression(),B.expression()), B.scalar()*A.scalar());
+	}
+};
 
 }}}
 #endif

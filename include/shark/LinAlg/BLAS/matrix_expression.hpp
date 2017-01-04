@@ -299,6 +299,24 @@ auto prod(vector_expression<VecV, Device> const& v,matrix_expression<MatA, Devic
 	return prod(trans(A),v);
 }
 
+/// \brief Operator syntax for computes the matrix-vector product
+///
+/// v%A= prod(v,A).
+template<class MatA, class VecV, class Device>
+auto operator%(vector_expression<VecV, Device> const& v,matrix_expression<MatA, Device> const& A) -> decltype(prod(trans(A),v)){
+	SIZE_CHECK(A().size1() == v().size());
+	return prod(trans(A),v);
+}
+
+/// \brief Operator syntax for computes the matrix-vector product
+///
+/// A%v = prod(A,v).
+template<class MatA, class VecV, class Device>
+auto operator%(matrix_expression<MatA, Device> const& A,vector_expression<VecV, Device> const& v) -> decltype(prod(A,v)){
+	SIZE_CHECK(A().size2() == v().size());
+	return prod(A,v);
+}
+
 /// \brief Computes the matrix-vector product x+= alpha * Av or x= alpha * Av
 ///
 /// A is interpreted as triangular matrix.
@@ -326,6 +344,18 @@ typename detail::matrix_matrix_prod_optimizer<MatA,MatB>::type prod(
 	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
 	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
 	return detail::matrix_matrix_prod_optimizer<MatA,MatB>::create(A(),B());
+}
+
+/// \brief Operator syntax for computes the matrix-matrix product
+///
+/// A%B= prod(A,B).
+template<class MatA, class MatB, class Device>
+auto operator%(
+	matrix_expression<MatA, Device> const& A,
+	matrix_expression<MatB, Device> const& B
+) -> decltype(prod(A,B)){
+	SIZE_CHECK(A().size2() == B().size1());
+	return prod(A,B);
 }
 
 /// \brief Computes the matrix-vector product x+= alpha * AB or x= alpha * AB
