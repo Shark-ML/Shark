@@ -34,9 +34,7 @@
 
 #include "default/getrf.hpp"
 
-namespace shark {
-namespace blas {
-namespace kernels {
+namespace shark {namespace blas {namespace kernels {
 
 ///\brief Implements the GEneral TRiangular matrix Factorisation GETRF.
 ///
@@ -48,20 +46,17 @@ namespace kernels {
 ///
 /// where L is lower unit-triangular and U upper triangular.
 /// 
-/// The unit triangular part is not stored explicitely. P is a permutation matrix
+/// The unit diagonal part of L is not stored explicitely. P is a permutation matrix
 /// where P(i) stores the index of the row that row i is swapped with.
 template <typename MatA, typename VecP>
-std::size_t potrf(
+void getrf(
 	matrix_expression<MatA, cpu_tag>& A,
-	vector_expression<VecP>& P,
+	vector_expression<VecP, cpu_tag>& P
 ) {
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(P().size() == A().size1());
 	return bindings::getrf(A,P);
 }
 
-}
-}
-}
-
+}}}
 #endif
