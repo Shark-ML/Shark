@@ -318,14 +318,14 @@ matrix_vector_prod<detail::dense_triangular_proxy<MatA const,TriangularType> ,Ve
 
 /// \brief computes the matrix-matrix product X+=AB
 template<class MatA, class MatB, class Device>
-matrix_matrix_prod<MatA,MatB> prod(
+typename detail::matrix_matrix_prod_optimizer<MatA,MatB>::type prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ) {
 	SIZE_CHECK(A().size2() == B().size1());
 	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
 	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
-	return matrix_matrix_prod<MatA,MatB>(A(),B());
+	return detail::matrix_matrix_prod_optimizer<MatA,MatB>::create(A(),B());
 }
 
 /// \brief Computes the matrix-vector product x+= alpha * AB or x= alpha * AB

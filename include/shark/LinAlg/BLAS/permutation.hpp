@@ -47,32 +47,32 @@ struct permutation_matrix:public vector<int> {
 
 ///\brief implements row pivoting at matrix A using permutation P
 ///
-///by convention it is not allowed that P(i) < i. 
-template<class M>
-void swap_rows(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
-	for (std::size_t i = 0; i != P.size(); ++ i)
-		A().swap_rows(i,P(i));
+///by convention it is not allowed that P()(i) < i. 
+template<class VecP, class M>
+void swap_rows(vector_expression<VecP, cpu_tag> const& P, matrix_expression<M, cpu_tag>& A){
+	for (std::size_t i = 0; i != P().size(); ++ i)
+		A().swap_rows(i,P()(i));
 }
 
 ///\brief implements column pivoting of vector A using permutation P
 ///
-///by convention it is not allowed that P(i) < i. 
-template<class V>
-void swap_rows(permutation_matrix const& P, vector_expression<V, cpu_tag>& v){
-	for (std::size_t i = 0; i != P.size(); ++ i)
-		std::swap(v()(i),v()(P(i)));
+///by convention it is not allowed that P()(i) < i. 
+template<class VecP, class V>
+void swap_rows(vector_expression<VecP, cpu_tag> const& P, vector_expression<V, cpu_tag>& v){
+	for (std::size_t i = 0; i != P().size(); ++ i)
+		std::swap(v()(i),v()(P()(i)));
 }
 
 ///\brief implements the inverse row pivoting of vector v using permutation P
 ///
 ///This is the inverse operation to swap_rows. 
-template<class V, class Permutation>
-void swap_rows_inverted(Permutation const& P, vector_expression<V, cpu_tag>& v){
-	for(std::size_t i = P.size(); i != 0; --i){
+template<class VecP, class V>
+void swap_rows_inverted(vector_expression<VecP, cpu_tag> const& P, vector_expression<V, cpu_tag>& v){
+	for(std::size_t i = P().size(); i != 0; --i){
 		std::size_t k = i-1;
-		if(k != std::size_t(P(k))){
+		if(k != std::size_t(P()(k))){
 			using std::swap;
-			swap(v()(k),v()(P(k)));
+			swap(v()(k),v()(P()(k)));
 		}
 	}
 }
@@ -80,29 +80,29 @@ void swap_rows_inverted(Permutation const& P, vector_expression<V, cpu_tag>& v){
 ///\brief implements column pivoting at matrix A using permutation P
 ///
 ///by convention it is not allowed that P(i) < i. 
-template<class M>
-void swap_columns(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
-	for(std::size_t i = 0; i != P.size(); ++i)
-		A().swap_columns(i,P(i));
+template<class VecP, class M>
+void swap_columns(vector_expression<VecP, cpu_tag> const& P, matrix_expression<M, cpu_tag>& A){
+	for(std::size_t i = 0; i != P().size(); ++i)
+		A().swap_columns(i,P()(i));
 }
 
 ///\brief implements the inverse row pivoting at matrix A using permutation P
 ///
-///This is the inverse operation to swapRows. 
-template<class M>
-void swap_rows_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
-	for(std::size_t i = P.size(); i != 0; --i){
-		A().swap_rows(i-1,P(i-1));
+///This is the inverse operation to swap_rows. 
+template<class VecP, class M>
+void swap_rows_inverted(vector_expression<VecP, cpu_tag> const& P, matrix_expression<M, cpu_tag>& A){
+	for(std::size_t i = P().size(); i != 0; --i){
+		A().swap_rows(i-1,P()(i-1));
 	}
 }
 
 ///\brief implements the inverse column pivoting at matrix A using permutation P
 ///
-///This is the inverse operation to swapColumns. 
-template<class M>
-void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
-	for(std::size_t i = P.size(); i != 0; --i){
-		A().swap_columns(i-1,P(i-1));
+///This is the inverse operation to swap_columns. 
+template<class VecP, class M>
+void swap_columns_inverted(vector_expression<VecP, cpu_tag> const& P, matrix_expression<M, cpu_tag>& A){
+	for(std::size_t i = P().size(); i != 0; --i){
+		A().swap_columns(i-1,P()(i-1));
 	}
 }
 
@@ -111,21 +111,21 @@ void swap_columns_inverted(permutation_matrix const& P, matrix_expression<M, cpu
 ///full pivoting does swap rows and columns such that the diagonal element
 ///A_ii is then at position A_P(i)P(i)
 ///by convention it is not allowed that P(i) < i. 
-template<class M>
-void swap_full(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
-	for(std::size_t i = 0; i != P.size(); ++i){
-		A().swap_rows(i,P(i));
-		A().swap_columns(i,P(i));
+template<class VecP, class M>
+void swap_full(vector_expression<VecP, cpu_tag> const& P, matrix_expression<M, cpu_tag>& A){
+	for(std::size_t i = 0; i != P().size(); ++i){
+		A().swap_rows(i,P()(i));
+		A().swap_columns(i,P()(i));
 	}
 }
 ///\brief implements the inverse full pivoting at matrix A using permutation P
 ///
 ///This is the inverse operation to swap_full. 
-template<class M>
-void swap_full_inverted(permutation_matrix const& P, matrix_expression<M, cpu_tag>& A){
-	for(std::size_t i = P.size(); i != 0; --i){
-		A().swap_rows(i-1,P(i-1));
-		A().swap_columns(i-1,P(i-1));
+template<class VecP, class M>
+void swap_full_inverted(vector_expression<VecP, cpu_tag> const& P, matrix_expression<M, cpu_tag>& A){
+	for(std::size_t i = P().size(); i != 0; --i){
+		A().swap_rows(i-1,P()(i-1));
+		A().swap_columns(i-1,P()(i-1));
 	}
 }
 

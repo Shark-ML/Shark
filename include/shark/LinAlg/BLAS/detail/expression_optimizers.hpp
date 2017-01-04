@@ -35,11 +35,10 @@
 
 namespace shark {namespace blas {namespace detail{
 	
-//forward declarations for vector
+//forward declarations
 template<class V>
 struct vector_range_optimizer;
 	
-//forward declarations for matrices
 template<class M>
 struct matrix_transpose_optimizer;
 template<class M>
@@ -50,6 +49,14 @@ template<class M, class V>
 struct matrix_vector_prod_optimizer;
 template<class M1, class M2>
 struct matrix_matrix_prod_optimizer;
+	
+template<class M1, class M2, class Tag, class Side>
+struct matrix_matrix_solve_optimizer;
+template<class M, class V, class Tag, class Side>
+struct matrix_vector_solve_optimizer;
+	
+template<class M, class Tag>
+struct matrix_inverse_optimizer;
 
 ////////////////////////////////////
 //// Vector Range
@@ -272,7 +279,7 @@ struct matrix_row_optimizer<matrix_binary<M1,M2, F> >{
 	}
 };
 
-//row(prod(A,B),i) = prod(trans(B),row(A)) 
+//row(prod(A,B),i) = prod(row(A),B) = prod(trans(B),row(A)) 
 template<class M1, class M2>
 struct matrix_row_optimizer<matrix_matrix_prod<M1,M2> >{
 	typedef matrix_row_optimizer<typename const_expression<M1>::type> left_opt;
@@ -287,6 +294,7 @@ struct matrix_row_optimizer<matrix_matrix_prod<M1,M2> >{
 		);
 	}
 };
+
 
 ////////////////////////////////////
 //// Matrix Range
@@ -460,6 +468,7 @@ struct matrix_vector_prod_optimizer<outer_product<V1,V2>,V3>{
 		return type(m.lhs(),alpha);
 	}
 };
+
 
 ////////////////////////////////////
 //// Matrix Product

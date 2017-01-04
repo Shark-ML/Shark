@@ -73,6 +73,7 @@ shark_add_test( LinAlg/BLAS/expression_optimizer.cpp BLAS_Expression_Optimizer)
 shark_add_test( LinAlg/BLAS/triangular_prod.cpp BLAS_Triangular_Prod)
 shark_add_test( LinAlg/BLAS/triangular_solve.cpp BLAS_Triangular_Solve)
 shark_add_test( LinAlg/BLAS/symm_solve.cpp BLAS_Symm_Solve)
+shark_add_test( LinAlg/BLAS/general_solve.cpp BLAS_General_Solve)
 shark_add_test( LinAlg/BLAS/cholesky.cpp BLAS_Cholesky)
 shark_add_test( LinAlg/BLAS/transformations.cpp BLAS_Transformations)
 

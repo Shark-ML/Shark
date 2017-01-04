@@ -156,7 +156,7 @@ typename major_iterator<M>::type major_end(matrix_expression<M, Device>& m, std:
 template<class ValueType, class Cateogry, class Device>
 struct vector_temporary_type;
 ///\brief Determines a good vector type storing an expression returning values of type T having a certain evaluation category on a specific device.
-template<class ValueType, class Orientation, class Cateogry, class Device>
+template<class ValueType, class Orientation, class Category, class Device>
 struct matrix_temporary_type;
 
 /// For the creation of temporary vectors in the assignment of proxies

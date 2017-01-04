@@ -170,6 +170,61 @@ private:
 	value_type m_value;
 };
 
+
+/// \brief Vector expression representing the ith unit vector
+template<class T, class Device>
+class unit_vector:public vector_expression<unit_vector<T, Device>, Device > {
+public:
+	typedef std::size_t size_type;
+	typedef T value_type;
+	typedef T const_reference;
+	typedef const_reference reference;
+
+	typedef unit_vector const_closure_type;
+	typedef unit_vector closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
+	typedef elementwise<sparse_tag> evaluation_category;
+	
+	// Construction and destruction
+	unit_vector()
+	:m_size(0), m_index(0) {}
+	explicit unit_vector(size_type size, size_type index)
+	:m_size(size), m_index(index) {}
+	unit_vector(unit_vector const& v)
+	:m_size(v.m_size), m_index(v.m_index) {}
+
+	// Accessors
+	size_type size() const {
+		return m_size;
+	}
+
+	// Element access
+	const_reference operator()(size_type const& i) const {
+		SIZE_CHECK(i < m_size);
+		return (i == m_index)? value_type(1) : value_type(0);
+	}
+#ifdef SHARK_USE_CLBLAS
+	boost::compute::command_queue& queue()const{
+		return boost::compute::system::default_queue();
+	}
+#endif
+public:
+	typedef typename device_traits<Device>:: template one_hot_iterator<value_type const> const_iterator;
+	typedef const_iterator iterator;
+
+	const_iterator begin() const {
+		return const_iterator(m_index,value_type(1),false);
+	}
+	const_iterator end() const {
+		return const_iterator(m_index,value_type(1),true);
+	}
+
+private:
+	size_type m_size;
+	size_type m_index;
+};
+
 ///\brief Class implementing vector transformation expressions.
 ///
 ///transforms a vector Expression e of type E using a Function f of type F as an elementwise transformation f(e(i))

@@ -51,21 +51,27 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Vector ){
 	
 	//Ax=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::symm_pos_def(),blas::left());
+		blas::vector<double> x = solve(A,b, blas::symm_pos_def(),blas::left());
+		blas::vector<double> xprod = prod(inv(A,blas::symm_pos_def()),b);
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(A,x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//A^Tx=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::symm_pos_def(),blas::left());
+		blas::vector<double> x = solve(trans(A),b, blas::symm_pos_def(),blas::left());
+		blas::vector<double> xprod = prod(inv(trans(A),blas::symm_pos_def()),b);
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(trans(A),x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//xA=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::symm_pos_def(),blas::right());
+		blas::vector<double> x = solve(A,b, blas::symm_pos_def(),blas::right());
+		blas::vector<double> xprod = prod(b,inv(A,blas::symm_pos_def()));
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(x,A);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -73,7 +79,9 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Vector ){
 	
 	//xA^T=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::symm_pos_def(),blas::right());
+		blas::vector<double> x = solve(trans(A),b, blas::symm_pos_def(),blas::right());
+		blas::vector<double> xprod = prod(b,inv(trans(A),blas::symm_pos_def()));
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(x,trans(A));
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -84,7 +92,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::size_t Dimensions = 128;
 	std::size_t k = 151;
 	
-	std::cout<<"blas::solve Symmetric matrix"<<std::endl;
+	std::cout<<"solve Symmetric matrix"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions);
 	blas::matrix<double,Orientation> B(Dimensions,k);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -95,21 +103,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	blas::matrix<double,Orientation> Bright = trans(B);
 	//Ax=b
 	{
-		blas::matrix<double,Orientation> X= blas::solve(A,B, blas::symm_pos_def(),blas::left());
+		blas::matrix<double,Orientation> X= solve(A,B, blas::symm_pos_def(),blas::left());
+		blas::matrix<double,Orientation> Xprod = prod(inv(A,blas::symm_pos_def()),B);
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(A,X);
 		double error = max(abs(test-B));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//A^Tx=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),B, blas::symm_pos_def(),blas::left());
+		blas::matrix<double,Orientation> X = solve(trans(A),B, blas::symm_pos_def(),blas::left());
+		blas::matrix<double,Orientation> Xprod = prod(trans(inv(A,blas::symm_pos_def())),B);
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(trans(A),X);
 		double error = max(abs(test-B));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//xA=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(A,Bright, blas::symm_pos_def(),blas::right());
+		blas::matrix<double,Orientation> X = solve(A,Bright, blas::symm_pos_def(),blas::right());
+		blas::matrix<double,Orientation> Xprod = prod(Bright,inv(A,blas::symm_pos_def()));
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(X,A);
 		double error = max(abs(test-Bright));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -117,7 +131,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	
 	//xA^T=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),Bright, blas::symm_pos_def(),blas::right());
+		blas::matrix<double,Orientation> X = solve(trans(A),Bright, blas::symm_pos_def(),blas::right());
+		blas::matrix<double,Orientation> Xprod = prod(Bright, trans(inv(A,blas::symm_pos_def())));
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(X,trans(A));
 		double error = max(abs(test-Bright));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -127,7 +143,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Full_Rank ){
 	std::size_t Dimensions = 128;
 	
-	std::cout<<"blas::solve Symmetric semi pos def vector, full rank"<<std::endl;
+	std::cout<<"solve Symmetric semi pos def vector, full rank"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions);
 	blas::vector<double> b(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -136,21 +152,27 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Full_Rank ){
 	
 	//Ax=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::symm_semi_pos_def(),blas::left());
+		blas::vector<double> x = solve(A,b, blas::symm_semi_pos_def(),blas::left());
+		blas::vector<double> xprod = prod(inv(A,blas::symm_semi_pos_def()),b);
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(A,x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//A^Tx=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::symm_semi_pos_def(),blas::left());
+		blas::vector<double> x = solve(trans(A),b, blas::symm_semi_pos_def(),blas::left());
+		blas::vector<double> xprod = prod(inv(trans(A),blas::symm_semi_pos_def()),b);
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(trans(A),x);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//xA=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::symm_semi_pos_def(),blas::right());
+		blas::vector<double> x = solve(A,b, blas::symm_semi_pos_def(),blas::right());
+		blas::vector<double> xprod = prod(b,inv(A,blas::symm_semi_pos_def()));
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(x,A);
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -158,7 +180,9 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Full_Rank ){
 	
 	//xA^T=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::symm_semi_pos_def(),blas::right());
+		blas::vector<double> x = solve(trans(A),b, blas::symm_semi_pos_def(),blas::right());
+		blas::vector<double> xprod = prod(b,inv(trans(A),blas::symm_semi_pos_def()));
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);//check that both expressions are the same
 		blas::vector<double> test = prod(x,trans(A));
 		double error = norm_inf(test-b);
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -170,7 +194,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Full_Rank, Orientat
 	std::size_t Dimensions = 128;
 	std::size_t k = 151;
 	
-	std::cout<<"blas::solve Symmetric semi pos def matrix, full rank"<<std::endl;
+	std::cout<<"solve Symmetric semi pos def matrix, full rank"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions);
 	blas::matrix<double,Orientation> B(Dimensions,k);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -181,21 +205,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Full_Rank, Orientat
 	blas::matrix<double,Orientation> Bright = trans(B);
 	//Ax=b
 	{
-		blas::matrix<double,Orientation> X= blas::solve(A,B, blas::symm_semi_pos_def(),blas::left());
+		blas::matrix<double,Orientation> X= solve(A,B, blas::symm_semi_pos_def(),blas::left());
+		blas::matrix<double,Orientation> Xprod = prod(inv(A,blas::symm_semi_pos_def()),B);
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(A,X);
 		double error = max(abs(test-B));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//A^Tx=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),B, blas::symm_semi_pos_def(),blas::left());
+		blas::matrix<double,Orientation> X = solve(trans(A),B, blas::symm_semi_pos_def(),blas::left());
+		blas::matrix<double,Orientation> Xprod = prod(inv(trans(A),blas::symm_semi_pos_def()),B);
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(trans(A),X);
 		double error = max(abs(test-B));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//xA=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(A,Bright, blas::symm_semi_pos_def(),blas::right());
+		blas::matrix<double,Orientation> X = solve(A,Bright, blas::symm_semi_pos_def(),blas::right());
+		blas::matrix<double,Orientation> Xprod = prod(Bright, inv(A,blas::symm_semi_pos_def()));
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(X,A);
 		double error = max(abs(test-Bright));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -203,7 +233,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Full_Rank, Orientat
 	
 	//xA^T=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),Bright, blas::symm_semi_pos_def(),blas::right());
+		blas::matrix<double,Orientation> X = solve(trans(A),Bright, blas::symm_semi_pos_def(),blas::right());
+		blas::matrix<double,Orientation> Xprod = prod(Bright, inv(trans(A),blas::symm_semi_pos_def()));
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);//check that both expressions are the same
 		blas::matrix<double> test = prod(X,trans(A));
 		double error = max(abs(test-Bright));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -214,7 +246,7 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Rank_Deficient ){
 	std::size_t Dimensions = 128;
 	std::size_t Rank = 50;
 	
-	std::cout<<"blas::solve Symmetric semi pos def vector, rank deficient"<<std::endl;
+	std::cout<<"solve Symmetric semi pos def vector, rank deficient"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions,Rank);
 	blas::vector<double> b(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -227,21 +259,21 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Rank_Deficient ){
 	
 	//Ax=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::symm_semi_pos_def(),blas::left());
+		blas::vector<double> x = solve(A,b, blas::symm_semi_pos_def(),blas::left());
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(prod(A,diff));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//A^Tx=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::symm_semi_pos_def(),blas::left());
+		blas::vector<double> x = solve(trans(A),b, blas::symm_semi_pos_def(),blas::left());
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(prod(A,diff));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//xA=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::symm_semi_pos_def(),blas::right());
+		blas::vector<double> x = solve(A,b, blas::symm_semi_pos_def(),blas::right());
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(prod(A,diff));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -249,7 +281,7 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Semi_Pos_Def_Vector_Rank_Deficient ){
 	
 	//xA^T=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::symm_semi_pos_def(),blas::right());
+		blas::vector<double> x = solve(trans(A),b, blas::symm_semi_pos_def(),blas::right());
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(prod(A,diff));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -261,7 +293,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Rank_Deficient, Ori
 	std::size_t Rank = 50;
 	std::size_t k = 151;
 	
-	std::cout<<"blas::solve Symmetric semi pos def matrix, rank deficient"<<std::endl;
+	std::cout<<"solve Symmetric semi pos def matrix, rank deficient"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions, Rank);
 	blas::matrix<double,Orientation> B(Dimensions,k);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -272,21 +304,21 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Rank_Deficient, Ori
 	blas::matrix<double,Orientation> Bright = trans(B);
 	//Ax=b
 	{
-		blas::matrix<double,Orientation> X= blas::solve(A,B, blas::symm_semi_pos_def(),blas::left());
+		blas::matrix<double,Orientation> X= solve(A,B, blas::symm_semi_pos_def(),blas::left());
 		blas::matrix<double> diff = prod(A,X) - B;
 		double error = max(abs(prod(A,diff)));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//A^Tx=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),B, blas::symm_semi_pos_def(),blas::left());
+		blas::matrix<double,Orientation> X = solve(trans(A),B, blas::symm_semi_pos_def(),blas::left());
 		blas::matrix<double> diff = prod(A,X) - B;
 		double error = max(abs(prod(A,diff)));
 		BOOST_CHECK_SMALL(error,1.e-12);
 	}
 	//xA=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(A,Bright, blas::symm_semi_pos_def(),blas::right());
+		blas::matrix<double,Orientation> X = solve(A,Bright, blas::symm_semi_pos_def(),blas::right());
 		blas::matrix<double> diff = prod(X,A) - Bright;
 		double error = max(abs(prod(diff,A)));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -294,7 +326,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Rank_Deficient, Ori
 	
 	//xA^T=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),Bright, blas::symm_semi_pos_def(),blas::right());
+		blas::matrix<double,Orientation> X = solve(trans(A),Bright, blas::symm_semi_pos_def(),blas::right());
 		blas::matrix<double> diff = prod(X,A) - Bright;
 		double error = max(abs(prod(diff,A)));
 		BOOST_CHECK_SMALL(error,1.e-12);
@@ -304,7 +336,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Semi_Pos_Def_Matrix_Rank_Deficient, Ori
 BOOST_AUTO_TEST_CASE( Solve_Symm_Conjugate_Gradient_Vector ){
 	std::size_t Dimensions = 128;
 	
-	std::cout<<"blas::solve Symmetric conjugate gradient, Vector"<<std::endl;
+	std::cout<<"solve Symmetric conjugate gradient, Vector"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions);
 	blas::vector<double> b(Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -317,21 +349,27 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Conjugate_Gradient_Vector ){
 	
 	//Ax=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::conjugate_gradient(),blas::left(),1.e-9);
+		blas::vector<double> x = solve(A,b, blas::conjugate_gradient(1.e-9),blas::left());
+		blas::vector<double> xprod = prod(inv(A,blas::conjugate_gradient(1.e-9)),b);
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(diff);
 		BOOST_CHECK_SMALL(error,1.e-8);
 	}
 	//A^Tx=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::conjugate_gradient(),blas::left(),1.e-9);
+		blas::vector<double> x = solve(trans(A),b, blas::conjugate_gradient(1.e-9),blas::left());
+		blas::vector<double> xprod = prod(trans(inv(A,blas::conjugate_gradient(1.e-9))),b);
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-15);
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(diff);
 		BOOST_CHECK_SMALL(error,1.e-8);
 	}
 	//xA=b
 	{
-		blas::vector<double> x = blas::solve(A,b, blas::conjugate_gradient(),blas::right(),1.e-9);
+		blas::vector<double> x = solve(A,b, blas::conjugate_gradient(1.e-9),blas::right());
+		blas::vector<double> xprod = prod(b,inv(A,blas::conjugate_gradient(1.e-9)));
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-14);
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(diff);
 		BOOST_CHECK_SMALL(error,1.e-8);
@@ -339,7 +377,9 @@ BOOST_AUTO_TEST_CASE( Solve_Symm_Conjugate_Gradient_Vector ){
 	
 	//xA^T=b
 	{
-		blas::vector<double> x = blas::solve(trans(A),b, blas::conjugate_gradient(),blas::right(),1.e-9);
+		blas::vector<double> x = solve(trans(A),b, blas::conjugate_gradient(1.e-9),blas::right());
+		blas::vector<double> xprod = prod(b,trans(inv(A,blas::conjugate_gradient(1.e-9))));
+		BOOST_CHECK_SMALL(norm_inf(x-xprod),1.e-14);
 		blas::vector<double> diff = prod(A,x)-b;
 		double error = norm_inf(diff);
 		BOOST_CHECK_SMALL(error,1.e-8);
@@ -350,7 +390,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Conjugate_Gradient, Orientation,result_
 	std::size_t Dimensions = 128;
 	std::size_t k = 151;
 	
-	std::cout<<"blas::solve Symmetric semi pos def matrix, full rank"<<std::endl;
+	std::cout<<"solve Symmetric semi pos def matrix, full rank"<<std::endl;
 	blas::matrix<double> A = createSymm(Dimensions);
 	blas::matrix<double,Orientation> B(Dimensions,k);
 	for(std::size_t i = 0; i != Dimensions; ++i){
@@ -361,21 +401,27 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Conjugate_Gradient, Orientation,result_
 	blas::matrix<double,Orientation> Bright = trans(B);
 	//Ax=b
 	{
-		blas::matrix<double,Orientation> X= blas::solve(A,B, blas::conjugate_gradient(),blas::left(),1.e-9);
+		blas::matrix<double,Orientation> X= solve(A,B, blas::conjugate_gradient(1.e-9),blas::left());
+		blas::matrix<double,Orientation> Xprod = prod(inv(A,blas::conjugate_gradient(1.e-9)),B);
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);
 		blas::matrix<double> test = prod(A,X);
 		double error = max(abs(test-B));
 		BOOST_CHECK_SMALL(error,1.e-8);
 	}
 	//A^Tx=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),B, blas::conjugate_gradient(),blas::left(),1.e-9);
+		blas::matrix<double,Orientation> X = solve(trans(A),B, blas::conjugate_gradient(1.e-9),blas::left());
+		blas::matrix<double,Orientation> Xprod = prod(inv(trans(A),blas::conjugate_gradient(1.e-9)),B);
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);
 		blas::matrix<double> test = prod(trans(A),X);
 		double error = max(abs(test-B));
 		BOOST_CHECK_SMALL(error,1.e-8);
 	}
 	//xA=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(A,Bright, blas::conjugate_gradient(),blas::right(),1.e-9);
+		blas::matrix<double,Orientation> X = solve(A,Bright, blas::conjugate_gradient(1.e-9),blas::right());
+		blas::matrix<double,Orientation> Xprod = prod(Bright, inv(A,blas::conjugate_gradient(1.e-9)));
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);
 		blas::matrix<double> test = prod(X,A);
 		double error = max(abs(test-Bright));
 		BOOST_CHECK_SMALL(error,1.e-8);
@@ -383,7 +429,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Symm_Conjugate_Gradient, Orientation,result_
 	
 	//xA^T=b
 	{
-		blas::matrix<double,Orientation> X = blas::solve(trans(A),Bright, blas::conjugate_gradient(),blas::right(),1.e-9);
+		blas::matrix<double,Orientation> X = solve(trans(A),Bright, blas::conjugate_gradient(1.e-9),blas::right());
+		blas::matrix<double,Orientation> Xprod = prod(Bright, inv(trans(A),blas::conjugate_gradient(1.e-9)));
+		BOOST_CHECK_SMALL(max(abs(X-Xprod)),1.e-15);
 		blas::matrix<double> test = prod(X,trans(A));
 		double error = max(abs(test-Bright));
 		BOOST_CHECK_SMALL(error,1.e-8);

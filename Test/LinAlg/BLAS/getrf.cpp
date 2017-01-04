@@ -18,8 +18,8 @@ blas::matrix<double> createMatrix(std::size_t dimensions){
 	
 	for(std::size_t i = 0; i != dimensions; ++i){
 		for(std::size_t j = 0; j <i; ++j){
-			U(j,i) = 2.0/std::abs((int)i -(int)j);
-			L(i,j)  = 5 - 5.0/dimensions*std::abs((int)i -(int)j);
+			U(j,i) = 0.0;//1 - 0.1/dimensions * std::abs((int)i -(int)j);
+			L(i,j)  = 3 - 3.0/dimensions*std::abs((int)i -(int)j);
 		}
 		U(i,i) = 0.5/dimensions*i+1;
 		L(i,i) = 1;

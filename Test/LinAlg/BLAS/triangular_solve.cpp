@@ -39,6 +39,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"left - lower"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(A,b, blas::lower(), blas::left());
+		blas::vector<double> resultProd = prod(inv(A,blas::lower()),b);
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);//check that both expressions are the same
 		blas::vector<double> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -46,6 +48,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"right - lower"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(A,b, blas::lower(), blas::right());
+		blas::vector<double> resultProd = prod(b,inv(A,blas::lower()));
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -54,6 +58,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"left - unit_lower"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(A,b,blas::unit_lower(), blas::left());
+		blas::vector<double> resultProd = prod(inv(A,blas::unit_lower()),b);
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -61,6 +67,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"right - unit_lower"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(A,b, blas::unit_lower(), blas::right());
+		blas::vector<double> resultProd = prod(b,inv(A,blas::unit_lower()));
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -69,6 +77,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"left - upper"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(Aupper,b, blas::upper(), blas::left());
+		blas::vector<double> resultProd = prod(inv(Aupper,blas::upper()),b);
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -76,6 +86,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"right - upper"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(Aupper,b,blas::upper(), blas::right());
+		blas::vector<double> resultProd = prod(b,inv(Aupper,blas::upper()));
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -84,6 +96,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"left - unit_upper"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(Aupper,b, blas::unit_upper(), blas::left());
+		blas::vector<double> resultProd = prod(inv(Aupper,blas::unit_upper()),b);
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -91,6 +105,8 @@ BOOST_AUTO_TEST_CASE( Solve_Vector ){
 	std::cout<<"right - unit_upper"<<std::endl;
 	{
 		blas::vector<double> testResult = solve(Aupper,b, blas::unit_upper(), blas::right());
+		blas::vector<double> resultProd = prod(b,inv(Aupper,blas::unit_upper()));
+		BOOST_CHECK_SMALL(norm_inf(testResult - resultProd),1.e-15);
 		blas::vector<double> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-b);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -124,6 +140,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"left - lower"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(A,B, blas::lower(), blas::left());
+		blas::matrix<double,Orientation> prodResult = prod(inv(A,blas::lower()),B);
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::lower>(A,testResult);
 		double error = norm_inf(result-B);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -131,6 +149,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"right - lower"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(A,Bright, blas::lower(), blas::right());
+		blas::matrix<double,Orientation> prodResult = prod(Bright,inv(A,blas::lower()));
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double> result = trans(blas::matrix<double>(blas::triangular_prod<blas::upper>(Aupper,trans(testResult))));
 		double error = norm_inf(result-Bright);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -138,6 +158,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"left - unit_lower"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(A,B, blas::unit_lower(), blas::left());
+		blas::matrix<double,Orientation> prodResult = prod(inv(A,blas::unit_lower()),B);
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::unit_lower>(A,testResult);
 		double error = norm_inf(result-B);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -145,6 +167,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"right - unit_lower"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(A,Bright, blas::unit_lower(), blas::right());
+		blas::matrix<double,Orientation> prodResult = prod(Bright,inv(A,blas::unit_lower()));
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double,blas::row_major> result = trans(blas::matrix<double>(blas::triangular_prod<blas::unit_upper>(Aupper,trans(testResult))));
 		double error = norm_inf(result-Bright);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -153,6 +177,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"left - upper"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(Aupper,B, blas::upper(), blas::left());
+		blas::matrix<double,Orientation> prodResult = prod(inv(Aupper,blas::upper()),B);
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::upper>(Aupper,testResult);
 		double error = norm_inf(result-B);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -160,6 +186,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"right - upper"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(Aupper,Bright, blas::upper(), blas::right());
+		blas::matrix<double,Orientation> prodResult = prod(Bright,inv(Aupper,blas::upper()));
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double> result = trans(blas::matrix<double>(blas::triangular_prod<blas::lower>(A,trans(testResult))));
 		double error = norm_inf(result-Bright);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -167,6 +195,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"left - unit_upper"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(Aupper,B, blas::unit_upper(), blas::left());
+		blas::matrix<double,Orientation> prodResult = prod(inv(Aupper,blas::unit_upper()),B);
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double,blas::row_major> result = blas::triangular_prod<blas::unit_upper>(Aupper,testResult);
 		double error = norm_inf(result-B);
 		BOOST_CHECK_SMALL(error, 1.e-11);
@@ -174,6 +204,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Solve_Matrix, Orientation,result_orientations) {
 	std::cout<<"right - unit_upper"<<std::endl;
 	{
 		blas::matrix<double,Orientation> testResult = solve(Aupper,Bright, blas::unit_upper(), blas::right());
+		blas::matrix<double,Orientation> prodResult = prod(Bright,inv(Aupper,blas::unit_upper()));
+		BOOST_CHECK_SMALL(max(abs(testResult - prodResult)),1.e-15);
 		blas::matrix<double,blas::row_major> result = trans(blas::matrix<double>(blas::triangular_prod<blas::unit_lower>(A,trans(testResult))));
 		double error = norm_inf(result-Bright);
 		BOOST_CHECK_SMALL(error, 1.e-11);

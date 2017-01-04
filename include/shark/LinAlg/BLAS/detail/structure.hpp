@@ -70,7 +70,9 @@ typedef cholesky_tag<upper> upper_cholesky;
 
 template<bool Left>
 struct system_tag{
+	typedef system_tag<!Left> transposed_tag;
 	static const bool is_left = Left;
+	
 };
 
 ///\brief The system of equations has form Ax=b
