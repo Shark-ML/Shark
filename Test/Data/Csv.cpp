@@ -51,7 +51,7 @@ const char test_no_separator[] = "\
 1 109 75 26 0 36.0 0.546 60 -1\n\
 1 158 76 36 245 31.6 0.851 28 1\n\
 0 88 58 11 54 24.8 0.267 22 -1\r\
-# i am a test comment at the end with newline\n";
+\n\n\n";//empty new lines at the end
 
 const char test_single_integer[] = "\
 # i am a test comment at the start\n\
