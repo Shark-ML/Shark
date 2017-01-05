@@ -5,14 +5,14 @@
  *
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -51,64 +51,87 @@ struct HypervolumeCalculator3D {
 	template<typename Set, typename VectorType >
 	double operator()( Set const& points, VectorType const& refPoint)
 	{
-		if (points.empty()) return 0;
+		if (points.empty()) return 0.0;
 		SIZE_CHECK(points.begin()->size() == 3);
 		SIZE_CHECK(refPoint.size() == 3);
 
 		std::vector<VectorType> set;
-		set.resize(points.size());
-		for (std::size_t i=0; i<points.size(); i++) set[i] = points[i];
+		for (std::size_t i=0; i<points.size(); i++)
+		{
+			VectorType const& p = points[i];
+			if (p[0] < refPoint[0] && p[1] < refPoint[1] && p[2] < refPoint[2]) set.push_back(p);
+		}
+		if (set.empty()) return 0.0;
 		std::sort(set.begin(), set.end(),
 					[] (VectorType const& x, VectorType const& y)
 					{ return (x[2] < y[2]); }
-//~					{
-//~						if (x[2] < y[2]) return true;
-//~						if (x[2] > y[2]) return false;
-//~						if (x[0] < y[0]) return true;
-//~						if (x[0] > y[0]) return false;
-//~						return (x[1] < y[1]);
-//~					}
 				);
 
-		double volume = 0.0;
-		double area = 0.0;
+		// add the first point
 		std::map<double, double> front2D;
-		double prev_x2 = 0.0;
-		for (size_t i=0; i<set.size(); i++)
+		VectorType const& x0 = set[0];
+		front2D[x0[0]] = x0[1];
+		double prev_x2 = x0[2];
+		double area = (refPoint[0] - x0[0]) * (refPoint[1] - x0[1]);
+		double volume = 0.0;
+
+		// process further points
+		for (size_t i=1; i<set.size(); i++)
 		{
+			assert(! front2D.empty());
+			assert(area > 0.0);
+
 			VectorType const& x = set[i];
-			if (i > 0) volume += area * (x[2] - prev_x2);
 
-			// check whether x is dominated
-			std::map<double, double>::iterator worse = front2D.upper_bound(x[0]);
-			double b = refPoint[1];
-			if (worse != front2D.begin())
+			// check whether x is dominated and find "top" coordinate
+			double t = refPoint[1];
+			std::map<double, double>::iterator right = front2D.lower_bound(x[0]);
+			std::map<double, double>::iterator left = right;
+			if (right == front2D.end())
 			{
-				std::map<double, double>::iterator better = worse;
-				if (better == front2D.end() || better->first > x[0]) --better;
-				if (better->second <= x[1]) continue;
-				b = better->second;
+				--left;
+				t = left->second;
+			}
+			else
+			{
+				if (right->first == x[0])
+				{
+					t = left->second;
+				}
+				else if (left != front2D.begin())
+				{
+					--left;
+					t = left->second;
+				}
+			}
+			if (x[1] >= t) continue;   // x is dominated
+
+			// add chunk to volume
+			volume += area * (x[2] - prev_x2);
+
+			// remove dominated points and corresponding areas
+			while (right != front2D.end() && right->second >= x[1])
+			{
+				std::map<double, double>::iterator tmp = right;
+				++right;
+				const double r = (right == front2D.end()) ? refPoint[0] : right->first;
+				area -= (r - tmp->first) * (t - tmp->second);
+				front2D.erase(tmp);
 			}
 
-			// remove dominated points
-			while (worse != front2D.end())
-			{
-				if (worse->second < x[1]) break;
-				std::map<double, double>::iterator it = worse;
-				++worse;
-				double r = (worse == front2D.end()) ? refPoint[0]: worse->first;
-				area -= (r - it->first) * (b - it->second);
-				front2D.erase(it);
-			}
-
-			// insert x
+			// add the new point
+			const double r = (right == front2D.end()) ? refPoint[0] : right->first;
+			area += (r - x[0]) * (t - x[1]);
 			front2D[x[0]] = x[1];
-			double r = (worse == front2D.end()) ? refPoint[0] : worse->first;
-			area += (r - x[0]) * (b - x[1]);
 
+			// volume is processed up to here:
 			prev_x2 = x[2];
 		}
+
+		// add trailing chunk to volume
 		volume += area * (refPoint[2] - prev_x2);
+
+		// return the result
 		return volume;
 	}
 };
