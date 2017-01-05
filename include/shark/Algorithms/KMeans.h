@@ -142,19 +142,19 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 	if(!maxIterations)
 		maxIterations = std::numeric_limits<std::size_t>::max();
 	
-	std::size_t ell = dataset.numberOfElements();
+	std::size_t n = dataset.numberOfElements();
 	RealMatrix kernelMatrix = calculateRegularizedKernelMatrix(kernel,dataset,0);
-	UIntVector clusterMembership(ell);
+	UIntVector clusterMembership(n);
 	UIntVector clusterSizes(k,0);
 	RealVector ckck(k,0);
 	
 	//init cluster assignments
-	for(unsigned int i = 0; i != ell; ++i){
+	for(unsigned int i = 0; i != n; ++i){
 		clusterMembership(i) = i % k;
 	}
 	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng,0,k-1);
 	std::random_shuffle(clusterMembership.begin(),clusterMembership.end(),uni);
-	for(std::size_t i = 0; i != ell; ++i){
+	for(std::size_t i = 0; i != n; ++i){
 		++clusterSizes(clusterMembership(i));
 	}
 	
@@ -167,23 +167,23 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 		//d^2(c_k,x_i) = <c_k,c_k> -2 < c_k,x_i> + <x_i,x_i> for the i-th point.
 		//thus we precompute <c_k,c_k>= sum_ij k(x_i,x_j)/(n_k)^2 for all x_i,x_j points of cluster k
 		ckck.clear();
-		for(std::size_t i = 0; i != ell; ++i){
+		for(std::size_t i = 0; i != n; ++i){
 			std::size_t c1 = clusterMembership(i);
-			for(std::size_t j = 0; j != ell; ++j){
+			for(std::size_t j = 0; j != n; ++j){
 				std::size_t c2 = clusterMembership(j);
 				if(c1 != c2) continue;
 				ckck(c1) += kernelMatrix(i,j);
 			}
 		}
 		noalias(ckck) = safe_div(ckck,sqr(clusterSizes),0);
-		
-		UIntVector newClusterMembership(kernelMatrix.size1());
+
+		UIntVector newClusterMembership(n);
 		RealVector currentDistances(k);
-		for(std::size_t i = 0; i != ell; ++i){
+		for(std::size_t i = 0; i != n; ++i){
 			//compute squared distances between the i-th point and the centers
-			 //we skip <x_i,x_i> as it is always the same for all elements and we don't need it for comparison
+			//we skip <x_i,x_i> as it is always the same for all elements and we don't need it for comparison
 			noalias(currentDistances) = ckck;
-			for(std::size_t j = 0; j != ell; ++j){
+			for(std::size_t j = 0; j != n; ++j){
 				std::size_t c = clusterMembership(j);
 				currentDistances(c) -= 2* kernelMatrix(i,j)/clusterSizes(c);
 			}
@@ -197,14 +197,14 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 		noalias(clusterMembership) = newClusterMembership;
 		//compute new sizes of clusters
 		clusterSizes.clear();
-		for(std::size_t i = 0; i != ell; ++i){
+		for(std::size_t i = 0; i != n; ++i){
 			++clusterSizes(clusterMembership(i));
 		}
-		
-		//if a cluster has size , assign a random point to it
+
+		//if a cluster is empty then assign a random point to it
 		for(unsigned int i = 0; i != k; ++i){
 			if(clusterSizes(i) == 0){
-				std::size_t elem = uni(ell-1);
+				std::size_t elem = uni(n-1);
 				--clusterSizes(clusterMembership(elem));
 				clusterMembership(elem)=i;
 				clusterSizes(i) = 1;
@@ -217,7 +217,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 	expansion.setStructure(&kernel,dataset,true,k);
 	expansion.offset() = -ckck;
 	expansion.alpha().clear();
-	for(std::size_t i = 0; i != ell; ++i){
+	for(std::size_t i = 0; i != n; ++i){
 		std::size_t c = clusterMembership(i);
 		expansion.alpha()(i,c) = 2.0 / clusterSizes(c);
 	}
