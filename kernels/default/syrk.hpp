@@ -34,7 +34,6 @@
 #include "../../expression_types.hpp"//for matrix_expression
 #include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
 #include "mgemm.hpp" //block macro kernel for dense syrk
-#include <boost/align/aligned_allocator.hpp> //mgemm requires aligned allocations
 #include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
 #include <type_traits> //std::common_type
 
