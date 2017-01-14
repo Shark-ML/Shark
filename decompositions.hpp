@@ -98,6 +98,7 @@ public:
 	MatrixStorage const& lower_factor()const{
 		return m_cholesky;
 	}
+
 	auto upper_factor()const ->decltype(trans(lower_factor())){
 		return trans(m_cholesky);
 	}
@@ -135,6 +136,10 @@ public:
 	/// \param beta the update factor. it Can be positive or negative
 	template<class VecV>
 	void update(value_type alpha, value_type beta, vector_expression<VecV,device_type> const& v){
+		if(beta == 0){
+			m_cholesky *= std::sqrt(alpha);
+			return;
+		}
 		//implementation blatantly stolen from Eigen
 		std::size_t n = v().size();
 		auto& L = m_cholesky;
