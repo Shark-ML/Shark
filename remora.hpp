@@ -33,20 +33,20 @@
 #define SHARK_LINALG_BLAS_REMORA_HPP
 
 //proxies
-#include <remora/vector_proxy.hpp>
-#include <remora/matrix_proxy.hpp>
+#include "vector_proxy.hpp"
+#include "matrix_proxy.hpp"
 //expressions
-#include <remora/vector_expression.hpp>
-#include <remora/matrix_expression.hpp>
-#include <remora/solve.hpp>
+#include "vector_expression.hpp"
+#include "matrix_expression.hpp"
+#include "solve.hpp"
 //containers
-#include <remora/vector.hpp>
-#include <remora/vector_sparse.hpp>
-#include <remora/matrix.hpp>
-#include <remora/matrix_sparse.hpp>
+#include "vector.hpp"
+#include "vector_sparse.hpp"
+#include "matrix.hpp"
+#include "matrix_sparse.hpp"
 
 //misc
-#include <remora/permutation.hpp>
-#include <remora/io.hpp>
+#include "permutation.hpp"
+#include "io.hpp"
 
 #endif
