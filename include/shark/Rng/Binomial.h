@@ -120,7 +120,7 @@ namespace shark{
 
 	///\brief Returns a random number from Binomial(n,p) by drawing random numbers from rng
 	template<class RngType>
-	bool coinToss(RngType& rng, unsigned int n, double pHeads){
+	unsigned int binomial(RngType& rng, unsigned int n, double pHeads){
 		Binomial<RngType> dist(rng, n, pHeads);
 		return dist();
 	}
