@@ -43,7 +43,7 @@
 
 //for debug error handling of linear algebra
 #include <shark/Core/Shark.h>
-#include <shark/LinAlg/BLAS/blas.h>
+#include <shark/LinAlg/BLAS/remora.hpp>
 #include <shark/Core/Exception.h>
 #include <shark/LinAlg/Initialize.h>
 #include <shark/LinAlg/Tools.h>
@@ -53,6 +53,8 @@
 #include <deque>
 
 namespace shark{
+
+namespace blas = ::remora;
 
 #define SHARK_VECTOR_MATRIX_TYPEDEFS(basetype, prefix) \
 	typedef blas::vector< basetype > prefix##Vector; \

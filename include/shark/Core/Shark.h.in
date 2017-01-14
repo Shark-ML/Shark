@@ -100,15 +100,24 @@ struct DynamicLibraryTag{
  */
 #cmakedefine SHARK_USE_SIMD
 
+#ifdef SHARK_USE_SIMD
+#define REMORA_USE_SIMD
+#endif
 /**
  * \brief Tags whether BLAS has been enabled.
  */
 #cmakedefine SHARK_USE_CBLAS
+#ifdef SHARK_USE_CBLAS
+#define REMORA_USE_CBLAS
+#endif
 
 /**
  * \brief Tags whether CLBLAS has been enabled.
  */
 #cmakedefine SHARK_USE_CLBLAS
+#ifdef SHARK_USE_CLBLAS
+#define REMORA_USE_GPU
+#endif
 
  /**
  * \brief Tags whether full LAPACK is available
