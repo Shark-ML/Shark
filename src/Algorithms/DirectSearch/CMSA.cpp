@@ -135,7 +135,7 @@ void CMSA::updatePopulation(std::vector< IndividualType > const& offspring ) {
 		noalias(xPrimeNew) += ind.searchPoint() / m_mu;
 	
 	// Covariance Matrix Update
-	m_mutationDistribution.lowerCholeskyFactor() *= std::sqrt(1. - 1./m_cC);
+	m_mutationDistribution.rankOneUpdate(1. - 1./m_cC,0,RealVector());
 	for( std::size_t i = 0; i < m_mu; i++ ) {
 		m_mutationDistribution.rankOneUpdate(1.0,1.0/m_mu*1./m_cC, selectedOffspring[i].chromosome().step);
 	}

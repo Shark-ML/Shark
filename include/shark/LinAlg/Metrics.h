@@ -32,9 +32,9 @@
 #ifndef SHARK_LINALG_METRICS_H
 #define SHARK_LINALG_METRICS_H
 
-#include <shark/LinAlg/BLAS/blas.h>
+#include <shark/LinAlg/BLAS/remora.hpp>
 #include <shark/Core/Math.h>
-namespace shark{ namespace blas{
+namespace remora{
 	
 ///////////////////////////////////////NORMS////////////////////////////////////////
 
@@ -425,6 +425,6 @@ typename VectorT::value_type diagonalMahalanobisDistance(
 	return std::sqrt(diagonalMahalanobisDistanceSqr(op1(), op2(), weights));
 }
 /** @}*/
-}}
+}
 
 #endif

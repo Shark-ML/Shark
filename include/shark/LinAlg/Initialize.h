@@ -43,7 +43,7 @@
 #define SHARK_LINALG_INITIALIZE_H
 
 #include "Impl/Initialize.h"
-namespace shark{ namespace blas{
+namespace remora{
 
 /**
  * \ingroup shark_globals
@@ -205,6 +205,6 @@ parameterSet(T& range){
 }
 
 /** @} */
-}}
+}
 
 #endif

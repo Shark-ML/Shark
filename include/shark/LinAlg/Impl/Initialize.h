@@ -34,11 +34,10 @@
 #define SHARK_LINALG_IMPL_INITIALIZE_H
 
 #include <shark/Core/Exception.h>
-#include <shark/LinAlg/BLAS/blas.h>
+#include <shark/LinAlg/BLAS/remora.hpp>
 #include <iterator>
 #include <boost/preprocessor/punctuation/comma.hpp>
-namespace shark{
-namespace blas{
+namespace remora{
 namespace detail{
 	
 //The  following looks a bit complicated and in fact, there ARE easier solutions.
@@ -146,7 +145,7 @@ template<class Matrix>
 class MatrixExpression:public InitializerBase<MatrixExpression<Matrix> >{
 private:
 	Matrix& m_matrix;
-	typedef typename blas::major_iterator<Matrix>::type major_iterator;
+	typedef typename major_iterator<Matrix>::type major_iterator;
 public:
 	MatrixExpression(Matrix& matrix):m_matrix(matrix){}
 	template<class Iter>
@@ -188,14 +187,14 @@ public:
 	ParameterizableExpression(T& parameterizable):m_parameterizable(parameterizable){}
 	template<class Iter>
 	void init(Iter& pos)const{
-		blas::vector<double> parameters = m_parameterizable.parameterVector();
-		VectorExpression<blas::vector<double>&> vectorWriter(parameters);
+		vector<double> parameters = m_parameterizable.parameterVector();
+		VectorExpression<vector<double>&> vectorWriter(parameters);
 		vectorWriter.init(pos);
 	}
 	template<class Iter>
 	void split(Iter& pos){
-		blas::vector<double> parameters(size());
-		VectorExpression<blas::vector<double>&> vectorWriter(parameters);
+		vector<double> parameters(size());
+		VectorExpression<vector<double>&> vectorWriter(parameters);
 		vectorWriter.split(pos);
 		m_parameterizable.setParameterVector(parameters);
 	}
@@ -212,14 +211,14 @@ public:
 	ParameterizableExpression(T* parameterizable):m_parameterizable(parameterizable){}
 	template<class Iter>
 	void init(Iter& pos)const{
-		blas::vector<double> parameters = m_parameterizable->parameterVector();
-		VectorExpression<blas::vector<double>&> vectorWriter(parameters);
+		vector<double> parameters = m_parameterizable->parameterVector();
+		VectorExpression<vector<double>&> vectorWriter(parameters);
 		vectorWriter.init(pos);
 	}
 	template<class Iter>
 	void split(Iter& pos){
-		blas::vector<double> parameters(size());
-		VectorExpression<blas::vector<double>&> vectorWriter(parameters);
+		vector<double> parameters(size());
+		VectorExpression<vector<double>&> vectorWriter(parameters);
 		vectorWriter.split(pos);
 		m_parameterizable->setParameterVector(parameters);
 	}
@@ -236,14 +235,14 @@ public:
 	ParameterizableExpression(T* parameterizable):m_parameterizable(parameterizable){}
 	template<class Iter>
 	void init(Iter& pos)const{
-		blas::vector<double> parameters = m_parameterizable->parameterVector();
-		VectorExpression<blas::vector<double>&> vectorWriter(parameters);
+		vector<double> parameters = m_parameterizable->parameterVector();
+		VectorExpression<vector<double>&> vectorWriter(parameters);
 		vectorWriter.init(pos);
 	}
 	template<class Iter>
 	void split(Iter& pos){
-		blas::vector<double> parameters(size());
-		VectorExpression<blas::vector<double>&> vectorWriter(parameters);
+		vector<double> parameters(size());
+		VectorExpression<vector<double>&> vectorWriter(parameters);
 		vectorWriter.split(pos);
 		m_parameterizable->setParameterVector(parameters);
 	}
@@ -252,7 +251,7 @@ public:
 	}
 };
 
-///\brief Wrapper representing a range of vectors or matrices like std::vector<blas::vector<double>> or std::list<SparseRealMatrix>.
+///\brief Wrapper representing a range of vectors or matrices like std::vector<vector<double>> or std::list<SparseRealMatrix>.
 ///
 ///The first template parameter is the iterator of the range, the second is a wrapper which handles the write or split
 ///operation for the underlying type. for a vector it would be VectorExpression.
@@ -387,7 +386,7 @@ VectorInitializer<Sink,InitializerNode<InitializerEnd, Type> > operator<<(const 
 	return VectorInitializer<Sink, Init>(sink.vector,Init(InitializerEnd(),source()));\
 }
 ///\brief Begins the initialization argument with a vector as first right hand side argument.
-SHARK_INIT_INIT(VectorExpression<const Source&>,shark::blas::vector_expression<Source BOOST_PP_COMMA() cpu_tag>)
+SHARK_INIT_INIT(VectorExpression<const Source&>,vector_expression<Source BOOST_PP_COMMA() cpu_tag>)
 ///\brief Begins the initialization argument with a arbitrary source as first right hand side argument.
 SHARK_INIT_INIT(Source,InitializerBase<Source>)
 #undef SHARK_INIT_INIT
@@ -416,7 +415,7 @@ VectorInitializer<Sink,InitializerNode<Init,Type > > operator,(const VectorIniti
 	return VectorInitializer<Sink, newExpression>(init.m_vector,newExpression(init.expression(),vec()));\
 }
 ///\brief Appends a single vector expression c to the expression vec<<a,b -> vec<<a,b,c.
-SHARK_INIT_COMMA(VectorExpression<const Source&>,shark::blas::vector_expression<Source BOOST_PP_COMMA() cpu_tag>)
+SHARK_INIT_COMMA(VectorExpression<const Source&>,vector_expression<Source BOOST_PP_COMMA() cpu_tag>)
 ///\brief Appends a initialization expression c to the expression vec<<a,b -> vec<<a,b,c.
 SHARK_INIT_COMMA(Source,InitializerBase<Source>)
 #undef SHARK_INIT_COMMA
@@ -486,7 +485,7 @@ operator>>(const ADLVector<Source>& source,Argument& sink){\
 	return VectorSplitter<Source, Init>(source.vector,Init(InitializerEnd(),sink()));\
 }
 ///\brief Appends a single mutable vector expression.
-SHARK_SPLIT_INIT(VectorExpression<Sink&>,shark::blas::vector_expression<Sink BOOST_PP_COMMA() cpu_tag>)
+SHARK_SPLIT_INIT(VectorExpression<Sink&>,vector_expression<Sink BOOST_PP_COMMA() cpu_tag>)
 ///\brief Appends an arbitrary source.
 SHARK_SPLIT_INIT(Sink,const InitializerBase<Sink>)
 #undef SHARK_SPLIT_INIT
@@ -513,9 +512,9 @@ operator>>(const ADLVector<Source>& source,Argument sink){\
 	return VectorSplitter<Source, Init>(source.vector,Init(InitializerEnd(),sink));\
 }
 ///\brief Appends a single mutable vector expression.
-SHARK_SPLIT_PROXY_INIT(shark::blas::vector_range<Sink>)
+SHARK_SPLIT_PROXY_INIT(vector_range<Sink>)
 ///\brief Appends a matrix row.
-SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_row<Sink>)
+SHARK_SPLIT_PROXY_INIT(matrix_row<Sink>)
 #undef SHARK_SPLIT_PROXY_INIT
 
 
@@ -523,7 +522,7 @@ SHARK_SPLIT_PROXY_INIT(shark::blas::matrix_row<Sink>)
 ///\brief Appends a single vector expression.
 template<class Source,class Init,class Sink>
 VectorSplitter<Source,InitializerNode<Init,VectorExpression<Sink&> > >
-operator,(const VectorSplitter<Source,Init >& source, shark::blas::vector_expression<Sink, cpu_tag>& vec){
+operator,(const VectorSplitter<Source,Init >& source, vector_expression<Sink, cpu_tag>& vec){
 	source.disable();
 	typedef InitializerNode<Init,VectorExpression<Sink&> > newExpression;
 	return VectorSplitter<Source, newExpression>(source.m_vector,newExpression(source.expression(),vec()));
@@ -560,10 +559,10 @@ operator,(const VectorSplitter<Source,Init >& source, Argument vec){\
 	typedef InitializerNode<Init,VectorExpression<Argument> > newExpression;\
 	return VectorSplitter<Source, newExpression>(source.m_vector,newExpression(source.expression(),vec));\
 }
-SHARK_SPLIT_PROXY_COMMA(shark::blas::vector_range<Sink>)
-SHARK_SPLIT_PROXY_COMMA(shark::blas::matrix_row<Sink>)
+SHARK_SPLIT_PROXY_COMMA(vector_range<Sink>)
+SHARK_SPLIT_PROXY_COMMA(matrix_row<Sink>)
 #undef SHARK_SPLIT_PROXY_COMMA
 
-}}}
+}}
 
 #endif

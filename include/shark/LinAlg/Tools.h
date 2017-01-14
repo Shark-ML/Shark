@@ -32,8 +32,7 @@
 #ifndef SHARK_LINALG_TOOLS_H
 #define SHARK_LINALG_TOOLS_H
 
-namespace shark {
-namespace blas{
+namespace remora{
 	
 ///\brief partitions the matrix in 4 blocks defined by one splitting point (i,j).
 ///
@@ -94,5 +93,5 @@ private:
 	matrix_range<Matrix> m_lowerRight;
 };
 
-}}
+}
 #endif

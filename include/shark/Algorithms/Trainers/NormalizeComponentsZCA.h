@@ -81,7 +81,7 @@ public:
 		
 		RealMatrix eigenvectors;
 		RealVector eigenvalues;
-		eigensymm(covariance, eigenvectors, eigenvalues);
+		blas::eigensymm(covariance, eigenvectors, eigenvalues);
 		covariance=RealMatrix();
 		
 		RealMatrix ZCAMatrix = eigenvectors;

@@ -54,8 +54,9 @@
 
 namespace shark{
 
-namespace blas = ::remora;
-
+namespace blas{
+using namespace remora;
+}
 #define SHARK_VECTOR_MATRIX_TYPEDEFS(basetype, prefix) \
 	typedef blas::vector< basetype > prefix##Vector; \
 	typedef blas::matrix< basetype, blas::row_major > prefix##Matrix; \

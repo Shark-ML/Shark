@@ -54,7 +54,7 @@ void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int
 
 	RealMatrix eigenvectors(inputDim, inputDim);
 	RealVector eigenvalues(inputDim);
-	eigensymm(scatter, eigenvectors, eigenvalues);
+	blas::eigensymm(scatter, eigenvectors, eigenvalues);
 	if (m_whitening){
 		for(std::size_t i = 0; i != inputDim; ++i){
 			if(eigenvalues(i) <= 0) continue;

@@ -126,7 +126,7 @@ public:
 
 	/// \brief Calculates the evd of the current covariance matrix.
 	void update() {
-		eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
+		blas::eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
 	}
 
 private:
@@ -172,6 +172,11 @@ public:
 	std::size_t size()const{
 		return m_cholesky.lower_factor().size1();
 	}
+
+	blas::matrix<double,blas::column_major> const& lowerCholeskyFactor()const{
+		return m_cholesky.lower_factor();
+	}
+
 	
 	/// \brief Sets the new covariance matrix by computing the new cholesky dcomposition
 	void setCovarianceMatrix(RealMatrix const& matrix){

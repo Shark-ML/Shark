@@ -22,8 +22,8 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Creation ){
 		double norm = -copySign(norm_2(test),test(0));
 		
 
-		double tau = createHouseholderReflection(test,reflection);
-		
+		double tau = blas::createHouseholderReflection(test,reflection);
+	
 		//when the reflection is correct, it should lead to
 		//(norm,0,....,0) when applied to test
 		RealVector result = test;
@@ -53,14 +53,15 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Apply_Left ){
 			}
 		}
 
-		double tau = createHouseholderReflection(column(test,0),reflection);
+		double tau = blas::createHouseholderReflection(column(test,0),reflection);
 		
 		//apply the slow default version
 		RealMatrix O = outer_prod(reflection,reflection);
 		noalias(result) -= tau*prod(O,test);
 		
 		//now the real test
-		applyHouseholderOnTheLeft(test,reflection,tau);
+		
+		blas::applyHouseholderOnTheLeft(test,reflection,tau);
 		
 		//they should be similar
 		for(std::size_t i = 0; i != Dimension1; ++i){
@@ -87,14 +88,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Apply_Right ){
 			}
 		}
 
-		double tau = createHouseholderReflection(row(test,0),reflection);
+		double tau = blas::createHouseholderReflection(row(test,0),reflection);
 		
 		//apply the slow default version
 		RealMatrix O = outer_prod(reflection,reflection);
 		noalias(result) -= tau*prod(test,O);
 		
 		//now the real test
-		applyHouseholderOnTheRight(test,reflection,tau);
+		blas::applyHouseholderOnTheRight(test,reflection,tau);
 		
 		//they should be similar
 		for(std::size_t i = 0; i != Dimension1; ++i){

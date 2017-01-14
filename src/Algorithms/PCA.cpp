@@ -56,7 +56,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		meanvar(inputs,m_mean,S);
 		m_eigenvalues.resize(m_n);
 		m_eigenvectors.resize(m_n, m_n);
-		eigensymm(S, m_eigenvectors, m_eigenvalues);
+		blas::eigensymm(S, m_eigenvectors, m_eigenvalues);
 	} else {
 		//let X0 be the design matrix having all inputs as rows
 		//we want to avoid to form it directly but us it's batch represntation in the dataset
@@ -93,7 +93,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 		m_eigenvectors.resize(m_n,m_l);
 		m_eigenvectors.clear();
 		RealMatrix U(m_l, m_l);
-		eigensymm(S, U, m_eigenvalues);
+		blas::eigensymm(S, U, m_eigenvalues);
 		// compute true eigenvectors
 		//eigenv=X0^T U
 		std::size_t batchStart  = 0;

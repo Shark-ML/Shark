@@ -333,7 +333,7 @@ struct range_const_iterator< shark::blas::dense_matrix_adaptor<T> >{
 };
 }
 
-namespace shark{ namespace blas{ 
+namespace remora{ 
 
 //dense matrix
 template< class T >
@@ -484,6 +484,6 @@ range_end( shark::blas::dense_matrix_adaptor<T>& m )
 
 /// \endcond
 
-}}
+}
 
 #endif
