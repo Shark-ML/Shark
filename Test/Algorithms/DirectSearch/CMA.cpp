@@ -14,6 +14,51 @@
 
 using namespace shark;
 
+
+struct MultiplicativeNoisySphere : public SingleObjectiveFunction {
+	
+	MultiplicativeNoisySphere(std::size_t numberOfVariables, double sigma):m_numberOfVariables(numberOfVariables), m_sigma(sigma) {
+		m_features |= CAN_PROPOSE_STARTING_POINT;
+		m_features |= IS_NOISY;
+	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MultiplicativeNoisySphere"; }
+
+	std::size_t numberOfVariables()const{
+		return m_numberOfVariables;
+	}
+	
+	bool hasScalableDimensionality()const{
+		return true;
+	}
+
+	void setNumberOfVariables( std::size_t numberOfVariables ){
+		m_numberOfVariables = numberOfVariables;
+	}
+
+	SearchPointType proposeStartingPoint() const {
+		RealVector x(numberOfVariables());
+
+		for (std::size_t i = 0; i < x.size(); i++) {
+			x(i) = Rng::gauss(0,1);
+		}
+		return x;
+	}
+
+	double eval(SearchPointType const& x) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
+		m_evaluationCounter++;
+		double f = norm_sqr(x);
+		double noise = exp(Rng::gauss(0,m_sigma));
+		return f * noise;
+	}
+private:
+	std::size_t m_numberOfVariables;
+	double m_sigma;
+};
+
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_CMA)
 
 BOOST_AUTO_TEST_CASE( CMA_Cigar )
@@ -91,6 +136,26 @@ BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 	BOOST_CHECK(cma.solution().value < 1E-9);
 	BOOST_CHECK(sigmaHigh);
 	BOOST_CHECK(!condHigh);
+}
+
+BOOST_AUTO_TEST_CASE( CMA_Multiplicative_Noisy_Sphere)
+{
+	std::cout<<"start"<<std::endl;
+	Rng::seed(42);
+	const unsigned N = 10;
+	RealVector x0(10, 0.1);
+	MultiplicativeNoisySphere sphere(N,10.0);
+	sphere.init();
+	CMA cma(Rng::globalRng);
+	cma.init(sphere, x0);
+
+	double start = log(norm_sqr(cma.solution().point));
+	for(unsigned i=0; i<501; i++) {
+		cma.step( sphere );
+		if(i%50 == 0)
+			std::cout<<i<<"\t"<<norm_sqr(cma.solution().point)<<"\t"<<(std::log(norm_sqr(cma.solution().point))-start)/sphere.evaluationCounter()<<"\t"<<cma.numberOfEvaluations()<<std::endl;
+	}
+	BOOST_CHECK(cma.solution().value < 1E-13);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

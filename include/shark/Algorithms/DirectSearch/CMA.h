@@ -215,6 +215,11 @@ public:
 		RealVector const& eigenValues = m_mutationDistribution.eigenValues();
 		return max(eigenValues)/min(eigenValues); 
 	}
+	
+	///\brief Returns how often a point is evaluated 
+	std::size_t numberOfEvaluations()const{
+		return m_numEvaluations;
+	}
 
 
 protected:
@@ -264,6 +269,11 @@ private:
 	RealVector m_evolutionPathSigma;
 
 	std::size_t m_counter; ///< counter for generations
+	
+	std::size_t m_numEvaluations;
+	double m_numEvalIncreaseFactor;
+	double m_rLambda;
+	double m_rankChangeQuantile;
 
 	MultiVariateNormalDistribution m_mutationDistribution;
 	DefaultRngType* mpe_rng;

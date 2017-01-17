@@ -108,7 +108,8 @@ public:
 		IS_CONSTRAINED_FEATURE           =  16, ///< The objective function is constrained.
 		HAS_CONSTRAINT_HANDLER           =  32, ///< The constraints are governed by a constraint handler which can be queried by getConstraintHandler()
 		CAN_PROVIDE_CLOSEST_FEASIBLE     = 64,	///< If the function is constrained, the method closestFeasible is implemented and returns a "repaired" solution.
-		IS_THREAD_SAFE     = 128	///< can eval or evalDerivative be called in parallel?
+		IS_THREAD_SAFE     = 128,	///< can eval or evalDerivative be called in parallel?
+		IS_NOISY     = 256	///< The function value is perturbed by some kind of noise
 	};
 
 	/// This statement declares the member m_features. See Core/Flags.h for details.
@@ -152,6 +153,11 @@ public:
 	/// \brief Returns true, when the function can be usd in parallel threads.
 	bool isThreadSafe()const{
 		return m_features & IS_THREAD_SAFE;
+	}
+	
+	/// \brief Returns true, when the function can be usd in parallel threads.
+	bool isNoisy()const{
+		return m_features & IS_NOISY;
 	}
 
 	/// \brief Default ctor.

@@ -37,8 +37,20 @@
 #include <shark/Core/Exception.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
+#include <shark/Core/utility/KeyValuePair.h>
 
 using namespace shark;
+
+namespace{
+	//computes percentile({|1-R|,|2-R|,...,|N-R|},q)
+	int deltaLim(int rank, std::size_t N, double percentile){
+		blas::vector<int> rankDistr(N);
+		std::iota(rankDistr.begin(),rankDistr.end(),1-rank);
+		noalias(rankDistr) = abs(rankDistr);
+		std::sort(rankDistr.begin(),rankDistr.end());
+		return rankDistr[std::size_t(percentile * (rankDistr.size()-1))];
+	}
+}
 
 /**
 * \brief Calculates lambda for the supplied dimensionality n.
@@ -108,6 +120,11 @@ void CMA::read( InArchive & archive ) {
 	archive >> m_mutationDistribution;
 
 	archive >> m_counter;
+	
+	archive >> m_numEvaluations;
+	archive >> m_numEvalIncreaseFactor;
+	archive >> m_rLambda;
+	archive >> m_rankChangeQuantile;
 }
 
 void CMA::write( OutArchive & archive ) const {
@@ -136,6 +153,11 @@ void CMA::write( OutArchive & archive ) const {
 	archive << m_mutationDistribution;
 
 	archive << m_counter;
+	
+	archive << m_numEvaluations;
+	archive << m_numEvalIncreaseFactor;
+	archive << m_rLambda;
+	archive << m_rankChangeQuantile;
 }
 
 
@@ -198,7 +220,11 @@ void CMA::doInit(
 	m_lambda = lambda;
 	m_mu = mu;
 	m_sigma =  initialSigma;
-
+	m_numEvalIncreaseFactor = 1.25;
+	
+	m_numEvaluations = 1;
+	m_rLambda = std::max(0.1, 2.0 / m_lambda);
+	m_rankChangeQuantile = 0.2 * 0.5; //0.2 *50% quantile
 	m_mean.resize( m_numberOfVariables );
 	m_evolutionPathC.resize( m_numberOfVariables );
 	m_evolutionPathSigma.resize( m_numberOfVariables );
@@ -312,7 +338,89 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 void CMA::step(ObjectiveFunctionType const& function){
 	std::vector<IndividualType> offspring = generateOffspring();
 	PenalizingEvaluator penalizingEvaluator;
+	penalizingEvaluator.m_numEvaluations = m_numEvaluations;
 	penalizingEvaluator( function, offspring.begin(), offspring.end() );
+	//check if the number of Evaluations must be increased on a noisy function
+	if(function.isNoisy()){
+		//compute number of points to reevaluate
+		double reevalFraction = m_rLambda * m_lambda;
+		std::size_t lambdaReeval = m_rLambda * m_lambda;
+		double rest = reevalFraction - lambdaReeval;
+		if(rest > 0){
+			lambdaReeval += coinToss(*mpe_rng,rest);
+		}
+		//only continue if we have at elast one point
+		if(lambdaReeval > 0){
+			//save old function values of the population
+			std::vector<shark::KeyValuePair<double,std::size_t> > ranksOld(m_lambda);
+			for(std::size_t i = 0; i != m_lambda; ++i){
+				ranksOld[i].key = offspring[i].penalizedFitness();
+				ranksOld[i].value = i;
+			}
+			
+			//compute and save new function values of the population
+			penalizingEvaluator(function,offspring.begin(),offspring.begin() + lambdaReeval);
+			std::vector<shark::KeyValuePair<double,std::size_t> > ranksNew(m_lambda);
+			for(std::size_t i = 0; i != m_lambda; ++i){
+				ranksNew[i].key = offspring[i].penalizedFitness();
+				ranksNew[i].value = i;
+			}
+			
+			// update function values of the population to be the mean of old and new values,
+			// this gives some more stability
+			// This is a difference compared to Hansens reference implementation.
+			// While Hansen is considering the ranks to be more stable, the average
+			// rank is a biased estimate, while the average value
+			// leads to an unbiased estimate of the true rank.
+			// This difference can be felt in noise with heavy outliers where rank averaging
+			// has the same effect as ignoring the worst quantiles. In a skewed noise distribution the
+			// average is however dominated by the outliers -> rank averaging
+			// optimizes a different, easier, function and is not guarantueed to converge to
+			// the true optimum for non-stationary noise.
+			for(std::size_t i = 0; i != lambdaReeval; ++i){
+				offspring[i].unpenalizedFitness() += ranksOld[i].key;
+				offspring[i].unpenalizedFitness() /= 2;
+			}
+			
+			//compute the noise estimate by computing a statistic over the rank changes
+			//of the points that got evaluated twice
+			
+			//compute old and new ranks
+			std::sort(ranksOld.begin(),ranksOld.end());
+			std::sort(ranksNew.begin(),ranksNew.end());
+			std::vector<std::pair<int, int> > ranks(lambdaReeval);
+			for(int i = 0; i != (int)m_lambda; ++i){
+				if(ranksOld[i].value < lambdaReeval){
+					ranks[ranksOld[i].value].first = i;
+				}
+				if(ranksNew[i].value < lambdaReeval){
+					ranks[ranksNew[i].value].second = i;
+				}
+			}
+			//compute noise estimate based on rank changes
+			//s is our current noise estimate
+			double s = 0;
+			for(std::size_t i = 0; i != lambdaReeval; ++i){
+				//measured rank difference(number of ranks between old and new point
+				//we use ranks in-between because if both estimates have a very close estimate,
+				//they will be placed directly next to each other -> 0 ranks in-between.
+				s += std::abs(ranks[i].first-ranks[i].second) - 1;
+				//minus a percentile of the expected difference on a truely random function
+				//as the first and second rank are interchangeable, the average is computed
+				s -= 0.5 * deltaLim(ranks[i].second - (ranks[i].second > ranks[i].first), 2*m_lambda-1,m_rankChangeQuantile);
+				s -= 0.5 * deltaLim(ranks[i].first - (ranks[i].first > ranks[i].second), 2*m_lambda-1,m_rankChangeQuantile);
+			}		
+			s /= lambdaReeval;
+			//simple adaptation of the number of reevaluations
+			if(s > 0){
+				double rawIncrease = (m_numEvalIncreaseFactor - 1.0 )* m_numEvaluations;
+				m_numEvaluations += std::max<std::size_t>(1,std::size_t(rawIncrease+0.5));
+			}else if (s < 0 && m_numEvaluations > 1){
+				double rawDecrease = (1.0 - 1.0/m_numEvalIncreaseFactor) * m_numEvaluations;
+				m_numEvaluations -= std::max<std::size_t>(1,std::size_t(rawDecrease+0.5));
+			}
+		}
+	}
 	updatePopulation(offspring);
 }
 
