@@ -49,13 +49,16 @@ namespace shark {
 *   y' & = & f( s' ) + \alpha \vert\vert s - s' \vert\vert_2^2
 * \f}
 * where \f$s'\f$ is the repaired version of \f$s\f$ if \f$s\f$ is not feasible and equal to \f$s\f$ otherwise.
-* The default value of \f$\alpha\f$ is \f$10^{-6}\f$.
+* The default value of \f$\alpha\f$ is \f$10^{-6}\f$. 
+*
+* This Evaluator can also handle noisy functions by applying reevaluations of a single point on f and
+* averaging the results.
 */
 struct PenalizingEvaluator {
 	/**
 	* \brief Default c'tor, initializes the penalty factor to \f$10^{-6}\f$.
 	*/
-	PenalizingEvaluator() : m_penaltyFactor( 1E-6 ) {}
+	PenalizingEvaluator() : m_penaltyFactor( 1E-6 ), m_numEvaluations(1) {}
 
 	/**
 	* \brief Evaluates the supplied function on the supplied individual
@@ -65,19 +68,17 @@ struct PenalizingEvaluator {
 	*/
 	template<typename Function, typename IndividualType>
 	void operator()( Function const& f, IndividualType& individual ) const {
-
-		if( f.isFeasible( individual.searchPoint() ) ) {
-			individual.unpenalizedFitness() = f.eval( individual.searchPoint() );
-			individual.penalizedFitness() = individual.unpenalizedFitness();
-			return;
+		typename Function::SearchPointType t( individual.searchPoint() );
+		if( !f.isFeasible( t ) ) {
+			f.closestFeasible( t );
 		}
 
-		typename Function::SearchPointType t( individual.searchPoint() );
-		f.closestFeasible( t );
-
 		individual.unpenalizedFitness() = f.eval( t );
+		for(std::size_t k = 1; k < m_numEvaluations; ++k){
+			individual.unpenalizedFitness() += f.eval(t);
+		}
+		individual.unpenalizedFitness()  /= m_numEvaluations;
 		individual.penalizedFitness() = individual.unpenalizedFitness();
-		
 		penalize(individual.searchPoint(),t,individual.penalizedFitness() );
 	}
 	
@@ -104,6 +105,7 @@ struct PenalizingEvaluator {
 	void penalize(SearchPointType const& s, SearchPointType const& t, RealVector& fitness)const{
 		fitness += m_penaltyFactor * norm_sqr( t - s );
 	}
+	
 
 	/**
 	* \brief Stores/loads the evaluator's state.
@@ -117,6 +119,7 @@ struct PenalizingEvaluator {
 	}
 
 	double m_penaltyFactor; ///< Penalty factor \f$\alpha\f$, default value: \f$10^{-6}\f$ .
+	std::size_t m_numEvaluations;///< Number of Evaluations on a noisy function
 
 };
 }
