@@ -38,7 +38,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ElitistSelection.h>
 #include <shark/Core/utility/KeyValuePair.h>
-
+#include <algorithm>
 using namespace shark;
 
 namespace{
@@ -47,8 +47,10 @@ namespace{
 		blas::vector<int> rankDistr(N);
 		std::iota(rankDistr.begin(),rankDistr.end(),1-rank);
 		noalias(rankDistr) = abs(rankDistr);
-		std::sort(rankDistr.begin(),rankDistr.end());
-		return rankDistr[std::size_t(percentile * (rankDistr.size()-1))];
+		//~ std::sort(rankDistr.begin(),rankDistr.end());
+		auto pos = rankDistr.begin() +std::size_t(percentile * (rankDistr.size()-1));
+		std::nth_element(rankDistr.begin(), pos, rankDistr.end());
+		return *pos;
 	}
 }
 
@@ -368,7 +370,10 @@ void CMA::step(ObjectiveFunctionType const& function){
 			
 			// update function values of the population to be the mean of old and new values,
 			// this gives some more stability
-			// This is a difference compared to Hansens reference implementation.
+			// This is a difference compared to
+			// Hansen, N., et al. "A method for handling uncertainty in evolutionary
+			// optimization with an application to feedback control of combustion." 
+			// IEEE Transactions on Evolutionary Computation 13.1 (2009): 180-197.
 			// While Hansen is considering the ranks to be more stable, the average
 			// rank is a biased estimate, while the average value
 			// leads to an unbiased estimate of the true rank.
@@ -414,10 +419,10 @@ void CMA::step(ObjectiveFunctionType const& function){
 			//simple adaptation of the number of reevaluations
 			if(s > 0){
 				double rawIncrease = (m_numEvalIncreaseFactor - 1.0 )* m_numEvaluations;
-				m_numEvaluations += std::max<std::size_t>(1,std::size_t(rawIncrease+0.5));
+				m_numEvaluations += std::max<std::size_t>(1,std::lround(rawIncrease));
 			}else if (s < 0 && m_numEvaluations > 1){
 				double rawDecrease = (1.0 - 1.0/m_numEvalIncreaseFactor) * m_numEvaluations;
-				m_numEvaluations -= std::max<std::size_t>(1,std::size_t(rawDecrease+0.5));
+				m_numEvaluations -= std::max<std::size_t>(1,std::lround(rawDecrease));
 			}
 		}
 	}

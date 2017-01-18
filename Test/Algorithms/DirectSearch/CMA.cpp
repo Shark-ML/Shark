@@ -51,7 +51,7 @@ struct MultiplicativeNoisySphere : public SingleObjectiveFunction {
 		SIZE_CHECK(x.size() == numberOfVariables());
 		m_evaluationCounter++;
 		double f = norm_sqr(x);
-		double noise = exp(Rng::gauss(0,m_sigma));
+		double noise = (1+Rng::gauss(0,m_sigma));
 		return f * noise;
 	}
 private:
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( CMA_Multiplicative_Noisy_Sphere)
 	cma.init(sphere, x0);
 
 	double start = log(norm_sqr(cma.solution().point));
-	for(unsigned i=0; i<501; i++) {
+	for(unsigned i=0; i<1501; i++) {
 		cma.step( sphere );
 		if(i%50 == 0)
 			std::cout<<i<<"\t"<<norm_sqr(cma.solution().point)<<"\t"<<(std::log(norm_sqr(cma.solution().point))-start)/sphere.evaluationCounter()<<"\t"<<cma.numberOfEvaluations()<<std::endl;
