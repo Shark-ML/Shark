@@ -45,15 +45,48 @@ namespace shark{
 //! The OnlineRNNet can only process a single input at a time. Internally
 //! it stores the last activation as well as the derivatives which get updated 
 //! over the course of the sequence. Instead of feeding in the whole sequence,
-//! the inputs must be given on after another. However if the whole sequence is
+//! the inputs must be given one after another. However if the whole sequence is
 //! available in advance, this implementation is not advisable, since it is a lot slower
 //! than RNNet which is targeted to whole sequences. 
 //! 
+//! All network state is stored in the State structure which can be created by createState()
+//! which has to be supplied to eval.
+//! A new time sequence is started by generating a new state object.
+//! When the network is created the user has to decide whether gradients
+//! are needed. In this case additional ressources are allocated in the state object on creation
+//! and eval makes sure that the gradient is properly updated between steps, this is costly.
+//! It is possible to skip steps updating the parameters, e.g. when no reward signal is available.
 class OnlineRNNet:public AbstractModel<RealVector,RealVector>
 {
+private:
+	struct InternalState: public State{
+		
+		InternalState(std::size_t numNeurons, std::size_t numParameters)
+		: activation(numNeurons)
+		, lastActivation(numNeurons)
+		, unitGradient(numParameters,numNeurons){}
+		//!the activation of the network at time t (after evaluation)
+		RealVector activation;
+		//!the activation of the network at time t-1 (before evaluation)
+		RealVector lastActivation;
+
+		//!\brief the gradient of the hidden units with respect to every weight
+		//!
+		//!The gradient \f$ \frac{\delta y_k(t)}{\delta w_{ij}} \f$ is stored in this
+		//!structure. Using this gradient, the derivative of the Network can be calculated as
+		//!\f[ \frac{\delta E(y(t))}{\delta w_{ij}}=\sum_{k=1}^n\frac{\delta E(y(t))}{\delta y_k} \frac{\delta y_k(t)}{\delta w_{ij}} \f]
+		//!where \f$ y_k(t) \f$ is the activation of neuron \f$ k \f$ at timestep \f$ t \f$
+		//!the gradient needs to be updated after every timestep using the formula
+		//!\f[ \frac{\delta y_k(t+1)}{\delta w_{ij}}= y'_k(t)= \left[\sum_{l=1}^n w_{il}\frac{\delta y_l(t)}{\delta w_{ij}} +\delta_{kl}y_l(t-1)\right]\f]
+		//!so if the gradient is needed, don't forget to call weightedParameterDerivative at every timestep!
+		RealMatrix unitGradient;
+	};
 public:
 	//! creates a configured neural network
-	SHARK_EXPORT_SYMBOL OnlineRNNet(RecurrentStructure* structure);
+	//!
+	//! \brief structure The structure of the OnlineRNNet
+	//! \brief computeGradient Whether the network will be used to compute gradients
+	SHARK_EXPORT_SYMBOL OnlineRNNet(RecurrentStructure* structure, bool computeGradient);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -62,9 +95,15 @@ public:
 	//!  \brief Feeds a timestep of a time series to the model and
 	//!         calculates it's output.
 	//!
-	//!  \param  pattern  Input patterns for the network.
+	//!  \param  pattern Input patterns for the network.
 	//!  \param  output Used to store the outputs of the network.
-	SHARK_EXPORT_SYMBOL void eval(RealMatrix const& pattern,RealMatrix& output);
+	//!  \param state the current state of the RNN that is updated by eval
+	SHARK_EXPORT_SYMBOL void eval(RealMatrix const& pattern,RealMatrix& output, State& state)const;
+	
+	
+	SHARK_EXPORT_SYMBOL void eval(RealMatrix const& pattern,RealMatrix& output)const{
+		throw SHARKEXCEPTION("[OnlineRNNet::eval] Eval can not be called without state object");
+	}
 	using AbstractModel<RealVector,RealVector>::eval;
 
 	/// obtain the input dimension
@@ -86,7 +125,11 @@ public:
 	//! \param pattern the pattern to evaluate
 	//! \param coefficients the oefficients which are used to calculate the weighted sum
 	//! \param gradient the calculated gradient
-	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(RealMatrix const& pattern, RealMatrix const& coefficients,  RealVector& gradient);
+	//! \param state the current state of the RNN
+	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
+		RealMatrix const& pattern, RealMatrix const& coefficients,
+		State const& state, RealVector& gradient
+	)const;
 
 	//! get internal parameters of the model
 	RealVector parameterVector() const{
@@ -101,15 +144,14 @@ public:
 	std::size_t numberOfParameters() const{
 		return mpe_structure->parameters();
 	}
-
-	//!resets the internal state of the network.
-	//!it resets the network to 0 activation and clears the derivative
-	//!this method needs to be called, when a sequence ends and a new sequence is to be started
-	void resetInternalState(){
-		m_lastActivation.clear();
-		m_activation.clear();
-		m_unitGradient.clear();
+	
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new InternalState( 
+			mpe_structure->numberOfUnits(),
+			m_computeGradient? mpe_structure->parameters(): 0
+		));
 	}
+	
 
 	//!  \brief This Method sets the activation of the output neurons
 	//!
@@ -120,31 +162,24 @@ public:
 	//!  However, the network might become unstable, when teacher-forcing is turned off
 	//!  because there is no force which prevents it from diverging anymore.
 	//!
+	//!  \param  state  The current state of the network
 	//!  \param  activation  Input patterns for the network.
-	void setOutputActivation(RealVector const& activation){
-		m_activation.resize(mpe_structure->numberOfUnits());
-		subrange(m_activation,mpe_structure->numberOfUnits()-outputSize(),mpe_structure->numberOfUnits()) = activation;
+	void setOutputActivation(State& state, RealVector const& activation){
+		InternalState& s = state.toState<InternalState>();
+		s.activation.resize(mpe_structure->numberOfUnits());
+		subrange(s.activation,mpe_structure->numberOfUnits()-outputSize(),mpe_structure->numberOfUnits()) = activation;
 	}
+	
+	
+	
 protected:
 	
 	//! the topology of the network.
 	RecurrentStructure* mpe_structure;
-
-	//!the activation of the network at time t (after evaluation)
-	RealVector m_activation;
-	//!the activation of the network at time t-1 (before evaluation)
-	RealVector m_lastActivation;
-
-	//!\brief the gradient of the hidden units with respect to every weight
-	//!
-	//!The gradient \f$ \frac{\delta y_k(t)}{\delta w_{ij}} \f$ is stored in this
-	//!structure. Using this gradient, the derivative of the Network can be calculated as
-	//!\f[ \frac{\delta E(y(t))}{\delta w_{ij}}=\sum_{k=1}^n\frac{\delta E(y(t))}{\delta y_k} \frac{\delta y_k(t)}{\delta w_{ij}} \f]
-	//!where \f$ y_k(t) \f$ is the activation of neuron \f$ k \f$ at timestep \f$ t \f$
-	//!the gradient needs to be updated after every timestep using the formula
-	//!\f[ \frac{\delta y_k(t+1)}{\delta w_{ij}}= y'_k(t)= \left[\sum_{l=1}^n w_{il}\frac{\delta y_l(t)}{\delta w_{ij}} +\delta_{kl}y_l(t-1)\right]\f]
-	//!so if the gradient is needed, don't forget to call weightedParameterDerivative at every timestep!
-	RealMatrix m_unitGradient;
+	
+	//! stores whether the network should compute a gradient
+	bool m_computeGradient;
+	
 };
 }
 

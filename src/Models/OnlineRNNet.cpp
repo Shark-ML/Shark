@@ -36,73 +36,59 @@
 using namespace std;
 using namespace shark;
 
-OnlineRNNet::OnlineRNNet(RecurrentStructure* structure):mpe_structure(structure),m_unitGradient(0,0){
+OnlineRNNet::OnlineRNNet(RecurrentStructure* structure, bool computeGradient)
+:mpe_structure(structure), m_computeGradient(computeGradient){
 	SHARK_CHECK(mpe_structure,"[OnlineRNNet] structure pointer is not allowed to be NULL");
-	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
+	if(computeGradient)
+		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }
 
 
-void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output){
+void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output, State& state)const{
 	SIZE_CHECK(pattern.size1()==1);//we can only process a single input at a time.
 	SIZE_CHECK(pattern.size2() == inputSize());
 	
-	std::size_t numUnits = mpe_structure->numberOfUnits();
 	
-	if(m_lastActivation.size() != numUnits){
-		m_activation.resize(numUnits);
-		m_lastActivation.resize(numUnits);
-		m_activation.clear();
-		m_lastActivation.clear();
-	}
-	swap(m_lastActivation,m_activation);
+	std::size_t numNeurons = mpe_structure->numberOfNeurons();
+	std::size_t numUnits = mpe_structure->numberOfUnits();
+	InternalState& s = state.toState<InternalState>();
+	RealVector& lastActivation = s.lastActivation;
+	RealVector& activation = s.activation;
+	swap(lastActivation,activation);
 
 	//we want to treat input and bias neurons exactly as hidden or output neurons, so we copy the current
 	//pattern at the beginning of the the last activation pattern aand set the bias neuron to 1
-	////so m_lastActivation has the format (input|1|lastNeuronActivation)
-	noalias(subrange(m_lastActivation,0,mpe_structure->inputs())) = row(pattern,0);
-	m_lastActivation(mpe_structure->bias())=1;
-	m_activation(mpe_structure->bias())=1;
+	////so lastActivation has the format (input|1|lastNeuronActivation)
+	noalias(subrange(lastActivation,0,mpe_structure->inputs())) = row(pattern,0);
+	lastActivation(mpe_structure->bias())=1;
+	activation(mpe_structure->bias())=1;
 
 	//activation of the hidden neurons is now just a matrix vector multiplication
 
-	noalias(subrange(m_activation,inputSize()+1,numUnits)) = prod(
+	noalias(subrange(activation,inputSize()+1,numUnits)) = prod(
 		mpe_structure->weights(),
-		m_lastActivation
+		lastActivation
 	);
 
 	//now apply the sigmoid function
 	for (std::size_t i = inputSize()+1;i != numUnits;i++){
-		m_activation(i) = mpe_structure->neuron(m_activation(i));
+		activation(i) = mpe_structure->neuron(activation(i));
 	}
 	//copy the result to the output
 	output.resize(1,outputSize());
-	noalias(row(output,0)) = subrange(m_activation,numUnits-outputSize(),numUnits);
-}
-
-
-void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const RealMatrix& coefficients,  RealVector& gradient){
-	SIZE_CHECK(pattern.size1()==1);//we can only process a single input at a time.
-	SIZE_CHECK(coefficients.size1()==1);
-	SIZE_CHECK(pattern.size2() == inputSize());
-	SIZE_CHECK(pattern.size2() == coefficients.size2());
-	gradient.resize(mpe_structure->parameters());
+	noalias(row(output,0)) = subrange(activation,numUnits-outputSize(),numUnits);
 	
-	std::size_t numNeurons = mpe_structure->numberOfNeurons();
-	std::size_t numUnits = mpe_structure->numberOfUnits();
-
-	//first check wether this is the first call of the derivative after a change of internal structure. in this case we have to allocate A LOT
-	//of memory for the derivative and set it to zero.
-	if(m_unitGradient.size1() != mpe_structure->parameters() || m_unitGradient.size2() != numNeurons){
-		m_unitGradient.resize(mpe_structure->parameters(),numNeurons);
-		m_unitGradient.clear();
-	}
-
+	//update the internal derivative if needed
+	if(!m_computeGradient) return;
+	
+	RealMatrix& unitGradient = s.unitGradient;
+	
 	//for the next steps see Kenji Doya, "Recurrent Networks: Learning Algorithms"
 
 	//calculate the derivative for all neurons f'
 	RealVector neuronDerivatives(numNeurons);
 	for(std::size_t i=0;i!=numNeurons;++i){
-		neuronDerivatives(i)=mpe_structure->neuronDerivative(m_activation(i+inputSize()+1));
+		neuronDerivatives(i)=mpe_structure->neuronDerivative(activation(i+inputSize()+1));
 	}
 	
 	//calculate the derivative for every weight using the derivative of the last time step
@@ -112,28 +98,41 @@ void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const R
 	);
 	
 	//update the new gradient with the effect of last timestep
-	noalias(m_unitGradient) = prod(m_unitGradient,trans(hiddenWeights));
+	unitGradient = prod(unitGradient,trans(hiddenWeights));
 	
-	//add the effect of the current time step
+	//add the effect of the current time step when there is a connection
 	std::size_t param = 0;
 	for(std::size_t i = 0; i != numNeurons; ++i){
 		for(std::size_t j = 0; j != numUnits; ++j){
 			if(mpe_structure->connection(i,j)){
-				m_unitGradient(param,i) += m_lastActivation(j);
-				++param;
+				unitGradient(param,i) += lastActivation(j);
 			}
 		}
 	}
 	
 	//multiply with outer derivative of the neurons
-	for(std::size_t i = 0; i != m_unitGradient.size1();++i){
-		noalias(row(m_unitGradient,i)) = element_prod(row(m_unitGradient,i),neuronDerivatives);
+	for(std::size_t i = 0; i != unitGradient.size1();++i){
+		noalias(row(unitGradient,i)) *= neuronDerivatives;
 	}
+	
+	//We are done here for eval, the rest can only be computed using an error signal
+}
+
+
+void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const RealMatrix& coefficients,  State const& state, RealVector& gradient)const{
+	if(!m_computeGradient) throw SHARKEXCEPTION("[OnlineFFNet::weightedParameterDerivative] Network is configured to not computing gradients!");
+	SIZE_CHECK(pattern.size1()==1);//we can only process a single input at a time.
+	SIZE_CHECK(coefficients.size1()==1);
+	SIZE_CHECK(pattern.size2() == inputSize());
+	SIZE_CHECK(pattern.size2() == coefficients.size2());
+	gradient.resize(mpe_structure->parameters());
+	
+	std::size_t numNeurons = mpe_structure->numberOfNeurons();
+	InternalState const& s = state.toState<InternalState>();
+	RealMatrix const& unitGradient = s.unitGradient;
 	//and formula 4 (the gradient itself)
 	noalias(gradient) = prod(
-		columns(m_unitGradient,numNeurons-outputSize(),numNeurons),
+		columns(unitGradient,numNeurons-outputSize(),numNeurons),
 		row(coefficients,0)
 	);
-	//sanity check
-	SIZE_CHECK(param == mpe_structure->parameters());
 }
