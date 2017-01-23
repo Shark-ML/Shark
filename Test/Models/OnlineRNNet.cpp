@@ -1,163 +1,125 @@
-#define BOOST_TEST_MODULE ML_RNNET
+#define BOOST_TEST_MODULE Models_OnlineRNNet
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include "derivativeTestHelper.h"
 
 #include <shark/Models/OnlineRNNet.h>
-#include <shark/Rng/GlobalRng.h>
 #include <sstream>
 
+
+#include <shark/Rng/GlobalRng.h>
+
+using namespace std;
+using namespace boost::archive;
 using namespace shark;
 
 
-//this test compares the network to the MSEFFNET of Shark 2.4
-//since the topology of the net changed, this is not that easy...
+class OnlineRNNetTestHelper: public AbstractModel<RealVector, RealVector>{
+public:
+	OnlineRNNetTestHelper(std::size_t seqLength, bool bias)
+	: m_structure(OnlineRNNetTestHelper::createStructure(bias))
+	, m_network(&m_structure,true)
+	, m_seqLength(seqLength){
+		m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
+	}
+	
+	//! get internal parameters of the model
+	RealVector parameterVector() const{
+		return m_network.parameterVector();
+	}
+	//! set internal parameters of the model
+	void setParameterVector(RealVector const& newParameters){
+		m_network.setParameterVector(newParameters);
+	}
+
+	//!number of parameters of the network
+	std::size_t numberOfParameters() const{
+		return m_network.numberOfParameters();
+	}
+	
+	boost::shared_ptr<State> createState()const{
+		return m_network.createState();
+	}
+	
+	std::size_t inputSize()const{
+		return m_seqLength * m_network.inputSize();
+	}
+	
+	std::size_t outputSize()const{
+		return m_network.outputSize();
+	}
+	
+	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
+		for(std::size_t i = 0; i != m_seqLength; ++i){
+			RealMatrix pattern = columns(patterns,i*m_structure.inputs(),(i+1)*m_structure.inputs());
+			m_network.eval(pattern,output,state);
+		}
+	}
+	
+	void weightedParameterDerivative(
+		RealMatrix const& patterns, RealMatrix const& coefficients,
+		State const& state, RealVector& gradient
+	)const{
+		std::size_t start = patterns.size2() - m_structure.inputs();
+		RealMatrix pattern = columns(patterns,start,patterns.size2());
+		m_network.weightedParameterDerivative(pattern,coefficients,state,gradient);
+	}
+	
+private:
+	static RecurrentStructure createStructure(bool bias){
+		RecurrentStructure structure;
+		structure.setStructure(2,4,2,bias);
+		return structure;
+	}
+	RecurrentStructure m_structure;
+	OnlineRNNet m_network;
+	std::size_t m_seqLength;
+};
+
+
 BOOST_AUTO_TEST_SUITE (Models_OnlineRNNet)
 
-BOOST_AUTO_TEST_CASE( ONLINERNNET_VALUE_TEST ){
-	//We simulate a Shark 2.4 network which would be created using
-	//setStructure(2,2) and setting all feed forward connections to 0.
-	//since the input units in the old network
-	//where sigmoids, we have to use a hidden layer to emulate them
-	//since this uses every feature of the topology possible, this
-	//test should catch every possible error during eval.
-	int regConnections[4][7]=
+//test the case when the sequence has length 1. this is
+//an easy case as the effect of the old gradient step is 0
+//(similar to a network without hidden layer and nonlinear outputs)
+BOOST_AUTO_TEST_CASE(WeightedDerivatives_Single)
+{
 	{
-		{1,0,0,0,0,0,0},//shark 2.4 input1
-		{0,1,0,0,0,0,0},//shark 2.4 input 2
-		{0,0,0,1,1,1,1},//output 1
-		{0,0,0,1,1,1,1} //output 2
-	};
-	IntMatrix conn(4,7);
-	for (size_t i = 0; i < 4; i++){
-		for (size_t j = 0; j < 7; j++){
-			conn(i,j)=regConnections[i][j];
-		}
+		OnlineRNNetTestHelper net(1,true);
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(), 9*6);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
 	}
-	RecurrentStructure netStruct;
-	netStruct.setStructure(2,2,conn);
-	OnlineRNNet net(&netStruct);
-	BOOST_REQUIRE_EQUAL(net.numberOfParameters(),10);
-
-
-	//initialize parameters
-	RealVector parameters(10);
-	//our simulated input neurons need strength 1
-	parameters(0)=1; 
-	parameters(1)=1;
-	for(size_t i=2;i!=10;++i){
-		parameters(i)=0.1*i-0.5;
-	}
-	net.setParameterVector(parameters);
-
-	std::cout<<parameters<<std::endl;
-	std::cout<<netStruct.weights()<<std::endl;
-	//input and output data from an test of an earlier implementation
-	RealMatrix testInputs(5,2);
-	for (size_t i = 0; i < 5; i++){
-		for(size_t j=0;j!=2;++j){
-			testInputs(i,j)  = i+j;
-		}
-	}
-	RealMatrix testOutputs(5,2);
-
-	testOutputs(0,0)=0.5;
-	testOutputs(0,1)=0.5;
-	testOutputs(1,0)=0.414301;
-	testOutputs(1,1)=0.633256;
-	testOutputs(2,0)=0.392478;
-	testOutputs(2,1)=0.651777;
-	testOutputs(3,0)=0.378951;
-	testOutputs(3,1)=0.658597;
-	testOutputs(4,0)=0.372836;
-	testOutputs(4,1)=0.661231;
-
-	//eval network output and test wether it's the same or not
-	for(size_t i=0;i!=5;++i){
-		RealVector output=net(row(testInputs,i));
-		std::cout<<output(0)<<" "<<output(1)<<std::endl;
-		BOOST_CHECK_SMALL(norm_2(output-row(testOutputs,i)),1.e-5);
-	}
-
-	//now, after resetting the network, we should get the same result
-	net.resetInternalState();
-	for(size_t i=0;i!=5;++i){
-		RealVector output=net(row(testInputs,i));
-		BOOST_CHECK_SMALL(norm_2(output-row(testOutputs,i)),1.e-5);
+	{
+		OnlineRNNetTestHelper net(1,false);
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(), 8*6);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
 	}
 }
-BOOST_AUTO_TEST_CASE( ONLINE_RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
-	RecurrentStructure netStruct;
-	netStruct.setStructure(2,4,2,true);
-	OnlineRNNet net(&netStruct);
-	const size_t T=10;
-	const size_t numberOfParameters=54;
-	BOOST_REQUIRE_EQUAL(net.numberOfParameters(),numberOfParameters);
 
-	//initialize parameters
-	RealVector parameters(numberOfParameters);
-	for(size_t i=0;i!=numberOfParameters;++i){
-		parameters(i)= Rng::gauss(0,1)-0.1;
+//This is the more complex case as the effect of the first iteration is now 
+//fed into the next step
+//(similar to a network with one hidden layer)
+BOOST_AUTO_TEST_CASE(WeightedDerivatives_TwoStep)
+{
+	{
+		OnlineRNNetTestHelper net(2,true);
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(), 9*6);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
 	}
-	net.setParameterVector(parameters);
-
-	//define sequence
-	RealMatrix testInputs(T,2);
-	for (size_t t = 0; t < T; t++){
-		for(size_t j=0;j!=2;++j){
-			testInputs(t,j)  = Rng::uni(-1,1);
-		}
+	{
+		OnlineRNNetTestHelper net(2,false);
+		BOOST_REQUIRE_EQUAL(net.numberOfParameters(), 8*6);
+		testWeightedDerivative(net,1000,5.e-6,1.e-7);
 	}
-	//define coefficients
-	RealMatrix coefficients(1,2);
-	coefficients(0,0)  = 0.5;
-	coefficients(0,1)  = 1;
-
-	//we test the derivative for every subsequence [0,t]
-	for(size_t t=0;t != T; ++t){
-		net.resetInternalState();
-		//run subsequence the first time and calculate iterative derivative
-		RealVector derivative;
-		for(size_t t2=0;t2 <=t; ++t2){
-			RealMatrix input(1,2);
-			row(input,0) = row(testInputs,t2);
-			net(input);
-			net.weightedParameterDerivative(input,coefficients,derivative);
-			BOOST_REQUIRE_EQUAL(derivative.size(),numberOfParameters);
-		}
-
-		//estimate weighted derivative
-		double epsilon=1.e-5;
-		RealVector testDerivative(numberOfParameters,0.0);
-		for(size_t w=0; w != numberOfParameters; ++w){
-			//create points with an change of +-epsilon in the wth component
-			RealVector point1(parameters);
-			RealVector point2(parameters);
-			point1(w)+=epsilon;
-			point2(w)-=epsilon;
-			//calculate first result
-			net.setParameterVector(point1);
-			//rerun the whole sequence
-			net.resetInternalState();
-			RealVector result1;
-			for(size_t t2=0;t2 <=t; ++t2){
-				result1=net(row(testInputs,t2));
-			}
-			//calculate second result
-			net.setParameterVector(point2);
-			//rerun the whole sequence
-			net.resetInternalState();
-			RealVector result2;
-			for(size_t t2=0;t2 <=t; ++t2){
-				result2=net(row(testInputs,t2));
-			}
-
-			//now estimate the derivative for the changed parameter
-			testDerivative(w)+=inner_prod(row(coefficients,0),(result1-result2)/(2*epsilon));
-		}
-		std::cout<<"est: "<<testDerivative<<"\n calc:"<<derivative<<std::endl;
-		//check wether the derivatives are identical
-		BOOST_CHECK_SMALL(::shark::distance(derivative,testDerivative),epsilon);
-	}
-
 }
+
+//This is the more complex case as the effect of the first iteration is now 
+//fed into the next step
+//(similar to a network with one hidden layer)
+BOOST_AUTO_TEST_CASE(WeightedDerivatives_Multiple)
+{
+	OnlineRNNetTestHelper net(4,true);
+	testWeightedDerivative(net,1000,5.e-6,1.e-7);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -57,7 +57,7 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output, State& sta
 	swap(lastActivation,activation);
 
 	//we want to treat input and bias neurons exactly as hidden or output neurons, so we copy the current
-	//pattern at the beginning of the the last activation pattern aand set the bias neuron to 1
+	//pattern at the beginning of the the last activation pattern and set the bias neuron to 1
 	////so lastActivation has the format (input|1|lastNeuronActivation)
 	noalias(subrange(lastActivation,0,mpe_structure->inputs())) = row(pattern,0);
 	lastActivation(mpe_structure->bias())=1;
@@ -84,12 +84,6 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output, State& sta
 	RealMatrix& unitGradient = s.unitGradient;
 	
 	//for the next steps see Kenji Doya, "Recurrent Networks: Learning Algorithms"
-
-	//calculate the derivative for all neurons f'
-	RealVector neuronDerivatives(numNeurons);
-	for(std::size_t i=0;i!=numNeurons;++i){
-		neuronDerivatives(i)=mpe_structure->neuronDerivative(activation(i+inputSize()+1));
-	}
 	
 	//calculate the derivative for every weight using the derivative of the last time step
 	auto hiddenWeights = columns(
@@ -106,13 +100,15 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output, State& sta
 		for(std::size_t j = 0; j != numUnits; ++j){
 			if(mpe_structure->connection(i,j)){
 				unitGradient(param,i) += lastActivation(j);
+				++param;
 			}
 		}
 	}
 	
 	//multiply with outer derivative of the neurons
-	for(std::size_t i = 0; i != unitGradient.size1();++i){
-		noalias(row(unitGradient,i)) *= neuronDerivatives;
+	for(std::size_t i = 0; i != unitGradient.size2();++i){
+		double neuronDerivative = mpe_structure->neuronDerivative(activation(i+inputSize()+1));
+		noalias(column(unitGradient,i)) *= neuronDerivative;
 	}
 	
 	//We are done here for eval, the rest can only be computed using an error signal

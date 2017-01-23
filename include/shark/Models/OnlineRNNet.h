@@ -56,15 +56,18 @@ namespace shark{
 //! are needed. In this case additional ressources are allocated in the state object on creation
 //! and eval makes sure that the gradient is properly updated between steps, this is costly.
 //! It is possible to skip steps updating the parameters, e.g. when no reward signal is available.
+//!
+//! Note that eval can only work with batches of size one and eval without  a state object can not
+//! be called.
 class OnlineRNNet:public AbstractModel<RealVector,RealVector>
 {
 private:
 	struct InternalState: public State{
 		
-		InternalState(std::size_t numNeurons, std::size_t numParameters)
-		: activation(numNeurons)
-		, lastActivation(numNeurons)
-		, unitGradient(numParameters,numNeurons){}
+		InternalState(RecurrentStructure const& structure)
+		: activation(structure.numberOfUnits(),0.0)
+		, lastActivation(structure.numberOfUnits(),0.0)
+		, unitGradient(structure.parameters(),structure.numberOfNeurons(),0.0){}
 		//!the activation of the network at time t (after evaluation)
 		RealVector activation;
 		//!the activation of the network at time t-1 (before evaluation)
@@ -93,14 +96,15 @@ public:
 	{ return "OnlineRNNet"; }
 
 	//!  \brief Feeds a timestep of a time series to the model and
-	//!         calculates it's output.
+	//!         calculates it's output. The batches must have size 1.
 	//!
 	//!  \param  pattern Input patterns for the network.
 	//!  \param  output Used to store the outputs of the network.
-	//!  \param state the current state of the RNN that is updated by eval
+	//!  \param  state the current state of the RNN that is updated by eval
 	SHARK_EXPORT_SYMBOL void eval(RealMatrix const& pattern,RealMatrix& output, State& state)const;
 	
 	
+	/// \brief It is forbidding to call eval without a state object.
 	SHARK_EXPORT_SYMBOL void eval(RealMatrix const& pattern,RealMatrix& output)const{
 		throw SHARKEXCEPTION("[OnlineRNNet::eval] Eval can not be called without state object");
 	}
@@ -146,10 +150,7 @@ public:
 	}
 	
 	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState( 
-			mpe_structure->numberOfUnits(),
-			m_computeGradient? mpe_structure->parameters(): 0
-		));
+		return boost::shared_ptr<State>(new InternalState( *mpe_structure));
 	}
 	
 
