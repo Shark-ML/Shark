@@ -234,7 +234,7 @@ if( ENABLE_CBLAS )
 		find_library(OPENBLAS_LIBRARY openblas
 			HINTS ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib/openblas-base
 		)
-		find_library(CBLAS_LIBRARY blas
+		find_library(CBLAS_LIBRARY cblas
 			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/libblas
 		)
 		find_library(CLAPACK_LIBRARY lapack
