@@ -78,6 +78,8 @@ struct HypervolumeCalculator {
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Points, typename VectorType>
 	double operator()( Points const& points, VectorType const& refPoint){
+		if(points.size() == 0)
+			return 0.0;
 		SIZE_CHECK( points.begin()->size() == refPoint.size() );
 		std::size_t numObjectives = refPoint.size();
 		if(numObjectives == 2){

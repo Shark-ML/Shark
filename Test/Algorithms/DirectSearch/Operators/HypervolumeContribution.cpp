@@ -230,13 +230,14 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionMD_With_3D ) {
 BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
 	const unsigned int numTests = 10;
 	const unsigned int numTrials = 100;
-	const std::size_t numPoints = 10;
+	const std::size_t numPoints = 20;
+	std::cout<<"Contribution MD Approx"<<std::endl;
 	
-	RealVector reference(3,1.0);
+	RealVector reference(5,1.0);
 	Rng::seed(42);
 	
 	for(unsigned int t = 0; t != numTests; ++t){
-		auto set = createRandomFront(numPoints,3,2);
+		auto set = createRandomFront(numPoints,5,2);
 		
 		auto contributionsTrue = contributionsNaive(set, reference);
 		std::vector<double> contributions(set.size());
