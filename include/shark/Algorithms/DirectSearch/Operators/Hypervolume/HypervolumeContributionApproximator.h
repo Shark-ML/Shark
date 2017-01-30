@@ -36,6 +36,7 @@
 #include <boost/cstdint.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 #include <algorithm>
 #include <limits>
 #include <vector>
@@ -73,6 +74,7 @@ struct HypervolumeContributionApproximator{
 		, approximatedContribution( 0. )
 		, contributionLowerBound( 0. )
 		, contributionUpperBound( 0. )
+		, computedExactly(false)
 		, noSamples( 0 )
 		, noSuccessfulSamples( 0 )
 		{}
@@ -86,7 +88,8 @@ struct HypervolumeContributionApproximator{
 		double approximatedContribution;
 		double contributionLowerBound;
 		double contributionUpperBound;
-
+		bool computedExactly;
+		
 		std::size_t noSamples;
 		std::size_t noSuccessfulSamples;
 	};
@@ -189,7 +192,7 @@ struct HypervolumeContributionApproximator{
 		
 		std::vector< Point<RealVector> > front;
 		front.reserve( points.size() );
-		for(auto const& point: points) {
+		for(auto const& point: points){
 			front.emplace_back( point, reference );
 		}
 		computeBoundingBoxes( front );
@@ -198,9 +201,15 @@ struct HypervolumeContributionApproximator{
 		for(auto it = front.begin(); it != front.end(); ++it ) {
 			if(std::find(minIndex.begin(),minIndex.end(),it-front.begin()) != minIndex.end())
 				continue;
+			//~ //check whether point is on the boundary -> least contributor
+			//~ for(std::size_t j = 0; j != minVal.size(); ++j){
+				//~ if(it->point[j] == reference[j]){
+					//~ return std::vector<KeyValuePair<double,std::size_t> >(1,{0.0,it-front.begin()});
+				//~ }
+			//~ }
 			activePoints.push_back( it );
-		}
 		
+		}
 		
 		
 		auto smallest = computeSmallest(activePoints, front.size());
@@ -214,6 +223,7 @@ private:
 	
 	template<class Set>
 	typename Set::value_type computeSmallest(Set& activePoints, std::size_t n)const{
+		typedef typename Set::value_type SetIter;
 		//compute initial guess for delta
 		double delta = 0.;
 		for( auto it = activePoints.begin(); it != activePoints.end(); ++it )
@@ -223,48 +233,52 @@ private:
 		unsigned int round = 0;
 		while( true ) {
 			round++;
-
-			//sample all active points so that their individual deviations are smaller than delta
-			for( std::size_t i = 0; i < activePoints.size(); i++ )
-				sample( *activePoints[i], round, delta, n );
-
-			//find the current least contributor
-			double minApprox = std::numeric_limits<double>::max();
-			auto minimalElement = activePoints.end();
-			for( auto it = activePoints.begin(); it != activePoints.end(); ++it ) {
-				if( (*it)->approximatedContribution < minApprox ) {
-					minApprox = (*it)->approximatedContribution;
-					minimalElement = it;
+			
+			//check whether we spent so much time on sampling that computing the real volume is not much more expensive any more.
+			//this guarantuees convergence even in cases that two points have the same hyper volume.
+			SHARK_PARALLEL_FOR(int i = 0; i < (int)activePoints.size(); ++i){
+				if(shouldCompute(*activePoints[i])){
+					computeExactly(*activePoints[i]);
 				}
 			}
+			
+			//sample all active points so that their individual deviations are smaller than delta
+			for( auto point: activePoints )
+				sample( *point, round, delta, n );
+
+			//find the current least contributor
+			auto minimalElement = std::min_element(
+				activePoints.begin(),activePoints.end(),
+				[](SetIter const& a, SetIter const& b){return a->approximatedContribution < b->approximatedContribution;}
+			);
 
 			//section 3.4.1: push the least contributor: decrease its delta further to have a chance to end earlier.
 			if( activePoints.size() > 2 ) {
 				sample( **minimalElement, round, m_minimumMultiplierDelta * delta, n );
-				minApprox = std::numeric_limits<double>::max();
-				for( auto it = activePoints.begin(); it != activePoints.end(); ++it ) {
-					if( (*it)->approximatedContribution < minApprox ) {
-						minApprox = (*it)->approximatedContribution;
-						minimalElement = it;
-					}
-				}
+				minimalElement = std::min_element(
+					activePoints.begin(),activePoints.end(),
+					[](SetIter const& a, SetIter const& b){return a->approximatedContribution < b->approximatedContribution;}
+				);
 			}
 
 			//remove all points whose confidence interval does not overlap with the current minimum any more.
-			auto it = activePoints.begin();
-			while( it != activePoints.end() ) {
-				if( (*minimalElement)->contributionUpperBound  < (*it)->contributionLowerBound )
-					it = activePoints.erase( it );
-				else
-					++it;
-			}
+			double erase_level = (*minimalElement)->contributionUpperBound;
+			auto erase_start = std::remove_if(
+				activePoints.begin(),activePoints.end(),
+				[=](SetIter const& point){return point->contributionLowerBound > erase_level;}
+			);
+			activePoints.erase(erase_start,activePoints.end());
+			
+			//if the set only has one point left, we are done.
+			if(activePoints.size() == 1)
+				return activePoints.front();
 
 			// stopping conditions: have we reached the desired accuracy? 
 			// for this we need to know:
 			// 1. contribution for all points are bounded above 0
 			// 2. upperBound(LC) < (1+epsilon)*lowerBound(A) for all A
 			double d = 0;
-			for( it = activePoints.begin(); it != activePoints.end(); ++it ) {
+			for( auto it = activePoints.begin(); it != activePoints.end(); ++it ) {
 				if( it == minimalElement )
 					continue;
 				double nom = (*minimalElement)-> contributionUpperBound;
@@ -292,6 +306,8 @@ private:
 	/// \param [in] n the total number of points in the front. Required for proper calculation of bounds
 	template<class VectorType>
 	void sample( Point<VectorType>& point, unsigned int r, double delta, std::size_t n )const{
+		if(point.computedExactly) return;//spend no time on points that are computed exactly
+		
 		double logFactor = std::log( 2. * n * (1. + m_gamma) / (m_errorProbability * m_gamma) );
 		double logR = std::log( static_cast<double>( r ) );
 		//compute how many samples we need until the bound of the current box is smaller than delta
@@ -390,6 +406,37 @@ private:
 				}
 			}
 		}
+	}
+	template<class VectorType>
+	bool shouldCompute(Point<VectorType> const& point)const{
+		//we do not compute if it is already computed
+		if(point.computedExactly) return false;
+		std::size_t numPoints = point.influencingPoints.size();
+		//point is on its own no need to sample.
+		if(numPoints == 0) return true;
+		std::size_t numObjectives = point.point.size();
+		//runtime already spend on point
+		double time =point.noSamples * numObjectives;
+		
+		//estimate of algo run time
+		double algoRunTime = 0.03 * numObjectives * numObjectives * std::pow(numPoints, numObjectives * 0.5 );
+		return time > algoRunTime;
+	}
+	
+	template<class VectorType>
+	void computeExactly(Point<VectorType>& point)const{
+		std::size_t numPoints = point.influencingPoints.size();
+		//compute volume of the points inside the box
+		std::vector<VectorType> transformedPoints(numPoints);
+		for(std::size_t j = 0; j != numPoints; ++j){
+			transformedPoints[j] = max(point.influencingPoints[j]->point, point.point);
+		}
+		HypervolumeCalculator vol;
+		double volume = point.boundingBoxVolume - vol(transformedPoints, point.boundingBox);
+		point.computedExactly = true;
+		point.contributionLowerBound = volume;
+		point.contributionUpperBound = volume;
+		point.approximatedContribution = volume;
 	}
 };
 }
