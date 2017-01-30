@@ -27,8 +27,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_MD_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_MD_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_MD_HOY_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_HYPERVOLUMECALCULATOR_MD_HOY_H
 
 #include <shark/LinAlg/Base.h>
 
@@ -45,7 +45,7 @@ namespace shark {
 /// Faster S-Metric Calculation by Considering Dominated Hypervolume as Klee's Measure Problem.
 ///  In: B. Kovalerchuk (ed.): Proceedings of the Second IASTED Conference on Computational Intelligence (CI 2006), 
 /// pp. 231-236. ACTA Press: Anaheim, 2006.
-struct HypervolumeCalculatorMD {
+struct HypervolumeCalculatorMDHOY{
 
 	/// \brief Executes the algorithm.
 	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: s' \preceq s \f$
