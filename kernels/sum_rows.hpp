@@ -33,7 +33,7 @@
 
 #include "default/sum_rows.hpp"
 #ifdef REMORA_USE_GPU
-#include "clblas/sum_rows.hpp"
+#include "gpu/sum_rows.hpp"
 #endif
 
 namespace remora {namespace bindings{

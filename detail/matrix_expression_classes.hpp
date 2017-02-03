@@ -1071,5 +1071,100 @@ private:
 	vector_closure_type m_diagonal; 
 };
 
+
+/// \brief Concatenates two matrices A and B.
+///
+/// The third boolean argument decides whether this happens to the right as A|B 
+/// or below as
+/// A
+/// --
+/// B
+template<class MatA, class MatB, bool add_right>
+class matrix_concat: public matrix_expression<matrix_concat<MatA, MatB,  add_right>, typename MatA::device_type > {
+public:
+	typedef typename MatA::const_closure_type matrix_closure_typeA;
+	typedef typename MatB::const_closure_type matrix_closure_typeB;
+public:
+	typedef typename common_value_type<MatA,MatB>::type value_type;
+	typedef typename MatA::size_type size_type;
+	typedef value_type const& const_reference;
+	typedef const_reference reference;
+
+	typedef matrix_concat const_closure_type;
+	typedef const_closure_type closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
+	typedef blockwise<typename evaluation_tag_restrict_traits<
+		typename MatA::evaluation_category::tag,
+		typename MatB::evaluation_category::tag
+	>::type> evaluation_category;
+	typedef unknown_orientation orientation;
+	typedef typename MatA::device_type device_type;
+
+	// Construction and destruction
+	explicit matrix_concat(
+		matrix_closure_typeA const& lhs,
+		matrix_closure_typeB const& rhs
+	):m_lhs(lhs), m_rhs(rhs) {}
+
+	size_type size1() const {
+		return add_right? m_lhs.size1() : m_lhs.size1() + m_rhs.size1();
+	}
+	size_type size2() const {
+		return add_right? m_lhs.size2() + m_rhs.size2() : m_lhs.size2();
+	}
+	
+	matrix_closure_typeA const& lhs() const {
+		return m_lhs;
+	}
+	matrix_closure_typeB const& rhs() const {
+		return m_rhs;
+	}
+
+	typename device_traits<device_type>::queue_type& queue()const{
+		return m_lhs.queue();
+	}
+	
+	//FIXME: This workaround is required
+	//as other expressions might query the iterator type
+	typedef typename MatA::const_row_iterator const_row_iterator;
+	typedef typename MatA::const_column_iterator const_column_iterator;
+	typedef const_row_iterator row_iterator;
+	typedef const_column_iterator column_iterator;
+	
+	//dispatcher to computation kernels
+	template<class MatX>
+	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+		if(add_right){
+			matrix_range<MatX> left(X(),0, X().size1(), 0, m_lhs.size2()); 
+			matrix_range<MatX> right(X(),0, X().size1(), m_lhs.size2(), X().size2()); 
+			assign(left,m_lhs,alpha);
+			assign(right,m_rhs,alpha);
+		}else{
+			matrix_range<MatX> top(X(),0, m_lhs.size1(), 0, X().size2()); 
+			matrix_range<MatX> bottom(X(),m_lhs.size1(), X().size1(),0, X().size2()); 
+			assign(top,m_lhs,alpha);
+			assign(bottom,m_rhs,alpha);
+		}
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+		if(add_right){
+			matrix_range<MatX> left(X(),0, X().size1(), 0, m_lhs.size2()); 
+			matrix_range<MatX> right(X(),0, X().size1(), m_lhs.size2(), X().size2()); 
+			plus_assign(left,m_lhs,alpha);
+			plus_assign(right,m_rhs,alpha);
+		}else{
+			matrix_range<MatX> top(X(),0, m_lhs.size1(), 0, X().size2()); 
+			matrix_range<MatX> bottom(X(),m_lhs.size1(), X().size1(),0, X().size2()); 
+			plus_assign(top,m_lhs,alpha);
+			plus_assign(bottom,m_rhs,alpha);
+		}
+	}
+private:
+	matrix_closure_typeA m_lhs;
+	matrix_closure_typeB m_rhs;
+};
+
 }
 #endif

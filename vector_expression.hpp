@@ -357,6 +357,49 @@ inner_prod(
 	return result;
 }
 
+
+// Vector Concatenation
+
+
+///\brief Concatenates two vectors
+///
+/// Given two vectors v and w, forms the vector (v,w). 
+template<class VecV1, class VecV2, class Device>
+vector_concat<VecV1,VecV2> operator|(
+	vector_expression<VecV1, Device> const& v1,
+	vector_expression<VecV2, Device> const& v2
+){
+	return vector_concat<VecV1,VecV2>(v1(),v2());
+}
+
+///\brief Concatenates a vector with a scalar
+///
+/// Given a vector v and a scalar t, forms the vector (v,t)
+template<class VecV, class T, class Device>
+typename boost::enable_if<
+	std::is_convertible<T, typename VecV::value_type>, 
+	vector_concat<VecV, scalar_vector<T, Device> >
+>::type operator| (
+	vector_expression<VecV, Device> const& v,
+	T t
+){
+	return v | scalar_vector<T, Device>(1,t);
+}
+
+///\brief Concatenates a vector with a scalar
+///
+/// Given a vector v and a scalar t, forms the vector (v,t)
+template<class T, class VecV, class Device>
+typename boost::enable_if<
+	std::is_convertible<T, typename VecV::value_type>,
+	vector_concat<scalar_vector<T, Device>,VecV >
+>::type operator| (
+	T t,
+	vector_expression<VecV, Device> const& v
+){
+	return scalar_vector<T, Device>(1,t) | v;
+}
+
 }
 
 #endif

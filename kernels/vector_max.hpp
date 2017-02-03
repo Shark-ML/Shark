@@ -32,7 +32,7 @@
 
 #include "default/vector_max.hpp"
 #ifdef REMORA_USE_GPU
-#include "clblas/vector_max.hpp"
+#include "gpu/vector_max.hpp"
 #endif
 	
 namespace remora { namespace kernels{

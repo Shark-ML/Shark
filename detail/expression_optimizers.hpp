@@ -212,13 +212,26 @@ template<class M1, class M2>
 struct matrix_transpose_optimizer<matrix_matrix_prod<M1,M2> >{
 	typedef matrix_transpose_optimizer<typename const_expression<M2>::type> left_opt;
 	typedef matrix_transpose_optimizer<typename const_expression<M1>::type> right_opt;
-	typedef matrix_matrix_prod<typename left_opt::type,typename right_opt::type > type;
+	typedef matrix_matrix_prod_optimizer<typename left_opt::type,typename right_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(matrix_matrix_prod<M1,M2> const& m){
-		return type(left_opt::create(m.rhs()),right_opt::create(m.lhs()));
+		return opt::create(left_opt::create(m.rhs()),right_opt::create(m.lhs()));
 	}
 };
 
+//(A | B)^T= (A^T & B^T)
+//(A & B)^T= (A^T | B^T)
+template<class M1, class M2, bool B>
+struct matrix_transpose_optimizer<matrix_concat<M1,M2,B> >{
+	typedef matrix_transpose_optimizer<typename const_expression<M2>::type> right_opt;
+	typedef matrix_transpose_optimizer<typename const_expression<M1>::type> left_opt;
+	typedef matrix_concat<typename left_opt::type,typename right_opt::type,!B > type;
+	
+	static type create(matrix_concat<M1,M2,B> const& m){
+		return type(left_opt::create(m.lhs()),right_opt::create(m.rhs()));
+	}
+};
 
 ////////////////////////////////////
 //// Matrix Row

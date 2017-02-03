@@ -65,7 +65,7 @@ void trmv(
 }}
 
 #ifdef REMORA_USE_GPU
-#include "clblas/trmv.hpp"
+#include "gpu/trmv.hpp"
 #endif
 
 #endif
