@@ -7,72 +7,68 @@
 
 #include <shark/Algorithms/DirectSearch/SteadyStateMOCMA.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
-
+#include "../testFunction.h"
 using namespace shark;
-
-struct PointExtractor{
-
-	template<class T>
-	RealVector const& operator()(T const& arg)const{
-		return arg.value;
-	}
-};
-
-void testObjectiveFunctionMOO(
-	MultiObjectiveFunction& f, 
-	std::size_t mu, 
-	double targetVolume, 
-	std::size_t iterations,
-	RealVector const& reference
-){
-	SteadyStateMOCMA mocma;
-	mocma.mu() = mu;
-	mocma.indicator().setReference(reference);
-	f.init();
-	mocma.init(f);
-	
-	
-	for(std::size_t i = 0; i != iterations; ++i){
-		mocma.step(f);
-	}
-	BOOST_REQUIRE_EQUAL(mocma.solution().size(), mu);
-	HypervolumeCalculator hyp;
-	double volume = hyp(boost::adaptors::transform(mocma.solution(),PointExtractor()),reference);
-	std::cout<<"\r"<<f.name()<<": "<<volume<<std::endl;
-	BOOST_CHECK_SMALL(volume - targetVolume, 5.e-3);
-}
 
 
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_SteadyStateMOCMA)
 
-BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
+BOOST_AUTO_TEST_CASE( HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
 	reference(1) = 11;
-	DTLZ2 dtlz2(5);
-	double dtlz2Volume = 120.178966;
-	testObjectiveFunctionMOO(dtlz2,10,dtlz2Volume,10000,reference);
-	DTLZ4 dtlz4(5);
-	double dtlz4Volume = 120.178966;
-	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,10000,reference);
-	//~ DTLZ7 dtlz7(5); //not sure whether correctly implemented
-	//~ double dtlz7Volume = 115.964708;
-	//~ testObjectiveFunctionMOO(dtlz7,10,dtlz7Volume,10000,reference);
-	ZDT1 zdt1(5);
-	double zdt1Volume = 120.613761;
-	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,10000,reference);
-	ZDT2 zdt2(5);
-	double zdt2Volume = 120.286820;
-	testObjectiveFunctionMOO(zdt2,10,zdt2Volume,10000,reference);
-	ZDT3 zdt3(5);
-	double zdt3Volume = 128.748470;
-	testObjectiveFunctionMOO(zdt3,10,zdt3Volume,10000,reference);
-	ZDT6 zdt6(5);
-	double zdt6Volume = 117.483246;
-	testObjectiveFunctionMOO(zdt6,10,zdt6Volume,10000,reference);
+	std::size_t mu = 10;
+	{
+		DTLZ2 function(5);
+		double volume = 120.178966;
+		SteadyStateMOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 10000,5.e-3);
+	}
+	{
+		DTLZ4 function(5);
+		double volume = 120.178966;
+		SteadyStateMOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 10000,5.e-3);
+	}
+	{
+		ZDT1 function(5);
+		double volume = 120.613761;
+		SteadyStateMOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 10000,5.e-3);
+	}
+	{
+		ZDT2 function(5);
+		double volume = 120.286820;
+		SteadyStateMOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 10000,5.e-3);
+	}
+	{
+		ZDT3 function(5);
+		double volume = 128.748470;
+		SteadyStateMOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 10000,5.e-3);
+	}
+	{
+		ZDT6 function(5);
+		double volume = 117.483246;
+		SteadyStateMOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 10000,5.e-3);
+	}
 }
 
-BOOST_AUTO_TEST_CASE( ApproximatedHypSteadyStateMOCMA ) {
+BOOST_AUTO_TEST_CASE( Algorithms_DirectSearch_SteadyStateMOCMA_Serialize ) {
 
 	SteadyStateMOCMA ssMocma;
 	DTLZ1 dtlz1;

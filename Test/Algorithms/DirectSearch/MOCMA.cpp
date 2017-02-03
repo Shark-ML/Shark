@@ -7,65 +7,66 @@
 
 #include <shark/Algorithms/DirectSearch/MOCMA.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
-
+#include "../testFunction.h"
 using namespace shark;
 
-struct PointExtractor{
-
-	template<class T>
-	RealVector const& operator()(T const& arg)const{
-		return arg.value;
-	}
-};
-
-void testObjectiveFunctionMOO(
-	MultiObjectiveFunction& f, 
-	std::size_t mu, 
-	double targetVolume, 
-	std::size_t iterations,
-	RealVector const& reference
-){
-	MOCMA mocma;
-	mocma.mu() = mu;
-	mocma.indicator().setReference(reference);
-	f.init();
-	mocma.init(f);
-	
-	
-	for(std::size_t i = 0; i != iterations; ++i){
-		mocma.step(f);
-	}
-	BOOST_REQUIRE_EQUAL(mocma.solution().size(), mu);
-	HypervolumeCalculator hyp;
-	double volume = hyp(boost::adaptors::transform(mocma.solution(),PointExtractor()),reference);
-	BOOST_CHECK_SMALL(volume - targetVolume, 5.e-3);
-}
 
 
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_MOCMA)
 
-BOOST_AUTO_TEST_CASE( MOCMA_HYPERVOLUME_Functions ) {
+BOOST_AUTO_TEST_CASE( HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
 	reference(1) = 11;
-	DTLZ2 dtlz2(5);
-	double dtlz2Volume = 120.178966;
-	testObjectiveFunctionMOO(dtlz2,10,dtlz2Volume,1000,reference);
-	DTLZ4 dtlz4(5);
-	double dtlz4Volume = 120.178966;
-	testObjectiveFunctionMOO(dtlz4,10,dtlz4Volume,1000,reference);
-	ZDT1 zdt1(5);
-	double zdt1Volume = 120.613761;
-	testObjectiveFunctionMOO(zdt1,10,zdt1Volume,1000,reference);
-	ZDT2 zdt2(5);
-	double zdt2Volume = 120.286820;
-	testObjectiveFunctionMOO(zdt2,10,zdt2Volume,1000,reference);
-	ZDT3 zdt3(5);
-	double zdt3Volume = 128.748470;
-	testObjectiveFunctionMOO(zdt3,10,zdt3Volume,1000,reference);
-	ZDT6 zdt6(5);
-	double zdt6Volume = 117.483246;
-	testObjectiveFunctionMOO(zdt6,10,zdt6Volume,1000,reference);
+	std::size_t mu = 10;
+	{
+		DTLZ2 function(5);
+		double volume = 120.178966;
+		MOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 1000,5.e-3);
+	}
+	{
+		DTLZ4 function(5);
+		double volume = 120.178966;
+		MOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 1000,5.e-3);
+	}
+	{
+		ZDT1 function(5);
+		double volume = 120.613761;
+		MOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 1000,5.e-3);
+	}
+	{
+		ZDT2 function(5);
+		double volume = 120.286820;
+		MOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 1000,5.e-3);
+	}
+	{
+		ZDT3 function(5);
+		double volume = 128.748470;
+		MOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 1000,5.e-3);
+	}
+	{
+		ZDT6 function(5);
+		double volume = 117.483246;
+		MOCMA mocma;
+		mocma.mu() = mu;
+		mocma.indicator().setReference(reference);
+		testFunction(mocma, function, reference, volume,1, 1000,5.e-3);
+	}
 }
 
 
