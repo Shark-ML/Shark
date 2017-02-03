@@ -162,12 +162,6 @@ Sharks comes with its own solver for Quadratic Programs:
 
 .. _label_for_linalg_tutorials:
 
-We give an introduction to Shark's usage of the
-library for "all things linear algebra":
-
-* :doc:`concepts/lin_alg/vector_matrix`
-* :doc:`concepts/lin_alg/lapack`
-
 For convenience, Shark provides a statistics class wrapper, as well as generic
 support for serialization:
 

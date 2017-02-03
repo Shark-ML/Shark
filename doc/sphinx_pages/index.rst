@@ -31,9 +31,6 @@
    rest_sources/tutorials/concepts/library_design/writing_kernels
    rest_sources/tutorials/concepts/library_design/writing_objective_functions
 
-   rest_sources/tutorials/concepts/lin_alg/vector_matrix
-   rest_sources/tutorials/concepts/lin_alg/lapack
-
    rest_sources/tutorials/concepts/data/datasets
    rest_sources/tutorials/concepts/data/labels
    rest_sources/tutorials/concepts/data/import_data
@@ -100,6 +97,7 @@
    rest_sources/quickref/quickref
 
    rest_sources/quickref/data_qr
+   rest_sources/quickref/remora
 
 
    rest_sources/faq/faq

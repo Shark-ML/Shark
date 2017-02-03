@@ -70,10 +70,10 @@ baseline: ::
 ..sharkcode<Supervised/McSvmLinear.tpp,trainer>
 
 Other possibilities are the machines proposed by Weston and Watkins
-(:doxy:`McSvm::WW`), Crammer and Singer (:doxy:`McSvm::CS`),
-Lee, Lin and Wahba (:doxy:`McSvm::LLW`), and many more
-(:doxy:`McSvm::ReinforcedSvm`, :doxy:`McSvm::MMR`, :doxy:`McSvm::ADM`,
-:doxy:`McSvm::ATM`, and :doxy:`McSvm::ATS`).
+(`McSvm::WW`), Crammer and Singer (`McSvm::CS`),
+Lee, Lin and Wahba (`McSvm::LLW`), and many more
+(`McSvm::ReinforcedSvm`, `McSvm::MMR`, `McSvm::ADM`,
+`McSvm::ATM`, and `McSvm::ATS`).
 
 Being left with this much choice is probably not helpful. In our
 experience the best strategy for picking a machine is to try WW and CS

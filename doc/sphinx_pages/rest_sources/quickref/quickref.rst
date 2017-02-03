@@ -10,4 +10,5 @@ many words.
 The following quick references are available:
 
 * :doc:`data_qr`
+* :doc:`remora`
 
