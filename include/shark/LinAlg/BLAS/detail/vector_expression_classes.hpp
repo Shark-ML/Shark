@@ -499,5 +499,78 @@ private:
 	}
 };
 
+
+//given vectors v and w, forms vector (v,w)
+template<class E1, class E2>
+class vector_concat: public vector_expression<vector_concat<E1,E2>, typename E1::device_type > {
+private:
+	typedef typename device_traits<typename E1::device_type>:: template add<typename E1::value_type> functor_type;
+public:
+	typedef typename common_value_type<E1,E2>::type value_type;
+	typedef value_type const_reference;
+	typedef value_type reference;
+	typedef typename E1::size_type size_type;
+
+	typedef typename E1::const_closure_type lhs_closure_type;
+	typedef typename E2::const_closure_type rhs_closure_type;
+	
+	typedef vector_concat const_closure_type;
+	typedef vector_concat closure_type;
+	typedef unknown_storage storage_type;
+	typedef unknown_storage const_storage_type;
+	typedef blockwise<typename evaluation_tag_restrict_traits<
+		typename E1::evaluation_category::tag,
+		typename E2::evaluation_category::tag
+	>::type> evaluation_category;
+	typedef typename E1::device_type device_type;
+
+	// Construction and destruction
+	explicit vector_concat(
+		lhs_closure_type e1, 
+		rhs_closure_type e2
+	):m_lhs(e1),m_rhs(e2){}
+
+	// Accessors
+	size_type size() const {
+		return m_lhs.size() + m_rhs.size();
+	}
+
+	// Expression accessors
+	lhs_closure_type const& lhs() const {
+		return m_lhs;
+	}
+	rhs_closure_type const& rhs() const {
+		return m_rhs;
+	}
+
+	typename device_traits<device_type>::queue_type& queue()const{
+		return m_lhs.queue();
+	}
+	
+	//computation kernels
+	template<class VecX>
+	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+		vector_range<VecX> left(x(),0,m_lhs.size()); 
+		vector_range<VecX> right(x(),m_lhs.size(),x().size()); 
+		assign(left,m_lhs, alpha);
+		assign(right,m_rhs, alpha);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+		vector_range<VecX> left(x(),0,m_lhs.size()); 
+		vector_range<VecX> right(x(),m_lhs.size(),x().size()); 
+		plus_assign(left,m_lhs, alpha);
+		plus_assign(right,m_rhs, alpha);
+	}
+
+	// Iterator types
+	typedef typename E1::const_iterator const_iterator;
+	typedef const_iterator iterator;
+
+private:
+	lhs_closure_type m_lhs;
+	rhs_closure_type m_rhs;
+};
+
 }
 #endif

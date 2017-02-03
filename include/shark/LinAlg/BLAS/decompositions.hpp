@@ -99,7 +99,7 @@ public:
 		return m_cholesky;
 	}
 
-	auto upper_factor()const ->decltype(trans(lower_factor())){
+	auto upper_factor()const ->decltype(trans(this->lower_factor())){
 		return trans(m_cholesky);
 	}
 	

@@ -498,6 +498,119 @@ diagonal_matrix<MatA> to_diagonal(vector_expression<MatA, Device> const& A){
 	return diagonal_matrix<MatA>(A());
 }
 
+
+// Block-Matrix Creation
+
+/// \brief Forms the block matrix (A|B) where B is to the right of A
+template<class MatA, class MatB, class Device>
+matrix_concat<MatA, MatB, true> operator|(
+	matrix_expression<MatA, Device> const& A,
+	matrix_expression<MatB, Device> const& B
+){
+	return matrix_concat<MatA, MatB, true>(A(),B());
+}
+
+/// \brief Forms the block matrix (A|v) where v is a column vector to the right of A
+template<class MatA, class VecV, class Device>
+auto operator|(
+	matrix_expression<MatA, Device> const& A,
+	vector_expression<VecV, Device> const& v
+) -> decltype(A | trans(repeat(v,1))){
+	return A | trans(repeat(v,1));
+}
+
+/// \brief Forms the block matrix (v|A) where v is a column vector to the left of A
+template<class MatA, class VecV, class Device>
+auto operator|(
+	vector_expression<VecV, Device> const& v,
+	matrix_expression<MatA, Device> const& A
+) -> decltype(trans(repeat(v,1)) | A){
+	return trans(repeat(v,1)) | A;
+}
+
+/// \brief Forms the block matrix (A|t)
+///
+/// The scalar t is interpreted as column vector
+template<class MatA, class T, class Device>
+typename boost::enable_if<
+	std::is_convertible<T, typename MatA::value_type>, 
+	matrix_concat<MatA, scalar_matrix<T, Device>, true > 
+>::type operator|(
+	matrix_expression<MatA, Device> const& A,
+	T const& t
+){
+	return A | repeat(t,A().size1(), 1);
+}
+
+/// \brief Forms the block matrix (t|A)
+///
+/// The scalar t is interpreted as column vector
+template<class MatA, class T, class Device>
+typename boost::enable_if<
+	std::is_convertible<T, typename MatA::value_type>, 
+	matrix_concat<scalar_matrix<T, Device>, MatA, true > 
+>::type operator|(
+	T const& t,
+	matrix_expression<MatA, Device> const& A
+){
+	return repeat(t,A().size1(), 1) | A;
+}
+
+///\brief Forms the block matrix A&B where A is on top of B
+template<class MatA, class MatB, class Device>
+matrix_concat<MatA, MatB, false> operator&(
+	matrix_expression<MatA, Device> const& A,
+	matrix_expression<MatB, Device> const& B
+){
+	return matrix_concat<MatA, MatB, false>(A(),B());
+}
+
+/// \brief Forms the block matrix (A & v) where v is a row vector on the bottom of A
+template<class MatA, class VecV, class Device>
+auto operator&(
+	matrix_expression<MatA, Device> const& A,
+	vector_expression<VecV, Device> const& v
+) -> decltype(A & repeat(v,1)){
+	return A & repeat(v,1);
+}
+
+/// \brief Forms the block matrix (A & v) where v is a row vector on the top of A
+template<class MatA, class VecV, class Device>
+auto operator&(
+	vector_expression<VecV, Device> const& v,
+	matrix_expression<MatA, Device> const& A
+) -> decltype(repeat(v,1) & A){
+	return repeat(v,1) & A;
+}
+
+/// \brief Forms the block matrix (A & t)
+///
+/// The scalar t is interpreted as row vector
+template<class MatA, class T, class Device>
+typename boost::enable_if<
+	std::is_convertible<T, typename MatA::value_type>, 
+	matrix_concat<MatA, scalar_matrix<T, Device>, false > 
+>::type operator&(
+	matrix_expression<MatA, Device> const& A,
+	T const& t
+){
+	return A & repeat(t, 1, A().size2());
+}
+
+/// \brief Forms the block matrix (t & A)
+///
+/// The scalar t is interpreted as row vector
+template<class MatA, class T, class Device>
+typename boost::enable_if<
+	std::is_convertible<T, typename MatA::value_type>, 
+	matrix_concat<scalar_matrix<T, Device>, MatA, false > 
+>::type operator&(
+	T const& t,
+	matrix_expression<MatA, Device> const& A
+){
+	return repeat(t,1, A().size2()) & A;
+}
+
 }
 
 #endif

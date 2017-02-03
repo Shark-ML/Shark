@@ -32,7 +32,7 @@
 
 #include "default/dot.hpp"
 #ifdef REMORA_USE_GPU
-#include "clblas/dot.hpp"
+#include "gpu/dot.hpp"
 #endif
 	
 namespace remora{namespace kernels{

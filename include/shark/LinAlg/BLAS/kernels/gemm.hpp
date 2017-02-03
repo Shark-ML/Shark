@@ -110,7 +110,7 @@ void gemm(
 }}
 
 #ifdef REMORA_USE_GPU
-#include "clblas/gemm.hpp"
+#include "gpu/gemm.hpp"
 #endif
 
 #endif

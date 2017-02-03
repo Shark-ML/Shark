@@ -69,7 +69,7 @@ void syrk(
 }}
 
 #ifdef REMORA_USE_GPU
-#include "clblas/syrk.hpp"
+#include "gpu/syrk.hpp"
 #endif
 
 #endif

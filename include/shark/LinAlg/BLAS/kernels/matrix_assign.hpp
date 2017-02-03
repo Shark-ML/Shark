@@ -30,7 +30,7 @@
 
 #include "default/matrix_assign.hpp"
 #ifdef REMORA_USE_GPU
-#include "clblas/matrix_assign.hpp"
+#include "gpu/matrix_assign.hpp"
 #endif
 
 namespace remora {namespace kernels{
