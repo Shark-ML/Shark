@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Cigar )
 	CrossEntropyMethod optimizer;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Discus )
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Discus )
 	CrossEntropyMethod optimizer;
 
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Ellipsoid )
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( CrossEntropyMethod_Ellipsoid )
 	CrossEntropyMethod optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( CrossEntropyMethod_DiffPowers )
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( CrossEntropyMethod_DiffPowers )
 	CrossEntropyMethod optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 10000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 10000, 1E-10 );
 }
 
 

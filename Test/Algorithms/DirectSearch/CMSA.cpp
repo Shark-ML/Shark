@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE( CMSA_Cigar )
 	CMSA optimizer;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( CMSA_Discus )
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( CMSA_Discus )
 	CMSA optimizer;
 
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( CMSA_Ellipsoid )
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE( CMSA_Ellipsoid )
 	CMSA optimizer;
 
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 BOOST_AUTO_TEST_CASE( CMSA_Rosenbrock )
 {
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( CMSA_Rosenbrock )
 
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
 	// TODO: Results here do not correspond to results in Beyer's paper.
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

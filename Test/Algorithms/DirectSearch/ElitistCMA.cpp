@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( ElitistCMA_Cigar )
 	optimizer.activeUpdate() = true;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( ElitistCMA_Discus )
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( ElitistCMA_Discus )
 	optimizer.activeUpdate() = true;
 	
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
 
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( ElitistCMA_Ellipsoid )
 	optimizer.activeUpdate() = true;
 	
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 1000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 BOOST_AUTO_TEST_CASE( ElitistCMA_Rosenbrock )
 {
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( ElitistCMA_Rosenbrock )
 	optimizer.activeUpdate() = true;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 2000, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 2000, 1E-10 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

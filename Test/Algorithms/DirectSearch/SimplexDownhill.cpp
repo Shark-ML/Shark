@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Sphere )
 	SimplexDownhill optimizer;
 
 	std::cout<<"\nTesting: "<<optimizer.name()<<" with "<<function.name()<<std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 200, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 200, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Ellipsoid )
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Ellipsoid )
 	SimplexDownhill optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 400, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 400, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Rosenbrock )
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Rosenbrock )
 	SimplexDownhill optimizer;
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	test_function( optimizer, function, _trials = 10, _iterations = 500, _epsilon = 1E-10 );
+	testFunction( optimizer, function, 10, 500, 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Reflection )
