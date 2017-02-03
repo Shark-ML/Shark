@@ -41,4 +41,5 @@ before_script:
   - cmake ..
   
 script:
-  - make -j3 && make test
+  - make -j3
+  - CTEST_OUTPUT_ON_FAILURE=TRUE make test
