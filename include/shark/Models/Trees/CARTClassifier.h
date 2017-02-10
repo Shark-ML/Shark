@@ -162,15 +162,15 @@ public:
 	using base_type::eval;
 	/// \brief Evaluate the Tree on a batch of patterns
 	void eval(BatchInputType const& patterns, BatchOutputType & outputs) const{
-		std::size_t numPatterns = shark::size(patterns);
+		std::size_t numPatterns = patterns.size1();
 		//evaluate the first pattern alone and create the batch output from that
 		LabelType const& firstResult = evalPattern(row(patterns,0));
 		outputs = Batch<LabelType>::createBatch(firstResult,numPatterns);
-		get(outputs,0) = firstResult;
+		getBatchElement(outputs,0) = firstResult;
 		
 		//evaluate the rest
 		for(std::size_t i = 0; i != numPatterns; ++i){
-			get(outputs,i) = evalPattern(row(patterns,i));
+			getBatchElement(outputs,i) = evalPattern(row(patterns,i));
 		}
 	}
 	

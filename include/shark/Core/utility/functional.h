@@ -34,8 +34,6 @@
 #define SHARK_CORE_FUNCTIONAL_H
 
 #include <boost/range/numeric.hpp>
-#include <boost/range/algorithm/nth_element.hpp>
-#include <boost/bind.hpp>
 #include <shark/Core/utility/Iterators.h>
 #include <algorithm>
 #include <shark/Rng/GlobalRng.h>
@@ -77,16 +75,13 @@ void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, Ra
 ///
 ///After the call, all elements left of the median element are
 ///guaranteed to be <= median and all element on the right are >= median.
-
 template<class Range>
 typename boost::range_iterator<Range>::type median_element(Range& range){
-	typedef typename boost::range_iterator<Range>::type iterator;
-
-	std::size_t size = shark::size(range);
+	std::size_t size = range.size();
 	std::size_t medianPos = (size+1)/2;
-	iterator medianIter = boost::begin(range)+medianPos;
+	auto medianIter = boost::begin(range)+medianPos;
 
-	boost::nth_element(range,medianIter);
+	std::nth_element(range.begin(),medianIter, range.end());
 
 	return medianIter;
 }
@@ -107,18 +102,16 @@ typename boost::range_iterator<Range>::type median_element(Range const& rangeAda
 /// The whole algorithm runs in linear time by iterating 2 times over the sequence.
 template<class Range>
 typename boost::range_iterator<Range>::type partitionEqually(Range& range){
-	typedef typename boost::range_iterator<Range>::type iterator;
-	typedef typename boost::iterator_value<iterator>::type value_type;
-
-	iterator begin = boost::begin(range);
-	iterator end = boost::end(range);
-	iterator medianIter = median_element(range);
+	auto begin = range.begin();
+	auto end = range.end();
+	auto medianIter = median_element(range);
 
 	// in 99% of the cases we would be done right now. in the remaining 1% the median element is
 	// not unique so we partition the left and the right such that all copies are ordered in the middle
-	value_type median = *medianIter;
-	iterator left = std::partition(begin,medianIter,boost::bind(std::less<value_type>(),_1,median));
-	iterator right = std::partition(medianIter,end,boost::bind(std::equal_to<value_type>(),_1,median));
+	auto median = *medianIter;
+	typedef typename Range::const_reference const_ref;
+	auto left = std::partition(begin,medianIter,[&](const_ref elem){return elem < median;});
+	auto right = std::partition(medianIter,end,[&](const_ref elem){return elem == median;});
 
 	// we guarantee that the left range is not empty
 	if(left == begin){

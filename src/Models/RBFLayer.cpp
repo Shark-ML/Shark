@@ -98,7 +98,7 @@ void RBFLayer::setGamma(RealVector const& gamma){
 
 void RBFLayer::eval(BatchInputType const& patterns, BatchOutputType& output, State& state)const{
 	SIZE_CHECK(patterns.size2() == inputSize());
-	std::size_t numPatterns = size(patterns);
+	std::size_t numPatterns = patterns.size1();
 	output.resize(numPatterns, outputSize());
 	
 	InternalState& s = state.toState<InternalState>();

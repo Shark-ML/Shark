@@ -155,7 +155,7 @@ public:
 	/// @param beta the vector of inverse temperatures
 	template<class States, class BetaVector>
 	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states, BetaVector const& beta)const{
-		SIZE_CHECK(size(states)==visibleBatch.size());
+		SIZE_CHECK(batchSize(states)==visibleBatch.size());
 		SIZE_CHECK(hiddenBatch.size()==visibleBatch.size());
 		visibleBatch.state = states;
 		

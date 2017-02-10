@@ -288,7 +288,7 @@ double elementEvalError(T a, U b){
 
 template<class T, class R>
 void testBatchEval(AbstractModel<T, R>& model, typename Batch<T>::type const& sampleBatch){
-	std::size_t batchSize = size(sampleBatch);
+	std::size_t size = batchSize(sampleBatch);
 
 	//evaluate batch of inputs using a state and without stat.
 	typename Batch<R>::type resultBatch = model(sampleBatch);
@@ -297,14 +297,14 @@ void testBatchEval(AbstractModel<T, R>& model, typename Batch<T>::type const& sa
 	model.eval(sampleBatch,resultBatch2,*state);
 	
 	//sanity check. if we don't get a result for every input something is seriously broken
-	BOOST_REQUIRE_EQUAL(size(resultBatch),batchSize);
-	BOOST_REQUIRE_EQUAL(size(resultBatch2),batchSize);
+	BOOST_REQUIRE_EQUAL(batchSize(resultBatch),size);
+	BOOST_REQUIRE_EQUAL(batchSize(resultBatch2),size);
 
 	//eval every element of the batch independently and compare the batch result with it
-	for(std::size_t i = 0; i != batchSize; ++i){
-		R result = model(get(sampleBatch,i));
-		double error = detail::elementEvalError(result, get(resultBatch,i));
-		double error2 = detail::elementEvalError(result, get(resultBatch2,i));
+	for(std::size_t i = 0; i != size; ++i){
+		R result = model(getBatchElement(sampleBatch,i));
+		double error = detail::elementEvalError(result, getBatchElement(resultBatch,i));
+		double error2 = detail::elementEvalError(result, getBatchElement(resultBatch2,i));
 		BOOST_CHECK_SMALL(error, 1.e-7);
 		BOOST_CHECK_SMALL(error2, 1.e-7);
 	}

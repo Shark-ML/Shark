@@ -69,8 +69,8 @@ public:
 
 	///\brief calculates the sum of all 
 	double eval(BatchLabelType const& labels, BatchOutputType const& predictions) const{
-		std::size_t numInputs = size(labels);
-		SIZE_CHECK(numInputs == size(predictions));
+		std::size_t numInputs = labels.size();
+		SIZE_CHECK(numInputs == predictions.size1());
 		
 		double error = 0;
 		//binary case for models with single output
@@ -97,9 +97,9 @@ public:
 	}
 
 	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient)const{
-		std::size_t numInputs = size(labels);
+		std::size_t numInputs = labels.size();
 		std::size_t outputDim = predictions.size2();
-		SIZE_CHECK(numInputs == size(predictions));
+		SIZE_CHECK(numInputs == predictions.size1());
 		
 		gradient.resize(numInputs,outputDim);
 		gradient.clear();

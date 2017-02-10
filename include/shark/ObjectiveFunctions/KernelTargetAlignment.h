@@ -186,7 +186,7 @@ public:
 		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
 			std::size_t startX = 0;
 			for(int j = 0; j != i; ++j){
-				startX+= size(m_data.batch(j));
+				startX+= batchSize(m_data.batch(j));
 			}
 			RealVector threadDerivative(parameters,0.0);
 			RealVector blockDerivative;
@@ -203,7 +203,7 @@ public:
 					blockDerivative
 				);
 				noalias(threadDerivative) += blockDerivative;
-				startY += size(m_data.batch(j));
+				startY += batchSize(m_data.batch(j));
 			}
 			SHARK_CRITICAL_REGION{
 				noalias(derivative) += threadDerivative;
@@ -322,8 +322,8 @@ private:
 		RealMatrix const& blockK, 
 		KernelMatrixResults const& matrixStatistics
 	)const{
-		std::size_t blockSize1 = size(m_data.batch(i));
-		std::size_t blockSize2 = size(m_data.batch(j));
+		std::size_t blockSize1 = batchSize(m_data.batch(i));
+		std::size_t blockSize2 = batchSize(m_data.batch(j));
 		//double n = m_elements;
 		double KcKc = matrixStatistics.KcKc;
 		double YcKc = matrixStatistics.YcKc;
@@ -372,15 +372,15 @@ private:
 		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
 			std::size_t startRow = 0;
 			for(int j = 0; j != i; ++j){
-				startRow+= size(m_data.batch(j));
+				startRow+= batchSize(m_data.batch(j));
 			}
-			std::size_t rowSize = size(m_data.batch(i));
+			std::size_t rowSize = batchSize(m_data.batch(i));
 			double threadKK = 0;
 			double threadYKc = 0;
 			RealVector threadk(m_elements,0.0);
 			std::size_t startColumn = 0; //starting column of the current block
 			for(int j = 0; j <= i; ++j){
-				std::size_t columnSize = size(m_data.batch(j));
+				std::size_t columnSize = batchSize(m_data.batch(j));
 				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
 					threadKK += frobenius_prod(blockK,blockK);

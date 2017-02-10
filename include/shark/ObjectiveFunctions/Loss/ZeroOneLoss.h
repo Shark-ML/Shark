@@ -68,8 +68,8 @@ public:
 
 	///\brief Return zero if labels == predictions and one otherwise.
 	double eval(BatchLabelType const& labels, BatchOutputType const& predictions) const{
-		std::size_t numInputs = size(labels);
-		SIZE_CHECK(numInputs == size(predictions));
+		std::size_t numInputs = labels.size();
+		SIZE_CHECK(numInputs == predictions.size());
 
 		double error = 0;
 		for(std::size_t i = 0; i != numInputs; ++i){
@@ -112,12 +112,12 @@ public:
 	/// saying that a positive value encodes class 0, a negative value
 	/// encodes class 1.
 	double eval(BatchLabelType const& labels, BatchOutputType const& predictions) const{
-		std::size_t numInputs = size(labels);
-		SIZE_CHECK(numInputs == (std::size_t)size(predictions));
+		std::size_t numInputs = labels.size();
+		SIZE_CHECK(numInputs == predictions.size1());
 
 		double error = 0;
 		for(std::size_t i = 0; i != numInputs; ++i){
-			error+=evalSingle(labels(i),get(predictions,i));
+			error+=evalSingle(labels(i),row(predictions,i));
 		}
 		return error;
 	}
@@ -127,8 +127,10 @@ public:
 		SIZE_CHECK(targets.numberOfElements() == weights.size());
 		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
 		double error = 0;
-		for(std::size_t i = 0; i != weights.size(); ++i){
-			error+= weights(i) * evalSingle(targets.element(i),predictions.element(i));
+		for(std::size_t i = 0; i != predictions.numberOfBatches(); ++i){
+			for(std::size_t j = 0; j != targets.batch(i).size(); ++j){
+				error+= weights(i) * evalSingle(targets.batch(i)(j),row(predictions.batch(i),j));
+			}
 		}
 		return error / weights.size();
 	}

@@ -148,7 +148,7 @@ public:
 
 		// prepare list of index/pointer pairs to be shared among the whole tree
 		mp_indexList = new std::size_t[m_size];
-		boost::iota(boost::make_iterator_range(mp_indexList,mp_indexList+m_size),0);
+		std::iota(mp_indexList,mp_indexList+m_size,0);
 	}
 
 	/// Destroy the tree and its internal data structures
@@ -258,30 +258,6 @@ public:
 	/// tight.
 	virtual double squaredDistanceLowerBound(value_type const& point) const = 0;
 
-#if 0
-	// debug code, please ignore
-	void print(unsigned int ident = 0) const
-	{
-		if (isLeaf())
-		{
-			for (unsigned int j=0; j<size(); j++)
-			{
-				for (unsigned int i=0; i<ident; i++) printf("  ");
-				printf("index: %d\n", (int)index(j));
-			}
-		}
-		else
-		{
-			for (unsigned int i=0; i<ident; i++) printf("  ");
-			printf("[%d]\n", (int)mp_left->size());
-			mp_left->print(ident + 1);
-			for (unsigned int i=0; i<ident; i++) printf("  ");
-			printf("[%d]\n", (int)mp_right->size());
-			mp_right->print(ident + 1);
-		}
-	}
-#endif
-
 protected:
 	/// \brief Sub-node constructor
 	///
@@ -327,31 +303,34 @@ protected:
 	/// @param points the points themselves
 	/// @returns returns the position were the point list was split
 	template<class Range1, class Range2>
-	typename boost::range_iterator<Range2>::type splitList (Range1& values, Range2& points){
-		typedef typename boost::range_iterator<Range1>::type iterator1;
-		typedef typename boost::range_iterator<Range2>::type iterator2;
+	typename Range2::iterator splitList (Range1& values, Range2& points){
+		std::vector<KeyValuePair<typename Range1::value_type, typename Range2::value_type> > range(values.size());
+		for(std::size_t i = 0; i != range.size(); ++i){
+			range[i].key = values[i]; 
+			range[i].value = points[i]; 
+		}
+		
 
-		iterator1 valuesBegin = boost::begin(values);
-		iterator1 valuesEnd = boost::end(values);
-
-		//KeyValueRange<iterator1,iterator2> kvrange = ;
-		std::pair<iterator1, iterator2> splitpoint = partitionEqually(zipKeyValuePairs(values,points)).iterators();
-		iterator1 valuesSplitpoint = splitpoint.first;
-		iterator2 pointsSplitpoint = splitpoint.second;
-		if (valuesSplitpoint == valuesEnd) {
+		auto pos = partitionEqually(range);
+		for(std::size_t i = 0; i != range.size(); ++i){
+			values[i] = range[i].key;
+			points[i] = range[i].value;
+		}
+		
+		if (pos == range.end()) {
 			// partitioning failed, all values are equal :(
-			m_threshold = *valuesBegin;
-			return splitpoint.second;
+			m_threshold = values[0];
+			return points.begin();
 		}
 
 		// We don't want the threshold to be the value of an element but always in between two of them.
 		// This ensures that no point of the training set lies on the boundary. This leeds to more stable
 		// results. So we use the mean of the found splitpoint and the nearest point on the other side
 		// of the boundary.
-		double maximum = *std::max_element(valuesBegin, valuesSplitpoint);
-		m_threshold = 0.5*(maximum + *valuesSplitpoint);
+		double maximum = std::max_element(range.begin(), pos)->key;
+		m_threshold = 0.5*(maximum + pos->key);
 
-		return pointsSplitpoint;
+		return points.begin() + (pos - range.begin());
 	}
 
 	/// parent node

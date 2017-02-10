@@ -145,8 +145,8 @@ int main()
 //###end<batches-for>
 //###begin<batches-doubleloop>
 	for(auto const& batch: data.batches()) {
-		for(std::size_t i=0; i != boost::size(batch); ++i) {
-			std::cout << shark::get(batch,i );   // prints element i of the batch
+		for(std::size_t i=0; i != batchSize(batch); ++i) {
+			std::cout << getBatchElement(batch,i );   // prints element i of the batch
 		}
 	}
 //###end<batches-doubleloop>

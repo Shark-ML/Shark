@@ -267,7 +267,7 @@ public:
 			//sum up weighted loss
 			double batchError = 0.0;
 			for(std::size_t j = 0; j != data.size(); ++j){
-				batchError += weights(j) * mep_loss->eval(get(data.label,j), get(prediction,j));
+				batchError += weights(j) * mep_loss->eval(getBatchElement(data.label,j), getBatchElement(prediction,j));
 			}
 			SHARK_CRITICAL_REGION{
 				error+= batchError;
@@ -298,7 +298,7 @@ public:
 			OutputType singleDerivative;
 			double batchError = 0.0;
 			for(std::size_t j = 0; j != data.size(); ++j){
-				batchError += weights(j) * mep_loss->evalDerivative(get(data.label,j), get(prediction,j), singleDerivative);
+				batchError += weights(j) * mep_loss->evalDerivative(getBatchElement(data.label,j), getBatchElement(prediction,j), singleDerivative);
 				noalias(row(errorDerivative,j) ) = weights(j) * singleDerivative;
 			}
 			

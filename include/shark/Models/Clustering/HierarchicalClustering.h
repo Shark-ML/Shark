@@ -87,13 +87,13 @@ public:
 
 	/// Return the best matching cluster for very pattern in the batch.
 	BatchOutputType hardMembership(BatchInputType const& patterns) const{
-		std::size_t numPatterns = boost::size(patterns);
+		std::size_t numPatterns = batchSize(patterns);
 		BatchOutputType memberships(numPatterns);
 		for(std::size_t i = 0; i != numPatterns; ++i){
 			tree_type const* tree = mep_tree;
 			memberships(i) = 0;
 			while (tree->hasChildren()){
-				if (tree->isLeft(get(patterns,i))){
+				if (tree->isLeft(row(patterns,i))){
 					tree = tree->left();
 				}
 				else{

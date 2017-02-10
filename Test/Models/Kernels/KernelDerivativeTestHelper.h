@@ -158,8 +158,8 @@ void testKernelInputDerivative(AbstractKernelFunction<T>& kernel,std::size_t inp
 
 template<class T>
 void testEval(AbstractKernelFunction<T>& kernel, typename Batch<T>::type const& sampleBatch1,typename Batch<T>::type const& sampleBatch2){
-	std::size_t batchSize1 = size(sampleBatch1);
-	std::size_t batchSize2 = size(sampleBatch2);
+	std::size_t batchSize1 = batchSize(sampleBatch1);
+	std::size_t batchSize2 = batchSize(sampleBatch2);
 	
 	//evaluate batch on the kernels
 	boost::shared_ptr<State> state = kernel.createState();
@@ -174,9 +174,9 @@ void testEval(AbstractKernelFunction<T>& kernel, typename Batch<T>::type const& 
 	BOOST_REQUIRE_EQUAL(kernelResultsIntermediate.size1(),batchSize1);
 	BOOST_REQUIRE_EQUAL(kernelResultsIntermediate.size2(),batchSize2);
 	for(std::size_t i = 0; i != batchSize1; ++i){
-		T x1 = get(sampleBatch1,i);
+		T x1 = getBatchElement(sampleBatch1,i);
 		for(std::size_t j = 0; j != batchSize2; ++j){
-			double result = kernel.eval(x1,get(sampleBatch2,j));
+			double result = kernel.eval(x1,getBatchElement(sampleBatch2,j));
 
 			BOOST_CHECK_SMALL(result-kernelResults(i,j), 1.e-13);
 			BOOST_CHECK_SMALL(result-kernelResultsIntermediate(i,j), 1.e-13);

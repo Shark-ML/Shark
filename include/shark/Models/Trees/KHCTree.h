@@ -197,7 +197,7 @@ protected:
 
 	template<class Range>
 	void calculateNormal(Range const& samples){
-		std::size_t numSamples = shark::size(samples);
+		std::size_t numSamples =batchSize(samples);
 		double best_dist2 = -1.0;
 		for (std::size_t i=1; i != numSamples; i++){
 			for (std::size_t j = 0; j != i; j++){

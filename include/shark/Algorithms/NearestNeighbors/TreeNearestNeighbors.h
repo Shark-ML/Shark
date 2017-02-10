@@ -422,10 +422,10 @@ public:
 
 	///\brief returns the k nearest neighbors of the point
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
-		std::size_t numPoints = shark::size(patterns);
+		std::size_t numPoints = batchSize(patterns);
 		std::vector<DistancePair> results(k*numPoints);
 		for(std::size_t p = 0; p != numPoints; ++p){
-			IterativeNNQuery<DataView<Data<InputType> const> > query(mep_tree, m_inputs, get(patterns, p));
+			IterativeNNQuery<DataView<Data<InputType> const> > query(mep_tree, m_inputs, row(patterns, p));
 			//find the neighbors using the queries
 			for(std::size_t i = 0; i != k; ++i){
 				typename IterativeNNQuery<DataView<Data<InputType> const> >::result_type result = query.next();

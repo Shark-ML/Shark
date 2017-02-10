@@ -70,7 +70,6 @@ public:
 	//! \param  set     data set with inputs and corresponding binary outputs (0 or 1)
 	template<class InputType>
 	ROC(AbstractModel<InputType,RealVector>& model,LabeledData<InputType,unsigned int> const& set){
-		std::size_t inputs=set.numberOfElements();
 
 		//calculat the number of classes
 		std::vector<std::size_t> classes = classSizes(set);
@@ -89,7 +88,7 @@ public:
 		for(std::size_t i = 0; i != set.size(); ++i){
 			RealMatrix output = model(set.batch(i).input);
 			SIZE_CHECK(output.size2() == 1);
-			for(std::size_t j = 0; j != size(output); ++j){ 
+			for(std::size_t j = 0; j != output.size1(); ++j){ 
 				double value = output(j,0);
 				if (set.batch(i)(j) == 1)
 				{

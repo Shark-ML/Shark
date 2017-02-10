@@ -77,26 +77,14 @@ public:
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
 	UnlabeledData<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const {
-		std::size_t batches = (size + maximumBatchSize - 1) / maximumBatchSize;
-		std::size_t optimalBatchSize = size / batches;
-		std::size_t remainder = size - batches * optimalBatchSize;
-		UnlabeledData<InputType> dataset(batches);
-		InputType input;
+		std::vector<InputType> data(size);
 
-		// now create and fill the batches, taking the remainder into account
-		for (std::size_t i=0; i<batches; ++i)
-		{
-			std::size_t batchsize = (i<remainder) ? optimalBatchSize + 1 : optimalBatchSize;
-			typename UnlabeledData<InputType>::batch_reference b = dataset.batch(i);
-			draw(input);
-			b = Batch<InputType>::createBatch(input, batchsize);
-			for (std::size_t j=0; j<batchsize; j++)
-			{
-				if (j != 0) draw(input);
-				shark::get(b, j) = input;
-			}
+		// draw the samples
+		for (std::size_t i = 0; i < size; ++i){
+			draw(data[i]);
 		}
-		return dataset;
+		//create dataset
+		return createUnlabeledDataFromRange(data,maximumBatchSize);
 	}
 	
 	/// \brief Generates a data set with samples from from the distribution.
@@ -139,32 +127,16 @@ public:
 	///
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
-	LabeledData<InputType, LabelType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const
-	{
-		// first determine the optimal number of batches and their sizes
-		std::size_t batches = (size + maximumBatchSize - 1) / maximumBatchSize;
-		std::size_t optimalBatchSize = size / batches;
-		std::size_t remainder = size - batches * optimalBatchSize;
-		LabeledData<InputType, LabelType> dataset(batches);
-		InputType input;
-		LabelType label;
-		DataPair<InputType, LabelType> pair(input, label);
+	LabeledData<InputType, LabelType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const{
+		std::vector<InputType> inputs(size);
+		std::vector<LabelType> labels(size);
 
-		// now create and fill the batches, taking the remainder into account
-		for (std::size_t i=0; i<batches; ++i)
-		{
-			std::size_t batchsize = (i<remainder) ? optimalBatchSize + 1 : optimalBatchSize;
-			typename LabeledData<InputType, LabelType>::batch_reference b = dataset.batch(i);
-			draw(input, label); pair.input = input; pair.label = label;
-			b = Batch<DataPair<InputType, LabelType> >::createBatch(pair, batchsize);
-			for (std::size_t j=0; j<batchsize; j++)
-			{
-				if (j != 0) draw(input, label);
-				shark::get(b, j).input = input;
-				shark::get(b, j).label = label;
-			}
+		// draw the samples
+		for (std::size_t i = 0; i < size; ++i){
+			draw(inputs[i], labels[i]);
 		}
-		return dataset;
+		//create dataset
+		return createLabeledDataFromRange(inputs,labels,maximumBatchSize);
 	}
 	
 	/// \brief Generates a data set with samples from from the distribution.

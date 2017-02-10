@@ -75,43 +75,43 @@ struct resize{
 	resize(std::size_t size1, std::size_t size2):m_size1(size1),m_size2(size2){};
 	template<class T>
 	void operator()(T& batch)const{
-		 shark::Batch<typename boost::range_value<T>::type>::resize(batch,m_size1,m_size2);
+		BatchTraits<T>::type::resize(batch,m_size1,m_size2);
 	}
 private:
 	std::size_t m_size1;
 	std::size_t m_size2;
 };
 
-///calls get(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
+///calls getBatchElement(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
 struct MakeRef{
 	template<class> struct result;
 	template<class T>
 	struct result<MakeRef(T const&)> {
-		typedef typename boost::range_reference<T>::type type;
+		typedef typename BatchTraits<T>::type::reference type;
 	};
 
 	MakeRef(std::size_t index):m_index(index){}
 
 	template<class T>
 	typename result<MakeRef(T const&) >::type operator()(T const& container)const{
-		return get(const_cast<T&>(container),m_index);//we need the const cast since the argument type must be a const ref.
+		return getBatchElement(const_cast<T&>(container),m_index);//we need the const cast since the argument type must be a const ref.
 	}
 private:
 	std::size_t m_index;
 };
-///calls get(container,index) on a container. Used as boost fusion functor in the cration of references in the Batch Interface
+///calls getBatchElement(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
 struct MakeConstRef{
 	template<class> struct result;
 	template<class T>
 	struct result<MakeConstRef(T const&)> {
-		typedef typename boost::range_reference<T const>::type type;
+		typedef typename BatchTraits<T>::type::const_reference type;
 	};
 
 	MakeConstRef(std::size_t index):m_index(index){}
 
 	template<class T>
 	typename result<MakeConstRef(T const&) >::type operator()(T const& container)const{
-		return get(container,m_index);
+		return getBatchElement(container,m_index);
 	}
 private:
 	std::size_t m_index;
@@ -335,7 +335,13 @@ public:\
 			boost::fusion::swap(fusionize(op1),fusionize(op2));\
 		}\
 		std::size_t size()const{\
-			return shark::size(boost::fusion::at_c<0>(fusionize(*this)));\
+			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));\
+		}\
+		reference operator[](std::size_t i){\
+			return *(begin()+i);\
+		}\
+		const_reference operator[](std::size_t i)const{\
+			return *(begin()+i);\
 		}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version)\
@@ -354,18 +360,45 @@ public:\
 		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),fusionize(batch));\
 		return batch;\
 	}\
-	template<class Range>\
-	static type createBatchFromRange(Range const& range){\
-		std::size_t points = shark::size(range);\
-		type batch = createBatch(*range.begin(),points);\
-		typename boost::range_iterator<Range>::type pos = range.begin();\
+	template<class Iterator>\
+	static type createBatchFromRange(Iterator const& begin, Iterator const& end){\
+		std::size_t points = end - begin;\
+		type batch = createBatch(*begin,points);\
+		Iterator pos = begin;\
 		for(std::size_t i = 0; i != points; ++i,++pos){\
-			get(batch,i) = *pos;\
+			getBatchElement(batch,i) = *pos;\
 		}\
 		return batch;\
 	}\
 	static void resize(type& batch, std::size_t batchSize, std::size_t elements){\
 		batch.resize(batchSize,elements);\
+	}\
+	template<class T>\
+	static std::size_t size(T const& batch){return batch.size();}\
+	\
+	template<class T>\
+	static typename T::reference get(T& batch, std::size_t i){\
+		return batch[i];\
+	}\
+	template<class T>\
+	static const_reference get(T const& batch, std::size_t i){\
+		return batch[i];\
+	}\
+	template<class T>\
+	static typename T::iterator begin(T& batch){\
+		return batch.begin();\
+	}\
+	template<class T>\
+	static const_iterator begin(T const& batch){\
+		return batch.begin();\
+	}\
+	template<class T>\
+	static typename T::iterator end(T& batch){\
+		return batch.end();\
+	}\
+	template<class T>\
+	static const_iterator end(T const& batch){\
+		return batch.end();\
 	}
 
 
@@ -413,12 +446,17 @@ public:\
 		void resize(std::size_t batchSize, std::size_t elementSize){\
 			boost::fusion::for_each(fusionize(*this), detail::resize(batchSize,elementSize));\
 		}\
-		\
+		reference operator[](std::size_t i){\
+			return *(begin()+i);\
+		}\
+		const_reference operator[](std::size_t i)const{\
+			return *(begin()+i);\
+		}\
 		friend void swap(type& op1, type& op2){\
 			boost::fusion::swap(fusionize(op1),fusionize(op2));\
 		}\
 		std::size_t size()const{\
-			return shark::size(boost::fusion::at_c<0>(fusionize(*this)));\
+			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));\
 		}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version)\
@@ -437,18 +475,45 @@ public:\
 		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),fusionize(batch));\
 		return batch;\
 	}\
-	template<class Range>\
-	static type createBatchFromRange(Range const& range){\
-		std::size_t points = shark::size(range);\
-		type batch = createBatch(*range.begin(),points);\
-		typename boost::range_iterator<Range>::type pos = range.begin();\
+	template<class Iterator>\
+	static type createBatchFromRange(Iterator const& begin, Iterator const& end){\
+		std::size_t points = end - begin;\
+		type batch = createBatch(*begin,points);\
+		Iterator pos = begin;\
 		for(std::size_t i = 0; i != points; ++i,++pos){\
-			get(batch,i) = *pos;\
+			getBatchElement(batch,i) = *pos;\
 		}\
 		return batch;\
 	}\
 	static void resize(type& batch, std::size_t batchSize, std::size_t elements){\
 		batch.resize(batchSize,elements);\
+	}\
+	template<class T>\
+	static std::size_t size(T const& batch){return batch.size();}\
+	\
+	template<class T>\
+	static typename T::reference get(T& batch, std::size_t i){\
+		return batch[i];\
+	}\
+	template<class T>\
+	static const_reference get(T const& batch, std::size_t i){\
+		return batch[i];\
+	}\
+	template<class T>\
+	static typename T::iterator begin(T& batch){\
+		return batch.begin();\
+	}\
+	template<class T>\
+	static const_iterator begin(T const& batch){\
+		return batch.begin();\
+	}\
+	template<class T>\
+	static typename T::iterator end(T& batch){\
+		return batch.end();\
+	}\
+	template<class T>\
+	static const_iterator end(T const& batch){\
+		return batch.end();\
 	}
 
 #endif

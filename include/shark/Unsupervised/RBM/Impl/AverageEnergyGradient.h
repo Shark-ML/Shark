@@ -63,18 +63,18 @@ public:
 	///@param logWeights the logarithm of the weights for every sample
 	template<class HiddenSampleBatch, class VisibleSampleBatch, class WeightVector>
 	void addVH(HiddenSampleBatch const& hiddens, VisibleSampleBatch const& visibles, WeightVector const& logWeights){
-		SIZE_CHECK(logWeights.size() == shark::size(hiddens));
-		SIZE_CHECK(logWeights.size() == shark::size(visibles));
+		SIZE_CHECK(logWeights.size() == batchSize(hiddens));
+		SIZE_CHECK(logWeights.size() == batchSize(visibles));
 		
 		///update the internal state and get the transformed weights for the batch
 		RealVector weights = updateWeights(logWeights);
 		if(weights.empty()) return;//weights are not relevant to the gradient
 		
-		std::size_t batchSize = shark::size(hiddens);
+		std::size_t size = batchSize(hiddens);
 		
 		//update the gradient
 		RealMatrix weightedFeatures = mpe_rbm->visibleNeurons().phi(visibles.state);
-		for(std::size_t i = 0; i != batchSize; ++i){
+		for(std::size_t i = 0; i != size; ++i){
 			row(weightedFeatures,i)*= weights(i);
 		}
 		noalias(m_deltaWeights) += prod(trans(mpe_rbm->hiddenNeurons().expectedPhiValue(hiddens.statistics)),weightedFeatures);
@@ -92,18 +92,18 @@ public:
 	///@param logWeights the logarithm of the weights for every sample
 	template<class HiddenSampleBatch, class VisibleSampleBatch, class WeightVector>
 	void addHV(HiddenSampleBatch const& hiddens, VisibleSampleBatch const& visibles, WeightVector const& logWeights){
-		SIZE_CHECK(logWeights.size() == shark::size(hiddens));
-		SIZE_CHECK(logWeights.size() == shark::size(visibles));
+		SIZE_CHECK(logWeights.size() == batchSize(hiddens));
+		SIZE_CHECK(logWeights.size() == batchSize(visibles));
 		
 		///update the internal state and get the transformed weights for the batch
 		RealVector weights = updateWeights(logWeights);
 		if(weights.empty()) return;
 		
-		std::size_t batchSize = shark::size(hiddens);
+		std::size_t size = batchSize(hiddens);
 		
 		//update the gradient
 		RealMatrix weightedFeatures = mpe_rbm->hiddenNeurons().phi(hiddens.state);
-		for(std::size_t i = 0; i != batchSize; ++i){
+		for(std::size_t i = 0; i != size; ++i){
 			row(weightedFeatures,i)*= weights(i);
 		}
 		
@@ -153,7 +153,7 @@ public:
 	///@param visibles a batch of samples of the visible layer
 	template<class HiddenSampleBatch, class VisibleSampleBatch>
 	void addVH(HiddenSampleBatch const& hiddens, VisibleSampleBatch const& visibles){
-		addVH(hiddens,visibles, blas::repeat(0.0,shark::size(hiddens)));
+		addVH(hiddens,visibles, blas::repeat(0.0,batchSize(hiddens)));
 	}
 
 	///\brief Calculates the weighted expectation of the energy gradient with respect to p(v|h) for a complete Batch.
@@ -165,7 +165,7 @@ public:
 	///@param visibles a batch of samples of the visible layer
 	template<class HiddenSampleBatch, class VisibleSampleBatch>
 	void addHV(HiddenSampleBatch const& hiddens, VisibleSampleBatch const& visibles){
-		addHV(hiddens,visibles, blas::repeat(0.0,shark::size(hiddens)));
+		addHV(hiddens,visibles, blas::repeat(0.0,batchSize(hiddens)));
 	}
 	
 	///Returns the log of the sum of the weights.
@@ -204,10 +204,10 @@ private:
 		double const maxExp = maxExpInput<double>();
 		
 		//calculate the gradient update with respect of only the current batch
-		std::size_t batchSize = shark::size(logWeights);
+		std::size_t size = batchSize(logWeights);
 		//first calculate the batchLogWeightSum
 		double batchLogWeightSum = logWeights(0);
-		for(std::size_t i = 1; i != batchSize; ++i){
+		for(std::size_t i = 1; i != size; ++i){
 			double const diff = logWeights(i) - batchLogWeightSum;
 			if(diff >= maxExp || diff <= minExp){
 				if(logWeights(i) > batchLogWeightSum)
@@ -241,11 +241,7 @@ private:
 		}
 			
 		//now calculate the weights for the elements of the new batch
-		RealVector weights(batchSize);
-		for(std::size_t i = 0; i != batchSize; ++i){
-			weights(i) = std::exp(logWeights(i)-m_logWeightSum);
-		}
-		return weights;
+		return exp(logWeights - m_logWeightSum);
 	}
 };
 }}

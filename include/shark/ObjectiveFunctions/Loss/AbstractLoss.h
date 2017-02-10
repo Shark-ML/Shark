@@ -88,9 +88,9 @@ public:
 	/// \param  prediction  prediction, typically made by a model
 	virtual double eval( ConstLabelReference target, ConstOutputReference prediction)const{
 		BatchLabelType labelBatch = Batch<LabelType>::createBatch(target,1);
-		get(labelBatch,0)=target;
+		getBatchElement(labelBatch,0)=target;
 		BatchOutputType predictionBatch = Batch<OutputType>::createBatch(prediction,1);
-		get(predictionBatch,0)=prediction;
+		getBatchElement(predictionBatch,0)=prediction;
 		return eval(labelBatch,predictionBatch);
 	}
 
@@ -101,12 +101,12 @@ public:
 	/// \param  gradient    the gradient of the loss function with respect to the prediction
 	virtual double evalDerivative(ConstLabelReference target, ConstOutputReference prediction, OutputType& gradient) const {
 		BatchLabelType labelBatch = Batch<LabelType>::createBatch(target,1);
-		get(labelBatch, 0) = target;
+		getBatchElement(labelBatch, 0) = target;
 		BatchOutputType predictionBatch = Batch<OutputType>::createBatch(prediction, 1);
-		get(predictionBatch, 0) = prediction;
+		getBatchElement(predictionBatch, 0) = prediction;
 		BatchOutputType gradientBatch = Batch<OutputType>::createBatch(gradient, 1);
 		double ret = evalDerivative(labelBatch, predictionBatch, gradientBatch);
-		gradient = get(gradientBatch, 0);
+		gradient = getBatchElement(gradientBatch, 0);
 		return ret;
 	}
 	

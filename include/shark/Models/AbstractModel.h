@@ -182,10 +182,10 @@ public:
 	/// \param output the prediction or response of the model to the pattern
 	virtual void eval(InputType const & pattern, OutputType& output)const{
 		BatchInputType patternBatch=Batch<InputType>::createBatch(pattern);
-		get(patternBatch,0) = pattern;
+		getBatchElement(patternBatch,0) = pattern;
 		BatchOutputType outputBatch;
 		eval(patternBatch,outputBatch);
-		output = get(outputBatch,0);
+		output = getBatchElement(outputBatch,0);
 	}
 
 	/// \brief Model evaluation as an operator for a whole dataset. This is a convenience function

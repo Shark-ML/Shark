@@ -72,6 +72,8 @@ public:
 	std::string name() const
 	{ return "HardClusteringModel"; }
 	
+	using ClusteringModel<InputT, unsigned int>::eval;
+	
 	/// \brief Compute best matching cluster.
 	///
 	/// \par

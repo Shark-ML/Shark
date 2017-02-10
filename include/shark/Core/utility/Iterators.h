@@ -36,7 +36,6 @@
 #include <boost/version.hpp>
 #include "Impl/boost_iterator_facade_fixed.hpp"//thanks, boost.
 
-#include <shark/Core/utility/Range.h>
 #include <boost/range/iterator.hpp>
 namespace shark{
 
@@ -164,187 +163,56 @@ private:
 	std::size_t m_position;
 };
 
-
-namespace detail{
-
-	///\brief Helper class of the MultiSequenceIterator, which querys everything needed to deduce the right iterator_facade
-	template<class Self, class SequenceContainer>
-	struct SequenceOfSequenceIteratorTraits{
-		typedef typename boost::remove_const<SequenceContainer>::type OuterSequence;
-		typedef typename boost::range_iterator<SequenceContainer>::type outer_iterator;
-		//the inner Sequence type is the value_type of the outer sequence. But if the outer sequence is const
-		//we have to make sure, that we also get const value_type.
-		//~ typedef typename CopyConst<typename boost::iterator_value<outer_iterator>::type,SequenceContainer>::type InnerSequence;
-		typedef typename boost::remove_reference<
-			typename boost::iterator_reference<outer_iterator>::type
-		>::type InnerSequence;
-		typedef typename boost::range_iterator<InnerSequence>::type inner_iterator;
-		typedef typename boost::iterator_reference<inner_iterator>::type reference;
-		typedef typename boost::iterator_value<inner_iterator>::type value_type;
-
-		//typedef boost::iterator_facade_fixed< Self, value_type, boost::random_access_traversal_tag, reference > base;
-		typedef  SHARK_ITERATOR_FACADE< Self, value_type, std::random_access_iterator_tag, reference > base;
-	};
-}
-
-///\brief Iterator which iterates of the elements of a nested sequence
-///
-///Think about a sequence which is split in several parts. These parts
-///are than stored into a new sequence. An example for this is std::deque
-///or the Data class. This iterator let's you tierate over the elements of the sequence
-///without having to care about that the sequence itself is splitted.
-///The Sequences both have to be random access containers.
-template<class SequenceContainer>
-class MultiSequenceIterator: public detail::SequenceOfSequenceIteratorTraits<
-	MultiSequenceIterator<SequenceContainer>,
-	SequenceContainer
->::base{
+template<class Container>
+class IndexingIterator: public SHARK_ITERATOR_FACADE<
+	IndexingIterator<Container>,
+	typename Container::value_type,
+	std::random_access_iterator_tag,
+	typename boost::mpl::if_<
+		std::is_const<Container>,
+		typename Container::const_reference,
+		typename Container::reference
+	>::type
+>{
 private:
-	typedef detail::SequenceOfSequenceIteratorTraits<
-		MultiSequenceIterator<SequenceContainer>,SequenceContainer
-	> Traits;
-	typedef typename Traits::outer_iterator outer_iterator;
+	template<class> friend class IndexingIterator;
 public:
-	typedef typename Traits::inner_iterator inner_iterator;
-	MultiSequenceIterator()
-	:m_positionInSequence(0){}
-
-	template<class OuterIter, class InnerIter>
-	MultiSequenceIterator(
-		OuterIter outerBegin,
-		OuterIter outerEnd,
-		OuterIter outerPosition,
-		InnerIter innerPosition,
-		std::size_t positionInSequence
-	):m_outerBegin(outer_iterator(outerBegin)),
-	m_outerPosition(outer_iterator(outerPosition)),
-	m_outerEnd(outer_iterator(outerEnd)),
-	m_innerPosition(innerPosition),
-	m_positionInSequence(positionInSequence){
-		//we can't dereference if we are past the end...
-		if(m_outerPosition != m_outerEnd){
-			m_innerBegin = boost::begin(*m_outerPosition);
-			m_innerEnd = boost::end(*m_outerPosition);
-		}
-
-	}
-
-
-	template<class S>
-	MultiSequenceIterator(MultiSequenceIterator<S> const& other)
-	: m_outerBegin(other.m_outerBegin),m_outerPosition(other.m_outerPosition),m_outerEnd(other.m_outerEnd),
-	m_innerBegin(other.m_innerBegin),m_innerPosition(other.m_innerPosition),m_innerEnd(other.m_innerEnd),
-	m_positionInSequence(other.m_positionInSequence) {}
-		
-	std::size_t index()const{
-		return m_positionInSequence;
-	}
+	IndexingIterator(){}
+	IndexingIterator(Container& container, std::size_t pos):m_container(&container), m_index(std::ptrdiff_t(pos)){}
 	
-	inner_iterator getInnerIterator()const{
-		return m_innerPosition;
-	}
+	template<class C>
+	IndexingIterator(IndexingIterator<C> const& iterator)
+	: m_container(iterator.m_container){}
 
 private:
 	friend class SHARK_ITERATOR_CORE_ACCESS;
-	template <class> friend class MultiSequenceIterator;
 
 	void increment() {
-		++m_positionInSequence;
-		++m_innerPosition;
-		if(m_innerPosition == m_innerEnd){
-			++m_outerPosition;
-			while (m_outerPosition != m_outerEnd){//support for empty subsequences
-				m_innerBegin = boost::begin(*m_outerPosition);
-				m_innerEnd = boost::end(*m_outerPosition);
-				if(m_innerBegin != m_innerEnd){
-					m_innerPosition = m_innerBegin;
-					return;
-				}
-				++m_outerPosition;
-			}
-		}
+		++m_index;
 	}
 	void decrement() {
-		SIZE_CHECK(m_positionInSequence);//don't call this method when the iterator is on the first element
-		--m_positionInSequence;
-		if(m_innerPosition != m_innerBegin){
-			--m_innerPosition;
-			return;
-		}
-			
-		--m_outerPosition;
-		m_innerBegin = boost::begin(*m_outerPosition);
-		m_innerEnd = boost::end(*m_outerPosition);
-		while(m_innerBegin == m_innerEnd){//support for empty subsequences
-			if( m_outerPosition == m_outerBegin)
-				return;//we are at the end
-			--m_outerPosition;
-			m_innerBegin = boost::begin(*m_outerPosition);
-			m_innerEnd = boost::end(*m_outerPosition);
-		}
-		m_innerPosition = m_innerEnd-1;
+		--m_index;
 	}
-	//this is not exactly O(1) as the standard wants. in fact it's O(n) in the number of inner sequences
-	//so approximately O(1) if the size of a sequence is big...
+	
 	void advance(std::ptrdiff_t n){
-		m_positionInSequence += n;
-		std::ptrdiff_t diff = m_innerPosition - m_innerBegin;
-		n += diff;//jump from the start of the current inner sequence
-		if(n== 0)
-			m_innerPosition = m_innerBegin;
-		if(n < 0){
-			n *= -1;
-			--m_outerPosition;
-			--n;
-			//jump over the outer position until we are in the correct range again
-			while ((unsigned int) n >= shark::size(*m_outerPosition) ){
-				n -= shark::size(*m_outerPosition);
-				--m_outerPosition;
-			}
-			//get the iterators to the current position if we are not before the beginning of the sequence
-			m_innerBegin = boost::begin(*m_outerPosition);
-			m_innerEnd = boost::end(*m_outerPosition);
-			m_innerPosition = m_innerEnd-(n+1);
-		}
-		else{
-
-			//jump over the outer position until we are in the correct range again
-			while (m_outerPosition != m_outerEnd && (unsigned int)n >= shark::size(*m_outerPosition) ){
-				n -= shark::size(*m_outerPosition);
-				++m_outerPosition;
-			}
-			SHARK_RUNTIME_CHECK(m_outerPosition != m_outerEnd || (n == 0), "iterator went past the end");
-			//get the iterators to the current position if we are not past the end
-			if(m_outerPosition != m_outerEnd){
-				m_innerBegin = boost::begin(*m_outerPosition);
-				m_innerPosition = m_innerBegin+n;
-				m_innerEnd = boost::end(*m_outerPosition);
-			}
-		}
+		m_index += n;
 	}
-
-	template<class Iter>
-	std::ptrdiff_t distance_to(const Iter& other) const{
-		return (std::ptrdiff_t)other.m_positionInSequence - (std::ptrdiff_t)m_positionInSequence;
+	
+	template<class C>
+	std::ptrdiff_t distance_to(IndexingIterator<C> const& other) const{
+		return other.m_index - m_index;
 	}
-
-	template<class Iter>
-	bool equal(Iter const& other) const{
-		return (m_positionInSequence == other.m_positionInSequence);
+	
+	template<class C>
+	bool equal(IndexingIterator<C> const& other) const{
+		return m_index == other.m_index;
 	}
-	typename Traits::reference dereference() const {
-		return *m_innerPosition;
+	typename IndexingIterator::reference dereference() const { 
+		return (*m_container)[m_index];
 	}
-
-	outer_iterator m_outerBegin;//in fact, it is a before-the-begin iterator
-	outer_iterator m_outerPosition;
-	outer_iterator m_outerEnd;
-
-	inner_iterator m_innerBegin;//in fact, it is a before-the-begin iterator
-	inner_iterator m_innerPosition;
-	inner_iterator m_innerEnd;
-
-	std::size_t m_positionInSequence;
+	
+	Container* m_container;
+	std::ptrdiff_t m_index;
 };
 
 }

@@ -50,6 +50,7 @@
 #include <shark/Core/Exception.h>
 #include <shark/Core/OpenMP.h>
 #include <shark/Core/utility/functional.h>
+#include <boost/iterator/transform_iterator.hpp>
 #include <shark/Rng/GlobalRng.h>
 #include "Impl/Dataset.inl"
 
@@ -127,7 +128,6 @@ class Data : public ISerializable
 {
 protected:
 	typedef detail::SharedContainer<Type> Container;
-	typedef Data<Type> self_type;
 
 	Container m_data;		///< data
 public:
@@ -151,7 +151,7 @@ public:
 		return (m_data == rhs.m_data);
 	}
 
-	/// \brief Two containers compare different if they don't share the same data.
+	/// \brief Two containers compare unequal if they don't share the same data.
 	template <class T> bool operator != (const Data<T>& rhs) {
 		return (! (*this == rhs));
 	}
@@ -159,10 +159,10 @@ public:
 	template <class InputT, class LabelT> friend class LabeledData;
 
 	// RANGES
-	typedef boost::iterator_range<typename Container::element_iterator> element_range;
-	typedef boost::iterator_range<typename Container::const_element_iterator> const_element_range;
-	typedef boost::iterator_range<typename Container::iterator> batch_range;
-	typedef boost::iterator_range<typename Container::const_iterator> const_batch_range;
+	typedef boost::iterator_range< detail::DataElementIterator<Data<Type> > > element_range;
+	typedef boost::iterator_range< detail::DataElementIterator<Data<Type> const> > const_element_range;
+	typedef detail::BatchRange<Data<Type> > batch_range;
+	typedef detail::BatchRange<Data<Type> const> const_batch_range;
 
 
 	///\brief Returns the range of elements.
@@ -170,14 +170,20 @@ public:
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_element_range elements()const{
-		return const_element_range(m_data.elemBegin(),m_data.elemEnd());
+		return const_element_range(
+			detail::DataElementIterator<Data<Type> const>(this,0,0,0),
+			detail::DataElementIterator<Data<Type> const>(this,numberOfBatches(),0,numberOfElements())
+		);
 	}
 	///\brief Returns therange of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	element_range elements(){
-		return element_range(m_data.elemBegin(),m_data.elemEnd());
+		return element_range(
+			detail::DataElementIterator<Data<Type> >(this,0,0,0),
+			detail::DataElementIterator<Data<Type> >(this,numberOfBatches(),0,numberOfElements())
+		);
 	}
 
 	///\brief Returns the range of batches.
@@ -185,14 +191,14 @@ public:
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
-		return const_batch_range(m_data.begin(),m_data.end());
+		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
-		return batch_range(m_data.begin(),m_data.end());
+		return batch_range(this);
 	}
 
 	///\brief Returns the number of batches of the set.
@@ -211,10 +217,10 @@ public:
 
 	// ELEMENT ACCESS
 	element_reference element(std::size_t i){
-		return *(m_data.elemBegin()+i);
+		return *(detail::DataElementIterator<Data<Type> >(this,0,0,0)+i);
 	}
 	const_element_reference element(std::size_t i) const{
-		return *(m_data.elemBegin()+i);
+		return *(detail::DataElementIterator<Data<Type> const>(this,0,0,0)+i);
 	}
 
 	// BATCH ACCESS
@@ -275,8 +281,8 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(std::size_t batch){
-		self_type right;
+	Data splice(std::size_t batch){
+		Data right;
 		right.m_data=m_data.splice(m_data.begin()+batch);
 		return right;
 	}
@@ -285,7 +291,7 @@ public:
 	///
 	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
 	/// dataset might change this one as well.
-	void append(self_type const& other){
+	void append(Data const& other){
 		m_data.append(other.m_data);
 	}
 	
@@ -312,12 +318,12 @@ public:
 
 	// SUBSETS
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, self_type& subset) const{
+	void indexedSubset(IndexSet const& indices, Data& subset) const{
 		subset.m_data=Container(m_data,indices);
 	}
 
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, self_type& subset, self_type& complement) const{
+	void indexedSubset(IndexSet const& indices, Data& subset, Data& complement) const{
 		IndexSet comp;
 		detail::complement(indices,m_data.size(),comp);
 		subset.m_data=Container(m_data,indices);
@@ -354,7 +360,6 @@ class UnlabeledData : public Data<InputT>
 public:
 	typedef InputT element_type;
 	typedef Data<element_type> base_type;
-	typedef UnlabeledData<element_type> self_type;
 	typedef element_type InputType;
 	typedef detail::SharedContainer<InputT> InputContainer;
 
@@ -394,7 +399,7 @@ public:
 		:base_type(container,batchSizes){}
 
 	/// \brief we allow assignment from Data.
-	self_type operator=(Data<InputT> const& data){
+	UnlabeledData operator=(Data<InputT> const& data){
 		static_cast<Data<InputT>& >(*this) = data;
 		return *this;
 	}
@@ -402,14 +407,14 @@ public:
 	///\brief Access to the base_type class as "inputs".
 	///
 	/// Added for consistency with the LabeledData::labels() method.
-	self_type& inputs(){
+	UnlabeledData& inputs(){
 		return *this;
 	}
 
 	///\brief Access to the base_type class as "inputs".
 	///
 	/// Added for consistency with the LabeledData::labels() method.
-	self_type const& inputs() const{
+	UnlabeledData const& inputs() const{
 		return *this;
 	}
 
@@ -417,8 +422,8 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(std::size_t batch){
-		self_type right;
+	UnlabeledData splice(std::size_t batch){
+		UnlabeledData right;
 		right.m_data=m_data.splice(m_data.begin()+batch);
 		return right;
 	}
@@ -446,8 +451,6 @@ public:
 template <class InputT, class LabelT>
 class LabeledData : public ISerializable
 {
-protected:
-	typedef LabeledData<InputT, LabelT> self_type;
 public:
 	typedef InputT InputType;
 	typedef LabelT LabelType;
@@ -455,75 +458,69 @@ public:
 	typedef Data<LabelT> LabelContainer;
 	typedef typename InputContainer::IndexSet IndexSet;
 
-	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = InputContainer::DefaultBatchSize);
+	static const std::size_t DefaultBatchSize = InputContainer::DefaultBatchSize;
 
-	// TYPEDEFS fOR PAIRS
-	typedef DataBatchPair<
+	// TYPEDEFS FOR PAIRS
+	typedef InputLabelBatch<
 		typename Batch<InputType>::type,
 		typename Batch<LabelType>::type
 	> batch_type;
 
-	typedef DataPair<
-		InputType,
-		LabelType
-	> element_type;
-
-	// TYPEDEFS FOR  RANGES
-	typedef typename PairRangeType<
-		element_type,
-		typename InputContainer::element_range,
-		typename LabelContainer::element_range
-	>::type element_range;
-	typedef typename PairRangeType<
-		element_type,
-		typename InputContainer::const_element_range,
-		typename LabelContainer::const_element_range
-	>::type const_element_range;
-	typedef typename PairRangeType<
-		batch_type,
-		typename InputContainer::batch_range,
-		typename LabelContainer::batch_range
-	>::type batch_range;
-	typedef typename PairRangeType<
-		batch_type,
-		typename InputContainer::const_batch_range,
-		typename LabelContainer::const_batch_range
-	>::type const_batch_range;
+	typedef InputLabelPair<InputType,LabelType> element_type;
 
 	// TYPEDEFS FOR REFERENCES
-	typedef typename boost::range_reference<batch_range>::type batch_reference;
-	typedef typename boost::range_reference<const_batch_range>::type const_batch_reference;
-	typedef typename boost::range_reference<element_range>::type element_reference;
-	typedef typename boost::range_reference<const_element_range>::type const_element_reference;
+	typedef InputLabelBatch<
+		typename Batch<InputType>::type&,
+		typename Batch<LabelType>::type&
+	> batch_reference;
+	typedef InputLabelBatch<
+		typename Batch<InputType>::type const&,
+		typename Batch<LabelType>::type const&
+	> const_batch_reference;
+	
+	typedef typename Batch<element_type>::reference element_reference;
+	typedef typename Batch<element_type>::const_reference const_element_reference;
+
+	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> > > element_range;
+	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> const> > const_element_range;
+	typedef detail::BatchRange<LabeledData<InputType,LabelType> > batch_range;
+	typedef detail::BatchRange<LabeledData<InputType,LabelType> const> const_batch_range;
+
 
 	///\brief Returns the range of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_element_range elements()const{
-		return zipPairRange<element_type>(m_data.elements(),m_label.elements());
+		return const_element_range(
+			detail::DataElementIterator<LabeledData<InputType,LabelType> const>(this,0,0,0),
+			detail::DataElementIterator<LabeledData<InputType,LabelType> const>(this,numberOfBatches(),0,numberOfElements())
+		);
 	}
 	///\brief Returns therange of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	element_range elements(){
-		return zipPairRange<element_type>(m_data.elements(),m_label.elements());
+		return element_range(
+			detail::DataElementIterator<LabeledData<InputType,LabelType> >(this,0,0,0),
+			detail::DataElementIterator<LabeledData<InputType,LabelType> >(this,numberOfBatches(),0,numberOfElements())
+		);
 	}
-
+	
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
-		return zipPairRange<batch_type>(m_data.batches(),m_label.batches());
+		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
-		return zipPairRange<batch_type>(m_data.batches(),m_label.batches());
+		return batch_range(this);
 	}
 
 	///\brief Returns the number of batches of the set.
@@ -592,16 +589,16 @@ public:
 		SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
 #ifndef DNDEBUG
 		for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
-			SIZE_CHECK(shark::size(inputs.batch(i))==shark::size(labels.batch(i)));
+			SIZE_CHECK(Batch<InputType>::size(inputs.batch(i))==Batch<LabelType>::size(labels.batch(i)));
 		}
 #endif
 	}
 	// ELEMENT ACCESS
 	element_reference element(std::size_t i){
-		return element_reference(m_data.element(i),m_label.element(i));
+		return *(detail::DataElementIterator<LabeledData<InputType,LabelType> >(this,0,0,0)+i);
 	}
 	const_element_reference element(std::size_t i) const{
-		return const_element_reference(m_data.element(i),m_label.element(i));
+		return *(detail::DataElementIterator<LabeledData<InputType,LabelType> const>(this,0,0,0)+i);
 	}
 
 	// BATCH ACCESS
@@ -647,15 +644,15 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(std::size_t batch){
-		return self_type(m_data.splice(batch),m_label.splice(batch));
+	LabeledData splice(std::size_t batch){
+		return LabeledData(m_data.splice(batch),m_label.splice(batch));
 	}
 
 	/// \brief Appends the contents of another data object to the end
 	///
 	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
 	/// dataset might change this one as well.
-	void append(self_type const& other){
+	void append(LabeledData const& other){
 		m_data.append(other.m_data);
 		m_label.append(other.m_label);
 	}
@@ -702,13 +699,13 @@ public:
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, self_type& subset) const{
+	void indexedSubset(IndexSet const& indices, LabeledData& subset) const{
 		m_data.indexedSubset(indices,subset.m_data);
 		m_label.indexedSubset(indices,subset.m_label);
 	}
 
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, self_type& subset, self_type& complement)const{
+	void indexedSubset(IndexSet const& indices, LabeledData& subset, LabeledData& complement)const{
 		IndexSet comp;
 		detail::complement(indices,m_data.numberOfBatches(),comp);
 		m_data.indexedSubset(indices,subset.m_data);
@@ -743,15 +740,14 @@ struct TransformedData{
 
 /// \brief creates a data object from a range of elements
 template<class Range>
-Data<typename boost::range_value<Range>::type>
+Data<typename Range::value_type>
 createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
-	typedef typename boost::range_value<Range const>::type Input;
-	typedef typename boost::range_iterator<Range const>::type Iterator;
+	typedef typename Range::value_type Input;
 
 	if (maximumBatchSize == 0)
 		maximumBatchSize = Data<Input>::DefaultBatchSize;
 
-	std::size_t numPoints = shark::size(inputs);
+	std::size_t numPoints = inputs.size();
 	//first determine the optimal number of batches as well as batch size
 	std::size_t batches = numPoints / maximumBatchSize;
 	if(numPoints > batches*maximumBatchSize)
@@ -761,10 +757,10 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 	Data<Input> data(batches);
 
 	//now create the batches taking the remainder into account
-	Iterator start= boost::begin(inputs);
+	auto start= inputs.begin();
 	for(std::size_t i = 0; i != batches; ++i){
 		std::size_t size = (i<remainder)?optimalBatchSize+1:optimalBatchSize;
-		Iterator end = start+size;
+		auto end = start+size;
 		data.batch(i) = createBatch<Input>(
 			boost::make_iterator_range(start,end)
 		);
@@ -785,17 +781,18 @@ template<class Range1, class Range2>
 LabeledData<
 	typename boost::range_value<Range1>::type,
 	typename boost::range_value<Range2>::type
-> createLabeledDataFromRange(Range1 const& inputs, Range2 const& labels, std::size_t batchSize = 0){
+
+> createLabeledDataFromRange(Range1 const& inputs, Range2 const& labels, std::size_t maximumBatchSize = 0){
 	SHARK_RUNTIME_CHECK(inputs.size() == labels.size(),"Number of inputs and number of labels must agree");
 	typedef typename boost::range_value<Range1>::type Input;
 	typedef typename boost::range_value<Range2>::type Label;
 
-	if (batchSize == 0)
-		batchSize = LabeledData<Input,Label>::DefaultBatchSize;
+	if (maximumBatchSize == 0)
+		maximumBatchSize = LabeledData<Input,Label>::DefaultBatchSize;
 
 	return LabeledData<Input,Label>(
-		createDataFromRange(inputs,batchSize),
-		createDataFromRange(labels,batchSize)
+		createDataFromRange(inputs,maximumBatchSize),
+		createDataFromRange(labels,maximumBatchSize)
 	);
 }
 
@@ -824,9 +821,8 @@ inline unsigned int numberOfClasses(Data<unsigned int> const& labels){
 inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 	std::vector<std::size_t> classCounts(numberOfClasses(labels),0u);
 	for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
-		std::size_t batchSize = size(labels.batch(i));
-		for(std::size_t j = 0; j != batchSize; ++j){
-			classCounts[labels.batch(i)(j)]++;
+		for(unsigned int elem: labels.batch(i)){
+			classCounts[elem]++;
 		}
 	}
 	return classCounts;
@@ -899,7 +895,10 @@ transform(Data<T> const& data, Functor f){
 	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(batches);
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
-		result.batch(i)= createBatch<T>(boost::adaptors::transform(data.batch(i), f));
+		result.batch(i)= createBatch<T>(
+			boost::make_transform_iterator(batchBegin(data.batch(i)), f),
+			boost::make_transform_iterator(batchEnd(data.batch(i)), f)
+		);
 	return result;
 }
 
@@ -960,8 +959,8 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 
 	std::size_t batchPos = 0;
 	std::size_t batchStart = 0;
-	while(batchStart + boost::size(data.batch(batchPos)) < elementIndex){
-		batchStart += boost::size(data.batch(batchPos));
+	while(batchStart + batchSize(data.batch(batchPos)) < elementIndex){
+		batchStart += batchSize(data.batch(batchPos));
 		++batchPos;
 	};
 	std::size_t splitPoint = elementIndex-batchStart;
@@ -990,31 +989,18 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	// Now place examples into the batches reserved for their class...
 	std::vector<std::size_t> bat = classStart;           // batch index until which the class is already filled in
 	std::vector<std::size_t> idx(classStart.size(), 0);  // index within the batch until which the class is already filled in
-	unsigned int c = 0;                                  // current class in whose batch space we operate
-	typedef typename Batch<I>::type InputBatchType;
-	typedef typename Batch<unsigned int>::type LabelBatchType;
-	for (std::size_t b=0; b<data.numberOfBatches(); b++)
-	{
-		// update class range index
+	std::size_t c = 0; // the current class space we are operating in
+	for (std::size_t b=0; b<data.numberOfBatches(); b++){
+		//check if we changed class space
+		if(b == classStart[c+1]) ++c;
+		auto&& batch = data.batch(b);
 		std::size_t e = 0;
-		while (c + 1 < classStart.size() && b == classStart[c + 1])
-		{
-			c++;
-			b = bat[c];
-			e = idx[c];
-		}
-		if (b == data.numberOfBatches()) break;
-
-		InputBatchType& bi1 = data.inputs().batch(b);
-		LabelBatchType& bl1 = data.labels().batch(b);
-		while (true)
-		{
-			unsigned int l = shark::get(bl1, e);
-			if (l == c)   // leave element in place
-			{
-				e++;
-				idx[c] = e;
-				if (e == boost::size(bl1))
+		while (true){
+			unsigned int label = batch.label[e];
+			if (label == c){  // leave element in place
+				++e;
+				++idx[c];
+				if (e == batch.size())
 				{
 					e = 0;
 					idx[c] = 0;
@@ -1022,18 +1008,15 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 					break;
 				}
 			}
-			else   // swap elements
-			{
-				InputBatchType& bi2 = data.inputs().batch(bat[l]);
-				LabelBatchType& bl2 = data.labels().batch(bat[l]);
-				swap(shark::get(bi1, e), shark::get(bi2, idx[l]));
-				shark::get(bl1, e) = shark::get(bl2, idx[l]);
-				shark::get(bl2, idx[l]) = l;
-				idx[l]++;
-				if (idx[l] == boost::size(bl2))
+			else{   // swap elements
+				auto&& batch2 = data.batch(bat[label]);
+				using std::swap;
+				swap(batch[e],batch2[idx[label]]);
+				idx[label]++;
+				if (idx[label] == batch2.size())
 				{
-					idx[l] = 0;
-					bat[l]++;
+					idx[label] = 0;
+					bat[label]++;
 				}
 			}
 		}
@@ -1053,22 +1036,23 @@ LabeledData<I,unsigned int> binarySubProblem(
 
 	//find first class
 	std::size_t start= 0;
-	for(;start != numBatches && get(data.batch(start),0).label != smaller;++start);
+	for(;start != numBatches && getBatchElement(data.batch(start),0).label != smaller;++start);
 	SHARK_RUNTIME_CHECK(start != numBatches, "First class does not exist");
 
 	//copy batch indices of first class
-	for(;start != numBatches && get(data.batch(start),0).label == smaller; ++start)
+	for(;start != numBatches && getBatchElement(data.batch(start),0).label == smaller; ++start)
 		indexSet.push_back(start);
 
 	//find second class
-	for(;start != numBatches && get(data.batch(start),0).label != bigger;++start);
+
+	for(;start != numBatches && getBatchElement(data.batch(start),0).label != bigger;++start);
 	SHARK_RUNTIME_CHECK(start != numBatches, "Second class does not exist");
 
 	//copy batch indices of second class
-	for(;start != numBatches && get(data.batch(start),0).label == bigger; ++start)
+	for(;start != numBatches && getBatchElement(data.batch(start),0).label == bigger; ++start)
 		indexSet.push_back(start);
 
-	return transformLabels(indexedSubset(data,indexSet), detail::TransformOneVersusRestLabels(oneClass));
+	return transformLabels(indexedSubset(data,indexSet), [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
 
 /// \brief Construct a binary (two-class) one-versus-rest problem from a multi-class problem.
@@ -1084,7 +1068,7 @@ LabeledData<I,unsigned int> oneVersusRestProblem(
 	LabeledData<I,unsigned int>const& data,
 	unsigned int oneClass)
 {
-	return transformLabels(data, detail::TransformOneVersusRestLabels(oneClass));
+	return transformLabels(data, [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
 
 ///

@@ -153,7 +153,7 @@ public:
 		RealMatrix bof_results(1,1);
 		typename Batch<InputType>::type bof_xi = Batch<InputType>::createBatch(input,1);
 		typename Batch<InputType>::type bof_input = Batch<InputType>::createBatch(input,1);
-		get(bof_input, 0) = input; //fixed over entire function scope
+		getBatchElement(bof_input, 0) = input; //fixed over entire function scope
 
 		// init helpers
 		RealVector der( m_nhp );
@@ -164,7 +164,7 @@ public:
 		noalias(derivative) = row(m_d_alphab_d_theta,m_noofFreeSVs); //without much thinking, we add db/d(\theta) to all derivatives
 		// first: go through free SVs and add their contributions (the actual ones, which use the matrix d_alphab_d_theta)
 		for ( std::size_t i=0; i<m_noofFreeSVs; i++ ) {
-			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]);
+			getBatchElement(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]);
 			mep_k->eval( bof_input, bof_xi, bof_results, *state );
 			double ker = bof_results(0,0);
 			double cur_alpha = m_freeAlphas(i);
@@ -174,7 +174,7 @@ public:
 		}
 		// second: go through all bounded SVs and add their "trivial" derivative contributions
 		for ( std::size_t i=0; i<m_noofBoundedSVs; i++ ) {
-			get(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]);
+			getBatchElement(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]);
 			mep_k->eval( bof_input, bof_xi, bof_results, *state );
 			double ker = bof_results(0,0);
 			double cur_label = m_boundedLabels(i);
@@ -295,10 +295,10 @@ private:
 		RealMatrix H( m_noofFreeSVs + 1, m_noofFreeSVs + 1,0.0);
 		std::vector< RealMatrix > dH( m_nkp , RealMatrix(m_noofFreeSVs+1, m_noofFreeSVs+1));
 		for ( std::size_t i=0; i<m_noofFreeSVs; i++ ) {
-			get(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]); //fixed over outer loop
+			getBatchElement(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]); //fixed over outer loop
 			// fill the off-diagonal entries..
 			for ( std::size_t j=0; j<i; j++ ) {
-				get(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
+				getBatchElement(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
 				mep_k->eval( bof_xi, bof_xj, bof_results, *state );
 				H( i,j ) = H( j,i ) = bof_results(0,0);
 				mep_k->weightedParameterDerivative( bof_xi, bof_xj, unit_weights, *state, der );
@@ -328,9 +328,9 @@ private:
 		RealMatrix R( m_noofFreeSVs+1, m_noofBoundedSVs );
 		std::vector< RealMatrix > dR( m_nkp, RealMatrix(m_noofFreeSVs+1, m_noofBoundedSVs));
 		for ( std::size_t i=0; i<m_noofBoundedSVs; i++ ) {
-			get(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]); //fixed over outer loop
+			getBatchElement(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]); //fixed over outer loop
 			for ( std::size_t j=0; j<m_noofFreeSVs; j++ ) { //this time, we (have to) do it row by row
-				get(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
+				getBatchElement(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
 				mep_k->eval( bof_xi, bof_xj, bof_results, *state );
 				R( j,i ) = bof_results(0,0);
 				mep_k->weightedParameterDerivative( bof_xi, bof_xj, unit_weights, *state, der );

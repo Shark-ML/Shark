@@ -123,8 +123,16 @@ public:
 			boost::fusion::swap(fusionize(op1),fusionize(op2));
 		}
 		std::size_t size()const{
-			return shark::size(boost::fusion::at_c<0>(fusionize(*this)));
+			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));
 		}
+		
+		reference operator[](std::size_t i){
+			return *(begin()+i);
+		}
+		const_reference operator[](std::size_t i)const{
+			return *(begin()+i);
+		}
+		
 		template<class Archive>
 		void serialize(Archive & archive,unsigned int version)
 		{
@@ -138,7 +146,35 @@ public:
 	typedef typename type::const_iterator const_iterator;
 
 	static type createBatch(value_type const& input, std::size_t size = 1){
-		return type(size,shark::size(FusionType::visible),shark::size(FusionType::hidden));
+		return type(size,batchSize(FusionType::visible),batchSize(FusionType::hidden));
+	}
+	
+	template<class T>
+	static std::size_t size(T const& batch){return batch.size();}
+	
+	template<class T>
+	static typename T::reference get(T& batch, std::size_t i){
+		return batch[i];
+	}
+	template<class T>
+	static const_reference get(T const& batch, std::size_t i){
+		return batch[i];
+	}
+	template<class T>
+	static typename T::iterator begin(T& batch){
+		return batch.begin();
+	}
+	template<class T>
+	static const_iterator begin(T const& batch){
+		return batch.begin();
+	}
+	template<class T>
+	static typename T::iterator end(T& batch){
+		return batch.end();
+	}
+	template<class T>
+	static const_iterator end(T const& batch){
+		return batch.end();
 	}
 };
 }

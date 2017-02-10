@@ -48,12 +48,138 @@
 #include <shark/Data/Dataset.h>
 namespace shark {
 	
+///\brief Input-Label pair of data
+template<class DataType, class WeightType>
+struct WeightedDataPair{
+	DataType data;
+	WeightType weight;
+	
+	WeightedDataPair(){}
+	
+	template<class DataT, class WeightT>
+	WeightedDataPair(
+		DataT&& data,
+		WeightT&& weight
+	):data(data),weight(weight){}
+	
+	template<class DataT, class WeightT>
+	WeightedDataPair(
+		WeightedDataPair<DataT,WeightT> const& pair
+	):data(pair.data),weight(pair.weight){}
+	
+	template<class DataT, class WeightT>
+	WeightedDataPair& operator=(WeightedDataPair<DataT,WeightT> const& batch){
+		data = batch.data;
+		weight = batch.weight;
+		return *this;
+	}
+	WeightedDataPair& operator=(WeightedDataPair const& batch){
+		data = batch.data;
+		weight = batch.weight;
+		return *this;
+	}
+};
+
+template<class D1, class W1, class D2, class W2>
+void swap(WeightedDataPair<D1, W1>&& p1, WeightedDataPair<D2, W2>&& p2){
+	using std::swap;
+	swap(std::forward<D1>(p1.data),std::forward<D2>(p2.data));
+	swap(std::forward<W1>(p1.weight),std::forward<W2>(p2.weight));
+}
+
+template<class DataBatchType,class WeightBatchType>
+struct WeightedDataBatch{
+private:
+	typedef typename BatchTraits<typename std::decay<DataBatchType>::type >::type DataBatchTraits;
+	typedef typename BatchTraits<typename std::decay<WeightBatchType>::type >::type WeightBatchTraits;
+public:
+	DataBatchType data;
+	WeightBatchType weight;
+
+	typedef WeightedDataPair<
+		typename DataBatchTraits::value_type,
+		typename WeightBatchTraits::value_type
+	> value_type;
+	typedef WeightedDataPair<
+		typename detail::batch_to_reference<DataBatchType>::type,
+		typename detail::batch_to_reference<WeightBatchType>::type
+	> reference;
+	typedef WeightedDataPair<
+		typename DataBatchTraits::const_reference,
+		typename WeightBatchTraits::const_reference
+	> const_reference;
+	typedef IndexingIterator<WeightedDataBatch> iterator;
+	typedef IndexingIterator<WeightedDataBatch const> const_iterator;
+
+	template<class D, class W>
+	WeightedDataBatch(
+		D&& data,
+		W&& weight
+	):data(data),weight(weight){}
+	
+	template<class Pair>
+	WeightedDataBatch(
+		std::size_t size,Pair const& p
+	):data(DataBatchTraits::createBatch(p.data,size)),weight(WeightBatchTraits::createBatch(p.weight,size)){}
+	
+	template<class I, class L>
+	WeightedDataBatch& operator=(WeightedDataBatch<I,L> const& batch){
+		data = batch.data;
+		weight = batch.weight;
+		return *this;
+	}
+
+	std::size_t size()const{
+		return DataBatchTraits::size(data);
+	}
+	
+	iterator begin(){
+		return iterator(*this,0);
+	}
+	const_iterator begin()const{
+		return const_iterator(*this,0);
+	}
+
+	iterator end(){
+		return iterator(*this,size());
+	}
+	const_iterator end()const{
+		return const_iterator(*this,size());
+	}
+
+	reference operator[](std::size_t i){
+		return reference(getBatchElement(data,i),getBatchElement(weight,i));
+	}
+	const_reference operator[](std::size_t i)const{
+		return const_reference(getBatchElement(data,i),getBatchElement(weight,i));
+	}
+};
+
+template<class D1, class W1, class D2, class W2>
+void swap(WeightedDataBatch<D1, W1>& p1, WeightedDataBatch<D2, W2>& p2){
+	using std::swap;
+	swap(p1.data,p2.data);
+	swap(p1.weight,p2.weight);
+}
+
+template<class DataType, class WeightType>
+struct Batch<WeightedDataPair<DataType, WeightType> >
+: public detail::SimpleBatch<
+	WeightedDataBatch<typename detail::element_to_batch<DataType>::type, typename detail::element_to_batch<WeightType>::type>
+>{};
+
+template<class DataType, class WeightType>
+struct BatchTraits<WeightedDataBatch<DataType, WeightType> >{
+	typedef typename detail::batch_to_element<DataType>::type DataElem;
+	typedef typename detail::batch_to_element<WeightType>::type WeightElem;
+	typedef Batch<WeightedDataPair<DataElem,WeightElem> > type;
+};
+
+
 namespace detail{
 template <class DataContainerT>
 class BaseWeightedDataset : public ISerializable
 {
-private:
-	typedef BaseWeightedDataset<DataContainerT> self_type;
 public:
 	typedef typename DataContainerT::element_type DataType;
 	typedef double WeightType;
@@ -61,70 +187,70 @@ public:
 	typedef Data<WeightType> WeightContainer;
 	typedef typename DataContainer::IndexSet IndexSet;
 
-	// TYPEDEFS fOR PAIRS
+	// TYPEDEFS FOR PAIRS
 	typedef WeightedDataPair<
 		DataType,
 		WeightType
 	> element_type;
 
-	typedef typename Batch<element_type>::type batch_type;
+	typedef WeightedDataBatch<
+		typename DataContainer::batch_type,
+		typename WeightContainer::batch_type
+	> batch_type;
 
-	// TYPEDEFS FOR  RANGES
-	typedef typename PairRangeType<
-		element_type,
-		typename DataContainer::element_range,
-		typename WeightContainer::element_range
-	>::type element_range;
-	typedef typename PairRangeType<
-		element_type,
-		typename DataContainer::const_element_range,
-		typename WeightContainer::const_element_range
-	>::type const_element_range;
-	typedef typename PairRangeType<
-		batch_type,
-		typename DataContainer::batch_range,
-		typename WeightContainer::batch_range
-	>::type batch_range;
-	typedef typename PairRangeType<
-		batch_type,
-		typename DataContainer::const_batch_range,
-		typename WeightContainer::const_batch_range
-	>::type const_batch_range;
+	// TYPEDEFS FOR BATCH REFERENCES
+	typedef WeightedDataBatch<
+		typename DataContainer::batch_reference,
+		typename WeightContainer::batch_reference
+	> batch_reference;
+	typedef WeightedDataBatch<
+		typename DataContainer::const_batch_reference,
+		typename WeightContainer::const_batch_reference
+	> const_batch_reference;
+	
+	typedef typename Batch<element_type>::reference element_reference;
+	typedef typename Batch<element_type>::const_reference const_element_reference;
 
-	// TYPEDEFS FOR REFERENCES
-	typedef typename boost::range_reference<batch_range>::type batch_reference;
-	typedef typename boost::range_reference<const_batch_range>::type const_batch_reference;
-	typedef typename boost::range_reference<element_range>::type element_reference;
-	typedef typename boost::range_reference<const_element_range>::type const_element_reference;
+	typedef boost::iterator_range< detail::DataElementIterator<BaseWeightedDataset<DataContainer> > > element_range;
+	typedef boost::iterator_range< detail::DataElementIterator<BaseWeightedDataset<DataContainer> const> > const_element_range;
+	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> > batch_range;
+	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> const> const_batch_range;
+
 
 	///\brief Returns the range of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_element_range elements()const{
-		return zipPairRange<element_type>(m_data.elements(),m_weights.elements());
+		return const_element_range(
+			detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,0,0,0),
+			detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,numberOfBatches(),0,numberOfElements())
+		);
 	}
 	///\brief Returns therange of elements.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	element_range elements(){
-		return zipPairRange<element_type>(m_data.elements(),m_weights.elements());
+		return element_range(
+			detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,0,0,0),
+			detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,numberOfBatches(),0,numberOfElements())
+		);
 	}
-
+	
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
-		return zipPairRange<batch_type>(m_data.batches(),m_weights.batches());
+		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
 	///
 	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
 	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
-		return zipPairRange<batch_type>(m_data.batches(),m_weights.batches());
+		return batch_range(this);
 	}
 
 	///\brief Returns the number of batches of the set.
@@ -194,7 +320,7 @@ public:
 		SHARK_RUNTIME_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedUnlabeledData] number of data and number of weights must agree");
 #ifndef DNDEBUG
 		for(std::size_t i  = 0; i != data.numberOfBatches(); ++i){
-			SIZE_CHECK(shark::size(data.batch(i))==shark::size(weights.batch(i)));
+			SIZE_CHECK(batchSize(data.batch(i)) == batchSize(weights.batch(i)));
 		}
 #endif
 	}
@@ -204,18 +330,17 @@ public:
 	: m_data(data), m_weights(data.numberOfBatches())
 	{
 		for(std::size_t i = 0; i != numberOfBatches(); ++i){
-			std::size_t batchSize = boost::size(m_data.batch(i));
-			m_weights.batch(i) = Batch<WeightType>::type(batchSize,weight);
+			m_weights.batch(i) = Batch<WeightType>::type(batchSize(m_data.batch(i)),weight);
 		}
 	}
 	
 	
 	// ELEMENT ACCESS
 	element_reference element(std::size_t i){
-		return element_reference(m_data.element(i),m_weights.element(i));
+		return *(detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,0,0,0)+i);
 	}
 	const_element_reference element(std::size_t i) const{
-		return const_element_reference(m_data.element(i),m_weights.element(i));
+		return *(detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,0,0,0)+i);
 	}
 
 	// BATCH ACCESS
@@ -249,6 +374,24 @@ public:
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
 		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
+		//~ batch_type* b;
+		//~ *(batch(0).begin()) = 0;
+		//~ typename const_batch_reference::iterator x=
+		//~ typename const_batch_reference::reference y= 0;//wrong: const/non
+		//~ typename const_batch_reference::const_reference y1= 0;//right: const/const
+		//~ typename batch_reference::reference z= 0;//right non/non
+		//~ typename batch_reference::const_reference z1= 0; //wrong: non/const
+		//~ const_batch_reference* a;
+		//~ batch_reference* b;
+		//~ *a = *b;
+		//~ (*b)[0] = *x;
+		//~ *x = (*b)[0] ;
+		//~ *x = y;
+		//~ *this->elements().begin() = z1;
+		//~ *this->elements().begin() = y1;
+		//~ *this->elements().begin() = z;
+		//~ *this->elements().begin() = y;
+		//~ y = *this->elements().begin();
 		shark::shuffle(this->elements().begin(),this->elements().end(), uni);
 	}
 
@@ -261,7 +404,7 @@ public:
 	///
 	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
 	/// dataset might change this one as well.
-	void append(self_type const& other){
+	void append(BaseWeightedDataset const& other){
 		m_data.append(other.m_data);
 		m_weights.append(other.m_weights);
 	}
@@ -285,7 +428,7 @@ public:
 		return m_data.getPartitioning();
 	}
 
-	friend void swap( self_type& a, self_type& b){
+	friend void swap( BaseWeightedDataset& a, BaseWeightedDataset& b){
 		swap(a.m_data,b.m_data);
 		swap(a.m_weights,b.m_weights);
 	}
@@ -294,13 +437,13 @@ public:
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, self_type& subset) const{
+	void indexedSubset(IndexSet const& indices, BaseWeightedDataset& subset) const{
 		m_data.indexedSubset(indices,subset.m_data);
 		m_weights.indexedSubset(indices,subset.m_weights);
 	}
 
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, self_type& subset, self_type& complement)const{
+	void indexedSubset(IndexSet const& indices, BaseWeightedDataset& subset, BaseWeightedDataset& complement)const{
 		IndexSet comp;
 		detail::complement(indices,m_data.numberOfBatches(),comp);
 		m_data.indexedSubset(indices,subset.m_data);
@@ -312,7 +455,6 @@ private:
 	DataContainer m_data;               /// point data
 	WeightContainer m_weights; /// weight data
 };
-
 }
 
 ///
@@ -331,7 +473,6 @@ template <class DataT>
 class WeightedUnlabeledData : public detail::BaseWeightedDataset <UnlabeledData<DataT> >
 {
 private:
-	typedef WeightedUnlabeledData<DataT> self_type;
 	typedef detail::BaseWeightedDataset <UnlabeledData<DataT> > base_type;
 public:
 	using base_type::data;
@@ -394,8 +535,8 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(std::size_t batch){
-		return self_type(data().splice(batch),weights().splice(batch));
+	WeightedUnlabeledData splice(std::size_t batch){
+		return WeightedUnlabeledData(data().splice(batch),weights().splice(batch));
 	}
 
 	friend void swap(WeightedUnlabeledData& a, WeightedUnlabeledData& b){
@@ -419,8 +560,9 @@ typename boost::disable_if<
 		typename boost::range_value<DataRange>::type
 	> 
 >::type createUnlabeledDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = 0){
-	SHARK_RUNTIME_CHECK(boost::size(data) == boost::size(weights),
-	"[createDataFromRange] number of data points and number of weights must agree");
+
+	SHARK_RUNTIME_CHECK(batchSize(data) == batchSize(weights),
+
 	typedef typename boost::range_value<DataRange>::type Data;
 
 	if (batchSize == 0)
@@ -454,7 +596,6 @@ template <class InputT, class LabelT>
 class WeightedLabeledData : public detail::BaseWeightedDataset <LabeledData<InputT,LabelT> >
 {
 private:
-	typedef WeightedLabeledData<InputT,LabelT> self_type;
 	typedef detail::BaseWeightedDataset <LabeledData<InputT,LabelT> > base_type;
 public:
 	typedef typename base_type::DataType DataType;
@@ -531,11 +672,11 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	self_type splice(std::size_t batch){
-		return self_type(data().splice(batch),weights().splice(batch));
+	WeightedLabeledData splice(std::size_t batch){
+		return WeightedLabeledData(data().splice(batch),weights().splice(batch));
 	}
 
-	friend void swap(self_type& a, self_type& b){
+	friend void swap(WeightedLabeledData& a, WeightedLabeledData& b){
 		swap(static_cast<base_type&>(a),static_cast<base_type&>(b));
 	}
 };
@@ -616,10 +757,11 @@ typename boost::disable_if<
 		typename boost::range_value<LabelRange>::type
 	>
 >::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = 0){
-	SHARK_RUNTIME_CHECK(boost::size(inputs) == boost::size(labels),
-	"[createDataFromRange] number of data points and number of weights must agree");
-	SHARK_RUNTIME_CHECK(boost::size(inputs) == boost::size(weights),
-	"[createDataFromRange] number of data points and number of weights must agree");
+
+	SHARK_RUNTIME_CHECK(batchSize(inputs) == batchSize(labels),
+	"number of inputs and number of labels must agree");
+	SHARK_RUNTIME_CHECK(batchSize(inputs) == batchSize(weights),
+	"number of data points and number of weights must agree");
 	typedef typename boost::range_value<InputRange>::type InputType;
 	typedef typename boost::range_value<LabelRange>::type LabelType;
 
@@ -684,7 +826,6 @@ WeightedUnlabeledData<InputType> bootstrap(
 	return bootstrapSet;
 }
 
-/** @*/
 }
 
 #endif

@@ -13,6 +13,10 @@
 
 #include <boost/version.hpp>
 
+#include <boost/iterator/iterator_facade.hpp>
+
+
+
 #if BOOST_VERSION < 105700
 #define SHARK_USE_ITERATOR_WORKAROUND
 #endif
@@ -21,11 +25,6 @@
 
 #define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
 #define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
-
-#include <boost/iterator/iterator_facade.hpp>
-
-#include <boost/iterator/detail/config_def.hpp> // this goes last
-
 namespace boost
 {
   // This forward declaration is required for the friend declaration
