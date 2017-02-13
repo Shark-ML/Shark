@@ -31,6 +31,7 @@
 #include <shark/Core/utility/KeyValuePair.h>
 #include <shark/Core/OpenMP.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Domination/NonDominatedSort.h>
 
 #include <algorithm>
 #include <vector>
@@ -38,7 +39,10 @@
 namespace shark {
 /// \brief Finds the hypervolume contribution for points in MD
 ///
-/// This is the naive default algorithm explicitely calculating Con{x\in S}=Hyp{S}-Hyp{S/x} for all x in the set of points S
+/// This implementation is slightly less naive. Instead of calculating Con{x\in S}=Hyp{S}-Hyp{S/x}
+/// directly, we restrict the volume dominated by points in S to be inside the box [x,ref]. This
+/// leads to points in S not being relevant for the computation and thus can be discarded using
+/// a simple dominance test.
 struct HypervolumeContributionMD {
 	/// \brief Returns the index of the points with smallest contribution.
 	///
@@ -48,13 +52,17 @@ struct HypervolumeContributionMD {
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
 		HypervolumeCalculator hv;
-		double baseVol = hv(points,ref);
 		std::vector<KeyValuePair<double,std::size_t> > result( points.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
-			std::vector<RealVector> copy( points.begin(), points.end() );
-			copy.erase( copy.begin() + i );
+			auto const& point = points[i];
 			
-			result[i].key = baseVol-hv(copy,ref);
+			//compute restricted pointset
+			std::vector<RealVector> pointset( points.begin(), points.end() );
+			pointset.erase( pointset.begin() + i );
+			restrictSet(pointset,point);
+			
+			double baseVol = std::exp(sum(log(ref-point)));
+			result[i].key = baseVol - hv(pointset,ref);
 			result[i].value = i;
 		}
 		std::sort(result.begin(),result.end());
@@ -70,14 +78,17 @@ struct HypervolumeContributionMD {
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
 		HypervolumeCalculator hv;
-		double baseVol = hv(points,ref);
 		std::vector<KeyValuePair<double,std::size_t> > result( points.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
-			std::vector<RealVector> copy( points.begin(), points.end() );
-			copy.erase( copy.begin() + i );
+			auto const& point = points[i];
 			
-			HypervolumeCalculator hv;
-			result[i].key = baseVol-hv(copy,ref);
+			//compute restricted pointset
+			std::vector<RealVector> pointset( points.begin(), points.end() );
+			pointset.erase( pointset.begin() + i );
+			restrictSet(pointset,point);
+			
+			double baseVol = std::exp(sum(log(ref-point)));
+			result[i].key = baseVol - hv(pointset,ref);
 			result[i].value = i;
 		}
 		std::sort(result.begin(),result.end());
@@ -108,15 +119,20 @@ struct HypervolumeContributionMD {
 			}
 		}
 		HypervolumeCalculator hv;
-		double baseVol = hv(points,ref);
 		std::vector<KeyValuePair<double,std::size_t> > result;
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
 			if(std::find(minIndex.begin(),minIndex.end(),i) != minIndex.end())
 				continue;
-			std::vector<RealVector> copy( points.begin(), points.end() );
-			copy.erase( copy.begin() + i );
 			
-			double volume = baseVol - hv(copy,ref);
+			auto const& point = points[i];
+			
+			//compute restricted pointset
+			std::vector<RealVector> pointset( points.begin(), points.end() );
+			pointset.erase( pointset.begin() + i );
+			restrictSet(pointset,point);
+			
+			double baseVol = std::exp(sum(log(ref-point)));
+			double volume = baseVol - hv(pointset,ref);
 			SHARK_CRITICAL_REGION{
 				result.emplace_back(volume,i);
 			}
@@ -126,10 +142,6 @@ struct HypervolumeContributionMD {
 		
 		return result;
 	}
-
-	
-	
-	
 	
 	/// \brief Returns the index of the points with largest contribution.
 	///
@@ -154,16 +166,19 @@ struct HypervolumeContributionMD {
 		}
 		
 		HypervolumeCalculator hv;
-		double baseVol = hv(points,ref);
 		std::vector<KeyValuePair<double,std::size_t> > result;
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
 			if(std::find(minIndex.begin(),minIndex.end(),i) != minIndex.end())
 				continue;
-			std::vector<RealVector> copy( points.begin(), points.end() );
-			copy.erase( copy.begin() + i );
+			auto const& point = points[i];
 			
-			HypervolumeCalculator hv;
-			double volume = baseVol - hv(copy,ref);
+			//compute restricted pointset
+			std::vector<RealVector> pointset( points.begin(), points.end() );
+			pointset.erase( pointset.begin() + i );
+			restrictSet(pointset,point);
+			
+			double baseVol = std::exp(sum(log(ref-point)));
+			double volume = baseVol - hv(pointset,ref);
 			SHARK_CRITICAL_REGION{
 				result.emplace_back(volume,i);
 			}
@@ -172,6 +187,30 @@ struct HypervolumeContributionMD {
 		result.erase(result.begin(),result.end()-k);
 		std::reverse(result.begin(),result.end());
 		return result;
+	}
+private:
+	/// \brief Restrict the points to the area covered by point and remove all points which are then dominated
+	template<class Pointset, class Point>
+	void restrictSet(Pointset& pointset, Point const& point) const{
+		for(auto& p: pointset){
+			noalias(p) = max(p,point);
+		}
+		std::vector<std::size_t> ranks(pointset.size());
+		nonDominatedSort(pointset,ranks);
+		std::size_t end = pointset.size();
+		std::size_t pos = 0;
+		while(pos != end){
+			if(ranks[pos] == 1){
+				++pos;
+				continue;
+			}
+			--end;
+			if(pos != end){
+				std::swap(pointset[pos],pointset[end]);
+				std::swap(ranks[pos],ranks[end]);
+			}
+		}
+		pointset.erase(pointset.begin() +end, pointset.end());
 	}
 };
 

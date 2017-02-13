@@ -33,7 +33,8 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator2D.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator3D.h>
-#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMD.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMDHOY.h>
+#include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMDWFG.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeApproximator.h>
 
 namespace shark {
@@ -78,8 +79,7 @@ struct HypervolumeCalculator {
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Points, typename VectorType>
 	double operator()( Points const& points, VectorType const& refPoint){
-		if(points.size() == 0)
-			return 0.0;
+		if(points.size() == 0) return 0;
 		SIZE_CHECK( points.begin()->size() == refPoint.size() );
 		std::size_t numObjectives = refPoint.size();
 		if(numObjectives == 2){
@@ -88,10 +88,13 @@ struct HypervolumeCalculator {
 		}else if(numObjectives == 3){
 			HypervolumeCalculator3D algorithm;
 			return algorithm(points, refPoint);
-		}else if(m_useApproximation){
+		}else if(numObjectives == 4){
+			HypervolumeCalculatorMDHOY algorithm;
+			return algorithm(points, refPoint);
+		}if(m_useApproximation){
 			return m_approximationAlgorithm(points, refPoint);
-		}else{
-			HypervolumeCalculatorMD algorithm;
+		}else {
+			HypervolumeCalculatorMDWFG algorithm;
 			return algorithm(points, refPoint);
 		}
 	}
