@@ -110,18 +110,22 @@ struct SimpleBatch{
 	}
 };
 
+
+
 ///\brief Wrapper for a matrix row, which offers a conversion operator to
 /// to the Vector Type.
-template<class Matrix, class Vector>
+template<class Matrix>
 class MatrixRowReference: public blas::temporary_proxy<blas::matrix_row<Matrix> >{
 private:
 	typedef blas::temporary_proxy<blas::matrix_row<Matrix> > base_type;
 public:
+	typedef typename blas::vector_temporary<Matrix>::type Vector;
+
 	MatrixRowReference( Matrix& matrix, std::size_t i)
 	:base_type(blas::matrix_row<Matrix>(matrix,i)){}
 	template<class T>//special version allows for const-conversion
 	MatrixRowReference(T const& matrixrow)
-	:base_type(blas::matrix_row<Matrix>(matrixrow.expression().expression(),matrixrow.index())){}
+	:base_type(blas::matrix_row<Matrix>(matrixrow.expression(),matrixrow.index())){}
 	
 	template<class T> 
 	const MatrixRowReference& operator=(const T& argument){
@@ -134,10 +138,77 @@ public:
 	}
 };
 
-template<class M, class V>
-void swap(MatrixRowReference<M,V> ref1, MatrixRowReference<M,V> ref2){
+template<class M>
+void swap(MatrixRowReference<M> ref1, MatrixRowReference<M> ref2){
 	swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
 }
+
+template<class M1, class M2>
+void swap(MatrixRowReference<M1> ref1, MatrixRowReference<M2> ref2){
+	swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
+}
+
+template<class Matrix>
+struct VectorBatch{
+	/// \brief Type of a batch of elements.
+	typedef typename blas::matrix_temporary<Matrix>::type type;
+	
+	/// \brief The type of the elements stored in the batch 
+	typedef typename blas::vector_temporary<Matrix>::type value_type;
+	
+	
+	/// \brief Type of a single element.
+	typedef detail::MatrixRowReference<Matrix> reference;
+	/// \brief Type of a single immutable element.
+	typedef detail::MatrixRowReference<const Matrix> const_reference;
+	
+	
+	/// \brief the iterator type of the object
+	typedef ProxyIterator<Matrix, value_type, reference > iterator;
+	/// \brief the const_iterator type of the object
+	typedef ProxyIterator<const Matrix, value_type, const_reference > const_iterator;
+	
+	///\brief creates a batch with input as size blueprint
+	template<class Element>
+	static type createBatch(Element const& input, std::size_t size = 1){
+		return type(size,input.size());
+	}
+	///\brief creates a batch storing the elements referenced by the provided range
+	template<class Iterator>
+	static type createBatchFromRange(Iterator const& pos, Iterator const& end){
+		type batch(end - pos,pos->size());
+		std::copy(pos,end,begin(batch));
+		return batch;
+	}
+	
+	
+	static void resize(Matrix& batch, std::size_t batchSize, std::size_t elements){
+		ensure_size(batch,batchSize,elements);
+	}
+	
+	static std::size_t size(Matrix const& batch){return batch.size1();}
+	static reference get( Matrix& batch, std::size_t i){
+		return reference(batch,i);
+	}
+	static const_reference get( Matrix const& batch, std::size_t i){
+		return const_reference(batch,i);
+	}
+	
+	static iterator begin(Matrix& batch){
+		return iterator(batch,0);
+	}
+	static const_iterator begin(Matrix const& batch){
+		return const_iterator(batch,0);
+	}
+	
+	static iterator end(Matrix& batch){
+		return iterator(batch,batch.size1());
+	}
+	static const_iterator end(Matrix const& batch){
+		return const_iterator(batch,batch.size1());
+	}
+};
+
 
 }
 
@@ -159,63 +230,7 @@ struct Batch
 
 /// \brief specialization for vectors which should be matrices in batch mode!
 template<class T>
-struct Batch<blas::vector<T> >{
-	/// \brief Type of a batch of elements.
-	typedef shark::blas::matrix<T> type;
-	/// \brief The type of the elements stored in the batch 
-	typedef blas::vector<T> value_type;
-	
-	
-	/// \brief Reference to a single element.
-	typedef detail::MatrixRowReference<type,value_type> reference;
-	/// \brief Reference to a single immutable element.
-	typedef detail::MatrixRowReference<const type,value_type> const_reference;
-	
-	
-	/// \brief the iterator type of the object
-	typedef ProxyIterator<type, value_type,reference > iterator;
-	/// \brief the const_iterator type of the object
-	typedef ProxyIterator<const type, value_type, const_reference > const_iterator;
-	
-	///\brief creates a batch with input as size blueprint
-	template<class Element>
-	static type createBatch(Element const& input, std::size_t size = 1){
-		return type(size,input.size());
-	}
-	///\brief creates a batch storing the elements referenced by the provided range
-	template<class Iterator>
-	static type createBatchFromRange(Iterator const& pos, Iterator const& end){
-		type batch(end - pos,pos->size());
-		std::copy(pos,end,begin(batch));
-		return batch;
-	}
-	
-	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		ensure_size(batch,batchSize,elements);
-	}
-	
-	static std::size_t size(type const& batch){return batch.size1();}
-	static reference get( type& batch, std::size_t i){
-		return reference(batch,i);
-	}
-	static const_reference get( type const& batch, std::size_t i){
-		return const_reference(batch,i);
-	}
-	
-	static iterator begin(type& batch){
-		return iterator(batch,0);
-	}
-	static const_iterator begin(type const& batch){
-		return const_iterator(batch,0);
-	}
-	
-	static iterator end(type& batch){
-		return iterator(batch,batch.size1());
-	}
-	static const_iterator end(type const& batch){
-		return const_iterator(batch,batch.size1());
-	}
-};
+struct Batch<blas::vector<T> >: public detail::VectorBatch<blas::matrix<T> >{};
 
 /// \brief specialization for ublas compressed vectors which are compressed matrices in batch mode!
 template<class T>
@@ -228,11 +243,9 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	
 	
 	/// \brief Type of a single element.
-	//typedef shark::blas::matrix_row<type> reference;
-	typedef detail::MatrixRowReference<type,value_type> reference;
+	typedef detail::MatrixRowReference<type> reference;
 	/// \brief Type of a single immutable element.
-	//typedef shark::blas::matrix_row<const type> const_reference;
-	typedef detail::MatrixRowReference<const type,value_type> const_reference;
+	typedef detail::MatrixRowReference<const type> const_reference;
 	
 	
 	/// \brief the iterator type of the object
@@ -287,9 +300,9 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	}
 };
 
-template<class M,class V>
-struct Batch<detail::MatrixRowReference<M,V> >
-:public Batch<V>{};
+template<class M>
+struct Batch<detail::MatrixRowReference<M> >
+:public Batch<typename detail::MatrixRowReference<M>::Vector>{};
 
 
 template<class BatchType>
@@ -307,11 +320,7 @@ struct BatchTraits<blas::compressed_matrix<T> >{
 };
 template<class T>
 struct BatchTraits<blas::dense_matrix_adaptor<T, blas::row_major> >{
-	typedef Batch<blas::vector<T> > type;
-};
-template<class T>
-struct BatchTraits<blas::dense_matrix_adaptor<T const, blas::row_major> >{
-	typedef Batch<blas::vector<T> > type;
+	typedef detail::VectorBatch<blas::dense_matrix_adaptor<T, blas::row_major> > type;
 };
 
 namespace detail{
@@ -355,13 +364,13 @@ template<class T>
 struct element_to_batch<T const&>{
 	typedef typename Batch<T>::type const& type;
 };
-template<class M,class V>
-struct element_to_batch<detail::MatrixRowReference<M,V> >{
-	typedef typename Batch<V>::type& type;
+template<class M>
+struct element_to_batch<detail::MatrixRowReference<M> >{
+	typedef typename Batch<typename detail::MatrixRowReference<M>::Vector>::type& type;
 };
-template<class M,class V>
-struct element_to_batch<detail::MatrixRowReference<M const,V> >{
-	typedef typename Batch<V>::type const& type;
+template<class M>
+struct element_to_batch<detail::MatrixRowReference<M const> >{
+	typedef typename Batch<typename detail::MatrixRowReference<M>::Vector>::type const& type;
 };
 }
 

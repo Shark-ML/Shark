@@ -184,7 +184,6 @@ shark_add_test( Models/CARTClassifier.cpp Models_CARTClassifier )
 
 # Core tests
 #shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
-shark_add_test( Core/Iterators.cpp Core_Iterators )
 
 # Data Tests
 shark_add_test( Data/Csv.cpp Data_Csv )
