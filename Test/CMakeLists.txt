@@ -81,6 +81,7 @@ shark_add_test( Algorithms/DirectSearch/NonDominatedSort.cpp DirectSearch_NonDom
 shark_add_test( Algorithms/DirectSearch/ParetoDominance.cpp DirectSearch_ParetoDominance )
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeSubsetSelection.cpp DirectSearch_HypervolumeSubsetSelection )
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeContribution.cpp DirectSearch_HypervolumeContribution )
+shark_add_test( Algorithms/DirectSearch/MOEAD.cpp DirectSearch_MOEAD )
 
 
 # Direct Search Operator tests
