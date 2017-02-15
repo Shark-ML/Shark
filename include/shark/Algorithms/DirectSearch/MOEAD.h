@@ -43,11 +43,186 @@
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Grid.h>
-#include <shark/Algorithms/DirectSearch/Operators/Scalarizers/Tchebycheff.h>
+
+#include <shark/LinAlg/BLAS/remora.hpp>
+#include <shark/LinAlg/Metrics.h>
+
 
 namespace shark {
 
+std::size_t factorial(std::size_t const n)
+{
+    std::size_t x = 1;
+    for(std::size_t i = 2; i <= n; ++i)
+    {
+        x *= i;
+    }
+    return x;
+}
+std::size_t n_choose_k(std::size_t const n, std::size_t const k)
+{
+    std::size_t denom = factorial(k) * factorial(n - k);
+    return denom == 0 ? 1 : factorial(n) / denom;
+}
+
+namespace detail {
+
+
+template <typename IndividualType>
+double tchebycheff_scalarizer(IndividualType const & individual, 
+                              RealVector const & weights, 
+                              RealVector const & optimalPointFitness)
+{
+    SIZE_CHECK(individual.unpenalizedFitness().size() == optimalPointFitness.size());
+
+    const RealVector & fitness = individual.unpenalizedFitness();
+    const std::size_t num_objectives = fitness.size();
+    double max_fun = -1.0e+30;
+    for(std::size_t i = 0; i < num_objectives; ++i)
+    {
+        max_fun = std::max(max_fun, 
+                           weights[i] * std::abs(fitness[i] - 
+                                                 optimalPointFitness[i]));
+    }
+    return max_fun;
+}
+
+
+
+RealMatrix uniformWeightVectorsRand(DefaultRngType * rng,
+                                    std::size_t const mu,
+                                    std::size_t const numOfObjectives)
+{
+    Uniform<> uniform_dist(*rng, 0, 1);
+    RealMatrix weights(mu, numOfObjectives);
+    for(std::size_t i = 0; i < mu; ++i)
+    {
+        for(std::size_t j = 0; j < numOfObjectives; ++j)
+        {
+            if(i < numOfObjectives)
+            {
+                weights(i, j) = (i == j);
+            }
+            else
+            {
+                weights(i, j) = uniform_dist();
+            }
+        }
+    }
+    return weights;
+}
+
+std::list<std::list<std::size_t>> sumsto(std::size_t const n, 
+                                         std::size_t const sum)
+{
+    SIZE_CHECK(n > 1);
+    if(n == 2)
+    {
+        std::list<std::list<std::size_t>> vs;
+        for(std::size_t i = 0; i <= sum; ++i)
+        {
+            vs.push_back(std::list<std::size_t>{i, sum - i});
+        }
+        return vs;
+    }
+    else // n > 2
+    {
+        std::list<std::list<std::size_t>> vs;
+        for(std::size_t i = 0; i <= sum; ++i)
+        {
+            auto vs_sub = sumsto(n - 1, sum - i);
+            for(auto & v_sub : vs_sub)
+            {
+                v_sub.push_front(i);
+                vs.push_back(v_sub);
+            }
+        }
+        return vs;
+    }
+}
+
+std::size_t approximate_mu_prime(std::size_t const d, 
+                                 std::size_t const target_mu)
+{
+    std::size_t cur = 0;
+    std::size_t mu_prime_approx = 0;
+    while(cur < target_mu)
+    {
+        cur += n_choose_k(mu_prime_approx + d - 2, d - 2);
+        ++mu_prime_approx;
+    }
+    return mu_prime_approx;
+}
+
+RealMatrix uniformWeightVectorLattice(std::size_t const mu_prime, 
+                                      std::size_t const numOfObjectives)
+{
+    std::list<std::vector<double>> weights;
+    typedef std::list<std::size_t> point_t;
+    std::list<point_t> points = sumsto(numOfObjectives, mu_prime);
+    for(point_t & point : points)
+    {
+        std::vector<double> w(point.size());
+        std::size_t i = 0;
+        for(std::size_t k : point)
+        {
+            w[i] = 1.0 * k / mu_prime;
+            ++i;
+        }
+        weights.push_back(w);
+    }
+    RealMatrix total_weights(weights.size(), numOfObjectives);
+    std::size_t row = 0;
+    for(std::vector<double> w : weights)
+    {
+        std::copy(w.begin(), w.end(), total_weights.row_begin(row));
+        ++row;
+    }
+    return total_weights;    
+}
+
+// init:
+// 1: uniformly generate N weight vectors (uniform distr.)
+// 2: calculate pairwise distances between weight vectors
+// 3: for each weight vector, pick the T closest vectors and remember their indices.
+// 4: with these indices, make B structure I -> [I] that maps an index of a weight vector to a list of the T closest weight indices.
+UIntMatrix getClosestWeightVectors(RealMatrix const & m, 
+                                   std::size_t const T)
+{
+    // Get pairwise distances between weight vectors.
+    const RealMatrix distances = remora::distanceSqr(m, m);
+    // This is called B in the paper.
+    UIntMatrix neighbourIndices(m.size1(), T);
+    // For each weight vector we are interested in indices of the T closest
+    // weight vectors.
+    for(std::size_t i = 0; i < m.size1(); ++i)
+    {
+        const RealVector my_dists(distances.row_begin(i), 
+                                  distances.row_end(i));
+        // Make some indices we can sort.
+        std::vector<std::size_t> indices(my_dists.size());
+        std::iota(indices.begin(), indices.end(), 0);
+        // Sort indices by the distances.
+        std::sort(indices.begin(), indices.end(),
+                  [&](std::size_t a, std::size_t b)
+                  {
+                      return my_dists[a] < my_dists[b];
+                  });
+        // Copy the T closest indices into B.
+        std::copy_n(indices.begin(), T, neighbourIndices.row_begin(i));
+    }
+    return neighbourIndices;
+}
+
+
+} // namespace detail
+
+
+/**
+ * \brief Implements the MOEA/D.
+ *
+ * More doc...
+ */
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector> 
 {
 public:
@@ -60,8 +235,6 @@ public:
         nc() = 20.0; // parameter for crossover operator
         nm() = 20.0; // parameter for mutation operator 
         neighbourhoodSize() = 10;
-        // Don't do anything...
-        repairFunction() = [](IndividualType &) {};
         this->m_features |= 
             AbstractMultiObjectiveOptimizer<RealVector>::CAN_SOLVE_CONSTRAINED;
     }
@@ -69,16 +242,6 @@ public:
     std::string name() const override
     {
         return "MOEA/D";
-    }
-
-    std::function<void(IndividualType &)> repairFunction() const
-    {
-        return m_repairFunction;
-    }
-    
-    std::function<void(IndividualType &)> & repairFunction()
-    {
-        return m_repairFunction;
     }
 
     double crossoverProbability() const
@@ -111,14 +274,18 @@ public:
         return m_crossover.m_nc;
     }
     
+    // When asking me what is the mu, answer the actual value...
     std::size_t mu() const
     {
         return m_mu;
     }
-
+    //... but when the user asks to change the mu, he can only request that the
+    // actual mu is about that value.  The actual value depends on the mu' and
+    // the dimensionality of the problem.
     std::size_t & mu()
     {
-        return m_mu;
+        //return m_mu;
+        return m_desired_mu;
     }
 
     std::size_t neighbourhoodSize() const
@@ -136,6 +303,7 @@ public:
     {
         archive & BOOST_SERIALIZATION_NVP(m_crossoverProbability);
         archive & BOOST_SERIALIZATION_NVP(m_mu);
+        archive & BOOST_SERIALIZATION_NVP(m_desired_mu);
         archive & BOOST_SERIALIZATION_NVP(m_mu_prime);
         archive & BOOST_SERIALIZATION_NVP(m_parents);
         archive & BOOST_SERIALIZATION_NVP(m_best);
@@ -145,7 +313,6 @@ public:
         archive & BOOST_SERIALIZATION_NVP(m_bestDecomposedValues);
         archive & BOOST_SERIALIZATION_NVP(m_crossover);
         archive & BOOST_SERIALIZATION_NVP(m_mutation);
-        archive & BOOST_SERIALIZATION_NVP(m_curParentIndex);
     }
 
     void init(ObjectiveFunctionType & function) override
@@ -205,13 +372,25 @@ public:
     void step(ObjectiveFunctionType const & function) override
     {
         PenalizingEvaluator penalizingEvaluator;
-        std::vector<IndividualType> offspring = generateOffspring(); // y in paper
-        // 2.2. Apply a problem-specific repair/improvement heuristic on y
-        // to make y' (usually nothing)
-        m_repairFunction(offspring[0]); // See footnote on p 715
-        // Evaluate the objective function on our new candidate
-        penalizingEvaluator(function, offspring[0]);
-        updatePopulation(offspring);
+
+        for(std::size_t i = 0; i < m_neighbourhoods.size1(); ++i)
+        {
+            // 2.1.
+            IndividualType pre_offspring = generateOffspring(i); // y in paper
+            // 2.2. Apply a problem-specific repair/improvement heuristic on y
+            // to make y'
+            IndividualType offspring = pre_offspring; // TODO See footnote on p 715
+            // 2.3. Update z
+            penalizingEvaluator(function, offspring);
+            // TODO: Unpenalized or penalized fitness?
+            RealVector candidate = offspring.unpenalizedFitness();
+            for(std::size_t i = 0; i < candidate.size(); ++i)
+            {
+                m_bestDecomposedValues[i] = std::min(m_bestDecomposedValues[i], 
+                                                     candidate[i]);
+            }
+            updatePopulation(i, offspring);
+        }
     }
     
 protected:
@@ -227,28 +406,23 @@ protected:
                 std::size_t const neighbourhoodSize)
     {
         SIZE_CHECK(initialSearchPoints.size() > 0);
-
-        m_curParentIndex = 0;
+        
         const std::size_t numOfObjectives = functionValues[0].size();
         // Decomposition-related initialization
-        m_mu_prime = bestPointSumForLattice(numOfObjectives, mu);
-        m_weights = sampleUniformly(*mpe_rng, 
-                                    weightLattice(numOfObjectives, m_mu_prime), 
-                                    mu);
-        m_neighbourhoodSize = neighbourhoodSize;
-        m_neighbourhoods = closestIndices(m_weights, 
-                                          neighbourhoodSize);
+        m_mu_prime = detail::approximate_mu_prime(numOfObjectives, desired_mu);
+        m_weights = detail::uniformWeightVectorLattice(m_mu_prime, numOfObjectives);
         
-        SIZE_CHECK(m_weights.size1() == mu);
-        SIZE_CHECK(m_neighbourhoods.size1() == mu);
-        m_mu = mu;
+        m_neighbourhoodSize = neighbourhoodSize;
+        m_neighbourhoods = detail::getClosestWeightVectors(m_weights, 
+                                                           neighbourhoodSize);
+        
+        m_mu = m_weights.size1();
         m_mutation.m_nm = nm;
         m_crossover.m_nc = nc;
         m_crossoverProbability = crossover_prob;
 		m_parents.resize(m_mu);
         m_best.resize(m_mu);
-        // If the number of supplied points is smaller than mu, fill everything
-        // in
+        // If the number of supplied points is smaller than mu, fill everything in
 		std::size_t numPoints = 0;
 		if(initialSearchPoints.size() <= m_mu)
         {
@@ -281,15 +455,13 @@ protected:
     }
 
     // Make me an offspring...
-    std::vector<IndividualType> generateOffspring() const
+    IndividualType generateOffspring(std::size_t const i) const
     {
         // Below should be in its own "selector"...
         DiscreteUniform<> uniform_int_dist(*mpe_rng, 0, m_neighbourhoods.size2() - 1);
         // 1. Randomly select two indices k,l from B(i)
-        const std::size_t k = m_neighbourhoods(m_curParentIndex, 
-                                               uniform_int_dist());
-        const std::size_t l = m_neighbourhoods(m_curParentIndex, 
-                                               uniform_int_dist());
+        const std::size_t k = m_neighbourhoods(i, uniform_int_dist());
+        const std::size_t l = m_neighbourhoods(i, uniform_int_dist());
         //    Then generate a new solution y from x_k and x_l
         IndividualType x_k = m_parents[k];
         IndividualType x_l = m_parents[l];
@@ -316,6 +488,15 @@ protected:
         // 2.4. Update of neighbouring solutions
         for(auto iter = m_neighbourhoods.row_begin(m_curParentIndex);
             iter != m_neighbourhoods.row_end(m_curParentIndex);
+        return x_k;
+    }
+
+    void updatePopulation(std::size_t const idx, 
+                          IndividualType const & offspring)
+    {
+        // 2.4. Update of neighbouring solutions
+        for(auto iter = m_neighbourhoods.row_begin(idx);
+            iter != m_neighbourhoods.row_end(idx);
             ++iter)
         {
             std::size_t j = *iter;
@@ -324,8 +505,9 @@ protected:
             IndividualType & x_j = m_parents[j];
             const RealVector & z = m_bestDecomposedValues;
             // if g^te(y' | lambda^j,z) <= g^te(x_j | lambda^j,z)
-            double tnew = tchebycheff(offspring.unpenalizedFitness(), lambda_j, z);
-            double told = tchebycheff(x_j.unpenalizedFitness(), lambda_j, z);
+            using detail::tchebycheff_scalarizer;
+            double tnew = tchebycheff_scalarizer<IndividualType>(offspring, lambda_j, z);
+            double told = tchebycheff_scalarizer<IndividualType>(x_j, lambda_j, z);
             if(tnew <= told)
             {
                 // then set x^j <- y'
@@ -339,9 +521,6 @@ protected:
         }
         // 2.5. Update of EP
         // This is not done in the authors' own implementation?
-        
-        // Finally, advance the parent index counter.
-        m_curParentIndex = (m_curParentIndex + 1) % m_neighbourhoods.size1();
     }
 
     std::vector<IndividualType> m_parents;    
@@ -349,31 +528,19 @@ protected:
 private:
     DefaultRngType * mpe_rng;
     double m_crossoverProbability; ///< Probability of crossover happening.
-    std::size_t m_mu_prime; ///< mu' is the factor used for getting the actual
-                            ///mu.
+    std::vector<IndividualType> m_parents;
+    std::size_t m_mu_prime; ///< mu' is the factor used for getting the actual mu.
     std::size_t m_mu; ///< Size of parent population and the "N" from the paper
+    std::size_t m_desired_mu; ///< What the user asks for to be mu.
 
-    std::size_t m_curParentIndex;
 
-    std::size_t m_neighbourhoodSize; ///< Number of neighbours for each
-                                     //candidate to consider.  This is the "T"
-                                     //from the paper.
-    RealMatrix m_weights; ///< The weight vectors.  These are all the lambdas
-                          ///from the paper
-    UIntMatrix m_neighbourhoods; ///< Row n is the indices of the T closest
-                                 ///weight vectors.  This is the "B" function
-                                 ///from the paper.
-    RealVector m_bestDecomposedValues; ///< The "z" from the paper.
+    std::size_t m_neighbourhoodSize; // The "T" from the paper
+    RealMatrix m_weights; // All the lambdas from the paper
+    UIntMatrix m_neighbourhoods; // size1: The "B" from the paper; size2: the "T"
+    RealVector m_bestDecomposedValues; // The "z" from the paper
 
     SimulatedBinaryCrossover<SearchPointType> m_crossover;
     PolynomialMutator m_mutation;
-    std::function<void(IndividualType &)> m_repairFunction; ///< A
-                                                            ///problem-specific
-                                                            ///repair function
-                                                            ///that is applied
-                                                            ///to offspring.
-                                                            ///Default is doing
-                                                            ///nothing.
 };
 
 
