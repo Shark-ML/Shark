@@ -43,27 +43,12 @@
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Grid.h>
 
-#include <shark/LinAlg/BLAS/remora.hpp>
-#include <shark/LinAlg/Metrics.h>
+//#include <shark/LinAlg/BLAS/remora.hpp>
 
 
 namespace shark {
-
-std::size_t factorial(std::size_t const n)
-{
-    std::size_t x = 1;
-    for(std::size_t i = 2; i <= n; ++i)
-    {
-        x *= i;
-    }
-    return x;
-}
-std::size_t n_choose_k(std::size_t const n, std::size_t const k)
-{
-    std::size_t denom = factorial(k) * factorial(n - k);
-    return denom == 0 ? 1 : factorial(n) / denom;
-}
 
 namespace detail {
 
@@ -89,131 +74,11 @@ double tchebycheff_scalarizer(IndividualType const & individual,
 
 
 
-RealMatrix uniformWeightVectorsRand(DefaultRngType * rng,
-                                    std::size_t const mu,
-                                    std::size_t const numOfObjectives)
-{
-    Uniform<> uniform_dist(*rng, 0, 1);
-    RealMatrix weights(mu, numOfObjectives);
-    for(std::size_t i = 0; i < mu; ++i)
-    {
-        for(std::size_t j = 0; j < numOfObjectives; ++j)
-        {
-            if(i < numOfObjectives)
-            {
-                weights(i, j) = (i == j);
-            }
-            else
-            {
-                weights(i, j) = uniform_dist();
-            }
-        }
-    }
-    return weights;
-}
-
-std::list<std::list<std::size_t>> sumsto(std::size_t const n, 
-                                         std::size_t const sum)
-{
-    SIZE_CHECK(n > 1);
-    if(n == 2)
-    {
-        std::list<std::list<std::size_t>> vs;
-        for(std::size_t i = 0; i <= sum; ++i)
-        {
-            vs.push_back(std::list<std::size_t>{i, sum - i});
-        }
-        return vs;
-    }
-    else // n > 2
-    {
-        std::list<std::list<std::size_t>> vs;
-        for(std::size_t i = 0; i <= sum; ++i)
-        {
-            auto vs_sub = sumsto(n - 1, sum - i);
-            for(auto & v_sub : vs_sub)
-            {
-                v_sub.push_front(i);
-                vs.push_back(v_sub);
-            }
-        }
-        return vs;
-    }
-}
-
-std::size_t approximate_mu_prime(std::size_t const d, 
-                                 std::size_t const target_mu)
-{
-    std::size_t cur = 0;
-    std::size_t mu_prime_approx = 0;
-    while(cur < target_mu)
-    {
-        cur += n_choose_k(mu_prime_approx + d - 2, d - 2);
-        ++mu_prime_approx;
-    }
-    return mu_prime_approx;
-}
-
-RealMatrix uniformWeightVectorLattice(std::size_t const mu_prime, 
-                                      std::size_t const numOfObjectives)
-{
-    std::list<std::vector<double>> weights;
-    typedef std::list<std::size_t> point_t;
-    std::list<point_t> points = sumsto(numOfObjectives, mu_prime);
-    for(point_t & point : points)
-    {
-        std::vector<double> w(point.size());
-        std::size_t i = 0;
-        for(std::size_t k : point)
-        {
-            w[i] = 1.0 * k / mu_prime;
-            ++i;
-        }
-        weights.push_back(w);
-    }
-    RealMatrix total_weights(weights.size(), numOfObjectives);
-    std::size_t row = 0;
-    for(std::vector<double> w : weights)
-    {
-        std::copy(w.begin(), w.end(), total_weights.row_begin(row));
-        ++row;
-    }
-    return total_weights;    
-}
-
 // init:
 // 1: uniformly generate N weight vectors (uniform distr.)
 // 2: calculate pairwise distances between weight vectors
 // 3: for each weight vector, pick the T closest vectors and remember their indices.
 // 4: with these indices, make B structure I -> [I] that maps an index of a weight vector to a list of the T closest weight indices.
-UIntMatrix getClosestWeightVectors(RealMatrix const & m, 
-                                   std::size_t const T)
-{
-    // Get pairwise distances between weight vectors.
-    const RealMatrix distances = remora::distanceSqr(m, m);
-    // This is called B in the paper.
-    UIntMatrix neighbourIndices(m.size1(), T);
-    // For each weight vector we are interested in indices of the T closest
-    // weight vectors.
-    for(std::size_t i = 0; i < m.size1(); ++i)
-    {
-        const RealVector my_dists(distances.row_begin(i), 
-                                  distances.row_end(i));
-        // Make some indices we can sort.
-        std::vector<std::size_t> indices(my_dists.size());
-        std::iota(indices.begin(), indices.end(), 0);
-        // Sort indices by the distances.
-        std::sort(indices.begin(), indices.end(),
-                  [&](std::size_t a, std::size_t b)
-                  {
-                      return my_dists[a] < my_dists[b];
-                  });
-        // Copy the T closest indices into B.
-        std::copy_n(indices.begin(), T, neighbourIndices.row_begin(i));
-    }
-    return neighbourIndices;
-}
-
 
 } // namespace detail
 
@@ -235,6 +100,7 @@ public:
         nc() = 20.0; // parameter for crossover operator
         nm() = 20.0; // parameter for mutation operator 
         neighbourhoodSize() = 10;
+        // FIXME: Can it?
         this->m_features |= 
             AbstractMultiObjectiveOptimizer<RealVector>::CAN_SOLVE_CONSTRAINED;
     }
@@ -376,10 +242,10 @@ public:
         for(std::size_t i = 0; i < m_neighbourhoods.size1(); ++i)
         {
             // 2.1.
-            IndividualType pre_offspring = generateOffspring(i); // y in paper
+            IndividualType offspring = generateOffspring(i); // y in paper
             // 2.2. Apply a problem-specific repair/improvement heuristic on y
             // to make y'
-            IndividualType offspring = pre_offspring; // TODO See footnote on p 715
+            m_repairFunction(offspring); // See footnote on p 715
             // 2.3. Update z
             penalizingEvaluator(function, offspring);
             // TODO: Unpenalized or penalized fitness?
@@ -409,12 +275,12 @@ protected:
         
         const std::size_t numOfObjectives = functionValues[0].size();
         // Decomposition-related initialization
-        m_mu_prime = detail::approximate_mu_prime(numOfObjectives, desired_mu);
-        m_weights = detail::uniformWeightVectorLattice(m_mu_prime, numOfObjectives);
+        m_mu_prime = bestPointCountForLattice(numOfObjectives, desired_mu);
+        m_weights = weightLattice(numOfObjectives, m_mu_prime);
         
         m_neighbourhoodSize = neighbourhoodSize;
-        m_neighbourhoods = detail::getClosestWeightVectors(m_weights, 
-                                                           neighbourhoodSize);
+        m_neighbourhoods = closestIndices(m_weights, 
+                                          neighbourhoodSize);
         
         m_mu = m_weights.size1();
         m_mutation.m_nm = nm;
@@ -541,6 +407,7 @@ private:
 
     SimulatedBinaryCrossover<SearchPointType> m_crossover;
     PolynomialMutator m_mutation;
+    std::function<void(IndividualType &)> m_repairFunction;
 };
 
 

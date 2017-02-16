@@ -82,11 +82,7 @@ shark_add_test( Algorithms/DirectSearch/ParetoDominance.cpp DirectSearch_ParetoD
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeSubsetSelection.cpp DirectSearch_HypervolumeSubsetSelection )
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeContribution.cpp DirectSearch_HypervolumeContribution )
 shark_add_test( Algorithms/DirectSearch/MOEAD.cpp DirectSearch_MOEAD )
-<<<<<<< HEAD
 shark_add_test( Algorithms/DirectSearch/Operators/Grid.cpp DirectSearch_Operators_Grid )
-=======
-
->>>>>>> Added first version of MOEA/D implementaion.
 
 # Direct Search Operator tests
 shark_add_test( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
