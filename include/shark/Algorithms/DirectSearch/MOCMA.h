@@ -239,7 +239,7 @@ protected:
 		}
 		
 		//partition the selected individuals to the front and remove the unselected ones
-		std::partition(m_parents.begin(), m_parents.end(),IndividualType::IsSelected);
+		std::partition(m_parents.begin(), m_parents.end(),[](IndividualType const& ind){return ind.selected();});
 		m_parents.erase(m_parents.begin()+mu(),m_parents.end());
 
 		//update solution set
