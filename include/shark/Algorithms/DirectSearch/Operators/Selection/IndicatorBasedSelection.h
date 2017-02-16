@@ -61,8 +61,7 @@ struct IndicatorBasedSelection {
 	* \param [in,out] mu the number of individuals to select
 	*/
 	template<typename PopulationType>
-	void operator()( PopulationType & population, std::size_t mu )
-	{
+	void operator()( PopulationType & population, std::size_t mu ){
 		if(population.empty()) return;
 		
 		//perform a nondominated sort to assign the rank to every element
@@ -74,7 +73,7 @@ struct IndicatorBasedSelection {
 		std::map< unsigned int, View > fronts;
 
 		for( unsigned int i = 0; i < population.size(); i++ ) {
-			maxRank = std::max( maxRank, static_cast<unsigned int>( population[i].rank() ) );
+			maxRank = std::max( maxRank, population[i].rank());
 			fronts[population[i].rank()].push_back( population[i] );
 			population[i].selected() = true;
 		}
@@ -94,10 +93,17 @@ struct IndicatorBasedSelection {
 		}
 		//now use the indicator to deselect the worst approximating elements of the last selected front
 		View& front = fronts[rank];
-		for(; popSize >mu;--popSize) {
-			std::size_t lc = m_indicator.leastContributor(penalizedFitness(front));
+		
+		//create an archive of points which are surely selected because of their domination rank
+		View archive;
+		archive.reserve(popSize - front.size());
+		for(unsigned int r = 0; r != maxRank; ++r){
+			archive.insert(archive.end(),fronts[r].begin(), fronts[r].end());
+		}
+		//deselect 
+		std::vector<std::size_t> deselected = m_indicator.leastContributors(penalizedFitness(front),penalizedFitness(archive), popSize - mu);
+		for(auto lc:deselected){
 			front[lc].selected() = false;
-			front.erase( front.begin() + lc );
 		}
 	}
 

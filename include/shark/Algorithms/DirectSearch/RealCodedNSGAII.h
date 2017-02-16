@@ -39,6 +39,7 @@
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/CrowdingDistance.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -294,5 +295,6 @@ private:
 
 typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;
 typedef IndicatorBasedRealCodedNSGAII< AdditiveEpsilonIndicator > EpsRealCodedNSGAII;
+typedef IndicatorBasedRealCodedNSGAII< CrowdingDistance > CrowdingRealCodedNSGAII;
 }
 #endif
