@@ -75,15 +75,15 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
         optimizer.neighbourhoodSize() = T;
         testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
     }
-	{
-		ZDT6 function(5);
-//		const double volume = 117.483246; // mu = 10
+    {
+        ZDT6 function(5);
+//      const double volume = 117.483246; // mu = 10
         const double volume = 117.514950; // mu = 100
-		MOEAD optimizer;
-		optimizer.mu() = mu;
-		optimizer.neighbourhoodSize() = T;
-		testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
-	}
+        MOEAD optimizer;
+        optimizer.mu() = mu;
+        optimizer.neighbourhoodSize() = T;
+        testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
+    }
 }
 
 
