@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(lattice_sum_to_one)
     const std::size_t n_max = 10;
     for(std::size_t n = 2; n < n_max; ++n)
     {
-        const RealMatrix weights = weightLattice(mu_prime, n);
+        const RealMatrix weights = weightLattice(n, mu_prime);
         for(std::size_t row = 0; row < weights.size1(); ++row)
         {
             double sum = 0;
