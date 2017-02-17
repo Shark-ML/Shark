@@ -1,5 +1,39 @@
-// The MOEA/D algorithm
-// This is work in progress.
+//===========================================================================
+/*!
+ * 
+ *
+ * \brief       Implements the MOEA/D algorithm.
+ * 
+ * Q. Zhang and H. Li, “MOEA/D: a multi-objective evolutionary algorithm based
+ * on decomposition,” IEEE Transactions on Evolutionary Computation, vol. 11,
+ * no. 6, pp. 712–731, 2007
+ * DOI: 10.1109/TEVC.2007.892759
+ * 
+ *
+ * \author      Bjørn Bugge Grathwohl
+ * \date        February 2017
+ *
+ * \par Copyright 1995-2017 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://shark-ml.org/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+//===========================================================================
 
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_MOEAD
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_MOEAD
@@ -10,32 +44,11 @@
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Grid.h>
+#include <shark/Algorithms/DirectSearch/Operators/Scalarizers/Tchebycheff.h>
 
 namespace shark {
 
 namespace detail {
-
-
-template <typename IndividualType>
-double tchebycheff_scalarizer(IndividualType const & individual, 
-                              RealVector const & weights, 
-                              RealVector const & optimalPointFitness)
-{
-    SIZE_CHECK(individual.unpenalizedFitness().size() == optimalPointFitness.size());
-
-    const RealVector & fitness = individual.unpenalizedFitness();
-    const std::size_t num_objectives = fitness.size();
-    double max_fun = -1.0e+30;
-    for(std::size_t i = 0; i < num_objectives; ++i)
-    {
-        auto w = weights[i] == 0 ? 1e-5 : weights[i];
-        max_fun = std::max(max_fun, 
-                           w * std::abs(fitness[i] - 
-                                        optimalPointFitness[i]));
-    }
-    return max_fun;
-}
-
 template <typename I>
 void dumpIndividuals(std::vector<I> const & individuals, 
                      std::string const & filename)
@@ -64,22 +77,10 @@ void dumpIndividualsFitness(std::vector<I> const & individuals,
         file << std::endl;
     }
 }
-
-
-// init:
-// 1: uniformly generate N weight vectors (uniform distr.)
-// 2: calculate pairwise distances between weight vectors
-// 3: for each weight vector, pick the T closest vectors and remember their indices.
-// 4: with these indices, make B structure I -> [I] that maps an index of a weight vector to a list of the T closest weight indices.
-
 } // namespace detail
 
 
-/**
- * \brief Implements the MOEA/D.
- *
- * More doc...
- */
+
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector> 
 {
 public:
@@ -87,15 +88,13 @@ public:
 
     MOEAD(DefaultRngType & rng = Rng::globalRng) : mpe_rng(&rng)
     {
-        m_iterCount = 0;
         mu() = 100;
         crossoverProbability() = 0.9;
         nc() = 20.0; // parameter for crossover operator
         nm() = 20.0; // parameter for mutation operator 
         neighbourhoodSize() = 10;
         // Don't do anything...
-        m_repairFunction = [](IndividualType &) {};
-        // FIXME: Can it?
+        repairFunction() = [](IndividualType &) {};
         this->m_features |= 
             AbstractMultiObjectiveOptimizer<RealVector>::CAN_SOLVE_CONSTRAINED;
     }
@@ -103,6 +102,16 @@ public:
     std::string name() const override
     {
         return "MOEA/D";
+    }
+
+    std::function<void(IndividualType &)> repairFunction() const
+    {
+        return m_repairFunction;
+    }
+    
+    std::function<void(IndividualType &)> & repairFunction()
+    {
+        return m_repairFunction;
     }
 
     double crossoverProbability() const
@@ -135,6 +144,8 @@ public:
         return m_crossover.m_nc;
     }
     
+    // FIXME Figure out if this is right thing to do..
+
     // When asking me what is the mu, answer the actual value...
     std::size_t mu() const
     {
@@ -243,7 +254,6 @@ public:
             m_repairFunction(offspring); // See footnote on p 715
             // 2.3. Update z
             penalizingEvaluator(function, offspring);
-            // TODO: Unpenalized or penalized fitness?
             RealVector candidate = offspring.unpenalizedFitness();
             for(std::size_t i = 0; i < candidate.size(); ++i)
             {
@@ -256,7 +266,7 @@ public:
         //                         "parents_" + std::to_string(m_iterCount) + ".dat");
         // detail::dumpIndividualsFitness(m_parents,
         //                                "parents_fitness_" + std::to_string(m_iterCount) + ".dat");
-        ++m_iterCount;
+        // ++m_iterCount;
     }
     
 protected:
@@ -352,9 +362,8 @@ protected:
             IndividualType & x_j = m_parents[j];
             const RealVector & z = m_bestDecomposedValues;
             // if g^te(y' | lambda^j,z) <= g^te(x_j | lambda^j,z)
-            using detail::tchebycheff_scalarizer;
-            double tnew = tchebycheff_scalarizer<IndividualType>(offspring, lambda_j, z);
-            double told = tchebycheff_scalarizer<IndividualType>(x_j, lambda_j, z);
+            double tnew = tchebycheff(offspring.unpenalizedFitness(), lambda_j, z);
+            double told = tchebycheff(x_j.unpenalizedFitness(), lambda_j, z);
             if(tnew <= told)
             {
                 // then set x^j <- y'
@@ -372,7 +381,6 @@ protected:
 
     
 private:
-    std::size_t m_iterCount;
     DefaultRngType * mpe_rng;
     double m_crossoverProbability; ///< Probability of crossover happening.
     std::vector<IndividualType> m_parents;
