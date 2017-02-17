@@ -122,6 +122,20 @@ UIntMatrix closestIndices(RealMatrix const & m,
     return neighbourIndices;
 }
 
+void dump(RealMatrix const & m, std::string const & filename)
+{
+    std::ofstream file(filename);
+    for(std::size_t row = 0; row < m.size1(); ++row)
+    {
+        std::for_each(m.row_begin(row), m.row_end(row),
+                      [&file](double x)
+                      {
+                          file << x << "\t";
+                      });
+        file << std::endl;
+    }
+}
+
 
 } // namespace shark
 
