@@ -14,9 +14,10 @@ using namespace shark;
 
 BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
 {
+    const std::size_t reps = 10;
     const std::size_t mu = 100;
     const std::size_t T = 10;
-    const std::size_t iters = 500;
+    const std::size_t iters = 250;
     const RealVector reference{11, 11};
     {
         DTLZ1 function(5);
@@ -25,7 +26,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
         MOEAD optimizer;
         optimizer.mu() = mu;
         optimizer.neighbourhoodSize() = T;
-        testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+        testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
     }
     {
         DTLZ2 function(5);
@@ -34,7 +35,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
         MOEAD optimizer;
         optimizer.mu() = mu;
         optimizer.neighbourhoodSize() = T;
-        testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+        testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
     }
     {
         ZDT1 function(5);
@@ -43,7 +44,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
         MOEAD optimizer;
         optimizer.mu() = mu;
         optimizer.neighbourhoodSize() = T;
-        testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+        testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
     }
 	{
 		ZDT2 function(5);
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
         MOEAD optimizer;
 		optimizer.mu() = mu;
         optimizer.neighbourhoodSize() = T;
-		testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+		testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
 	}
 	{
 		ZDT3 function(5);
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
 		MOEAD optimizer;
 		optimizer.mu() = mu;
         optimizer.neighbourhoodSize() = T;
-		testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+		testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
 	}
     {
         ZDT4 function(5);
@@ -70,7 +71,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
         MOEAD optimizer;
         optimizer.mu() = mu;
         optimizer.neighbourhoodSize() = T;
-        testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+        testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
     }
 	{
 		ZDT6 function(5);
@@ -79,7 +80,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
 		MOEAD optimizer;
 		optimizer.mu() = mu;
 		optimizer.neighbourhoodSize() = T;
-		testFunction(optimizer, function, reference, volume, 10, iters, 5.e-3);
+		testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
 	}
 }
 

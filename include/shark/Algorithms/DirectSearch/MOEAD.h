@@ -45,9 +45,6 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Grid.h>
 
-//#include <shark/LinAlg/BLAS/remora.hpp>
-
-
 namespace shark {
 
 namespace detail {
@@ -65,13 +62,42 @@ double tchebycheff_scalarizer(IndividualType const & individual,
     double max_fun = -1.0e+30;
     for(std::size_t i = 0; i < num_objectives; ++i)
     {
+        auto w = weights[i] == 0 ? 1e-5 : weights[i];
         max_fun = std::max(max_fun, 
-                           weights[i] * std::abs(fitness[i] - 
-                                                 optimalPointFitness[i]));
+                           w * std::abs(fitness[i] - 
+                                        optimalPointFitness[i]));
     }
     return max_fun;
 }
 
+template <typename I>
+void dumpIndividuals(std::vector<I> const & individuals, 
+                     std::string const & filename)
+{
+    std::ofstream file(filename);
+    for(auto & individual : individuals)
+    {
+        for(auto & x : individual.searchPoint())
+        {
+            file << x << "\t";
+        }
+        file << std::endl;
+    }
+}
+template <typename I>
+void dumpIndividualsFitness(std::vector<I> const & individuals, 
+                            std::string const & filename)
+{
+    std::ofstream file(filename);
+    for(auto & individual : individuals)
+    {
+        for(auto & x : individual.penalizedFitness())
+        {
+            file << x << "\t";
+        }
+        file << std::endl;
+    }
+}
 
 
 // init:
@@ -95,6 +121,7 @@ public:
 
     MOEAD(DefaultRngType & rng = Rng::globalRng) : mpe_rng(&rng)
     {
+        m_iterCount = 0;
         mu() = 100;
         crossoverProbability() = 0.9;
         nc() = 20.0; // parameter for crossover operator
@@ -146,7 +173,7 @@ public:
         return m_mu;
     }
     //... but when the user asks to change the mu, he can only request that the
-    // actual mu is about that value.  The actual value depends on the mu' and
+    // actual mu is approx. that value.  The actual value depends on the mu' and
     // the dimensionality of the problem.
     std::size_t & mu()
     {
@@ -257,6 +284,11 @@ public:
             }
             updatePopulation(i, offspring);
         }
+        // detail::dumpIndividuals(m_parents, 
+        //                         "parents_" + std::to_string(m_iterCount) + ".dat");
+        // detail::dumpIndividualsFitness(m_parents,
+        //                                "parents_fitness_" + std::to_string(m_iterCount) + ".dat");
+        ++m_iterCount;
     }
     
 protected:
@@ -277,11 +309,9 @@ protected:
         // Decomposition-related initialization
         m_mu_prime = bestPointCountForLattice(numOfObjectives, desired_mu);
         m_weights = weightLattice(numOfObjectives, m_mu_prime);
-        
         m_neighbourhoodSize = neighbourhoodSize;
         m_neighbourhoods = closestIndices(m_weights, 
                                           neighbourhoodSize);
-        
         m_mu = m_weights.size1();
         m_mutation.m_nm = nm;
         m_crossover.m_nc = nc;
@@ -392,6 +422,7 @@ protected:
     std::vector<IndividualType> m_parents;    
 
 private:
+    std::size_t m_iterCount;
     DefaultRngType * mpe_rng;
     double m_crossoverProbability; ///< Probability of crossover happening.
     std::vector<IndividualType> m_parents;
