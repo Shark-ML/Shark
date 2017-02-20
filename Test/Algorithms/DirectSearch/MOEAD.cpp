@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
     const std::size_t reps = 10;
     const std::size_t mu = 100;
     const std::size_t T = 10;
-    const std::size_t iters = 250;
+    const std::size_t iters = 500 * mu;
     const RealVector reference{11, 11};
     {
         DTLZ1 function(5);
