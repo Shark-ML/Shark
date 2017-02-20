@@ -48,39 +48,6 @@
 
 namespace shark {
 
-namespace detail {
-template <typename I>
-void dumpIndividuals(std::vector<I> const & individuals, 
-                     std::string const & filename)
-{
-    std::ofstream file(filename);
-    for(auto & individual : individuals)
-    {
-        for(auto & x : individual.searchPoint())
-        {
-            file << x << "\t";
-        }
-        file << std::endl;
-    }
-}
-template <typename I>
-void dumpIndividualsFitness(std::vector<I> const & individuals, 
-                            std::string const & filename)
-{
-    std::ofstream file(filename);
-    for(auto & individual : individuals)
-    {
-        for(auto & x : individual.penalizedFitness())
-        {
-            file << x << "\t";
-        }
-        file << std::endl;
-    }
-}
-} // namespace detail
-
-
-
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector> 
 {
 public:
@@ -93,6 +60,7 @@ public:
         nc() = 20.0; // parameter for crossover operator
         nm() = 20.0; // parameter for mutation operator 
         neighbourhoodSize() = 10;
+        m_curParentIndex = 0;
         // Don't do anything...
         repairFunction() = [](IndividualType &) {};
         this->m_features |= 
@@ -244,29 +212,13 @@ public:
     void step(ObjectiveFunctionType const & function) override
     {
         PenalizingEvaluator penalizingEvaluator;
-
-        for(std::size_t i = 0; i < m_neighbourhoods.size1(); ++i)
-        {
-            // 2.1.
-            IndividualType offspring = generateOffspring(i); // y in paper
-            // 2.2. Apply a problem-specific repair/improvement heuristic on y
-            // to make y'
-            m_repairFunction(offspring); // See footnote on p 715
-            // 2.3. Update z
-            penalizingEvaluator(function, offspring);
-            RealVector candidate = offspring.unpenalizedFitness();
-            for(std::size_t i = 0; i < candidate.size(); ++i)
-            {
-                m_bestDecomposedValues[i] = std::min(m_bestDecomposedValues[i], 
-                                                     candidate[i]);
-            }
-            updatePopulation(i, offspring);
-        }
-        // detail::dumpIndividuals(m_parents, 
-        //                         "parents_" + std::to_string(m_iterCount) + ".dat");
-        // detail::dumpIndividualsFitness(m_parents,
-        //                                "parents_fitness_" + std::to_string(m_iterCount) + ".dat");
-        // ++m_iterCount;
+        std::vector<IndividualType> offspring = generateOffspring(); // y in paper
+        // 2.2. Apply a problem-specific repair/improvement heuristic on y
+        // to make y' (usually nothing)
+        m_repairFunction(offspring[0]); // See footnote on p 715
+        // Evaluate the objective function on our new candidate
+        penalizingEvaluator(function, offspring[0]);
+        updatePopulation(offspring);
     }
     
 protected:
@@ -296,7 +248,8 @@ protected:
         m_crossoverProbability = crossover_prob;
 		m_parents.resize(m_mu);
         m_best.resize(m_mu);
-        // If the number of supplied points is smaller than mu, fill everything in
+        // If the number of supplied points is smaller than mu, fill everything
+        // in
 		std::size_t numPoints = 0;
 		if(initialSearchPoints.size() <= m_mu)
         {
@@ -329,13 +282,15 @@ protected:
     }
 
     // Make me an offspring...
-    IndividualType generateOffspring(std::size_t const i) const
+    std::vector<IndividualType> generateOffspring() const
     {
         // Below should be in its own "selector"...
         DiscreteUniform<> uniform_int_dist(*mpe_rng, 0, m_neighbourhoods.size2() - 1);
         // 1. Randomly select two indices k,l from B(i)
-        const std::size_t k = m_neighbourhoods(i, uniform_int_dist());
-        const std::size_t l = m_neighbourhoods(i, uniform_int_dist());
+        const std::size_t k = m_neighbourhoods(m_curParentIndex, 
+                                               uniform_int_dist());
+        const std::size_t l = m_neighbourhoods(m_curParentIndex, 
+                                               uniform_int_dist());
         //    Then generate a new solution y from x_k and x_l
         IndividualType x_k = m_parents[k];
         IndividualType x_l = m_parents[l];
@@ -345,15 +300,24 @@ protected:
             m_crossover(*mpe_rng, x_k, x_l);
         }
         m_mutation(*mpe_rng, x_k);
-        return x_k;
+        return {x_k};
     }
 
-    void updatePopulation(std::size_t const idx, 
-                          IndividualType const & offspring)
+    void updatePopulation(std::vector<IndividualType> const & offspringvec)
     {
+        SIZE_CHECK(offspringvec.size() == 1);
+        const IndividualType & offspring = offspringvec[0];
+        // 2.3. Update the "Z" vector.
+        RealVector candidate = offspring.unpenalizedFitness();
+        for(std::size_t i = 0; i < candidate.size(); ++i)
+        {
+            m_bestDecomposedValues[i] = std::min(m_bestDecomposedValues[i], 
+                                                 candidate[i]);
+        }
+        
         // 2.4. Update of neighbouring solutions
-        for(auto iter = m_neighbourhoods.row_begin(idx);
-            iter != m_neighbourhoods.row_end(idx);
+        for(auto iter = m_neighbourhoods.row_begin(m_curParentIndex);
+            iter != m_neighbourhoods.row_end(m_curParentIndex);
             ++iter)
         {
             std::size_t j = *iter;
@@ -377,6 +341,9 @@ protected:
         }
         // 2.5. Update of EP
         // This is not done in the authors' own implementation?
+        
+        // Finally, advance the parent index counter.
+        m_curParentIndex = (m_curParentIndex + 1) % m_neighbourhoods.size1();
     }
 
     
@@ -384,19 +351,32 @@ private:
     DefaultRngType * mpe_rng;
     double m_crossoverProbability; ///< Probability of crossover happening.
     std::vector<IndividualType> m_parents;
-    std::size_t m_mu_prime; ///< mu' is the factor used for getting the actual mu.
+    std::size_t m_mu_prime; ///< mu' is the factor used for getting the actual
+                            ///mu.
     std::size_t m_mu; ///< Size of parent population and the "N" from the paper
     std::size_t m_desired_mu; ///< What the user asks for to be mu.
 
+    std::size_t m_curParentIndex;
 
-    std::size_t m_neighbourhoodSize; // The "T" from the paper
-    RealMatrix m_weights; // All the lambdas from the paper
-    UIntMatrix m_neighbourhoods; // size1: The "B" from the paper; size2: the "T"
-    RealVector m_bestDecomposedValues; // The "z" from the paper
+    std::size_t m_neighbourhoodSize; ///< Number of neighbours for each
+                                     //candidate to consider.  This is the "T"
+                                     //from the paper.
+    RealMatrix m_weights; ///< The weight vectors.  These are all the lambdas
+                          ///from the paper
+    UIntMatrix m_neighbourhoods; ///< Row n is the indices of the T closest
+                                 ///weight vectors.  This is the "B" function
+                                 ///from the paper.
+    RealVector m_bestDecomposedValues; ///< The "z" from the paper.
 
     SimulatedBinaryCrossover<SearchPointType> m_crossover;
     PolynomialMutator m_mutation;
-    std::function<void(IndividualType &)> m_repairFunction;
+    std::function<void(IndividualType &)> m_repairFunction; ///< A
+                                                            ///problem-specific
+                                                            ///repair function
+                                                            ///that is applied
+                                                            ///to offspring.
+                                                            ///Default is doing
+                                                            ///nothing.
 };
 
 
