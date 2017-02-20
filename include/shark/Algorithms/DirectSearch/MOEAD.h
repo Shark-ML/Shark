@@ -112,20 +112,14 @@ public:
         return m_crossover.m_nc;
     }
     
-    // FIXME Figure out if this is right thing to do..
-
-    // When asking me what is the mu, answer the actual value...
     std::size_t mu() const
     {
         return m_mu;
     }
-    //... but when the user asks to change the mu, he can only request that the
-    // actual mu is approx. that value.  The actual value depends on the mu' and
-    // the dimensionality of the problem.
+
     std::size_t & mu()
     {
-        //return m_mu;
-        return m_desired_mu;
+        return m_mu;
     }
 
     std::size_t neighbourhoodSize() const
@@ -143,7 +137,6 @@ public:
     {
         archive & BOOST_SERIALIZATION_NVP(m_crossoverProbability);
         archive & BOOST_SERIALIZATION_NVP(m_mu);
-        archive & BOOST_SERIALIZATION_NVP(m_desired_mu);
         archive & BOOST_SERIALIZATION_NVP(m_mu_prime);
         archive & BOOST_SERIALIZATION_NVP(m_parents);
         archive & BOOST_SERIALIZATION_NVP(m_best);
@@ -153,6 +146,7 @@ public:
         archive & BOOST_SERIALIZATION_NVP(m_bestDecomposedValues);
         archive & BOOST_SERIALIZATION_NVP(m_crossover);
         archive & BOOST_SERIALIZATION_NVP(m_mutation);
+        archive & BOOST_SERIALIZATION_NVP(m_curParentIndex);
     }
 
     void init(ObjectiveFunctionType & function) override
@@ -242,7 +236,7 @@ protected:
         m_neighbourhoodSize = neighbourhoodSize;
         m_neighbourhoods = closestIndices(m_weights, 
                                           neighbourhoodSize);
-        m_mu = m_weights.size1();
+        m_mu = m_weights.size1(); // Set the actual mu now.
         m_mutation.m_nm = nm;
         m_crossover.m_nc = nc;
         m_crossoverProbability = crossover_prob;
@@ -354,7 +348,6 @@ private:
     std::size_t m_mu_prime; ///< mu' is the factor used for getting the actual
                             ///mu.
     std::size_t m_mu; ///< Size of parent population and the "N" from the paper
-    std::size_t m_desired_mu; ///< What the user asks for to be mu.
 
     std::size_t m_curParentIndex;
 
