@@ -45,6 +45,34 @@ BOOST_AUTO_TEST_CASE(sumsto_has_expected_size)
     }
 }
 
+BOOST_AUTO_TEST_CASE(weights_expected_size)
+{
+    for(std::size_t n = 2; n < 6; ++n)
+    {
+        for(std::size_t sum = 3; sum < 15; ++sum)
+        {
+            std::size_t exp = sumlength(n, sum);
+            RealMatrix w = weightLattice(n, sum);
+            BOOST_CHECK_EQUAL(w.size1(), exp);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(best_point_count)
+{
+    for(std::size_t n = 2; n < 5; ++n)
+    {
+        for(std::size_t sum = 3; sum < 10; ++sum)
+        {
+            std::size_t b = bestPointCountForLattice(n, sum);
+            RealMatrix w = weightLattice(n, b);
+            BOOST_CHECK(sumlength(n, b) >= sum);
+            BOOST_CHECK_EQUAL(w.size1(), sumlength(n, b));
+        }
+    }
+}
+
+
 BOOST_AUTO_TEST_CASE(lattice_sum_to_one)
 {
     const std::size_t mu_prime = 12;
