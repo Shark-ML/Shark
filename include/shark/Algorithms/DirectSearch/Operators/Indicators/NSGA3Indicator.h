@@ -27,12 +27,14 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_NSGAIII_SELECTION_H
-#define SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_NSGAIII_SELECTION_H
+#ifndef SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_NSGA3_INDICATOR_H
+#define SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_NSGA3_INDICATOR_H
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/utility/KeyValuePair.h>
 #include <limits>
+#include <vector>
+#include <utility>
 
 namespace shark {
 
@@ -48,59 +50,42 @@ struct NSGA3Indicator {
 		for(auto const& point: front)
 			points.push_back(point);
 		
-		//step 1: compute ideal and nadir over all points
-		RealVector ideal = points[0];
-		RealVector nadir = points[0];
+		//step 1: compute ideal point
+		RealVector ideal = points.front();
 		for(auto& point: points){
 			noalias(ideal) = min(ideal,point);
-			noalias(nadir) = max(nadir,point);
 		}
-		//step 2 compute normalizer
-		//todo: by default the algorithm uses a weird way to compute the hyper plane
-		//it can sometimes fail and then we would need to fallback to the below anyways
-		//~ //step 2: find front closest mapping to the objective axis
-		//~ double epsilon = 0.00001;
-		//~ std::vector<std::size_t> z_max(ideal.size(),0);
-		//~ std::vector<double> z_dist(ideal.size(),std::numeric_limits<double>::max());
-		//~ for(std::size_t dim = 0; dim != ideal.size(); ++dim){
-			//~ for(std::size_t i = 0; i != front.size(); ++i){
-				//~ auto const& point = front[i];
-				//~ double dist = epsilon * sum(point) + (1-epsilon) * point[j];
-				//~ if(dist< z_dist[dim]){
-					//~ dist = z_dist[dim];
-					//~ z_max[dim] = i;
-				//~ }
-			//~ }
-		//~ }
-		//~ //step 2.2: find the equation of the plane spanned
-		//~ RealMatrix Z(ideal.size(),ideal.size());
-		RealVector normalizer = nadir - ideal;
+		//move current optimum in all objectives to 0
+		for(auto& point: points)
+			noalias(point) = point - ideal;
+		//~ std::cout<<ideal<<std::endl;
+		RealVector normalizer = computeNormalizer(points);
 		
 		//step 2.3: create normalized fitness values
-		for(auto& point: archive)
-			noalias(point) = (point - ideal) / normalizer;
-		
+		for(auto& point: points)
+			noalias(point) = point/ normalizer;
 		
 		typedef KeyValuePair<double,std::pair<std::size_t, std::size_t> > Pair;//stores (dist(p_j,z_i),j,i)
 		// step 3: generate associative pairings between all points and the reference points
 		std::vector<Pair> pairing(points.size(),makeKeyValuePair(std::numeric_limits<double>::max(),std::pair<std::size_t, std::size_t>()));
-		for(std::size_t i = 0; i != Z.size(); ++i){
-			double norm = norm_sqr(Z[i]);
-			auto projection = 1 - outer_prod(Z[i],Z[i])/ norm;//projection to the plane with normal Z_i
-			for(std::size_t j = 0; j != points.size(); ++j){
-				double dist = norm_sqr(prod(projection,points[j]));
+		for(std::size_t j = 0; j != points.size(); ++j){
+			// find the reference this point is closest to
+			for(std::size_t i = 0; i != m_Z.size(); ++i){
+				//by pythagoras law we have a right triangle between our point x,
+				//the projection onto the line z_i = <z_i,x>c_i and 0.
+				//therefore we have |x-<z_i,x>z_i|^2 = |x|^2 - <z_i,x>^2
+				// using |z_i| = 1
+				double dist = norm_sqr(points[j]) - sqr(inner_prod(m_Z[i],points[j]));
 				pairing[j] = min(pairing[j],makeKeyValuePair(dist,std::make_pair(j,i)));
 			}
 		}
 		
-		
 		//check how points are assigned in the archive
-		std::vector<std::size_t> rho(Z.size(),0);
+		std::vector<std::size_t> rho(m_Z.size(),0);//rho_i counts the number of points assigned to Z_i
 		std::size_t k = 0;
 		for(; k != archive.size(); ++k){
 			rho[pairing[k].value.second] ++;
 		}
-		//~ std::cout<<k<<std::endl;
 		// step 4: select the points to keep
 		while(k < points.size() - K){
 			//find reference point that got least points assigned;
@@ -126,7 +111,10 @@ struct NSGA3Indicator {
 				++k;
 			}
 		}
-		
+		//~ for(std::size_t i = 0; i != rho.size(); ++i){
+			//~ std::cout<<rho[i]<<" ";
+		//~ }
+		//~ std::cout<<"\n";
 		//return the indices of the remaining unselected points
 		std::vector<std::size_t> unselected;
 		for(; k != points.size(); ++k){
@@ -137,10 +125,65 @@ struct NSGA3Indicator {
 		
 	}
 	
-	std::vector<RealVector> Z;
-		
 	template<typename Archive>
-	void serialize( Archive &, const unsigned int ) {}
+	void serialize( Archive & ar, const unsigned int ) {
+		ar & m_Z;
+	}
+	
+	void setReferencePoints(std::vector<RealVector> const& Z){
+		m_Z = Z;
+		
+		for(auto& z: m_Z){
+			z /= norm_2(z);
+		}
+	}
+private:
+	std::vector<RealVector> m_Z;
+
+	// approximates the points of the front by a plane spanned by the most extreme points.
+	// then a normalizer is computed such that for the normalized points the plane has normal
+	// (1,1,...,1). If this fails, the normalizer is chosen such that all values lie between 0 and 1.
+	RealVector computeNormalizer(std::vector<RealVector> const& points)const{
+		//step 1 find points spanning the plane
+		double epsilon = 0.00001;
+		std::size_t dimensions = points.front().size();
+		RealMatrix cornerPoints(dimensions, dimensions,0.0);
+		for(std::size_t dim = 0; dim != dimensions; ++dim){
+			KeyValuePair<double,std::size_t> best(std::numeric_limits<double>::max(),0);
+			for(std::size_t i = 0; i != points.size(); ++i){
+				auto const& point = points[i];
+				double dist = epsilon * sum(point) + (1-epsilon) * point[dim];
+				best = std::min(best,makeKeyValuePair(dist,i));
+			}
+			noalias(row(cornerPoints,dim)) = points[best.value];
+		}
+		// compute plane equation
+		// set up system of equations for linear regression
+		// the plane equation is c_i^T w + b = 0 for all
+		// corner points c_i. as w can be scaled freely, any value of b != 0
+		// will give rise to a solution as long as the c_i are not linearly dependent.
+		RealMatrix A = trans((cornerPoints|1)) % (cornerPoints|1);
+		RealVector b = trans((cornerPoints|1)) % blas::repeat(-1.0,dimensions);//value of the right hand side of % does not matter as long as it is < 0
+		blas::symm_pos_semi_definite_solver<RealMatrix> solver(A);
+		if(solver.rank() == dimensions){//check if system is solvable
+			solver.solve(b, blas::left());
+			RealVector w = subrange(b,0,dimensions);// get the plane normal.
+			if(min(w) >= 0){//check if linear factors make sense
+				return blas::repeat(1.0,dimensions)/w;
+			}
+		}
+		
+		// if some of the error conditions are true,
+		// we use the worst function values as
+		// normalizer
+		RealVector nadir = points.front();
+		for(auto& point: points){
+			noalias(nadir) = max(nadir,point);
+		}
+		return nadir;
+		
+		
+	}
 };
 
 }

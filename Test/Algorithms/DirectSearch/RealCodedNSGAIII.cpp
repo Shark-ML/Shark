@@ -19,44 +19,37 @@ BOOST_AUTO_TEST_CASE( TEST_NSGAIII) {
 		DTLZ2 function(5);
 		double volume = 120.178966;
 		RealCodedNSGAIII optimizer;
-		optimizer.mu() = mu;
-		testFunction(optimizer, function, reference, volume,10, 10000,5.e-3);
+		optimizer.mu() = 12;
+		testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
 	}
-	//~ {
-		//~ DTLZ4 function(5);
-		//~ double volume = 120.178966;
-		//~ RealCodedNSGAIII optimizer;
-		//~ optimizer.mu() = mu;
-		//~ testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
-	//~ }
-	//~ {
-		//~ ZDT1 function(5);
-		//~ double volume = 120.613761;
-		//~ RealCodedNSGAIII optimizer;
-		//~ optimizer.mu() = mu;
-		//~ testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
-	//~ }
-	//~ {
-		//~ ZDT2 function(5);
-		//~ double volume = 120.286820;
-		//~ RealCodedNSGAIII optimizer;
-		//~ optimizer.mu() = mu;
-		//~ testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
-	//~ }
-	//~ {
-		//~ ZDT3 function(5);
-		//~ double volume = 128.748470;
-		//~ RealCodedNSGAIII optimizer;
-		//~ optimizer.mu() = mu;
-		//~ testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
-	//~ }
-	//~ {
-		//~ ZDT6 function(5);
-		//~ double volume = 117.483246;
-		//~ RealCodedNSGAIII optimizer;
-		//~ optimizer.mu() = mu;
-		//~ testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
-	//~ }
+	{
+		ZDT1 function(5);
+		double volume = 120.613761;
+		RealCodedNSGAIII optimizer;
+		optimizer.mu() = 11;
+		testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
+	}
+	{
+		ZDT2 function(5);
+		double volume = 120.286820;
+		RealCodedNSGAIII optimizer;
+		optimizer.mu() = mu;
+		testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
+	}
+	{
+		ZDT3 function(5);
+		double volume = 128.748470;
+		RealCodedNSGAIII optimizer;
+		optimizer.mu() = mu;
+		testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
+	}
+	{
+		ZDT6 function(5);
+		double volume = 117.483246;
+		RealCodedNSGAIII optimizer;
+		optimizer.mu() = 11;
+		testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
+	}
 }
 
 

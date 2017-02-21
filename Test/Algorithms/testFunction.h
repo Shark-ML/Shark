@@ -69,6 +69,10 @@ void testFunction(
 		HypervolumeCalculator hyp;
 		double volume = hyp(boost::adaptors::transform(optimizer.solution(),PointExtractor()),reference);
 		stats.push_back(volume);
+		//~ std::cout<<"vol: "<<volume<<std::endl;
+		//~ for(auto const& s: optimizer.solution()){
+			//~ std::cout<<s.value<<std::endl;
+		//~ }
 	}
 	std::cout<<std::endl;
 	BOOST_CHECK_SMALL( targetVolume - max(stats), epsilon );

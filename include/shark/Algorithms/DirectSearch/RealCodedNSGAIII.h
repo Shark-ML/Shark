@@ -207,7 +207,7 @@ public:
 		updatePopulation(offspring);
 	}
 protected:
-	/// \brief The individual type of the NSGA-II.
+	/// \brief The individual type of the NSGA-III.
 	typedef shark::Individual<RealVector,RealVector> IndividualType;
 
 	void doInit(
@@ -224,13 +224,14 @@ protected:
 		SIZE_CHECK(initialSearchPoints.size() > 0);
 		SIZE_CHECK(lowerBounds.size() == upperBounds.size());
 		SIZE_CHECK(Z.size() == mu);
+		
 		m_mu = mu;
 		m_mutation.m_nm = nm;
 		m_crossover.m_nc = nc;
 		m_crossoverProbability = crossover_prob;
 		m_best.resize( mu );
 		m_parents.resize( mu );
-		indicator().Z = Z;
+		indicator().setReferencePoints(Z);
 		//if the number of supplied points is smaller than mu, fill everything in
 		std::size_t numPoints = 0;
 		if(initialSearchPoints.size()<=mu){

@@ -97,7 +97,7 @@ struct IndicatorBasedSelection {
 		//create an archive of points which are surely selected because of their domination rank
 		View archive;
 		archive.reserve(popSize - front.size());
-		for(unsigned int r = 0; r != rank; ++r){
+		for(unsigned int r = 1; r != rank; ++r){
 			archive.insert(archive.end(),fronts[r].begin(), fronts[r].end());
 		}
 		//deselect 
