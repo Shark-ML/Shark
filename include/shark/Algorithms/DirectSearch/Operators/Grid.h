@@ -40,22 +40,13 @@
 
 namespace shark {
 
-std::size_t nChooseK(std::size_t const n, std::size_t const k)
-{
-    return static_cast<std::size_t>(
-        boost::math::binomial_coefficient<double>(n, k));
-}
 
 // The number of n-points that sum up to 'sum'
 std::size_t sumlength(std::size_t const n, std::size_t const sum)
 {
-    std::size_t s = 0;
     const std::size_t d = n - 2;
-    for(std::size_t i = 0; i <= sum; ++i)
-    {
-        s += nChooseK(i + d, d);
-    }
-    return s;
+    return static_cast<std::size_t>(
+        boost::math::binomial_coefficient<double>(d + sum + 1, sum));
 }
 
 // A list of n-dimensional points that each sums to "sum".
@@ -101,7 +92,9 @@ std::size_t bestPointCountForLattice(std::size_t const n,
     const std::size_t d = n - 2;
     while(cur < target_count)
     {
-        cur += nChooseK(dimension_ticks_count + d, d);
+        cur += static_cast<std::size_t>(
+            boost::math::binomial_coefficient<double>(
+                dimension_ticks_count + d, d));
         ++dimension_ticks_count;
     }
     return dimension_ticks_count;
