@@ -95,6 +95,7 @@ std::list<std::list<std::size_t>> sumsto(std::size_t const n,
 std::size_t bestPointCountForLattice(std::size_t const n, 
                                      std::size_t const target_count)
 {
+    SIZE_CHECK(n > 1);
     std::size_t cur = 0;
     std::size_t dimension_ticks_count = 0;
     const std::size_t d = n - 2;
