@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( Epsilon_RealCodedNSGAII) {
 	RealVector reference(2);
 	reference(0) = 11;
 	reference(1) = 11;
-	std::size_t mu = 12;
+	std::size_t mu = 10;
 	std::cout<<"Optimizing Epsilon NSGAII"<<std::endl;
 	{
 		DTLZ2 function(5);

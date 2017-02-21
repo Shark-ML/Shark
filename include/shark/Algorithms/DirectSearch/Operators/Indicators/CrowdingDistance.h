@@ -63,10 +63,10 @@ struct CrowdingDistance {
 				order[j].key = front[j][i];
 				order[j].value = j;
 			}
-			//~ for( std::size_t j = 0; j != archive.size(); ++j ) {
-				//~ order[j+front.size()].key = archive[j][i];
-				//~ order[j+front.size()].value = j+front.size();
-			//~ }
+			for( std::size_t j = 0; j != archive.size(); ++j ) {
+				order[j+front.size()].key = archive[j][i];
+				order[j+front.size()].value = j+front.size();
+			}
 			//order to obtain neighbours
 			std::sort(order.begin(),order.end());
 			
