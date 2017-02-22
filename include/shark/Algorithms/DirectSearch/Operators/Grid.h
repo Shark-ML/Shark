@@ -50,8 +50,8 @@ std::size_t sumlength(std::size_t const n, std::size_t const sum)
 }
 
 // A list of n-dimensional points that each sums to "sum".
-std::list<std::list<std::size_t>> sumsto(std::size_t const n, 
-                                         std::size_t const sum)
+std::list<std::list<std::size_t>> sumsto_rec(std::size_t const n, 
+                                             std::size_t const sum)
 {
     SIZE_CHECK(n > 1);
     if(n == 2)
@@ -68,7 +68,7 @@ std::list<std::list<std::size_t>> sumsto(std::size_t const n,
         std::list<std::list<std::size_t>> vs;
         for(std::size_t i = 0; i <= sum; ++i)
         {
-            for(auto & v_sub : sumsto(n - 1, sum - i))
+            for(auto & v_sub : sumsto_rec(n - 1, sum - i))
             {
                 v_sub.push_front(i);
                 vs.push_back(v_sub);
@@ -76,6 +76,47 @@ std::list<std::list<std::size_t>> sumsto(std::size_t const n,
         }
         return vs;
     }
+}
+
+namespace detail {
+void sumsto_helper(UIntMatrix & pointMatrix,
+                   std::size_t const rowidx,
+                   std::size_t const colidx,
+                   std::size_t const sum_rest)
+{
+    const std::size_t n = pointMatrix.size2() - colidx;
+    if(n == 1)
+    {
+        pointMatrix(rowidx, colidx) = sum_rest;
+    }
+    else
+    {
+        std::size_t total_rows = 0;
+        for(std::size_t i = 0; i <= sum_rest; ++i)
+        {
+            const std::size_t submatrix_height = sumlength(n - 1, 
+                                                           sum_rest - i);
+            // Each first entry in submatrix contains i, and remaining columns
+            // in each row all sum to sum_rest - i.
+            for(std::size_t j = 0; j < submatrix_height; ++j)
+            {
+                pointMatrix(total_rows + rowidx + j, colidx) = i;
+            }
+            sumsto_helper(pointMatrix, total_rows + rowidx,
+                          colidx + 1, sum_rest - i);
+            total_rows += submatrix_height;
+        }
+    }
+}
+} // namespace detail
+
+UIntMatrix sumsto(std::size_t const n, std::size_t const sum)
+{
+    SIZE_CHECK(n > 1);
+    const std::size_t point_count = sumlength(n, sum);
+    UIntMatrix pointMatrix(point_count, n);
+    detail::sumsto_helper(pointMatrix, 0, 0, sum);
+    return pointMatrix;
 }
 
 // Gives the number of ticks in each dimension required to make an n-dimensional
@@ -87,6 +128,10 @@ std::size_t bestPointCountForLattice(std::size_t const n,
                                      std::size_t const target_count)
 {
     SIZE_CHECK(n > 1);
+    if(n == 2)
+    {
+        return target_count - 1;
+    }
     std::size_t cur = 0;
     std::size_t dimension_ticks_count = 0;
     const std::size_t d = n - 2;
@@ -102,16 +147,7 @@ std::size_t bestPointCountForLattice(std::size_t const n,
 
 UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
 {
-    typedef std::list<std::size_t> point_t;
-    std::list<point_t> points = sumsto(n, sum);
-    UIntMatrix point_matrix(points.size(), n);
-    std::size_t row = 0;
-    for(point_t & point : points)
-    {
-        std::copy(point.begin(), point.end(), point_matrix.row_begin(row));
-        ++row;
-    }
-    return point_matrix;
+    return sumsto(n, sum);
 }
 
 RealMatrix weightLattice(std::size_t const n, 
