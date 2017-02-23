@@ -5,6 +5,7 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Grid.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
+#include <shark/Rng/Rng.h>
 
 #include <iostream>
 
@@ -12,13 +13,13 @@ using namespace shark;
 
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Grid)
 
-BOOST_AUTO_TEST_CASE(sumsto_correct)
+BOOST_AUTO_TEST_CASE(pointLattice_correct)
 {
-    for(std::size_t n = 2; n < 6; ++n)
+    for(std::size_t n = 1; n < 6; ++n)
     {
         for(std::size_t sum = 3; sum < 10; ++sum)
         {
-            UIntMatrix m = sumsto(n, sum);
+            UIntMatrix m = pointLattice(n, sum);
             for(std::size_t row = 0; row < m.size1(); ++row)
             {
                 std::size_t actual_sum = 0;
@@ -28,6 +29,38 @@ BOOST_AUTO_TEST_CASE(sumsto_correct)
                 }
                 BOOST_CHECK_EQUAL(actual_sum, sum);
             }   
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE(sampleUniformly_correct)
+{
+    DefaultRngType rng;
+    for(std::size_t n = 2; n < 5; ++n)
+    {
+        for(std::size_t sum = n; sum < 15; ++sum)
+        {
+            UIntMatrix m = pointLattice(n, sum);
+            UIntMatrix sampled = sampleUniformly(rng, m, sum);
+            BOOST_CHECK_EQUAL(sampled.size1(), sum);
+            std::size_t num_corners_orig = 0;
+            std::size_t num_corners_sampled = 0;
+            for(std::size_t r = 0; r < sampled.size1(); ++r)
+            {
+                if(detail::isCorner(sampled.row_begin(r), sampled.row_end(r)))
+                {
+                    ++num_corners_sampled;
+                }
+            }
+            for(std::size_t r = 0; r < m.size1(); ++r)
+            {
+                if(detail::isCorner(m.row_begin(r), m.row_end(r)))
+                {
+                    ++num_corners_orig;
+                }
+            }
+            BOOST_CHECK_EQUAL(num_corners_orig, n);
+            BOOST_CHECK_EQUAL(num_corners_sampled, n);
         }
     }
 }
@@ -56,21 +89,21 @@ BOOST_AUTO_TEST_CASE(best_point_count_2d_correct)
 {
     for(std::size_t i = 1; i < 100; ++i)
     {
-        const std::size_t pc = bestPointCountForLattice(2, i);
+        const std::size_t pc = bestPointSumForLattice(2, i);
         BOOST_CHECK_EQUAL(i, sumlength(2, pc));
     }
 }
 
 
-BOOST_AUTO_TEST_CASE(sumsto_has_expected_size)
+BOOST_AUTO_TEST_CASE(pointLattice_has_expected_size)
 {
     for(std::size_t mu_prime = 3; mu_prime < 10; ++mu_prime)
     {
         for(std::size_t d = 2; d < 5; ++d)
         {
-            std::list<std::list<std::size_t>> ls = sumsto_rec(d, mu_prime);
+            UIntMatrix l = pointLattice(d, mu_prime);
             std::size_t expected_size = sumlength(d, mu_prime);
-            BOOST_CHECK_EQUAL(expected_size, ls.size());
+            BOOST_CHECK_EQUAL(expected_size, l.size1());
         }
     }
 }
@@ -94,7 +127,7 @@ BOOST_AUTO_TEST_CASE(best_point_count)
     {
         for(std::size_t sum = 3; sum < 10; ++sum)
         {
-            std::size_t b = bestPointCountForLattice(n, sum);
+            std::size_t b = bestPointSumForLattice(n, sum);
             RealMatrix w = weightLattice(n, b);
             BOOST_CHECK(sumlength(n, b) >= sum);
             BOOST_CHECK_EQUAL(w.size1(), sumlength(n, b));
