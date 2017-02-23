@@ -207,8 +207,7 @@ public:
 	///
 	/// If the function does not offer a constraint handler, an exception is thrown.
 	AbstractConstraintHandler<SearchPointType> const& getConstraintHandler()const{
-		if(m_constraintHandler == NULL)
-			throw SHARKEXCEPTION("Objective Function does not have an constraint handler!");
+		SHARK_RUNTIME_CHECK(m_constraintHandler, "Objective Function does not have an constraint handler!");
 		return *m_constraintHandler;
 	}
 
@@ -217,8 +216,7 @@ public:
 	/// \return true if the point is feasible, false otherwise.
 	virtual bool isFeasible( const SearchPointType & input) const {
 		if(hasConstraintHandler()) return getConstraintHandler().isFeasible(input);
-		if(isConstrained())
-			throw SHARKEXCEPTION("[AbstractObjectiveFunction::isFasible] not overwritten, even though function is constrained");
+		SHARK_RUNTIME_CHECK(!isConstrained(), "Not overwritten, even though function is constrained");
 		return true;
 	}
 
@@ -291,7 +289,7 @@ protected:
 	///
 	/// This function quries the propabilities of the handler and sts up the flags accordingly
 	void announceConstraintHandler(AbstractConstraintHandler<SearchPointType> const* handler){
-		SHARK_CHECK(handler != NULL, "[AbstractObjectiveFunction::AnnounceConstraintHandler] Handler is not allowed to be NULL");
+		SHARK_RUNTIME_CHECK(handler, "[AbstractObjectiveFunction::AnnounceConstraintHandler] Handler is not allowed to be NULL");
 		m_constraintHandler = handler;
 		m_features |= IS_CONSTRAINED_FEATURE;
 		m_features |= HAS_CONSTRAINT_HANDLER;

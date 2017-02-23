@@ -143,8 +143,8 @@ public:
 		m_models.resize(n_tree);
 		if (weights.empty()) // set default weights to 1
 			we.resize(n_tree, 1);
-		else if (weights.size() != n_tree)
-			throw SHARKEXCEPTION("Weights must be the same number as trees");
+		else 
+			SHARK_RUNTIME_CHECK(weights.size() == n_tree, "Weights must be the same number as trees");
 
 		for (std::size_t i=0; i<n_tree; ++i){
 			m_models[i]=SubmodelType{finfo[i]};

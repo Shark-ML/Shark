@@ -45,7 +45,7 @@ public:
 	: mpe_rbm(rbm)
 	, m_deltaWeights(rbm->numFilters(),RealMatrix(rbm->filterSize1(), rbm->filterSize2(),0.0))
 	, m_logWeightSum(-std::numeric_limits<double>::infinity()){
-		SHARK_CHECK(mpe_rbm != 0, "rbm is not allowed to be 0");
+		SHARK_RUNTIME_CHECK(mpe_rbm != 0, "rbm is not allowed to be 0");
 		std::size_t const hiddenParameters = rbm->hiddenNeurons().numberOfParameters();
 		std::size_t const visibleParameters = rbm->visibleNeurons().numberOfParameters();
 		m_deltaBiasHidden.resize(hiddenParameters);

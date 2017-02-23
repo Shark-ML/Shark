@@ -57,7 +57,7 @@ public:
 	{ return "KernelMeanClassifier"; }
 
 	void train(KernelClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
-		SHARK_CHECK(numberOfClasses(dataset) ==2, "[KernelMeanClassifier::train] not a binary class problem");
+		SHARK_RUNTIME_CHECK(numberOfClasses(dataset) ==2, "Not a binary classification problem");
 		
 		model.decisionFunction().setStructure(mpe_kernel,dataset.inputs(),true);
 
@@ -65,8 +65,8 @@ public:
 		std::vector<std::size_t> numClasses = classSizes(dataset);
 		double coeffs[]     = {0,0};
 		
-		SHARK_CHECK(numClasses[0] > 0, "[KernelMeanClassifier::train] class 0 has no class members" );
-		SHARK_CHECK(numClasses[1] > 0, "[KernelMeanClassifier::train] class 1 has no class members" );
+		SHARK_RUNTIME_CHECK(numClasses[0] > 0, "Class 0 has no class members" );
+		SHARK_RUNTIME_CHECK(numClasses[1] > 0, "Class 1 has no class members" );
 		
 		coeffs[0] =  1.0 / numClasses[0];
 		coeffs[1] = -1.0 / numClasses[1];

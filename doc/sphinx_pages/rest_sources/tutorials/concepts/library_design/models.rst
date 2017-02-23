@@ -247,7 +247,6 @@ Model                                    Description
 =====================================    ========================================================================
 :doxy:`LinearClassifier`                 Given a metric represented by a scatter matrix and the class means,
                                          assigns a new point to the class with the nearest mean
-:doxy:`NBClassifier`                     Standard, but flexible, naive Bayes classifier
 :doxy:`OneVersusOneClassifier`           Multi-class classifier which does majority voting using binary
                                          classifiers for every class combination
 :doxy:`NearestNeighborClassifier`        Nearest neighbor search for classification using a majority vote system.

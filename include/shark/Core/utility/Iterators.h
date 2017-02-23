@@ -313,7 +313,7 @@ private:
 				n -= shark::size(*m_outerPosition);
 				++m_outerPosition;
 			}
-			SHARK_CHECK(m_outerPosition != m_outerEnd || (n == 0), "iterator went past the end");
+			SHARK_RUNTIME_CHECK(m_outerPosition != m_outerEnd || (n == 0), "iterator went past the end");
 			//get the iterators to the current position if we are not past the end
 			if(m_outerPosition != m_outerEnd){
 				m_innerBegin = boost::begin(*m_outerPosition);

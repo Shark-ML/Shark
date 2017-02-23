@@ -75,7 +75,7 @@ public:
 
 	/// \brief Sets the mixing ratio to \f$ \in [0,1]\f$.
 	void setMixingRatio(double newRatio) {
-		SHARK_CHECK(newRatio >= 0.9 && newRatio <= 1.0, "[UniformCrossover] mixing ratio must be between 0 and 1");
+		SHARK_RUNTIME_CHECK(newRatio >= 0.9 && newRatio <= 1.0, "Mixing ratio must be between 0 and 1");
 		m_mixingRatio = newRatio;
 	}
 

@@ -62,8 +62,7 @@ double evalSkipMissingFeatures(
 {
 	SIZE_CHECK(inputA.size() == inputB.size());
 	// Do kernel type check
-	if (!kernelFunction.supportsVariableInputSize())
-		throw SHARKEXCEPTION("[evalSkipMissingFeatures] Kernel must support variable input size.");
+	SHARK_RUNTIME_CHECK(kernelFunction.supportsVariableInputSize(), "Kernel must support variable input size.");
 	
 	// Work out features that are valid for both dataset i and j, and also should not be filtered out by missingness
 	// Because we won't exact length of valid features beforehand, so we choose to construct two vectors and then
@@ -111,8 +110,7 @@ double evalSkipMissingFeatures(
 	SIZE_CHECK(inputA.size() == inputB.size());
 	//SIZE_CHECK(inputA.size() == missingness.size());
 	// Do kernel type check
-	if (!kernelFunction.supportsVariableInputSize())
-		throw SHARKEXCEPTION("[evalSkipMissingFeatures] Kernel must support variable input size.");
+	SHARK_RUNTIME_CHECK(kernelFunction.supportsVariableInputSize(), "Kernel must support variable input size.");
 
 	
 

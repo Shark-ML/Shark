@@ -95,7 +95,7 @@ public:
 
 	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input)
 	{
-		SHARK_CHECK(input.numberOfElements() >= 2, "[NormalizeComponentsUnitVariance::train] input needs to consist of at least two points");
+		SHARK_RUNTIME_CHECK(input.numberOfElements() >= 2, "Input needs to consist of at least two points");
 		std::size_t dc = dataDimension(input);
 
 		RealVector mean;

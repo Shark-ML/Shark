@@ -94,12 +94,8 @@ public:
 	, m_storage2(m_numVariables)
 	, m_useShrinking(true)
 	{
-
-		SHARK_CHECK(
-			target.numberOfElements() == m_numExamples 
-			&& linearMat.size1() == kernel.size(),
-			"[QpMcDecomp::QpMcDecomp] dimension conflict"
-		);
+		SHARK_RUNTIME_CHECK(target.numberOfElements() == kernel.size(), "Size of kernel matrix and target vector do not agree.");
+		SHARK_RUNTIME_CHECK(kernel.size() == linearMat.size1(), "Size of kernel matrix and linear factor to not agree.");
 		
 		// prepare m_problem internal variables
 		m_activeEx = m_numExamples;

@@ -153,10 +153,8 @@ public:
 	}
 	
 	void read(InArchive& ar){
-		if(mpe_kernel == NULL)
-			throw SHARKEXCEPTION("[ModelKernel::read] the kernel function is NULL, kernel needs to be constructed prior to read in");
-		if(mpe_model == NULL)
-			throw SHARKEXCEPTION("[ModelKernel::read] the model is NULL, model needs to be constructed prior to read in");
+		SHARK_RUNTIME_CHECK(mpe_kernel, "The kernel function is NULL, kernel needs to be constructed prior to read in");
+		SHARK_RUNTIME_CHECK(mpe_model, "The model is NULL, model needs to be constructed prior to read in");
 		ar >> *mpe_kernel;
 		ar >> *mpe_model;
 	}
@@ -205,6 +203,8 @@ public:
 		AbstractKernelFunction<IntermediateType>* kernel, 
 		AbstractModel<InputType,IntermediateType>* model
 	):m_wrapper(new detail::ModelKernelImpl<InputType,IntermediateType>(kernel,model)){
+		SHARK_RUNTIME_CHECK(kernel, "The kernel function is not allowed to be NULL");
+		SHARK_RUNTIME_CHECK(model, "The model is not allowed to be NULL");
 		if(m_wrapper->hasFirstParameterDerivative())
 			this->m_features|=base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 	}

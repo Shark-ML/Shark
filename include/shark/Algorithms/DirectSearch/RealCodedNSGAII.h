@@ -134,8 +134,7 @@ public:
 
 	void init( ObjectiveFunctionType& function){
 		checkFeatures(function);
-		if(!function.canProposeStartingPoint())
-			throw SHARKEXCEPTION( "[RealCodedNSGAII::init] Objective function does not propose a starting point");
+		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
 		std::vector<RealVector> points(mu());
 		for(std::size_t i = 0; i != mu(); ++i){
 			points[i] = function.proposeStartingPoint();
@@ -155,8 +154,7 @@ public:
 		checkFeatures(function);
 		std::vector<RealVector> values(initialSearchPoints.size());
 		for(std::size_t i = 0; i != initialSearchPoints.size(); ++i){
-			if(!function.isFeasible(initialSearchPoints[i]))
-				throw SHARKEXCEPTION("[RealCodedNSGAII::init] starting point(s) not feasible");
+			SHARK_RUNTIME_CHECK(function.isFeasible(initialSearchPoints[i]),"Starting point(s) not feasible");
 			values[i] = function.eval(initialSearchPoints[i]);
 		}
 		
@@ -170,7 +168,10 @@ public:
 			lowerBounds = handler.lower();
 			upperBounds = handler.upper();
 		} else{
-			throw SHARKEXCEPTION("[RealCodedNSGAII::init] Algorithm does only allow box constraints");
+			SHARK_RUNTIME_CHECK(
+				function.hasConstraintHandler() && !function.getConstraintHandler().isBoxConstrained(),
+				"Algorithm does only allow box constraints"
+			);
 		}
 		
 		doInit(initialSearchPoints,values,lowerBounds, upperBounds, mu(), nm(), nc(), crossoverProbability());

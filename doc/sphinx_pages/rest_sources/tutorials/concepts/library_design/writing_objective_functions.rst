@@ -232,8 +232,7 @@ Let's constrain our function above to the box of :math:`[0,1]^n`::
 	    }
 	    
 	    ResultType eval( const SearchPointType & input )const {
-		if(!m_handler.isFeasible(input))
-		    throw SHARKEXCEPTION("input point not feasible");
+		SHARK_RUNTIME_CHECK(m_handler.isFeasible(input),"input point not feasible");
 		return std::pow(normSqr(input),m_a);
 	    }
 	private:

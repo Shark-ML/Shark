@@ -38,7 +38,7 @@ using namespace shark;
 
 OnlineRNNet::OnlineRNNet(RecurrentStructure* structure, bool computeGradient)
 :mpe_structure(structure), m_computeGradient(computeGradient){
-	SHARK_CHECK(mpe_structure,"[OnlineRNNet] structure pointer is not allowed to be NULL");
+	SHARK_RUNTIME_CHECK(mpe_structure,"Structure pointer is not allowed to be NULL");
 	if(computeGradient)
 		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }
@@ -116,7 +116,7 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output, State& sta
 
 
 void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const RealMatrix& coefficients,  State const& state, RealVector& gradient)const{
-	if(!m_computeGradient) throw SHARKEXCEPTION("[OnlineFFNet::weightedParameterDerivative] Network is configured to not computing gradients!");
+	SHARK_RUNTIME_CHECK(m_computeGradient, "Network is configured to not computing gradients!");
 	SIZE_CHECK(pattern.size1()==1);//we can only process a single input at a time.
 	SIZE_CHECK(coefficients.size1()==1);
 	SIZE_CHECK(pattern.size2() == inputSize());

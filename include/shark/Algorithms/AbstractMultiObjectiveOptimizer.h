@@ -79,8 +79,7 @@ public:
 	* \throws Exception if the function does not feature the proposal of starting points.
 	*/
 	virtual void init(ObjectiveFunctionType & function ) {
-		if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
-			throw SHARKEXCEPTION( "Objective function does not propose a starting point");
+		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
 		std::vector<RealVector> startingPoints(1);
 		startingPoints[0] = function.proposeStartingPoint();
 		init(function,startingPoints);

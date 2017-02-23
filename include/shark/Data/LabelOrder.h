@@ -84,15 +84,11 @@ public:
 	void normalizeLabels(LabeledData<RealVector, unsigned int> &dataset)
 	{
 		// determine the min and max labels of the given dataset
-		int minLabel = std::numeric_limits<int>::max();
-		int maxLabel = -1;
+		unsigned int minLabel = std::numeric_limits<unsigned int>::max();
+		unsigned int maxLabel = 0;
 		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
 		{
-			int label = dataset.labels().element(i);
-
-			// we react allergic to negative labels
-			if(label < 0)
-				throw SHARKEXCEPTION("Negative label found. Will not process negative labels!");
+			unsigned int label = dataset.labels().element(i);
 
 			if(label < minLabel)
 				minLabel = label;
@@ -124,7 +120,7 @@ public:
 		// now map every label
 		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
 		{
-			int label = dataset.labels().element(i);
+			unsigned int label = dataset.labels().element(i);
 			dataset.labels().element(i) = foundLabels[label - minLabel];
 		}
 	}
@@ -143,11 +139,10 @@ public:
 		// now map every label
 		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
 		{
-			int label = dataset.labels().element(i);
+			unsigned int label = dataset.labels().element(i);
 
 			// check if the reordering fit the data
-			if(label >= (int) m_labelOrder.size())
-				throw SHARKEXCEPTION("Dataset labels does not fit to the stored ordering!");
+			SHARK_RUNTIME_CHECK(label < m_labelOrder.size(),"Dataset labels does not fit to the stored ordering!");
 
 			// relabel
 			label = m_labelOrder[label];
@@ -161,45 +156,25 @@ public:
 	///
 	/// \param[out] labelOrder      vector to store the current label order.
 
-	void getLabelOrder(std::vector<int> &labelOrder)
+	void getLabelOrder(std::vector<unsigned int>& labelOrder)
 	{
 		labelOrder = m_labelOrder;
 	}
-
-
-
-	/// \brief Get label ordering directly
-	///
-	/// \param[out] labelOrder      vector to store the current label order.
-
-        void getLabelOrder (std::vector<unsigned int> &labelOrder)
-        {
-                labelOrder = std::vector<unsigned int>( m_labelOrder.begin(), m_labelOrder.end() );
-        }
 
 
 	/// \brief Set label ordering directly
 	///
 	/// \param[in] labelOrder      vector with the new label order
 
-	void setLabelOrder(std::vector<int> &labelOrder)
+	void setLabelOrder(std::vector<unsigned int> const& labelOrder)
 	{
 		m_labelOrder = labelOrder;
 	}
 
 
-        /// \brief Set label ordering directly
-        ///
-        /// \param[in] labelOrder      vector with the new label order
-        void setLabelOrder (std::vector<unsigned int> &labelOrder)
-        {
-                m_labelOrder  = std::vector<int>( labelOrder.begin(), labelOrder.end() );
-        }
-
-
 protected:
 
-	std::vector<int> m_labelOrder;
+	std::vector<unsigned int> m_labelOrder;
 };
 
 }

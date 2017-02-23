@@ -98,8 +98,7 @@ BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
     
     size_t nSupportVectors = supportVectors.numberOfElements();
     std::cout << "We have " << nSupportVectors << " support vectors in our model.\n";
-    if (nSupportVectors > budgetSize)
-        SHARKEXCEPTION ("Something has gone wrong. There are more support vectors in the budget than specified!");
+    BOOST_REQUIRE_LE(nSupportVectors, budgetSize);
 
     // Create another test problem with 500 points
     std::cout << "Creating test data set with 500 points.\n";

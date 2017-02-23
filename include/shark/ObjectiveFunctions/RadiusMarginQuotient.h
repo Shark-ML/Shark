@@ -93,7 +93,7 @@ public:
 	/// kernel-induced metric.
 	double eval(SearchPointType const& parameters) const{
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
-		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::eval] call setDataset first");
+		SHARK_RUNTIME_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::eval] call setDataset first");
 		m_evaluationCounter++;
 		
 		
@@ -111,7 +111,7 @@ public:
 	/// radius-margin quotient and its derivative are computed
 	/// w.r.t. the kernel-induced metric.
 	double evalDerivative(SearchPointType const& parameters, FirstOrderDerivative& derivative) const{
-		SHARK_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::evalDerivative] call setDataset first");
+		SHARK_RUNTIME_CHECK(! m_dataset.empty(), "[RadiusMarginQuotient::evalDerivative] call setDataset first");
 		SIZE_CHECK(parameters.size() == mep_kernel->numberOfParameters());
 		m_evaluationCounter++;
 		

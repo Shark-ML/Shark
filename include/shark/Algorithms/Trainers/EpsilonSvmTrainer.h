@@ -135,7 +135,7 @@ public:
 	void train(KernelExpansion<InputType>& svm, LabeledData<InputType, RealVector> const& dataset){
 		svm.setStructure(base_type::m_kernel,dataset.inputs(),true,1);
 		
-		SHARK_CHECK(labelDimension(dataset) == 1, "[EpsilonSvmTrainer::train] can only train 1D labels");
+		SHARK_RUNTIME_CHECK(labelDimension(dataset) == 1, "Can only train 1D labels");
 
 		if (QpConfig::precomputeKernel())
 			trainSVM<PrecomputedBlockMatrixType>(svm,dataset);

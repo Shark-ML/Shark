@@ -73,7 +73,11 @@ public:
 			OptimizerType* optimizer,
 			StoppingCriterionType* stoppingCriterion)
 	: mep_loss(loss), mep_optimizer(optimizer), mep_stoppingCriterion(stoppingCriterion)
-	{ }
+	{ 
+		SHARK_RUNTIME_CHECK(loss != nullptr, "Loss function must not be NULL");
+		SHARK_RUNTIME_CHECK(optimizer != nullptr, "optimizer must not be NULL");
+		SHARK_RUNTIME_CHECK(stoppingCriterion != nullptr, "Stopping Criterion must not be NULL");
+	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

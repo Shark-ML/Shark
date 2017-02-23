@@ -78,7 +78,7 @@ public:
 	/// \param dim input dimension
 	/// \param gamma_init initial gamma value for all dimensions (true value, used as passed into ctor)
 	ARDKernelUnconstrained(unsigned int dim, double gamma_init = 1.0){
-		SHARK_CHECK( gamma_init > 0, "[ARDKernelUnconstrained::ARDKernelUnconstrained] Expected positive weight.");
+		SHARK_RUNTIME_CHECK( gamma_init > 0, "[ARDKernelUnconstrained::ARDKernelUnconstrained] Expected positive weight.");
 
 		//init abstract model's informational flags
 		this->m_features|=base_type::HAS_FIRST_PARAMETER_DERIVATIVE;

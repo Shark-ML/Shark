@@ -58,9 +58,7 @@ struct EPTournamentSelection {
 	){
 		std::size_t outputSize = std::distance( out, outE );
 		std::vector<KeyValuePair<int, InIterator> > results = performTournament(rng, it, itE);
-		if(results.size() < outputSize){
-			throw SHARKEXCEPTION("[EPTournamentSelection] Input range must be bigger than output range");
-		}
+		SHARK_RUNTIME_CHECK(results.size() > outputSize, "Input range must be bigger than output range");
 		
 		for(std::size_t i = 0; i != outputSize; ++i, ++out){
 			*out = *results[i].value;
@@ -78,7 +76,7 @@ struct EPTournamentSelection {
 		DefaultRngType& rng,
 		Population& population,std::size_t mu
 	){
-		SIZE_CHECK(population.size() >= mu);
+		SHARK_RUNTIME_CHECK(population.size() >= mu, "Population Size must be at least mu");
 		typedef typename Population::iterator InIterator;
 		std::vector<KeyValuePair<int, InIterator> > results = performTournament(rng, population.begin(),population.end());
 		

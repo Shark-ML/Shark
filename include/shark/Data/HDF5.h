@@ -150,26 +150,26 @@ void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::st
 	dims.assign(0);
 	H5T_class_t typeClass;
 	size_t typeSize;
-	THROW_IF(
-		H5LTget_dataset_info(*fileId, dataSetName.c_str(), dims.c_array(), &typeClass, &typeSize) < 0,
-		(boost::format("[importHDF5] Get data set(%1%) info from file(%2%).") % dataSetName % fileName).str());
+	SHARK_RUNTIME_CHECK(
+		H5LTget_dataset_info(*fileId, dataSetName.c_str(), dims.c_array(), &typeClass, &typeSize) >= 0,
+		(boost::format("Get data set(%1%) info from file(%2%).") % dataSetName % fileName).str());
 
 	if (0 == dims[0])
 		return;
 
 	// Support 1 or 2 dimensions only at the moment
-	THROW_IF(
-		0 != dims[2],
+	SHARK_RUNTIME_CHECK(
+		0 == dims[2],
 		(boost::format(
-			"[loadIntoMatrix][%1%][%2%] Support 1 or 2 dimensions, but this dataset has at least 3 dimensions.") % fileName % dataSetName).str());
+			"[%1%][%2%] Support 1 or 2 dimensions, but this dataset has at least 3 dimensions.") % fileName % dataSetName).str());
 
 	const hsize_t dim0 = dims[0];
 	const hsize_t dim1 = (0 == dims[1]) ? 1 : dims[1]; // treat one dimension as two-dimension of N x 1
 
-	THROW_IF(
-		!detail::isSupported<RawValueType>(typeClass, typeSize),
+	SHARK_RUNTIME_CHECK(
+		detail::isSupported<RawValueType>(typeClass, typeSize),
 		(boost::format(
-			"[loadIntoMatrix] DataType doesn't match. HDF5 data type in dataset(%3%::%4%): %1%, size: %2%")
+			"DataType doesn't match. HDF5 data type in dataset(%3%::%4%): %1%, size: %2%")
 			% typeClass
 			% typeSize
 			% fileName
@@ -177,7 +177,7 @@ void loadIntoMatrix(MatrixType& data, const std::string& fileName, const std::st
 
 	// Read data into a buffer
 	const boost::scoped_array<RawValueType> dataBuffer(new RawValueType[dim0 * dim1]);
-	THROW_IF(detail::readHDF5Dataset(*fileId, dataSetName.c_str(), dataBuffer.get()) < 0, "[loadIntoMatrix] Read data set.");
+	SHARK_RUNTIME_CHECK(detail::readHDF5Dataset(*fileId, dataSetName.c_str(), dataBuffer.get()) >= 0, " Read data set.");
 
 	// dims[0] = M, dims[1] = N, means each basic vector has M elements, and there are N of them.
 	for (size_t i = 0; i < dim1; ++i) {
@@ -198,9 +198,9 @@ void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vecto
 {
 	typedef typename MatrixType::value_type VectorType; // e.g., std::vector<double>
 
-	THROW_IF(
-		3 != cscDatasetName.size(),
-		"[importHDF5] Must provide 3 dataset names for importing Compressed Sparse Column format.");
+	SHARK_RUNTIME_CHECK(
+		3 == cscDatasetName.size(),
+		"Must provide 3 dataset names for importing Compressed Sparse Column format.");
 
 	std::vector<VectorType> valBuf;
 	std::vector<std::vector<boost::int32_t> > indicesBuf;
@@ -208,13 +208,13 @@ void loadHDF5Csc(MatrixType& data, const std::string& fileName, const std::vecto
 	detail::loadIntoMatrix(valBuf, fileName, cscDatasetName[0]);
 	detail::loadIntoMatrix(indicesBuf, fileName, cscDatasetName[1]);
 	detail::loadIntoMatrix(indexPtrBuf, fileName, cscDatasetName[2]);
-	THROW_IF(1u != valBuf.size() || 1u != indicesBuf.size() || 1u != indexPtrBuf.size(), "All datasets should be of one dimension.");
+	SHARK_RUNTIME_CHECK(1u == valBuf.size() && 1u == indicesBuf.size() && 1u == indexPtrBuf.size(), "All datasets should be of one dimension.");
 
 	const VectorType& val = valBuf.front();
 	const std::vector<boost::int32_t>& indices = indicesBuf.front(); // WARNING: Not all indices are of int32 type
 	const std::vector<boost::int32_t>& indexPtr = indexPtrBuf.front();
-	THROW_IF(val.size() != indices.size(), "Size of value and indices should be the same.");
-	THROW_IF(indexPtr.back() != (boost::int32_t)val.size(), "Last element of index pointer should equal to size of value.");
+	SHARK_RUNTIME_CHECK(val.size() == indices.size(), "Size of value and indices should be the same.");
+	SHARK_RUNTIME_CHECK(indexPtr.back() == (boost::int32_t)val.size(), "Last element of index pointer should equal to size of value.");
 
 	// Figure out dimensions of dense matrix
 	const boost::uint32_t columnCount = indexPtr.size() - 1; // the last one is place holder
@@ -245,12 +245,12 @@ void constructLabeledData(
 	const std::vector<VectorType>& dataBuffer,
 	const std::vector<std::vector<LabelType> >& labelBuffer)
 {
-	THROW_IF(
-		1 != labelBuffer.size(),
-		(boost::format("[importHDF5] Expect only one label vector, but get %1%.") % labelBuffer.size()).str());
-	THROW_IF(
-		dataBuffer.size() != labelBuffer.front().size(),
-		boost::format("[importHDF5] Dimensions of data and label don't match.").str());
+	SHARK_RUNTIME_CHECK(
+		1 == labelBuffer.size(),
+		(boost::format("Expect only one label vector, but get %1%.") % labelBuffer.size()).str());
+	SHARK_RUNTIME_CHECK(
+		dataBuffer.size() == labelBuffer.front().size(),
+		boost::format("Dimensions of data and label don't match.").str());
 
 	labeledData = createLabeledDataFromRange(dataBuffer, labelBuffer.front());
 }

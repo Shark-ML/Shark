@@ -50,9 +50,7 @@ struct TwoStateSpace{
 	/// @return the number of States. 
 	static std::size_t numberOfStates(std::size_t numberOfNeurons){
 		long double result = std::pow( 2., static_cast< int >( numberOfNeurons ) );
-		if(result > std::numeric_limits<std::size_t>::max()){
-			SHARKEXCEPTION("number of neurons is too big for calculation");
-		}
+		SHARK_RUNTIME_CHECK(result < std::numeric_limits<std::size_t>::max(), "number of neurons is too big for calculation");
 		return static_cast<std::size_t>(result);
 	  
 	}

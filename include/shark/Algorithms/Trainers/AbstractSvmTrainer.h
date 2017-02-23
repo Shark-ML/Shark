@@ -199,7 +199,10 @@ public:
 	, m_trainOffset(offset)
 	, m_unconstrained(unconstrained)
 	, m_cacheSize(0x4000000)
-	{ RANGE_CHECK( C > 0 ); }
+	{ 
+		SHARK_RUNTIME_CHECK( C > 0, "C must be larger than 0" );
+		SHARK_RUNTIME_CHECK( kernel != nullptr, "Kernel must not be NULL" );
+	}
 	
 	//! Constructor featuring two regularization parameters
 	//! \param  kernel         kernel function to use for training and prediction
@@ -214,8 +217,9 @@ public:
 	, m_unconstrained(unconstrained)
 	, m_cacheSize(0x4000000)
 	{ 
-		RANGE_CHECK( positiveC > 0 ); 
-		RANGE_CHECK( negativeC > 0 ); 
+		SHARK_RUNTIME_CHECK( positiveC > 0, "C must be larger than 0" );
+		SHARK_RUNTIME_CHECK( negativeC > 0, "C must be larger than 0" );
+		SHARK_RUNTIME_CHECK( kernel != nullptr, "Kernel must not be NULL" );
 		m_regularizers[0] = negativeC;
 		m_regularizers[1] = positiveC;
 		
@@ -227,28 +231,31 @@ public:
 		SIZE_CHECK(m_regularizers.size() == 1);
 		return m_regularizers[0];
 	}
-	double& C()
-	{
-		SIZE_CHECK(m_regularizers.size() == 1);
-		return m_regularizers[0];
+	/// \brief Set the value of the regularization parameter C.
+	void setC(double C) {
+		SHARK_RUNTIME_CHECK( C > 0, "C must be larger than 0" );
+		m_regularizers[0] = C;
 	}
-	
+
 	RealVector const& regularizationParameters() const
 	{
 		return m_regularizers;
 	}
 	
-	RealVector& regularizationParameters()
-	{
-		return m_regularizers;
+	/// \brief Set the value of the regularization parameter C.
+	void setRegularizationParameters(RealVector const& regularizers) {
+		SHARK_RUNTIME_CHECK( min(regularizers) > 0, "regularization parameters must be larger than 0" );
+		m_regularizers = regularizers;
 	}
 	
 	KernelType* kernel()
 	{ return m_kernel; }
-	const KernelType* kernel() const
+	KernelType const* kernel() const
 	{ return m_kernel; }
-	void setKernel(KernelType* kernel)
-	{ m_kernel = kernel; }
+	void setKernel(KernelType* kernel){ 
+		SHARK_RUNTIME_CHECK( kernel != nullptr, "Kernel must not be NULL" );
+		m_kernel = kernel; 
+	}
 
 	bool isUnconstrained() const
 	{ return m_unconstrained; }
@@ -262,8 +269,7 @@ public:
 	{ m_cacheSize = size; }
 
 	/// get the hyper-parameter vector
-	RealVector parameterVector() const
-	{
+	RealVector parameterVector() const{
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + m_regularizers.size());
 		if(m_unconstrained)
@@ -274,8 +280,7 @@ public:
 	}
 
 	/// set the vector of hyper-parameters
-	void setParameterVector(RealVector const& newParameters)
-	{
+	void setParameterVector(RealVector const& newParameters){
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + m_regularizers.size());
 		init(newParameters) >> parameters(m_kernel), m_regularizers;
@@ -331,7 +336,7 @@ public:
 	: m_C(C)
 	, m_trainOffset(offset)
 	, m_unconstrained(unconstrained)
-	{ RANGE_CHECK( C > 0 ); }
+	{ SHARK_RUNTIME_CHECK( C > 0, "C must be larger than 0" );}
 
 	/// \brief Return the value of the regularization parameter C.
 	double C() const
@@ -339,7 +344,7 @@ public:
 
 	/// \brief Set the value of the regularization parameter C.
 	void setC(double C) {
-		RANGE_CHECK( C > 0 );
+		SHARK_RUNTIME_CHECK( C > 0, "C must be larger than 0" );
 		m_C = C;
 	}
 

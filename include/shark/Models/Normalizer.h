@@ -137,35 +137,35 @@ public:
 	/// return the diagonal of the matrix
 	RealVector const& diagonal() const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::matrix] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::matrix] model is not initialized");
 		return m_A;
 	}
 
 	/// return the offset vector
 	RealVector const& offset() const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::vector] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::vector] model is not initialized");
 		return m_b;
 	}
 
 	/// obtain the input dimension
 	std::size_t inputSize() const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::inputSize] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::inputSize] model is not initialized");
 		return m_A.size();
 	}
 
 	/// obtain the output dimension
 	std::size_t outputSize() const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::outputSize] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::outputSize] model is not initialized");
 		return m_A.size();
 	}
 
 	/// obtain the parameter vector
 	RealVector parameterVector() const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::parameterVector] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::parameterVector] model is not initialized");
 		std::size_t dim = m_A.size();
 		if (hasOffset())
 		{
@@ -184,7 +184,7 @@ public:
 	/// overwrite the parameter vector
 	void setParameterVector(RealVector const& newParameters)
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::setParameterVector] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::setParameterVector] model is not initialized");
 		std::size_t dim = m_A.size();
 		if (hasOffset())
 		{
@@ -201,7 +201,7 @@ public:
 	/// return the number of parameter
 	std::size_t numberOfParameters() const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::numberOfParameters] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::numberOfParameters] model is not initialized");
 		return (m_hasOffset) ? m_A.size() + m_b.size() : m_A.size();
 	}
 
@@ -223,7 +223,7 @@ public:
 	/// overwrite structure and parameters
 	void setStructure(RealVector const& diagonal, RealVector const& offset)
 	{
-		SHARK_CHECK(diagonal.size() == offset.size(), "[Normalizer::setStructure] dimension conflict");
+		SHARK_RUNTIME_CHECK(diagonal.size() == offset.size(), "[Normalizer::setStructure] dimension conflict");
 		m_A = diagonal;
 		m_b = offset;
 		m_hasOffset = true;
@@ -234,7 +234,7 @@ public:
 	/// \brief Evaluate the model: output = matrix * input + offset.
 	void eval(BatchInputType const& input, BatchOutputType& output) const
 	{
-		SHARK_CHECK(isValid(), "[Normalizer::eval] model is not initialized");
+		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::eval] model is not initialized");
 		output.resize(input.size1(), input.size2());
 		noalias(output) = input * repeat(m_A,input.size1());
 		if (hasOffset())

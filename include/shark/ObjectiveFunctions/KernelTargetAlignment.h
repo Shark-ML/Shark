@@ -113,7 +113,7 @@ public:
 		LabeledData<InputType, LabelType> const& dataset, 
 		AbstractKernelFunction<InputType>* kernel
 	){
-		SHARK_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
+		SHARK_RUNTIME_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
 		
 		mep_kernel = kernel;
 		

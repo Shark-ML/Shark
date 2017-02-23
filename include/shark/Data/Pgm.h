@@ -51,32 +51,24 @@ namespace detail {
 void importPGM( std::string const& fileName, std::vector<unsigned char>& ppData, std::size_t& sx, std::size_t& sy )
 {
 	std::ifstream file(fileName.c_str(), std::ios::binary);
-	
-	if( !file) throw SHARKEXCEPTION( "[importPGM] cannot open file: " + fileName);
+	SHARK_RUNTIME_CHECK(file, "Can not open File");
 	
 	std::string id;
 	std::size_t nGrayValues = 0;
 	file>> id;
-	if(id != "P5")
-		throw SHARKEXCEPTION( "[importPGM] " + fileName+ "is not a pgm");
+	SHARK_RUNTIME_CHECK(id == "P5" , "File " + fileName+ "is not a pgm");
 	//ignore comments
 	file >> std::ws;//skip white space
 	while(file.peek() == '#'){
 		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	}
 	file >> sx >> sy >> nGrayValues;
-	
-	if(nGrayValues > 255){
-		throw SHARKEXCEPTION( "[importPGM] " + fileName+ "unsupported format");
-	}
-	
-	if(!file)
-		throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
+	SHARK_RUNTIME_CHECK(file, "Error reading file!");
+	SHARK_RUNTIME_CHECK(nGrayValues <= 255, "File " + fileName+ "unsupported format");
 	
 	ppData.resize(sx*sy);
 	file.read((char*)ppData.data(),sx*sy);
-	if(!file)
-		throw SHARKEXCEPTION( "[importPGM] error reading file: " + fileName );
+	SHARK_RUNTIME_CHECK(file, "Error reading file!");
 }
 
 /**
@@ -94,7 +86,7 @@ void importPGM( std::string const& fileName, std::vector<unsigned char>& ppData,
 void writePGM( std::string const& fileName, std::vector<unsigned char> const& data, std::size_t sx, std::size_t sy )
 {
 	std::ofstream file(fileName.c_str(), std::ios::binary);
-	if( !file ) throw SHARKEXCEPTION( "[writePGM] cannot open file: " + fileName);
+	SHARK_RUNTIME_CHECK(file, "Can not open File");
 
 	file<<"P5\n"<<sx<<" "<<sy<<"\n"<<255<<"\n";
 	file.write((char*)data.data(),sx*sy);

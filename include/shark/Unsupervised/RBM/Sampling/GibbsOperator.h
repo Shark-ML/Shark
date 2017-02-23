@@ -188,10 +188,10 @@ public:
 	}
 	
 	void setAlpha(double newAlphaVisible, double newAlphaHidden){
-		SHARK_CHECK(newAlphaVisible >= 0.0, "alpha >= 0 not fulfilled for the visible layer");
-		SHARK_CHECK(newAlphaVisible <= 1., "alpha <=1 not fulfilled for the visible layer");
-		SHARK_CHECK(newAlphaHidden >= 0.0, "alpha >= 0 not fulfilled for the hidden layer");
-		SHARK_CHECK(newAlphaHidden <= 1., "alpha <=1 not fulfilled for the hidden layer");
+		SHARK_RUNTIME_CHECK(newAlphaVisible >= 0.0, "alpha >= 0 not fulfilled for the visible layer");
+		SHARK_RUNTIME_CHECK(newAlphaVisible <= 1., "alpha <=1 not fulfilled for the visible layer");
+		SHARK_RUNTIME_CHECK(newAlphaHidden >= 0.0, "alpha >= 0 not fulfilled for the hidden layer");
+		SHARK_RUNTIME_CHECK(newAlphaHidden <= 1., "alpha <=1 not fulfilled for the hidden layer");
 		m_alphaVisible = newAlphaVisible;
 		m_alphaHidden = newAlphaHidden;
 	}

@@ -128,7 +128,6 @@ Trainer                                     Model                               
                                                                                      to the class of the nearest mean.
 :doxy:`LDA`                               :doxy:`LinearClassifier`                   Performs Linear Discriminant Analysis, see the :doc:`LDA tutorial<../../algorithms/lda>`.
 :doxy:`LinearRegression`                  :doxy:`LinearModel`                        Finds the best linear regression model for the labels.
-:doxy:`NBClassifierTrainer`               :doxy:`NBClassifier`                       Trains a standard naive-Bayes classifier.
 :doxy:`OptimizationTrainer`               all                                        Combines the elements of a given learning problem -- optimizer,
                                                                                      model, error function and stopping criterion -- into a trainer.
 :doxy:`Perceptron`                        :doxy:`KernelExpansion`                    Kernelized perceptron -- tries to find a separating hyperplane of

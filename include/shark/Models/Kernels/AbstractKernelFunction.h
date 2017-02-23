@@ -111,10 +111,7 @@ public:
 	///evaluated in parallel!
 	virtual boost::shared_ptr<State> createState()const
 	{
-		if (hasFirstParameterDerivative() || hasFirstInputDerivative())
-		{
-			throw SHARKEXCEPTION("[AbstractKernelFunction::createState] createState must be overridden by kernels with derivatives");
-		}
+		SHARK_RUNTIME_CHECK(!hasFirstParameterDerivative() && !hasFirstInputDerivative(), "createState must be overridden by kernels with derivatives");
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 
@@ -173,7 +170,7 @@ public:
 		State const& state, 
 		RealVector& gradient
 	) const {
-		throw SHARKEXCEPTION("[AbstractKernelFunction::weightedParameterDerivative] weightedParameterDerivative(...) not implemented.");
+		SHARK_FEATURE_EXCEPTION(HAS_FIRST_PARAMETER_DERIVATIVE);
 	}
 
 	/// \brief Calculates the derivative of the inputs X1 (only x1!).
@@ -189,7 +186,7 @@ public:
 		State const& state, 
 		BatchInputType& gradient
 	) const {
-		throw SHARKEXCEPTION("[AbstractKernelFunction::weightedInputDerivative] weightedInputDerivative(...) not implemented");
+		SHARK_FEATURE_EXCEPTION(HAS_FIRST_INPUT_DERIVATIVE);
 	}
 
 

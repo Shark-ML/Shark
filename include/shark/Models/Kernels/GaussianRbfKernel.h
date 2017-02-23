@@ -89,12 +89,12 @@ public:
 		return ret;
 	}
 	void setParameterVector(RealVector const& newParameters){
-		SHARK_CHECK(newParameters.size() == 1, "[GaussianRbfKernel::setParameterVector] invalid size of parameter vector");
+		SHARK_RUNTIME_CHECK(newParameters.size() == 1, "[GaussianRbfKernel::setParameterVector] invalid size of parameter vector");
 		if (m_unconstrained){
 			m_gamma = std::exp(newParameters(0));
 		}
 		else{
-			SHARK_CHECK(newParameters(0) > 0.0, "[GaussianRbfKernel::setParameterVector] gamma must be positive");
+			SHARK_RUNTIME_CHECK(newParameters(0) > 0.0, "[GaussianRbfKernel::setParameterVector] gamma must be positive");
 			m_gamma = newParameters(0);
 		}
 	}
@@ -116,7 +116,7 @@ public:
 	/// Set the bandwidth parameter value.
 	/// \throws shark::Exception if gamma <= 0.
 	void setGamma(double gamma){
-		SHARK_CHECK(gamma > 0.0, "[GaussianRbfKernel::setGamma] gamma must be positive");
+		SHARK_RUNTIME_CHECK(gamma > 0.0, "[GaussianRbfKernel::setGamma] gamma must be positive");
 		m_gamma = gamma;
 	}
 

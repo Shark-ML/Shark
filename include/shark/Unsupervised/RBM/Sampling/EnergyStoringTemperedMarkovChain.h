@@ -97,7 +97,7 @@ public:
 	}
 	
 	void setBatchSize(std::size_t batchSize){
-		SHARK_CHECK(batchSize == 1, "[TemperedMarkovChain::setBatchSize] markov chain can only compute batches of size 1.");
+		SHARK_RUNTIME_CHECK(batchSize == 1, "Markov chain can only compute batches of size 1.");
 	}
 	std::size_t batchSize(){
 		return 1;

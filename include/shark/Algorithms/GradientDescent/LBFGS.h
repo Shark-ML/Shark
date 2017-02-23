@@ -62,7 +62,7 @@ public:
 	///
 	///\param numhist The amount of steps to use.
 	void setHistCount(unsigned int numhist) {
-		SHARK_CHECK(numhist > 0, "[LBFGS::setHistCount] An empty history is not allowed");
+		SHARK_RUNTIME_CHECK(numhist > 0, "An empty history is not allowed");
 		m_numHist = numhist;
 	}
 

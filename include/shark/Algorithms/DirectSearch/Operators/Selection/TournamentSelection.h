@@ -73,8 +73,8 @@ struct TournamentSelection {
 	Iterator operator()(DefaultRngType& rng, Iterator it, Iterator itE) const
 	{
 		std::size_t n = std::distance( it, itE );
-		SHARK_CHECK(tournamentSize > 0, " Tournament size k needs to be larger than 0");
-		SHARK_CHECK(n > tournamentSize, " Size of population needs to be larger than size of tournament");
+		SHARK_RUNTIME_CHECK(tournamentSize > 0, " Tournament size k needs to be larger than 0");
+		SHARK_RUNTIME_CHECK(n > tournamentSize, " Size of population needs to be larger than size of tournament");
 		
 		Predicate predicate;
 		Iterator result = it + discrete(rng, 0, n-1 );

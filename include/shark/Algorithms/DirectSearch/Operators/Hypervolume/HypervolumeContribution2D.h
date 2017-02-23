@@ -103,6 +103,7 @@ public:
 	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<typename Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest( Set const& points, std::size_t k, VectorType const& referencePoint)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::vector<Point> front;
 		front.emplace_back(0,referencePoint[1],points.size()+1);//add reference point
 		for(std::size_t i  = 0; i != points.size(); ++i)
@@ -121,6 +122,7 @@ public:
 	/// \param [in] k The number of points to select.
 	template<typename Set>
 	std::vector<KeyValuePair<double,std::size_t> > smallest( Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::vector<Point> front;
 		for(std::size_t i  = 0; i != points.size(); ++i)
 			front.emplace_back(points[i][0],points[i][1],i);
@@ -135,6 +137,7 @@ public:
 	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<typename Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest( Set const& points, std::size_t k, VectorType const& referencePoint)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::vector<Point> front;
 		front.emplace_back(0,referencePoint[1],points.size()+1);//add reference point
 		for(std::size_t i  = 0; i != points.size(); ++i)
@@ -153,6 +156,7 @@ public:
 	/// \param [in] k The number of points to select.
 	template<typename Set>
 	std::vector<KeyValuePair<double,std::size_t> > largest( Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::vector<Point> front;
 		for(std::size_t i  = 0; i != points.size(); ++i)
 			front.emplace_back(points[i][0],points[i][1],i);

@@ -36,7 +36,6 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 		//Run through all the cross validation sets
 		RegressionDataset dataTrain = folds.training(fold);
 		RegressionDataset dataTest = folds.validation(fold);
-		std::size_t numTrainElements = dataTrain.numberOfElements();
 
 		//AttributeTables tables = createAttributeTables(dataTrain.inputs());
 
@@ -62,7 +61,7 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 			model.setTree(tree);
 		}
 	}
-        SHARK_CHECK(bestTree.size() > 0, "We should never set a tree that is empty.");
+        SHARK_RUNTIME_CHECK(bestTree.size() > 0, "We should never set a tree that is empty.");
 	model.setTree(bestTree);
 }
 
@@ -110,7 +109,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 			model.setTree(tree);
 		}
 	}
-        SHARK_CHECK(bestTree.size() > 0, "We should never set a tree that is empty.");
+        SHARK_RUNTIME_CHECK(bestTree.size() > 0, "We should never set a tree that is empty.");
 	model.setTree(bestTree);
 
 }
@@ -407,7 +406,6 @@ CARTTrainer::Split CARTTrainer::findSplit(
 			}
 		}
 	}
-	auto& bestTable = tables[best.splitAttribute];
 	best.splitValue = tables[best.splitAttribute][best.splitRow].value;
 	return best;
 }
@@ -417,10 +415,8 @@ CARTTrainer::Split CARTTrainer::findSplit(
  * Returns the Total Sum of Squares
  */
 double CARTTrainer::totalSumOfSquares(std::vector<RealVector> const& labels, std::size_t start, std::size_t length, RealVector const& sumLabel){
-	if (length < 1)
-		throw SHARKEXCEPTION("[CARTTrainer::totalSumOfSquares] length < 1");
-	if (start+length > labels.size())
-		throw SHARKEXCEPTION("[CARTTrainer::totalSumOfSquares] start+length > labels.size()");
+	SIZE_CHECK(length > 1);
+	SIZE_CHECK(start+length <= labels.size());
 
 	RealVector labelAvg(sumLabel);
 	labelAvg /= length;

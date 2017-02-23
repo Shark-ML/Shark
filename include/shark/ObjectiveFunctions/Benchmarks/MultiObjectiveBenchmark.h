@@ -96,8 +96,7 @@ public:
 	
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		for(auto& f: m_rotations){
-			if(!f.hasScalableDimensionality())
-				throw SHARKEXCEPTION("[MultiObjectiveBenchmark] function is not scalable");
+			SHARK_RUNTIME_CHECK(f.hasScalableDimensionality(),"Function is not scalable");
 			f.setNumberOfVariables(numberOfVariables);
 		}
 	}

@@ -81,11 +81,9 @@ public:
 	std::string name() const
 	{ return "NormalizeComponentsUnitInterval"; }
 
-	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input)
-	{
-		//SHARK_CHECK(model.hasOffset(), "[NormalizeComponentsUnitInterval::train] model must have an offset term");
+	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input){
 		std:: size_t ic = input.numberOfElements();
-		SHARK_CHECK(ic >= 2, "[NormalizeComponentsUnitInterval::train] input needs to consist of at least two points");
+		SHARK_RUNTIME_CHECK(ic >= 2, "Input needs to consist of at least two points");
 		std::size_t dc = dataDimension(input);
 
 		RealVector min = input.element(0);

@@ -283,7 +283,7 @@ public:
 				lg = lossGradientATS;
 			}
 		}
-		if (initialPrimal <= 0.0 || lg == NULL) throw SHARKEXCEPTION("[McPegasos::solve] the combination of margin and loss is not implemented");
+		SHARK_RUNTIME_CHECK(initialPrimal > 0 && lg, "The combination of margin and loss is not implemented");
 
 		double normbound2 = initialPrimal / lambda;     // upper bound for |sigma * w|^2
 		double norm_w2 = 0.0;                           // squared norm of w

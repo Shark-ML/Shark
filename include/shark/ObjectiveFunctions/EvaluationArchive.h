@@ -170,9 +170,7 @@ public:
 	/// \brief Wrapper function; conditional on vector space property.
 	std::size_t numberOfVariables() const
 	{
-		base_type* avsof = dynamic_cast<base_type*>(mep_objective);
-		if (avsof) return avsof->numberOfVariables();
-		else throw SHARKEXCEPTION("search space is not a vector space");
+		return mep_objective->numberOfVariables();
 	}
 
 	/// \brief Wrapper function storing point and result.

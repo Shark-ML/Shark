@@ -64,65 +64,60 @@ namespace shark {
 /// The label can be positioned either in the first or the last column, or
 /// there can be no label present at all.
 enum LabelPosition {
-    FIRST_COLUMN,
-    LAST_COLUMN,
+	FIRST_COLUMN,
+	LAST_COLUMN,
 };
 
 namespace detail {
 
-    // export function for unlabeled data
-    template<typename T, typename Stream>
-    void exportCSV(const T &data,   // Container that holds the samples
-            Stream &out,  // The file to be read from
-            char separator,  // The separator between elements
-            bool scientific = true, //scientific notation?
-            unsigned int fieldwidth = 0
-    ) {
-        if (!out) {
-            throw(std::invalid_argument("[exportCSV (1)] Stream cannot be opened for writing."));
-        }
+// export function for unlabeled data
+template<typename T, typename Stream>
+void exportCSV(const T &data,   // Container that holds the samples
+	Stream &out,  // The file to be read from
+	char separator,  // The separator between elements
+	bool scientific = true, //scientific notation?
+	unsigned int fieldwidth = 0
+) {
+	SHARK_RUNTIME_CHECK(out, "Stream cannot be opened for writing.");
 
-        // set output format
-        if (scientific)
-            out.setf(std::ios_base::scientific);
-        std::streamsize ss = out.precision();
-        out.precision(10);
+	// set output format
+	if (scientific)
+		out.setf(std::ios_base::scientific);
+	std::streamsize ss = out.precision();
+	out.precision(10);
 
-        // write out
-        typename T::const_iterator it = data.begin();
-        for (; it != data.end(); ++it) {
-            SHARK_CHECK(it->begin() != it->end(), "[exportCSV (1)] record must not be empty");
-            for (std::size_t i=0; i<(*it).size()-1; i++) {
-                out << std::setw(fieldwidth) << (*it)(i) << separator;
-            }
-            out << std::setw(fieldwidth) << (*it)((*it).size()-1) << std::endl;
-        }
+	// write out
+	typename T::const_iterator it = data.begin();
+	for (; it != data.end(); ++it) {
+		SHARK_RUNTIME_CHECK(it->begin() != it->end(), "Record must not be empty");
+		for (std::size_t i=0; i<(*it).size()-1; i++) {
+			out << std::setw(fieldwidth) << (*it)(i) << separator;
+		}
+		out << std::setw(fieldwidth) << (*it)((*it).size()-1) << std::endl;
+	}
 
-        // restore output format
-        out.precision(ss);
-    }
+	// restore output format
+	out.precision(ss);
+}
 
     // export function for labeled data
 
-    template<typename T, typename U, typename Stream>
-    void exportCSV_labeled(const T &input,   // Container that holds the samples
-            const U &labels,  // Container that holds the labels
-            Stream &out,  // The file to be read from
-            LabelPosition lp,  // The position of the label
-            char separator,  // The separator between elements
-            bool scientific = true, //scientific notation?
-            unsigned int fieldwidth = 0, //column-align using this field width
-        typename boost::enable_if<
-            std::is_arithmetic<typename boost::range_value<U>::type>
-        >::type* dummy = 0//enable this only for arithmetic types
-    ) {
-
-        if (!out) {
-            throw(std::invalid_argument("[exportCSV (2)] Stream cannot be opened for writing."));
-        }
+template<typename T, typename U, typename Stream>
+void exportCSV_labeled(const T &input,   // Container that holds the samples
+	const U &labels,  // Container that holds the labels
+	Stream &out,  // The file to be read from
+	LabelPosition lp,  // The position of the label
+	char separator,  // The separator between elements
+	bool scientific = true, //scientific notation?
+	unsigned int fieldwidth = 0, //column-align using this field width
+	typename boost::enable_if<
+		std::is_arithmetic<typename boost::range_value<U>::type>
+	>::type* dummy = 0//enable this only for arithmetic types
+) {
+	SHARK_RUNTIME_CHECK(out, "Stream cannot be opened for writing.");
 
         if (scientific)
-            out.setf(std::ios_base::scientific);
+		out.setf(std::ios_base::scientific);
         std::streamsize ss = out.precision();
         out.precision(10);
 
@@ -131,24 +126,24 @@ namespace detail {
 
 
         for (; iti != input.end(); ++iti, ++itl) {
-            SHARK_CHECK(iti->begin() != iti->end(), "[exportCSV (2)] record must not be empty");
-            if (lp == FIRST_COLUMN)
-                out << *itl << separator;
-            for (std::size_t i=0; i<(*iti).size()-1; i++) {
-                out << std::setw(fieldwidth) << (*iti)(i) << separator;
-            }
-            if (lp == FIRST_COLUMN) {
-                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
-            } else {
-                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << separator << *itl << std::endl;
-            }
+		SHARK_RUNTIME_CHECK(iti->begin() != iti->end(), "Record must not be empty");
+		if (lp == FIRST_COLUMN)
+			out << *itl << separator;
+		for (std::size_t i=0; i<(*iti).size()-1; i++) {
+			out << std::setw(fieldwidth) << (*iti)(i) << separator;
+		}
+		if (lp == FIRST_COLUMN) {
+			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
+		} else {
+			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << separator << *itl << std::endl;
+		}
         }
         out.precision(ss);
-    }
+}
 
-    // export function for data with vector labels
-    template<typename T, typename U, typename Stream>
-    void exportCSV_labeled(
+// export function for data with vector labels
+template<typename T, typename U, typename Stream>
+void exportCSV_labeled(
         const T &input,  // Container that holds the samples
         const U &labels,  // Container that holds the labels
         Stream &out,  // The file to be read from
@@ -157,17 +152,14 @@ namespace detail {
         bool scientific = true, //scientific notation?
         unsigned int fieldwidth = 0, //column-align using this field width
         typename boost::disable_if<
-            std::is_arithmetic<typename boost::range_value<U>::type>
+		std::is_arithmetic<typename boost::range_value<U>::type>
         >::type* dummy = 0//enable this only for complex types
-    ) {
-
-        if (!out) {
-            throw(std::invalid_argument("[exportCSV (2)] Stream cannot be opened for writing."));
-        }
+) {
+	SHARK_RUNTIME_CHECK(out, "Stream cannot be opened for writing.");
 
 
         if (scientific)
-            out.setf(std::ios_base::scientific);
+		out.setf(std::ios_base::scientific);
         std::streamsize ss = out.precision();
         out.precision(10);
 
@@ -175,23 +167,25 @@ namespace detail {
         typename U::const_iterator itl = labels.begin();
 
         for (; iti != input.end(); ++iti, ++itl) {
-            SHARK_CHECK(iti->begin() != iti->end(), "[exportCSV (2)] record must not be empty");
-            if (lp == FIRST_COLUMN) {
-                for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth) << (*itl)(j) << separator;
-            }
-            for (std::size_t i=0; i<(*iti).size()-1; i++) {
-                out << std::setw(fieldwidth) << (*iti)(i) << separator;
-            }
-            if (lp == FIRST_COLUMN) {
-                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
-            } else {
-                out << std::setw(fieldwidth) << (*iti)((*iti).size()-1);
-                for (std::size_t j = 0; j < itl->size(); j++) out << std::setw(fieldwidth)  << separator << (*itl)(j);
-                out << std::endl;
-            }
+		SHARK_RUNTIME_CHECK(iti->begin() != iti->end(), "[exportCSV (2)] record must not be empty");
+		if (lp == FIRST_COLUMN) {
+			for (std::size_t j = 0; j < itl->size(); j++)
+				out << std::setw(fieldwidth) << (*itl)(j) << separator;
+		}
+		for (std::size_t i=0; i<(*iti).size()-1; i++) {
+			out << std::setw(fieldwidth) << (*iti)(i) << separator;
+		}
+		if (lp == FIRST_COLUMN) {
+			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1) << std::endl;
+		} else {
+			out << std::setw(fieldwidth) << (*iti)((*iti).size()-1);
+			for (std::size_t j = 0; j < itl->size(); j++)
+				out << std::setw(fieldwidth)  << separator << (*itl)(j);
+			out << std::endl;
+		}
         }
         out.precision(ss);
-    }
+}
 } // namespace detail
 
 
@@ -206,11 +200,11 @@ namespace detail {
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    Data<FloatVector> &data,
-    std::string const& contents,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = Data<RealVector>::DefaultBatchSize
+	Data<FloatVector> &data,
+	std::string const& contents,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<RealVector>::DefaultBatchSize
 );
 
 /// \brief Import unlabeled vectors from a read-in character-separated value file.
@@ -221,11 +215,11 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment    Trailing character indicating comment line. By dfault it is '#'
 /// \param  maximumBatchSize   Size of batches in the dataset
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    Data<RealVector> &data,
-    std::string const& contents,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = Data<RealVector>::DefaultBatchSize
+	Data<RealVector> &data,
+	std::string const& contents,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<RealVector>::DefaultBatchSize
 );
 
 /// \brief Import "csv" from string consisting only of a single unsigned int per row
@@ -236,11 +230,11 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    Data<unsigned int> &data,
-    std::string const& contents,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = Data<unsigned int>::DefaultBatchSize
+	Data<unsigned int> &data,
+	std::string const& contents,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<unsigned int>::DefaultBatchSize
 );
 
 /// \brief Import "csv" from string consisting only of a single  int per row
@@ -251,11 +245,11 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    Data<int> &data,
-    std::string const& contents,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = Data<int>::DefaultBatchSize
+	Data<int> &data,
+	std::string const& contents,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<int>::DefaultBatchSize
 );
 
 /// \brief Import "csv" from string consisting only of a single double per row
@@ -266,11 +260,11 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    Data<float> &data,
-    std::string const& contents,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = Data<double>::DefaultBatchSize
+	Data<float> &data,
+	std::string const& contents,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<double>::DefaultBatchSize
 );
 
 /// \brief Import "csv" from string consisting only of a single double per row
@@ -281,11 +275,11 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment            Trailing characters indicating comment line. By default it is "#"
 /// \param  maximumBatchSize   Size of batches in the dataset
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    Data<double> &data,
-    std::string const& contents,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = Data<double>::DefaultBatchSize
+	Data<double> &data,
+	std::string const& contents,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = Data<double>::DefaultBatchSize
 );
 
 /// \brief Import labeled data from a character-separated value file.
@@ -297,12 +291,12 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment    Character for indicating a comment, by default '#'
 /// \param  maximumBatchSize  maximum size of a batch in the dataset after import
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    LabeledData<RealVector, unsigned int> &dataset,
-    std::string const& contents,
-    LabelPosition lp,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	LabeledData<RealVector, unsigned int> &dataset,
+	std::string const& contents,
+	LabelPosition lp,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
 /// \brief Import labeled data from a character-separated value file.
@@ -314,12 +308,12 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 /// \param  comment    Character for indicating a comment, by default '#'
 /// \param  maximumBatchSize  maximum size of a batch in the dataset after import
 SHARK_EXPORT_SYMBOL void csvStringToData(
-    LabeledData<FloatVector, unsigned int> &dataset,
-    std::string const& contents,
-    LabelPosition lp,
-    char separator = ',',
-    char comment = '#',
-    std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	LabeledData<FloatVector, unsigned int> &dataset,
+	std::string const& contents,
+	LabelPosition lp,
+	char separator = ',',
+	char comment = '#',
+	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 );
 
 
@@ -381,7 +375,7 @@ void importCSV(
 	std::size_t titleLines = 0
 ){
 	std::ifstream stream(fn.c_str());
-	if(!stream) throw(std::invalid_argument("[importCSV] Stream cannot be opened for reading."));
+	SHARK_RUNTIME_CHECK(stream, "Stream cannot be opened for reading.");
 	
 	stream.unsetf(std::ios::skipws);
 	
@@ -415,7 +409,7 @@ void importCSV(
 	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
 ){
 	std::ifstream stream(fn.c_str());
-	if(!stream) throw(std::invalid_argument("[importCSV] Stream cannot be opened for reading."));
+	SHARK_RUNTIME_CHECK(stream, "Stream cannot be opened for reading.");
 
 	stream.unsetf(std::ios::skipws);
 	std::istream_iterator<char> streamBegin(stream);
@@ -447,7 +441,7 @@ void importCSV(
 	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
 ){
 	std::ifstream stream(fn.c_str());
-	if(!stream) throw(std::invalid_argument("[importCSV] Stream cannot be opened for reading."));
+	SHARK_RUNTIME_CHECK(stream, "Stream cannot be opened for reading.");
 
 	stream.unsetf(std::ios::skipws);
 	std::istream_iterator<char> streamBegin(stream);
@@ -475,6 +469,7 @@ void exportCSV(
 	unsigned int width = 0
 ) {
 	std::ofstream ofs(fn.c_str());
+	SHARK_RUNTIME_CHECK(ofs, "Stream cannot be opened for writing.");
 	detail::exportCSV(set.elements(), ofs, separator, sci, width);
 }
 
@@ -497,6 +492,7 @@ void exportCSV(
     unsigned int width = 0
 ) {
 	std::ofstream ofs(fn.c_str());
+	SHARK_RUNTIME_CHECK(ofs, "Stream cannot be opened for writing.");
 	detail::exportCSV_labeled(dataset.inputs().elements(), dataset.labels().elements(), ofs, lp, separator, sci, width);
 }
 

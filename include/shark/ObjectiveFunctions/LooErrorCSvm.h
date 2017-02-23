@@ -60,7 +60,7 @@ public:
 	, mep_kernel(kernel)
 	, m_withOffset(withOffset)
 	{
-		SHARK_CHECK(kernel != NULL, "kernel is not allowed to be Null");
+		SHARK_RUNTIME_CHECK(kernel != NULL, "kernel is not allowed to be Null");
 		m_features |= HAS_VALUE;
 	}
 

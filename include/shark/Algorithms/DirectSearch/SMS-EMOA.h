@@ -134,8 +134,7 @@ public:
 		checkFeatures(function);
 		std::vector<RealVector> values(initialSearchPoints.size());
 		for(std::size_t i = 0; i != initialSearchPoints.size(); ++i){
-			if(!function.isFeasible(initialSearchPoints[i]))
-				throw SHARKEXCEPTION("[SMS-EMOA::init] starting point(s) not feasible");
+			SHARK_RUNTIME_CHECK(function.isFeasible(initialSearchPoints[i]),"Starting point(s) not feasible");
 			values[i] = function.eval(initialSearchPoints[i]);
 		}
 		
@@ -149,7 +148,10 @@ public:
 			lowerBounds = handler.lower();
 			upperBounds = handler.upper();
 		} else{
-			throw SHARKEXCEPTION("[SMS-EMOA::init] Algorithm does only allow box constraints");
+			SHARK_RUNTIME_CHECK(
+				function.hasConstraintHandler() && !function.getConstraintHandler().isBoxConstrained(),
+				"Algorithm does only allow box constraints"
+			);
 		}
 		doInit(initialSearchPoints,values,lowerBounds, upperBounds,mu(),nm(),nc(),crossoverProbability());
 	}

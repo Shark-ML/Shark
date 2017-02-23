@@ -167,8 +167,7 @@ public:
 		double error = 0;
 		for(std::size_t i = 0; i != labels.size(); ++i){
 			SIZE_CHECK(labels[i].size()==predictions[i].size());
-			if(labels[i].size() <= m_ignore)
-				throw SHARKEXCEPTION("[SquaredLoss::eval] Number of sequence elements to ignore is too large");
+			SHARK_RUNTIME_CHECK(labels[i].size()  > m_ignore,"Number of sequence elements to ignore is too large");
 
 			for(std::size_t j = m_ignore; j != labels[i].size(); ++j){
 				error += distanceSqr(predictions[i][j],labels[i][j]);
@@ -186,8 +185,7 @@ public:
 		double error = 0;
 		for(std::size_t i = 0; i != labels.size(); ++i){
 			SIZE_CHECK(labels[i].size()==predictions[i].size());
-			if(labels[i].size() <= m_ignore)
-				throw SHARKEXCEPTION("[SquaredLoss::eval] Number of sequence elements to ignore is too large");
+			SHARK_RUNTIME_CHECK(labels[i].size()  > m_ignore,"Number of sequence elements to ignore is too large");
 			for(std::size_t j = 0; j != m_ignore; ++j){
 				gradient[i].push_back(RealVector(predictions[i][j].size(),0.0));
 			}

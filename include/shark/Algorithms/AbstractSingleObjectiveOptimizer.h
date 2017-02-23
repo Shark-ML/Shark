@@ -58,8 +58,7 @@ namespace shark {
 		///initializes the optimizer. The objectivefunction is required to provide a starting point, so CAN_PROPOSE_STARTING_POINT
 		///must be set. If this is not the case, an exception is thrown
 		virtual void init(ObjectiveFunctionType& function ){
-			if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
-				throw SHARKEXCEPTION( "[AbstractSingleObjectiveOptimizer::init] Objective function does not propose a starting point");
+			SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
 			init(function,function.proposeStartingPoint());
 		}
 		///initializes the optimizer using a predefined starting point

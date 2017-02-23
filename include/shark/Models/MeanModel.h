@@ -98,7 +98,7 @@ public:
 	/// \param model the new model
 	/// \param weight weight of the model. must be > 0
 	void addModel(ModelType const& model, double weight = 1.0){
-		SHARK_CHECK(weight > 0, "Weights must be positive");
+		SHARK_RUNTIME_CHECK(weight > 0, "Weights must be positive");
 		m_models.push_back(model);
 		m_weight.push_back(weight);
 		m_weightSum+=weight;

@@ -77,7 +77,7 @@ public:
 	/// a weight to the linear combination.
 	void add(double weight, element const& e)
 	{
-		SHARK_CHECK(weight >= 0.0, "[CombinedObjectiveFunction::add] weight must be non-negative");
+		SHARK_RUNTIME_CHECK(weight >= 0.0, "[CombinedObjectiveFunction::add] weight must be non-negative");
 
 		m_weight.push_back(weight);
 		m_elements.push_back(&e);
@@ -117,7 +117,7 @@ public:
 	/// and calculates its gradient.
 	typename super::ResultType evalDerivative( const typename super::SearchPointType & input, typename super::FirstOrderDerivative & derivative ) const {
 		++this->m_evaluationCounter;
-		SHARK_CHECK(this->m_features.test(super::HAS_FIRST_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not differentiable");
+		SHARK_RUNTIME_CHECK(this->m_features.test(super::HAS_FIRST_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not differentiable");
 		typename super::FirstOrderDerivative der;
 		std::size_t ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);
@@ -134,7 +134,7 @@ public:
 	/// and calculates its gradient and
 	/// its Hessian.
 	typename super::ResultType evalDerivative( const typename super::SearchPointType & input, typename super::SecondOrderDerivative & derivative )const {
-		SHARK_CHECK(this->m_features.test(super::HAS_SECOND_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not twice differentiable");
+		SHARK_RUNTIME_CHECK(this->m_features.test(super::HAS_SECOND_DERIVATIVE), "[CombinedObjectiveFunction::evalDerivative] At least one of the objective functions combined is not twice differentiable");
 		typename super::SecondOrderDerivative der;
 		std::size_t ic = m_elements.size();
 		typename super::ResultType ret = m_weight[0] * m_elements[0]->evalDerivative(input, der);

@@ -81,40 +81,7 @@ namespace shark
 /// to create an specialization of this strategy for a given input type.
 ///
 template<class InputType>
-class MergeBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<InputType>
-{
-	typedef KernelExpansion<InputType> ModelType;
-	typedef LabeledData<InputType, unsigned int> DataType;
-	typedef typename DataType::element_type ElementType;
-
-public:
-
-	/// constructor.
-	MergeBudgetMaintenanceStrategy()
-	{
-	}
-
-
-	/// add to model.
-	/// this is just a fake here, as it is unclear in general how to merge two objects,
-	/// one needs to specialize this template.
-	///
-	/// @param[in,out]  model   the model the strategy will work with
-	/// @param[in]  alpha   alphas for the new budget vector
-	/// @param[in]  supportVector the vector to add to the model by applying the maintenance strategy
-	///
-	virtual void addToModel(ModelType& model, InputType &alpha, ElementType &supportVector)
-	{
-		// this has to be implemented for every specialization
-		// so here we throw some error
-		throw(SHARKEXCEPTION("MergeBudgetMaintenanceStrategy: There is no default merging strategy for the InputType you provided! Please specialize this class."));
-	}
-
-
-	/// class name
-	std::string name() const
-	{ return "MergeBudgetMaintenanceStrategy"; }
-};
+class MergeBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<InputType>{};
 
 
 
@@ -133,12 +100,6 @@ class MergeBudgetMaintenanceStrategy<RealVector>: public AbstractBudgetMaintenan
 	typedef RealVector InputType;
 
 public:
-
-	/// constructor.
-	MergeBudgetMaintenanceStrategy()
-	{
-	}
-
 
 	/// This is the objective function we need to optimize during merging.
 	/// Basically the merging strategy needs a line search to find the parameter

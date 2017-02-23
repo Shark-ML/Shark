@@ -40,7 +40,7 @@ using namespace shark;
 
 /// Set the input data, which is stored in the PCA object.
 void PCA::setData(UnlabeledData<RealVector> const& inputs) {
-	SHARK_CHECK(inputs.numberOfElements() >= 2, "[PCA::train] input needs to contain at least two points");
+	SHARK_RUNTIME_CHECK(inputs.numberOfElements() >= 2, "Input needs to contain at least two points");
 	m_l = inputs.numberOfElements(); ///< number of data points
 	PCAAlgorithm algorithm = m_algorithm;
 	m_n = dataDimension(inputs); 

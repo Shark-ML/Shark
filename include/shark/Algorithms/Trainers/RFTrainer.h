@@ -106,8 +106,8 @@ public:
 
 
 	/// Set the number of trees to grow.
-	SHARK_EXPORT_SYMBOL void setNTrees(long nTrees) {
-		if(nTrees<1) throw SHARKEXCEPTION("[RFTrainer::setNTree] nTrees should be a positive number");
+	void setNTrees(long nTrees) {
+		SHARK_RUNTIME_CHECK(nTrees >= 1, "nTrees must be a positive number");
 		m_B = nTrees;
 	}
 
@@ -118,11 +118,9 @@ public:
 
 	/// Set the fraction of the original training dataset to use as the
 	/// out of bag sample. The default value is 0.66.
-	SHARK_EXPORT_SYMBOL void setOOBratio(double ratio)
+	void setOOBratio(double ratio)
 	{
-		if(m_OOBratio <= 0 || m_OOBratio>1){
-			throw SHARKEXCEPTION("[RFTrainer::setOOBratio] OOBratio should be in the interval (0,1]");
-		}
+		SHARK_RUNTIME_CHECK(m_OOBratio > 0 && m_OOBratio <= 1, "OOBratio must be in the interval (0,1]");
 		m_OOBratio = ratio;
 	}
 

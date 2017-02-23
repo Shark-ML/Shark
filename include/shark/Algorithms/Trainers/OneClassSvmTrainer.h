@@ -121,8 +121,7 @@ public:
 	{ m_cacheSize = size; }
 
 	/// get the hyper-parameter vector
-	RealVector parameterVector() const
-	{
+	RealVector parameterVector() const{
 		size_t kp = m_kernel->numberOfParameters();
 		RealVector ret(kp + 1);
 		noalias(subrange(ret, 0, kp)) = m_kernel->parameterVector();
@@ -131,8 +130,7 @@ public:
 	}
 
 	/// set the vector of hyper-parameters
-	void setParameterVector(RealVector const& newParameters)
-	{
+	void setParameterVector(RealVector const& newParameters){
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
 		m_kernel->setParameterVector(subrange(newParameters, 0, kp));
@@ -145,7 +143,7 @@ public:
 
 	void train(KernelExpansion<InputType>& svm, UnlabeledData<InputType> const& inputset)
 	{
-		SHARK_CHECK(m_nu > 0.0 && m_nu< 1.0, "[OneClassSvmTrainer::train] invalid setting of the parameter nu (must be 0 < nu < 1)");
+		SHARK_RUNTIME_CHECK(m_nu > 0.0 && m_nu< 1.0, "invalid setting of the parameter nu (must be 0 < nu < 1)");
 		svm.setStructure(m_kernel,inputset,true);
 
 		// solve the quadratic program

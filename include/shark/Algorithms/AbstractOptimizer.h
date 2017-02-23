@@ -137,30 +137,20 @@ protected:
 	* \throws shark::Exception
 	*/
 	void checkFeatures (ObjectiveFunctionType const& objectiveFunction){
-		//test first derivative
-		if( (m_features & REQUIRES_FIRST_DERIVATIVE) &
-			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_FIRST_DERIVATIVE)
-		)throw SHARKEXCEPTION("[ "+name()+" ] requires first derivative");
-		//test second derivative
-		if( (m_features & REQUIRES_SECOND_DERIVATIVE) &
-			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_SECOND_DERIVATIVE)
-		)throw SHARKEXCEPTION("[ "+name()+" ] requires second derivative");
-
 		//test whether the function can be evaluated
-		if( (m_features & REQUIRES_VALUE) &
-			!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE)
-		)throw SHARKEXCEPTION("[ "+name()+" ] requires the value of the function");
-
-		//test for constrains
-		if( !(m_features & CAN_SOLVE_CONSTRAINED) &
-			(objectiveFunction.features() & ObjectiveFunctionType::IS_CONSTRAINED_FEATURE)
-		)throw SHARKEXCEPTION("[ "+name()+" ] can not solve constrained functions");
-
-		//test for closest feasible in constrained functions
-		if( (objectiveFunction.features() & ObjectiveFunctionType::IS_CONSTRAINED_FEATURE) &
-			!(objectiveFunction.features() & ObjectiveFunctionType::CAN_PROVIDE_CLOSEST_FEASIBLE) &
-			(m_features & REQUIRES_CLOSEST_FEASIBLE)
-		)throw SHARKEXCEPTION("[ "+name()+" ] requires closest feasible for constrained functions");
+		SHARK_RUNTIME_CHECK(!requiresValue() || objectiveFunction.hasValue(), name()+" Requires value of objective function");
+		//test first derivative
+		SHARK_RUNTIME_CHECK(!requiresFirstDerivative() || objectiveFunction.hasFirstDerivative(), name()+" Requires first derivative of objective function");
+		//test second derivative
+		SHARK_RUNTIME_CHECK(!requiresSecondDerivative() || objectiveFunction.hasSecondDerivative(), name()+" Requires second derivative of objective function");
+		//test for constraints
+		if(objectiveFunction.isConstrained()){
+			SHARK_RUNTIME_CHECK(canSolveConstrained(), name()+" Can not solve constrained problems");
+			SHARK_RUNTIME_CHECK(
+				!requiresClosestFeasible() || objectiveFunction.canProvideClosestFeasible(), 
+				name()+" Requires closest feasible solution for solving constrained problems"
+			);
+		}
 	}
 };
 

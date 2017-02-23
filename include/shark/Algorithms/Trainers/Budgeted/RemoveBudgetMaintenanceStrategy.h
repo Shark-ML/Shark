@@ -70,14 +70,15 @@ class RemoveBudgetMaintenanceStrategy: public AbstractBudgetMaintenanceStrategy<
 public:
 
 	/// the flavors of the remove strategy
-	enum RemoveStrategyFlavor {RANDOM, SMALLEST};
+	enum RemoveStrategyFlavor {RANDOM = 0, SMALLEST = 1};
 
 
 	/// constructor.
 	/// @param[in] flavor   enum that decides on the method a vector is removed.
-	RemoveBudgetMaintenanceStrategy(size_t flavor = SMALLEST)
+	RemoveBudgetMaintenanceStrategy(RemoveStrategyFlavor flavor = SMALLEST)
 		: m_flavor(flavor)
 	{
+		SHARK_RUNTIME_CHECK(flavor < 2, "Invalid flavor");
 	}
 
 
@@ -119,9 +120,6 @@ public:
 			// we already have found the smallest alpha, so nothing to do
 			break;
 		}
-		default:
-			// throw some error
-			throw(SHARKEXCEPTION("RemoveBudgetMaintenanceStrategy: Unknown flavor!"));
 		}
 
 		// replace vector and alpha

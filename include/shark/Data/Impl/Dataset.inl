@@ -339,7 +339,7 @@ public:
 	///Order of elements remain unchanged. SharedContainer is not allowed to be shared for
 	///this to work.
 	void splitBatch(iterator position, std::size_t elementIndex){
-		SHARK_CHECK(isIndependent(), "[SharedContainer::splitBlock] Container is not Independent");
+		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
 		SIZE_CHECK(elementIndex <= shark::size(*position));
 
 		BatchType& source=*position;
@@ -367,7 +367,7 @@ public:
 	///Order of elements remain unchanged. The SharedContainer is not allowed to be shared for
 	///this to work.
 	SharedContainer<Type> splice(iterator position){
-		SHARK_CHECK(isIndependent(), "[SharedContainer::splice] Container is not Independent");
+		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
 		SharedContainer<Type> right;
 		right.m_data.assign(position.base(),m_data.end());
 		m_data.erase(position.base(),m_data.end());
@@ -386,7 +386,7 @@ public:
 		SIZE_CHECK(sum == numberOfElements());
 
 
-		SHARK_CHECK(isIndependent(), "[SharedContainer::repartition] Container is not Independent");
+		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
 		Container newPartitioning;
 		std::size_t currentBatch = 0;
 		std::size_t currentBatchIndex = 0;

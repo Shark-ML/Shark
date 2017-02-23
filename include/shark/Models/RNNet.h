@@ -70,7 +70,7 @@ public:
 	//! \param structure the structure of this neural network. It can be shared between multiple instances or with then
 	//!                  online version of this net.
 	RNNet(RecurrentStructure* structure):mpe_structure(structure){
-		SHARK_CHECK(mpe_structure,"[RNNet] structure is not allowed to be empty");
+		SHARK_RUNTIME_CHECK(mpe_structure,"[RNNet] structure is not allowed to be empty");
 		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
 

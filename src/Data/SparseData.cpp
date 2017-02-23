@@ -60,9 +60,7 @@ importSparseDataReader(std::istream& stream) {
 			double_ >> *(uint_ >> ':' >> double_),
 			space, newPoint
 		);
-		if (!r || first != last) {
-			throw SHARKEXCEPTION("[importSparseDataReader] failed to parse record: " + line);
-		}
+		SHARK_RUNTIME_CHECK(r && first == last, "Failed to parse record: " + line);
 
 		fileContents.push_back(newPoint);
 	}
@@ -130,9 +128,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 			maxIndex = std::max(maxIndex, inputs.back().first);
 	}
 	maxIndex = std::max<std::size_t>(maxIndex,dimensions);
-	if(dimensions > 0 && maxIndex > dimensions){
-		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
-	}
+	SHARK_RUNTIME_CHECK(dimensions == 0 || maxIndex <= dimensions, "Number of dimensions supplied is smaller than actual index data" );
 
 	//check labels for conformity
 	bool binaryLabels = false;
@@ -141,19 +137,19 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != numPoints; ++i){
 			int label = static_cast<int>(contents[i].first);
-			if (label != contents[i].first)
-				throw SHARKEXCEPTION("non-integer labels are only allows for regression");
-			if(label < -1)
-				throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
-			else if(label == -1)
+			SHARK_RUNTIME_CHECK(label == contents[i].first, "non-integer labels are only allows for regression" );
+			SHARK_RUNTIME_CHECK(label >= -1, "labels can not be smaller than -1" );
+			if(label == -1)
 				binaryLabels = true;
 			else if(label < minPositiveLabel)
 				minPositiveLabel = label;
 			else if(label > maxPositiveLabel)
 				maxPositiveLabel = label;
 		}
-		if(binaryLabels && (minPositiveLabel == 0||  maxPositiveLabel > 1))
-			throw SHARKEXCEPTION("negative labels are only allowed for classes -1/1");
+		SHARK_RUNTIME_CHECK(
+			minPositiveLabel >= 0 || (minPositiveLabel == -1 && maxPositiveLabel == 1),
+			"negative labels are only allowed for classes -1/1"
+		);
 	}
 
 	// check for feature index zero (non-standard, but it happens)
@@ -204,9 +200,7 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 			maxIndex = std::max(maxIndex, inputs.back().first);
 	}
 	maxIndex = std::max<std::size_t>(maxIndex,dimensions);
-	if (dimensions > 0 && maxIndex > dimensions) {
-		throw SHARKEXCEPTION("number of dimensions supplied is smaller than actual index data");
-	}
+	SHARK_RUNTIME_CHECK(dimensions == 0 || maxIndex <= dimensions, "Number of dimensions supplied is smaller than actual index data" );
 
 	// check for feature index zero (non-standard, but it happens)
 	bool hasZero = false;
@@ -280,7 +274,7 @@ void shark::importSparseData(
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
-	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
 	dataset =  libsvm_importer_classification<RealVector>(ifs, highestIndex, batchSize);
 }
 
@@ -291,7 +285,7 @@ void shark::importSparseData(
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
-	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
 	dataset =  libsvm_importer_regression<RealVector>(ifs, highestIndex, batchSize);
 }
 
@@ -302,7 +296,7 @@ void shark::importSparseData(
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
-	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
 	dataset =  libsvm_importer_classification<CompressedRealVector>(ifs, highestIndex, batchSize);
 }
 
@@ -313,6 +307,6 @@ void shark::importSparseData(
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
-	if (! ifs.good()) throw SHARKEXCEPTION("[shark::importSparseData] failed to open file for input");
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
 	dataset =  libsvm_importer_regression<CompressedRealVector>(ifs, highestIndex, batchSize);
 }

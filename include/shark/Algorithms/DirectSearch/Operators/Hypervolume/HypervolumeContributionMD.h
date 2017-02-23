@@ -51,6 +51,7 @@ struct HypervolumeContributionMD {
 	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		HypervolumeCalculator hv;
 		std::vector<KeyValuePair<double,std::size_t> > result( points.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
@@ -77,6 +78,7 @@ struct HypervolumeContributionMD {
 	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		HypervolumeCalculator hv;
 		std::vector<KeyValuePair<double,std::size_t> > result( points.size() );
 		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
@@ -105,6 +107,7 @@ struct HypervolumeContributionMD {
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		//find reference point as well as points with lowest function value
 		std::vector<std::size_t> minIndex(points[0].size(),0);
 		RealVector minVal = points[0];
@@ -151,6 +154,7 @@ struct HypervolumeContributionMD {
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		//find reference point as well as points with lowest function value
 		std::vector<std::size_t> minIndex(points[0].size(),0);
 		RealVector minVal = points[0];

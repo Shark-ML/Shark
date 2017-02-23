@@ -126,7 +126,7 @@ public:
 	}
 	
 	void setBatchSize(std::size_t batchSize){
-		SHARK_CHECK(batchSize == 1, "[TemperedMarkovChain::setBatchSize] markov chain can only compute batches of size 1.");
+		SHARK_RUNTIME_CHECK(batchSize == 1, "Markov chain can only compute batches of size 1.");
 	}
 	std::size_t batchSize(){
 		return 1;
@@ -165,8 +165,7 @@ public:
 	/// Be aware that the number of chains and the temperatures need to bee specified previously.
 	/// @param dataSet the data set
 	void initializeChain(Data<RealVector> const& dataSet){
-		if(m_temperedChains.size()==0) 
-			throw SHARKEXCEPTION("you did not initialize the number of temperatures bevor initializing the chain!");
+		SHARK_RUNTIME_CHECK(m_temperedChains.size() != 0,"You did not initialize the number of temperatures bevor initializing the chain!");
 		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles = m_operator.rbm()->numberOfVN();
 		RealMatrix sampleData(m_temperedChains.size(),visibles);
@@ -182,8 +181,7 @@ public:
 	/// Be aware that the number of chains and the temperatures need to bee specified previously.
 	/// @param sampleData the data set
 	void initializeChain(RealMatrix const& sampleData){
- 		if(m_temperedChains.size()==0) 
-			throw SHARKEXCEPTION("you did not initialize the number of temperatures bevor initializing the chain!");
+ 		SHARK_RUNTIME_CHECK(m_temperedChains.size() != 0,"You did not initialize the number of temperatures bevor initializing the chain!");
 
 		m_operator.createSample(m_temperedChains.hidden,m_temperedChains.visible,sampleData,m_betas);
 		

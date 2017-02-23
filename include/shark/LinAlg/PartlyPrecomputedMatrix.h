@@ -79,8 +79,7 @@ public:
 		: m_cacheSize(cachesize)
 		, m_baseMatrix(base)
 	{
-		if((m_baseMatrix == NULL) || (m_baseMatrix ->size() == 0))
-			throw SHARKEXCEPTION("Cannot cache a NULL matrix!");
+		SHARK_RUNTIME_CHECK(m_baseMatrix || m_baseMatrix ->size() == 0, "Cannot cache a NULL matrix!");
 
 		// remember the original size of the matrix
 		m_originalNumberOfRows = m_baseMatrix -> size();
@@ -90,8 +89,7 @@ public:
 
 		// how many rows fit into our cache?
 		size_t m_nRows = (size_t) m_cacheSize / rowSizeBytes;
-		if(m_nRows < 1)
-			throw SHARKEXCEPTION("Cache size is smaller than the size of a row!");
+		SHARK_RUNTIME_CHECK(m_nRows, "Cache size is smaller than the size of a row!");
 
 		// if we have more space than needed, well, we do not need it.
 		if(m_nRows > m_originalNumberOfRows)

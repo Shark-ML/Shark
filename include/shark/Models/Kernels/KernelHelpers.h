@@ -55,7 +55,7 @@ void calculateRegularizedKernelMatrix(
 	blas::matrix_expression<M, Device>& matrix,
 	double regularizer = 0
 ){
-	SHARK_CHECK(regularizer >= 0, "regularizer must be >=0");
+	SHARK_RUNTIME_CHECK(regularizer >= 0, "regularizer must be >=0");
 	std::size_t B = dataset.numberOfBatches();
 	//get start of all batches in the matrix
 	//also include  the past the end position at the end
@@ -143,7 +143,7 @@ RealMatrix calculateRegularizedKernelMatrix(
 	Data<InputType> const& dataset, 
 	double regularizer = 0
 ){
-	SHARK_CHECK(regularizer >= 0, "regularizer must be >=0");
+	SHARK_RUNTIME_CHECK(regularizer >= 0, "regularizer must be >=0");
 	RealMatrix M;
 	calculateRegularizedKernelMatrix(kernel,dataset,M,regularizer);
 	return M;

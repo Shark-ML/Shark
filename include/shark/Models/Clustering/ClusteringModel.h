@@ -58,7 +58,7 @@ public:
 	/// Constructor.
 	ClusteringModel(ClusteringType* clustering)
 	: mep_clustering(clustering)
-	{ SHARK_CHECK(clustering, "[ClusteringModel] Clustering must not be NULL"); }
+	{ SHARK_RUNTIME_CHECK(clustering, "[ClusteringModel] Clustering must not be NULL"); }
 
 
 	/// Redirect parameter access to the clustering object

@@ -48,7 +48,7 @@ RealVector ThresholdConverter::parameterVector() const{
 }
 
 void ThresholdConverter::setParameterVector(RealVector const& newParameters){
-	SHARK_CHECK(newParameters.size() == 0, "[ThresholdConverter::setParameterVector] invalid number of parameters");
+	SIZE_CHECK(newParameters.size() == 0);
 }
 
 std::size_t ThresholdConverter::numberOfParameters() const{ 
@@ -56,7 +56,7 @@ std::size_t ThresholdConverter::numberOfParameters() const{
 }
 
 void ThresholdConverter::eval(BatchInputType const& pattern, BatchOutputType& outputs)const{
-	SHARK_CHECK(pattern.size2() == 1, "[ThresholdConverter::eval] invalid size of input");
+	SIZE_CHECK(pattern.size2() == 1);
 	outputs.resize(pattern.size1());
 	for(std::size_t i = 0; i != pattern.size1(); ++i)
 		outputs(i) = (pattern(i,0) > m_threshold) ? 1 : 0;
@@ -74,7 +74,7 @@ RealVector ThresholdVectorConverter::parameterVector() const{
 }
 
 void ThresholdVectorConverter::setParameterVector(RealVector const& newParameters){
-	SHARK_CHECK(newParameters.size() == 0, "[ThresholdVectorConverter::setParameterVector] invalid number of parameters");
+	SIZE_CHECK(newParameters.size() == 0);
 }
 
 std::size_t ThresholdVectorConverter::numberOfParameters() const{ 

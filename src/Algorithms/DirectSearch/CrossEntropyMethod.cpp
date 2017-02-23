@@ -179,7 +179,7 @@ void CrossEntropyMethod::updateStrategyParameters( const std::vector<Individual<
 * \brief Executes one iteration of the algorithm.
 */
 void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
-
+	
 	std::vector< IndividualType > offspring( m_populationSize );
 
 	PenalizingEvaluator penalizingEvaluator;
@@ -207,8 +207,7 @@ void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 }
 
 void CrossEntropyMethod::init(ObjectiveFunctionType& function ){
-	if(!(function.features() & ObjectiveFunctionType::CAN_PROPOSE_STARTING_POINT))
-		throw SHARKEXCEPTION( "[AbstractSingleObjectiveOptimizer::init] Objective function does not propose a starting point");
+	SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
 	CrossEntropyMethod::init(function,function.proposeStartingPoint());
 }
 

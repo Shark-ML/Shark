@@ -49,8 +49,7 @@ struct HypervolumeCalculator3D {
 	/// \param [in] points The set of points for which to compute the volume
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^3\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<typename Set, typename VectorType >
-	double operator()( Set const& points, VectorType const& refPoint)
-	{
+	double operator()( Set const& points, VectorType const& refPoint){
 		if (points.empty()) return 0.0;
 		SIZE_CHECK(points.begin()->size() == 3);
 		SIZE_CHECK(refPoint.size() == 3);

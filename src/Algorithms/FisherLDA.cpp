@@ -43,7 +43,7 @@ FisherLDA::FisherLDA(bool whitening, std::size_t dimensions){
 }
 
 void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int> const& dataset){
-	SHARK_CHECK(! dataset.empty(), "[FisherLDA::train] dataset is empty");
+	SHARK_RUNTIME_CHECK(!dataset.empty(), "Dataset can not be empty.");
 
 	std::size_t inputDim = inputDimension(dataset);
 	std::size_t nComp = m_subspaceDimensions? m_subspaceDimensions : numberOfClasses(dataset);

@@ -140,19 +140,19 @@ public:
 		return m_alpha(example, cls);
 	}
 	RealVector& offset(){
-		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_RUNTIME_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b;
 	}
 	RealVector const& offset() const{
-		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_RUNTIME_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b;
 	}
 	double& offset(std::size_t cls){
-		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_RUNTIME_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b(cls);
 	}
 	double const& offset(std::size_t cls) const{
-		SHARK_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
+		SHARK_RUNTIME_CHECK(hasOffset(), "[KernelExpansion::offset] invalid call for object without offset term");
 		return m_b(cls);
 	}
 
@@ -206,7 +206,7 @@ public:
 	}
 
 	void setParameterVector(RealVector const& newParameters){
-		SHARK_CHECK(newParameters.size() == numberOfParameters(), "[KernelExpansion::setParameterVector] invalid size of the parameter vector");
+		SHARK_RUNTIME_CHECK(newParameters.size() == numberOfParameters(), "[KernelExpansion::setParameterVector] invalid size of the parameter vector");
 
 		if (hasOffset())
 			init(newParameters) >> toVector(m_alpha), m_b;

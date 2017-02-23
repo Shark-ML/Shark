@@ -86,7 +86,7 @@ public:
 	typedef typename base_type::ConstBatchInputReference ConstBatchInputReference;
 
 	WeightedSumKernel(std::vector<AbstractKernelFunction<InputType>* > const& base){
-		SHARK_CHECK( base.size() > 0, "[WeightedSumKernel::WeightedSumKernel] There should be at least one sub-kernel.");
+		SHARK_RUNTIME_CHECK( base.size() > 0, "[WeightedSumKernel::WeightedSumKernel] There should be at least one sub-kernel.");
 
 		m_base.resize( base.size() );
 		m_numParameters = m_base.size()-1;

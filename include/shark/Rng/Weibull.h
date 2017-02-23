@@ -133,10 +133,7 @@ class Weibull:public boost::variate_generator<RngType*,Weibull_distribution<> >
 
 		double p(double x)const
 		{
-			if (x <= 0)
-			{
-				throw SHARKEXCEPTION("Weibull distribution not defined for x <= 0");
-			}
+			SHARK_RUNTIME_CHECK(x > 0,"Weibull distribution not defined for x <= 0");
 			return alpha() / beta() * exp(-pow(x / beta(), alpha())) * pow(x / beta(), alpha() - 1.);
 
 		}

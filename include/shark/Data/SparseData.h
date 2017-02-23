@@ -220,10 +220,7 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, const
 	} else {
 	    ofs.open (fn.c_str());
 	}
-
-	if( !ofs ) {
-		throw( SHARKEXCEPTION( "[exportSparseData] file can not be opened for writing" ) );
-	}
+	SHARK_RUNTIME_CHECK(ofs, "File can not be opened for writing");
 
 	exportSparseData(dataset, ofs, oneMinusOne, sortLabels);
 }
@@ -269,9 +266,7 @@ void exportSparseData(LabeledData<InputType, RealVector> const& dataset, const s
 		ofs.open (fn.c_str());
 	}
 
-	if( !ofs ) {
-		throw( SHARKEXCEPTION( "[exportSparseData] file can not be opened for writing" ) );
-	}
+	SHARK_RUNTIME_CHECK(ofs, "File can not be opened for writing");
 
 	exportSparseData(dataset, ofs);
 }

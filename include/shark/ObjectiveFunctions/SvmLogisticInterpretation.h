@@ -97,8 +97,8 @@ public:
 	,  mep_svmStoppingCondition(stop_cond)
 	,  m_sigmoidSlopeIsUnconstrained(true)
 	{
-		SHARK_CHECK(kernel != NULL, "[SvmLogisticInterpretation::SvmLogisticInterpretation] kernel is not allowed to be NULL");  //mtq: necessary despite indirect check via call in initialization list?
-		SHARK_CHECK(m_numFolds > 1, "[SvmLogisticInterpretation::SvmLogisticInterpretation] please provide a meaningful number of folds for cross validation");
+		SHARK_RUNTIME_CHECK(kernel != NULL, "[SvmLogisticInterpretation::SvmLogisticInterpretation] kernel is not allowed to be NULL");  //mtq: necessary despite indirect check via call in initialization list?
+		SHARK_RUNTIME_CHECK(m_numFolds > 1, "[SvmLogisticInterpretation::SvmLogisticInterpretation] please provide a meaningful number of folds for cross validation");
 		if (!m_svmCIsUnconstrained)   //mtq: important: we additionally need to deal with kernel feasibility indicators! important!
 			m_features|=IS_CONSTRAINED_FEATURE;
 		m_features|=HAS_VALUE;
@@ -115,7 +115,6 @@ public:
 	//! \param input the point to test for feasibility
 	bool isFeasible(const SearchPointType &input) const {
 		SHARK_ASSERT(input.size() == m_nhp);
-		//throw SHARKEXCEPTION("[SvmLogisticInterpretation::isFeasible] Please first clarify how the kernel parameter feasibility should be dealt with. Afterwards, please write a test for this method. Thanks.");
 		if (input(0) <= 0.0 && !m_svmCIsUnconstrained) {
 			return false;
 		}
@@ -133,7 +132,7 @@ public:
 	//! of the best fitting sigmoid, given a set of SVM hyperparameters.
 	//! \param parameters the SVM hyperparameters to use for all C-SVMs
 	double eval(SearchPointType const &parameters) const {
-		SHARK_CHECK(m_nhp == parameters.size(), "[SvmLogisticInterpretation::eval] wrong number of parameters");
+		SHARK_RUNTIME_CHECK(m_nhp == parameters.size(), "[SvmLogisticInterpretation::eval] wrong number of parameters");
 		// initialize, copy parameters
 		double C_reg = (m_svmCIsUnconstrained ? std::exp(parameters(m_nkp)) : parameters(m_nkp));   //set up regularization parameter
 		mep_kernel->setParameterVector(subrange(parameters, 0, m_nkp));   //set up kernel parameters
@@ -203,7 +202,7 @@ public:
 	//! \param derivative will store the computed derivative w.r.t. the current hyperparameters
 	// mtq: should this also follow the first-call-error()-then-call-deriv() paradigm?
 	double evalDerivative(SearchPointType const &parameters, FirstOrderDerivative &derivative) const {
-		SHARK_CHECK(m_nhp == parameters.size(), "[SvmLogisticInterpretation::evalDerivative] wrong number of parameters");
+		SHARK_RUNTIME_CHECK(m_nhp == parameters.size(), "[SvmLogisticInterpretation::evalDerivative] wrong number of parameters");
 		// initialize, copy parameters
 		double C_reg = (m_svmCIsUnconstrained ? std::exp(parameters(m_nkp)) : parameters(m_nkp));   //set up regularization parameter
 		mep_kernel->setParameterVector(subrange(parameters, 0, m_nkp));   //set up kernel parameters

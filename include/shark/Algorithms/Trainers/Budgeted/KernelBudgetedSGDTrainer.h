@@ -131,31 +131,33 @@ public:
 	/// \param[in]  preInitializationMethod     the method to preinitialize the budget.
 	/// \param[in]  minMargin   the margin every vector has to obey. Usually this is 1.
 	///
-	KernelBudgetedSGDTrainer(KernelType* kernel,
-							 const LossType* loss,
-							 double C,
-							 bool offset,
-							 bool unconstrained = false,
-							 size_t budgetSize = 500,
-							 AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy = NULL,
-							 size_t epochs = 1,
-							 size_t preInitializationMethod = NONE,
-							 double minMargin = 1.0f)
-		: m_kernel(kernel)
-		, m_loss(loss)
-		, m_C(C)
-		, m_offset(offset)
-		, m_unconstrained(unconstrained)
-		, m_budgetSize(budgetSize)
-		, m_budgetMaintenanceStrategy(budgetMaintenanceStrategy)
-		, m_epochs(epochs)
-		, m_preInitializationMethod(preInitializationMethod)
-		, m_minMargin(minMargin)
+	KernelBudgetedSGDTrainer(
+		KernelType* kernel,
+		const LossType* loss,
+		double C,
+		bool offset,
+		bool unconstrained = false,
+		size_t budgetSize = 500,
+		AbstractBudgetMaintenanceStrategy<InputType> *budgetMaintenanceStrategy = NULL,
+		size_t epochs = 1,
+		size_t preInitializationMethod = NONE,
+		double minMargin = 1.0f
+	): m_kernel(kernel)
+	, m_loss(loss)
+	, m_C(C)
+	, m_offset(offset)
+	, m_unconstrained(unconstrained)
+	, m_budgetSize(budgetSize)
+	, m_budgetMaintenanceStrategy(budgetMaintenanceStrategy)
+	, m_epochs(epochs)
+	, m_preInitializationMethod(preInitializationMethod)
+	, m_minMargin(minMargin)
 	{
 
 		// check that the maintenance strategy is not null.
-		if(m_budgetMaintenanceStrategy == NULL)
-			throw(SHARKEXCEPTION("KernelBudgetedSGDTrainer: No budget maintenance strategy provided!"));
+		SHARK_RUNTIME_CHECK(m_budgetMaintenanceStrategy, "Budget maintenance strategy must not be NULL!");
+		SHARK_RUNTIME_CHECK(m_kernel, "Kernel must not be NULL!");
+		SHARK_RUNTIME_CHECK(m_loss, "Loss must not be NULL!");
 	}
 
 

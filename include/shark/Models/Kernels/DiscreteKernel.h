@@ -62,13 +62,13 @@ public:
 	DiscreteKernel(RealMatrix const& matrix)
 	: m_matrix(matrix)
 	{
-		SHARK_CHECK(matrix.size1() == matrix.size2(), "[DiscreteKernel::DiscreteKernel] kernel matrix must be square");
+		SHARK_RUNTIME_CHECK(matrix.size1() == matrix.size2(), "[DiscreteKernel::DiscreteKernel] kernel matrix must be square");
 #ifdef DEBUG
 		for (std::size_t i=0; i<matrix.size1(); i++)
 		{
 			for (std::size_t j=0; j<i; j++)
 			{
-				SHARK_CHECK(matrix(i, j) == matrix(j, i), "[DiscreteKernel::DiscreteKernel] kernel matrix must be symmetric");
+				SHARK_RUNTIME_CHECK(matrix(i, j) == matrix(j, i), "[DiscreteKernel::DiscreteKernel] kernel matrix must be symmetric");
 			}
 		}
 #endif

@@ -129,11 +129,11 @@ public:
 	/// not matter.
 	void add(std::size_t row, std::size_t col, QpFloatType value)
 	{
-		SHARK_CHECK(m_used < m_data.size(), "[QpSparseArray::add] insufficient storage space");
+		SIZE_CHECK(m_used < m_data.size());
 	
 		Row& r = m_row[row];
 		if (r.entry == NULL) r.entry = &m_data[m_used];
-		else SHARK_CHECK(r.entry + r.size == &m_data[m_used], "[QpSparseArray::add] data must be added row-wise");
+		else SIZE_CHECK(r.entry + r.size == &m_data[m_used]);
 	
 		m_data[m_used].index = col;
 		m_data[m_used].value = value;

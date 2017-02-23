@@ -55,6 +55,7 @@ public:
 
 	void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
+		SHARK_RUNTIME_CHECK(startingPoint.size() == objectiveFunction.numberOfVariables(), "Initial starting point and dimensionality of function do not agree");
 		
 		m_path.resize(startingPoint.size());
 		m_path.clear();

@@ -43,7 +43,7 @@ public:
 	AverageEnergyGradient(RBM const* rbm)
 	:mpe_rbm(rbm),
 	m_logWeightSum(-std::numeric_limits<double>::infinity()){
-		SHARK_CHECK(mpe_rbm != 0, "rbm is not allowed to be 0");
+		SHARK_RUNTIME_CHECK(mpe_rbm != 0, "rbm is not allowed to be 0");
 		std::size_t const hiddens = mpe_rbm->numberOfHN();
 		std::size_t const visibles = mpe_rbm->numberOfVN();
 		std::size_t const hiddenParameters = mpe_rbm->hiddenNeurons().numberOfParameters();

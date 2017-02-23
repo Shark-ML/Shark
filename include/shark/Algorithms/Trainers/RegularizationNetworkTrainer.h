@@ -115,8 +115,7 @@ public:
 	void setPrecision(double beta)
 	{ this->C() = beta; }
 
-	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset)
-	{
+	void train(KernelExpansion<InputType>& svm, const LabeledData<InputType, RealVector>& dataset){
 		svm.setStructure(base_type::m_kernel,dataset.inputs(),false);
 		
 		// Setup the kernel matrix

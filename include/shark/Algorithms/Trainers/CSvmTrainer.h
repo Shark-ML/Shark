@@ -209,7 +209,6 @@ public:
 				setupMcParametersMMR(nu,M, classes);
 			break;
 			case McSvm::OVA: // handle OVA is switch statement to silence compiler warning
-				throw SHARKEXCEPTION("This error cannot occur");
 			break;
 		}
 		
@@ -257,10 +256,8 @@ public:
 	}
 
 	/// \brief Train the C-SVM using weights.
-	void train(KernelClassifier<InputType>& svm, WeightedLabeledData<InputType, unsigned int> const& dataset)
-	{
-		if(numberOfClasses(dataset) != 2)
-			throw SHARKEXCEPTION("CSVM with weights is only implemented for binary problems");
+	void train(KernelClassifier<InputType>& svm, WeightedLabeledData<InputType, unsigned int> const& dataset){
+		SHARK_RUNTIME_CHECK(numberOfClasses(dataset) == 2, "CSVM with weights is only implemented for binary problems");
 		// prepare model
 		std::size_t n = dataset.numberOfElements();
 		auto& f = svm.decisionFunction();
@@ -737,7 +734,7 @@ private:
 		lower_i = problem.permutation(lower_i);
 		upper_i = problem.permutation(upper_i);
 
-		SHARK_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C" );
+		SHARK_RUNTIME_CHECK(base_type::m_regularizers.size() == 1, "derivative only implemented for SVM with one C" );
 
 		// We next compute the derivative of lowerBound and upperBound wrt C, in order to then get that of b wrt C.
 		// The equation at the foundation of this simply is g_i = y_i - \sum_j \alpha_j K_{ij} .

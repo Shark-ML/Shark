@@ -69,7 +69,7 @@ public:
 	/// \param prediction: prediction by classifier, OutputType-valued vector
 	/// \param column: indicates the column of the prediction vector interpreted as probability of positive class
 	double eval(Data<LabelType> const& target, Data<OutputType> const& prediction, unsigned int column) const {
-		SHARK_CHECK(dataDimension(prediction) > column,"[NegativeAUC::eval] column number too large");
+		SHARK_RUNTIME_CHECK(dataDimension(prediction) > column,"[NegativeAUC::eval] column number too large");
 
 		std::size_t elements = target.numberOfElements();
 
@@ -128,15 +128,13 @@ public:
 	/// \param target: class label, 0 or 1
 	/// \param prediction: prediction by classifier, OutputType-valued vector
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
-
+		SHARK_RUNTIME_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
+		SHARK_RUNTIME_CHECK(dataDimension(prediction) < 3, "Can not compute with more than two columns");
 		std::size_t dim = dataDimension(prediction);
 		if(dim == 1) 
 			return eval(target, prediction, 0);
 		else if(dim == 2) 
 			return eval(target, prediction, 1);
-
-		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
 		return 0.;
 	}
 
@@ -181,7 +179,7 @@ public:
 	/// \param prediction: interpreted as binary class label
 	/// \param column: indicates the column of the prediction vector interpreted as probability of positive class
 	double eval(Data<LabelType> const& target, Data<OutputType> const& prediction, unsigned int column) const {
-		SHARK_CHECK(prediction(0).size() > column,"[NegativeWilcoxonMannWhitneyStatistic::eval] column number too large");
+		SHARK_RUNTIME_CHECK(prediction(0).size() > column,"[NegativeWilcoxonMannWhitneyStatistic::eval] column number too large");
 		std::vector<double> pos, neg;
 		for(std::size_t i=0; i<prediction.size(); i++) {
 			if(!m_invert){
@@ -230,15 +228,15 @@ public:
 	}
 
 	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		SHARK_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
-
+		SHARK_RUNTIME_CHECK(prediction.numberOfElements() >= 1,"[NegativeAUC::eval] empty prediction set");
+		SHARK_RUNTIME_CHECK(dataDimension(prediction) < 3, "Can not compute with more than two columns");
+		
 		std::size_t dim = dataDimension(prediction);
 		if(dim == 1) 
 			return eval(target, prediction, 0);
 		else if(dim == 2) 
 			return eval(target, prediction, 1);
-		
-		throw SHARKEXCEPTION("[NegativeAUC::eval] no default value for column");
+			return eval(target, prediction, 1);
 		return 0.;
 	}
 

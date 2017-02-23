@@ -59,7 +59,7 @@ public:
 
 	double m_targetVariance;
 	NormalizeComponentsZCA(double targetVariance = 1.0){ 
-		SHARK_CHECK(targetVariance > 0.0, "[NormalizeComponentsZCA::NormalizeComponentsZCA] target variance must be positive");
+		SHARK_RUNTIME_CHECK(targetVariance > 0.0, "Target variance must be positive");
 		m_targetVariance = targetVariance;
 	}
 
@@ -69,8 +69,7 @@ public:
 
 	void train(ModelType& model, UnlabeledData<RealVector> const& input){
 		std::size_t dc = dataDimension(input);
-		SHARK_CHECK(input.numberOfElements() >= dc + 1, "[NormalizeComponentsZCA::train] input needs to contain more points than there are input dimensions");
-		SHARK_CHECK(m_targetVariance > 0.0, "[NormalizeComponentsZCA::train] target variance must be positive");
+		SHARK_RUNTIME_CHECK(input.numberOfElements() >= dc + 1, "Input needs to contain more points than there are input dimensions");
 
 		// dense model with bias having input and output dimension equal to data dimension
 		model.setStructure(dc, dc, true); 

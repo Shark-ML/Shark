@@ -115,7 +115,6 @@ shark_add_test( Algorithms/Trainers/LinearSAGTrainer.cpp Trainers_LinearSAGTrain
 shark_add_test( Algorithms/Trainers/LassoRegression.cpp Trainers_LassoRegression )
 shark_add_test( Algorithms/Trainers/McSvmTrainer.cpp Trainers_McSvmTrainer )
 shark_add_test( Algorithms/Trainers/LinearSvmTrainer.cpp Trainers_LinearSvmTrainer )
-shark_add_test( Algorithms/Trainers/NBClassifierTrainerTests.cpp Trainers_NBClassifier )
 shark_add_test( Algorithms/Trainers/Normalization.cpp Trainers_Normalization )
 shark_add_test( Algorithms/Trainers/KernelNormalization.cpp Trainers_KernelNormalization )
 shark_add_test( Algorithms/Trainers/SigmoidFit.cpp Trainers_SigmoidFit )
@@ -142,7 +141,6 @@ shark_add_test( Models/TiedAutoencoder.cpp Models_TiedAutoencoder )
 shark_add_test( Models/LinearModel.cpp Models_LinearModel )
 shark_add_test( Models/LinearNorm.cpp Models_LinearNorm )
 shark_add_test( Models/ConvexCombination.cpp Models_ConvexCombination )
-shark_add_test( Models/NBClassifierTests.cpp Models_NBClassifier )
 shark_add_test( Models/OnlineRNNet.cpp Models_OnlineRNNet )
 shark_add_test( Models/RBFLayer.cpp Models_RBFLayer ) 
 shark_add_test( Models/RNNet.cpp Models_RNNet ) 
@@ -187,7 +185,6 @@ shark_add_test( Models/CARTClassifier.cpp Models_CARTClassifier )
 # Core tests
 #shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
 shark_add_test( Core/Iterators.cpp Core_Iterators )
-shark_add_test( Core/Math.cpp Core_Math )
 
 # Data Tests
 shark_add_test( Data/Csv.cpp Data_Csv )

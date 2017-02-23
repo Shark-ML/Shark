@@ -78,7 +78,7 @@ public:
 
 	void train( ScaledKernel<InputType>& kernel, UnlabeledData<InputType> const& input )
 	{
-		SHARK_CHECK(input.numberOfElements() >= 2, "[NormalizeKernelUnitVariance::train] input needs to contain at least two points");
+		SHARK_RUNTIME_CHECK(input.numberOfElements() >= 2, "Input needs to contain at least two points");
 		AbstractKernelFunction< InputType > const& k = *kernel.base(); //get direct access to the kernel we want to use.		
 		
 		// Next compute the trace and mean of the kernel matrix. This means heavy lifting: 

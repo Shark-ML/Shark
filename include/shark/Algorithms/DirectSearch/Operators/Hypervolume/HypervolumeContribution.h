@@ -82,6 +82,7 @@ struct HypervolumeContribution {
 	/// \param [in] referencePoint The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		SIZE_CHECK( points.begin()->size() == ref.size() );
 		std::size_t numObjectives = ref.size();
 		if(numObjectives == 2){
@@ -104,6 +105,7 @@ struct HypervolumeContribution {
 	/// \param [in] referencePoint The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		SIZE_CHECK( points.begin()->size() == ref.size() );
 		std::size_t numObjectives = ref.size();
 		if(numObjectives == 2){
@@ -112,9 +114,8 @@ struct HypervolumeContribution {
 		}else if(numObjectives == 3){
 			HypervolumeContribution3D algorithm;
 			return algorithm.largest(points, k, ref);
-		}else if(m_useApproximation){
-			throw SHARKEXCEPTION("[HypervolumeContribution] largest not implemented for approximation algorithm");
 		}else{
+			SHARK_RUNTIME_CHECK(!m_useApproximation, "Largest not implemented for approximation algorithm");
 			HypervolumeContributionMD algorithm;
 			return algorithm.largest(points, k, ref);
 		}
@@ -129,6 +130,7 @@ struct HypervolumeContribution {
 	/// \param [in] referencePoint The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::size_t numObjectives = points[0].size();
 		if(numObjectives == 2){
 			HypervolumeContribution2D algorithm;
@@ -152,6 +154,7 @@ struct HypervolumeContribution {
 	/// \param [in] referencePoint The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::size_t numObjectives = points[0].size();
 		if(numObjectives == 2){
 			HypervolumeContribution2D algorithm;
@@ -159,9 +162,8 @@ struct HypervolumeContribution {
 		}else if(numObjectives == 3){
 			HypervolumeContribution3D algorithm;
 			return algorithm.largest(points, k);
-		}else if(m_useApproximation){
-			throw SHARKEXCEPTION("[HypervolumeContribution] largest not implemented for approximation algorithm");
 		}else{
+			SHARK_RUNTIME_CHECK(!m_useApproximation, "Largest not implemented for approximation algorithm");
 			HypervolumeContributionMD algorithm;
 			return algorithm.largest(points, k);
 		}

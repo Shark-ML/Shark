@@ -56,9 +56,7 @@ struct ElitistSelection {
 	){
 		std::size_t outputSize = std::distance( out, outE );
 		std::vector<InIterator> results = order(it, itE);
-		if(results.size() < outputSize){
-			throw SHARKEXCEPTION("[ElitistSelection] Input range must be bigger than output range");
-		}
+		SHARK_RUNTIME_CHECK(results.size() > outputSize, "Input range must be bigger than output range");
 		
 		for(std::size_t i = 0; i != outputSize; ++i, ++out){
 			*out = *results[i];
@@ -75,7 +73,8 @@ struct ElitistSelection {
 	void operator()(
 		Population& population,std::size_t mu
 	){
-		SIZE_CHECK(population.size() >= mu);
+		SHARK_RUNTIME_CHECK(population.size() >= mu, "Population Size must be at least mu");
+
 		typedef typename Population::iterator InIterator;
 		std::vector<InIterator> results = order(population.begin(),population.end());
 		

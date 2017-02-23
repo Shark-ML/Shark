@@ -90,9 +90,10 @@ struct HypervolumeApproximator {
 		VectorType vol( noPoints, 1. );
 		for( std::size_t p = 0; p != noPoints; ++p) {
 			//guard against points which are worse than the reference
-			if(min(refPoint - points[p] ) < 0){
-				throw SHARKEXCEPTION("HyperVolumeApproximator: points must be better than reference point");
-			}
+			SHARK_RUNTIME_CHECK(
+				min(refPoint - points[p] ) >= 0,
+				"HyperVolumeApproximator: points must be better than reference point"
+			);
 			//taking the sum of logs instead of their product is numerically more stable in large dimensions were intermediate volumes can become very small or large
 			vol[p] = std::exp(sum(log(refPoint[ 0 ] - points[p] )));
 		}

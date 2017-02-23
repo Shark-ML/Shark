@@ -67,7 +67,7 @@ public:
 	/// Constructor
 	SoftClusteringModel(ClusteringType* clustering)
 	: base_type(clustering){
-		SHARK_CHECK(
+		SHARK_RUNTIME_CHECK(
 			clustering->hasSoftMembershipFunction(), 
 			"[SoftClusteringModel] Clustering does not support soft membership function"
 		);

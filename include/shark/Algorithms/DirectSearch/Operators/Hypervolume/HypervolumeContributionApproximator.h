@@ -144,7 +144,8 @@ struct HypervolumeContributionApproximator{
 	/// \param [in] reference The reference point to consider for calculating individual points' contributions.
 	template<class Set,class VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& reference)const{
-		SHARK_CHECK(k == 1, "not implemented for k != 1");
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
+		SHARK_RUNTIME_CHECK(k == 1, "Not implemented for k != 1");
 				
 		std::vector< Point<VectorType> > front;
 		for(auto const& point: points) {
@@ -174,7 +175,8 @@ struct HypervolumeContributionApproximator{
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k)const{
-		SHARK_CHECK(k == 1, "not implemented for k != 1");
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
+		SHARK_RUNTIME_CHECK(k == 1, "Not implemented for k != 1");
 		
 		//find reference point as well as points with lowest function value
 		std::vector<std::size_t> minIndex(points[0].size(),0);

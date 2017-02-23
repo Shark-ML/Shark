@@ -353,8 +353,7 @@ inline ErrorFunction::ErrorFunction(
 	AbstractLoss<LabelType, OutputType>* loss
 ){
 	m_regularizer = 0;
-	if(model->isSequential())
-		throw SHARKEXCEPTION("ErrorFunction not implemented for weighted sequential models");
+	SHARK_RUNTIME_CHECK(!model->isSequential(),"ErrorFunction not implemented for weighted sequential models");
 	mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss));
 	this -> m_features = mp_wrapper -> features();
 }

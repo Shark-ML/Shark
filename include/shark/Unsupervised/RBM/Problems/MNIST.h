@@ -57,11 +57,7 @@ private:
 	void init(){
 		//m_name="MNIST";
 		std::ifstream infile(m_filename.c_str(), std::ios::binary);
-		if (!infile) {
-			std::stringstream str;
-			str<< "cannot open mnist-file: " << m_filename << std::endl;
-			throw SHARKEXCEPTION(str.str());
-		}
+		SHARK_RUNTIME_CHECK(infile, "Can not open file!");
 		
 		//get file size
 		infile.seekg(0,std::ios::end);
@@ -72,11 +68,7 @@ private:
 		infile.seekg (0, std::ios::beg);
 		infile.read ((char *) memblock, inputSize);
         
-		if (readInt(memblock) != 2051){
-			std::stringstream str;
-			str<<"magic number for mnist wrong: " << readInt(memblock) << " != 2051";
-			throw SHARKEXCEPTION(str.str());
-		}
+		SHARK_RUNTIME_CHECK(readInt(memblock) == 2051, "magic number for mnist wrong!");
 		std::size_t numImages = readInt(memblock + 4);
 		std::size_t numRows = readInt(memblock + 8);
 		std::size_t numColumns = readInt(memblock + 12);

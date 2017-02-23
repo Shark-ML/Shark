@@ -589,7 +589,7 @@ public:
 	LabeledData(Data<InputType> const& inputs, Data<LabelType> const& labels)
 	: m_data(inputs), m_label(labels)
 	{
-		SHARK_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "[LabeledData::LabeledData] number of inputs and number of labels must agree");
+		SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
 #ifndef DNDEBUG
 		for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
 			SIZE_CHECK(shark::size(inputs.batch(i))==shark::size(labels.batch(i)));
@@ -786,8 +786,7 @@ LabeledData<
 	typename boost::range_value<Range1>::type,
 	typename boost::range_value<Range2>::type
 > createLabeledDataFromRange(Range1 const& inputs, Range2 const& labels, std::size_t batchSize = 0){
-	SHARK_CHECK(boost::size(inputs) == boost::size(labels),
-	"[createDataFromRange] number of inputs and number of labels must agree");
+	SHARK_RUNTIME_CHECK(inputs.size() == labels.size(),"Number of inputs and number of labels must agree");
 	typedef typename boost::range_value<Range1>::type Input;
 	typedef typename boost::range_value<Range2>::type Label;
 
@@ -1055,7 +1054,7 @@ LabeledData<I,unsigned int> binarySubProblem(
 	//find first class
 	std::size_t start= 0;
 	for(;start != numBatches && get(data.batch(start),0).label != smaller;++start);
-	SHARK_CHECK(start != numBatches, "[shark::binarySubProblem] class does not exist");
+	SHARK_RUNTIME_CHECK(start != numBatches, "First class does not exist");
 
 	//copy batch indices of first class
 	for(;start != numBatches && get(data.batch(start),0).label == smaller; ++start)
@@ -1063,7 +1062,7 @@ LabeledData<I,unsigned int> binarySubProblem(
 
 	//find second class
 	for(;start != numBatches && get(data.batch(start),0).label != bigger;++start);
-	SHARK_CHECK(start != numBatches, "[shark::binarySubProblem] class does not exist");
+	SHARK_RUNTIME_CHECK(start != numBatches, "Second class does not exist");
 
 	//copy batch indices of second class
 	for(;start != numBatches && get(data.batch(start),0).label == bigger; ++start)

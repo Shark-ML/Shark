@@ -72,7 +72,7 @@ public:
 	/// \param  tree  tree object underlying the clustering
 	HierarchicalClustering(const tree_type* tree)
 	: mep_tree(tree){
-		SHARK_CHECK(tree, "[HierarchicalClustering] Tree must not be NULL");
+		SHARK_RUNTIME_CHECK(tree, "[HierarchicalClustering] Tree must not be NULL");
 	}
 
 	/// \brief From INameable: return the class name.

@@ -47,10 +47,19 @@ namespace shark {
 		* \param [in] what String that describes the exception.
 		* \param [in] file Filename the function that has thrown the exception resides in.
 		* \param [in] line Line of file that has thrown the exception.
+		* \param [in] func Name of the Function the error appeared in.
 		*/
-		Exception( const std::string & what = std::string(), const std::string & file = std::string(), unsigned int line = 0 ) : m_what( what ),
-			m_file( file ),
-			m_line( line ) {
+		Exception( 
+			const std::string & what = "unknown reason",
+			const std::string & file = "unknown",
+			unsigned int line = 0,
+			const std::string & func = "function"
+		): m_what( what )
+		, m_file( file )
+		, m_line( line )
+		, m_func( func )
+		{
+			m_message="["+m_file+"::"+m_func+","+std::to_string(line)+"] " + what; 
 		}
 
 		/**
@@ -62,27 +71,30 @@ namespace shark {
 		* \brief Accesses the description of the exception.
 		*/
 		inline const char* what() const throw() {
-			return m_what.c_str();
+			return m_message.c_str();
 		}
 
 		/**
 		* \brief Accesses the name of the file the exception occurred in.
 		*/
 		inline const std::string & file() const {
-			return( m_file );
+			return m_file;
 		}
 
 		/**
 		* \brief Accesses the line of the file the exception occured in.
 		*/
 		inline unsigned int line() const {
-			return( m_line );
+			return m_line;
 		}
 
 	protected:
 		std::string m_what; ///< Description of the exception.
 		std::string m_file; ///< File name the exception occurred in.
 		unsigned int m_line; ///< Line of file the exception occurred in.
+		std::string m_func; ///< Function name the exception occured in
+		std::string m_message; ///< complete error message
+		
 	};
 
 }
@@ -91,34 +103,19 @@ namespace shark {
 * \brief Convenience macro that creates an instance of class shark::exception,
 * injecting file and line information automatically.
 */
-#define SHARKEXCEPTION(message) shark::Exception(message, __FILE__, __LINE__)
-
-/// Break the execution and throw exception with @a message in case of predefined @a unexpectedCondition is true
-/// @note This should not be replaced by SHARK_CHECK as we need always evaluate @a unexpectedCondition
-inline void THROW_IF(bool unexpectedCondition, const std::string& message)
-{
-	if (unexpectedCondition)
-		throw SHARKEXCEPTION(message);
-}
+#define SHARKEXCEPTION(message) shark::Exception(message, __FILE__, __LINE__, __func__)
 
 // some handy macros for special types of checks,
 // throwing standard error messages
 #ifndef NDEBUG
-//~ #define RANGE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("range check error: "#cond); } while (false)
-//~ #define SIZE_CHECK(cond) do { if (!(cond)) throw SHARKEXCEPTION("size mismatch: "#cond); } while (false)
-//~ #define SHARK_ASSERT(cond) do { if (!(cond)) throw SHARKEXCEPTION("assertion failed: "#cond); } while (false)
-//~ #define SHARK_CHECK(cond, error) do { if (!(cond)) throw SHARKEXCEPTION(error); } while (false)
 #define RANGE_CHECK(cond) assert(cond)
 #define SIZE_CHECK(cond) assert(cond)
 #define SHARK_ASSERT(cond) assert(cond)
-#define SHARK_CHECK(cond, error) assert(cond)
 #else
 #define RANGE_CHECK(cond) do { (void)sizeof(cond); } while (false)
 #define SIZE_CHECK(cond) do { (void)sizeof(cond); } while (false)
-#define TYPE_CHECK(cond) do { (void)sizeof(cond); } while (false)
-#define IO_CHECK(cond) do { (void)sizeof(cond); } while (false)
 #define SHARK_ASSERT(cond) do { (void)sizeof(cond); } while (false)
-#define SHARK_CHECK(cond, error) do { (void)sizeof(cond); (void)sizeof(error);} while (false)
 #endif
+#define SHARK_RUNTIME_CHECK(cond, message) do { if (!(cond)) throw SHARKEXCEPTION(message);} while (false)
 
 #endif // SHARK_CORE_EXCEPTION_H

@@ -90,10 +90,9 @@ public:
 	std::string name() const
 	{ return "MissingFeatureSvmTrainer"; }
 
-	void train(MissingFeaturesKernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset)
-	{
+	void train(MissingFeaturesKernelExpansion<InputType>& svm, LabeledData<InputType, unsigned int> const& dataset){
 		// Check prerequisites
-		SHARK_CHECK(numberOfClasses(dataset) == 2, "[MissingFeatureSvmTrainer::train] Not a binary problem");
+		SHARK_RUNTIME_CHECK(numberOfClasses(dataset) == 2, "Not a binary problem");
 
 		svm.setStructure(base_type::m_kernel,dataset.inputs(), this->m_trainOffset);
 		

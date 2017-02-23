@@ -37,9 +37,8 @@
 using namespace shark;
 
 void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> const& dataset){
-	if(dataset.empty()){
-		throw SHARKEXCEPTION("[LDA::train] the dataset must not be empty");
-	}
+	SHARK_RUNTIME_CHECK(!dataset.empty(),"The dataset must not be empty");
+
 	std::size_t inputs = dataset.numberOfElements();
 	std::size_t dim = inputDimension(dataset);
 	std::size_t classes = numberOfClasses(dataset);
@@ -67,8 +66,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	covariance/=inputs-classes;
 	//calculate mean and the covariance matrix from second moment
 	for (std::size_t c = 0; c != classes; c++){
-		if (num[c] == 0) 
-			throw SHARKEXCEPTION("[LDA::train] LDA can not handle a class without examples");
+		SHARK_RUNTIME_CHECK(num[c] != 0,"LDA can not handle a class without examples");
 		row(means,c) /= num(c);
 		double factor = num(c);
 		factor/=inputs-classes;
@@ -106,9 +104,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 }
 
 void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsigned int> const& dataset){
-	if(dataset.empty()){
-		throw SHARKEXCEPTION("[LDA::train] the dataset must not be empty");
-	}
+	SHARK_RUNTIME_CHECK(!dataset.empty(),"The dataset must not be empty");
 	std::size_t dim = inputDimension(dataset);
 	std::size_t classes = numberOfClasses(dataset);
 
@@ -140,8 +136,7 @@ void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsign
 	
 	//calculate mean and the covariance matrix from second moment
 	for (std::size_t c = 0; c != classes; c++){
-		if (classWeight[c] == 0.0) 
-			throw SHARKEXCEPTION("[LDA::train] LDA can not handle a class without examples");
+		SHARK_RUNTIME_CHECK(classWeight[c] != 0,"LDA can not handle a class without examples");
 		row(means,c) /= classWeight(c);
 		double factor = classWeight(c) / weightSum;
 		noalias(covariance)-= factor*outer_prod(row(means,c),row(means,c));

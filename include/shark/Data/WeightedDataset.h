@@ -191,7 +191,7 @@ public:
 	BaseWeightedDataset(DataContainer const& data, Data<WeightType> const& weights)
 	: m_data(data), m_weights(weights)
 	{
-		SHARK_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedUnlabeledData] number of data and number of weights must agree");
+		SHARK_RUNTIME_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedUnlabeledData] number of data and number of weights must agree");
 #ifndef DNDEBUG
 		for(std::size_t i  = 0; i != data.numberOfBatches(); ++i){
 			SIZE_CHECK(shark::size(data.batch(i))==shark::size(weights.batch(i)));
@@ -419,7 +419,7 @@ typename boost::disable_if<
 		typename boost::range_value<DataRange>::type
 	> 
 >::type createUnlabeledDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = 0){
-	SHARK_CHECK(boost::size(data) == boost::size(weights),
+	SHARK_RUNTIME_CHECK(boost::size(data) == boost::size(weights),
 	"[createDataFromRange] number of data points and number of weights must agree");
 	typedef typename boost::range_value<DataRange>::type Data;
 
@@ -616,9 +616,9 @@ typename boost::disable_if<
 		typename boost::range_value<LabelRange>::type
 	>
 >::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = 0){
-	SHARK_CHECK(boost::size(inputs) == boost::size(labels),
+	SHARK_RUNTIME_CHECK(boost::size(inputs) == boost::size(labels),
 	"[createDataFromRange] number of data points and number of weights must agree");
-	SHARK_CHECK(boost::size(inputs) == boost::size(weights),
+	SHARK_RUNTIME_CHECK(boost::size(inputs) == boost::size(weights),
 	"[createDataFromRange] number of data points and number of weights must agree");
 	typedef typename boost::range_value<InputRange>::type InputType;
 	typedef typename boost::range_value<LabelRange>::type LabelType;

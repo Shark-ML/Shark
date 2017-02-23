@@ -203,8 +203,6 @@ void IRpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType
 	init(objectiveFunction,startingPoint,0.01);
 }
 void IRpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
-	if(!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE))
-		SHARKEXCEPTION("[IRPropPlus::init] requires the value of the function");
 	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
 	m_oldError = std::numeric_limits<double>::max();
 }
@@ -272,8 +270,6 @@ void IRpropPlusFull::init(ObjectiveFunctionType& objectiveFunction, SearchPointT
 	init(objectiveFunction,startingPoint,0.01);
 }
 void IRpropPlusFull::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
-	if(!(objectiveFunction.features() & ObjectiveFunctionType::HAS_VALUE))
-		SHARKEXCEPTION("[IRPropPlus::init] requires the value of the function");
 	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
 	m_oldError = std::numeric_limits<double>::max();
 }

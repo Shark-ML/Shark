@@ -127,11 +127,11 @@ public:
 	  m_nkp( trainer->kernel()->numberOfParameters() ),
 	  m_nhp( trainer->kernel()->numberOfParameters()+1 )
 	{
-		SHARK_CHECK( mep_ke->kernel() == trainer->kernel(), "[CSvmDerivative::CSvmDerivative] KernelExpansion and SvmTrainer must use the same KernelFunction.");
-		SHARK_CHECK( mep_ke != NULL, "[CSvmDerivative::CSvmDerivative] KernelExpansion cannot be NULL.");
-		SHARK_CHECK( mep_ke->outputSize() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
-		SHARK_CHECK( mep_ke->hasOffset() == 1, "[CSvmDerivative::CSvmDerivative] only defined for SVMs with offset.");
-		SHARK_CHECK( m_alpha.size2() == 1, "[CSvmDerivative::CSvmDerivative] this class is only defined for binary SVMs.");
+		SHARK_RUNTIME_CHECK( mep_ke->kernel() == trainer->kernel(), "[CSvmDerivative::CSvmDerivative] KernelExpansion and SvmTrainer must use the same KernelFunction.");
+		SHARK_RUNTIME_CHECK( mep_ke != NULL, "[CSvmDerivative::CSvmDerivative] KernelExpansion cannot be NULL.");
+		SHARK_RUNTIME_CHECK( mep_ke->outputSize() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
+		SHARK_RUNTIME_CHECK( mep_ke->hasOffset() == 1, "[CSvmDerivative::CSvmDerivative] only defined for SVMs with offset.");
+		SHARK_RUNTIME_CHECK( m_alpha.size2() == 1, "[CSvmDerivative::CSvmDerivative] this class is only defined for binary SVMs.");
 		prepareCSvmParameterDerivative(); //main
 	}
 
@@ -207,15 +207,11 @@ public:
 		return m_d_alphab_d_theta;
 	}
 
-	//\todo //mtq
 	/// From ISerializable, reads a network from an archive
 	virtual void read( InArchive & archive ) {
-		throw SHARKEXCEPTION("[CSvmDerivative::read] Not implemented yet.");
 	}
-	//\todo //mtq
 	/// From ISerializable, writes a network to an archive
 	virtual void write( OutArchive & archive ) const {
-		throw SHARKEXCEPTION("[CSvmDerivative::write] Not implemented yet.");
 	}
 
 private:

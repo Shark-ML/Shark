@@ -79,7 +79,7 @@ public:
 	  m_offset( offset ),
 	  m_degreeIsParam( degree_is_parameter ),
 	  m_unconstrained( unconstrained ) {
-		SHARK_CHECK(degree > 0, "[PolynomialKernel::PolynomialKernel] degree must be positive");
+		SHARK_RUNTIME_CHECK(degree > 0, "[PolynomialKernel::PolynomialKernel] degree must be positive");
 		this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		this->m_features |= base_type::SUPPORTS_VARIABLE_INPUT_SIZE;
 		  if ( !m_degreeIsParam )
@@ -92,7 +92,7 @@ public:
 	
 	void setDegree( unsigned int deg ) {
 		RANGE_CHECK( deg > 0 );
-		SHARK_CHECK( !m_degreeIsParam, "[PolynomialKernel::setDegree] Please use setParameterVector when the degree is a parameter.");
+		SHARK_RUNTIME_CHECK( !m_degreeIsParam, "[PolynomialKernel::setDegree] Please use setParameterVector when the degree is a parameter.");
 		m_degree = deg;
 	}
 	

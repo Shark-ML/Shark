@@ -102,7 +102,7 @@ public:
 			m_binary[i]->setParameterVector(subrange(newParameters, used, used + n));
 			used += n;
 		}
-		SHARK_CHECK(used == newParameters.size(),
+		SHARK_RUNTIME_CHECK(used == newParameters.size(),
 				"[OneVersusOneClassifier::setParameterVector] invalid number of parameters");
 	}
 
@@ -145,7 +145,7 @@ public:
 	/// predict the n+1 classes {0, ..., n}.
 	void addClass(std::vector<binary_classifier_type*> const& binmodels)
 	{
-		SHARK_CHECK(binmodels.size() == m_classes, "[OneVersusOneClassifier::addClass] wrong number of binary models");
+		SHARK_RUNTIME_CHECK(binmodels.size() == m_classes, "[OneVersusOneClassifier::addClass] wrong number of binary models");
 		m_classes++;
 		m_binary.insert(m_binary.end(), binmodels.begin(), binmodels.end());
 	}

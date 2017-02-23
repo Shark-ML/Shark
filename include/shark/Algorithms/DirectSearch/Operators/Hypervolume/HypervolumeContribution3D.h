@@ -278,6 +278,7 @@ public:
 	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		std::vector<Point> front;
 		for(std::size_t i = 0; i != points.size(); ++i){
 			front.emplace_back(points[i](0)-ref(0),points[i](1)-ref(1),points[i](2)-ref(2),i);
@@ -302,6 +303,7 @@ public:
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		//reference point computation, and obtain the indizes of the extremum elements
 		std::size_t minIndex[]={0,0,0};
 		double minVal[]={points[0](0),points[0](1),points[0](2)};
@@ -376,6 +378,7 @@ public:
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k)const{
+		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		//reference point computation, and obtain the indizes of the extremum elements
 		std::size_t minIndex[]={0,0,0};
 		double minVal[]={points[0](0),points[0](1),points[0](2)};

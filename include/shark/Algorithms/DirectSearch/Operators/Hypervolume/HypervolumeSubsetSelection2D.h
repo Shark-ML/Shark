@@ -191,9 +191,8 @@ private:
 	/// Fast calculation O(n*k) for the hypervolume selection problem. 
 	/// for the selected points, it sets selected=true.
 	void hypSSP(std::vector<Point>& front,std::size_t k)const{
-		SHARK_CHECK( k > 0, "[HypervolumeSubsetSelection2D] k must be non-zero");
-		if( k > front.size())
-			throw SHARKEXCEPTION("[HypervolumeSubsetSelection2D] the front must have at least k nondominated points");
+		SHARK_RUNTIME_CHECK( k > 0, "k must be non-zero");
+		SHARK_RUNTIME_CHECK( k <= front.size(), "The front must have at least k nondominated points");
 		
 		std::size_t n = front.size();
 		std::vector<LinearFunction> functions(n);
@@ -256,8 +255,8 @@ public:
 	template<typename Set, typename SelectedSet, typename VectorType >
 	void operator()( Set const& points, SelectedSet& selected, std::size_t k, VectorType const& refPoint){
 		SIZE_CHECK(points.size() == selected.size());
-		SHARK_CHECK(k > 0, "[HyperVolumeSubsetSelection2D] k must be >0");
-		SHARK_CHECK( k <= points.size(), "[HypervolumeSubsetSelection2D] the number of points mjust be larger than k");
+		SHARK_RUNTIME_CHECK(k > 0, "k must be >0");
+		SHARK_RUNTIME_CHECK( k <= points.size(), "the number of points must be larger than k");
 		SIZE_CHECK( points.begin()->size() == 2 );
 		SIZE_CHECK( refPoint.size() == 2 );
 		
@@ -290,8 +289,8 @@ public:
 	template<typename Set, typename SelectedSet>
 	void operator()( Set const& points, SelectedSet& selected, std::size_t k){
 		SIZE_CHECK(points.size() == selected.size());
-		SHARK_CHECK( k >= 2, "[HypervolumeSubsetSelection2D] k must be larger or equal 2");
-		SHARK_CHECK( k <= points.size(), "[HypervolumeSubsetSelection2D] the number of points mjust be larger than k");
+		SHARK_RUNTIME_CHECK( k >= 2, "k must be larger or equal 2");
+		SHARK_RUNTIME_CHECK( k <= points.size(), "the number of points mjust be larger than k");
 		SIZE_CHECK(points.size() == selected.size());
 		SIZE_CHECK( points.begin()->size() == 2 );
 		

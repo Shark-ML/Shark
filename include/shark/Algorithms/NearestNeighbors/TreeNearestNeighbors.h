@@ -132,8 +132,7 @@ public:
 
 	/// find and return the next nearest neighbor
 	result_type next() {
-		if (m_neighbors >= mp_trace->m_tree->size()) 
-			throw SHARKEXCEPTION("[IterativeNNQuery::next] no more neighbors available");
+		SHARK_RUNTIME_CHECK(m_neighbors < mp_trace->m_tree->size(), "No more neighbors available");
 
 		assert(! m_queue.empty());
 

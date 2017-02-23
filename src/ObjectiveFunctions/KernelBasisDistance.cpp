@@ -37,8 +37,8 @@ KernelBasisDistance::KernelBasisDistance(
 	KernelExpansion<RealVector>* kernelExpansion,
 	std::size_t numApproximatingVectors
 ):mep_expansion(kernelExpansion),m_numApproximatingVectors(numApproximatingVectors){
-	SHARK_CHECK(kernelExpansion != NULL, "[KernelBasisDistance] kernelExpansion must not be NULL");
-	SHARK_CHECK(kernelExpansion->kernel() != NULL, "[KernelBasisDistance] kernelExpansion must have a kernel");
+	SHARK_RUNTIME_CHECK(kernelExpansion != NULL, "KernelExpansion must not be NULL");
+	SHARK_RUNTIME_CHECK(kernelExpansion->kernel() != NULL, "KernelExpansion must have a kernel");
 	mep_expansion -> sparsify(); //purge all non-support vectors
 
 	m_features|=HAS_VALUE;

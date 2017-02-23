@@ -38,7 +38,7 @@ using namespace shark;
 using namespace blas;
 
 NormalizeComponentsWhitening::NormalizeComponentsWhitening(double targetVariance){ 
-	SHARK_CHECK(targetVariance > 0.0, "[NormalizeComponentsWhitening::NormalizeComponentsWhitening] target variance must be positive");
+	SHARK_RUNTIME_CHECK(targetVariance > 0.0, "Target variance must be positive");
 	m_targetVariance = targetVariance;
 }
 
@@ -48,8 +48,8 @@ std::string NormalizeComponentsWhitening::name() const
 
 void NormalizeComponentsWhitening::train(ModelType& model, UnlabeledData<RealVector> const& input){
 	std::size_t dc = dataDimension(input);
-	SHARK_CHECK(input.numberOfElements() >= dc + 1, "[NormalizeComponentsWhitening::train] input needs to contain more points than there are input dimensions");
-	SHARK_CHECK(m_targetVariance > 0.0, "[NormalizeComponentsWhitening::train] target variance must be positive");
+	SHARK_RUNTIME_CHECK(input.numberOfElements() >= dc + 1, "Input needs to contain more points than there are input dimensions");
+	SHARK_RUNTIME_CHECK(m_targetVariance > 0.0, "Target variance must be positive");
 
 	RealVector mean;
 	RealMatrix covariance;

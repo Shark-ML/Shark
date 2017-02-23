@@ -93,10 +93,8 @@ public:
 	/// @param[out] minIndex    the index of the vector with smallest coefficient
 	/// @param[out] minAlpha    the 2-norm of the alpha coefficient of the found vector
 	///
-	static void findSmallestVector(ModelType const& model, size_t &minIndex, double &minAlpha)
-	{
-		if(model.alpha().size1() == 0)
-			throw SHARKEXCEPTION("[AbstractBudgetMaintainanceStrategy::findSmallestVector] Model is empty!");
+	static void findSmallestVector(ModelType const& model, size_t &minIndex, double &minAlpha){
+		SHARK_RUNTIME_CHECK(model.alpha().size1(), "Model is empty!");
 		// we do not have it, so we remove the vector with the
 		// smallest 'influcence', measured by the smallest alpha
 
