@@ -42,11 +42,11 @@ double tchebycheff(RealVector const & fitness,
                    RealVector const & weights, 
                    RealVector const & optimalPointFitness)
 {
-    const std::size_t num_objectives = fitness.size();
-    double max_fun = -1.0e+30;
-    for(std::size_t i = 0; i < num_objectives; ++i)
+    auto w = weights[0] == 0 ? 1e-5 : weights[0];
+    double max_fun = w * std::abs(fitness[0] - optimalPointFitness[0]);
+    for(std::size_t i = 1; i < fitness.size(); ++i)
     {
-        auto w = weights[i] == 0 ? 1e-5 : weights[i];
+        w = weights[i] == 0 ? 1e-5: weights[i];
         max_fun = std::max(max_fun, 
                            w * std::abs(fitness[i] - 
                                         optimalPointFitness[i]));
