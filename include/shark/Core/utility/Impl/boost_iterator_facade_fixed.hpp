@@ -22,7 +22,7 @@
 #endif
 
 #ifdef SHARK_USE_ITERATOR_WORKAROUND
-
+#include <boost/iterator/detail/config_def.hpp>
 #define SHARK_ITERATOR_FACADE boost::iterator_facade_fixed
 #define SHARK_ITERATOR_CORE_ACCESS boost::iterator_core_access_fixed
 namespace boost
