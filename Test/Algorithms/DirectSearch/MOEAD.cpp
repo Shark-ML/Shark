@@ -16,12 +16,12 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
 {
     const std::size_t reps = 10;
     const std::size_t mu = 100;
-    const std::size_t T = 10;
-    const std::size_t iters = 500 * mu;
+    const std::size_t T = 20;
+    const std::size_t iters = 450 * mu;
     const RealVector reference{11, 11};
     {
         DTLZ1 function(5);
-//      const double volume = 120.861111; // mu = 10
+//        const double volume = 120.861111; // mu = 10
         const double volume = 120.873737; // mu = 100
         MOEAD optimizer;
         optimizer.mu() = mu;
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
     }
     {
         DTLZ2 function(5);
-//      const double volume = 120.178966; // mu = 10
+//        const double volume = 120.178966; // mu = 10
         const double volume = 120.210644; // mu = 100
         MOEAD optimizer;
         optimizer.mu() = mu;
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
 	}
     {
         ZDT4 function(5);
-//      const double volume = 120.613761; // mu = 10
+//        const double volume = 120.613761; // mu = 10
         const double volume = 120.662137; // mu = 100
         MOEAD optimizer;
         optimizer.mu() = mu;
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(HYPERVOLUME_Functions)
     }
     {
         ZDT6 function(5);
-//      const double volume = 117.483246; // mu = 10
+//        const double volume = 117.483246; // mu = 10
         const double volume = 117.514950; // mu = 100
         MOEAD optimizer;
         optimizer.mu() = mu;
