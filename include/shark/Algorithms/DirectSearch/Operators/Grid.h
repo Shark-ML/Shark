@@ -37,19 +37,23 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/Metrics.h>
+#include <shark/Rng/DiscreteUniform.h>
 
 namespace shark {
 
 
-// The number of n-points that sum up to 'sum'
+/*
+ * An n-dimensional point sums to 's' if the sum of the parts equal 's',
+ * e.g. the point (x_0,x_1,x_2) sums to x_0+x_1+x+2 etc.  The number of
+ * n-dimensional points that sum to 's' is given by the formula "N over K" where
+ * N is n - 2 + s + 1 and K is s. 
+ */
 std::size_t sumlength(std::size_t const n, std::size_t const sum)
 {
-    const std::size_t d = n - 2;
     return static_cast<std::size_t>(
-        boost::math::binomial_coefficient<double>(d + sum + 1, sum));
+        boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
 }
 
-// A list of n-dimensional points that each sums to "sum".
 std::list<std::list<std::size_t>> sumsto_rec(std::size_t const n, 
                                              std::size_t const sum)
 {
@@ -79,10 +83,11 @@ std::list<std::list<std::size_t>> sumsto_rec(std::size_t const n,
 }
 
 namespace detail {
-void sumsto_helper(UIntMatrix & pointMatrix,
-                   std::size_t const rowidx,
-                   std::size_t const colidx,
-                   std::size_t const sum_rest)
+
+void pointLattice_helper(UIntMatrix & pointMatrix,
+                         std::size_t const rowidx,
+                         std::size_t const colidx,
+                         std::size_t const sum_rest)
 {
     const std::size_t n = pointMatrix.size2() - colidx;
     if(n == 1)
@@ -102,21 +107,93 @@ void sumsto_helper(UIntMatrix & pointMatrix,
             {
                 pointMatrix(total_rows + rowidx + j, colidx) = i;
             }
-            sumsto_helper(pointMatrix, total_rows + rowidx,
-                          colidx + 1, sum_rest - i);
+            pointLattice_helper(pointMatrix, total_rows + rowidx,
+                                colidx + 1, sum_rest - i);
             total_rows += submatrix_height;
         }
     }
 }
+
+// A corner is a point where exactly one dimension is non-zero.
+template <typename Iterator> 
+bool isCorner(Iterator begin, Iterator end)
+{
+    std::size_t nonzero = 0;
+    for(auto iter = begin; iter != end; ++iter)
+    {
+        if(nonzero > 1)
+        {
+            return false;
+        }
+        if(*iter > 0)
+        {
+            ++nonzero;
+        }
+    }
+    return nonzero == 1;
+}
+
 } // namespace detail
 
-UIntMatrix sumsto(std::size_t const n, std::size_t const sum)
+/*
+ * Generates a matrix where each row is an n-dimensional point that sums to
+ * 'sum'. These points are all on the (n-1)-dimensional simplex, i.e., when the
+ * points are 3-dimensional the points are on a triangle, when the points are
+ * 2-dimensional they are on a line etc.  An (n-1)-dimensional simplex has n
+ * corners which are the points where exactly one dimension is non-zero.
+ */
+UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
 {
-    SIZE_CHECK(n > 1);
     const std::size_t point_count = sumlength(n, sum);
     UIntMatrix pointMatrix(point_count, n);
-    detail::sumsto_helper(pointMatrix, 0, 0, sum);
+    detail::pointLattice_helper(pointMatrix, 0, 0, sum);
     return pointMatrix;
+}
+
+
+/*
+ * Sample points uniformly from the simplex given in the matrix.  Corners are
+ * always included in the sampled point set (unless excplicitly turned off with
+ * keep_corners set to false).  The returned matrix will always have n points or
+ * the same number of points as the original matrix if n is smaller.  
+ */
+template <typename Matrix, typename RngType = shark::DefaultRngType>
+Matrix sampleUniformly(RngType & rng, Matrix const & matrix, 
+                       std::size_t const n,
+                       bool const keep_corners = true)
+{
+    // No need to do all the below stuff if we're gonna grab it all anyway.
+    if(matrix.size1() <= n) 
+    {
+        return matrix;
+    }
+    Matrix sampledMatrix(n, matrix.size2());
+    std::set<std::size_t> added_rows;
+    // First find all the corners and add them to our set of sampled points.
+    if(keep_corners)
+    {
+        for(std::size_t row = 0; row < matrix.size1(); ++row)
+        {
+            if(detail::isCorner(matrix.row_begin(row), matrix.row_end(row)))
+            {
+                added_rows.insert(row);
+            }
+        }
+    }
+    DiscreteUniform<RngType> uni(rng, 0, matrix.size1() - 1);
+    while(added_rows.size() < n)
+    {
+        // If we sample an existing index it doesn't alter the set.
+        added_rows.insert(uni());
+    }
+    std::size_t i = 0;
+    for(std::size_t row_idx : added_rows)
+    {
+        std::copy(matrix.row_begin(row_idx), matrix.row_end(row_idx),
+                  sampledMatrix.row_begin(i));
+        ++i;
+    }
+    return sampledMatrix;
 }
 
 // Gives the number of ticks in each dimension required to make an n-dimensional
@@ -124,10 +201,13 @@ UIntMatrix sumsto(std::size_t const n, std::size_t const sum)
 // Given n and target_count returns T such that
 //     forall T'<T . sumlength(n,T') < target_count
 // and forall T'>T . sumlength(n,T') > target_count
-std::size_t bestPointCountForLattice(std::size_t const n, 
-                                     std::size_t const target_count)
+std::size_t bestPointSumForLattice(std::size_t const n, 
+                                   std::size_t const target_count)
 {
-    SIZE_CHECK(n > 1);
+    if(n == 1)
+    {
+        return target_count;
+    }
     if(n == 2)
     {
         return target_count - 1;
@@ -143,11 +223,6 @@ std::size_t bestPointCountForLattice(std::size_t const n,
         ++dimension_ticks_count;
     }
     return dimension_ticks_count;
-}
-
-UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
-{
-    return sumsto(n, sum);
 }
 
 
