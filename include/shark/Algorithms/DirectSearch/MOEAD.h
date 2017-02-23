@@ -60,7 +60,6 @@ public:
         nc() = 20.0; // parameter for crossover operator
         nm() = 20.0; // parameter for mutation operator 
         neighbourhoodSize() = 10;
-        m_curParentIndex = 0;
         // Don't do anything...
         repairFunction() = [](IndividualType &) {};
         this->m_features |= 
@@ -221,22 +220,28 @@ protected:
                 std::vector<ResultType> const & functionValues,
                 RealVector const & lowerBounds,
                 RealVector const & upperBounds,
-                std::size_t const desired_mu,
+                std::size_t const mu,
                 double const nm,
                 double const nc,
                 double const crossover_prob,
                 std::size_t const neighbourhoodSize)
     {
         SIZE_CHECK(initialSearchPoints.size() > 0);
-        
+
+        m_curParentIndex = 0;
         const std::size_t numOfObjectives = functionValues[0].size();
         // Decomposition-related initialization
-        m_mu_prime = bestPointCountForLattice(numOfObjectives, desired_mu);
-        m_weights = weightLattice(numOfObjectives, m_mu_prime);
+        m_mu_prime = bestPointSumForLattice(numOfObjectives, mu);
+        m_weights = sampleUniformly(*mpe_rng, 
+                                    weightLattice(numOfObjectives, m_mu_prime), 
+                                    mu);
         m_neighbourhoodSize = neighbourhoodSize;
         m_neighbourhoods = closestIndices(m_weights, 
                                           neighbourhoodSize);
-        m_mu = m_weights.size1(); // Set the actual mu now.
+        
+        SIZE_CHECK(m_weights.size1() == mu);
+        SIZE_CHECK(m_neighbourhoods.size1() == mu);
+        m_mu = mu;
         m_mutation.m_nm = nm;
         m_crossover.m_nc = nc;
         m_crossoverProbability = crossover_prob;
@@ -308,7 +313,6 @@ protected:
             m_bestDecomposedValues[i] = std::min(m_bestDecomposedValues[i], 
                                                  candidate[i]);
         }
-        
         // 2.4. Update of neighbouring solutions
         for(auto iter = m_neighbourhoods.row_begin(m_curParentIndex);
             iter != m_neighbourhoods.row_end(m_curParentIndex);
@@ -340,11 +344,11 @@ protected:
         m_curParentIndex = (m_curParentIndex + 1) % m_neighbourhoods.size1();
     }
 
-    
+    std::vector<IndividualType> m_parents;    
+
 private:
     DefaultRngType * mpe_rng;
     double m_crossoverProbability; ///< Probability of crossover happening.
-    std::vector<IndividualType> m_parents;
     std::size_t m_mu_prime; ///< mu' is the factor used for getting the actual
                             ///mu.
     std::size_t m_mu; ///< Size of parent population and the "N" from the paper
