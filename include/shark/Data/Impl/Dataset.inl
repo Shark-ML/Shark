@@ -36,6 +36,7 @@
 #include <boost/mpl/eval_if.hpp>
 
 #include <boost/serialization/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/range/adaptor/indirected.hpp>
 
