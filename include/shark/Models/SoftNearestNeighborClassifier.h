@@ -139,7 +139,7 @@ public:
 
 	/// soft k-nearest-neighbor prediction
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs) const {
-		std::size_t numPatterns = shark::size(patterns);
+		std::size_t numPatterns = batchSize(patterns);
 		std::vector<typename NearestNeighbors::DistancePair> neighbors = m_algorithm->getNeighbors(patterns, m_neighbors);
 
 		outputs.resize(numPatterns, m_classes);

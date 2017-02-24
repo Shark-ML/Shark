@@ -133,8 +133,8 @@ public:
 		State const& state, 
 		BatchInputType& gradient
 	) const{
-		SIZE_CHECK(coefficientsX2.size1() == shark::size(batchX1));
-		SIZE_CHECK(coefficientsX2.size2() == shark::size(batchX2));
+		SIZE_CHECK(coefficientsX2.size1() == batchSize(batchX1));
+		SIZE_CHECK(coefficientsX2.size2() == batchSize(batchX2));
 		m_base->weightedInputDerivative( batchX1, batchX2, coefficientsX2, state, gradient );
 		gradient *= m_factor;
 	}

@@ -160,7 +160,7 @@ public:
 	void eval(
 		BatchInputType const & patterns, BatchOutputType& output, State& state
 	)const{
-		std::size_t numPatterns = size(patterns);
+		std::size_t numPatterns = batchSize(patterns);
 		output.resize(numPatterns);
 		output.clear();
 		

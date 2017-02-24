@@ -110,7 +110,8 @@ public:
 	}
 	
 private:
-	double evalForBatch(RealVector const& input, BatchDataType const& batch)const {
+	template<class Batch>
+	double evalForBatch(SearchPointType const& input, Batch const& batch)const {
 		mep_model->setParameterVector(input);
 	
 		BatchOutputType predictions;
@@ -118,11 +119,11 @@ private:
 
 		//calculate error derivative of the loss function
 		double error= mep_loss->eval(batch.label, predictions);
-		error /= shark::size(batch);
+		error /= shark::batchSize(batch);
 		return error;
 	}
-	
-	ResultType evalDerivativeForBatch( SearchPointType const& input, FirstOrderDerivative & derivative, BatchDataType const& batch)const {
+	template<class Batch>
+	ResultType evalDerivativeForBatch( SearchPointType const& input, FirstOrderDerivative & derivative, Batch const& batch)const {
 		mep_model->setParameterVector(input);
 		boost::shared_ptr<State> state = mep_model->createState();
 		
@@ -136,8 +137,8 @@ private:
 		//chain rule
 		mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,derivative);
 	
-		error /= shark::size(batch);
-		derivative /= shark::size(batch);
+		error /= shark::batchSize(batch);
+		derivative /= shark::batchSize(batch);
 		return error;
 	}
 

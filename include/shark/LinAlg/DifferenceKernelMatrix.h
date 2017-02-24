@@ -104,10 +104,10 @@ public:
 		std::size_t batch_gj = std::get<2>(pj);
 		std::size_t index_gj = std::get<3>(pj);
 		typedef typename Data<InputType>::const_element_reference reference;
-		reference si = shark::get(m_dataset.batch(batch_si), index_si);
-		reference gi = shark::get(m_dataset.batch(batch_gi), index_gi);
-		reference sj = shark::get(m_dataset.batch(batch_sj), index_sj);
-		reference gj = shark::get(m_dataset.batch(batch_gj), index_gj);
+		reference si = getBatchElement(m_dataset.batch(batch_si), index_si);
+		reference gi = getBatchElement(m_dataset.batch(batch_gi), index_gi);
+		reference sj = getBatchElement(m_dataset.batch(batch_sj), index_sj);
+		reference gj = getBatchElement(m_dataset.batch(batch_gj), index_gj);
 		double k_gi_gj = m_kernel(gi, gj);
 		double k_gi_sj = m_kernel(gi, sj);
 		double k_si_gj = m_kernel(si, gj);

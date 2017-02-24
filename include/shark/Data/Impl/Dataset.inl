@@ -30,23 +30,22 @@
 
 #include <shark/Data/BatchInterface.h>
 #include <shark/Core/ISerializable.h>
-#include <shark/Core/utility/ZipPair.h>
 #include <shark/Core/Exception.h>
 #include <shark/Core/utility/CanBeCalled.h>
 
 #include <boost/mpl/eval_if.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/iterator/indirect_iterator.hpp>
-#include <boost/range/adaptor/transformed.hpp>
 #include <boost/range/adaptor/indirected.hpp>
 
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/vector.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 
 #include <algorithm>
+#include <memory>
 
 namespace shark {
 namespace detail{
@@ -105,6 +104,43 @@ inline std::size_t batchPartitioning(
 	return sumOfBatches;
 }
 
+/// compute the complement of the indices with respect to the set [0,...n[
+template<class T,class T2>
+void complement(
+	T const& set,
+	std::size_t n,
+	T2& comp)
+{
+	std::vector<std::size_t> parentSet(n);
+	for(std::size_t i = 0; i != n; ++i){
+		parentSet[i]=i;
+	}
+	std::vector<std::size_t> setCopy(set.begin(),set.end());
+	std::sort(setCopy.begin(),setCopy.end());
+
+	std::vector<std::size_t> resultSet(parentSet.size());
+	std::vector<std::size_t>::iterator pos = std::set_difference(
+		parentSet.begin(),parentSet.end(),
+		setCopy.begin(),setCopy.end(),
+		resultSet.begin()
+	);
+	comp.resize(std::distance(resultSet.begin(),pos));
+	std::copy(resultSet.begin(),pos,comp.begin());
+}
+
+/// compute the index set for the range [0, ..., size[
+template<class T>
+void range(size_t size, T& indices){
+	indices.resize(size);
+	for (size_t i=0; i<size; i++) indices[i] = i;
+}
+/// compute the index set for the range [start, ..., size+start[
+template<class T>
+void range(size_t size,size_t start, T& indices){
+	indices.resize(size);
+	for (size_t i=0; i<size; i++) indices[i] = start+i;
+}
+
 /// \brief Shared memory container class with slicing
 template <class Type>
 class SharedContainer : public ISerializable
@@ -126,7 +162,7 @@ public:
 	SharedContainer(std::size_t numBatches){
 		m_data.resize(numBatches);
 		for(std::size_t i = 0; i != numBatches; ++i){
-			m_data[i].reset(new BatchType());
+			m_data[i] = boost::make_shared<BatchType>();
 		}
 	}
 
@@ -147,8 +183,8 @@ public:
 	///@param maximumBatchSize The size of the batches. If set to 0, the size is unlimited
 	template<class Range>
 	SharedContainer(Range const& data, std::size_t maximumBatchSize){
-		SIZE_CHECK(shark::size(data) != 0 );
-		std::size_t points = shark::size(data);
+		SIZE_CHECK(data.size() != 0 );
+		std::size_t points = data.size();
 		if(maximumBatchSize == 0)
 			maximumBatchSize = points;
 		
@@ -184,34 +220,22 @@ public:
 		}
 	}
 
-	///\brief Creates a shared container form another with different batch architecture
-	///
-	///@param container The old container from whcih to create the one with the new batch sizes
-	///@param batchSizes vector with the size of every batch of this container
-	///@param dummy to distinguish this call from the subset call
-	SharedContainer(SharedContainer const& container, std::vector<std::size_t> batchSizes, bool dummy){
-		//create batches
-		for(std::size_t i = 0; i != batchSizes.size(); ++i){
-			m_data.push_back(
-				boost::shared_ptr<BatchType>(
-					new BatchType(BatchTraits::createBatch(*container.elemBegin(),batchSizes[i]))
-				)
-			);
-		}
+	//~ ///\brief Creates a shared container form another with different batch architecture
+	//~ ///
+	//~ ///@param container The old container from which to create the one with the new batch sizes
+	//~ ///@param batchSizes vector with the size of every batch of this container
+	//~ ///@param dummy to distinguish this call from the subset call
+	//~ SharedContainer(SharedContainer const& container, std::vector<std::size_t> batchSizes, bool dummy){
+		//~ //create batches
+		//~ for(std::size_t i = 0; i != batchSizes.size(); ++i){
+			//~ m_data.push_back(
+				//~ boost::make_shared<BatchType>(BatchTraits::createBatch(*container.elemBegin(),batchSizes[i]))
+			//~ );
+		//~ }
 
-		//copy data into batches
-		int pos = 0;
-		std::size_t batch=0;
-		for(std::size_t i = 0; i != batchSizes.size(); ++i){
-			for(std::size_t j = 0; j != batchSizes[i]; ++j,++pos){
-				if(pos==(int)shark::size(*(container.m_data[batch]))){
-					pos = 0;
-					++batch;
-				}
-				get(*(m_data[i]),j)=get(*(container.m_data[batch]),pos);
-			}
-		}
-	}
+		//~ //copy data into batches
+		//~ std::copy(container.elemBegin(),container.elemEnd(), elemBegin());
+	//~ }
 
 	/// \brief Clear the contents of this container without affecting the others.
 	void clear(){
@@ -232,7 +256,7 @@ public:
 	std::size_t numberOfElements()const{
 		std::size_t numElems = 0;
 		for(std::size_t i = 0; i != m_data.size(); ++i){
-			numElems+=boost::size(*m_data[i]);
+			numElems+=BatchTraits::size(*m_data[i]);
 		}
 		return numElems;
 	}
@@ -281,51 +305,9 @@ public:
 		return iterator(m_data.end());
 	}
 
-	///////////ITERATORS OVER THE ELEMENTS//////////////////
-private:
-	struct BatchRange:public boost::iterator_range<iterator>{
-	BatchRange(iterator const& begin, iterator const& end):boost::iterator_range<iterator>(begin,end){}
-	};
-	struct ConstBatchRange:public boost::iterator_range<const_iterator>{
-	ConstBatchRange(const_iterator const& begin, const_iterator const& end)
-	:boost::iterator_range<const_iterator>(begin,end){}
-	};
-public:
-
-	typedef MultiSequenceIterator<BatchRange > element_iterator;
-	typedef MultiSequenceIterator<ConstBatchRange > const_element_iterator;
-
-
-	///\brief Iterator access over the single elements
-	const_element_iterator elemBegin() const{
-		if(size() == 0)
-			return elemEnd();
-		
-		return const_element_iterator(begin(),end(),begin(),boost::begin(*m_data[0]),0);
-	}
-
-	///\brief Iterator access over the single elements
-	const_element_iterator elemEnd() const{
-		return const_element_iterator(begin(),end(),end(),typename BatchTraits::const_iterator(),numberOfElements());
-	}
-
-	///\brief Iterator access over the single elements
-	element_iterator elemBegin(){
-		if(size() == 0)
-			return elemEnd();
-		return element_iterator(begin(),end(),begin(),boost::begin(*m_data[0]),0);
-	}
-
-	///\brief Iterator access over the single elements
-	element_iterator elemEnd(){
-		return element_iterator(begin(),end(),end(),typename BatchTraits::iterator(),numberOfElements());
-	}
-
 	///////////////////////ADDING NEW BATCHES////////////////////////
 	void push_back(BatchType const& batch){
-		m_data.push_back(boost::shared_ptr<BatchType>(
-			new BatchType(batch)
-		));
+		m_data.push_back(boost::make_shared<BatchType>(batch));
 	}
 	
 	void append(SharedContainer const& other){
@@ -340,29 +322,25 @@ public:
 	///this to work.
 	void splitBatch(iterator position, std::size_t elementIndex){
 		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
-		SIZE_CHECK(elementIndex <= shark::size(*position));
+		SIZE_CHECK(elementIndex <= batchSize(*position));
 
 		BatchType& source=*position;
 		std::size_t leftElements = elementIndex;
-		std::size_t rightElements = shark::size(source)-leftElements;
+		std::size_t rightElements = batchSize(source)-leftElements;
 
 		if(leftElements == 0 || rightElements == 0)
 			return;
 
-		boost::shared_ptr<BatchType> leftSplit(
-			new BatchType(BatchTraits::createBatch(get(source,0),leftElements))
-		);
-		boost::shared_ptr<BatchType> rightSplit(
-			new BatchType(BatchTraits::createBatch(get(source,0),rightElements))
-		);
-		std::copy(boost::begin(source),boost::begin(source)+leftElements,boost::begin(*leftSplit));
-		std::copy(boost::begin(source)+leftElements,boost::end(source),boost::begin(*rightSplit));
+		auto leftSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),leftElements));
+		auto rightSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),rightElements));
+		std::copy(BatchTraits::begin(source),BatchTraits::begin(source)+leftElements,BatchTraits::begin(*leftSplit));
+		std::copy(BatchTraits::begin(source)+leftElements,BatchTraits::end(source),BatchTraits::begin(*rightSplit));
 		*(position.base())=rightSplit;//override old batch
 		m_data.insert(position.base(),leftSplit);
 
 	}
 
-	///\brief Splits the container in two independent parts. The lft part remains in the containr, the right is stored as return type
+	///\brief Splits the container in two independent parts. The left part remains in the container, the right is stored as return type
 	///
 	///Order of elements remain unchanged. The SharedContainer is not allowed to be shared for
 	///this to work.
@@ -393,11 +371,11 @@ public:
 		for(std::size_t i = 0; i != batchSizes.size(); ++i){
 			//create new batch
 			std::size_t currentBatchSize = batchSizes[i];
-			boost::shared_ptr<BatchType> newBatch(new BatchType(BatchTraits::createBatch(get(batch(currentBatch),0),currentBatchSize)));
+			boost::shared_ptr<BatchType> newBatch = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(batch(currentBatch),0),currentBatchSize));
 			for(std::size_t j = 0; j != currentBatchSize; ++j){
-				get(*newBatch,j)=get(batch(currentBatch),currentBatchIndex);
+				getBatchElement(*newBatch,j)=getBatchElement(batch(currentBatch),currentBatchIndex);
 				++currentBatchIndex;
-				if(currentBatchIndex == shark::size(batch(currentBatch))){
+				if(currentBatchIndex == BatchTraits::size(batch(currentBatch))){
 					m_data[currentBatch].reset();//free old memory
 					++currentBatch;
 					currentBatchIndex = 0;
@@ -420,7 +398,7 @@ public:
 	std::vector<std::size_t> getPartitioning()const{
 		std::vector<std::size_t> batchSizes(size());
 		for(std::size_t i = 0; i != size(); ++i){
-			batchSizes[i] = boost::size(*m_data[i]);
+			batchSizes[i] = BatchTraits::size(*m_data[i]);
 		}
 		return batchSizes;
 	}
@@ -493,58 +471,189 @@ private:
 	}
 };
 
-/// compute the complement of the indices with respect to the set [0,...n[
-template<class T,class T2>
-void complement(
-	T const& set,
-	std::size_t n,
-	T2& comp)
-{
-	std::vector<std::size_t> parentSet(n);
-	for(std::size_t i = 0; i != n; ++i){
-		parentSet[i]=i;
+template<class C>
+struct BatchRange{
+	typedef IndexingIterator<BatchRange<C> > iterator;
+	typedef IndexingIterator<BatchRange<C> const > const_iterator;
+	typedef typename C::batch_type value_type;
+	typedef typename boost::mpl::if_<
+		std::is_const<C>,
+		typename C::const_batch_reference,
+		typename C::batch_reference
+	>::type reference;
+	typedef typename C::const_batch_reference const_reference;
+	typedef std::size_t size_type;
+	typedef std::ptrdiff_t difference_type;
+	
+	BatchRange()=default;
+	BatchRange(C* container):m_container(container){}
+	
+	template<class C2>
+	BatchRange(BatchRange<C2> const& other):m_container(other.m_container){}
+	
+	std::size_t size()const{
+		return m_container->numberOfBatches();
 	}
-	std::vector<std::size_t> setCopy(set.begin(),set.end());
-	std::sort(setCopy.begin(),setCopy.end());
+	
+	bool empty()const{return size() == 0;}
+	
+	iterator begin(){
+		return iterator(*this,0);
+	}
+	const_iterator begin()const{
+		return const_iterator(*this,0);
+	}
 
-	std::vector<std::size_t> resultSet(parentSet.size());
-	std::vector<std::size_t>::iterator pos = std::set_difference(
-		parentSet.begin(),parentSet.end(),
-		setCopy.begin(),setCopy.end(),
-		resultSet.begin()
-	);
-	comp.resize(std::distance(resultSet.begin(),pos));
-	std::copy(resultSet.begin(),pos,comp.begin());
-}
+	iterator end(){
+		return iterator(*this,size());
+	}
+	const_iterator end()const{
+		return const_iterator(*this,size());
+	}
 
-/// compute the index set for the range [0, ..., size[
-template<class T>
-void range(size_t size, T& indices){
-	indices.resize(size);
-	for (size_t i=0; i<size; i++) indices[i] = i;
-}
-/// compute the index set for the range [start, ..., size+start[
-template<class T>
-void range(size_t size,size_t start, T& indices){
-	indices.resize(size);
-	for (size_t i=0; i<size; i++) indices[i] = start+i;
-}
+	reference operator[](std::size_t i){
+		return m_container->batch(i);
+	}
+	const_reference operator[](std::size_t i)const{
+		return m_container->batch(i);
+	}
+	
+	reference front(){
+		return m_container->batch(0);
+	}
+	const_reference front()const{
+		return m_container->batch(0);
+	}
+private:
+	template <class> friend class BatchRange;
+	C* m_container;
+};
 
-struct TransformOneVersusRestLabels
-{
-	TransformOneVersusRestLabels(unsigned int oneClass)
-	: m_oneClass(oneClass)
-	{ }
+template<class Dataset>
+class DataElementIterator: 
+public SHARK_ITERATOR_FACADE< 
+	DataElementIterator<Dataset>, 
+	typename Dataset::element_type, 
+	std::random_access_iterator_tag, 
+	typename boost::mpl::if_<
+		std::is_const<Dataset>,
+		typename Dataset::const_element_reference,
+		typename Dataset::element_reference
+	>::type
+>{
+private:
+	Dataset* m_container;
+	std::size_t m_batchPosition;
+	std::size_t m_elementPosition;
+	std::size_t m_positionInSequence;
+public:
+	typedef typename boost::mpl::if_<
+		std::is_const<Dataset>,
+		typename Dataset::const_element_reference,
+		typename Dataset::element_reference
+	>::type reference;
 
-	typedef unsigned int result_type;
+	DataElementIterator()
+	:m_positionInSequence(0){}
 
-	unsigned int operator() (unsigned int label) const
-	{
-		return ((label == m_oneClass) ? 1 : 0);
+	DataElementIterator(
+		Dataset* container,
+		std::size_t batchPosition,
+		std::size_t elementPosition,
+		std::size_t positionInSequence
+	):m_container(container),
+	m_batchPosition(batchPosition),
+	m_elementPosition(elementPosition),
+	m_positionInSequence(positionInSequence){}
+
+	template<class D>
+	DataElementIterator(DataElementIterator<D> const& other)
+	:m_container(other.m_container),
+	m_batchPosition(other.m_batchPosition),
+	m_elementPosition(other.m_elementPosition),
+	m_positionInSequence(other.m_positionInSequence){}
+	
+	template<class D>
+	DataElementIterator operator=(DataElementIterator<D> const& other){
+		m_container = other.m_container;
+		m_batchPosition = other.m_batchPosition;
+		m_elementPosition = other.m_elementPosition;
+		m_positionInSequence = other.m_positionInSequence;
+	}
+		
+	std::size_t index()const{
+		return m_positionInSequence;
+	}
+	
+	auto getInnerIterator()const ->decltype (batchBegin(m_container->batch(m_batchPosition))){
+		return batchBegin(m_container->batch(m_batchPosition)) + m_elementPosition;
 	}
 
 private:
-	unsigned int m_oneClass;
+	friend class SHARK_ITERATOR_CORE_ACCESS;
+	template <class> friend class DataElementIterator;
+
+	void increment() {
+		++m_positionInSequence;
+		++m_elementPosition;
+		if(m_elementPosition == batchSize(m_container->batch(m_batchPosition))){
+			++m_batchPosition;
+			m_elementPosition = 0;
+		}
+	}
+	void decrement() {
+		SIZE_CHECK(m_positionInSequence);//don't call this method when the iterator is on the first element
+		--m_positionInSequence;
+		if(m_elementPosition == 0){
+			--m_batchPosition;
+			m_elementPosition = batchSize(m_container->batch(m_batchPosition));
+		}
+		--m_elementPosition;
+	}
+	//this is not exactly O(1) as the standard wants. in fact it's O(n) in the number of inner sequences
+	//so approximately O(1) if the size of a sequence is big...
+	void advance(std::ptrdiff_t n){
+		m_positionInSequence += n;
+		n += m_elementPosition;//jump from the start of the current inner sequence
+		m_elementPosition = 0;
+		if( n == 0)
+			return;
+		if(n < 0){
+			std::size_t npos = -n;
+			--m_batchPosition;
+			--npos;
+			//jump over the outer position until we are in the correct range again
+			while ((unsigned int) npos >= batchSize(m_container->batch(m_batchPosition)) ){
+				npos -= batchSize(m_container->batch(m_batchPosition));
+				--m_batchPosition;
+			}
+			m_elementPosition = batchSize(m_container->batch(m_batchPosition)) - 1 - npos;
+		}
+		else{
+			std::size_t npos = n;
+			//jump over the outer position until we are in the correct range again
+			while (npos >= batchSize(m_container->batch(m_batchPosition))){
+				npos -= batchSize(m_container->batch(m_batchPosition));
+				++m_batchPosition;
+				SHARK_RUNTIME_CHECK(m_batchPosition != m_container->numberOfBatches() || (npos == 0), "iterator went past the end");
+			}
+			m_elementPosition = npos;
+		}
+	}
+
+	template<class Iter>
+	std::ptrdiff_t distance_to(const Iter& other) const{
+		return (std::ptrdiff_t)other.m_positionInSequence - (std::ptrdiff_t)m_positionInSequence;
+	}
+
+	template<class Iter>
+	bool equal(Iter const& other) const{
+		return m_positionInSequence == other.m_positionInSequence;
+	}
+	reference dereference() const {
+		auto&& batch = m_container->batch(m_batchPosition);
+		return getBatchElement(batch,m_elementPosition);
+	}
 };
 
 ///\brief Selects a subset of features from a given Matrix
@@ -553,23 +662,23 @@ private:
 ///such a class to be a template argument. C++11 does.
 template<class FeatureSet>
 class SelectFeatures{
-	public:
-		SelectFeatures(FeatureSet const& f):features(f){}
-			
-		typedef RealMatrix result_type;
+public:
+	SelectFeatures(FeatureSet const& f):features(f){}
 		
-		RealMatrix operator()(RealMatrix const& input)const{
-			RealMatrix output(input.size1(),features.size());
-			for(std::size_t i = 0; i != input.size1(); ++i){
-				for(std::size_t j = 0; j != features.size(); ++j){
-					output(i,j) = input(i,features[j]);
-				}
+	typedef RealMatrix result_type;
+	
+	RealMatrix operator()(RealMatrix const& input)const{
+		RealMatrix output(input.size1(),features.size());
+		for(std::size_t i = 0; i != input.size1(); ++i){
+			for(std::size_t j = 0; j != features.size(); ++j){
+				output(i,j) = input(i,features[j]);
 			}
-			return output;
 		}
-	private:
-		FeatureSet const& features;
-	};
+		return output;
+	}
+private:
+	FeatureSet const& features;
+};
 
 /// \brief For Data<T> and functor F calculates the result of the resulting elements F(T).
 template<class Functor, class T>
@@ -590,592 +699,152 @@ public:
 		>
 	>::type type;
 };
-
-///\brief Base type used to mimic a pair of data batches.
-///
-/// The template parameters choose which type of data is stored as input or labels, and PairType<Element1,Element2> governs the value type
-template<class Batch1Type,class Batch2Type, template<class, class> class PairType>
-struct BaseDataBatchPair{
-private:
-	//A Bunch of typedefs needed to member2query the types of iterators, references and values of the batches
-	typedef typename boost::range_iterator<Batch1Type>::type Batch1Iterator;
-	typedef typename boost::range_iterator<Batch1Type const>::type ConstBatch1Iterator;
-	typedef typename boost::range_iterator<Batch2Type>::type Batch2Iterator;
-	typedef typename boost::range_iterator<Batch2Type const>::type ConstBatch2Iterator;
-
-	typedef typename boost::iterator_value<Batch1Iterator>::type Element1Type;
-	typedef typename boost::iterator_value<Batch2Iterator>::type Element2Type;
-public:
-	Batch1Type member1;
-	Batch2Type member2;
-
-	typedef PairType<Element1Type,Element2Type> value_type;
-	typedef PairIterator<
-		value_type,Batch1Iterator,Batch2Iterator
-	> iterator;
-	typedef PairIterator<
-		value_type,ConstBatch1Iterator,ConstBatch2Iterator
-	> const_iterator;
-	typedef typename iterator::reference reference;
-	typedef typename const_iterator::reference const_reference;
-
-	template<class Batch1T, class Batch2T>
-	BaseDataBatchPair(
-		Batch1T& member1,
-		Batch2T& member2
-	):member1(member1),member2(member2){}
+/** @*/
 
 
-	iterator begin(){
-		return iterator(boost::begin(member1),boost::begin(member2));
-	}
-	const_iterator begin()const{
-		return const_iterator(boost::begin(member1),boost::begin(member2));
-	}
 
-	iterator end(){
-		return iterator(boost::end(member1),boost::end(member2));
-	}
-	const_iterator end()const{
-		return const_iterator(boost::end(member1),boost::end(member2));
-	}
+}
 
-	std::size_t size()const{
-		return boost::size(member1);
-	}
 
-	reference operator[](std::size_t i){
-		return get(*this,i);
-	}
-	const_reference operator[](std::size_t i)const{
-		return get(*this,i);
-	}
-};
-
-///\brief Base type used to mimic a reference to a pair of data batches.
-template<class Batch1Reference, class Batch2Reference, template<class,class> class PairType >
-struct BaseDataBatchPairReference{
-private:
-	typedef typename boost::range_iterator<typename boost::remove_reference<Batch1Reference>::type >::type Batch1Iterator;
-	typedef typename boost::range_iterator<typename boost::remove_reference<Batch2Reference>::type>::type Batch2Iterator;
-	typedef typename boost::iterator_value<Batch1Iterator>::type Element1Type;
-	typedef typename boost::iterator_value<Batch2Iterator>::type Element2Type;
-	typedef BaseDataBatchPairReference self_type;
-public:
-	typedef PairType<Element1Type,Element2Type> value_type;
-	typedef PairIterator<
-		value_type,Batch1Iterator,Batch2Iterator
-	> iterator;
-	typedef iterator const_iterator;
-
-	typedef typename boost::iterator_reference<iterator>::type reference;
-	typedef typename boost::iterator_reference<const_iterator>::type const_reference;
-
-	Batch1Reference member1;
-	Batch2Reference member2;
-
-	BaseDataBatchPairReference(
-		Batch1Reference member1,
-		Batch2Reference member2
-	):member1(member1),member2(member2){}
-
-	template<class Other>
-	BaseDataBatchPairReference(
-		Other const& pair
-	):member1(pair.member1),member2(pair.member2){}
-
-	template<class Other>
-	self_type& operator=(Other const& pair){
-		member1 = pair.member1;
-		member2 = pair.member2;
-		return *this;
-	}
-	self_type& operator=(self_type const& pair){
-		member1 = pair.member1;
-		member2 = pair.member2;
-		return *this;
-	}
-
-	iterator begin(){
-		return iterator(boost::begin(member1),boost::begin(member2));
-	}
-	const_iterator begin()const{
-		return const_iterator(
-			boost::begin(const_cast<typename boost::remove_reference<Batch1Reference>::type& >(member1)),
-			boost::begin(const_cast<typename boost::remove_reference<Batch2Reference>::type&>(member2))
-		);
-	}
-
-	iterator end(){
-		return iterator(boost::end(member1),boost::end(member2));
-	}
-	const_iterator end()const{
-		return const_iterator(
-			boost::end(const_cast<typename boost::remove_reference<Batch1Reference>::type& >(member1)),
-			boost::end(const_cast<typename boost::remove_reference<Batch2Reference>::type&>(member2))
-		);
-	}
-
-	std::size_t size()const{
-		return boost::size(member1);
-	}
-
-	reference operator[](std::size_t i){
-		return get(*this,i);
-	}
-	const_reference operator[](std::size_t i)const{
-		return get(*this,i);
-	}
-	
-	friend void swap(self_type& a, self_type& b){
-		using std::swap;
-		swap(a.member1,b.member1);
-		swap(a.member2,b.member2);
-	}
-};
-
-}//end namespace detail
-
-///\brief The type used to mimic a pair of data.
-///
-/// The template parameters choose which type of data is stored as input or labels
+///\brief Input-Label pair of data
 template<class InputType,class LabelType>
-struct DataPair{
-	typedef InputType& InputReference;
-	typedef LabelType& LabelReference;
-	typedef InputType const& ConstInputReference;
-	typedef LabelType const& ConstLabelReference;
+struct InputLabelPair{
 	InputType input;
 	LabelType label;
+	
+	InputLabelPair(){}
 
-	DataPair(
-		InputType const& input,
-		LabelType const& label
+	template<class I, class L>
+	InputLabelPair(
+		I&& input,
+		L&& label
 	):input(input),label(label){}
+	
 	template<class InputT, class LabelT>
-	DataPair(
-		InputT& input,
-		LabelT& label
-	):input(input),label(label){}
-
+	InputLabelPair(
+		InputLabelPair<InputT,LabelT> const& pair
+	):input(pair.input),label(pair.label){}
+	
+	InputLabelPair& operator=(
+		InputLabelPair const& pair
+	){
+		input = pair.input;
+		label = pair.label;
+		return *this;
+	}
+	
 	template<class InputT, class LabelT>
-	DataPair(
-		DataPair<InputT,LabelT> const& pair
-	):input(pair.input),label(pair.label){}
-
-	template<class T>
-	DataPair(
-		T const& pair
-	):input(pair.input),label(pair.label){}
+	InputLabelPair& operator=(
+		InputLabelPair<InputT,LabelT> const& pair
+	){
+		input = pair.input;
+		label = pair.label;
+		return *this;
+	}
 		
-	friend bool operator<(DataPair const& op1, DataPair const& op2){
+	friend bool operator<(InputLabelPair const& op1, InputLabelPair const& op2){
 		return op1.label < op2.label;
 	}
 };
 
-///\brief The type used to mimic a pair of data batches.
-///
-/// The template parameters choose which type of data is stored as input or labels
-template<class InputBatchType,class LabelBatchType>
-struct DataBatchPair:public detail::BaseDataBatchPair<InputBatchType,LabelBatchType,DataPair>{
+template<class I1, class L1, class I2, class L2>
+void swap(InputLabelPair<I1, L1>&& p1, InputLabelPair<I2, L2>&& p2){
+	using std::swap;
+	swap(p1.input,p2.input);
+	swap(p1.label,p2.label);
+}
+
+///\brief Input label pair of batches
+template<class Batch1Type,class Batch2Type>
+struct InputLabelBatch{
 private:
-	typedef detail::BaseDataBatchPair<InputBatchType,LabelBatchType,DataPair> base_type;
+	typedef typename BatchTraits<typename std::decay<Batch1Type>::type >::type Batch1Traits;
+	typedef typename BatchTraits<typename std::decay<Batch2Type>::type >::type Batch2Traits;
+	typedef typename std::is_const<typename std::remove_reference<Batch1Type>::type>::type IsConstant;
 public:
-	InputBatchType& input;
-	LabelBatchType& label;
+	Batch1Type input;
+	Batch2Type label;
 
-	DataBatchPair(
-		InputBatchType const& input,
-		LabelBatchType const& label
-	):base_type(input,label),input(this->member1),label(this->member2){}
+	typedef InputLabelPair<
+		typename Batch1Traits::value_type,
+		typename Batch2Traits::value_type
+	> value_type;
+	typedef InputLabelPair<
+		typename detail::batch_to_reference<Batch1Type>::type,
+		typename detail::batch_to_reference<Batch2Type>::type
+	> reference;
+	typedef InputLabelPair<
+		typename Batch1Traits::const_reference,
+		typename Batch2Traits::const_reference
+	> const_reference;
+	typedef IndexingIterator<InputLabelBatch> iterator;
+	typedef IndexingIterator<InputLabelBatch const> const_iterator;
 
-	template<class InputBatchT, class LabelBatchT>
-	DataBatchPair(
-		InputBatchT& input,
-		LabelBatchT& label
-	):base_type(input,label),input(this->member1),label(this->member2){}
-
-	template<class Other>
-	DataBatchPair(
-		Other const& pair
-	):base_type(pair.input,pair.label),input(this->member1),label(this->member2){}
-		
-	template<class Other>
-	DataBatchPair& operator=(Other const& pair){
-		input = pair.input;
-		label = pair.label;
+	template<class I, class L>
+	InputLabelBatch(
+		I&& input,
+		L&& label
+	):input(input),label(label){}
+	
+	template<class Pair>
+	InputLabelBatch(
+		std::size_t size,Pair const& p
+	):input(Batch1Traits::createBatch(p.input,size)),label(Batch2Traits::createBatch(p.label,size)){}
+	
+	template<class I, class L>
+	InputLabelBatch& operator=(InputLabelBatch<I,L> const& batch){
+		input = batch.input;
+		label = batch.label;
 		return *this;
 	}
-	DataBatchPair& operator=(DataBatchPair const& pair){
-		input = pair.input;
-		label = pair.label;
-		return *this;
+
+
+	std::size_t size()const{
+		return Batch1Traits::size(input);
+	}
+	
+	iterator begin(){
+		return iterator(*this,0);
+	}
+	const_iterator begin()const{
+		return const_iterator(*this,0);
+	}
+
+	iterator end(){
+		return iterator(*this,size());
+	}
+	const_iterator end()const{
+		return const_iterator(*this,size());
+	}
+
+	reference operator[](std::size_t i){
+		return reference(getBatchElement(input,i),getBatchElement(label,i));
+	}
+	const_reference operator[](std::size_t i)const{
+		return const_reference(getBatchElement(input,i),getBatchElement(label,i));
 	}
 };
 
-/// \cond
-
-template<class I, class L,class InputIterator, class LabelIterator>
-struct PairReference<DataPair<I, L>, InputIterator, LabelIterator >{
-	struct type{
-		typedef typename boost::iterator_reference<InputIterator>::type InputReference;
-		typedef typename boost::iterator_reference<LabelIterator>::type LabelReference;
-		typedef InputReference ConstInputReference;
-		typedef LabelReference ConstLabelReference;
-		InputReference input;
-		LabelReference label;
-
-		type(
-			InputReference input,
-			LabelReference label
-		):input(input),label(label){}
-
-		template<class Other>
-		type(
-			Other const& pair
-		):input(pair.input),label(pair.label){}
-
-		template<class Other>
-		type& operator=(Other const& pair){
-			input = pair.input;
-			label = pair.label;
-			return *this;
-		}
-		type& operator=(type const& pair){
-			input = pair.input;
-			label = pair.label;
-			return *this;
-		}
-		
-		friend void swap(type a, type b){
-			using std::swap;
-			swap(a.input,b.input);
-			swap(a.label,b.label);
-		}
-		friend bool operator<(type const& op1, type const& op2){
-			return op1.label < op2.label;
-		}
-		friend bool operator<(type const& op1, DataPair<I,L> const& op2){
-			return op1.label < op2.label;
-		}
-		friend bool operator<(DataPair<I,L> const&  op1, type const& op2){
-			return op1.label < op2.label;
-		}
-	};
-};
-
-template<class InputBatchType, class LabelBatchType,class OuterInputBatchIterator, class OuterLabelBatchIterator>
-struct PairReference<DataBatchPair<InputBatchType, LabelBatchType>, OuterInputBatchIterator, OuterLabelBatchIterator >{
-private:
-	typedef typename boost::iterator_reference<OuterInputBatchIterator>::type InputBatchReference;
-	typedef typename boost::iterator_reference<OuterLabelBatchIterator>::type LabelBatchReference;
-	typedef detail::BaseDataBatchPairReference<InputBatchReference,LabelBatchReference,DataPair> base_type;
-public:
-	struct type: public base_type {
-		InputBatchReference input;
-		LabelBatchReference label;
-
-		type(
-			InputBatchReference input,
-			LabelBatchReference label
-		):base_type(input,label),input(input),label(label){}
-
-		template<class Other>
-		type(
-			Other const& pair
-		):base_type(pair.input,pair.label),input(pair.input),label(pair.label){}
-
-		template<class Other>
-		type& operator=(Other const& pair){
-			input = pair.input;
-			label = pair.label;
-			return *this;
-		}
-		type& operator=(type const& pair){
-			input = pair.input;
-			label = pair.label;
-			return *this;
-		}
-	};
-};
+template<class I1, class L1, class I2, class L2>
+void swap(InputLabelBatch<I1, L1>& p1, InputLabelBatch<I2, L2>& p2){
+	using std::swap;
+	swap(p1.input,p2.input);
+	swap(p1.label,p2.label);
+}
 
 template<class InputType, class LabelType>
-struct Batch<DataPair<InputType, LabelType> >{
-private:
-	template<class T>
-	struct GetElementInput{
-		typedef typename T::ConstInputReference result_type;
-		
-		result_type operator()(T const& element)const{
-			return element.input;
-		}
-	};
-	template<class T>
-	struct GetElementLabel{
-		typedef typename T::ConstLabelReference result_type;
-		
-		result_type operator()(T const& element)const{
-			return element.label;
-		}
-	};
-public:
-	/// \brief Type of a batch of elements.
-	typedef DataBatchPair<
-		typename Batch<InputType>::type,
-		typename Batch<LabelType>::type
-	> type;
-	
-	/// \brief The type of the elements stored in the batch 
-	typedef DataPair<InputType, LabelType> value_type;
-	
-	/// \brief Reference to a single element.
-	typedef typename type::reference reference;
-	
-	/// \brief Const Reference to a single element.
-	typedef typename type::const_reference const_reference;
-	
-	/// \brief Iterator over the elements
-	typedef typename type::iterator iterator;
-	/// \brief Iterator over the elements
-	typedef typename type::const_iterator const_iterator;
-	
-	///\brief creates a batch with input as size blueprint
-	static type createBatch(value_type const& input, std::size_t size = 1){
-		return type(
-			Batch<InputType>::createBatch(input.input,size),
-			Batch<LabelType>::createBatch(input.label,size)
-		);
-	}
-	///\brief creates a batch storing the elements referenced by the provided range
-	template<class Range>
-	static type createBatch(Range const& range){
-		typedef typename 
-			boost::remove_const<typename boost::remove_reference<
-				typename Range::const_reference
-			>::type>::type R;
-		using boost::adaptors::transform;
-		return type(
-			Batch<InputType>::createBatchFromRange(transform(range, GetElementInput<R>())),
-			Batch<LabelType>::createBatchFromRange(transform(range, GetElementLabel<R>()))
-		);
-	}
-	
-	
-	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		Batch<InputType>::resize(batch.input,batchSize,elements);
-		Batch<LabelType>::resize(batch.label,batchSize,elements);
-	}
-};
-/// \endcond
+struct Batch<InputLabelPair<InputType, LabelType> >
+: public detail::SimpleBatch<
+	InputLabelBatch<typename detail::element_to_batch<InputType>::type, typename detail::element_to_batch<LabelType>::type>
+>{};
 
-
-///\brief The type used to mimic a pair of data.
-///
-/// The template parameters choose which type of data is stored
-template<class DataType, class WeightType>
-struct WeightedDataPair{
-	typedef DataType& DataReference;
-	typedef WeightType& WeightReference;
-	typedef DataType const& ConstDataReference;
-	typedef WeightType ConstWeightReference;
-	DataType data;
-	WeightType weight;
-
-	WeightedDataPair(
-		DataType const& data,
-		double weight
-	):data(data),weight(weight){}
-	template<class DataT, class WeightT>
-	WeightedDataPair(
-		DataT& data,
-		WeightT& weight
-	):data(data),weight(weight){}
-
-	template<class DataT, class WeightT>
-	WeightedDataPair(
-		WeightedDataPair<DataT, WeightT> const& pair
-	):data(pair.data),weight(pair.weight){}
-
-	template<class T>
-	WeightedDataPair(
-		T const& pair
-	):data(pair.data),weight(pair.weight){}
+template<class InputBatchType, class LabelBatchType>
+struct BatchTraits<InputLabelBatch<InputBatchType, LabelBatchType> >{
+	typedef typename detail::batch_to_element<InputBatchType>::type InputElem;
+	typedef typename detail::batch_to_element<LabelBatchType>::type LabelElem;
+	typedef Batch<InputLabelPair<InputElem,LabelElem> > type;
 };
 
-///\brief The type used to mimic a pair of points and weights.
-///
-/// The template parameter chooses which type of data is stored
-template<class DataBatchType, class WeightBatchType>
-struct WeightedDataBatchPair:public detail::BaseDataBatchPair<DataBatchType,WeightBatchType,WeightedDataPair>{
-private:
-	typedef detail::BaseDataBatchPair<DataBatchType,WeightBatchType,WeightedDataPair> base_type;
-public:
-	DataBatchType& data;
-	WeightBatchType& weight;
-
-	WeightedDataBatchPair(
-		DataBatchType const& data,
-		WeightBatchType const& weight
-	):base_type(data,weight),data(this->member1),weight(this->member2){}
-
-	template<class DataBatchT, class WeightBatchT>
-	WeightedDataBatchPair(
-		DataBatchT& data,
-		WeightBatchT& weight
-	):base_type(data,weight),data(this->member1),weight(this->member2){}
-
-	template<class Other>
-	WeightedDataBatchPair(
-		Other const& pair
-	):base_type(pair.data,pair.weight),data(this->member1),weight(this->member2){}
-};
-
-/// \cond
-
-template<class Data, class Weight, class DataIterator, class WeightIterator>
-struct PairReference<WeightedDataPair<Data, Weight>, DataIterator, WeightIterator >{
-	struct type{
-		typedef typename boost::iterator_reference<DataIterator>::type DataReference;
-		typedef typename boost::iterator_reference<WeightIterator>::type WeightReference;
-		typedef DataReference ConstDataReference;
-		typedef WeightReference ConstWeightReference;
-		DataReference data;
-		WeightReference weight;
-
-		type(
-			DataReference data,
-			WeightReference weight
-		):data(data),weight(weight){}
-
-		template<class Other>
-		type(
-			Other const& pair
-		):data(pair.data),weight(pair.weight){}
-
-		template<class Other>
-		type& operator=(Other const& pair){
-			data = pair.data;
-			weight = pair.weight;
-			return *this;
-		}
-		type& operator=(type const& pair){
-			data = pair.data;
-			weight = pair.weight;
-			return *this;
-		}
-		
-		friend void swap(type a, type b){
-			using std::swap;
-			swap(a.data,b.data);
-			swap(a.weight,b.weight);
-		}
-	};
-};
-
-template<class DataBatchType,class WeightBatchType, class OuterDataBatchIterator, class OuterWeightBatchIterator>
-struct PairReference<WeightedDataBatchPair<DataBatchType, WeightBatchType>, OuterDataBatchIterator, OuterWeightBatchIterator >{
-private:
-	typedef typename boost::iterator_reference<OuterDataBatchIterator>::type DataBatchReference;
-	typedef typename boost::iterator_reference<OuterWeightBatchIterator>::type WeightBatchReference;
-	typedef detail::BaseDataBatchPairReference<DataBatchReference,WeightBatchReference,WeightedDataPair> base_type;
-public:
-	struct type: public base_type {
-		DataBatchReference data;
-		WeightBatchReference weight;
-
-		type(
-			DataBatchReference data,
-			WeightBatchReference weight
-		):base_type(data,weight),data(data),weight(weight){}
-
-		template<class Other>
-		type(
-			Other const& pair
-		):base_type(pair.data,pair.weight),data(pair.data),weight(pair.weight){}
-
-		template<class Other>
-		type& operator=(Other const& pair){
-			data = pair.data;
-			weight = pair.weight;
-			return *this;
-		}
-		type& operator=(type const& pair){
-			data = pair.data;
-			weight = pair.weight;
-			return *this;
-		}
-	};
-};
-
-template<class DataType, class WeightType>
-struct Batch<WeightedDataPair<DataType,WeightType> >{
-private:
-	template<class T>
-	struct GetElementData{
-		typedef typename T::ConstDataReference result_type;
-		
-		result_type operator()(T const& element)const{
-			return element.data;
-		}
-	};
-	template<class T>
-	struct GetElementWeight{
-		typedef typename T::ConstWeightReference result_type;
-		
-		result_type operator()(T const& element)const{
-			return element.weight;
-		}
-	};
-public:
-	/// \brief Type of a batch of elements.
-	typedef WeightedDataBatchPair<
-		typename Batch<DataType>::type,
-		typename Batch<WeightType>::type
-	> type;
-	
-	/// \brief The type of the elements stored in the batch 
-	typedef WeightedDataPair<DataType, WeightType> value_type;
-	
-	/// \brief Reference to a single element.
-	typedef typename type::reference reference;
-	
-	/// \brief Const Reference to a single element.
-	typedef typename type::const_reference const_reference;
-	
-	/// \brief Iterator over the elements
-	typedef typename type::iterator iterator;
-	/// \brief Iterator over the elements
-	typedef typename type::const_iterator const_iterator;
-	
-	///\brief creates a batch with input as size blueprint
-	static type createBatch(value_type const& input, std::size_t size = 1){
-		return type(
-			Batch<DataType>::createBatch(input.data,size),
-			Batch<WeightType>::createBatch(input.weight,size)
-		);
-	}
-	///\brief creates a batch storing the elements referenced by the provided range
-	template<class Range>
-	static type createBatch(Range const& range){
-		typedef typename 
-			boost::remove_const<typename boost::remove_reference<
-				typename Range::const_reference
-			>::type>::type R;
-		using boost::adaptors::transform;
-		return type(
-			Batch<DataType>::createBatchFromRange(transform(range, GetElementData<R>())),
-			Batch<WeightType>::createBatchFromRange(transform(range, GetElementWeight<R>()))
-		);
-	}
-	
-	
-	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		Batch<DataType>::resize(batch.data,batchSize,elements);
-		Batch<WeightType>::resize(batch.weight,batchSize,elements);
-	}
-};
-/// \endcond
-
-/** @*/
 }
+
 #endif

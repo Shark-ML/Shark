@@ -148,7 +148,7 @@ public:
 		SIZE_CHECK(kernels.size() == ranges.size());
 		for(std::size_t i = 0; i != kernels.size(); ++i){
 			m_kernelWrappers.push_back(
-				SubrangeKernelWrapper<InputType>(get(kernels,i),get(ranges,i).first,get(ranges,i).second)
+				SubrangeKernelWrapper<InputType>(kernels[i],ranges[i].first,ranges[i].second)
 			);
 		}
 	}

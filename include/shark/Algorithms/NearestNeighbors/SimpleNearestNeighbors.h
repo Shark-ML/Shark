@@ -68,7 +68,7 @@ public:
 
 	///\brief Return the k nearest neighbors of the query point.
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
-		std::size_t numPatterns = size(patterns);
+		std::size_t numPatterns = batchSize(patterns);
 		std::size_t maxThreads = std::min(SHARK_NUM_THREADS,m_dataset.numberOfBatches());
 		//heaps of key value pairs (distance,classlabel). One heap for every pattern and thread.
 		//For memory alignment reasons, all heaps are stored in one continuous array
@@ -99,7 +99,7 @@ public:
 					if(biggest->key >= distances(p,i)){
 						//push the smaller neighbor in the heap and replace the biggest one
 						biggest->key=distances(p,i);
-						biggest->value=get(m_dataset.batch(b).label,i);
+						biggest->value=getBatchElement(m_dataset.batch(b).label,i);
 						std::push_heap(heapStart,heapEnd);
 						//pop biggest element, so that 
 						//biggest is again the biggest element

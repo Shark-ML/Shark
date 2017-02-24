@@ -212,7 +212,7 @@ protected:
 		std::vector<double> distance(m_size);
 		iterator point = begin;
 		for(std::size_t i = 0; i != m_size; ++i,++point){
-			distance[i] = get(**point,m_cutDim);
+			distance[i] = (**point)[m_cutDim];
 		}
 
 		// split the list into sub-cells

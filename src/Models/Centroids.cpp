@@ -85,12 +85,12 @@ void Centroids::write(OutArchive& archive) const{
 
 RealMatrix Centroids::distances(BatchInputType const& patterns) const{
 	std::size_t numClusters = numberOfClusters();
-	std::size_t numPatterns = boost::size(patterns);
+	std::size_t numPatterns = patterns.size1();
 	RealMatrix distances(numPatterns, numClusters);
 	//first evaluate distance to all centroids;
 	std::size_t batchBegin = 0;
 	for (std::size_t i=0; i != m_centroids.numberOfBatches(); i++){
-		std::size_t batchEnd = batchBegin +boost::size(m_centroids.batch(i));
+		std::size_t batchEnd = batchBegin + m_centroids.batch(i).size1();
 		columns(distances,batchBegin,batchEnd) = sqrt(distanceSqr(patterns, m_centroids.batch(i)));
 		batchBegin = batchEnd;
 	}
@@ -103,7 +103,7 @@ RealVector Centroids::softMembership(RealVector const& pattern) const{
 	//first evaluate distance to all centroids;
 	std::size_t batchBegin = 0;
 	for (std::size_t i=0; i != m_centroids.numberOfBatches(); i++){
-		std::size_t batchEnd = batchBegin +boost::size(m_centroids.batch(i));
+		std::size_t batchEnd = batchBegin + m_centroids.batch(i).size1();
 		subrange(membership,batchBegin,batchEnd) = sqrt(distanceSqr(pattern, m_centroids.batch(i)));
 		batchBegin = batchEnd;
 	}
@@ -117,7 +117,7 @@ RealVector Centroids::softMembership(RealVector const& pattern) const{
 
 RealMatrix Centroids::softMembership(BatchInputType const& patterns) const{
 	std::size_t numClusters = numberOfClusters();
-	std::size_t numPatterns = boost::size(patterns);
+	std::size_t numPatterns = patterns.size1();
 	RealMatrix membership = distances(patterns);
 	//apply membership kernels and normalize to 1
 	for (std::size_t i=0; i != numPatterns; i++){

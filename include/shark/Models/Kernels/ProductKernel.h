@@ -137,8 +137,8 @@ public:
 	}
 	
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
-		std::size_t sizeX1=shark::size(batchX1);
-		std::size_t sizeX2=shark::size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 		
 		//evaluate first kernel to initialize the result
 		m_kernels[0]->eval(batchX1,batchX2,result);

@@ -131,8 +131,8 @@ public:
 	void eval(ConstBatchInputReference const& batchX1, ConstBatchInputReference const& batchX2, RealMatrix& result, State& state) const{
 		InternalState& s = state.toState<InternalState>();
 		
-		std::size_t sizeX1 = size(batchX1);
-		std::size_t sizeX2 = size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 		s.resize(sizeX1,sizeX2,m_base);
 		result.resize(sizeX1,sizeX2);
 		
@@ -141,19 +141,19 @@ public:
 		
 		//possible very slow way to evaluate
 		//we need to calculate k(x_i,x_i) and k(y_j,y_j) for every element.
-		//we do it by coping the single element in a batch of size 1 and evaluating this. 
+		//we do it by copying the single element in a batch of size 1 and evaluating this. 
 		//the following could be made easier with an interface like 
 		//m_base->eval(batchX1,s.kxx,s.statekxx);
-		BatchInputType singleBatch = Batch<InputType>::createBatch(get(batchX1,0));
+		BatchInputType singleBatch = Batch<InputType>::createBatch(getBatchElement(batchX1,0));
 		RealMatrix singleResult(1,1);
 		for(std::size_t i = 0; i != sizeX1;++i){
-			get(singleBatch,0) = get(batchX1,i);
+			getBatchElement(singleBatch,0) = getBatchElement(batchX1,i);
 			m_base->eval(singleBatch,singleBatch,singleResult,*s.stateKxx[i]);
 			s.kxx[i] = singleResult(0,0);
 		}
 		
 		for(std::size_t j = 0; j != sizeX2;++j){
-			get(singleBatch,0) = get(batchX2,j);
+			getBatchElement(singleBatch,0) = getBatchElement(batchX2,j);
 			m_base->eval(singleBatch,singleBatch,singleResult,*s.stateKyy[j]);
 			s.kyy[j] = singleResult(0,0);
 		}
@@ -169,18 +169,18 @@ public:
 	/// calculates
 	/// \f[ \tilde k(x, y) := \frac{k(x, y)}{\sqrt{k(x, x) \cdot k(y, y)}} \f]
 	void eval(ConstBatchInputReference const& batchX1, ConstBatchInputReference const& batchX2, RealMatrix& result) const{
-		std::size_t sizeX1 = size(batchX1);
-		std::size_t sizeX2 = size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 
 		m_base->eval(batchX1, batchX2,result);
 		
 		RealVector sqrtKyy(sizeX2);
 		for(std::size_t j = 0; j != sizeX2;++j){
-			sqrtKyy(j) = std::sqrt(m_base->eval(get(batchX2,j),get(batchX2,j)));
+			sqrtKyy(j) = std::sqrt(m_base->eval(getBatchElement(batchX2,j),getBatchElement(batchX2,j)));
 		}
 		
 		for(std::size_t i = 0; i != sizeX1;++i){
-			double sqrtKxx = std::sqrt(m_base->eval(get(batchX2,i),get(batchX2,i)));
+			double sqrtKxx = std::sqrt(m_base->eval(getBatchElement(batchX2,i),getBatchElement(batchX2,i)));
 			noalias(row(result,i)) = sqrtKxx* row(result,i) / sqrtKyy;
 		}
 	}
@@ -199,8 +199,8 @@ public:
 	) const{
 		ensure_size(gradient,numberOfParameters());
 		InternalState const& s = state.toState<InternalState>();
-		std::size_t sizeX1 = size(batchX1);
-		std::size_t sizeX2 = size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 		
 		RealMatrix weights = coefficients / sqrt(outer_prod(s.kxx,s.kyy));
 		
@@ -215,16 +215,16 @@ public:
 		//m_base->weightedParameterDerivative(batchX2,wy,s.statekyy,subGradient);
 		//(calculating the weighted parameter derivative of k(x_i,x_i) or (k(y_i,y_i)
 		RealVector subGradient(gradient.size());
-		BatchInputType singleBatch = Batch<InputType>::createBatch(get(batchX1,0));
+		BatchInputType singleBatch = Batch<InputType>::createBatch(getBatchElement(batchX1,0));
 		RealMatrix coeff(1,1);
 		for(std::size_t i = 0; i != sizeX1; ++i){
-			get(singleBatch,0) = get(batchX1,i);
+			getBatchElement(singleBatch,0) = getBatchElement(batchX1,i);
 			coeff(0,0) = wx(i);
 			m_base->weightedParameterDerivative(singleBatch,singleBatch,coeff,*s.stateKxx[i],subGradient);
 			gradient -= subGradient;
 		}
 		for(std::size_t j = 0; j != sizeX2; ++j){
-			get(singleBatch,0) = get(batchX2,j);
+			getBatchElement(singleBatch,0) = getBatchElement(batchX2,j);
 			coeff(0,0) = wy(j);
 			m_base->weightedParameterDerivative(singleBatch,singleBatch,coeff,*s.stateKyy[j],subGradient);
 			gradient -= subGradient;
@@ -245,7 +245,7 @@ public:
 		BatchInputType& gradient
 	) const{
 		InternalState const& s = state.toState<InternalState>();
-		std::size_t sizeX1 = size(batchX1);
+		std::size_t sizeX1 = batchSize(batchX1);
 		
 		RealMatrix weights = coefficientsX2 / sqrt(outer_prod(s.kxx,s.kyy));
 		
@@ -258,10 +258,10 @@ public:
 		//m_base->weightedInputDerivative(batchX1,wx,s.statekxx,subGradient);
 		//(calculating the weighted input derivative of k(x_i,x_i)
 		RealMatrix subGradient;
-		BatchInputType singleBatch = Batch<InputType>::createBatch(get(batchX1,0));
+		BatchInputType singleBatch = Batch<InputType>::createBatch(getBatchElement(batchX1,0));
 		RealMatrix coeff(1,1);
 		for(std::size_t i = 0; i != sizeX1; ++i){
-			get(singleBatch,0) = get(batchX1,i);
+			getBatchElement(singleBatch,0) = getBatchElement(batchX1,i);
 			coeff(0,0) = wx(i);
 			m_base->weightedInputDerivative(singleBatch,singleBatch,coeff,*s.stateKxx[i],subGradient);
 			noalias(row(gradient,i)) -= row(subGradient,0);

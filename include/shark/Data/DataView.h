@@ -143,7 +143,7 @@ public:
 	{
 		std::size_t index = 0;
 		for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-			std::size_t batchSize = shark::size(dataset.batch(i));
+			std::size_t batchSize = Batch<value_type>::size(dataset.batch(i));
 			for(std::size_t j = 0; j != batchSize; ++j,++index){
 				m_indices[index].batch = i;
 				m_indices[index].positionInBatch = j;
@@ -155,7 +155,7 @@ public:
 	/// create a subset of the dataset type using only the elemnt indexed by indices
 	template<class IndexRange>
 	DataView(DataView<DatasetType> const& view, IndexRange const& indices)
-	:m_dataset(view.m_dataset),m_indices(shark::size(indices))
+	:m_dataset(view.m_dataset),m_indices(indices.size())
 	{
 		for(std::size_t i = 0; i != m_indices.size(); ++i)
 			m_indices[i] = view.m_indices[indices[i]];
@@ -164,12 +164,31 @@ public:
 	reference operator[](std::size_t position){
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		return get(m_dataset.batch(index.batch),index.positionInBatch);
+		auto&& batch = m_dataset.batch(index.batch);
+		return getBatchElement(batch,index.positionInBatch);
 	}
 	const_reference operator[](std::size_t position) const{
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		return get(m_dataset.batch(index.batch),index.positionInBatch);
+		auto&& batch = m_dataset.batch(index.batch);
+		return getBatchElement(batch,index.positionInBatch);
+	}
+	
+	reference front(){
+		SIZE_CHECK(size() != 0);
+		return (*this)[0];
+	}
+	const_reference front()const{
+		SIZE_CHECK(size() != 0);
+		return (*this)[0];
+	}
+	reference back(){
+		SIZE_CHECK(size() != 0);
+		return (*this)[size()-1];
+	}
+	const_reference back()const{
+		SIZE_CHECK(size() != 0);
+		return (*this)[size()-1];
 	}
 
 	/// \brief Position of the element in the dataset.
@@ -257,7 +276,7 @@ typename DataView<DatasetType>::batch_type subBatch(
 	DataView<DatasetType> batchElems = subset(view,indizes);
 	
 	//and now use the batch range construction to create it
-	return Batch<typename DatasetType::element_type>::createBatch(batchElems);
+	return createBatch(batchElems);
 }
 
 /// \brief Creates a random batch of a given size
@@ -300,15 +319,7 @@ toDataset(DataView<T> const& view, std::size_t batchSize = DataView<T>::dataset_
 	//O.K. todo: this is slow for sparse elements, use subBatch or something similar.
 	std::size_t elements = view.size();
 	typename DataView<T>::dataset_type dataset(elements,view[0],batchSize);
-	std::size_t batches = dataset.numberOfBatches();
-	
-	std::size_t element = 0;
-	for(std::size_t i = 0; i != batches; ++i){
-		std::size_t batchSize = shark::size(dataset.batch(i));
-		for(std::size_t j = 0; j != batchSize; ++j, ++element){
-			get(dataset.batch(i),j) = view[element];
-		}
-	}
+	std::copy(view.begin(),view.end(),dataset.elements().begin());
 	return dataset;
 }
 

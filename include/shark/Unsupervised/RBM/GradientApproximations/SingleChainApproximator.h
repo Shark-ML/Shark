@@ -137,7 +137,7 @@ public:
 			//fill the batch with fresh samples
 			for(std::size_t i = 0; i != currentBatchSize; ++i){
 				m_chain.step(m_k);
-				get(gradientBatch,i) = m_chain.sample();
+				getBatchElement(gradientBatch,i) = m_chain.sample();
 			}
 			//do the gradient update
 			modelAverage.addVH(gradientBatch.hidden, gradientBatch.visible);

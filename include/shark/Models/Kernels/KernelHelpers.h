@@ -61,7 +61,7 @@ void calculateRegularizedKernelMatrix(
 	//also include  the past the end position at the end
 	std::vector<std::size_t> batchStart(B+1,0);
 	for(std::size_t i = 1; i != B+1; ++i){
-		batchStart[i] = batchStart[i-1]+ boost::size(dataset.batch(i-1));
+		batchStart[i] = batchStart[i-1]+ batchSize(dataset.batch(i-1));
 	}
 	SIZE_CHECK(batchStart[B] == dataset.numberOfElements());
 	std::size_t N  = batchStart[B];//number of elements
@@ -104,11 +104,11 @@ void calculateMixedKernelMatrix(
 	//also include  the past the end position at the end
 	std::vector<std::size_t> batchStart1(B1+1,0);
 	for(std::size_t i = 1; i != B1+1; ++i){
-		batchStart1[i] = batchStart1[i-1]+ boost::size(dataset1.batch(i-1));
+		batchStart1[i] = batchStart1[i-1]+ batchSize(dataset1.batch(i-1));
 	}
 	std::vector<std::size_t> batchStart2(B2+1,0);
 	for(std::size_t i = 1; i != B2+1; ++i){
-		batchStart2[i] = batchStart2[i-1]+ boost::size(dataset2.batch(i-1));
+		batchStart2[i] = batchStart2[i-1]+ batchSize(dataset2.batch(i-1));
 	}
 	SIZE_CHECK(batchStart1[B1] == dataset1.numberOfElements());
 	SIZE_CHECK(batchStart2[B2] == dataset2.numberOfElements());
@@ -193,10 +193,10 @@ RealVector calculateKernelMatrixParameterDerivative(
 	boost::shared_ptr<State> state = kernel.createState();
 	std::size_t startX = 0;
 	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
-		std::size_t sizeX=shark::size(dataset.batch(i));
+		std::size_t sizeX= batchSize(dataset.batch(i));
 		std::size_t startY = 0;//start of the current batch in y-direction
 		for (std::size_t j=0; j <= i; j++){
-			std::size_t sizeY=shark::size(dataset.batch(j));
+			std::size_t sizeY= batchSize(dataset.batch(j));
 			kernel.eval(dataset.batch(i), dataset.batch(j),block,*state);
 			kernel.weightedParameterDerivative(
 				dataset.batch(i), dataset.batch(j),//points

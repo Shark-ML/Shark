@@ -76,6 +76,8 @@ public:
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "SoftClusteringModel"; }
+	
+	using ClusteringModel<InputT, unsigned int>::eval;
 
 	/// \brief Compute best matching cluster.
 	///

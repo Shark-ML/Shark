@@ -73,9 +73,9 @@ struct Energy{
 		
 	///\brief Calculates the Energy given the states of batches of hidden and visible variables .
 	RealVector energy(RealMatrix const& hidden, RealMatrix const& visible)const{
-		SIZE_CHECK(size(visible)==size(hidden));
+		SIZE_CHECK(visible.size1() == hidden.size1());
 		
-		std::size_t batchSize = size(visible);
+		std::size_t batchSize = visible.size1();
 		RealMatrix input(batchSize,m_hiddenNeurons.size());
 		inputHidden( input, visible);
 		
@@ -116,7 +116,7 @@ struct Energy{
 	)const{
 		SIZE_CHECK(hiddenState.size1()==visibleInput.size1());
 		SIZE_CHECK(hiddenState.size1()==beta.size());
-		std::size_t batchSize = size(hiddenState);
+		std::size_t batchSize = hiddenState.size1();
 		
 		//calculate the energy terms of the hidden neurons for the whole batch
 		RealVector energyTerms = m_hiddenNeurons.energyTerm(hiddenState,beta);
@@ -145,7 +145,7 @@ struct Energy{
 	)const{
 		SIZE_CHECK(visibleState.size1()==hiddenInput.size1());
 		SIZE_CHECK(visibleState.size1()==beta.size());
-		std::size_t batchSize = size(visibleState);
+		std::size_t batchSize = visibleState.size1();
 		
 		//calculate the energy terms of the visible neurons for the whole batch
 		RealVector energyTerms = m_visibleNeurons.energyTerm(visibleState,beta);
@@ -195,7 +195,7 @@ struct Energy{
 		RealMatrix const& visible
 	)const{
 		RealMatrix const& phiOfH = m_hiddenNeurons.phi(hidden);
-		std::size_t batchSize = size(hiddenInput);
+		std::size_t batchSize = hiddenInput.size1();
 		RealVector energies(batchSize);
 		for(std::size_t i = 0; i != batchSize; ++i){
 			energies(i) = -inner_prod(row(hiddenInput,i),row(phiOfH,i));
@@ -217,7 +217,7 @@ struct Energy{
 		RealMatrix const& visible
 	)const{
  		RealMatrix const& phiOfV = m_visibleNeurons.phi(visible);
-		std::size_t batchSize = size(visibleInput);
+		std::size_t batchSize = visibleInput.size1();
 		RealVector energies(batchSize);
 		for(std::size_t i = 0; i != batchSize; ++i){
 			energies(i) = -inner_prod(row(phiOfV,i),row(visibleInput,i));

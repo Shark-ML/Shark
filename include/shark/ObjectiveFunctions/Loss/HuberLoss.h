@@ -80,10 +80,11 @@ public:
 	}
 
 	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient)const{
-		std::size_t numInputs = size(labels);
+		SIZE_CHECK(labels.size1() == predictions.size1());
+		SIZE_CHECK(labels.size2() == predictions.size2());
+		std::size_t numInputs = predictions.size1();
 		std::size_t outputDim = predictions.size2();
-		SIZE_CHECK(numInputs == size(predictions));
-		
+
 		gradient.resize(numInputs,outputDim);
 		double error = 0;
 		for(std::size_t i = 0; i != numInputs;++i){

@@ -123,8 +123,8 @@ public:
 		RealMatrix res;
 		BatchInputType b1 = Traits::createBatch(x1,1);
 		BatchInputType b2 = Traits::createBatch(x2,1);
-		get(b1,0) = x1;
-		get(b2,0) = x2;
+		getBatchElement(b1,0) = x1;
+		getBatchElement(b2,0) = x2;
 		eval(b1, b2, res);
 		return res(0, 0);
 	}
@@ -206,8 +206,8 @@ public:
 	}
 	
 	virtual RealMatrix featureDistanceSqr(ConstBatchInputReference batchX1,ConstBatchInputReference batchX2) const{
-		std::size_t sizeX1=shark::size(batchX1);
-		std::size_t sizeX2=shark::size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 		RealMatrix result=(*this)(batchX1,batchX2);
 		result *= -2.0;
 		if (isNormalized()){
@@ -216,10 +216,10 @@ public:
 			//compute self-product
 			RealVector kx2(sizeX2);
 			for(std::size_t i = 0; i != sizeX2;++i){
-				kx2(i)=eval(get(batchX2,i),get(batchX2,i));
+				kx2(i)=eval(getBatchElement(batchX2,i),getBatchElement(batchX2,i));
 			}
 			for(std::size_t j = 0; j != sizeX1;++j){
-				double kx1=eval(get(batchX1,j),get(batchX1,j));
+				double kx1=eval(getBatchElement(batchX1,j),getBatchElement(batchX1,j));
 				noalias(row(result,j)) += kx1 + kx2;
 			}
 		}

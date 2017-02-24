@@ -76,8 +76,8 @@ public:
 
 	void eval(BatchInputType const& x, BatchOutputType& y, State& state)const
 	{ 
-		y.resize(shark::size(x));
-		for(std::size_t i = 0; i != shark::size(x); ++i){
+		y.resize(batchSize(x));
+		for(std::size_t i = 0; i != batchSize(x); ++i){
 			y(i) = (x(i) < m_threshold) ? 0 : 1;
 		}
 	}

@@ -219,8 +219,8 @@ public:
 	/// \f$ k(x, y) = \frac{\sum_i \exp(w_i) k_i(x, y)}{sum_i exp(w_i)} \f$
 	/// for two batches of inputs.
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
-		std::size_t sizeX1=shark::size(batchX1);
-		std::size_t sizeX2=shark::size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 		ensure_size(result,sizeX1,sizeX2);
 		result.clear();
 
@@ -237,8 +237,8 @@ public:
 	/// for two batches of inputs.
 	/// (see the documentation of numberOfIntermediateValues for the workings of the intermediates)
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result, State& state) const{
-		std::size_t sizeX1=shark::size(batchX1);
-		std::size_t sizeX2=shark::size(batchX2);
+		std::size_t sizeX1 = batchSize(batchX1);
+		std::size_t sizeX2 = batchSize(batchX2);
 		ensure_size(result,sizeX1,sizeX2);
 		result.clear();
 
@@ -306,8 +306,8 @@ public:
 		State const& state,
 		BatchInputType& gradient
 	) const{
-		SIZE_CHECK(coefficientsX2.size1() == shark::size(batchX1));
-		SIZE_CHECK(coefficientsX2.size2() == shark::size(batchX2));
+		SIZE_CHECK(coefficientsX2.size1() == batchSize(batchX1));
+		SIZE_CHECK(coefficientsX2.size2() == batchSize(batchX2));
 		weightedInputDerivativeImpl<BatchInputType>(batchX1,batchX2,coefficientsX2,state,gradient);
 	}
 

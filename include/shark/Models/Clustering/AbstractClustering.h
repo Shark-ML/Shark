@@ -121,7 +121,7 @@ public:
 	/// create a batch of size 1 and return the result of the batch call to hardMembership
 	virtual unsigned int hardMembership(InputType const& pattern) const{
 		typename Batch<InputType>::type b = Batch<InputType>::createBatch(pattern);
-		get(b,0) = pattern;
+		getBatchElement(b,0) = pattern;
 		return hardMembership(b)(0);
 	}
 	
@@ -133,7 +133,7 @@ public:
 	/// The (typically slow) default implementation is to
 	/// return the arg max of the soft membership function for every pattern.
 	virtual BatchOutputType hardMembership(BatchInputType const& patterns) const{
-		std::size_t numPatterns = boost::size(patterns);
+		std::size_t numPatterns = batchSize(patterns);
 		RealMatrix f = softMembership(patterns);
 		SHARK_ASSERT(f.size2() > 0);
 		SHARK_ASSERT(f.size1() == numPatterns);

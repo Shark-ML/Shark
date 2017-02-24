@@ -79,17 +79,17 @@ public:
 		//so i am using a DataView to have O(1) random access lookup. but this is not needed!
 		DataView<Data<InputType> const > indexedBasis(Base::m_basis);
 		
-		ensure_size(outputs,size(patterns),Base::outputSize());
+		ensure_size(outputs,batchSize(patterns),Base::outputSize());
 		if (Base::hasOffset())
-				noalias(outputs) = repeat(Base::m_b,size(patterns));
+				noalias(outputs) = repeat(Base::m_b,batchSize(patterns));
 			else
 				outputs.clear();
 		
-		for(std::size_t p = 0; p != size(patterns); ++p){
+		for(std::size_t p = 0; p != batchSize(patterns); ++p){
 
 
 			// Calculate scaling coefficient for the 'pattern'
-			const double patternNorm = computeNorm(column(Base::m_alpha, 0), m_scalingCoefficients, get(patterns,p));
+			const double patternNorm = computeNorm(column(Base::m_alpha, 0), m_scalingCoefficients, row(patterns,p));
 			const double patternSc = patternNorm / m_classifierNorm;
 
 			// Do normal classification except that we use kernel which supports inputs with Missing features
@@ -99,7 +99,7 @@ public:
 				const double k = evalSkipMissingFeatures(
 					*Base::mep_kernel,
 					indexedBasis[i],
-					get(patterns,p)) / m_scalingCoefficients[i] / patternSc;
+					row(patterns,p)) / m_scalingCoefficients[i] / patternSc;
 				noalias(row(outputs,p)) += k * row(Base::m_alpha, i);
 				
 			}

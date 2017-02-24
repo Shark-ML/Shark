@@ -208,7 +208,7 @@ public:
 		
 		ModelBatchOutputType modelResult;
 		m_decisionFunction.eval(input,modelResult);
-		std::size_t batchSize = shark::size(modelResult);
+		std::size_t batchSize = modelResult.size1();
 		output.resize(batchSize);
 		if(modelResult.size2()== 1)
 		{

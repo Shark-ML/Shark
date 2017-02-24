@@ -754,8 +754,8 @@ private:
 		typename Batch<InputType>::type singleInput = Batch<InputType>::createBatch( dataset.element(0).input, 1 );
 		typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatch( dataset.element(lower_i).input, 1 );
 		typename Batch<InputType>::type upperInput = Batch<InputType>::createBatch( dataset.element(upper_i).input, 1 );
-		get( lowerInput, 0 ) = dataset.element(lower_i).input; //copy the current input into the batch
-		get( upperInput, 0 ) = dataset.element(upper_i).input; //copy the current input into the batch
+		getBatchElement( lowerInput, 0 ) = dataset.element(lower_i).input; //copy the current input into the batch
+		getBatchElement( upperInput, 0 ) = dataset.element(upper_i).input; //copy the current input into the batch
 		RealMatrix one(1,1,1); //weight of input
 		RealMatrix result(1,1); //stores the result of the call
 
@@ -763,7 +763,7 @@ private:
 			double cur_alpha = problem.alpha(problem.permutation(i));
 			if ( cur_alpha != 0 ) {
 				int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
-				get( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch
+				getBatchElement( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch
 				// treat contributions of largest gradient at lower bound
 				base_type::m_kernel->eval( lowerInput, singleInput, result, *kernelState );
 				dlower_dC += cur_label * result(0,0);

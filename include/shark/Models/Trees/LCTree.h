@@ -204,7 +204,7 @@ protected:
 	//the normal along this direction
 	template<class Range>
 	void calculateNormal(Range const& samples){
-		std::size_t numSamples = shark::size(samples);
+		std::size_t numSamples = samples.size();
 		std::size_t besti = 0;
 		std::size_t bestj = 0;
 		double best_dist2 = -1.0;
