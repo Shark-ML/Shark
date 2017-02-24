@@ -50,6 +50,7 @@ class KTAFixture
 public:
 
 	KTAFixture():numInputs(100),dims(10){
+		Rng::seed(42);
 		std::vector<RealVector> inputs(numInputs, RealVector(dims));
 		std::vector<unsigned int> labels(numInputs);
 		std::vector<RealVector> labelsRegression(numInputs,RealVector(1));
@@ -170,7 +171,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel 
 
 //testing the correctness of the calculated formulas
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
-	double epsilon  = 1.0e-8;
+	double epsilon  = 1.0e-7;
 	
 	//estimate derivatives
 	double estimatedDerivativeKcKc = 0;
