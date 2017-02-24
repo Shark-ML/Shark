@@ -151,7 +151,7 @@ public:
 
 private:
 	typedef Batch<Type> BatchTraits;
-	typedef std::vector<std::shared_ptr<BatchType> > Container;
+	typedef std::vector<boost::shared_ptr<BatchType> > Container;
 public:
 
 	///\brief Create an empty container.
@@ -161,7 +161,7 @@ public:
 	SharedContainer(std::size_t numBatches){
 		m_data.resize(numBatches);
 		for(std::size_t i = 0; i != numBatches; ++i){
-			m_data[i] = std::make_shared<BatchType>();
+			m_data[i] = boost::make_shared<BatchType>();
 		}
 	}
 
@@ -228,7 +228,7 @@ public:
 		//~ //create batches
 		//~ for(std::size_t i = 0; i != batchSizes.size(); ++i){
 			//~ m_data.push_back(
-				//~ std::make_shared<BatchType>(BatchTraits::createBatch(*container.elemBegin(),batchSizes[i]))
+				//~ boost::make_shared<BatchType>(BatchTraits::createBatch(*container.elemBegin(),batchSizes[i]))
 			//~ );
 		//~ }
 
@@ -260,7 +260,7 @@ public:
 		return numElems;
 	}
 
-	std::shared_ptr<BatchType> const& pointer(std::size_t i)const{
+	boost::shared_ptr<BatchType> const& pointer(std::size_t i)const{
 		return m_data[i];
 	}
 
@@ -306,7 +306,7 @@ public:
 
 	///////////////////////ADDING NEW BATCHES////////////////////////
 	void push_back(BatchType const& batch){
-		m_data.push_back(std::make_shared<BatchType>(batch));
+		m_data.push_back(boost::make_shared<BatchType>(batch));
 	}
 	
 	void append(SharedContainer const& other){
@@ -330,8 +330,8 @@ public:
 		if(leftElements == 0 || rightElements == 0)
 			return;
 
-		auto leftSplit = std::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),leftElements));
-		auto rightSplit = std::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),rightElements));
+		auto leftSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),leftElements));
+		auto rightSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),rightElements));
 		std::copy(BatchTraits::begin(source),BatchTraits::begin(source)+leftElements,BatchTraits::begin(*leftSplit));
 		std::copy(BatchTraits::begin(source)+leftElements,BatchTraits::end(source),BatchTraits::begin(*rightSplit));
 		*(position.base())=rightSplit;//override old batch
@@ -370,7 +370,7 @@ public:
 		for(std::size_t i = 0; i != batchSizes.size(); ++i){
 			//create new batch
 			std::size_t currentBatchSize = batchSizes[i];
-			std::shared_ptr<BatchType> newBatch = std::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(batch(currentBatch),0),currentBatchSize));
+			boost::shared_ptr<BatchType> newBatch = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(batch(currentBatch),0),currentBatchSize));
 			for(std::size_t j = 0; j != currentBatchSize; ++j){
 				getBatchElement(*newBatch,j)=getBatchElement(batch(currentBatch),currentBatchIndex);
 				++currentBatchIndex;
