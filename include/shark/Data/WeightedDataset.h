@@ -561,7 +561,7 @@ typename boost::disable_if<
 	> 
 >::type createUnlabeledDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = 0){
 
-	SHARK_RUNTIME_CHECK(batchSize(data) == batchSize(weights),
+	SHARK_RUNTIME_CHECK(batchSize(data) == batchSize(weights),"Number of datapoints and number of weights must agree");
 
 	typedef typename boost::range_value<DataRange>::type Data;
 
