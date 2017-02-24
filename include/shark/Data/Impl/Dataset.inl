@@ -635,7 +635,7 @@ private:
 			while (npos >= batchSize(m_container->batch(m_batchPosition))){
 				npos -= batchSize(m_container->batch(m_batchPosition));
 				++m_batchPosition;
-				SHARK_CHECK(m_batchPosition != m_container->numberOfBatches() || (npos == 0), "iterator went past the end");
+				SHARK_RUNTIME_CHECK(m_batchPosition != m_container->numberOfBatches() || (npos == 0), "iterator went past the end");
 			}
 			m_elementPosition = npos;
 		}
