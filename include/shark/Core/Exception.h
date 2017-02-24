@@ -35,6 +35,8 @@
 #include <string>
 #include <exception>
 
+
+
 namespace shark {
 
 	/**
@@ -99,12 +101,12 @@ namespace shark {
 
 }
 
-/**
-* \brief Convenience macro that creates an instance of class shark::exception,
-* injecting file and line information automatically.
-*/
+//MSVC  does not have the __func__ so __FUNCTION__ has to be used instead.
+#ifdef _MSC_VER
+#define SHARKEXCEPTION(message) shark::Exception(message, __FILE__, __LINE__, __FUNCTION__)
+#else
 #define SHARKEXCEPTION(message) shark::Exception(message, __FILE__, __LINE__, __func__)
-
+#endif
 // some handy macros for special types of checks,
 // throwing standard error messages
 #ifndef NDEBUG
