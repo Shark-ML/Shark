@@ -65,35 +65,6 @@ BOOST_AUTO_TEST_CASE(sampleUniformly_correct)
     }
 }
 
-BOOST_AUTO_TEST_CASE(sumsto_rec_correct)
-{
-    const std::size_t sum = 10;
-    const std::size_t n_max = 10;
-    for(std::size_t n = 2; n < n_max; ++n)
-    {
-        std::list<std::list<std::size_t>> ls = sumsto_rec(n, sum);
-        for(std::list<std::size_t> & l : ls)
-        {
-            std::size_t actual_sum = 0;
-            for(auto x : l)
-            {
-                actual_sum += x;
-            }
-            BOOST_CHECK_EQUAL(actual_sum, sum);
-        }
-    }
-}
-
-
-BOOST_AUTO_TEST_CASE(best_point_count_2d_correct)
-{
-    for(std::size_t i = 1; i < 100; ++i)
-    {
-        const std::size_t pc = bestPointSumForLattice(2, i);
-        BOOST_CHECK_EQUAL(i, sumlength(2, pc));
-    }
-}
-
 
 BOOST_AUTO_TEST_CASE(pointLattice_has_expected_size)
 {
@@ -121,15 +92,24 @@ BOOST_AUTO_TEST_CASE(weights_expected_size)
     }
 }
 
+BOOST_AUTO_TEST_CASE(best_point_count_2d_correct)
+{
+    for(std::size_t i = 1; i < 100; ++i)
+    {
+        const std::size_t pc = bestPointSumForLattice(2, i);
+        BOOST_CHECK_EQUAL(i, sumlength(2, pc));
+    }
+}
+
 BOOST_AUTO_TEST_CASE(best_point_count)
 {
-    for(std::size_t n = 2; n < 5; ++n)
+    for(std::size_t n = 3; n < 5; ++n)
     {
         for(std::size_t sum = 3; sum < 10; ++sum)
         {
             std::size_t b = bestPointSumForLattice(n, sum);
             RealMatrix w = weightLattice(n, b);
-            BOOST_CHECK(sumlength(n, b) >= sum);
+            BOOST_CHECK(sumlength(n, b) > sum);
             BOOST_CHECK_EQUAL(w.size1(), sumlength(n, b));
         }
     }
