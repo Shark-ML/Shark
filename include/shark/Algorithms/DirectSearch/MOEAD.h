@@ -232,39 +232,39 @@ protected:
         m_mutation.m_nm = nm;
         m_crossover.m_nc = nc;
         m_crossoverProbability = crossover_prob;
-		m_parents.resize(m_mu);
+        m_parents.resize(m_mu);
         m_best.resize(m_mu);
         // If the number of supplied points is smaller than mu, fill everything
         // in
-		std::size_t numPoints = 0;
-		if(initialSearchPoints.size() <= m_mu)
+        std::size_t numPoints = 0;
+        if(initialSearchPoints.size() <= m_mu)
         {
-			numPoints = initialSearchPoints.size();
-			for(std::size_t i = 0; i < numPoints; ++i)
+            numPoints = initialSearchPoints.size();
+            for(std::size_t i = 0; i < numPoints; ++i)
             {
-				m_parents[i].searchPoint() = initialSearchPoints[i];
-				m_parents[i].penalizedFitness() = functionValues[i];
-				m_parents[i].unpenalizedFitness() = functionValues[i];
-			}
-		}
-		// Copy points randomly
-		for(std::size_t i = numPoints; i < m_mu; ++i)
+                m_parents[i].searchPoint() = initialSearchPoints[i];
+                m_parents[i].penalizedFitness() = functionValues[i];
+                m_parents[i].unpenalizedFitness() = functionValues[i];
+            }
+        }
+        // Copy points randomly
+        for(std::size_t i = numPoints; i < m_mu; ++i)
         {
-			std::size_t index = discrete(*mpe_rng, 0, 
+            std::size_t index = discrete(*mpe_rng, 0, 
                                          initialSearchPoints.size() - 1);
-			m_parents[i].searchPoint() = initialSearchPoints[index];
-			m_parents[i].penalizedFitness() = functionValues[index];
-			m_parents[i].unpenalizedFitness() = functionValues[index];
-		}
+            m_parents[i].searchPoint() = initialSearchPoints[index];
+            m_parents[i].penalizedFitness() = functionValues[index];
+            m_parents[i].unpenalizedFitness() = functionValues[index];
+        }
         m_bestDecomposedValues = RealVector(numOfObjectives, 1e30);
-		// Create initial mu best points
-		for(std::size_t i = 0; i < m_mu; ++i)
+        // Create initial mu best points
+        for(std::size_t i = 0; i < m_mu; ++i)
         {
-			m_best[i].point = m_parents[i].searchPoint();
-			m_best[i].value = m_parents[i].unpenalizedFitness();
-		}
-		m_crossover.init(lowerBounds, upperBounds);
-		m_mutation.init(lowerBounds, upperBounds);
+            m_best[i].point = m_parents[i].searchPoint();
+            m_best[i].value = m_parents[i].unpenalizedFitness();
+        }
+        m_crossover.init(lowerBounds, upperBounds);
+        m_mutation.init(lowerBounds, upperBounds);
     }
 
     // Make me an offspring...
