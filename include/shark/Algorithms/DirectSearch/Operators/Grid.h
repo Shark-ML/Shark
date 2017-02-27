@@ -47,7 +47,7 @@ namespace detail {
  * An n-dimensional point sums to 's' if the sum of the parts equal 's',
  * e.g. the point (x_0,x_1,x_2) sums to x_0+x_1+x+2 etc.  The number of
  * n-dimensional points that sum to 's' is given by the formula "N over K" where
- * N is n - 2 + s + 1 and K is s. 
+ * N is n - 2 + s + 1 and K is s.
  */
 std::size_t sumlength(std::size_t const n, std::size_t const sum)
 {
@@ -70,7 +70,7 @@ void pointLattice_helper(UIntMatrix & pointMatrix,
         std::size_t total_rows = 0;
         for(std::size_t i = 0; i <= sum_rest; ++i)
         {
-            const std::size_t submatrix_height = sumlength(n - 1, 
+            const std::size_t submatrix_height = sumlength(n - 1,
                                                            sum_rest - i);
             // Each first entry in submatrix contains i, and remaining columns
             // in each row all sum to sum_rest - i.
@@ -86,7 +86,7 @@ void pointLattice_helper(UIntMatrix & pointMatrix,
 }
 
 // A corner is a point where exactly one dimension is non-zero.
-template <typename Iterator> 
+template <typename Iterator>
 bool isCorner(Iterator begin, Iterator end)
 {
     std::size_t nonzero = 0;
@@ -129,12 +129,12 @@ UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
  * smaller.
  */
 template <typename Matrix, typename RngType = shark::DefaultRngType>
-Matrix sampleUniformly(RngType & rng, Matrix const & matrix, 
+Matrix sampleUniformly(RngType & rng, Matrix const & matrix,
                        std::size_t const n,
                        bool const keep_corners = true)
 {
     // No need to do all the below stuff if we're gonna grab it all anyway.
-    if(matrix.size1() <= n) 
+    if(matrix.size1() <= n)
     {
         return matrix;
     }
@@ -172,7 +172,7 @@ Matrix sampleUniformly(RngType & rng, Matrix const & matrix,
  * n-dimensional simplex grid.  For example, the points in a two-dimensional
  * grid -- a line -- with size n are the points (0,n-1), (1,n-2), ... (n-1,0).
  */
-std::size_t bestPointSumForLattice(std::size_t const n, 
+std::size_t bestPointSumForLattice(std::size_t const n,
                                    std::size_t const target_count)
 {
     if(n == 1)
@@ -199,7 +199,7 @@ std::size_t bestPointSumForLattice(std::size_t const n,
 /*
  * Returns a set of points that are normalized to weights.
  */
-RealMatrix weightLattice(std::size_t const n, 
+RealMatrix weightLattice(std::size_t const n,
                          std::size_t const sum)
 {
     return static_cast<RealMatrix>(pointLattice(n, sum)) / sum;
@@ -211,7 +211,7 @@ RealMatrix weightLattice(std::size_t const n,
  * the 'n' closest row vectors.
  */
 template <typename Matrix>
-UIntMatrix computeClosestNeighbourIndices(Matrix const & m, 
+UIntMatrix computeClosestNeighbourIndices(Matrix const & m,
                                           std::size_t const n)
 {
     const RealMatrix distances = remora::distanceSqr(m, m);

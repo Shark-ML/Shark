@@ -61,7 +61,7 @@ public:
         mu() = 100;
         crossoverProbability() = 0.9;
         nc() = 20.0; // parameter for crossover operator
-        nm() = 20.0; // parameter for mutation operator 
+        nm() = 20.0; // parameter for mutation operator
         neighbourhoodSize() = 10;
         this->m_features |= 
             AbstractMultiObjectiveOptimizer<RealVector>::CAN_SOLVE_CONSTRAINED;
@@ -76,7 +76,7 @@ public:
     {
         return m_crossoverProbability;
     }
-    
+
     double & crossoverProbability()
     {
         return m_crossoverProbability;
@@ -101,7 +101,7 @@ public:
     {
         return m_crossover.m_nc;
     }
-    
+
     std::size_t mu() const
     {
         return m_mu;
@@ -142,7 +142,7 @@ public:
     void init(ObjectiveFunctionType & function) override
     {
         checkFeatures(function);
-        SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), 
+        SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(),
                             "[" + name() + "::init] Objective function " +
                             "does not propose a starting point");
         std::vector<SearchPointType> points(mu());
@@ -152,8 +152,8 @@ public:
         }
         init(function, points);
     }
-    
-    void init(ObjectiveFunctionType & function, 
+
+    void init(ObjectiveFunctionType & function,
               std::vector<SearchPointType> const & initialSearchPoints) override
     {
         checkFeatures(function);
@@ -168,11 +168,11 @@ public:
         std::size_t dim = function.numberOfVariables();
         RealVector lowerBounds(dim, -1e20);
         RealVector upperBounds(dim, 1e20);
-        if(function.hasConstraintHandler() && 
+        if(function.hasConstraintHandler() &&
            function.getConstraintHandler().isBoxConstrained())
         {
             typedef BoxConstraintHandler<SearchPointType> ConstraintHandler;
-            ConstraintHandler const & handler = 
+            ConstraintHandler const & handler =
                 static_cast<ConstraintHandler const &>(
                     function.getConstraintHandler());
             lowerBounds = handler.lower();
@@ -181,13 +181,13 @@ public:
         else
         {
             SHARK_RUNTIME_CHECK(
-                function.hasConstraintHandler() && 
+                function.hasConstraintHandler() &&
                 !function.getConstraintHandler().isBoxConstrained(),
-				"[" + name() + "::init] Algorithm does " +
+                "[" + name() + "::init] Algorithm does " +
                 "only allow box constraints"
-			);
+            );
         }
-        doInit(initialSearchPoints, values, lowerBounds, 
+        doInit(initialSearchPoints, values, lowerBounds,
                upperBounds, mu(), nm(), nc(), crossoverProbability(),
                neighbourhoodSize());
     }
@@ -195,12 +195,13 @@ public:
     void step(ObjectiveFunctionType const & function) override
     {
         PenalizingEvaluator penalizingEvaluator;
-        std::vector<IndividualType> offspring = generateOffspring(); // y in paper
+        // y in paper
+        std::vector<IndividualType> offspring = generateOffspring();
         // Evaluate the objective function on our new candidate
         penalizingEvaluator(function, offspring[0]);
         updatePopulation(offspring);
     }
-    
+
 protected:
 
     void doInit(std::vector<SearchPointType> const & initialSearchPoints,
@@ -219,13 +220,13 @@ protected:
         const std::size_t numOfObjectives = functionValues[0].size();
         // Decomposition-related initialization
         m_mu_prime = bestPointSumForLattice(numOfObjectives, mu);
-        m_weights = sampleUniformly(*mpe_rng, 
-                                    weightLattice(numOfObjectives, m_mu_prime), 
+        m_weights = sampleUniformly(*mpe_rng,
+                                    weightLattice(numOfObjectives, m_mu_prime),
                                     mu);
         m_neighbourhoodSize = neighbourhoodSize;
-        m_neighbourhoods = computeClosestNeighbourIndices(m_weights, 
+        m_neighbourhoods = computeClosestNeighbourIndices(m_weights,
                                                           neighbourhoodSize);
-        
+
         SIZE_CHECK(m_weights.size1() == mu);
         SIZE_CHECK(m_neighbourhoods.size1() == mu);
         m_mu = mu;
@@ -250,7 +251,7 @@ protected:
         // Copy points randomly
         for(std::size_t i = numPoints; i < m_mu; ++i)
         {
-            std::size_t index = discrete(*mpe_rng, 0, 
+            std::size_t index = discrete(*mpe_rng, 0,
                                          initialSearchPoints.size() - 1);
             m_parents[i].searchPoint() = initialSearchPoints[index];
             m_parents[i].penalizedFitness() = functionValues[index];
@@ -271,16 +272,17 @@ protected:
     std::vector<IndividualType> generateOffspring() const
     {
         // Below should be in its own "selector"...
-        DiscreteUniform<> uniform_int_dist(*mpe_rng, 0, m_neighbourhoods.size2() - 1);
+        DiscreteUniform<> uniform_int_dist(*mpe_rng, 0,
+                                           m_neighbourhoods.size2() - 1);
         // 1. Randomly select two indices k,l from B(i)
-        const std::size_t k = m_neighbourhoods(m_curParentIndex, 
+        const std::size_t k = m_neighbourhoods(m_curParentIndex,
                                                uniform_int_dist());
-        const std::size_t l = m_neighbourhoods(m_curParentIndex, 
+        const std::size_t l = m_neighbourhoods(m_curParentIndex,
                                                uniform_int_dist());
         //    Then generate a new solution y from x_k and x_l
         IndividualType x_k = m_parents[k];
         IndividualType x_l = m_parents[l];
-        
+
         if(coinToss(*mpe_rng, m_crossoverProbability))
         {
             m_crossover(*mpe_rng, x_k, x_l);
@@ -297,7 +299,7 @@ protected:
         RealVector candidate = offspring.unpenalizedFitness();
         for(std::size_t i = 0; i < candidate.size(); ++i)
         {
-            m_bestDecomposedValues[i] = std::min(m_bestDecomposedValues[i], 
+            m_bestDecomposedValues[i] = std::min(m_bestDecomposedValues[i],
                                                  candidate[i]);
         }
         // 2.4. Update of neighbouring solutions
@@ -307,9 +309,9 @@ protected:
             IndividualType & x_j = m_parents[j];
             const RealVector & z = m_bestDecomposedValues;
             // if g^te(y' | lambda^j,z) <= g^te(x_j | lambda^j,z)
-            double tnew = tchebycheffScalarizer(offspring.unpenalizedFitness(), 
+            double tnew = tchebycheffScalarizer(offspring.unpenalizedFitness(),
                                                 lambda_j, z);
-            double told = tchebycheffScalarizer(x_j.unpenalizedFitness(), 
+            double told = tchebycheffScalarizer(x_j.unpenalizedFitness(),
                                                 lambda_j, z);
             if(tnew <= told)
             {
@@ -322,14 +324,11 @@ protected:
                 m_best[j].value = x_j.unpenalizedFitness();
             }
         }
-        // 2.5. Update of EP
-        // This is not done in the authors' own implementation?
-        
         // Finally, advance the parent index counter.
         m_curParentIndex = (m_curParentIndex + 1) % m_neighbourhoods.size1();
     }
 
-    std::vector<IndividualType> m_parents;    
+    std::vector<IndividualType> m_parents;
 
 private:
     DefaultRngType * mpe_rng;
