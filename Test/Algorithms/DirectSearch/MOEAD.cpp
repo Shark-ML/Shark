@@ -53,19 +53,19 @@ double optimal_hyper_volume(std::size_t n, const ZDT6 &) {
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_MOEAD)
 
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(Hypervolume_functions_mu100, OF, obj_funs)
+BOOST_AUTO_TEST_CASE_TEMPLATE(Hypervolume_functions_mu10, OF, obj_funs)
 {
     const std::size_t reps = 5;
-    const std::size_t mu = 100;
-    const std::size_t T = 20;
-    const std::size_t iters = 450 * mu;
+    const std::size_t mu = 10;
+    const std::size_t T = 5;
+    const std::size_t iters = 1000 * mu;
     const RealVector reference{11, 11};
     OF function(5);
     const double volume = optimal_hyper_volume(mu, function);
     MOEAD optimizer;
     optimizer.mu() = mu;
     optimizer.neighbourhoodSize() = T;
-    testFunction(optimizer, function, reference, volume, reps, iters, 5.e-3);
+    testFunction(optimizer, function, reference, volume, reps, iters, 5.e-2);
 }
 
 
