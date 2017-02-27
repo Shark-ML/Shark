@@ -307,8 +307,10 @@ protected:
             IndividualType & x_j = m_parents[j];
             const RealVector & z = m_bestDecomposedValues;
             // if g^te(y' | lambda^j,z) <= g^te(x_j | lambda^j,z)
-            double tnew = tchebycheff(offspring.unpenalizedFitness(), lambda_j, z);
-            double told = tchebycheff(x_j.unpenalizedFitness(), lambda_j, z);
+            double tnew = tchebycheffScalarizer(offspring.unpenalizedFitness(), 
+                                                lambda_j, z);
+            double told = tchebycheffScalarizer(x_j.unpenalizedFitness(), 
+                                                lambda_j, z);
             if(tnew <= told)
             {
                 // then set x^j <- y'
