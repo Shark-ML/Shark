@@ -122,10 +122,11 @@ UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
 }
 
 /*
- * Sample points uniformly from the simplex given in the matrix.  Corners are
- * always included in the sampled point set (unless excplicitly turned off with
- * keep_corners set to false).  The returned matrix will always have n points or
- * the same number of points as the original matrix if n is smaller.  
+ * Sample points uniformly and uniquely from the simplex given in the matrix.
+ * Corners are always included in the sampled point set (unless excplicitly
+ * turned off with keep_corners set to false).  The returned matrix will always
+ * have n points or the same number of points as the original matrix if n is
+ * smaller.
  */
 template <typename Matrix, typename RngType = shark::DefaultRngType>
 Matrix sampleUniformly(RngType & rng, Matrix const & matrix, 
