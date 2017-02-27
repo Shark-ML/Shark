@@ -72,16 +72,6 @@ public:
         return "MOEA/D";
     }
 
-    std::function<void(IndividualType &)> repairFunction() const
-    {
-        return m_repairFunction;
-    }
-    
-    std::function<void(IndividualType &)> & repairFunction()
-    {
-        return m_repairFunction;
-    }
-
     double crossoverProbability() const
     {
         return m_crossoverProbability;
@@ -206,9 +196,6 @@ public:
     {
         PenalizingEvaluator penalizingEvaluator;
         std::vector<IndividualType> offspring = generateOffspring(); // y in paper
-        // 2.2. Apply a problem-specific repair/improvement heuristic on y
-        // to make y' (usually nothing)
-        m_repairFunction(offspring[0]); // See footnote on p 715
         // Evaluate the objective function on our new candidate
         penalizingEvaluator(function, offspring[0]);
         updatePopulation(offspring);
@@ -367,13 +354,6 @@ private:
 
     SimulatedBinaryCrossover<SearchPointType> m_crossover;
     PolynomialMutator m_mutation;
-    std::function<void(IndividualType &)> m_repairFunction; ///< A
-                                                            ///problem-specific
-                                                            ///repair function
-                                                            ///that is applied
-                                                            ///to offspring.
-                                                            ///Default is doing
-                                                            ///nothing.
 };
 
 
