@@ -223,8 +223,8 @@ protected:
                                     weightLattice(numOfObjectives, m_mu_prime), 
                                     mu);
         m_neighbourhoodSize = neighbourhoodSize;
-        m_neighbourhoods = closestIndices(m_weights, 
-                                          neighbourhoodSize);
+        m_neighbourhoods = computeClosestNeighbourIndices(m_weights, 
+                                                          neighbourhoodSize);
         
         SIZE_CHECK(m_weights.size1() == mu);
         SIZE_CHECK(m_neighbourhoods.size1() == mu);
