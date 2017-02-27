@@ -301,13 +301,9 @@ protected:
                                                  candidate[i]);
         }
         // 2.4. Update of neighbouring solutions
-        for(auto iter = m_neighbourhoods.row_begin(m_curParentIndex);
-            iter != m_neighbourhoods.row_end(m_curParentIndex);
-            ++iter)
+        for(std::size_t j : remora::row(m_neighbourhoods, m_curParentIndex))
         {
-            std::size_t j = *iter;
-            const RealVector lambda_j(m_weights.row_begin(j), 
-                                      m_weights.row_end(j));
+            const RealVector lambda_j = remora::row(m_weights, j);
             IndividualType & x_j = m_parents[j];
             const RealVector & z = m_bestDecomposedValues;
             // if g^te(y' | lambda^j,z) <= g^te(x_j | lambda^j,z)
