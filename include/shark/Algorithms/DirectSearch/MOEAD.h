@@ -152,11 +152,9 @@ public:
     void init(ObjectiveFunctionType & function) override
     {
         checkFeatures(function);
-        if(!function.canProposeStartingPoint())
-        {
-            throw SHARKEXCEPTION("[" + name() + "::init] Objective function " +
-                                 "does not propose a starting point");
-        }
+        SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), 
+                            "[" + name() + "::init] Objective function " +
+                            "does not propose a starting point");
         std::vector<SearchPointType> points(mu());
         for(std::size_t i = 0; i < mu(); ++i)
         {
@@ -172,12 +170,9 @@ public:
         std::vector<RealVector> values(initialSearchPoints.size());
         for(std::size_t i = 0; i < initialSearchPoints.size(); ++i)
         {
-            if(!function.isFeasible(initialSearchPoints[i]))
-            {
-				throw SHARKEXCEPTION("[" + name() + "::init] starting " +
-                                     "point(s) not feasible");
-            }
-
+            SHARK_RUNTIME_CHECK(function.isFeasible(initialSearchPoints[i]),
+                                "[" + name() + "::init] starting " +
+                                "point(s) not feasible");
             values[i] = function.eval(initialSearchPoints[i]);
         }
         std::size_t dim = function.numberOfVariables();
@@ -195,8 +190,12 @@ public:
         }
         else
         {
-            throw SHARKEXCEPTION("[" + name() + "::init] Algorithm does " +
-                                 "only allow box constraints");
+            SHARK_RUNTIME_CHECK(
+                function.hasConstraintHandler() && 
+                !function.getConstraintHandler().isBoxConstrained(),
+				"[" + name() + "::init] Algorithm does " +
+                "only allow box constraints"
+			);
         }
         doInit(initialSearchPoints, values, lowerBounds, 
                upperBounds, mu(), nm(), nc(), crossoverProbability(),
