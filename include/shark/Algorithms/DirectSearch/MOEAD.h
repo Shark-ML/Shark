@@ -4,12 +4,6 @@
  *
  * \brief       Implements the MOEA/D algorithm.
  * 
- * Q. Zhang and H. Li, “MOEA/D: a multi-objective evolutionary algorithm based
- * on decomposition,” IEEE Transactions on Evolutionary Computation, vol. 11,
- * no. 6, pp. 712–731, 2007
- * DOI: 10.1109/TEVC.2007.892759
- * 
- *
  * \author      Bjørn Bugge Grathwohl
  * \date        February 2017
  *
@@ -48,6 +42,15 @@
 
 namespace shark {
 
+/**
+ * \brief Implements the MOEA/D algorithm.
+ * 
+ * Implementation of the MOEA/D algorithm from the following paper:
+ * Q. Zhang and H. Li, “MOEA/D: a multi-objective evolutionary algorithm based
+ * on decomposition,” IEEE Transactions on Evolutionary Computation, vol. 11,
+ * no. 6, pp. 712–731, 2007
+ * DOI: 10.1109/TEVC.2007.892759
+ */
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector> 
 {
 public:
@@ -130,7 +133,7 @@ public:
     }
 
     template <typename Archive>
-    void serialize(Archive & archive) override
+    void serialize(Archive & archive)
     {
         archive & BOOST_SERIALIZATION_NVP(m_crossoverProbability);
         archive & BOOST_SERIALIZATION_NVP(m_mu);
@@ -163,7 +166,7 @@ public:
     }
     
     void init(ObjectiveFunctionType & function, 
-              std::vector<SearchPointType> const & initialSearchPoints)
+              std::vector<SearchPointType> const & initialSearchPoints) override
     {
         checkFeatures(function);
         std::vector<RealVector> values(initialSearchPoints.size());
