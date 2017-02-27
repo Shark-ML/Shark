@@ -54,33 +54,6 @@ std::size_t sumlength(std::size_t const n, std::size_t const sum)
         boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
 }
 
-std::list<std::list<std::size_t>> sumsto_rec(std::size_t const n, 
-                                             std::size_t const sum)
-{
-    SIZE_CHECK(n > 1);
-    if(n == 2)
-    {
-        std::list<std::list<std::size_t>> vs;
-        for(std::size_t i = 0; i <= sum; ++i)
-        {
-            vs.push_back(std::list<std::size_t>{i, sum - i});
-        }
-        return vs;
-    }
-    else // n > 2
-    {
-        std::list<std::list<std::size_t>> vs;
-        for(std::size_t i = 0; i <= sum; ++i)
-        {
-            for(auto & v_sub : sumsto_rec(n - 1, sum - i))
-            {
-                v_sub.push_front(i);
-                vs.push_back(v_sub);
-            }
-        }
-        return vs;
-    }
-}
 
 namespace detail {
 
@@ -196,11 +169,11 @@ Matrix sampleUniformly(RngType & rng, Matrix const & matrix,
     return sampledMatrix;
 }
 
-// Gives the number of ticks in each dimension required to make an n-dimensional
-// lattice where the total number of points is as close to 'target_count' as possible:
-// Given n and target_count returns T such that
-//     forall T'<T . sumlength(n,T') < target_count
-// and forall T'>T . sumlength(n,T') > target_count
+/*
+ * Gives the least number of ticks in each dimension required to make an
+ * n-dimensional simplex grid.  For example, the points in a two-dimensional
+ * grid -- a line -- with size n are the points (0,n-1), (1,n-2), ... (n-1,0).
+ */
 std::size_t bestPointSumForLattice(std::size_t const n, 
                                    std::size_t const target_count)
 {
@@ -223,11 +196,6 @@ std::size_t bestPointSumForLattice(std::size_t const n,
         ++dimension_ticks_count;
     }
     return dimension_ticks_count;
-}
-
-UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
-{
-    return sumsto(n, sum);
 }
 
 RealMatrix weightLattice(std::size_t const n, 
