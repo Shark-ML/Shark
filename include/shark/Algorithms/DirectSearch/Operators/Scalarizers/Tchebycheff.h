@@ -38,9 +38,9 @@
 namespace shark {
 
 
-double tchebycheff(RealVector const & fitness,
-                   RealVector const & weights, 
-                   RealVector const & optimalPointFitness)
+double tchebycheffScalarizer(RealVector const & fitness,
+                             RealVector const & weights, 
+                             RealVector const & optimalPointFitness)
 {
     auto w = weights[0] == 0 ? 1e-5 : weights[0];
     double max_fun = w * std::abs(fitness[0] - optimalPointFitness[0]);
