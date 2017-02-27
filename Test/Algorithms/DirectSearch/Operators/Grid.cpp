@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(pointLattice_has_expected_size)
         for(std::size_t d = 2; d < 5; ++d)
         {
             UIntMatrix l = pointLattice(d, mu_prime);
-            std::size_t expected_size = sumlength(d, mu_prime);
+            std::size_t expected_size = detail::sumlength(d, mu_prime);
             BOOST_CHECK_EQUAL(expected_size, l.size1());
         }
     }
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(weights_expected_size)
     {
         for(std::size_t sum = 3; sum < 15; ++sum)
         {
-            std::size_t exp = sumlength(n, sum);
+            std::size_t exp = detail::sumlength(n, sum);
             RealMatrix w = weightLattice(n, sum);
             BOOST_CHECK_EQUAL(w.size1(), exp);
         }
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(best_point_count_2d_correct)
     for(std::size_t i = 1; i < 100; ++i)
     {
         const std::size_t pc = bestPointSumForLattice(2, i);
-        BOOST_CHECK_EQUAL(i, sumlength(2, pc));
+        BOOST_CHECK_EQUAL(i, detail::sumlength(2, pc));
     }
 }
 
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE(best_point_count)
         {
             std::size_t b = bestPointSumForLattice(n, sum);
             RealMatrix w = weightLattice(n, b);
-            BOOST_CHECK(sumlength(n, b) > sum);
-            BOOST_CHECK_EQUAL(w.size1(), sumlength(n, b));
+            BOOST_CHECK(detail::sumlength(n, b) > sum);
+            BOOST_CHECK_EQUAL(w.size1(), detail::sumlength(n, b));
         }
     }
 }
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(vector_sorting_correct)
         const RealMatrix weights = weightLattice(mu_prime, n);
         for(std::size_t T = 1; T <= weights.size1() / 2 && T <= 30; ++T)
         {
-            UIntMatrix dists = closestIndices(weights, T);
+            UIntMatrix dists = computeClosestNeighbourIndices(weights, T);
             for(std::size_t row = 0; row < dists.size1(); ++row)
             {
                 std::list<std::vector<double>> my_nearest_points;

@@ -41,6 +41,7 @@
 
 namespace shark {
 
+namespace detail {
 
 /*
  * An n-dimensional point sums to 's' if the sum of the parts equal 's',
@@ -53,9 +54,6 @@ std::size_t sumlength(std::size_t const n, std::size_t const sum)
     return static_cast<std::size_t>(
         boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
 }
-
-
-namespace detail {
 
 void pointLattice_helper(UIntMatrix & pointMatrix,
                          std::size_t const rowidx,
@@ -117,12 +115,11 @@ bool isCorner(Iterator begin, Iterator end)
  */
 UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
 {
-    const std::size_t point_count = sumlength(n, sum);
+    const std::size_t point_count = detail::sumlength(n, sum);
     UIntMatrix pointMatrix(point_count, n);
     detail::pointLattice_helper(pointMatrix, 0, 0, sum);
     return pointMatrix;
 }
-
 
 /*
  * Sample points uniformly from the simplex given in the matrix.  Corners are
@@ -198,24 +195,30 @@ std::size_t bestPointSumForLattice(std::size_t const n,
     return dimension_ticks_count;
 }
 
+/*
+ * Returns a set of points that are normalized to weights.
+ */
 RealMatrix weightLattice(std::size_t const n, 
                          std::size_t const sum)
 {
     return static_cast<RealMatrix>(pointLattice(n, sum)) / sum;
 }
 
-// For each row in the matrix, give the indices of the 't' closest vectors
-// sorted ascendingly.  returns a m.size(1) * t matrix with the indices.
-UIntMatrix closestIndices(RealMatrix const & m, 
-                          std::size_t const t)
+/*
+ * Computes the pairwise euclidean distance between all row vectors in the
+ * matrix and returns a matrix containing, for each row vector, the indices of
+ * the 'n' closest row vectors.
+ */
+template <typename Matrix>
+UIntMatrix computeClosestNeighbourIndices(Matrix const & m, 
+                                          std::size_t const n)
 {
     const RealMatrix distances = remora::distanceSqr(m, m);
-    UIntMatrix neighbourIndices(m.size1(), t);
+    UIntMatrix neighbourIndices(m.size1(), n);
     // For each vector we are interested in indices of the t closest vectors.
     for(std::size_t i = 0; i < m.size1(); ++i)
     {
-        const RealVector my_dists(distances.row_begin(i),
-                                  distances.row_end(i));
+        const RealVector my_dists = remora::row(distances, i);
         // Make some indices we can sort.
         std::vector<std::size_t> indices(my_dists.size());
         std::iota(indices.begin(), indices.end(), 0);
@@ -226,23 +229,9 @@ UIntMatrix closestIndices(RealMatrix const & m,
                       return my_dists[a] < my_dists[b];
                   });
         // Copy the T closest indices into B.
-        std::copy_n(indices.begin(), t, neighbourIndices.row_begin(i));
+        std::copy_n(indices.begin(), n, neighbourIndices.row_begin(i));
     }
     return neighbourIndices;
-}
-
-void dump(RealMatrix const & m, std::string const & filename)
-{
-    std::ofstream file(filename);
-    for(std::size_t row = 0; row < m.size1(); ++row)
-    {
-        std::for_each(m.row_begin(row), m.row_end(row),
-                      [&file](double x)
-                      {
-                          file << x << "\t";
-                      });
-        file << std::endl;
-    }
 }
 
 
