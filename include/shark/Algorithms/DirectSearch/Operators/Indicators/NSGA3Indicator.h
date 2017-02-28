@@ -59,7 +59,6 @@ struct NSGA3Indicator {
 		//move current optimum in all objectives to 0
 		for(auto& point: points)
 			noalias(point) = point - ideal;
-		//~ std::cout<<ideal<<std::endl;
 		RealVector normalizer = computeNormalizer(points);
 		
 		//step 2.3: create normalized fitness values
@@ -100,7 +99,6 @@ struct NSGA3Indicator {
 					closest = std::min(closest,makeKeyValuePair(pairing[i].key,i));
 				}
 			}
-			//~ std::cout<<found<<" "<<closest.value<<" "<<pairing[closest.value].value.first<<std::endl;
 			//if no point was found, we disregard the reference point from now on
 			if(!found){
 				rho[index] = points.size() +1;
@@ -112,10 +110,6 @@ struct NSGA3Indicator {
 				++k;
 			}
 		}
-		//~ for(std::size_t i = 0; i != rho.size(); ++i){
-			//~ std::cout<<rho[i]<<" ";
-		//~ }
-		//~ std::cout<<"\n";
 		//return the indices of the remaining unselected points
 		std::vector<std::size_t> unselected;
 		for(; k != points.size(); ++k){
