@@ -1,12 +1,12 @@
 //===========================================================================
 /*!
  *
+ * \brief   Various functions for generating n-dimensional grids
+ *          (simplex-lattices).
  *
- * \brief       Various functions for generating n-dimensional grids.
  *
- *
- * \author      Bjørn Bugge Grathwohl
- * \date        February 2017
+ * \author   Bjørn Bugge Grathwohl
+ * \date     February 2017
  *
  * \par Copyright 1995-2017 Shark Development Team
  *
@@ -21,7 +21,7 @@
  *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
@@ -56,9 +56,9 @@ std::size_t sumlength(std::size_t const n, std::size_t const sum)
 }
 
 void pointLattice_helper(UIntMatrix & pointMatrix,
-                         std::size_t const rowidx,
-                         std::size_t const colidx,
-                         std::size_t const sum_rest)
+						 std::size_t const rowidx,
+						 std::size_t const colidx,
+						 std::size_t const sum_rest)
 {
 	const std::size_t n = pointMatrix.size2() - colidx;
 	if(n == 1)
@@ -124,7 +124,7 @@ UIntMatrix pointLattice(std::size_t const n, std::size_t const sum)
 /*
  * Sample points uniformly and uniquely from the simplex given in the matrix.
  * Corners are always included in the sampled point set (unless excplicitly
- * turned off with keep_corners set to false).  The returned matrix will always
+ * turned off with keep_corners set to false). The returned matrix will always
  * have n points or the same number of points as the original matrix if n is
  * smaller.
  */
@@ -197,12 +197,28 @@ std::size_t bestPointSumForLattice(std::size_t const n,
 }
 
 /*
- * Returns a set of points that are normalized to weights.
+ * Returns a set of evenly spaced n-dimensional points on the "unit simplex".
  */
 RealMatrix weightLattice(std::size_t const n,
                          std::size_t const sum)
 {
 	return static_cast<RealMatrix>(pointLattice(n, sum)) / sum;
+}
+
+/*
+ * Return a set of evenly spaced n-dimensional points on the unit sphere.
+ */
+RealMatrix unitVectors(std::size_t const n,
+                       std::size_t const sum)
+{
+	RealMatrix m = weightLattice(n, sum);
+	const RealVector w(m.size2(), 1);
+	for(std::size_t i = 0; i < m.size1(); ++i)
+	{
+		remora::row(m, i) /= std::sqrt(remora::inner_prod(remora::row(m, i),
+		                                                  remora::row(m, i)));
+	}
+	return m;
 }
 
 /*
