@@ -4,7 +4,7 @@
  *
  * \brief		Implements the MOEA/D algorithm.
  *
- * \author		Bjørn Bugge Grathwohl
+ * \author		Bjoern Bugge Grathwohl
  * \date		February 2017
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -32,13 +32,11 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_MOEAD
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_MOEAD
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
-#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
-#include <shark/Algorithms/DirectSearch/Operators/Scalarizers/Tchebycheff.h>
 
 namespace shark {
 
@@ -54,16 +52,7 @@ namespace shark {
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:
-	typedef shark::Individual<RealVector, RealVector> IndividualType;
-
-	MOEAD(DefaultRngType & rng = Rng::globalRng) : mpe_rng(&rng){
-		mu() = 100;
-		crossoverProbability() = 0.9;
-		nc() = 20.0; // parameter for crossover operator
-		nm() = 20.0; // parameter for mutation operator
-		neighbourhoodSize() = 10;
-		m_features |= CAN_SOLVE_CONSTRAINED;
-	}
+	SHARK_EXPORT_SYMBOL MOEAD(DefaultRngType & rng = Rng::globalRng);
 
 	std::string name() const override{
 		return "MOEA/D";
@@ -125,61 +114,15 @@ public:
 		archive & BOOST_SERIALIZATION_NVP(m_curParentIndex);
 	}
 
-	void init(ObjectiveFunctionType & function) override{
-		checkFeatures(function);
-		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(),"Function can not propose a starting point");
-		std::vector<SearchPointType> points(mu());
-		for(std::size_t i = 0; i < mu(); ++i)
-		{
-			points[i] = function.proposeStartingPoint();
-		}
-		init(function, points);
-	}
-
-	void init(
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function);
+	SHARK_EXPORT_SYMBOL void init(
 		ObjectiveFunctionType & function,
 		std::vector<SearchPointType> const & initialSearchPoints
-	) override{
-		checkFeatures(function);
-		std::vector<RealVector> values(initialSearchPoints.size());
-		for(std::size_t i = 0; i < initialSearchPoints.size(); ++i){
-			SHARK_RUNTIME_CHECK(function.isFeasible(initialSearchPoints[i]), "Supplied points are not feasible");
-			values[i] = function.eval(initialSearchPoints[i]);
-		}
-		std::size_t dim = function.numberOfVariables();
-		RealVector lowerBounds(dim, -1e20);
-		RealVector upperBounds(dim, 1e20);
-		if(function.hasConstraintHandler()){
-			SHARK_RUNTIME_CHECK(
-				function.getConstraintHandler().isBoxConstrained(),
-				"Algorithm does only allow box constraints"
-			);
-			typedef BoxConstraintHandler<SearchPointType> ConstraintHandler;
-			ConstraintHandler const & handler =
-				static_cast<ConstraintHandler const &>(
-					function.getConstraintHandler());
-			lowerBounds = handler.lower();
-			upperBounds = handler.upper();
-		}
-		doInit(
-			initialSearchPoints, values, lowerBounds,
-			upperBounds, mu(), nm(), nc(), crossoverProbability(),
-			neighbourhoodSize()
-		);
-	}
-
-	void step(ObjectiveFunctionType const & function) override{
-		PenalizingEvaluator penalizingEvaluator;
-		// y in paper
-		std::vector<IndividualType> offspring = generateOffspring();
-		// Evaluate the objective function on our new candidate
-		penalizingEvaluator(function, offspring[0]);
-		updatePopulation(offspring);
-	}
-
+	);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const & function) override;
 protected:
-
-	void doInit(
+	typedef shark::Individual<RealVector, RealVector> IndividualType;
+	SHARK_EXPORT_SYMBOL void doInit(
 		std::vector<SearchPointType> const & initialSearchPoints,
 		std::vector<ResultType> const & functionValues,
 		RealVector const & lowerBounds,
@@ -189,111 +132,10 @@ protected:
 		double const nc,
 		double const crossover_prob,
 		std::size_t const neighbourhoodSize
-	){
-		SIZE_CHECK(initialSearchPoints.size() > 0);
-
-		m_curParentIndex = 0;
-		const std::size_t numOfObjectives = functionValues[0].size();
-		// Decomposition-related initialization
-		std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
-		m_weights = sampleLatticeUniformly(
-			*mpe_rng,
-			weightLattice(numOfObjectives, numLatticeTicks),
-			mu
-		);
-		m_neighbourhoodSize = neighbourhoodSize;
-		m_neighbourhoods = computeClosestNeighbourIndicesOnLattice(
-			m_weights,neighbourhoodSize
-		);
-
-		SIZE_CHECK(m_weights.size1() == mu);
-		SIZE_CHECK(m_neighbourhoods.size1() == mu);
-		m_mu = mu;
-		m_mutation.m_nm = nm;
-		m_crossover.m_nc = nc;
-		m_crossoverProbability = crossover_prob;
-		m_parents.resize(m_mu);
-		m_best.resize(m_mu);
-		// If the number of supplied points is smaller than mu, fill everything in
-		std::size_t numPoints = 0;
-		if(initialSearchPoints.size() <= m_mu){
-			numPoints = initialSearchPoints.size();
-			for(std::size_t i = 0; i < numPoints; ++i){
-				m_parents[i].searchPoint() = initialSearchPoints[i];
-				m_parents[i].penalizedFitness() = functionValues[i];
-				m_parents[i].unpenalizedFitness() = functionValues[i];
-			}
-		}
-		// Copy points randomly
-		for(std::size_t i = numPoints; i < m_mu; ++i){
-			std::size_t index = discrete(*mpe_rng, 0, initialSearchPoints.size() - 1);
-			m_parents[i].searchPoint() = initialSearchPoints[index];
-			m_parents[i].penalizedFitness() = functionValues[index];
-			m_parents[i].unpenalizedFitness() = functionValues[index];
-		}
-		m_bestDecomposedValues = RealVector(numOfObjectives, 1e30);
-		// Create initial mu best points
-		for(std::size_t i = 0; i < m_mu; ++i){
-			m_best[i].point = m_parents[i].searchPoint();
-			m_best[i].value = m_parents[i].unpenalizedFitness();
-		}
-		m_crossover.init(lowerBounds, upperBounds);
-		m_mutation.init(lowerBounds, upperBounds);
-	}
-
+	);
 	// Make me an offspring...
-	std::vector<IndividualType> generateOffspring() const{
-		// Below should be in its own "selector"...
-		DiscreteUniform<> uniform_int_dist(*mpe_rng, 0, m_neighbourhoods.size2() - 1);
-		// 1. Randomly select two indices k,l from B(i)
-		const std::size_t k = m_neighbourhoods(m_curParentIndex, uniform_int_dist());
-		const std::size_t l = m_neighbourhoods(m_curParentIndex, uniform_int_dist());
-		//    Then generate a new solution y from x_k and x_l
-		IndividualType x_k = m_parents[k];
-		IndividualType x_l = m_parents[l];
-
-		if(coinToss(*mpe_rng, m_crossoverProbability)){
-			m_crossover(*mpe_rng, x_k, x_l);
-		}
-		m_mutation(*mpe_rng, x_k);
-		return {x_k};
-	}
-
-	void updatePopulation(std::vector<IndividualType> const & offspringvec){
-		SIZE_CHECK(offspringvec.size() == 1);
-		const IndividualType & offspring = offspringvec[0];
-		// 2.3. Update the "Z" vector.
-		RealVector candidate = offspring.unpenalizedFitness();
-		for(std::size_t i = 0; i < candidate.size(); ++i){
-			m_bestDecomposedValues[i] = std::min(
-				m_bestDecomposedValues[i], candidate[i]
-			);
-		}
-		// 2.4. Update of neighbouring solutions
-		for(std::size_t j : row(m_neighbourhoods, m_curParentIndex)){
-			auto lambda_j = row(m_weights, j);
-			IndividualType & x_j = m_parents[j];
-			RealVector const& z = m_bestDecomposedValues;
-			// if g^te(y' | lambda^j,z) <= g^te(x_j | lambda^j,z)
-			double tnew = tchebycheffScalarizer(
-				offspring.unpenalizedFitness(), lambda_j, z
-			);
-			double told = tchebycheffScalarizer(
-				x_j.unpenalizedFitness(), lambda_j, z
-			);
-			if(tnew <= told){
-				// then set x^j <- y'
-				// and FV^j <- F(y')
-				// This is done below, since the F-value is
-				// contained in the offspring itself (the unpenalizedFitness)
-				x_j = offspring;
-				noalias(m_best[j].point) = x_j.searchPoint();
-				m_best[j].value = x_j.unpenalizedFitness();
-			}
-		}
-		// Finally, advance the parent index counter.
-		m_curParentIndex = (m_curParentIndex + 1) % m_neighbourhoods.size1();
-	}
+	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;
+	SHARK_EXPORT_SYMBOL void updatePopulation(std::vector<IndividualType> const & offspringvec);
 
 	std::vector<IndividualType> m_parents;
 
