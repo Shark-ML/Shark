@@ -38,18 +38,16 @@
 namespace shark {
 
 
-double tchebycheffScalarizer(RealVector const & fitness,
-							 RealVector const & weights,
-							 RealVector const & optimalPointFitness)
-{
+double tchebycheffScalarizer(
+	RealVector const & fitness,
+	RealVector const & weights,
+	RealVector const & optimalPointFitness
+){
 	auto w = weights[0] == 0 ? 1e-5 : weights[0];
 	double max_fun = w * std::abs(fitness[0] - optimalPointFitness[0]);
-	for(std::size_t i = 1; i < fitness.size(); ++i)
-	{
+	for(std::size_t i = 1; i < fitness.size(); ++i){
 		w = weights[i] == 0 ? 1e-5: weights[i];
-		max_fun = std::max(max_fun,
-						   w * std::abs(fitness[i] -
-										optimalPointFitness[i]));
+		max_fun = std::max(max_fun,w * std::abs(fitness[i] - optimalPointFitness[i]));
 	}
 	return max_fun;
 }
