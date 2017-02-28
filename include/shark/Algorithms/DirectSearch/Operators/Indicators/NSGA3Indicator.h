@@ -32,6 +32,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/utility/KeyValuePair.h>
+#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 #include <limits>
 #include <vector>
 #include <utility>
@@ -135,6 +136,20 @@ struct NSGA3Indicator {
 		
 		for(auto& z: m_Z){
 			z /= norm_2(z);
+		}
+	}
+	
+	template<class Rng>
+	void init(std::size_t numOfObjectives, std::size_t mu, Rng& rng){
+		std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
+		RealMatrix refs = sampleLatticeUniformly(
+			rng,
+			unitVectorsOnLattice(numOfObjectives, numLatticeTicks),
+			mu
+		);
+		m_Z.resize(mu);
+		for(std::size_t i = 0; i != mu; ++i){
+			m_Z[i] = row(refs,i);
 		}
 	}
 private:

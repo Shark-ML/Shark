@@ -88,6 +88,9 @@ struct AdditiveEpsilonIndicator {
 		}
 		return indices;
 	}
+	
+	template<class Rng>
+	void init(std::size_t /*numOfObjectives*/, std::size_t /*mu*/, Rng& /*rng*/){}
 		
 	template<typename Archive>
 	void serialize( Archive &, const unsigned int ) {}

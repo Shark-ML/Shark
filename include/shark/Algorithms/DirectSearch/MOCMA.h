@@ -204,6 +204,8 @@ protected:
 			m_best[i].point = m_parents[i].searchPoint();
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
+		
+		indicator().init(functionValues.front().size(),mu,*mpe_rng);
 	}
 	
 	std::vector<IndividualType> generateOffspring()const{

@@ -79,6 +79,9 @@ struct HypervolumeIndicator {
 		return indices;
 	}
 	
+	template<class Rng>
+	void init(std::size_t /*numOfObjectives*/, std::size_t /*mu*/, Rng& /*rng*/){}
+	
 	/// \brief Sets the reference point. 
 	///
 	/// If no point is set, it is estimated from the current front and the extremum points are never selected.

@@ -40,6 +40,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/CrowdingDistance.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/NSGA3Indicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -174,8 +175,7 @@ public:
 			upperBounds = handler.upper();
 		} else{
 			SHARK_RUNTIME_CHECK(
-				function.hasConstraintHandler() && !function.getConstraintHandler().isBoxConstrained(),
-				"Algorithm does only allow box constraints"
+				!function.isConstrained(), "Algorithm does only allow box constraints"
 			);
 		}
 		
@@ -234,10 +234,12 @@ protected:
 			m_best[i].point = m_parents[i].searchPoint();
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
-		m_selection( m_parents, mu );
-		
 		m_crossover.init(lowerBounds,upperBounds);
 		m_mutation.init(lowerBounds,upperBounds);
+		indicator().init(functionValues.front().size(),mu,*mpe_rng);
+		m_selection( m_parents, mu );
+		
+		
 	}
 	
 	std::vector<IndividualType> generateOffspring()const{
