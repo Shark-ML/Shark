@@ -105,6 +105,16 @@ struct scalar_tanh{
 };
 
 template<class T>
+struct scalar_acos{
+	static const bool zero_identity = false;
+	typedef T result_type;
+	T operator()(T x)const {
+		using std::acos;
+		return acos(x);
+	}
+};
+
+template<class T>
 struct scalar_soft_plus {
 	static const bool zero_identity = false;
 	typedef T result_type;
