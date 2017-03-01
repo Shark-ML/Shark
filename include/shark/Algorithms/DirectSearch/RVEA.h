@@ -3,13 +3,17 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_RVEA
 
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Operators/ReferenceVectorAdaptation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ReferenceVectorGuidedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 
+#include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 
 
 namespace shark {
@@ -26,8 +30,8 @@ public:
 		nc() = 20.0; // parameter for crossover operator
 		nm() = 20.0; // parameter for mutation operator
 		alpha() = 2.0; // parameter for reference vector selection
-		fr() = 0.2;
-		// Don't do anything...
+		fr() = 0.1;
+		maxIterations() = 0; // must be set by user
 		this->m_features |= CAN_SOLVE_CONSTRAINED;
 	}
 
@@ -98,12 +102,17 @@ public:
 
 	RealMatrix referenceVectors() const
 	{
-		return m_unitReferenceVectors;
+		return m_referenceVectors;
 	}
 
 	RealMatrix & referenceVectors()
 	{
-		return m_unitReferenceVectors;
+		return m_referenceVectors;
+	}
+	
+	RealMatrix initialReferenceVectors() const
+	{
+		return m_initialReferenceVectors;
 	}
 
 	std::size_t maxIterations() const
@@ -116,16 +125,31 @@ public:
 		return m_maxIterations;
 	}
 
+	// HypervolumeIndicator & indicator(){
+	// 	return m_selection.indicator();
+	// }
+    // HypervolumeIndicator const& indicator()const{
+	// 	return m_selection.indicator();
+	// }
+
+
 	template <typename Archive>
 	void serialize(Archive & archive)
 	{
-		archive & BOOST_SERIALIZATION_NVP(m_crossoverProbability);
-		archive & BOOST_SERIALIZATION_NVP(m_mu);
-		archive & BOOST_SERIALIZATION_NVP(m_parents);
-		archive & BOOST_SERIALIZATION_NVP(m_best);
-		archive & BOOST_SERIALIZATION_NVP(m_bestDecomposedValues);
-		archive & BOOST_SERIALIZATION_NVP(m_crossover);
-		archive & BOOST_SERIALIZATION_NVP(m_mutation);
+#define S(var) archive & BOOST_SERIALIZATION_NVP(var)
+		S(m_crossoverProbability);
+		S(m_mu);
+		S(m_parents);
+		S(m_best);
+		S(m_crossover);
+		S(m_mutation);
+		S(m_alpha);
+		S(m_fr);
+		S(m_curIteration);
+		S(m_maxIterations);
+		S(m_initialReferenceVectors);
+		S(m_referenceVectors);
+#undef S
 	}
 
 	void init(ObjectiveFunctionType & function) override
@@ -178,14 +202,14 @@ public:
 		}
 		doInit(initialSearchPoints, values, lowerBounds,
 		       upperBounds, mu(), nm(), nc(), 
-		       crossoverProbability(), alpha(), fr(), 0);
+		       crossoverProbability(), alpha(), fr(), maxIterations());
 	}
 
 	void step(ObjectiveFunctionType const & function) override
 	{
 		PenalizingEvaluator penalizingEvaluator;
 		std::vector<IndividualType> offspring = generateOffspring();
-		penalizingEvaluator(function, offspring[0]);
+		penalizingEvaluator(function, offspring.begin(), offspring.end());
 		updatePopulation(offspring);
 	}
 
@@ -213,9 +237,11 @@ protected:
 		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, c);
 		m_initialReferenceVectors = m_referenceVectors;
 
+		m_mu = m_referenceVectors.size1();
+
 		m_curIteration = 0;
 		m_maxIterations = max_iterations;
-		m_mu = mu;
+//		m_mu = mu;
 		m_mutation.m_nm = nm;
 		m_crossover.m_nc = nc;
 		m_crossoverProbability = crossover_prob;
@@ -245,7 +271,6 @@ protected:
 			m_parents[i].penalizedFitness() = functionValues[index];
 			m_parents[i].unpenalizedFitness() = functionValues[index];
 		}
-		m_bestDecomposedValues = RealVector(numOfObjectives, 1e30);
 		// Create initial mu best points
 		for(std::size_t i = 0; i < m_mu; ++i)
 		{
@@ -256,9 +281,9 @@ protected:
 		m_mutation.init(lowerBounds, upperBounds);
 	}
 
-	// Make me an offspring...
 	std::vector<IndividualType> generateOffspring() const
 	{
+		SIZE_CHECK(m_maxIterations > 0);  // Not initialized?
 		TournamentSelection<IndividualType::RankOrdering> selection;
 		std::vector<IndividualType> offspring(mu());
 		selection(*mpe_rng,
@@ -281,12 +306,12 @@ protected:
 
 	void updatePopulation(std::vector<IndividualType> const & offspringvec)
 	{
-		SIZE_CHECK(m_maxIterations > 0);
 		m_parents.insert(m_parents.end(), offspringvec.begin(),
 		                 offspringvec.end());
 		ReferenceVectorGuidedSelection selection;
 		selection(alpha(), m_parents, 
-		          m_referenceVectors, m_curIteration, m_maxIteration);
+		          m_referenceVectors, m_curIteration, m_maxIterations);
+
 		std::partition(m_parents.begin(), 
 		               m_parents.end(), 
 		               IndividualType::IsSelected);
@@ -298,9 +323,28 @@ protected:
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
 
-		ReferenceVectorAdaptation adapt;
-		adapt(m_fr, m_parents, m_referenceVectors, 
-		      m_initialReferenceVectors, m_curIteration, m_maxIteration);
+		referenceVectorAdaptation(m_fr, m_parents, m_referenceVectors, 
+		      m_initialReferenceVectors, m_curIteration, m_maxIterations);
+		if(true){
+			std::ofstream file("fitness_" + std::to_string(m_curIteration) + ".dat");
+			for(auto & p : m_parents)
+			{
+				for(auto & x : p.unpenalizedFitness())
+				{
+					file << x << " ";
+				}
+				file << "\n";
+			}
+			std::ofstream reffile("refvecs_" + std::to_string(m_curIteration) + ".dat");
+			for(std::size_t i = 0; i < m_referenceVectors.size1(); ++i)
+			{
+				for(std::size_t j = 0; j < m_referenceVectors.size2(); ++j)
+				{
+					reffile << m_referenceVectors(i, j) << " ";
+				}
+				reffile << "\n";
+			}
+		}
 
 		++m_curIteration;
 	}

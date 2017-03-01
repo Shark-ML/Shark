@@ -83,6 +83,7 @@ shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeSubsetSelection.cpp
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeContribution.cpp DirectSearch_HypervolumeContribution )
 shark_add_test( Algorithms/DirectSearch/MOEAD.cpp DirectSearch_MOEAD )
 shark_add_test( Algorithms/DirectSearch/Operators/Lattice.cpp DirectSearch_Operators_Lattice )
+shark_add_test( Algorithms/DirectSearch/RVEA.cpp DirectSearch_RVEA )
 
 # Direct Search Operator tests
 shark_add_test( Algorithms/DirectSearch/Operators/Selection/Selection.cpp DirectSearch_Selection )
