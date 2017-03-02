@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Implements a Model using a linear function.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers, O. Krause
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -45,7 +45,7 @@ namespace shark {
 /// The output may be a single number, and the offset term b may be
 /// dropped.
 ///
-/// The class allows for dense and sparse input vector types. However it assumes that 
+/// The class allows for dense and sparse input vector types. However it assumes that
 /// the weight matrix and the ouputs are dense. There are some cases where this is not
 /// good behavior. Check for example Normalizer for a class which is designed for sparse
 /// inputs and outputs.
@@ -125,7 +125,7 @@ public:
 	RealVector parameterVector() const{
 		RealVector ret(numberOfParameters());
 		init(ret) << toVector(m_matrix),m_offset;
-		
+
 		return ret;
 	}
 
@@ -151,12 +151,12 @@ public:
 		m_matrix = matrix;
 		m_offset = offset;
 	}
-	
+
 	/// return a copy of the matrix in dense format
 	RealMatrix const& matrix() const{
 		return m_matrix;
 	}
-	
+
 	RealMatrix& matrix(){
 		return m_matrix;
 	}
@@ -168,7 +168,7 @@ public:
 	RealVector& offset(){
 		return m_offset;
 	}
-	
+
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
@@ -185,7 +185,7 @@ public:
 		}
 	}
 
-	void eval(InputType const& input, OutputType& output)const {
+	void eval(InputType const& input, RealVector& output)const {
 		output.resize(m_matrix.size1());
 		//we multiply with a set of row vectors from the left
 		noalias(output) = m_matrix % input;
@@ -197,8 +197,8 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		eval(inputs,outputs);
 	}
-	
-	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch 
+
+	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch
 	void weightedParameterDerivative(
 		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
@@ -219,7 +219,7 @@ public:
 			noalias(subrange(gradient, start, start + outputs)) = sum_rows(coefficients);
 		}
 	}
-	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch 
+	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
 	void weightedInputDerivative(
 		RealMatrix const & patterns,
 		BatchOutputType const & coefficients,
