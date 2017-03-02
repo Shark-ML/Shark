@@ -2,7 +2,7 @@
  * \brief       This file provides a simplistic TCP/IP socket class and an HTTP download function.
  * 
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -34,8 +34,8 @@
 #include <cstring>
 
 #ifdef _WIN32
+	#define _WINSOCK_DEPRECATED_NO_WARNINGS
 	#include <winsock2.h>
-	// typedef int socklen_t;
 
 	#ifndef MSG_NOSIGNAL
 		#define MSG_NOSIGNAL 0
@@ -68,6 +68,12 @@ namespace detail {
 class Socket
 {
 public:
+#ifdef _WIN32
+	using SocketType = SOCKET;
+#else
+	using SocketType = int;
+#endif
+
 	/// \brief Connect to a remote host.
 	Socket(std::string const& remoteHost, unsigned short remotePort)
 	: m_handle(0)
@@ -76,12 +82,19 @@ public:
 		// initialize Windows network library
 		WSADATA info;
 		int result = WSAStartup(2 /* API version 2.0 */, &info);
-#endif
 
 		m_handle = ::socket(AF_INET, SOCK_STREAM, 0);
+		if (m_handle == INVALID_SOCKET)
+		{
+			m_handle = 0;
+			return;
+		}
+#else
+		m_handle = ::socket(AF_INET, SOCK_STREAM, 0);
 		if (m_handle <= 0) return;
+#endif
 
-		hostent *host = gethostbyname(remoteHost.c_str());
+		hostent* host = gethostbyname(remoteHost.c_str());
 		if (! host)
 		{
 			close();
@@ -94,8 +107,8 @@ public:
 		addr.sin_addr.s_addr = ((in_addr *)host->h_addr)->s_addr;
 		memset(&(addr.sin_zero), 0, 8);
 
-		int ret = ::connect(m_handle, (sockaddr*) & addr, sizeof(sockaddr));
-		if (ret < 0) close();
+		int result = ::connect(m_handle, (sockaddr*)&addr, sizeof(sockaddr));
+		if (result != 0) close();
 	}
 
 	/// \brief Close the connection
@@ -105,15 +118,15 @@ public:
 
 	/// \brief Check whether the connection is fine.
 	inline bool connected() const
-	{ return (m_handle > 0); }
+	{ return (m_handle); }
 
 	/// \brief Close the connection (makes connected() return false).
 	void close()
 	{
 #ifdef _WIN32
-		if (m_handle > 0) ::closesocket(m_handle);
+		if (m_handle) ::closesocket(m_handle);
 #else
-		if (m_handle > 0) ::close(m_handle);
+		if (m_handle) ::close(m_handle);
 #endif
 		m_handle = 0;
 	}
@@ -210,7 +223,7 @@ public:
 	}
 
 private:
-	int m_handle;                      ///< POSIX socket handle
+	SocketType m_handle;               ///< POSIX socket handle
 };
 
 } // namespace detail

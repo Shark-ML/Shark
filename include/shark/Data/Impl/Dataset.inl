@@ -525,7 +525,7 @@ struct BatchRange{
 		return m_container->batch(0);
 	}
 private:
-	template <class> friend class BatchRange;
+	template <class> friend struct BatchRange;
 	C* m_container;
 };
 
