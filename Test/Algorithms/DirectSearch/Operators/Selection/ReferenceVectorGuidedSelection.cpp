@@ -23,20 +23,20 @@ BOOST_AUTO_TEST_CASE(populationPartition_correct)
     refVecs(2, 0) = 1;                refVecs(2, 1) = 0;
 	
 	RealMatrix fitness(6, 2);
-	// group 0
-	fitness(0, 0) = 0;                      fitness(0, 1) = 1;
-	fitness(1, 0) = 0.1;                    fitness(1, 1) = 0.9;
 	// group 1
-	fitness(2, 0) = 1 / std::sqrt(2);       fitness(2, 1) = 1 / std::sqrt(2);
-	fitness(3, 0) = 1 / std::sqrt(2) - 0.1; fitness(3, 1) = 1 / std::sqrt(2) + 0.1;
+	fitness(2, 0) = 0;                      fitness(2, 1) = 1;
+	fitness(3, 0) = 0.1;                    fitness(3, 1) = 0.9;
+	// group 0
+	fitness(0, 0) = 1 / std::sqrt(2);       fitness(0, 1) = 1 / std::sqrt(2);
+	fitness(1, 0) = 1 / std::sqrt(2) - 0.1; fitness(1, 1) = 1 / std::sqrt(2) + 0.1;
 	// group 2
 	fitness(4, 0) = 1;                      fitness(4, 1) = 0;
 	fitness(5, 0) = 0.9;                    fitness(5, 1) = 0.1;
 
 	const std::vector<std::set<std::size_t>> groups = rv::populationPartition(rv::cosAngles(fitness, refVecs));
-	
-	std::set<std::size_t> exp0{0, 1};
-	std::set<std::size_t> exp1{2, 3};
+
+	std::set<std::size_t> exp0{2, 3};
+	std::set<std::size_t> exp1{0, 1};
 	std::set<std::size_t> exp2{4, 5};
 	BOOST_CHECK(groups[0] == exp0);
 	BOOST_CHECK(groups[1] == exp1);
