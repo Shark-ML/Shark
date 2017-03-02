@@ -9,7 +9,7 @@ using namespace shark;
 
 bool verifyConnection()
 {
-	detail::Socket socket("http://mldata.org/repository/data/download/libsvm/iris/", 80);
+	detail::Socket socket("mldata.org", 80);
 	return socket.connected();
 }
 
