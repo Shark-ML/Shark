@@ -5,6 +5,9 @@
 
 namespace shark {
 
+// The optimal hypervolumes for various population sizes.  All with a reference
+// point of (11, 11).
+
 #define HV(type, vol10, vol100)                                         \
 	double optimal_hyper_volume(type const &, std::size_t mu) { \
 	switch(mu){ \

@@ -1,4 +1,3 @@
-// To be the RVEA algorithm.
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_RVEA
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_RVEA
 
@@ -12,8 +11,8 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 
-#include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-#include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
+// #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
+// #include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 
 
 namespace shark {
@@ -23,9 +22,10 @@ class RVEA : public AbstractMultiObjectiveOptimizer<RealVector>
 public:
 	typedef shark::Individual<RealVector, RealVector> IndividualType;
 
-	RVEA(DefaultRngType & rng = Rng::globalRng) : mpe_rng(&rng)
+	RVEA(DefaultRngType & rng = Rng::globalRng) : m_rng(&rng)
 	{
-		mu() = 100;
+		approxMu() = 100;
+		m_mu = approxMu();
 		crossoverProbability() = 0.9;
 		nc() = 20.0; // parameter for crossover operator
 		nm() = 20.0; // parameter for mutation operator
@@ -95,9 +95,19 @@ public:
 		return m_mu;
 	}
 
-	std::size_t & mu()
+	// std::size_t & mu()
+	// {
+	// 	return m_mu;
+	// }
+
+	std::size_t approxMu() const
 	{
-		return m_mu;
+		return m_approxMu;
+	}
+
+	std::size_t & approxMu()
+	{
+		return m_approxMu;
 	}
 
 	RealMatrix referenceVectors() const
@@ -124,13 +134,6 @@ public:
 	{
 		return m_maxIterations;
 	}
-
-	// HypervolumeIndicator & indicator(){
-	// 	return m_selection.indicator();
-	// }
-    // HypervolumeIndicator const& indicator()const{
-	// 	return m_selection.indicator();
-	// }
 
 
 	template <typename Archive>
@@ -201,7 +204,7 @@ public:
 			);
 		}
 		doInit(initialSearchPoints, values, lowerBounds,
-		       upperBounds, mu(), nm(), nc(), 
+		       upperBounds, approxMu(), nm(), nc(), 
 		       crossoverProbability(), alpha(), fr(), maxIterations());
 	}
 
@@ -220,7 +223,7 @@ protected:
 		std::vector<ResultType> const & functionValues,
 		RealVector const & lowerBounds,
 		RealVector const & upperBounds,
-		std::size_t const mu,
+		std::size_t const approx_mu,
 		double const nm,
 		double const nc,
 		double const crossover_prob,
@@ -233,15 +236,14 @@ protected:
 		const std::size_t numOfObjectives = functionValues[0].size();
 
 		// Set the reference vectors
-		std::size_t c = computeOptimalLatticeTicks(numOfObjectives, mu);
-		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, c);
+		std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, approx_mu);
+		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
 		m_initialReferenceVectors = m_referenceVectors;
 
 		m_mu = m_referenceVectors.size1();
 
 		m_curIteration = 0;
 		m_maxIterations = max_iterations;
-//		m_mu = mu;
 		m_mutation.m_nm = nm;
 		m_crossover.m_nc = nc;
 		m_crossoverProbability = crossover_prob;
@@ -265,7 +267,7 @@ protected:
 		// Copy points randomly
 		for(std::size_t i = numPoints; i < m_mu; ++i)
 		{
-			std::size_t index = discrete(*mpe_rng, 0,
+			std::size_t index = discrete(*m_rng, 0,
 			                             initialSearchPoints.size() - 1);
 			m_parents[i].searchPoint() = initialSearchPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
@@ -286,20 +288,20 @@ protected:
 		SIZE_CHECK(m_maxIterations > 0);  // Not initialized?
 		TournamentSelection<IndividualType::RankOrdering> selection;
 		std::vector<IndividualType> offspring(mu());
-		selection(*mpe_rng,
+		selection(*m_rng,
 		          m_parents.begin(), m_parents.end(),
 		          offspring.begin(), offspring.end());
 
 		for(std::size_t i = 0; i < mu() - 1; i += 2)
 		{
-			if(coinToss(*mpe_rng, m_crossoverProbability))
+			if(coinToss(*m_rng, m_crossoverProbability))
 			{
-				m_crossover(*mpe_rng, offspring[i], offspring[i + 1]);
+				m_crossover(*m_rng, offspring[i], offspring[i + 1]);
 			}
 		}
 		for(std::size_t i = 0; i < mu(); ++i)
 		{
-			m_mutation(*mpe_rng, offspring[i]);
+			m_mutation(*m_rng, offspring[i]);
 		}
 		return offspring;
 	}
@@ -352,9 +354,10 @@ protected:
 	std::vector<IndividualType> m_parents;
 
 private:
-	DefaultRngType * mpe_rng;
+	DefaultRngType * m_rng;
 	double m_crossoverProbability; ///< Probability of crossover happening.
-	std::size_t m_mu; ///< Size of parent population and the "N" from the paper
+	std::size_t m_mu; ///< Size of parent population and number of reference vectors
+	std::size_t m_approxMu; ///< The "approximate" value of mu that the user asked for.
 	SimulatedBinaryCrossover<SearchPointType> m_crossover;
 	PolynomialMutator m_mutation;
 	double m_alpha;
