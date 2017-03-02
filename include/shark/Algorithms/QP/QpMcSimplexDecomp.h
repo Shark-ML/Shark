@@ -193,9 +193,9 @@ public:
 			// Limit case of a single variable;
 			std::size_t i = m_variables[v].example;
 			SHARK_ASSERT(i < m_activeEx);
-			unsigned int p = m_variables[v].p;
+			std::size_t p = m_variables[v].p;
 			unsigned int y = m_examples[i].y;
-			unsigned int r = m_cardP * y + p;
+			std::size_t r = m_cardP * y + p;
 			double& varsum = m_examples[i].varsum;
 			//the upper bound depends on the values of the variables of the other classes.
 			double upperBound = m_C-varsum+m_alpha(v);
@@ -213,21 +213,21 @@ public:
 			// S2DO
 			std::size_t iv = m_variables[v].example;
 			SHARK_ASSERT(iv < m_activeEx);
-			unsigned int pv = m_variables[v].p;
+			std::size_t pv = m_variables[v].p;
 			unsigned int yv = m_examples[iv].y;
 			double& varsumv = m_examples[iv].varsum;
 
 			std::size_t iw = m_variables[w].example;
 			SHARK_ASSERT(iw < m_activeEx);
-			unsigned int pw = m_variables[w].p;
+			std::size_t pw = m_variables[w].p;
 			unsigned int yw = m_examples[iw].y;
 			double& varsumw = m_examples[iw].varsum;
 
 			// get the matrix rows corresponding to the working set
 			QpFloatType* qv = m_kernelMatrix.row(iv, 0, m_activeEx);
 			QpFloatType* qw = m_kernelMatrix.row(iw, 0, m_activeEx);
-			unsigned int rv = m_cardP*yv+pv;
-			unsigned int rw = m_cardP*yw+pw;
+			std::size_t rv = m_cardP*yv+pv;
+			std::size_t rw = m_cardP*yw+pw;
 
 			// get the Q-matrix restricted to the working set
 			double Qvv = m_variables[v].diagonal;
@@ -305,7 +305,7 @@ public:
 			//check the simplex for possible search directions
 			//case 1:  simplex is bounded and stays at the bound, in this case proceed as in MVP
 			if(down > 0 && ex.varsum == m_C && up-down > 0){
-				int pc = ex.active; 
+				int pc = (int)ex.active;
 				for(int p = pc-1; p >= 0; --p){
 					double a = m_alpha(ex.avar[p]);
 					double g = m_gradient(ex.avar[p]);
@@ -317,7 +317,7 @@ public:
 						//shrinking this variable means, that the whole simplex can't move,
 						//so shrink every variable, even the ones that previously couldn't
 						//be shrinked
-						for(int q = ex.active; q >= 0; --q){
+						for(int q = (int)ex.active; q >= 0; --q){
 							deactivateVariable(ex.avar[q]);
 						}
 						p = 0;
@@ -327,7 +327,7 @@ public:
 			//case 2: all variables are zero and pushed against the boundary
 			// -> shrink the example
 			else if(ex.varsum == 0 && up < 0){
-				int pc = ex.active; 
+				int pc = (int)ex.active; 
 				for(int p = pc-1; p >= 0; --p){
 					deactivateVariable(ex.avar[p]);
 				}
@@ -357,9 +357,9 @@ public:
 			if (mu == 0.0) continue;
 
 			std::size_t iv = m_variables[v].example;
-			unsigned int pv = m_variables[v].p;
+			std::size_t pv = m_variables[v].p;
 			unsigned int yv = m_examples[iv].y;
-			unsigned int r = m_cardP * yv + pv;
+			std::size_t r = m_cardP * yv + pv;
 			std::vector<QpFloatType> q(m_numExamples);
 			m_kernelMatrix.row(iv, 0, m_numExamples, &q[0]);
 
@@ -529,7 +529,7 @@ protected:
 	std::pair<std::pair<std::size_t,std::size_t>,double> maxGainBox(std::size_t i)const{
 		std::size_t e = m_variables[i].example;
 		SHARK_ASSERT(e < m_activeEx);
-		unsigned int pi = m_variables[i].p;
+		std::size_t pi = m_variables[i].p;
 		unsigned int yi = m_examples[e].y;
 		double Qii = m_variables[i].diagonal;
 		double gi = m_gradient(i);
@@ -558,7 +558,7 @@ protected:
 			{
 				std::size_t j = exa.var[p];
 				
-				std::size_t Qjj = m_variables[j].diagonal;
+				double Qjj = m_variables[j].diagonal;
 				double gj = m_gradient(j);
 				double Qij = def * k[a];
 				//check whether we are at an existing element of the sparse row
@@ -692,7 +692,7 @@ protected:
 		std::pair<double,std::size_t>,
 		std::pair<double,std::size_t> 
 	> getSimplexMVP(Example const& ex)const{
-		unsigned int pc = ex.active;
+		std::size_t pc = ex.active;
 		double up = -1e100;
 		double down = 1e100;
 		std::size_t maxUp = ex.avar[0];
@@ -758,8 +758,8 @@ protected:
 	void deactivateVariable(std::size_t v)
 	{
 		std::size_t ev = m_variables[v].example;
-		unsigned int iv = m_variables[v].index;
-		unsigned int pv = m_variables[v].p;
+		std::size_t iv = m_variables[v].index;
+		std::size_t pv = m_variables[v].p;
 		Example* exv = &m_examples[ev];
 
 		std::size_t ih = exv->active - 1;
@@ -772,8 +772,8 @@ protected:
 
 		std::size_t j = m_activeVar - 1;
 		std::size_t ej = m_variables[j].example;
-		unsigned int ij = m_variables[j].index;
-		unsigned int pj = m_variables[j].p;
+		std::size_t ij = m_variables[j].index;
+		std::size_t pj = m_variables[j].p;
 		Example* exj = &m_examples[ej];
 
 		// exchange entries in the lists
@@ -903,7 +903,7 @@ public:
 		RealVector step(classes);
 		
 		double start_time = Timer::now();
-		unsigned int iterations = 0;
+		unsigned long long iterations = 0;
 		
 		do{
 			QpSolutionProperties propInner;

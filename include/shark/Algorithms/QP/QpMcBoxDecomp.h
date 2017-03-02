@@ -109,7 +109,7 @@ public:
 			m_examples[i].var = &m_storage1[m_cardP * i];
 			m_examples[i].avar = &m_storage2[m_cardP * i];
 			double k = m_kernelMatrix.entry(i, i);
-			for (std::size_t p=0; p<m_cardP; p++, v++)
+			for (unsigned int p=0; p<m_cardP; p++, v++)
 			{
 				m_variables[v].i = i;
 				m_variables[v].p = p;
@@ -219,7 +219,7 @@ public:
 			SHARK_ASSERT(i < m_activeEx);
 			unsigned int p = m_variables[v].p;
 			unsigned int y = m_examples[i].y;
-			unsigned int r = m_cardP * y + p;
+			std::size_t r = m_cardP * y + p;
 			QpFloatType* q = m_kernelMatrix.row(i, 0, m_activeEx);
 			double Qvv = m_variables[v].diagonal;
 			double mu = -m_alpha(v);
@@ -243,8 +243,8 @@ public:
 			// get the matrix rows corresponding to the working set
 			QpFloatType* qv = m_kernelMatrix.row(iv, 0, m_activeEx);
 			QpFloatType* qw = m_kernelMatrix.row(iw, 0, m_activeEx);
-			unsigned int rv = m_cardP*yv+pv;
-			unsigned int rw = m_cardP*yw+pw;
+			std::size_t rv = m_cardP*yv+pv;
+			std::size_t rw = m_cardP*yw+pw;
 
 			// get the Q-matrix restricted to the working set
 			double Qvv = m_variables[v].diagonal;
@@ -296,7 +296,7 @@ public:
 
 		// shrink variables
 		bool se = false;
-		for (int a= m_activeVar-1; a >= 0; a--)
+		for (int a= (int)m_activeVar-1; a >= 0; a--)
 		{
 			double v = m_alpha(a);
 			double g = m_gradient(a);
@@ -318,7 +318,7 @@ public:
 		{
 			// exchange examples such that shrinked examples
 			// are moved to the ends of the lists
-			for (int a = m_activeEx - 1; a >= 0; a--)
+			for (int a = (int)m_activeEx - 1; a >= 0; a--)
 			{
 				if (m_examples[a].active == 0) 
 					deactivateExample(a);
@@ -342,7 +342,7 @@ public:
 			std::size_t iv = m_variables[v].i;
 			unsigned int pv = m_variables[v].p;
 			unsigned int yv = m_examples[iv].y;
-			unsigned int r = m_cardP * yv + pv;
+			std::size_t r = m_cardP * yv + pv;
 			std::vector<QpFloatType> q(m_numExamples);
 			m_kernelMatrix.row(iv, 0, m_numExamples, &q[0]);
 
@@ -489,7 +489,7 @@ protected:
 	void deactivateVariable(std::size_t v)
 	{
 		std::size_t ev = m_variables[v].i;
-		unsigned int iv = m_variables[v].index;
+		std::size_t iv = m_variables[v].index;
 		unsigned int pv = m_variables[v].p;
 		Example* exv = &m_examples[ev];
 
@@ -503,7 +503,7 @@ protected:
 
 		std::size_t j = m_activeVar - 1;
 		std::size_t ej = m_variables[j].i;
-		unsigned int ij = m_variables[j].index;
+		std::size_t ij = m_variables[j].index;
 		unsigned int pj = m_variables[j].p;
 		Example* exj = &m_examples[ej];
 
@@ -561,7 +561,7 @@ protected:
 		/// constraint corresponding to this m_variables
 		unsigned int p;
 		/// index into example->m_numVariables
-		unsigned int index;
+		std::size_t index;
 		/// diagonal entry of the big Q-matrix
 		double diagonal;
 	};
@@ -574,7 +574,7 @@ protected:
 		/// label of this example
 		unsigned int y;
 		/// number of active m_numVariables
-		unsigned int active;
+		std::size_t active;
 		/// list of all m_cardP m_numVariables, in order of the p-index
 		std::size_t* var;
 		/// list of active m_numVariables
@@ -594,7 +594,7 @@ protected:
 	unsigned int m_classes;
 	
 	///number of dual m_numVariables per example
-	unsigned int m_cardP;
+	std::size_t m_cardP;
 	
 	///number of m_examples in the problem (size of the kernel matrix)
 	std::size_t m_numExamples;
@@ -656,7 +656,7 @@ public:
 		RealVector step(classes);
 		
 		double start_time = Timer::now();
-		unsigned int iterations = 0;
+		unsigned long long iterations = 0;
 		
 		do{
 			QpSolutionProperties propInner;
