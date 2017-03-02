@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Hypervolume_functions, OF, obj_funs)
 	function.setNumberOfObjectives(num_objectives);
 	const double volume = optimal_hyper_volume(function, mu);
 	RVEA optimizer;
-	optimizer.mu() = mu;
+	optimizer.approxMu() = mu;
 	optimizer.nc() = 30;
 	optimizer.crossoverProbability() = 1;
 	optimizer.maxIterations() = iters;

@@ -82,7 +82,6 @@ shark_add_test( Algorithms/DirectSearch/ParetoDominance.cpp DirectSearch_ParetoD
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeSubsetSelection.cpp DirectSearch_HypervolumeSubsetSelection )
 shark_add_test( Algorithms/DirectSearch/Operators/HypervolumeContribution.cpp DirectSearch_HypervolumeContribution )
 shark_add_test( Algorithms/DirectSearch/MOEAD.cpp DirectSearch_MOEAD )
-shark_add_test( Algorithms/DirectSearch/Operators/Lattice.cpp DirectSearch_Operators_Lattice )
 shark_add_test( Algorithms/DirectSearch/RVEA.cpp DirectSearch_RVEA )
 
 # Direct Search Operator tests
@@ -90,6 +89,8 @@ shark_add_test( Algorithms/DirectSearch/Operators/Selection/Selection.cpp Direct
 shark_add_test( Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.cpp DirectSearch_IndicatorBasedSelection )
 shark_add_test( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp DirectSearch_BitflipMutation )
 shark_add_test( Algorithms/DirectSearch/Operators/PenalizingEvaluator.cpp DirectSearch_PenalizingEvaluator )
+shark_add_test( Algorithms/DirectSearch/Operators/Lattice.cpp DirectSearch_Operators_Lattice )
+shark_add_test( Algorithms/DirectSearch/Operators/Selection/ReferenceVectorGuidedSelection.cpp DirectSearch_Operators_ReferenceVectorGuidedSelection )
 
 # Direct Search Indicator tests
 shark_add_test( Algorithms/DirectSearch/Indicators/HypervolumeIndicator.cpp DirectSearch_HypervolumeIndicator )
