@@ -32,6 +32,7 @@
 #include <map>
 #include <stdexcept>
 #include <cstring>
+#include <cctype>
 
 #ifdef _WIN32
 	#define _WINSOCK_DEPRECATED_NO_WARNINGS

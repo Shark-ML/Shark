@@ -21,7 +21,7 @@ void testFunction(AbstractSingleObjectiveOptimizer<Point>& optimizer,Function& f
 				
 		double error=0;
 
-		for( size_t iteration = 0; iteration < static_cast<size_t>(iterations); ++iteration ) {
+		for( unsigned int iteration = 0; iteration < iterations; ++iteration ) {
 			//~ std::cout<<iteration<<" "<<iterations<<std::endl;
 			optimizer.step( function );
 			error=optimizer.solution().value;

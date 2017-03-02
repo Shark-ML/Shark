@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
     // what happens if we have all alphas the same?
     for (size_t i = 0; i < m_budgetSize; i++)
         for (size_t j = 0; j < classes; j++)
-            budgetModel.alpha(i, j) = classes;
+            budgetModel.alpha(i, j) = (double)classes;
     
     AbstractBudgetMaintenanceStrategy<RealVector>::findSmallestVector(budgetModel, index, minAlpha);
     BOOST_REQUIRE_EQUAL(minAlpha, sqrt(2.0*classes*classes));

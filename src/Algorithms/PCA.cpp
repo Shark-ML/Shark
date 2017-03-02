@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       PCA
- * 
- * 
+ *
+ *
  *
  * \author      T.Glasmachers, Christian Igel
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -43,13 +43,13 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 	SHARK_RUNTIME_CHECK(inputs.numberOfElements() >= 2, "Input needs to contain at least two points");
 	m_l = inputs.numberOfElements(); ///< number of data points
 	PCAAlgorithm algorithm = m_algorithm;
-	m_n = dataDimension(inputs); 
-	
+	m_n = dataDimension(inputs);
+
 	if(algorithm == AUTO)  {
 		if(m_n > m_l) algorithm = SMALL_SAMPLE; // more attributes than data points
 		else algorithm = STANDARD;
 	}
-	
+
 	// decompose covariance matrix
 	if(algorithm == STANDARD) { // standard case
 		RealMatrix S(m_n,m_n);//covariance matrix
@@ -114,7 +114,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 //! m-dimensional PCA coordinate system.
 void PCA::encoder(LinearModel<>& model, std::size_t m) {
 	if(!m) m = std::min(m_n,m_l);
-	
+
 	RealMatrix A = trans(columns(m_eigenvectors, 0, m) );
 	RealVector offset = -prod(A, m_mean);
 	if(m_whitening){
@@ -122,7 +122,7 @@ void PCA::encoder(LinearModel<>& model, std::size_t m) {
 			//take care of numerical difficulties for very small eigenvalues.
 			if(m_eigenvalues(i)/m_eigenvalues(0) < 1.e-15){
 				row(A,i).clear();
-				offset(i) = 0;			
+				offset(i) = 0;
 			}
 			else{
 				row(A, i) /= std::sqrt(m_eigenvalues(i));
@@ -146,7 +146,7 @@ void PCA::decoder(LinearModel<>& model, std::size_t m) {
 		for(std::size_t i=0; i<A.size2(); i++) {
 			//take care of numerical difficulties for very small eigenvalues.
 			if(m_eigenvalues(i)/m_eigenvalues(0) < 1.e-15){
-				column(A,i).clear();		
+				column(A,i).clear();
 			}
 			else{
 				column(A, i) = column(A, i) * std::sqrt(m_eigenvalues(i));

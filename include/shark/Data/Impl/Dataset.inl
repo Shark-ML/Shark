@@ -623,7 +623,7 @@ private:
 			--m_batchPosition;
 			--npos;
 			//jump over the outer position until we are in the correct range again
-			while ((unsigned int) npos >= batchSize(m_container->batch(m_batchPosition)) ){
+			while (npos != 0 && npos >= batchSize(m_container->batch(m_batchPosition)) ){
 				npos -= batchSize(m_container->batch(m_batchPosition));
 				--m_batchPosition;
 			}
@@ -632,7 +632,7 @@ private:
 		else{
 			std::size_t npos = n;
 			//jump over the outer position until we are in the correct range again
-			while (npos >= batchSize(m_container->batch(m_batchPosition))){
+			while (npos != 0 && npos >= batchSize(m_container->batch(m_batchPosition))){
 				npos -= batchSize(m_container->batch(m_batchPosition));
 				++m_batchPosition;
 				SHARK_RUNTIME_CHECK(m_batchPosition != m_container->numberOfBatches() || (npos == 0), "iterator went past the end");
