@@ -418,7 +418,7 @@ private:
 		if(numPoints == 0) return true;
 		std::size_t numObjectives = point.point.size();
 		//runtime already spend on point
-		double time =point.noSamples * numObjectives;
+		double time = (double)point.noSamples * numObjectives;
 		
 		//estimate of algo run time
 		double algoRunTime = 0.03 * numObjectives * numObjectives * std::pow(numPoints, numObjectives * 0.5 );

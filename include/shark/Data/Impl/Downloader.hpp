@@ -32,6 +32,7 @@
 #include <map>
 #include <stdexcept>
 #include <cstring>
+#include <cctype>
 
 #ifdef _WIN32
 	#include <winsock2.h>

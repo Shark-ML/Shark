@@ -179,9 +179,18 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
 		outputs.resize(inputs.size1(),m_matrix.size1());
 		//we multiply with a set of row vectors from the left
-		noalias(outputs) = prod(inputs,trans(m_matrix));
+		noalias(outputs) = inputs % trans(m_matrix);
 		if (hasOffset()){
 			noalias(outputs)+=repeat(m_offset,inputs.size1());
+		}
+	}
+
+	void eval(InputType const& input, OutputType& output)const {
+		output.resize(m_matrix.size1());
+		//we multiply with a set of row vectors from the left
+		noalias(output) = m_matrix % input;
+		if (hasOffset()) {
+			noalias(output) += m_offset;
 		}
 	}
 	/// Evaluate the model: output = matrix * input + offset
@@ -203,7 +212,7 @@ public:
 
 		auto weightGradient = blas::to_matrix(gradient, outputs,inputs);
 		//sum_i coefficients(output,i)*pattern(i))
-		noalias(weightGradient) = prod(trans(coefficients),patterns);
+		noalias(weightGradient) = trans(coefficients) % patterns;
 
 		if (hasOffset()){
 			std::size_t start = inputs*outputs;
@@ -221,7 +230,7 @@ public:
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
 		derivative.resize(patterns.size1(),inputSize());
-		noalias(derivative) = prod(coefficients,m_matrix);
+		noalias(derivative) = coefficients % m_matrix;
 	}
 
 	/// From ISerializable

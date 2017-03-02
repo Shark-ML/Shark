@@ -97,7 +97,7 @@ public:
 			m_base[i].weight = 1.0;
 			m_base[i].adaptive = false;
 		}
-		m_weightsum = m_base.size();
+		m_weightsum = (double)m_base.size();
 
 		// set m_base class features
 		bool hasFirstParameterDerivative = true;

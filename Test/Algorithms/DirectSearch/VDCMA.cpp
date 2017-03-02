@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE( CMA_Ellipsoid )
 	optimizer.setInitialSigma(2);
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	testFunction( optimizer, function, 10, 5000/optimizer.suggestLambda(20), 1E-10 );
+	testFunction( optimizer, function, 10, (unsigned int)(5000/optimizer.suggestLambda(20)), 1E-10 );
 }
 
 BOOST_AUTO_TEST_CASE( CMA_Rosenbrock )
@@ -30,6 +30,6 @@ BOOST_AUTO_TEST_CASE( CMA_Rosenbrock )
 	std::size_t lambda= optimizer.suggestLambda(20);
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
-	testFunction( optimizer, function, 101, 22000/lambda, 1E-10 );
+	testFunction( optimizer, function, 101, (unsigned int)(22000/lambda), 1E-10 );
 }
 BOOST_AUTO_TEST_SUITE_END()

@@ -98,7 +98,7 @@ void applyHouseholderOnTheRight(
 	
 	SIZE_CHECK(matrix().size2() == reflection().size());
 	//Ax
-	vector<T> temp = prod(matrix,reflection);
+	blas::vector<T> temp = prod(matrix,reflection);
 	
 	//A -=beta*(Ax)x^T
 	noalias(matrix()) -= beta * outer_prod(temp,reflection);
@@ -124,7 +124,7 @@ void applyHouseholderOnTheLeft(
 		return;
 	}
 	//x^T A
-	vector<T> temp = prod(trans(matrix),reflection);
+	blas::vector<T> temp = prod(trans(matrix),reflection);
 	
 	//A -=beta*x(x^T A)
 	noalias(matrix()) -= beta * outer_prod(reflection,temp);

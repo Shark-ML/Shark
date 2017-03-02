@@ -90,7 +90,7 @@ struct DTLZ1 : public MultiObjectiveFunction
 		ResultType value( numberOfObjectives() );
 
 		std::size_t k = numberOfVariables() - numberOfObjectives()+1;
-		double g = k;
+		double g = (double)k;
 		for( std::size_t i = numberOfVariables() - k; i < numberOfVariables(); i++ )
 			g += sqr( x( i ) - 0.5 ) - std::cos( 20.0 * M_PI * ( x( i ) - 0.5) );
 		g *= 100;

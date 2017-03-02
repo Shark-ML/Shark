@@ -62,7 +62,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 		noalias(column(Ablocks.upperRight(),0))+=sum_rows(batch.input);
 	}
 	row(Ablocks.lowerLeft(),0) = column(Ablocks.upperRight(),0);
-	matA(inputDim,inputDim) = numInputs;
+	matA(inputDim,inputDim) = (double) numInputs;
 	//X^TX+=lambda* I
 	diag(Ablocks.upperLeft()) += m_regularization;
 	

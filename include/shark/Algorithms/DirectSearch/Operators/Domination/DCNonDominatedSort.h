@@ -97,12 +97,12 @@ private:
 
 		
 		double const* obj;
-		std::size_t frt;    // front index (1-based)
+		unsigned int frt;    // front index (1-based)
 		std::size_t m_size;
 	};
 
 	typedef std::vector<Point*> ContainerType;
-	typedef std::map<std::size_t, double> MapType;
+	typedef std::map<unsigned int, double> MapType;
 	typedef std::set<std::size_t, std::greater<std::size_t> > SetType;
 	typedef std::map<double, SetType > InverseMapType;
 
@@ -219,7 +219,7 @@ private:
 		for (std::size_t i=1; i<S.size(); i++)
 		{
 			// O(T.size()) operation, should be logarithmic...?
-			std::size_t r = 0;
+			unsigned int r = 0;
 			for (auto p : T)
 			{
 				if (p.second <= S[i]->obj[1]) r = std::max(r, p.first);
@@ -375,7 +375,7 @@ private:
 			}
 
 			// O(T.size()) operation, should be logarithmic...
-			std::size_t r = 0;
+			unsigned int r = 0;
 			for (auto p : T)
 			{
 				if (p.second <= H[j]->obj[1]) r = std::max(r, p.first);
