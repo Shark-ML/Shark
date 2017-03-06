@@ -10,12 +10,13 @@ struct ReferenceVectorGuidedSelection
 {
 	typedef shark::Individual<RealVector, RealVector> IndividualType;
 	typedef std::set<std::size_t> bag_t;
-	
+
 
 	void operator()(
 		double const alpha,
 		std::vector<IndividualType> & population,
 		RealMatrix const & referenceVectors,
+		RealVector const & gammas,
 		std::size_t const curIteration, std::size_t const maxIteration)
 	{
 		if(population.empty())
@@ -25,7 +26,6 @@ struct ReferenceVectorGuidedSelection
 		RealMatrix fitness = extractPopulationFitness(population);
 		SIZE_CHECK(fitness.size2() == referenceVectors.size2());
 		const std::size_t groupCount = referenceVectors.size1();
-
 		// Objective value translation
 		// line 4
 		const RealVector minFitness = minFitnessValues(fitness);
@@ -38,54 +38,37 @@ struct ReferenceVectorGuidedSelection
 		const RealMatrix angles = acos(cosA);
 		// line 14-17
 		const std::vector<bag_t> subGroups = populationPartition(cosA);
-
-		// Angle-penalized distance (APD) calculation
-		// line 19-23
-		const RealMatrix apDists = anglePenalizedDistance(
-			angles, referenceVectors, fitness, subGroups,
-			curIteration, maxIteration, alpha);
-
+		SIZE_CHECK(subGroups.size() == groupCount);
 		// Elitism selection
 		for(auto & p : population)
 		{
 			p.selected() = false;
 		}
+		const double theta = fitness.size2() 
+			* std::pow(static_cast<double>(curIteration) / 
+			           static_cast<double>(maxIteration), alpha);
 		// line 25-28
 		for(std::size_t j = 0; j < groupCount; ++j)
 		{
-			std::size_t min_idx = 0;
-			double min = 1e10;
+			if(subGroups[j].size() == 0)
+			{
+				continue;
+			}
+			std::size_t selected_idx = 0;
+			double min = 1e5;
 			for(std::size_t i : subGroups[j])
 			{
-				if(apDists(i, j) < min)
+				// Angle-penalized distance (APD) calculation
+				double apd = 1 + theta * angles(i, j) / gammas[j];
+				apd *= norm_2(row(fitness, i));
+				if(apd < min)
 				{
-					min_idx = i;
-					min = apDists(i, j);
+					selected_idx = i;
+					min = apd;
 				}
 			}
-			population[min_idx].selected() = true;
+			population[selected_idx].selected() = true;
 		}
-	}
-
-	static RealMatrix anglePenalizedDistance(
-		RealMatrix const & angles, RealMatrix const & referenceVectors,
-		RealMatrix const & fitness, std::vector<bag_t> const & subGroups,
-		double const t, double const t_max, 
-		double const alpha)
-	{
-		const RealVector gammas = leastAngles(referenceVectors);
-		const std::size_t objCount = fitness.size2();
-		const double theta = objCount * std::pow(t / t_max, alpha);
-		RealMatrix apDists(angles.size1(), referenceVectors.size1());
-		for(std::size_t j = 0; j < referenceVectors.size1(); ++j)
-		{
-			for(std::size_t i : subGroups[j])
-			{
-				apDists(i, j) = 1 + theta * angles(i, j) / gammas[j];
-				apDists(i, j) *= norm_2(row(fitness, i));
-			}
-		}
-		return apDists;
 	}
 
 	static std::vector<bag_t> populationPartition(
@@ -113,26 +96,6 @@ struct ReferenceVectorGuidedSelection
 			row(c, i) /= norm_2(row(fitness, i));
 		}
 		return c;
-	}
-
-	static RealVector leastAngles(RealMatrix const & referenceVectors)
-	{
-		RealVector la(referenceVectors.size1(), 1e10);
-		for(std::size_t i = 0; i < referenceVectors.size1(); ++i)
-		{
-			for(std::size_t j = 0; j < referenceVectors.size1(); ++j)
-			{
-				if(j == i) 
-				{
-					continue;
-				}
-				double thisAngle =  std::acos(
-					inner_prod(row(referenceVectors, j),
-					           row(referenceVectors, i)));
-				la[i] = std::min(la[i], thisAngle);
-			}
-		}
-		return la;
 	}
 
 	static RealMatrix extractPopulationFitness(

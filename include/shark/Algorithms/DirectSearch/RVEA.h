@@ -11,9 +11,6 @@
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 
-// #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
-// #include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
-
 
 namespace shark {
 
@@ -135,7 +132,6 @@ public:
 		return m_maxIterations;
 	}
 
-
 	template <typename Archive>
 	void serialize(Archive & archive)
 	{
@@ -239,9 +235,11 @@ protected:
 		std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, approx_mu);
 		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
 		m_initialReferenceVectors = m_referenceVectors;
+		// m_additionalReferenceVectors = m_referenceVectors;
+		m_referenceVectorMinAngles = RealVector(m_referenceVectors.size1());
+		updateReferenceVectorMinAngles();
 
 		m_mu = m_referenceVectors.size1();
-
 		m_curIteration = 0;
 		m_maxIterations = max_iterations;
 		m_mutation.m_nm = nm;
@@ -285,7 +283,8 @@ protected:
 
 	std::vector<IndividualType> generateOffspring() const
 	{
-		SIZE_CHECK(m_maxIterations > 0);  // Not initialized?
+		SHARK_RUNTIME_CHECK(m_maxIterations > 0, 
+		                    "Maximum number of iterations not set.");
 		TournamentSelection<IndividualType::RankOrdering> selection;
 		std::vector<IndividualType> offspring(mu());
 		selection(*m_rng,
@@ -312,7 +311,9 @@ protected:
 		                 offspringvec.end());
 		ReferenceVectorGuidedSelection selection;
 		selection(alpha(), m_parents, 
-		          m_referenceVectors, m_curIteration, m_maxIterations);
+		          m_referenceVectors,
+		          m_referenceVectorMinAngles,
+		          m_curIteration + 1, m_maxIterations);
 
 		std::partition(m_parents.begin(), 
 		               m_parents.end(), 
@@ -325,9 +326,7 @@ protected:
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
 
-		referenceVectorAdaptation(m_fr, m_parents, m_referenceVectors, 
-		      m_initialReferenceVectors, m_curIteration, m_maxIterations);
-		if(true){
+		if(false){
 			std::ofstream file("fitness_" + std::to_string(m_curIteration) + ".dat");
 			for(auto & p : m_parents)
 			{
@@ -338,17 +337,36 @@ protected:
 				file << "\n";
 			}
 			std::ofstream reffile("refvecs_" + std::to_string(m_curIteration) + ".dat");
-			for(std::size_t i = 0; i < m_referenceVectors.size1(); ++i)
+			RealMatrix m = m_referenceVectors;
+			for(std::size_t i = 0; i < m.size1(); ++i)
 			{
-				for(std::size_t j = 0; j < m_referenceVectors.size2(); ++j)
+				for(std::size_t j = 0; j < m.size2(); ++j)
 				{
-					reffile << m_referenceVectors(i, j) << " ";
+					reffile << m(i, j) << " ";
 				}
 				reffile << "\n";
 			}
 		}
+		std::size_t x = std::ceil(m_fr * m_maxIterations);
+		if(m_curIteration % x == 0)
+		{
+			referenceVectorAdaptation(
+				m_parents, m_referenceVectors, m_initialReferenceVectors);
+			updateReferenceVectorMinAngles();
+		}
 
 		++m_curIteration;
+	}
+
+	void updateReferenceVectorMinAngles()
+	{
+		const std::size_t s = m_referenceVectors.size1();
+		RealMatrix m = acos(prod(m_referenceVectors, trans(m_referenceVectors))) +
+			to_diagonal(RealVector(s, 1e10));
+		for(std::size_t i = 0; i < s; ++i)
+		{
+			m_referenceVectorMinAngles[i] = min(row(m, i));
+		}
 	}
 
 	std::vector<IndividualType> m_parents;
@@ -367,6 +385,8 @@ private:
 	
 	RealMatrix m_initialReferenceVectors;
 	RealMatrix m_referenceVectors;
+//	RealMatrix m_additionalReferenceVectors;
+	RealVector m_referenceVectorMinAngles;
 };
 
 } // namespace shark
