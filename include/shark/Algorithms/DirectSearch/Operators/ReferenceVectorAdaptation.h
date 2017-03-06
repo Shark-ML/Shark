@@ -6,27 +6,21 @@
 namespace shark {
 
 void referenceVectorAdaptation(
-	double const f_r,
 	std::vector<shark::Individual<RealVector, RealVector>> const & population,
 	RealMatrix & referenceVectors,
-	RealMatrix const & initialReferenceVectors,
-	std::size_t const curIteration, std::size_t const maxIteration)
+	RealMatrix const & initialReferenceVectors)
 {
 	typedef ReferenceVectorGuidedSelection rvgs;
-	const std::size_t k = curIteration % static_cast<std::size_t>(std::ceil(f_r * maxIteration));
-	if(k == 0)
+	RealMatrix f = rvgs::extractPopulationFitness(population);
+	RealVector diff(f.size2());
+	for(std::size_t i = 0; i < f.size2(); ++i)
 	{
-		RealMatrix f = rvgs::extractPopulationFitness(population);
-		RealVector diffMinMaxFitness(f.size2());
-		for(std::size_t i = 0; i < f.size2(); ++i)
-		{
-			diffMinMaxFitness[i] = max(column(f, i)) - min(column(f, i));
-		}
-		for(std::size_t i = 0; i < referenceVectors.size1(); ++i)
-		{
-			auto v = row(initialReferenceVectors, i) * diffMinMaxFitness;
-			row(referenceVectors, i) = v / norm_2(v);
-		}
+		diff[i] = max(column(f, i)) - min(column(f, i));
+	}
+	referenceVectors = initialReferenceVectors * repeat(diff, initialReferenceVectors.size1());
+	for(std::size_t i = 0; i < referenceVectors.size1(); ++i)
+	{
+		row(referenceVectors, i) /= norm_2(row(referenceVectors, i));
 	}
 }
 

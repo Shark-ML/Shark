@@ -12,10 +12,10 @@
 
 using namespace shark;
 
-typedef boost::mpl::list<DTLZ1, 
-                         DTLZ2,
-                         DTLZ3,
-                         DTLZ4
+typedef boost::mpl::list<DTLZ1, DTLZ2, DTLZ3, DTLZ4
+//	DTLZ5
+//	DTLZ6
+//	DTLZ7
                          > obj_funs;
 
 
