@@ -270,7 +270,14 @@ private:
 				[=](SetIter const& point){return point->contributionLowerBound > erase_level;}
 			);
 			activePoints.erase(erase_start,activePoints.end());
-			
+
+			// The minimal least contributer must be found again
+			// since the erase call might invalidate the previous iterator
+			minimalElement = std::min_element(
+				activePoints.begin(), activePoints.end(),
+				[](SetIter const& a, SetIter const& b) {return a->approximatedContribution < b->approximatedContribution; }
+			);
+
 			//if the set only has one point left, we are done.
 			if(activePoints.size() == 1)
 				return activePoints.front();
