@@ -108,8 +108,8 @@ public:
 		addr.sin_addr.s_addr = ((in_addr *)host->h_addr)->s_addr;
 		memset(&(addr.sin_zero), 0, 8);
 
-		int result = ::connect(m_handle, (sockaddr*)&addr, sizeof(sockaddr));
-		if (result != 0) close();
+		int connectionResult = ::connect(m_handle, (sockaddr*)&addr, sizeof(sockaddr));
+		if (connectionResult != 0) close();
 	}
 
 	/// \brief Close the connection
