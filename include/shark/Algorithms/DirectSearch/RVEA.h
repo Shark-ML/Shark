@@ -214,6 +214,12 @@ public:
 		updatePopulation(offspring);
 	}
 
+    std::size_t suggestMu(std::size_t n, std::size_t const approx_mu) const
+	{
+		std::size_t t = computeOptimalLatticeTicks(n, approx_mu);
+		return shark::detail::sumlength(n, t);
+	}
+
 protected:
 
 	void doInit(
@@ -241,6 +247,7 @@ protected:
 		m_adaptation.updateAngles(m_referenceVectors, m_referenceVectorMinAngles);
 
 		m_mu = m_referenceVectors.size1();
+		SIZE_CHECK(m_mu == suggestMu(numOfObjectives, approx_mu));
 		m_curIteration = 0;
 		maxIterations() = max_iterations;
 		m_mutation.m_nm = nm;
