@@ -13,11 +13,10 @@ struct ReferenceVectorGuidedSelection
 
 
 	void operator()(
-		double const alpha,
 		std::vector<IndividualType> & population,
 		RealMatrix const & referenceVectors,
 		RealVector const & gammas,
-		std::size_t const curIteration, std::size_t const maxIteration)
+		std::size_t const curIteration)
 	{
 		if(population.empty())
 		{
@@ -46,7 +45,7 @@ struct ReferenceVectorGuidedSelection
 		}
 		const double theta = fitness.size2() 
 			* std::pow(static_cast<double>(curIteration) / 
-			           static_cast<double>(maxIteration), alpha);
+			           static_cast<double>(m_maxIters), m_alpha);
 		// line 25-28
 		for(std::size_t j = 0; j < groupCount; ++j)
 		{
@@ -119,6 +118,16 @@ struct ReferenceVectorGuidedSelection
 		}
 		return minFitness;
 	}
+
+	template <typename Archive>
+	void serialize(Archive & archive)
+	{
+		archive & BOOST_SERIALIZATION_NVP(m_alpha);
+		archive & BOOST_SERIALIZATION_NVP(m_maxIters);
+	}
+
+	double m_alpha;
+	std::size_t m_maxIters;
 };
 
 } // namespace shark
