@@ -91,6 +91,7 @@ shark_add_test( Algorithms/DirectSearch/Operators/Mutation/BitflipMutation.cpp D
 shark_add_test( Algorithms/DirectSearch/Operators/PenalizingEvaluator.cpp DirectSearch_PenalizingEvaluator )
 shark_add_test( Algorithms/DirectSearch/Operators/Lattice.cpp DirectSearch_Operators_Lattice )
 shark_add_test( Algorithms/DirectSearch/Operators/Selection/ReferenceVectorGuidedSelection.cpp DirectSearch_Operators_ReferenceVectorGuidedSelection )
+shark_add_test( Algorithms/DirectSearch/Operators/ReferenceVectorAdaptation.cpp DirectSearch_Operators_ReferenceVectorAdaptation )
 
 # Direct Search Indicator tests
 shark_add_test( Algorithms/DirectSearch/Indicators/HypervolumeIndicator.cpp DirectSearch_HypervolumeIndicator )
