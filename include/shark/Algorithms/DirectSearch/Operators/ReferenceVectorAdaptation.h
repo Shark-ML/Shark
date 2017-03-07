@@ -19,7 +19,8 @@ struct ReferenceVectorAdaptation
 		RealVector diff(f.size2());
 		for(std::size_t i = 0; i < f.size2(); ++i)
 		{
-			diff[i] = max(column(f, i)) - min(column(f, i));
+			double d = max(column(f, i)) - min(column(f, i));
+			diff[i] = (d == 0) ? 1 : d;
 		}
 		referenceVectors = m_initVecs * repeat(diff, m_initVecs.size1());
 		for(std::size_t i = 0; i < referenceVectors.size1(); ++i)
