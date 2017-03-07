@@ -5,24 +5,52 @@
 
 namespace shark {
 
-void referenceVectorAdaptation(
-	std::vector<shark::Individual<RealVector, RealVector>> const & population,
-	RealMatrix & referenceVectors,
-	RealMatrix const & initialReferenceVectors)
+struct ReferenceVectorAdaptation
 {
-	typedef ReferenceVectorGuidedSelection rvgs;
-	RealMatrix f = rvgs::extractPopulationFitness(population);
-	RealVector diff(f.size2());
-	for(std::size_t i = 0; i < f.size2(); ++i)
+	typedef shark::Individual<RealVector, RealVector> IndividualType;
+
+	void operator()(
+		std::vector<IndividualType> const & population,
+		RealMatrix & referenceVectors,
+		RealVector & minAngles)
 	{
-		diff[i] = max(column(f, i)) - min(column(f, i));
+		typedef ReferenceVectorGuidedSelection rv;
+		const RealMatrix f = rv::extractPopulationFitness(population);
+		RealVector diff(f.size2());
+		for(std::size_t i = 0; i < f.size2(); ++i)
+		{
+			diff[i] = max(column(f, i)) - min(column(f, i));
+		}
+		referenceVectors = m_initVecs * repeat(diff, m_initVecs.size1());
+		for(std::size_t i = 0; i < referenceVectors.size1(); ++i)
+		{
+			row(referenceVectors, i) /= norm_2(row(referenceVectors, i));
+		}
+		updateAngles(referenceVectors, minAngles);
 	}
-	referenceVectors = initialReferenceVectors * repeat(diff, initialReferenceVectors.size1());
-	for(std::size_t i = 0; i < referenceVectors.size1(); ++i)
+
+	static void updateAngles(
+		RealMatrix const & referenceVectors,
+		RealVector & minAngles)
 	{
-		row(referenceVectors, i) /= norm_2(row(referenceVectors, i));
+		const std::size_t s = referenceVectors.size1();
+		const RealMatrix m = acos(prod(referenceVectors, 
+		                               trans(referenceVectors))) +
+			to_diagonal(RealVector(s, 1e10));
+		for(std::size_t i = 0; i < s; ++i)
+		{
+			minAngles[i] = min(row(m, i));
+		}
 	}
-}
+
+	template <typename Archive>
+	void serialize(Archive & archive)
+	{
+		archive & m_initVecs;
+	}
+
+    RealMatrix m_initVecs;
+};
 
 } // namespace shark
 

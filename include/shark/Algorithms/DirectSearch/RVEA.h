@@ -27,7 +27,7 @@ public:
 		nc() = 20.0; // parameter for crossover operator
 		nm() = 20.0; // parameter for mutation operator
 		alpha() = 2.0; // parameter for reference vector selection
-		fr() = 0.1;
+		adaptationFrequency() = 0.1;
 		maxIterations() = 0; // must be set by user
 		this->m_features |= CAN_SOLVE_CONSTRAINED;
 	}
@@ -69,22 +69,22 @@ public:
 
 	double alpha() const
 	{
-		return m_alpha;
+		return m_selection.m_alpha;
 	}
 
 	double & alpha()
 	{
-		return m_alpha;
+		return m_selection.m_alpha;
 	}
 
-	double fr() const
+	double adaptationFrequency() const
 	{
-		return m_fr;
+		return m_adaptParam;
 	}
 
-	double & fr()
-	{
-		return m_fr;
+	double & adaptationFrequency()
+	{	
+		return m_adaptParam;
 	}
 
 	std::size_t mu() const
@@ -119,17 +119,17 @@ public:
 	
 	RealMatrix initialReferenceVectors() const
 	{
-		return m_initialReferenceVectors;
+		return m_adaptation.m_initVecs;
 	}
 
 	std::size_t maxIterations() const
 	{
-		return m_maxIterations;
+		return m_selection.m_maxIters;
 	}
 
 	std::size_t & maxIterations()
 	{
-		return m_maxIterations;
+		return m_selection.m_maxIters;
 	}
 
 	template <typename Archive>
@@ -138,16 +138,17 @@ public:
 #define S(var) archive & BOOST_SERIALIZATION_NVP(var)
 		S(m_crossoverProbability);
 		S(m_mu);
+		S(m_approxMu);
 		S(m_parents);
 		S(m_best);
 		S(m_crossover);
 		S(m_mutation);
-		S(m_alpha);
-		S(m_fr);
+		S(m_adaptParam);
 		S(m_curIteration);
-		S(m_maxIterations);
-		S(m_initialReferenceVectors);
 		S(m_referenceVectors);
+		S(m_referenceVectorMinAngles);
+		S(m_selection);
+		S(m_adaptation);
 #undef S
 	}
 
@@ -201,7 +202,8 @@ public:
 		}
 		doInit(initialSearchPoints, values, lowerBounds,
 		       upperBounds, approxMu(), nm(), nc(), 
-		       crossoverProbability(), alpha(), fr(), maxIterations());
+		       crossoverProbability(), alpha(), adaptationFrequency(), 
+		       maxIterations());
 	}
 
 	void step(ObjectiveFunctionType const & function) override
@@ -223,7 +225,7 @@ protected:
 		double const nm,
 		double const nc,
 		double const crossover_prob,
-		double const alpha,
+		double const alph,
 		double const fr,
 		std::size_t const max_iterations)
 	{
@@ -234,19 +236,18 @@ protected:
 		// Set the reference vectors
 		std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, approx_mu);
 		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
-		m_initialReferenceVectors = m_referenceVectors;
-		// m_additionalReferenceVectors = m_referenceVectors;
+		m_adaptation.m_initVecs = m_referenceVectors;
 		m_referenceVectorMinAngles = RealVector(m_referenceVectors.size1());
-		updateReferenceVectorMinAngles();
+		m_adaptation.updateAngles(m_referenceVectors, m_referenceVectorMinAngles);
 
 		m_mu = m_referenceVectors.size1();
 		m_curIteration = 0;
-		m_maxIterations = max_iterations;
+		maxIterations() = max_iterations;
 		m_mutation.m_nm = nm;
 		m_crossover.m_nc = nc;
 		m_crossoverProbability = crossover_prob;
-		m_alpha = alpha;
-		m_fr = fr;
+		alpha() = alph;
+		adaptationFrequency() = fr;
 		m_parents.resize(m_mu);
 		m_best.resize(m_mu);
 		// If the number of supplied points is smaller than mu, fill everything
@@ -283,7 +284,7 @@ protected:
 
 	std::vector<IndividualType> generateOffspring() const
 	{
-		SHARK_RUNTIME_CHECK(m_maxIterations > 0, 
+		SHARK_RUNTIME_CHECK(maxIterations() > 0, 
 		                    "Maximum number of iterations not set.");
 		TournamentSelection<IndividualType::RankOrdering> selection;
 		std::vector<IndividualType> offspring(mu());
@@ -309,11 +310,10 @@ protected:
 	{
 		m_parents.insert(m_parents.end(), offspringvec.begin(),
 		                 offspringvec.end());
-		ReferenceVectorGuidedSelection selection;
-		selection(alpha(), m_parents, 
-		          m_referenceVectors,
-		          m_referenceVectorMinAngles,
-		          m_curIteration + 1, m_maxIterations);
+		m_selection(m_parents, 
+		            m_referenceVectors,
+		            m_referenceVectorMinAngles,
+		            m_curIteration + 1);
 
 		std::partition(m_parents.begin(), 
 		               m_parents.end(), 
@@ -347,46 +347,39 @@ protected:
 				reffile << "\n";
 			}
 		}
-		std::size_t x = std::ceil(m_fr * m_maxIterations);
-		if(m_curIteration % x == 0)
+		if(shouldAdaptReferenceVectors())
 		{
-			referenceVectorAdaptation(
-				m_parents, m_referenceVectors, m_initialReferenceVectors);
-			updateReferenceVectorMinAngles();
+			m_adaptation(m_parents, 
+			             m_referenceVectors, 
+			             m_referenceVectorMinAngles);
 		}
 
 		++m_curIteration;
 	}
 
-	void updateReferenceVectorMinAngles()
-	{
-		const std::size_t s = m_referenceVectors.size1();
-		RealMatrix m = acos(prod(m_referenceVectors, trans(m_referenceVectors))) +
-			to_diagonal(RealVector(s, 1e10));
-		for(std::size_t i = 0; i < s; ++i)
-		{
-			m_referenceVectorMinAngles[i] = min(row(m, i));
-		}
-	}
-
 	std::vector<IndividualType> m_parents;
 
 private:
+	bool shouldAdaptReferenceVectors()
+	{
+		return m_curIteration % static_cast<std::size_t>(
+			std::ceil(adaptationFrequency() * m_selection.m_maxIters)
+			) == 0;
+	}
+
 	DefaultRngType * m_rng;
 	double m_crossoverProbability; ///< Probability of crossover happening.
 	std::size_t m_mu; ///< Size of parent population and number of reference vectors
 	std::size_t m_approxMu; ///< The "approximate" value of mu that the user asked for.
 	SimulatedBinaryCrossover<SearchPointType> m_crossover;
 	PolynomialMutator m_mutation;
-	double m_alpha;
-	double m_fr; // hyperparameter for reference vector adaptation.
+	double m_adaptParam; // hyperparameter for reference vector adaptation.
 	std::size_t m_curIteration;
-	std::size_t m_maxIterations;
-	
-	RealMatrix m_initialReferenceVectors;
+
 	RealMatrix m_referenceVectors;
-//	RealMatrix m_additionalReferenceVectors;
 	RealVector m_referenceVectorMinAngles;
+	ReferenceVectorGuidedSelection m_selection;
+	ReferenceVectorAdaptation m_adaptation;
 };
 
 } // namespace shark
