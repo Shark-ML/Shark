@@ -33,7 +33,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_LATTICE
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_LATTICE
 
-#include <boost/math/special_functions/binomial.hpp>
+// #include <boost/math/special_functions/binomial.hpp>
 
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/Metrics.h>
@@ -49,43 +49,17 @@ namespace detail {
  * n-dimensional points that sum to 's' is given by the formula "N over K" where
  * N is n - 2 + s + 1 and K is s.
  */
-std::size_t sumlength(std::size_t const n, std::size_t const sum)
-{
-	return static_cast<std::size_t>(
-		boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
-}
+std::size_t sumlength(std::size_t const n, std::size_t const sum);
 
 void pointLattice_helper(
 	UIntMatrix & pointMatrix,
 	std::size_t const rowidx,
 	std::size_t const colidx,
-	std::size_t const sum_rest
-){
-	const std::size_t n = pointMatrix.size2() - colidx;
-	if(n == 1){
-		pointMatrix(rowidx, colidx) = sum_rest;
-	}
-	else{
-		std::size_t total_rows = 0;
-		for(std::size_t i = 0; i <= sum_rest; ++i){
-			const std::size_t submatrix_height = sumlength(n - 1, sum_rest - i);
-			// Each first entry in submatrix contains i, and remaining columns
-			// in each row all sum to sum_rest - i.
-			for(std::size_t j = 0; j < submatrix_height; ++j)
-			{
-				pointMatrix(total_rows + rowidx + j, colidx) = i;
-			}
-			pointLattice_helper(pointMatrix, total_rows + rowidx,
-			                    colidx + 1, sum_rest - i);
-			total_rows += submatrix_height;
-		}
-	}
-}
+	std::size_t const sum_rest);
 
 /// \brief A corner is a point where exactly one dimension is non-zero.
 template <typename Iterator>
-bool isLatticeCorner(Iterator begin, Iterator end)
-{
+bool isLatticeCorner(Iterator begin, Iterator end){
 	std::size_t nonzero = 0;
 	for(auto iter = begin; iter != end; ++iter)
 	{
@@ -100,6 +74,7 @@ bool isLatticeCorner(Iterator begin, Iterator end)
 	}
 	return nonzero == 1;
 }
+
 
 } // namespace detail
 
@@ -116,8 +91,7 @@ template <typename Matrix, typename RngType = shark::DefaultRngType>
 Matrix sampleLatticeUniformly(
 	RngType & rng, Matrix const & matrix,
 	std::size_t const n,
-	bool const keep_corners = true
-){
+	bool const keep_corners = true){
 	// No need to do all the below stuff if we're gonna grab it all anyway.
 	if(matrix.size1() <= n){
 		return matrix;
@@ -157,46 +131,15 @@ Matrix sampleLatticeUniformly(
 /// For example, the points in a two-dimensional
 /// grid -- a line -- with size n are the points (0,n-1), (1,n-2), ... (n-1,0).
 std::size_t computeOptimalLatticeTicks(
-	std::size_t const n,std::size_t const target_count
-){
-	if(n == 1){
-		return target_count;
-	}
-	if(n == 2){
-		return target_count - 1;
-	}
-	std::size_t cur = 0;
-	std::size_t dimension_ticks_count = 0;
-	const std::size_t d = n - 2;
-	while(cur < target_count){
-		cur += static_cast<std::size_t>(
-			boost::math::binomial_coefficient<double>(
-				dimension_ticks_count + d, d));
-		++dimension_ticks_count;
-	}
-	return dimension_ticks_count;
-}
+	std::size_t const n, std::size_t const target_count
+	);
 
 
 /// \brief Returns a set of evenly spaced n-dimensional points on the "unit simplex".
-RealMatrix weightLattice(std::size_t const n,std::size_t const sum)
-{
-	const std::size_t point_count = detail::sumlength(n, sum);
-	UIntMatrix pointMatrix(point_count, n);
-	detail::pointLattice_helper(pointMatrix, 0, 0, sum);
-	RealMatrix result = pointMatrix;
-	result /= static_cast<double>(sum);
-	return result;
-}
+RealMatrix weightLattice(std::size_t const n, std::size_t const sum);
 
 /// \brief Return a set of evenly spaced n-dimensional points on the unit sphere.
-RealMatrix unitVectorsOnLattice(std::size_t const n,std::size_t const sum){
-	RealMatrix m = weightLattice(n, sum);
-	for(std::size_t i = 0; i < m.size1(); ++i){
-		row(m, i) /= norm_2(row(m,i));
-	}
-	return m;
-}
+RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum);
 
 /*
  * Computes the pairwise euclidean distance between all row vectors in the
@@ -205,8 +148,7 @@ RealMatrix unitVectorsOnLattice(std::size_t const n,std::size_t const sum){
  */
 template <typename Matrix>
 UIntMatrix computeClosestNeighbourIndicesOnLattice(
-	Matrix const & m, std::size_t const n
-){
+	Matrix const & m, std::size_t const n){
 	const RealMatrix distances = distanceSqr(m, m);
 	UIntMatrix neighbourIndices(m.size1(), n);
 	// For each vector we are interested in indices of the t closest vectors.
@@ -230,4 +172,4 @@ UIntMatrix computeClosestNeighbourIndicesOnLattice(
 
 } // namespace shark
 
-#endif // SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_GRID
+#endif // SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_LATTICE
