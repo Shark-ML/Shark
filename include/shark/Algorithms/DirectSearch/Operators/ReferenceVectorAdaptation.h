@@ -63,8 +63,8 @@ struct ReferenceVectorAdaptation
 		RealVector diff(w);
 		for(std::size_t i = 0; i < w; ++i)
 		{
-			double max = -1e10;
-			double min = 1e10;
+			double max = std::numeric_limits<double>::min();
+			double min = std::numeric_limits<double>::max();
 			for(std::size_t j = 0; j < f.size(); ++j)
 			{
 				max = std::max(max, f[j][i]);
