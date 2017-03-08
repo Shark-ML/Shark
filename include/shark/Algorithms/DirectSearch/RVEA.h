@@ -1,140 +1,161 @@
+//===========================================================================
+/*!
+ *
+ *
+ * \brief		Implements the RVEA algorithm.
+ *
+ * \author		Bjoern Bugge Grathwohl
+ * \date		March 2017
+ *
+ * \par Copyright 1995-2017 Shark Development Team
+ *
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://shark-ml.org/>
+ *
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+//===========================================================================
+
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_RVEA
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_RVEA
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractMultiObjectiveOptimizer.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Operators/ReferenceVectorAdaptation.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ReferenceVectorGuidedSelection.h>
-#include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
-#include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
-
 
 namespace shark {
 
+/**
+ * \brief Implements the RVEA algorithm.
+ *
+ * Implementation of the RVEA algorithm from the following paper:
+ * R. Cheng, Y. Jin, M. Olhofer, and B. Sendhoff, “A reference vector guided
+ * evolutionary algorithm for many-objective optimization,” IEEE Transactions on
+ * Evolutionary Computation, Vol 20, Issue 5, October 2016
+ * http://dx.doi.org/10.1109/TEVC.2016.2519378
+ */
 class RVEA : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:
-	typedef shark::Individual<RealVector, RealVector> IndividualType;
+	SHARK_EXPORT_SYMBOL RVEA(DefaultRngType & rng = Rng::globalRng);
 
-	RVEA(DefaultRngType & rng = Rng::globalRng) : m_rng(&rng)
-	{
-		approxMu() = 100;
-		m_mu = approxMu();
-		crossoverProbability() = 0.9;
-		nc() = 20.0; // parameter for crossover operator
-		nm() = 20.0; // parameter for mutation operator
-		alpha() = 2.0; // parameter for reference vector selection
-		adaptationFrequency() = 0.1;
-		maxIterations() = 0; // must be set by user
-		this->m_features |= CAN_SOLVE_CONSTRAINED;
-	}
-
-	std::string name() const override
-	{
+	std::string name() const override{
 		return "RVEA";
 	}
 
-	double crossoverProbability() const
-	{
+	double crossoverProbability() const{
 		return m_crossoverProbability;
 	}
 
-	double & crossoverProbability()
-	{
+	double & crossoverProbability(){
 		return m_crossoverProbability;
 	}
 
-	double nm() const
-	{
+	double nm() const{
 		return m_mutation.m_nm;
 	}
 
-	double & nm()
-	{
+	double & nm(){
 		return m_mutation.m_nm;
 	}
 
-	double nc() const
-	{
+	double nc() const{
 		return m_crossover.m_nc;
 	}
 
-	double & nc()
-	{
+	double & nc(){
 		return m_crossover.m_nc;
 	}
 
-	double alpha() const
-	{
+	double alpha() const{
 		return m_selection.m_alpha;
 	}
 
-	double & alpha()
-	{
+	double & alpha(){
 		return m_selection.m_alpha;
 	}
 
-	double adaptationFrequency() const
-	{
+	double adaptationFrequency() const{
 		return m_adaptParam;
 	}
 
-	double & adaptationFrequency()
-	{	
+	double & adaptationFrequency(){
 		return m_adaptParam;
 	}
 
-	std::size_t mu() const
-	{
+	/// \brief Size of parent population and number of reference vectors.
+	///
+	/// In the RVEA algorithm, the exact mu value is determined by the
+	/// simplex-lattice design (Lattice.h), so the user cannot set it directly.
+	/// Instead, one must set the approxMu() value, which will be used as a
+	/// parameter in the lattice.  If one wants to know the exact mu value, set
+	/// approxMu() to RVEA::suggestMu(n, m) where n is the objective dimension
+	/// and m is the approximate mu.  Then the actual mu value will not be
+	/// changed in the initialization.
+	std::size_t mu() const{
 		return m_mu;
 	}
 
-	// std::size_t & mu()
-	// {
-	// 	return m_mu;
-	// }
-
-	std::size_t approxMu() const
-	{
+	std::size_t approxMu() const{
 		return m_approxMu;
 	}
 
-	std::size_t & approxMu()
-	{
+	std::size_t & approxMu(){
 		return m_approxMu;
 	}
 
-	RealMatrix referenceVectors() const
-	{
+	RealMatrix referenceVectors() const{
 		return m_referenceVectors;
 	}
 
-	RealMatrix & referenceVectors()
-	{
+	RealMatrix & referenceVectors(){
 		return m_referenceVectors;
 	}
-	
-	RealMatrix initialReferenceVectors() const
-	{
+
+	RealMatrix initialReferenceVectors() const{
 		return m_adaptation.m_initVecs;
 	}
 
-	std::size_t maxIterations() const
-	{
+	std::size_t maxIterations() const{
 		return m_selection.m_maxIters;
 	}
 
-	std::size_t & maxIterations()
-	{
+	std::size_t & maxIterations(){
 		return m_selection.m_maxIters;
+	}
+
+	/// \brief True if the reference vectors will be adapted.
+	///
+	/// Returns true if the algorithm will adapt the unit reference vectors in
+	/// the current iteration.  This is controlled by the adaptationFreqency()
+	/// parameter; a value of, e.g., 0.2 will make the algorithm readapt
+	/// reference vectors every 20% of the iteration. Running the algorithm for
+	/// 1000 iterations will then make it readapt on iteration 0, 200, 400, etc.
+	bool willAdaptReferenceVectors() const{
+		return m_curIteration % static_cast<std::size_t>(
+			std::ceil(adaptationFrequency() * m_selection.m_maxIters)
+			) == 0;
 	}
 
 	template <typename Archive>
-	void serialize(Archive & archive)
-	{
+	void serialize(Archive & archive){
 #define S(var) archive & BOOST_SERIALIZATION_NVP(var)
 		S(m_crossoverProbability);
 		S(m_mu);
@@ -152,77 +173,19 @@ public:
 #undef S
 	}
 
-	void init(ObjectiveFunctionType & function) override
-	{
-		checkFeatures(function);
-		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(),
-		                    "[" + name() + "::init] Objective function " +
-		                    "does not propose a starting point");
-		std::vector<SearchPointType> points(mu());
-		for(std::size_t i = 0; i < mu(); ++i)
-		{
-			points[i] = function.proposeStartingPoint();
-		}
-		init(function, points);
-	}
-
-	void init(ObjectiveFunctionType & function,
-			  std::vector<SearchPointType> const & initialSearchPoints) override
-	{
-		checkFeatures(function);
-		std::vector<RealVector> values(initialSearchPoints.size());
-		for(std::size_t i = 0; i < initialSearchPoints.size(); ++i)
-		{
-			SHARK_RUNTIME_CHECK(function.isFeasible(initialSearchPoints[i]),
-			                    "[" + name() + "::init] starting " +
-			                    "point(s) not feasible");
-			values[i] = function.eval(initialSearchPoints[i]);
-		}
-		std::size_t dim = function.numberOfVariables();
-		RealVector lowerBounds(dim, -1e20);
-		RealVector upperBounds(dim, 1e20);
-		if(function.hasConstraintHandler() &&
-		   function.getConstraintHandler().isBoxConstrained())
-		{
-			typedef BoxConstraintHandler<SearchPointType> ConstraintHandler;
-			ConstraintHandler const & handler =
-				static_cast<ConstraintHandler const &>(
-					function.getConstraintHandler());
-			lowerBounds = handler.lower();
-			upperBounds = handler.upper();
-		}
-		else
-		{
-			SHARK_RUNTIME_CHECK(
-				function.hasConstraintHandler() &&
-				!function.getConstraintHandler().isBoxConstrained(),
-				"[" + name() + "::init] Algorithm does " +
-				"only allow box constraints"
-			);
-		}
-		doInit(initialSearchPoints, values, lowerBounds,
-		       upperBounds, approxMu(), nm(), nc(), 
-		       crossoverProbability(), alpha(), adaptationFrequency(), 
-		       maxIterations());
-	}
-
-	void step(ObjectiveFunctionType const & function) override
-	{
-		PenalizingEvaluator penalizingEvaluator;
-		std::vector<IndividualType> offspring = generateOffspring();
-		penalizingEvaluator(function, offspring.begin(), offspring.end());
-		updatePopulation(offspring);
-	}
-
-    std::size_t suggestMu(std::size_t n, std::size_t const approx_mu) const
-	{
-		std::size_t t = computeOptimalLatticeTicks(n, approx_mu);
-		return shark::detail::sumlength(n, t);
-	}
-
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function) override;
+	SHARK_EXPORT_SYMBOL void init(
+		ObjectiveFunctionType & function,
+		std::vector<SearchPointType> const & initialSearchPoints
+	) override;
+	SHARK_EXPORT_SYMBOL void step(
+		ObjectiveFunctionType const & function
+	) override;
+	SHARK_EXPORT_SYMBOL static std::size_t suggestMu(
+		std::size_t n, std::size_t const approx_mu);
 protected:
-
-	void doInit(
+	typedef shark::Individual<RealVector, RealVector> IndividualType;
+	SHARK_EXPORT_SYMBOL void doInit(
 		std::vector<SearchPointType> const & initialSearchPoints,
 		std::vector<ResultType> const & functionValues,
 		RealVector const & lowerBounds,
@@ -233,160 +196,53 @@ protected:
 		double const crossover_prob,
 		double const alph,
 		double const fr,
-		std::size_t const max_iterations)
-	{
-		SIZE_CHECK(initialSearchPoints.size() > 0);
+		std::size_t const max_iterations
+	);
 
-		const std::size_t numOfObjectives = functionValues[0].size();
-
-		// Set the reference vectors
-		std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, approx_mu);
-		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
-		m_adaptation.m_initVecs = m_referenceVectors;
-		m_referenceVectorMinAngles = RealVector(m_referenceVectors.size1());
-		m_adaptation.updateAngles(m_referenceVectors, m_referenceVectorMinAngles);
-
-		m_mu = m_referenceVectors.size1();
-		SIZE_CHECK(m_mu == suggestMu(numOfObjectives, approx_mu));
-		m_curIteration = 0;
-		maxIterations() = max_iterations;
-		m_mutation.m_nm = nm;
-		m_crossover.m_nc = nc;
-		m_crossoverProbability = crossover_prob;
-		alpha() = alph;
-		adaptationFrequency() = fr;
-		m_parents.resize(m_mu);
-		m_best.resize(m_mu);
-		// If the number of supplied points is smaller than mu, fill everything
-		// in
-		std::size_t numPoints = 0;
-		if(initialSearchPoints.size() <= m_mu)
-		{
-			numPoints = initialSearchPoints.size();
-			for(std::size_t i = 0; i < numPoints; ++i)
-			{
-				m_parents[i].searchPoint() = initialSearchPoints[i];
-				m_parents[i].penalizedFitness() = functionValues[i];
-				m_parents[i].unpenalizedFitness() = functionValues[i];
-			}
-		}
-		// Copy points randomly
-		for(std::size_t i = numPoints; i < m_mu; ++i)
-		{
-			std::size_t index = discrete(*m_rng, 0,
-			                             initialSearchPoints.size() - 1);
-			m_parents[i].searchPoint() = initialSearchPoints[index];
-			m_parents[i].penalizedFitness() = functionValues[index];
-			m_parents[i].unpenalizedFitness() = functionValues[index];
-		}
-		// Create initial mu best points
-		for(std::size_t i = 0; i < m_mu; ++i)
-		{
-			m_best[i].point = m_parents[i].searchPoint();
-			m_best[i].value = m_parents[i].unpenalizedFitness();
-		}
-		m_crossover.init(lowerBounds, upperBounds);
-		m_mutation.init(lowerBounds, upperBounds);
-	}
-
-	std::vector<IndividualType> generateOffspring() const
-	{
-		SHARK_RUNTIME_CHECK(maxIterations() > 0, 
-		                    "Maximum number of iterations not set.");
-		TournamentSelection<IndividualType::RankOrdering> selection;
-		std::vector<IndividualType> offspring(mu());
-		selection(*m_rng,
-		          m_parents.begin(), m_parents.end(),
-		          offspring.begin(), offspring.end());
-
-		for(std::size_t i = 0; i < mu() - 1; i += 2)
-		{
-			if(coinToss(*m_rng, m_crossoverProbability))
-			{
-				m_crossover(*m_rng, offspring[i], offspring[i + 1]);
-			}
-		}
-		for(std::size_t i = 0; i < mu(); ++i)
-		{
-			m_mutation(*m_rng, offspring[i]);
-		}
-		return offspring;
-	}
-
-	void updatePopulation(std::vector<IndividualType> const & offspringvec)
-	{
-		m_parents.insert(m_parents.end(), offspringvec.begin(),
-		                 offspringvec.end());
-		m_selection(m_parents, 
-		            m_referenceVectors,
-		            m_referenceVectorMinAngles,
-		            m_curIteration + 1);
-
-		std::partition(m_parents.begin(), 
-		               m_parents.end(), 
-		               IndividualType::IsSelected);
-		m_parents.erase(m_parents.begin() + mu(), m_parents.end());
-
-		for(std::size_t i = 0; i < mu(); ++i)
-		{
-			noalias(m_best[i].point) = m_parents[i].searchPoint();
-			m_best[i].value = m_parents[i].unpenalizedFitness();
-		}
-
-		if(false){
-			std::ofstream file("fitness_" + std::to_string(m_curIteration) + ".dat");
-			for(auto & p : m_parents)
-			{
-				for(auto & x : p.unpenalizedFitness())
-				{
-					file << x << " ";
-				}
-				file << "\n";
-			}
-			std::ofstream reffile("refvecs_" + std::to_string(m_curIteration) + ".dat");
-			RealMatrix m = m_referenceVectors;
-			for(std::size_t i = 0; i < m.size1(); ++i)
-			{
-				for(std::size_t j = 0; j < m.size2(); ++j)
-				{
-					reffile << m(i, j) << " ";
-				}
-				reffile << "\n";
-			}
-		}
-		if(shouldAdaptReferenceVectors())
-		{
-			m_adaptation(m_parents, 
-			             m_referenceVectors, 
-			             m_referenceVectorMinAngles);
-		}
-
-		++m_curIteration;
-	}
+	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;
+	SHARK_EXPORT_SYMBOL void updatePopulation(
+		std::vector<IndividualType> const & offspringvec
+	);
 
 	std::vector<IndividualType> m_parents;
 
 private:
-	bool shouldAdaptReferenceVectors()
-	{
-		return m_curIteration % static_cast<std::size_t>(
-			std::ceil(adaptationFrequency() * m_selection.m_maxIters)
-			) == 0;
-	}
-
 	DefaultRngType * m_rng;
 	double m_crossoverProbability; ///< Probability of crossover happening.
-	std::size_t m_mu; ///< Size of parent population and number of reference vectors
-	std::size_t m_approxMu; ///< The "approximate" value of mu that the user asked for.
+	/// \brief Size of parent population
+	///
+	/// It is also the number of reference vectors.
+	std::size_t m_mu;
+	/// \brief The "approximate" value of mu that the user asked for.
+	///
+	/// The actual value of mu is determined via the simplex-lattice design for
+	/// the unit reference vectors.  It will always be the same as
+	/// RVEA::suggestMu(n, m_approxMu) where n is the number of objectives.
+	std::size_t m_approxMu;
 	SimulatedBinaryCrossover<SearchPointType> m_crossover;
 	PolynomialMutator m_mutation;
-	double m_adaptParam; // hyperparameter for reference vector adaptation.
+	/// \brief Hyperparameter controlling reference vector adaptation rate.
+	///
+	/// A value of 0.2 makes the algorithm adapt the reference vectors every 20%
+	/// of the iterations. If the algorithm runs for a total of 1000 iterations,
+	/// they will be readjusted on iteration 0, 200, 400, etc.  Is is called
+	/// "f_r" in the paper.
+	double m_adaptParam;
+	/// \brief Current iteration of the algorithm.
+	///
+	/// The algorithm maintains knowledge of how long it has been running as
+	/// this is required by parts of the RVEA algorithm.
 	std::size_t m_curIteration;
 
+	/// \brief The active set of unit reference vectors.
 	RealMatrix m_referenceVectors;
+	/// \brief Contains the minimum angles between reference vectors.
+	///
+	/// For each reference vector i, position i in this vector is the smallest
+	/// angle between reference vector i and all the other reference vectors.
 	RealVector m_referenceVectorMinAngles;
-	ReferenceVectorGuidedSelection m_selection;
-	ReferenceVectorAdaptation m_adaptation;
+	ReferenceVectorGuidedSelection<IndividualType> m_selection;
+	ReferenceVectorAdaptation<IndividualType> m_adaptation;
 };
 
 } // namespace shark
