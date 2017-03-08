@@ -335,7 +335,7 @@ public:
 			auto pos = std::find_if(
 				result.begin(),result.end(),
 				[&](KeyValuePair<double,std::size_t> const& p){
-					return p.value == minIndex[j];
+					return p.value == minIndex[j] && result.size() > k;
 				}
 			);
 			if(pos != result.end())
