@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_ReferenceVectorGuidedSe
 
 BOOST_AUTO_TEST_CASE(populationPartition_correct)
 {
-	typedef ReferenceVectorGuidedSelection rv;
+	typedef ReferenceVectorGuidedSelection<shark::Individual<RealVector, RealVector>> rv;
 	// Three unit vectors
 	const double sq = std::sqrt(2);
     const RealMatrix refVecs{
@@ -47,12 +47,12 @@ BOOST_AUTO_TEST_CASE(populationPartition_correct)
 
 BOOST_AUTO_TEST_CASE(objectiveValueTranslation_correct)
 {
-	typedef ReferenceVectorGuidedSelection rv;
+	typedef ReferenceVectorGuidedSelection<shark::Individual<RealVector, RealVector>> rv;
 	const RealMatrix fitness{
 		{12, 45}, 
 		{87, 2}, 
 		{23, 1}};
-	const RealVector mins = rv::minFitnessValues(fitness);
+	const RealVector mins = rv::minCol(fitness);
 
 	BOOST_CHECK_EQUAL(mins.size(), fitness.size2());
 	BOOST_CHECK_EQUAL(mins[0], 12);
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(objectiveValueTranslation_correct)
 
 BOOST_AUTO_TEST_CASE(cosAngles_correct)
 {
-	typedef ReferenceVectorGuidedSelection rv;
+	typedef ReferenceVectorGuidedSelection<shark::Individual<RealVector, RealVector>> rv;
 	const RealMatrix vecs{{0,1}, {1,0}};
 	const RealMatrix f{{12, 12}};
 	const RealMatrix angles = acos(rv::cosAngles(f, vecs));

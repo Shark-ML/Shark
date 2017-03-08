@@ -4,6 +4,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/ReferenceVectorAdaptation.h>
+#include <shark/Algorithms/DirectSearch/Individual.h>
 
 #include <iostream>
 
@@ -13,13 +14,14 @@ BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_ReferenceVectorAdaptati
 
 BOOST_AUTO_TEST_CASE(updateAngles_correct)
 {
+	typedef Individual<RealVector, RealVector> I;
 	const RealMatrix vecs{
 		{0, 1}, 
 		{std::cos(3*M_PI / 8), std::sin(3*M_PI / 8)},
 		{1 / std::sqrt(2), 1 / std::sqrt(2)},
 		{1, 0} };
 	RealVector angles(4);
-	ReferenceVectorAdaptation::updateAngles(vecs, angles);
+	ReferenceVectorAdaptation<I>::updateAngles(vecs, angles);
 	BOOST_CHECK_EQUAL(angles.size(), 4);
 	// The three upper vectors are all 22.5 degress from each other.
 	BOOST_CHECK_EQUAL(angles[0], angles[1]);
@@ -31,7 +33,7 @@ BOOST_AUTO_TEST_CASE(updateAngles_correct)
 
 BOOST_AUTO_TEST_CASE(adaptVectors_correct)
 {
-	ReferenceVectorAdaptation adapt;
+	ReferenceVectorAdaptation<Individual<RealVector, RealVector>> adapt;
 	const RealMatrix initVecs{
 		{0, 1},
 		{std::cos(3*M_PI / 8), std::sin(3*M_PI / 8)},
@@ -80,7 +82,7 @@ BOOST_AUTO_TEST_CASE(adaptVectors_correct)
 
 BOOST_AUTO_TEST_CASE(adaptVectors_zeros_correct)
 {
-	ReferenceVectorAdaptation adapt;
+	ReferenceVectorAdaptation<Individual<RealVector, RealVector>> adapt;
 	const RealMatrix initVecs{
 		{0, 1},
 		{std::cos(3*M_PI / 8), std::sin(3*M_PI / 8)},
