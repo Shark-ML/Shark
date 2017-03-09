@@ -131,7 +131,7 @@ SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, RBFLayer& m
 /// for k-means to work. This is because the current implementation
 /// does not allow for empty clusters.
 ///
-/// \param data           vector-valued data to be clustered
+/// \param dataset        vector-valued data to be clustered
 /// \param k              number of clusters
 /// \param kernel         kernel function object
 /// \param maxIterations  maximum number of k-means iterations; 0: unlimited
