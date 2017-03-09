@@ -247,13 +247,17 @@ std::pair<std::string, std::string> splitUrl(std::string const & url)
 		start = 8;
 	}
 	std::size_t slash_idx = url.find('/', start);
+	std::string resource;
 	if(slash_idx == std::string::npos)
 	{
-		throw new std::runtime_error("[splitUrl] invalid URL (failed to "
-		                             "split into domain and resource)");
+		slash_idx = url.size();
+		resource = "/";
+	}
+	else
+	{
+		resource = url.substr(slash_idx);
 	}
 	std::string domain = url.substr(start, slash_idx - start);
-	std::string resource = url.substr(slash_idx);
 	return std::make_pair(domain, resource);
 }
 
