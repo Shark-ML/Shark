@@ -48,4 +48,26 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 	BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
 }
 
+BOOST_AUTO_TEST_CASE(Data_Download_Url_splitter)
+{
+	std::vector<std::string> urls{
+		"http://mldata.org/repository/data/download/libsvm/iris/",
+			"http://dr.dk/nyhederne",
+		    "google.com/en?sdfsdfsfs",
+			"https://secret.website.com/noaccess"};
+	std::vector<std::pair<std::string, std::string>> exp{
+		std::make_pair("mldata.org", "/repository/data/download/libsvm/iris/"),
+		std::make_pair("dr.dk", "/nyhederne"),
+		std::make_pair("google.com", "/en?sdfsdfsfs"),
+		std::make_pair("secret.website.com", "/noaccess")
+			};
+	for(std::size_t i = 0; i < urls.size(); ++i)
+	{
+		std::string d, r;
+		std::tie(d, r) = splitUrl(urls[i]);
+		BOOST_CHECK_EQUAL(d, std::get<0>(exp[i]));
+		BOOST_CHECK_EQUAL(r, std::get<1>(exp[i]));
+	}
+}
+
 BOOST_AUTO_TEST_SUITE_END()
