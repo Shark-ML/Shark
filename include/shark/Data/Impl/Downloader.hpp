@@ -215,6 +215,34 @@ private:
 
 } // namespace detail
 
+/// \brief Split a URL into its domain and resource parts.
+///
+/// Returns a std::pair where the first element is the domain and the second is
+/// the resource. With std::tie you can do pattern-matching:
+/// std::tie(domain, resource) = splitUrl(url);
+/// will fill the std::string variables domain and resource.
+std::pair<std::string, std::string> splitUrl(std::string const & url)
+{
+	std::size_t start = 0;
+	if(url.size() >= 7 && url.substr(0, 7) == "http://")
+	{
+		start = 7;
+	}
+	if(url.size() >= 8 && url.substr(0, 8) == "https://")
+	{
+		start = 8;
+	}
+	std::size_t slash_idx = url.find('/', start);
+	if(slash_idx == std::string::npos)
+	{
+		throw new std::runtime_error("[splitUrl] invalid URL (failed to "
+		                             "split into domain and resource)");
+	}
+	std::string domain = url.substr(start, slash_idx - start);
+	std::string resource = url.substr(slash_idx);
+	return std::make_pair(domain, resource);
+}
+
 /// \brief Download a document with the HTTP protocol.
 ///
 /// \param  url       download URL, for example "www.shark-ml.org/index.html"
@@ -231,12 +259,8 @@ private:
 std::string download(std::string const& url, unsigned short port = 80)
 {
 	// split the URL into domain and resource
-	std::size_t start = 0;
-	if (url.size() >= 7 && url.substr(0, 7) == "http://") start = 7;
-	std::size_t slash = url.find('/', start);
-	if (slash == std::string::npos) throw std::runtime_error("[download] invalid URL (failed to split into domain and resource)");
-	std::string domain = url.substr(start, slash - start);
-	std::string resource = url.substr(slash);
+	std::string domain, resource;
+	std::tie(domain, resource) = splitUrl(url);
 
 	// open a TCP/IP socket connection
 	detail::Socket socket(domain, port);
