@@ -31,7 +31,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Hypervolume_functions, OF, obj_funs)
 	const std::size_t num_objectives = 2;
 	const RealVector reference(num_objectives, 11);
 	OF function(5);
-//	function.setNumberOfObjectives(num_objectives);
 	const double volume = optimal_hyper_volume(function, mu);
 	RVEA optimizer;
 	optimizer.approxMu() = mu;
@@ -39,7 +38,6 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(Hypervolume_functions, OF, obj_funs)
 	optimizer.maxIterations() = iters;
 	testFunction(optimizer, function, reference, volume, reps, iters, 5.e-2);
 }
-
 
 
 BOOST_AUTO_TEST_SUITE_END()
