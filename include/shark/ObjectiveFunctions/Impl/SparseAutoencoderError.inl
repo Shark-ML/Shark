@@ -6,21 +6,21 @@
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -65,7 +65,7 @@ private:
 		}
 		return error;
 	}
-	
+
 public:
 	SparseAutoencoderErrorWrapper(
 		LabeledData<RealVector, RealVector> const& dataset,
@@ -89,7 +89,7 @@ public:
 	SearchPointType proposeStartingPoint() const{
 		return mep_model->parameterVector();
 	}
-	
+
 	std::size_t numberOfVariables()const{
 		return mep_model->numberOfParameters();
 	}
@@ -140,7 +140,7 @@ public:
 		RealMatrix W1Derivatives(hiddens,inputs,0.0); // hiddenDerivatives * input
 		RealVector hiddenDerivativeSum(hiddens,0.0);
 		gradient.clear();
-		
+
 		boost::shared_ptr<State> state = mep_model->createState();
 		double error = 0.0;
 		for(auto const& batch: m_dataset.batches()){
@@ -185,18 +185,18 @@ public:
 			row(W1Derivatives,i) *= m_beta*derivativeKL;
 			hiddenDerivativeSum(i) *= m_beta*derivativeKL;
 		}
-		
+
 		if(m_beta != 0){
 			//now update the gradient of the first layer of the FFNet
 			std::size_t W1params = hiddens*inputs;
 			noalias(to_matrix(subrange(gradient,0,W1params),hiddens,inputs)) += W1Derivatives;
-			
+
 			//adjust bias units
 			std::size_t biasStart = mep_model->numberOfParameters()-inputs-hiddens;
 			noalias(subrange(gradient,biasStart,biasStart+hiddens)) += hiddenDerivativeSum;
-		
-		}	
-		
+
+		}
+
 		gradient /= dataSize;
 
 		// add kl error term to the error
@@ -219,8 +219,8 @@ private:
 template<class HiddenNeuron, class OutputNeuron>
 SparseAutoencoderError::SparseAutoencoderError(
 	DatasetType const& dataset,
-	Autoencoder<HiddenNeuron,OutputNeuron>* model, 
-	AbstractLoss<RealVector, RealVector>* loss, 
+	Autoencoder<HiddenNeuron,OutputNeuron>* model,
+	AbstractLoss<RealVector, RealVector>* loss,
 	double rho, double beta
 ):m_regularizer(0){
 	m_features |= HAS_FIRST_DERIVATIVE;
@@ -232,8 +232,8 @@ SparseAutoencoderError::SparseAutoencoderError(
 template<class HiddenNeuron, class OutputNeuron>
 SparseAutoencoderError::SparseAutoencoderError(
 	DatasetType const& dataset,
-	TiedAutoencoder<HiddenNeuron,OutputNeuron>* model, 
-	AbstractLoss<RealVector, RealVector>* loss, 
+	TiedAutoencoder<HiddenNeuron,OutputNeuron>* model,
+	AbstractLoss<RealVector, RealVector>* loss,
 	double rho, double beta
 ):m_regularizer(0){
 	m_features |= HAS_FIRST_DERIVATIVE;

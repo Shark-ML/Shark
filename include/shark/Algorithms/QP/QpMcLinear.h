@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       Quadratic programming solvers for linear multi-class SVM training without bias.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers
  * \date        -
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -119,7 +119,7 @@ public:
 
 		// scheduling of steps, for ACF only
 		RealVector pref(ell, 1.0);                   // example-wise measure of success
-		double prefsum = ell;                        // normalization constant
+		double prefsum = (double)ell;                // normalization constant
 
 		std::vector<std::size_t> schedule(ell);
 		if (m_strategy == UNIFORM)
@@ -142,7 +142,7 @@ public:
 		const double gain_learning_rate = 1.0 / ell;
 		double average_gain = 0.0;
 
-        
+
 		// outer optimization loop (epochs)
 		bool canstop = true;
 		while (true)
@@ -173,15 +173,15 @@ public:
 
 			if (m_shrinking == true)
 			{
-				for (std::size_t i=0; i<active; i++) 
+				for (std::size_t i=0; i<active; i++)
 					std::swap(schedule[i], schedule[Rng::discrete(0, active - 1)]);
 			}
 			else
 			{
-				for (std::size_t i=0; i<ell; i++) 
+				for (std::size_t i=0; i<ell; i++)
 					std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
 			}
-                
+
 			// inner loop (one epoch)
 			max_violation = 0.0;
 			size_t nPoints = ell;
@@ -260,7 +260,7 @@ public:
 
 			if (max_violation < stop.minAccuracy)
 			{
-				if (verbose) 
+				if (verbose)
 					std::cout << "#" << std::flush;
 				if (canstop)
 				{
@@ -274,7 +274,7 @@ public:
 						// prepare full sweep for a reliable checking of the stopping criterion
 						canstop = true;
 						for (std::size_t i=0; i<ell; i++) pref(i) = 1.0;
-						prefsum = ell;
+						prefsum = (double)ell;
 					}
 
 					if (m_shrinking == true)

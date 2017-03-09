@@ -46,9 +46,9 @@ namespace shark {
 template<class PointRange, class RankRange>
 void nonDominatedSort(PointRange const& points, RankRange& ranks) {
 	SIZE_CHECK(points.size() == ranks.size());
-	double n = points.size();
+	std::size_t n = points.size();
 	if(n == 0) return;
-	double m = points[0].size();
+	std::size_t m = points[0].size();
 	// heuristic switching strategy based on simple benchmarks
 	if (m == 2 || n > 5000 || std::log(n) / log(3.0) < m + 1.0)
 	{

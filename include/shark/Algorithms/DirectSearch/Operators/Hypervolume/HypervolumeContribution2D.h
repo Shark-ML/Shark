@@ -90,9 +90,8 @@ private:
 				--heapEnd;
 			}
 		}
-		bestK.pop_back();//remove the k+1th element
 		std::sort_heap(heapStart,heapEnd,pointComp);
-		
+		bestK.pop_back();//remove the k+1th element
 		return bestK;
 	}
 public:
