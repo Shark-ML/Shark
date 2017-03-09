@@ -9,9 +9,7 @@ using namespace shark;
 
 bool verifyConnection()
 {
-	std::string domain;
-	std::tie(domain, std::ignore) = splitUrl("http://mldata.org/repository/data/download/libsvm/iris/");
-	detail::Socket socket(domain, 80);
+	detail::Socket socket("mldata.org", 80);
 	return socket.connected();
 }
 
@@ -48,27 +46,46 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 	BOOST_CHECK_EQUAL(dataset.numberOfElements(), 150);
 	BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
 	BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
-}
+	}
 
 BOOST_AUTO_TEST_CASE(Data_Download_Url_splitter)
 {
-	std::vector<std::string> urls{
-		"http://mldata.org/repository/data/download/libsvm/iris/",
-			"http://dr.dk/nyhederne",
-		    "google.com/en?sdfsdfsfs",
-			"https://secret.website.com/noaccess"};
-	std::vector<std::pair<std::string, std::string>> exp{
-		std::make_pair("mldata.org", "/repository/data/download/libsvm/iris/"),
-		std::make_pair("dr.dk", "/nyhederne"),
-		std::make_pair("google.com", "/en?sdfsdfsfs"),
-		std::make_pair("secret.website.com", "/noaccess")
+	using std::make_tuple;
+	std::vector<std::tuple<std::string, std::string, std::string>> data{
+		make_tuple("http://mldata.org/repository/data/download/libsvm/iris/",
+		           "mldata.org", 
+		           "/repository/data/download/libsvm/iris/"),
+			make_tuple("http://dr.dk/nyhederne", 
+			           "dr.dk", 
+			           "/nyhederne"),
+			make_tuple("google.com/en?sdfsdfsfs", 
+			           "google.com", 
+			           "/en?sdfsdfsfs"),
+			make_tuple("https://secret.website.com/noaccess", 
+			           "secret.website.com", 
+			           "/noaccess"),
+			make_tuple("http://alexandra.dk", 
+			           "alexandra.dk", 
+			           "/"),
+			make_tuple("alexandra.dk", 
+			           "alexandra.dk", 
+			           "/"),
+			make_tuple("alexandra.dk/about/hello",
+			           "alexandra.dk", 
+			           "/about/hello"),
+			make_tuple("alexandra.dk/", 
+			           "alexandra.dk",
+			           "/"),
+			make_tuple("http://alexandra.dk/",
+			           "alexandra.dk",
+			           "/")
 			};
-	for(std::size_t i = 0; i < urls.size(); ++i)
+	for(auto & tc : data)
 	{
 		std::string d, r;
-		std::tie(d, r) = splitUrl(urls[i]);
-		BOOST_CHECK_EQUAL(d, std::get<0>(exp[i]));
-		BOOST_CHECK_EQUAL(r, std::get<1>(exp[i]));
+		std::tie(d, r) = splitUrl(std::get<0>(tc));
+		BOOST_CHECK_EQUAL(d, std::get<1>(tc));
+		BOOST_CHECK_EQUAL(r, std::get<2>(tc));
 	}
 }
 
