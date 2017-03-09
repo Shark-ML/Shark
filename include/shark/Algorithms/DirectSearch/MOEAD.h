@@ -114,11 +114,11 @@ public:
 		archive & BOOST_SERIALIZATION_NVP(m_curParentIndex);
 	}
 
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function) override;
 	SHARK_EXPORT_SYMBOL void init(
 		ObjectiveFunctionType & function,
 		std::vector<SearchPointType> const & initialSearchPoints
-	);
+	) override;
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const & function) override;
 protected:
 	typedef shark::Individual<RealVector, RealVector> IndividualType;
