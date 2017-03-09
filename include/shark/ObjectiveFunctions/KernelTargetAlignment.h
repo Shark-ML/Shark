@@ -1,30 +1,30 @@
 /*!
- * 
+ *
  *
  * \brief       Kernel Target Alignment - a measure of alignment of a kernel Gram matrix with labels.
- * 
- * 
+ *
+ *
  *
  * \author      T. Glasmachers, O.Krause
  * \date        2010-2012
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -110,23 +110,23 @@ public:
 	/// Don't forget to provide a data set with the setDataset method
 	/// before using the object.
 	KernelTargetAlignment(
-		LabeledData<InputType, LabelType> const& dataset, 
+		LabeledData<InputType, LabelType> const& dataset,
 		AbstractKernelFunction<InputType>* kernel
 	){
 		SHARK_RUNTIME_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
-		
+
 		mep_kernel = kernel;
-		
+
 		m_features|=HAS_VALUE;
 		m_features|=CAN_PROPOSE_STARTING_POINT;
-		
+
 		if(mep_kernel -> hasFirstParameterDerivative())
 			m_features|=HAS_FIRST_DERIVATIVE;
-		
+
 		m_data = dataset;
 		m_elements = dataset.numberOfElements();
-		
-		
+
+
 		setupY(dataset.labels());
 	}
 
@@ -138,8 +138,8 @@ public:
 	SearchPointType proposeStartingPoint() const {
 		return  mep_kernel -> parameterVector();
 	}
-	
-	
+
+
 	std::size_t numberOfVariables()const{
 		return mep_kernel->numberOfParameters();
 	}
@@ -179,7 +179,7 @@ public:
 		// \langle K^c,K^c \rangle , mk and k are evaluated exactly as in eval
 
 		KernelMatrixResults results = evaluateKernelMatrix();
-				
+
 		std::size_t parameters = mep_kernel->numberOfParameters();
 		derivative.resize(parameters);
 		derivative.clear();
@@ -228,7 +228,7 @@ private:
 		double error;
 		double meanK;
 	};
-	
+
 	void setupY(Data<unsigned int>const& labels){
 		//preprocess Y so calculate column means and overall mean
 		//the most efficient way to do this is via the class counts
@@ -240,19 +240,19 @@ private:
 			classMean(i) = classCount[i]-(m_elements-classCount[i])/dm1;
 			classMean /= m_elements;
 		}
-		
+
 		m_columnMeanY.resize(m_elements);
 		for(std::size_t i = 0; i != m_elements; ++i){
-			m_columnMeanY(i) = classMean(labels.element(i)); 
+			m_columnMeanY(i) = classMean(labels.element(i));
 		}
 		m_meanY=sum(m_columnMeanY)/m_elements;
 	}
-	
+
 	void setupY(Data<RealVector>const& labels){
 		RealVector meanLabel = mean(labels);
 		m_columnMeanY.resize(m_elements);
 		for(std::size_t i = 0; i != m_elements; ++i){
-			m_columnMeanY(i) = inner_prod(labels.element(i),meanLabel); 
+			m_columnMeanY(i) = inner_prod(labels.element(i),meanLabel);
 		}
 		m_meanY=sum(m_columnMeanY)/m_elements;
 	}
@@ -274,7 +274,7 @@ private:
 		}
 		return result;
 	}
-	
+
 	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
 	double updateYKc(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix const& block)const{
 		std::size_t blockSize1 = labelsi.size1();
@@ -289,7 +289,7 @@ private:
 		}
 		return result;
 	}
-	
+
 	void computeBlockY(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix& blockY)const{
 		std::size_t blockSize1 = labelsi.size();
 		std::size_t blockSize2 = labelsj.size();
@@ -303,7 +303,7 @@ private:
 			}
 		}
 	}
-	
+
 	void computeBlockY(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix& blockY)const{
 		std::size_t blockSize1 = labelsi.size1();
 		std::size_t blockSize2 = labelsj.size1();
@@ -317,9 +317,9 @@ private:
 	/// Compute a sub-block of the matrix
 	/// \f[ W = \langle K^c, K^c \rangle Y - \langle Y, K^c \rangle K -2 (\langle K^c, K^c \rangle y - \langle Y, K^c \rangle k) u^T + (\langle K^c, K^c \rangle my - \langle Y, K^c \rangle mk) u u^T \f]
 	RealMatrix generateDerivativeWeightBlock(
-		std::size_t i, std::size_t j, 
-		std::size_t start1, std::size_t start2, 
-		RealMatrix const& blockK, 
+		std::size_t i, std::size_t j,
+		std::size_t start1, std::size_t start2,
+		RealMatrix const& blockK,
 		KernelMatrixResults const& matrixStatistics
 	)const{
 		std::size_t blockSize1 = batchSize(m_data.batch(i));
@@ -329,7 +329,7 @@ private:
 		double YcKc = matrixStatistics.YcKc;
 		double meanK = matrixStatistics.meanK;
 		RealMatrix blockW(blockSize1,blockSize2);
-		
+
 		//first calculate \langle Kc,Kc \rangle  Y.
 		computeBlockY(m_data.batch(i).label,m_data.batch(j).label,blockW);
 		blockW *= KcKc;
@@ -357,17 +357,17 @@ private:
 	/// \f[ \langle K^c, K^c \rangle = \\
 	///     \langle K^c, K^c \rangle  = \langle K,K \rangle  -2n\langle k,k \rangle  +mk^2n^2 \\
 	///     \langle K^c, Y \rangle  = \langle K, Y \rangle  - 2 n \langle k, y \rangle  + n^2 mk my \f]
-	/// where k is the row mean over K and y the row mean over y, mk, my the total means of K and Y 
+	/// where k is the row mean over K and y the row mean over y, mk, my the total means of K and Y
 	/// and n the number of elements
 	KernelMatrixResults evaluateKernelMatrix()const{
 		//it holds
 		// \langle K^c,K^c \rangle  = \langle K,K \rangle  -2n\langle k,k \rangle  +mk^2n^2
 		// \langle K^c,Y \rangle  = \langle K, Y \rangle  - 2 n \langle k, y \rangle  + n^2 mk my
-		// where k is the row mean over K and y the row mean over y, mk, my the total means of K and Y 
+		// where k is the row mean over K and y the row mean over y, mk, my the total means of K and Y
 		// and n the number of elements
-		
-		double KK = 0; //stores \langle K,K \rangle 
-		double YKc = 0; //stores \langle Y,K^c \rangle 
+
+		double KK = 0; //stores \langle K,K \rangle
+		double YKc = 0; //stores \langle Y,K^c \rangle
 		RealVector k(m_elements,0.0);//stores the row/column means of K
 		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
 			std::size_t startRow = 0;
@@ -402,7 +402,7 @@ private:
 			}
 		}
 		//calculate the error
-		double n = m_elements;
+		double n = (double)m_elements;
 		k /= n;//means
 		double meanK = sum(k)/n;
 		double n2 = sqr(n);

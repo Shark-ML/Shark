@@ -101,7 +101,7 @@ void testContributionNoRef(Algorithm algorithm, std::vector<RealVector> const& s
 		BOOST_CHECK_SMALL(naiveLeastContributions[i].key - leastContributions[i].key,1.e-9);
 	}
 	
-	for(std::size_t i = 0; i != k; ++i){
+	for(int i = 0; i != (int)k; ++i){
 		//ensure returned value is correct
 		BOOST_CHECK_SMALL(naiveLeastContributions.end()[-i-1].key - largestContributions[i].key,1.e-9);
 	}
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
 		//check that we do not have too many errors, i.e. contributions with errors larger than 1+epsilon
 		//we make on average 100*errorProbability=10 errors. we give 100% more slack to be further away than 3 standard deviations.
 		//failures follow a binomial distribution with p=0.1 thus the stddev is 3 and thus 19 errors are still not completely unlikely
-		BOOST_CHECK_LT(approxContributions[(1-2.0*algorithm.delta())*numTrials], (1+algorithm.epsilon())*contributionsTrue[0].key);
+		BOOST_CHECK_LT(approxContributions[(unsigned int)((1-2.0*algorithm.delta())*numTrials)], (1+algorithm.epsilon())*contributionsTrue[0].key);
 	}
 }
 

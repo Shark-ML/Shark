@@ -9,9 +9,7 @@ using namespace shark;
 
 bool verifyConnection()
 {
-	std::string domain;
-	std::tie(domain, std::ignore) = splitUrl("http://mldata.org/repository/data/download/libsvm/iris/");
-	detail::Socket socket(domain, 80);
+	detail::Socket socket("mldata.org", 80);
 	return socket.connected();
 }
 

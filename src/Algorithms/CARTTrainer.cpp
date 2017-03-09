@@ -31,7 +31,7 @@ void CARTTrainer::train(ModelType& model, RegressionDataset const& dataset)
 	CVFolds<RegressionDataset > folds = createCVSameSize(set, m_numberOfFolds);
 	double bestErrorRate = std::numeric_limits<double>::max();
 	CARTClassifier<RealVector>::TreeType bestTree;
-	
+
 	for (unsigned fold = 0; fold < m_numberOfFolds; ++fold){
 		//Run through all the cross validation sets
 		RegressionDataset dataTrain = folds.training(fold);
@@ -82,7 +82,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 	//find the best tree for the cv folds
 	double bestErrorRate = std::numeric_limits<double>::max();
 	CARTClassifier<RealVector>::TreeType bestTree;
-	
+
 	//Run through all the cross validation sets
 	for (unsigned fold = 0; fold < m_numberOfFolds; ++fold) {
 		ClassificationDataset dataTrain = folds.training(fold);
@@ -95,7 +95,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 		//create initial tree for the fold
 		TreeType tree = buildTree(SortedIndex{dataTrain}, dataTrain, cFull, 0);
 		model.setTree(tree);
-		
+
 		while(true){
 			ZeroOneLoss<unsigned int, RealVector> loss;
 			double errorRate = loss.eval(dataTest.labels(), model(dataTest.inputs()));
@@ -129,7 +129,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 	//~ //find the best tree for the cv folds
 	//~ double bestErrorRate = std::numeric_limits<double>::max();
 	//~ CARTClassifier<RealVector>::TreeType bestTree;
-	
+
 	//~ //Run through all the cross validation sets
 	//~ for (unsigned fold = 0; fold < m_numberOfFolds; ++fold) {
 		//~ ClassificationDataset dataTrain = folds.training(fold);
@@ -141,7 +141,7 @@ void CARTTrainer::train(ModelType& model, ClassificationDataset const& dataset){
 		//~ //create initial tree for the fold
 		//~ CARTClassifier<RealVector>::TreeType tree = buildTree(tables, dataTrain, cAbove, 0);
 		//~ model.setTree(tree);
-		
+
 		//~ while(tree.size()!=1){
 			//~ double errorRate = evalWeightedError(model, dataTest, weights);
 			//~ if(errorRate < bestErrorRate){
@@ -428,6 +428,3 @@ double CARTTrainer::totalSumOfSquares(std::vector<RealVector> const& labels, std
 	}
 	return sumOfSquares;
 }
-
-
-

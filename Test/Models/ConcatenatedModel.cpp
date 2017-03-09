@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 	net1.setStructure(3,5,2);
 	net2.setStructure(2,4);
 	ConcatenatedModel<RealVector,RealVector> model (&net1,&net2);
-	BOOST_CHECK_EQUAL(model.optimizeFirstModelParameters(),1);
-	BOOST_CHECK_EQUAL(model.optimizeSecondModelParameters(),1);
+	BOOST_CHECK_EQUAL(model.optimizeFirstModelParameters(),true);
+	BOOST_CHECK_EQUAL(model.optimizeSecondModelParameters(),true);
 
 	//test1: all activated
 	{

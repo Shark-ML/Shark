@@ -270,7 +270,7 @@ public:
 					// prepare full sweep for a reliable checking of the stopping criterion
 					canstop = true;
 					for (std::size_t i=0; i<ell; i++) m_pref[i] = 1.0;
-					prefsum = ell;
+					prefsum = (double)ell;
 				}
 			}
 			else

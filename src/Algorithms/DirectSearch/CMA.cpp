@@ -245,7 +245,7 @@ void CMA::doInit(
 		break;
 	case LINEAR:
 		for (std::size_t i = 0; i < m_mu; i++)
-			m_weights(i) = mu-i;
+			m_weights(i) = (double)(mu-i);
 		break;
 	case SUPERLINEAR:
 		for (std::size_t i = 0; i < m_mu; i++)
@@ -346,7 +346,7 @@ void CMA::step(ObjectiveFunctionType const& function){
 	if(function.isNoisy()){
 		//compute number of points to reevaluate
 		double reevalFraction = m_rLambda * m_lambda;
-		std::size_t lambdaReeval = m_rLambda * m_lambda;
+		std::size_t lambdaReeval = std::lround(m_rLambda * m_lambda);
 		double rest = reevalFraction - lambdaReeval;
 		if(rest > 0){
 			lambdaReeval += coinToss(*mpe_rng,rest);

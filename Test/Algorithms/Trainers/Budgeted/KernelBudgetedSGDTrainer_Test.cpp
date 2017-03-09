@@ -55,7 +55,10 @@ BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_KernelBudgetedSGDTrainer_Tes
 
 BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
 {
-    // Create a Gaussian RBF Kernel 
+	// fix random seed 
+	Rng::seed(44);
+	
+	// Create a Gaussian RBF Kernel 
     double gamma = 1.0f;
     GaussianRbfKernel<> *kernel = new GaussianRbfKernel<> (gamma);
 
@@ -98,7 +101,7 @@ BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
     
     size_t nSupportVectors = supportVectors.numberOfElements();
     std::cout << "We have " << nSupportVectors << " support vectors in our model.\n";
-    BOOST_REQUIRE_LE(nSupportVectors, budgetSize);
+    BOOST_REQUIRE_EQUAL(nSupportVectors, budgetSize);
 
     // Create another test problem with 500 points
     std::cout << "Creating test data set with 500 points.\n";
@@ -111,7 +114,8 @@ BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
     ZeroOneLoss<unsigned int> loss;
     Data<unsigned int> prediction = kernelClassifier (testData.inputs());
     double error_rate = loss (testData.labels(), prediction);
-
+	BOOST_REQUIRE_SMALL(error_rate - 0.168, 1.e-8);
+	
     // Report performance.
     std::cout << "Test error rate: " << error_rate << std::endl;
 }

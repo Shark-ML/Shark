@@ -1,31 +1,31 @@
 //===========================================================================
 /*!
- * 
+ *
  *
  * \brief       FisherLDA
- * 
- * 
+ *
+ *
  *
  * \author      O.Krause
  * \date        2010-2011
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ *
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
- * 
+ *
  * Shark is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published 
+ * it under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Shark is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
@@ -37,9 +37,9 @@
 using namespace shark;
 
 
-FisherLDA::FisherLDA(bool whitening, std::size_t dimensions){ 
-	m_whitening = whitening; 
-	m_subspaceDimensions = dimensions; 
+FisherLDA::FisherLDA(bool whitening, std::size_t dimensions){
+	m_whitening = whitening;
+	m_subspaceDimensions = dimensions;
 }
 
 void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int> const& dataset){
@@ -75,11 +75,11 @@ void FisherLDA::meanAndScatter(
 	RealVector& mean,
 	RealMatrix& scatter)
 {
-	
+
 	std::size_t classes = numberOfClasses(dataset);
 	std::size_t inputs = dataset.numberOfElements();
 	std::size_t inputDim = inputDimension(dataset);
-	
+
 
 	// intermediate results
 	std::vector<RealVector> means(classes, RealVector(inputDim,0.0));
@@ -118,7 +118,7 @@ void FisherLDA::meanAndScatter(
 
 	// calculate global mean
 	mean.clear();
-	for (std::size_t c = 0; c != classes; c++) 
+	for (std::size_t c = 0; c != classes; c++)
 		noalias(mean) += counter[c] * means[c]/inputs;
 	mean /= inputs;
 

@@ -222,7 +222,7 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_WARM_START )
 		input[i].resize(2);
 		input[i](0) = 0.01 * i;
 		input[i](1) = 0.1 * (i % 37);
-		target[i] = (double)(i / (n/2));   // 0-1-labels
+		target[i] = (unsigned int)(i / (n/2));   // 0-1-labels
 	}
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 
@@ -253,7 +253,7 @@ BOOST_AUTO_TEST_CASE( CSVM_TRAINER_WARM_START_NO_OFFSET )
 		input[i].resize(2);
 		input[i](0) = 0.01 * i;
 		input[i](1) = 0.1 * (i % 37);
-		target[i] = (double)(i / (n/2));   // 0-1-labels
+		target[i] = (unsigned int)(i / (n/2));   // 0-1-labels
 	}
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 

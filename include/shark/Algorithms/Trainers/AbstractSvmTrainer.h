@@ -263,7 +263,7 @@ public:
 	bool trainOffset() const
 	{ return m_trainOffset; }
 
-	double cacheSize() const
+	std::size_t cacheSize() const
 	{ return m_cacheSize; }
 	void setCacheSize( std::size_t size )
 	{ m_cacheSize = size; }
