@@ -278,9 +278,10 @@ protected:
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
 	}
-private:
 
 	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
+
+private:
 	std::size_t m_mu; ///< Size of parent generation
 
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
