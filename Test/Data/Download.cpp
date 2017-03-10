@@ -26,10 +26,20 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 
 	// test the download of a data file from a given URL
 	LabeledData<RealVector, unsigned int> dataset;
-	downloadSparseData(dataset, "http://mldata.org/repository/data/download/libsvm/iris/");
-	BOOST_CHECK_EQUAL(dataset.numberOfElements(), 150);
-	BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
-	BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
+	try
+	{
+		downloadSparseData(dataset, "http://mldata.org/repository/data/download/libsvm/iris/");
+		BOOST_CHECK_EQUAL(dataset.numberOfElements(), 150);
+		BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
+		BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
+	}
+	catch(std::runtime_error err)
+	{
+		// Don't count the HTTP 500 error as an actual error...
+		std::string msg500("[download] failed with HTTP status 500");
+		BOOST_CHECK_MESSAGE(err.what() == msg500,
+		                    "Got exception " + std::string(err.what()));
+	}
 }
 
 BOOST_AUTO_TEST_CASE(Data_Download_MLData)
@@ -42,11 +52,21 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 
 	// test the download of a data file from openml.org given a data set name
 	LabeledData<RealVector, unsigned int> dataset;
-	downloadFromMLData(dataset, "iris");
-	BOOST_CHECK_EQUAL(dataset.numberOfElements(), 150);
-	BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
-	BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
+	try
+	{
+		downloadFromMLData(dataset, "iris");
+		BOOST_CHECK_EQUAL(dataset.numberOfElements(), 150);
+		BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
+		BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
 	}
+	catch(std::runtime_error err)
+	{
+		// Don't count the HTTP 500 error as an actual error...
+		std::string msg500("[download] failed with HTTP status 500");
+		BOOST_CHECK_MESSAGE(err.what() == msg500,
+		                    "Got exception " + std::string(err.what()));
+	}
+}
 
 BOOST_AUTO_TEST_CASE(Data_Download_Url_splitter)
 {
