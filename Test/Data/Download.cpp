@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 	catch(std::runtime_error err)
 	{
 		// Don't count the HTTP 500 error as an actual error...
-		std::string msg500("[download] failed with HTTP status 500");
+		std::string msg500("[download] failed with HTTP status 500 Internal Server Error");
 		BOOST_CHECK_MESSAGE(err.what() == msg500,
 		                    "Got exception " + std::string(err.what()));
 	}
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 	catch(std::runtime_error err)
 	{
 		// Don't count the HTTP 500 error as an actual error...
-		std::string msg500("[download] failed with HTTP status 500");
+		std::string msg500("[download] failed with HTTP status 500 Internal Server Error");
 		BOOST_CHECK_MESSAGE(err.what() == msg500,
 		                    "Got exception " + std::string(err.what()));
 	}
