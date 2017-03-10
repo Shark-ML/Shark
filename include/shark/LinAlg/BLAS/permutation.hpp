@@ -34,7 +34,7 @@ namespace remora {
 struct permutation_matrix:public vector<int> {
 	// Construction and destruction
 	explicit permutation_matrix(size_type size):vector<int> (size){
-		for (size_type i = 0; i < size; ++ i)
+		for (int i = 0; i < (int)size; ++ i)
 			(*this)(i) = i;
 	}
 
