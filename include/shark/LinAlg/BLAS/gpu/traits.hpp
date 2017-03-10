@@ -447,11 +447,30 @@ struct device_traits<gpu_tag>{
 	template<class T>
 	using exp = boost::compute::exp<T>;
 	template<class T>
+	using sin = boost::compute::sin<T>;
+	template<class T>
+	using cos = boost::compute::cos<T>;
+	template<class T>
+	using tan = boost::compute::tan<T>;
+	template<class T>
+	using asin = boost::compute::asin<T>;
+	template<class T>
+	using acos = boost::compute::acos<T>;
+	template<class T>
+	using atan = boost::compute::atan<T>;
+	template<class T>
 	using tanh = boost::compute::tanh<T>;
 	template<class T>
 	using sqrt = boost::compute::sqrt<T>;
 	template<class T>
+	using cbrt = boost::compute::cbrt<T>;
+	template<class T>
 	using abs = boost::compute::fabs<T>;
+	
+	template<class T>
+	using erf = boost::compute::erf<T>;
+	template<class T>
+	using erfc = boost::compute::erfc<T>;
 	
 	template<class T>
 	struct sqr : public boost::compute::function<T (T)>{

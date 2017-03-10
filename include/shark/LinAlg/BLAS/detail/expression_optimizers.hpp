@@ -504,6 +504,17 @@ struct matrix_vector_prod_optimizer<outer_product<V1,V2>,V3>{
 	}
 };
 
+//(diag(v1) * v2) = v1 .* v2
+template<class V1,class V2>
+struct matrix_vector_prod_optimizer<diagonal_matrix<V1>,V2>{
+	typedef typename common_value_type<V1,V2>::type value_type;
+	typedef typename device_traits<typename V1::device_type>:: template multiply<value_type> functor;
+	typedef vector_binary<V1, V2, functor  > type;
+	static type create(diagonal_matrix<V1> const& m, typename V2::const_closure_type const& v){
+		return type(m.expression(),v, functor());
+	}
+};
+
 
 ////////////////////////////////////
 //// Matrix Product

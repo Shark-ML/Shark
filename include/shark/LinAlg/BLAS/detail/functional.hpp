@@ -46,16 +46,6 @@ struct scalar_inverse {
 };
 
 template<class T>
-struct scalar_abs{
-	static const bool zero_identity = true;
-	typedef T result_type;
-	T operator()(T x)const {
-		using std::abs;
-		return abs(x);
-	}
-};
-
-template<class T>
 struct scalar_sqr{
 	static const bool zero_identity = true;
 	typedef T result_type;
@@ -64,45 +54,50 @@ struct scalar_sqr{
 	}
 };
 
-template<class T>
-struct scalar_sqrt{
-	static const bool zero_identity = true;
-	typedef T result_type;
-	T operator()(T x)const {
-		using std::sqrt;
-		return sqrt(x);
-	}
+#define REMORA_STD_UNARY_FUNCTION(func, id)\
+template<class T>\
+struct scalar_##func{\
+	static const bool zero_identity = id;\
+	typedef T result_type;\
+	T operator()(T x)const {\
+		using std::func;\
+		return func(x);\
+	}\
 };
 
+REMORA_STD_UNARY_FUNCTION(abs, true)
+REMORA_STD_UNARY_FUNCTION(sqrt, true)
+REMORA_STD_UNARY_FUNCTION(cbrt, true)
+
+REMORA_STD_UNARY_FUNCTION(exp, false)
+REMORA_STD_UNARY_FUNCTION(log, false)
+
+//trigonometric functions
+REMORA_STD_UNARY_FUNCTION(cos, false)
+REMORA_STD_UNARY_FUNCTION(sin, true)
+REMORA_STD_UNARY_FUNCTION(tan, true)
+
+REMORA_STD_UNARY_FUNCTION(acos, false)
+REMORA_STD_UNARY_FUNCTION(asin, true)
+REMORA_STD_UNARY_FUNCTION(atan, true)
+
+//sigmoid type functions
+REMORA_STD_UNARY_FUNCTION(tanh, true)
 template<class T>
-struct scalar_exp{
+struct scalar_sigmoid {
 	static const bool zero_identity = false;
-	typedef T result_type;
-	T operator()(T x)const {
-		using std::exp;
-		return exp(x);
-	}
-};
-
-template<class T>
-struct scalar_log {
-	static const bool zero_identity = false;
-	typedef T result_type;
-	T operator()(T x)const {
-		using std::log;
-		return log(x);
-	}
-};
-
-template<class T>
-struct scalar_tanh{
-	static const bool zero_identity = true;
 	typedef T result_type;
 	T operator()(T x)const {
 		using std::tanh;
-		return tanh(x);
+		return (tanh(x/T(2)) + T(1))/T(2);
 	}
 };
+
+//special functions
+REMORA_STD_UNARY_FUNCTION(erf, false)
+REMORA_STD_UNARY_FUNCTION(erfc, false)
+#undef REMORA_STD_UNARY_FUNCTION
+
 
 template<class T>
 struct scalar_acos{
@@ -129,15 +124,7 @@ struct scalar_soft_plus {
 	}
 };
 
-template<class T>
-struct scalar_sigmoid {
-	static const bool zero_identity = false;
-	typedef T result_type;
-	T operator()(T x)const {
-		using std::tanh;
-		return (tanh(x/T(2)) + T(1))/T(2);
-	}
-};
+
 
 template<class T>
 struct scalar_multiply1{

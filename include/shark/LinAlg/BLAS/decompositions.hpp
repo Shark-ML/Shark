@@ -33,6 +33,7 @@
 #include "kernels/potrf.hpp"
 #include "kernels/pstrf.hpp"
 #include "kernels/getrf.hpp"
+#include "kernels/syev.hpp"
 #include "assignment.hpp"
 #include "permutation.hpp"
 #include "matrix_expression.hpp"
@@ -79,11 +80,6 @@ public:
 	typedef typename MatrixStorage::device_type device_type;
 	cholesky_decomposition(){}
 	template<class E>
-	cholesky_decomposition(matrix_expression<E,device_type> const& e):m_cholesky(e){
-		kernels::potrf<lower>(m_cholesky);
-	}
-	
-	template<class E, class Ta>
 	cholesky_decomposition(matrix_expression<E,device_type> const& e):m_cholesky(e){
 		kernels::potrf<lower>(m_cholesky);
 	}
@@ -182,6 +178,79 @@ private:
 	MatrixStorage m_cholesky;
 };
 
+
+/// \brief Symmetric eigenvalue decomposition A=QDQ^T
+///
+/// every symmetric matrix can be decomposed into its eigenvalue decomposition
+/// A=QDQ^T, where Q is an orthogonal matrix with Q^TQ=QQ^T=I
+/// and D is the diagonal matrix of eigenvalues of A.
+template<class MatrixStorage>
+class symm_eigenvalue_decomposition:
+	public solver_expression<
+		symm_eigenvalue_decomposition<MatrixStorage>, 
+		typename MatrixStorage::device_type
+>{
+private:
+	typedef typename MatrixStorage::value_type value_type;
+	typedef typename vector_temporary<MatrixStorage>::type VectorStorage;
+public:
+	typedef typename MatrixStorage::device_type device_type;
+	symm_eigenvalue_decomposition(){}
+	template<class E>
+	symm_eigenvalue_decomposition(matrix_expression<E,device_type> const& e){
+		decompose(e);
+	}
+	
+	template<class E>
+	void decompose(matrix_expression<E,device_type> const& e){
+		SIZE_CHECK(e().size1() ==  e().size2());
+		m_eigenvectors.resize(e().size1(),e().size1());
+		m_eigenvalues.resize(e().size1());
+		noalias(m_eigenvectors) = e;
+
+		kernels::syev(m_eigenvectors,m_eigenvalues);
+	}
+	
+	MatrixStorage const& Q()const{
+		return m_eigenvectors;
+	}
+	VectorStorage const& D()const{
+		return m_eigenvalues;
+	}
+	
+	
+	template<class MatB>
+	void solve(matrix_expression<MatB,device_type>& B, left)const{
+		B() = Q() % to_diagonal(elem_inv(D()))% trans(Q()) % B;
+	}
+	template<class MatB>
+	void solve(matrix_expression<MatB,device_type>& B, right)const{
+		auto transB = trans(B);
+		solve(transB,left());
+	}
+	template<class VecB>
+	void solve(vector_expression<VecB,device_type>&b, left)const{
+		b() = Q() % safe_div(trans(Q()) % b,D() ,0.0);
+	}
+	
+	template<class VecB>
+	void solve(vector_expression<VecB,device_type>&b, right)const{
+		solve(b,left());
+	}
+	
+	template<typename Archive>
+	void serialize( Archive & ar, const std::size_t version ) {
+		ar & m_eigenvectors;
+		ar & m_eigenvalues;
+	}
+private:
+	MatrixStorage m_eigenvectors;
+	VectorStorage m_eigenvalues;
+};
+
+
+
+
 template<class MatrixStorage>
 class pivoting_lu_decomposition:
 public solver_expression<
@@ -265,7 +334,7 @@ public:
 		m_cholesky.decompose(prod(trans(L),L));
 	}
 	
-	unsigned rank()const{
+	std::size_t rank()const{
 		return m_rank;
 	}
 	
@@ -330,7 +399,7 @@ public:
 		swap_rows_inverted(m_permutation,b);
 	}
 private:
-	unsigned int m_rank;
+	std::size_t m_rank;
 	MatrixStorage m_factor;
 	cholesky_decomposition<MatrixStorage> m_cholesky;
 	permutation_matrix m_permutation;

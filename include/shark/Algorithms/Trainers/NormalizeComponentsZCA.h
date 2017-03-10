@@ -41,7 +41,6 @@
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Data/Statistics.h>
-#include <shark/LinAlg/eigenvalues.h>
 
 namespace shark {
 
@@ -78,19 +77,11 @@ public:
 		RealMatrix covariance;
 		meanvar(input, mean, covariance);
 		
-		RealMatrix eigenvectors;
-		RealVector eigenvalues;
-		blas::eigensymm(covariance, eigenvectors, eigenvalues);
-		covariance=RealMatrix();
+		blas::symm_eigenvalue_decomposition<RealMatrix> eigen(covariance);
+		covariance=RealMatrix(); //covariance not needed anymore
 		
-		RealMatrix ZCAMatrix = eigenvectors;
-		for(std::size_t i=0; i<dc; i++) {
-			if(eigenvalues(i) > 0)
-				column(ZCAMatrix, i) /= std::sqrt(eigenvalues(i));
-			else
-				column(ZCAMatrix, i).clear();
-		}
-		ZCAMatrix = prod(ZCAMatrix,trans(eigenvectors));
+		
+		RealMatrix ZCAMatrix = eigen.Q() % to_diagonal(elem_inv(sqrt(eigen.D()))) % trans(eigen.Q());
 		ZCAMatrix *= std::sqrt(m_targetVariance);
 
 		RealVector offset = -prod(ZCAMatrix,mean);

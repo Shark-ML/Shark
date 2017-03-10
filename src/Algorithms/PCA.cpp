@@ -32,7 +32,6 @@
  */
 //===========================================================================
 #define SHARK_COMPILE_DLL
-#include <shark/LinAlg/eigenvalues.h>
 #include <shark/Data/Statistics.h>
 #include <shark/Algorithms/Trainers/PCA.h>
 
@@ -54,9 +53,9 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 	if(algorithm == STANDARD) { // standard case
 		RealMatrix S(m_n,m_n);//covariance matrix
 		meanvar(inputs,m_mean,S);
-		m_eigenvalues.resize(m_n);
-		m_eigenvectors.resize(m_n, m_n);
-		blas::eigensymm(S, m_eigenvectors, m_eigenvalues);
+		blas::symm_eigenvalue_decomposition<RealMatrix> eigen(S);
+		m_eigenvectors = eigen.Q();
+		m_eigenvalues = eigen.D();
 	} else {
 		//let X0 be the design matrix having all inputs as rows
 		//we want to avoid to form it directly but us it's batch represntation in the dataset
@@ -89,11 +88,11 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			start1+=batchSize1;
 		}
 		S /= m_l;
-		m_eigenvalues.resize(m_l);
+		
+		blas::symm_eigenvalue_decomposition<RealMatrix> eigen(S);
+		m_eigenvalues = eigen.D();
 		m_eigenvectors.resize(m_n,m_l);
 		m_eigenvectors.clear();
-		RealMatrix U(m_l, m_l);
-		blas::eigensymm(S, U, m_eigenvalues);
 		// compute true eigenvectors
 		//eigenv=X0^T U
 		std::size_t batchStart  = 0;
@@ -101,7 +100,7 @@ void PCA::setData(UnlabeledData<RealVector> const& inputs) {
 			std::size_t batchSize = inputs.batch(b).size1();
 			std::size_t batchEnd = batchStart+batchSize;
 			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
-			noalias(m_eigenvectors) += prod(trans(X),rows(U,batchStart,batchEnd));
+			noalias(m_eigenvectors) += prod(trans(X),rows(eigen.Q(),batchStart,batchEnd));
 			batchStart = batchEnd;
 		}
 		//normalize

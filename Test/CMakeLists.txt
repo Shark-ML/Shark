@@ -60,7 +60,6 @@ shark_add_test( LinAlg/rotations.cpp LinAlg_rotations )
 shark_add_test( LinAlg/permute.cpp LinAlg_Permutations )
 shark_add_test( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )
 shark_add_test( LinAlg/Metrics.cpp LinAlg_Metrics)
-shark_add_test( LinAlg/eigensymm.cpp LinAlg_eigensymm )
 
 shark_add_test( LinAlg/Initialize.cpp LinAlg_Initialize)
 shark_add_test( LinAlg/LRUCache.cpp LinAlg_LRUCache )

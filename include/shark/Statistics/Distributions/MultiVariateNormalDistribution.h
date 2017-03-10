@@ -32,7 +32,7 @@
 #ifndef SHARK_STATISTICS_MULTIVARIATENORMALDISTRIBUTION_H
 #define SHARK_STATISTICS_MULTIVARIATENORMALDISTRIBUTION_H
 
-#include <shark/LinAlg/eigenvalues.h>
+#include <shark/LinAlg/Base.h>
 #include <shark/Rng/GlobalRng.h>
 namespace shark {
 
@@ -62,16 +62,14 @@ public:
 	template<typename Archive>
 	void serialize( Archive & ar, const std::size_t version ) {
 		ar & BOOST_SERIALIZATION_NVP( m_covarianceMatrix );
-		ar & BOOST_SERIALIZATION_NVP( m_eigenVectors );
-		ar & BOOST_SERIALIZATION_NVP( m_eigenValues );
+		ar & BOOST_SERIALIZATION_NVP( m_decomposition );
 	}
 
 	/// \brief Resizes the distribution. Updates both eigenvectors and eigenvalues.
 	/// \param [in] size The new size of the distribution
 	void resize( std::size_t size ) {
 		m_covarianceMatrix = blas::identity_matrix<double>( size );
-		m_eigenValues = blas::repeat(1.0,size);
-		m_eigenVectors = blas::identity_matrix<double>( size );
+		update();
 	}
 
 	/// \brief Accesses the covariance matrix defining the distribution.
@@ -94,45 +92,36 @@ public:
 	}
 
 	/// \brief Accesses an immutable reference to the eigenvectors of the covariance matrix.
-	const RealMatrix & eigenVectors() const {
-		return m_eigenVectors;
+	RealMatrix const& eigenVectors() const {
+		return m_decomposition.Q();
 	}
 
 	/// \brief Accesses an immutable reference to the eigenvalues of the covariance matrix.
 	RealVector const& eigenValues() const {
-		return m_eigenValues;
-	}
-	
-	/// \brief Accesses a reference to the eigenvalues of the covariance matrix.
-	RealVector& eigenValues(){
-		return m_eigenValues;
+		return m_decomposition.D();
 	}
 
 	/// \brief Samples the distribution.
 	template<class RngType>
 	result_type operator()(RngType& rng) const {
-		RealVector result( m_eigenValues.size(), 0. );
-		RealVector z( m_eigenValues.size() );
+		RealVector z( m_covarianceMatrix.size1() );
 		
-		for( std::size_t i = 0; i < result.size(); i++ ) {
+		for( std::size_t i = 0; i < z.size(); i++ ) {
 			z( i ) = gauss(rng, 0., 1. );
 		}
-		for( std::size_t i = 0; i < result.size(); i++ )
-			for( std::size_t j = 0; j < result.size(); j++ )
-				result( i ) += m_eigenVectors( i, j ) * std::sqrt( std::abs( m_eigenValues(j) ) ) * z( j );
-
-		return( std::make_pair( result, z ) );
+		
+		RealVector result = m_decomposition.Q() % to_diagonal(sqrt(max(eigenValues(),0))) % z;
+		return std::make_pair( result, z );
 	}	    
 
 	/// \brief Calculates the evd of the current covariance matrix.
 	void update() {
-		blas::eigensymm( m_covarianceMatrix, m_eigenVectors, m_eigenValues );
+		m_decomposition.decompose(m_covarianceMatrix);
 	}
 
 private:
 	RealMatrix m_covarianceMatrix; ///< Covariance matrix of the mutation distribution.
-	RealMatrix m_eigenVectors; ///< Eigenvectors of the covariance matrix.
-	RealVector m_eigenValues; ///< Eigenvalues of the covariance matrix.
+	blas::symm_eigenvalue_decomposition<RealMatrix> m_decomposition; /// < Eigenvalue decomposition of the covarianceMatrix
 };
 
 /// \brief Multivariate normal distribution with zero mean using a cholesky decomposition
