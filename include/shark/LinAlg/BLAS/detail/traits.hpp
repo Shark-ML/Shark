@@ -303,6 +303,8 @@ struct device_traits<cpu_tag>{
 	template<class T>
 	using tanh = functors::scalar_tanh<T>;
 	template<class T>
+	using acos = functors::scalar_acos<T>;
+	template<class T>
 	using sqrt = functors::scalar_sqrt<T>;
 	template<class T>
 	using cbrt = functors::scalar_cbrt<T>;

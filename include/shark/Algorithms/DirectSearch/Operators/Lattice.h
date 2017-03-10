@@ -1,7 +1,6 @@
 //===========================================================================
 /*!
  *
- *
  * \brief   Various functions for generating n-dimensional grids
  *          (simplex-lattices).
  *
@@ -154,16 +153,15 @@ UIntMatrix computeClosestNeighbourIndicesOnLattice(
 	// For each vector we are interested in indices of the t closest vectors.
 	for(std::size_t i = 0; i < m.size1(); ++i)
 	{
-		const RealVector my_dists = row(distances, i);
 		// Make some indices we can sort.
-		std::vector<std::size_t> indices(my_dists.size());
+		std::vector<std::size_t> indices(distances.size2());
 		std::iota(indices.begin(), indices.end(), 0);
 		// Sort indices by the distances.
 		std::sort(indices.begin(), indices.end(),
-				  [&](std::size_t a, std::size_t b)
-				  {
-					  return my_dists[a] < my_dists[b];
-				  });
+		          [&](std::size_t a, std::size_t b)
+		          {
+			          return distances(i, a) < distances(i, b);
+		          });
 		// Copy the T closest indices into B.
 		std::copy_n(indices.begin(), n, neighbourIndices.row_begin(i));
 	}
