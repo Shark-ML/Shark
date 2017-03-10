@@ -33,7 +33,6 @@
 //===========================================================================
 #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/Trainers/FisherLDA.h>
-#include <shark/LinAlg/eigenvalues.h>
 using namespace shark;
 
 
@@ -51,19 +50,18 @@ void FisherLDA::train(LinearModel<>& model, LabeledData<RealVector, unsigned int
 	RealVector mean(inputDim);
 	RealMatrix scatter(inputDim, inputDim);
 	meanAndScatter(dataset, mean, scatter);
-
-	RealMatrix eigenvectors(inputDim, inputDim);
-	RealVector eigenvalues(inputDim);
-	blas::eigensymm(scatter, eigenvectors, eigenvalues);
-	if (m_whitening){
-		for(std::size_t i = 0; i != inputDim; ++i){
-			if(eigenvalues(i) <= 0) continue;
-			column(eigenvectors,i) /= std::sqrt(eigenvalues(i));
-		}
-	}
+	
+	blas::symm_eigenvalue_decomposition<RealMatrix> eigen(scatter);
+	
 	//reduce the size of the covariance matrix the the needed
 	//subspace
-	RealMatrix subspaceDirections = trans(columns(eigenvectors,0,nComp));
+	RealMatrix subspaceDirections = trans(columns(eigen.Q(),0,nComp));
+	if (m_whitening){
+		for(std::size_t i = 0; i != nComp; ++i){
+			if(eigen.D()(i) <= 0) continue;
+			row(subspaceDirections,i) /= std::sqrt(eigen.D()(i));
+		}
+	}
 	RealVector offset = -prod(subspaceDirections, mean);
 
 	// write the parameters into the model
