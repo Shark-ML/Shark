@@ -327,8 +327,8 @@ public:
 	}
 	template<class E>
 	matrix_transpose& operator = (matrix_expression<E, typename M::device_type> const& e) {
-		expression() = matrix_transpose<E const>(e());
-		return *this;
+		//~ expression() = matrix_transpose<E const>(e());
+		return assign(*this,typename matrix_temporary<M>::type(e));
 	}
 	
 	void swap_rows(size_type i, size_type j){

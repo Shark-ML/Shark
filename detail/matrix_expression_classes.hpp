@@ -472,10 +472,10 @@ public:
 	}
 
 	const_column_iterator column_begin(size_type i) const {
-		return const_row_iterator(m_expression.column_begin(i),m_functor);
+		return const_column_iterator(m_expression.column_begin(i),m_functor);
 	}
 	const_column_iterator column_end(size_type i) const {
-		return const_row_iterator(m_expression.column_end(i),m_functor);
+		return const_column_iterator(m_expression.column_end(i),m_functor);
 	}
 
 private:
@@ -1039,6 +1039,9 @@ public:
 		return m_diagonal.queue();
 	}
 	
+	vector_closure_type const& expression()const{
+		return m_diagonal;
+	}
 	// Element access
 	const_reference operator()(size_type i, size_type j) const {
 		if (i == j)

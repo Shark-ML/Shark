@@ -99,7 +99,7 @@ std::size_t pstrf(
 			//such that j == pivot and Ak(j,j) = pivots(pivot)
 			std::size_t pivot = std::max_element(pivots.begin()+j,pivots.end())-pivots.begin();
 			if(pivot != j){
-				P()(k+j) = pivot+k;
+				P()(k+j) = (int)(pivot+k);
 				A().swap_rows(k+j,k+pivot);
 				A().swap_columns(k+j,k+pivot);
 				std::swap(pivots(j),pivots(pivot));

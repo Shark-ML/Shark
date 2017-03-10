@@ -169,8 +169,8 @@ void dense_gemm(
 		std::size_t current_size = std::min(tile_size,A().size2() - start_k);
 		dense_matrix_adaptor<value_type,row_major> A_block(A_pointer, size1, current_size);
 		dense_matrix_adaptor<value_type,row_major> B_block(B_pointer, current_size, size2);
-		matrix_range<MatA> A_range(A(), 0, size1, start_k, start_k + current_size);
-		matrix_range<MatB> B_range(B(), start_k, start_k + current_size, 0, size2);
+		matrix_range<MatA const> A_range(A(), 0, size1, start_k, start_k + current_size);
+		matrix_range<MatB const> B_range(B(), start_k, start_k + current_size, 0, size2);
 		noalias(A_block) = A_range;
 		noalias(B_block) = B_range;
 		dense_gemm(A_block, B_block, C, alpha, boost::mpl::true_());
