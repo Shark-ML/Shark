@@ -288,11 +288,26 @@ struct device_traits<cpu_tag>{
 	template<class T>
 	using exp = functors::scalar_exp<T>;
 	template<class T>
+	using sin = functors::scalar_sin<T>;
+	template<class T>
+	using cos = functors::scalar_cos<T>;
+	template<class T>
+	using tan = functors::scalar_tan<T>;
+	template<class T>
+	using asin = functors::scalar_asin<T>;
+	template<class T>
+	using acos = functors::scalar_acos<T>;
+	template<class T>
+	using atan = functors::scalar_atan<T>;
+	
+	template<class T>
 	using tanh = functors::scalar_tanh<T>;
 	template<class T>
 	using acos = functors::scalar_acos<T>;
 	template<class T>
 	using sqrt = functors::scalar_sqrt<T>;
+	template<class T>
+	using cbrt = functors::scalar_cbrt<T>;
 	template<class T>
 	using abs = functors::scalar_abs<T>;
 	template<class T>
@@ -303,6 +318,11 @@ struct device_traits<cpu_tag>{
 	using sigmoid = functors::scalar_sigmoid<T>;
 	template<class T>
 	using inv = functors::scalar_inverse<T>;
+	
+	template<class T>
+	using erf = functors::scalar_erf<T>;
+	template<class T>
+	using erfc = functors::scalar_erfc<T>;
 	
 	//min/max
 	template<class T>
