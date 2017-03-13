@@ -76,6 +76,10 @@ struct ZDT3 : public MultiObjectiveFunction
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		m_handler.setBounds(numberOfVariables,0,1);
 	}
+	
+	std::size_t numberOfObjectives()const{
+		return 2;
+	}
 
 	ResultType eval( const SearchPointType & x ) const {
 		m_evaluationCounter++;

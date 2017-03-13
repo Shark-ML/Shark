@@ -39,6 +39,8 @@
 // MOO specific stuff
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/CrowdingDistance.h>
+#include <shark/Algorithms/DirectSearch/Operators/Indicators/NSGA3Indicator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
@@ -48,21 +50,17 @@
 
 namespace shark {
 
-/**
-* \brief Implements the NSGA-II.
-*
-* Please see the following papers for further reference:
-*  Deb, Agrawal, Pratap and Meyarivan. 
-*  A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II 
-*  IEEE TRANSACTIONS ON EVOLUTIONARY COMPUTATION, VOL. 6, NO. 2, APRIL 2002
-*/
+/// \brief Implements the NSGA-II.
+///
+/// Please see the following papers for further reference:
+///  Deb, Agrawal, Pratap and Meyarivan. 
+///  A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II 
+///  IEEE TRANSACTIONS ON EVOLUTIONARY COMPUTATION, VOL. 6, NO. 2, APRIL 2002
 template<typename Indicator>
-class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector >{		
+class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector>{		
 public:
 
-	/**
-	* \brief Default c'tor.
-	*/
+	/// \brief Default c'tor.
 	IndicatorBasedRealCodedNSGAII(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
 		mu() = 100;
 		crossoverProbability() = 0.9;
@@ -84,29 +82,36 @@ public:
 		return m_crossoverProbability;
 	}
 	
+	/// \brief Returns the mutation variation strength parameter.
 	double nm()const{
 		return m_mutation.m_nm;
 	}
+	/// \brief Returns a reference to the mutation variation strength parameter.
 	double& nm(){
 		return m_mutation.m_nm;
 	}
-	
+	/// \brief Returns the crossover variation strength parameter.
 	double nc()const{
 		return m_crossover.m_nc;
 	}
+	/// \brief Returns a reference to the crossover variation strength parameter.
 	double& nc(){
 		return m_crossover.m_nc;
 	}
 	
+	/// \brief Returns the number of elements in the front.
 	std::size_t mu()const{
 		return m_mu;
 	}
+	/// \brief Returns the number of elements in the front.
 	std::size_t& mu(){
 		return m_mu;
 	}
+	/// \brief Returns the indicator used.
 	Indicator& indicator(){
 		return m_selection.indicator();
 	}
+	/// \brief Returns the indicator used.
 	Indicator const& indicator()const{
 		return m_selection.indicator();
 	}
@@ -116,7 +121,7 @@ public:
 		archive >> BOOST_SERIALIZATION_NVP(m_mu);
 		archive >> BOOST_SERIALIZATION_NVP(m_best);
 		
-		archive >> BOOST_SERIALIZATION_NVP( m_selection );
+		archive >> BOOST_SERIALIZATION_NVP(m_selection);
 		archive >> BOOST_SERIALIZATION_NVP(m_crossover);
 		archive >> BOOST_SERIALIZATION_NVP(m_mutation);
 		archive >> BOOST_SERIALIZATION_NVP(m_crossoverProbability);
@@ -126,12 +131,15 @@ public:
 		archive << BOOST_SERIALIZATION_NVP(m_mu);
 		archive << BOOST_SERIALIZATION_NVP(m_best);
 		
-		archive << BOOST_SERIALIZATION_NVP( m_selection );
+		archive << BOOST_SERIALIZATION_NVP(m_selection);
 		archive << BOOST_SERIALIZATION_NVP(m_crossover);
 		archive << BOOST_SERIALIZATION_NVP(m_mutation);
 		archive << BOOST_SERIALIZATION_NVP(m_crossoverProbability);
 	}
-
+	
+	/// \brief Initializes the algorithm for the supplied objective function.
+	///
+	/// \param [in] function The objective function.
 	void init( ObjectiveFunctionType& function){
 		checkFeatures(function);
 		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
@@ -141,12 +149,10 @@ public:
 		}
 		init(function,points);
 	}
-	/**
-	 * \brief Initializes the algorithm for the supplied objective function.
-	 * 
-	 * \param [in] function The objective function.
-	 * \param [in] initialSearchPoints A set of intiial search points.
-	 */
+	/// \brief Initializes the algorithm for the supplied objective function.
+	///
+	/// \param [in] function The objective function.
+	/// \param [in] initialSearchPoints A set of intiial search points.
 	void init( 
 		ObjectiveFunctionType& function, 
 		std::vector<SearchPointType> const& initialSearchPoints
@@ -169,19 +175,16 @@ public:
 			upperBounds = handler.upper();
 		} else{
 			SHARK_RUNTIME_CHECK(
-				function.hasConstraintHandler() && !function.getConstraintHandler().isBoxConstrained(),
-				"Algorithm does only allow box constraints"
+				!function.isConstrained(), "Algorithm does only allow box constraints"
 			);
 		}
 		
 		doInit(initialSearchPoints,values,lowerBounds, upperBounds, mu(), nm(), nc(), crossoverProbability());
 	}
 	
-	/**
-	 * \brief Executes one iteration of the algorithm.
-	 * 
-	 * \param [in] function The function to iterate upon.
-	 */
+	/// \brief Executes one iteration of the algorithm.
+	///
+	///\param [in] function The function to iterate upon.
 	void step( ObjectiveFunctionType const& function ) {
 		std::vector<IndividualType> offspring = generateOffspring();
 		PenalizingEvaluator penalizingEvaluator;
@@ -231,10 +234,12 @@ protected:
 			m_best[i].point = m_parents[i].searchPoint();
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
-		m_selection( m_parents, mu );
-		
 		m_crossover.init(lowerBounds,upperBounds);
 		m_mutation.init(lowerBounds,upperBounds);
+		indicator().init(functionValues.front().size(),mu,*mpe_rng);
+		m_selection( m_parents, mu );
+		
+		
 	}
 	
 	std::vector<IndividualType> generateOffspring()const{
@@ -259,17 +264,12 @@ protected:
 		return offspring;
 	}
 
-	/**
-	 * \brief Executes one iteration of the algorithm.
-	 * 
-	 * \param [in] function The function to iterate upon.
-	 */
 	void updatePopulation(  std::vector<IndividualType> const& offspringVec) {
 		m_parents.insert(m_parents.end(),offspringVec.begin(),offspringVec.end());
 		m_selection( m_parents, mu());
 		
 		//partition the selected individuals to the front and remove the unselected ones
-		std::partition(m_parents.begin(), m_parents.end(),IndividualType::IsSelected);
+		std::partition(m_parents.begin(), m_parents.end(), [](IndividualType const& ind){return ind.selected();});
 		m_parents.erase(m_parents.begin()+mu(),m_parents.end());
 
 		//update solution set
@@ -278,9 +278,10 @@ protected:
 			m_best[i].value = m_parents[i].unpenalizedFitness();
 		}
 	}
-private:
 
 	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
+
+private:
 	std::size_t m_mu; ///< Size of parent generation
 
 	IndicatorBasedSelection<Indicator> m_selection; ///< Selection operator relying on the (contributing) hypervolume indicator.
@@ -294,5 +295,6 @@ private:
 
 typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;
 typedef IndicatorBasedRealCodedNSGAII< AdditiveEpsilonIndicator > EpsRealCodedNSGAII;
+typedef IndicatorBasedRealCodedNSGAII< CrowdingDistance > CrowdingRealCodedNSGAII;
 }
 #endif

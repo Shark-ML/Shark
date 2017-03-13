@@ -51,25 +51,46 @@ namespace shark {
 ///	- Bringmann, Friedrich, Neumann, Wagner. Approximation-Guided Evolutionary Multi-Objective Optimization. IJCAI '11.
 struct AdditiveEpsilonIndicator {
 	/// \brief Given a pareto front, returns the index of the point which is the least contributer
-	template<typename ParetofrontType>
-	unsigned int leastContributor(ParetofrontType const& front){
+	///
+	/// The archive has no effect on the volume as the archive is dominating all points in the front
+	template<typename ParetoFrontType, typename ParetoArchive>
+	std::size_t leastContributor( ParetoFrontType const& front, ParetoArchive const& /*archive*/)const{
 		std::size_t leastIndex = 0;
-		double leastValue = -std::numeric_limits<double>::max();
+		double leastValue = std::numeric_limits<double>::max();
 		for( std::size_t i = 0; i != front.size(); i++ ) {
 			//find the minimum distance the front with one point removed has to be moved to dominate the original front
-			double result = -std::numeric_limits<double>::max();
+			double result = std::numeric_limits<double>::max();
 			for(std::size_t j = 0; j != front.size(); ++j){
 				if(j == i) continue; //this point is removed
-				result = std::min<double>(result,max(front[i]-front[j])); 
+				result = std::min(result,max(front[j]-front[i])); 
 			}
 			if(result < leastValue){
-				result = leastValue;
+				leastValue = result;
 				leastIndex = i;
 			}
 		}
-		
+		//~ std::cout<<leastIndex<<" "<<leastValue<<std::endl;
 		return leastIndex;
 	}
+	
+	template<typename ParetoFrontType, typename ParetoArchive>
+	std::vector<std::size_t> leastContributors( ParetoFrontType const& front, ParetoArchive const& archive, std::size_t K)const{
+		std::vector<std::size_t> indices;
+		std::vector<RealVector> points(front.begin(),front.end());
+		std::vector<std::size_t> activeIndices(points.size());
+		std::iota(activeIndices.begin(),activeIndices.end(),0);
+		for(std::size_t k=0; k != K; ++k){
+			std::size_t index = leastContributor(points,archive);
+			
+			points.erase(points.begin()+index);
+			indices.push_back(activeIndices[index]);
+			activeIndices.erase(activeIndices.begin()+index);
+		}
+		return indices;
+	}
+	
+	template<class Rng>
+	void init(std::size_t /*numOfObjectives*/, std::size_t /*mu*/, Rng& /*rng*/){}
 		
 	template<typename Archive>
 	void serialize( Archive &, const unsigned int ) {}
