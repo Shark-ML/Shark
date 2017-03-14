@@ -216,7 +216,9 @@ void RVEA::updatePopulation(std::vector<IndividualType> const & offspringvec){
 
 	std::partition(m_parents.begin(),
 	               m_parents.end(),
-	               IndividualType::IsSelected);
+	               [](IndividualType const & ind){
+		               return ind.selected();
+	               });
 	m_parents.erase(m_parents.begin() + mu(), m_parents.end());
 
 	for(std::size_t i = 0; i < mu(); ++i)
