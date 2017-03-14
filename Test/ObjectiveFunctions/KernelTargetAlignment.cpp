@@ -55,7 +55,7 @@ public:
 		std::vector<unsigned int> labels(numInputs);
 		std::vector<RealVector> labelsRegression(numInputs,RealVector(1));
 		for(std::size_t i = 0; i != numInputs; ++i){
-			labels[i] = i%2;
+			labels[i] = Rng::coinToss(0.2);
 			labelsRegression[i](0) = Rng::gauss(1,2);
 			for(std::size_t j = 0; j != dims; ++j)
 				inputs[i](j) = Rng::uni(j-1.0+3*labels[i],j+1.0+3*labels[i]);
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear_Cente
 	
 	double evalCentered = ktaCentered.eval(input);
 	double eval = kta.eval(input);
-	BOOST_CHECK_CLOSE(eval,evalCentered,1.e-5);
+	BOOST_CHECK_CLOSE(eval,evalCentered,1.e-9);
 }
 
 //calculate the centered KTA and check against trivially calculated result 
@@ -136,22 +136,22 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear )
 	KernelTargetAlignment<> kta(data, &kernel);
 	
 	//calculate analytic result from centered Kernel
-	RealMatrix K = calculateRegularizedKernelMatrix(kernel,dataCentered.inputs());
+	RealMatrix K = calculateCenteredKernelMatrix(kernel,data.inputs());
 	
 	double KY=sum(element_prod(K,Y));
 	double KK = sum(element_prod(K,K));
-	double result = -KY/std::sqrt(KK);
+	double result = -KY/std::sqrt(KK)/numInputs;
 	
 	//linear Kernel doesn't have any parameters...
 	RealVector input;
 	double eval = kta.eval(input);
-	BOOST_CHECK_CLOSE(eval,result,1.e-5);
+	BOOST_CHECK_CLOSE(eval,result,1.e-9);
 	
 }
 
 //calculate centered KTA against "dumb" calculation
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel ){
-	GaussianRbfKernel<> kernel(1);
+	GaussianRbfKernel<> kernel(1.0);
 	KernelTargetAlignment<> kta(data, &kernel);
 	
 	//calculate analytic result from centered Kernel
@@ -159,13 +159,11 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel 
 	
 	double KY=sum(element_prod(K,Y));
 	double KK = sum(element_prod(K,K));
-	double result = -KY/std::sqrt(KK);
+	double result = -KY/std::sqrt(KK)/numInputs;
 	
 	//linear Kernel doesn't have any parameters...
-	RealVector input(1);
-	input(0) = 1;
-	double eval = kta.eval(input);
-	BOOST_CHECK_CLOSE(eval,result,1.e-5);
+	double eval = kta.eval(kernel.parameterVector());
+	BOOST_CHECK_CLOSE(eval,result,1.e-9);
 	
 }
 
@@ -228,8 +226,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
-		input(0) = Rng::uni(0.1,1);
-		testDerivative(kta,input);
+		input(0) = Rng::uni(0.5,2);
+		testDerivative(kta,input,1.e-8);
 	}
 	
 }
