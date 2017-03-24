@@ -42,7 +42,12 @@
 
 namespace shark{
 
-/// \brief Most general problem formulation, needs to be configured by hand.
+/// \brief Quadratic Problem with only Box-Constraints
+/// Let K the kernel matrix, than the problem has the form
+///
+/// max_\alpha - 1/2 \alpha^T K \alpha +  \alpha^Tv
+/// under constraints:
+/// l_i <= \alpha_i <= u_i
 template<class MatrixT>
 class GeneralQuadraticProblem{
 public:
@@ -127,7 +132,6 @@ public:
 		boxMin *=factor;
 		boxMax *=factor;
 	}
-
 
 	/// representation of the quadratic part of the objective function
 	MatrixType& quadratic;
@@ -233,6 +237,11 @@ private:
 
 
 /// \brief Problem formulation for binary C-SVM problems
+///
+/// max_\alpha - 1/2 \alpha^T K \alpha +  \alpha^Ty
+/// under constraints:
+/// l_i <= \alpha_i <= u_i
+/// \sum_i \alpha_i = 0
 template<class MatrixT>
 class CSVMProblem{
 public:
