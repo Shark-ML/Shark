@@ -46,10 +46,9 @@ namespace shark {
 /// diagonal covariance matrix:
 /// \f$ k(x, z) = \exp(-\sum_i \gamma_i  (x_i - z_i)^2) \f$.
 /// The ARD kernel holds one real-valued parameter \f$ \gamma_i \f$ per input dimension.
-/// The parameters \f$ p_i \f$ are encoded as \f$ p_i^2 = \gamma_i \f$, allowing for unconstrained
-/// optimization. Here, the exposed/visible parameters are squared before being used in the
-/// actual computations, because the otherwise Shark-canonical exponential encoding proved
-/// a bit unstable, that is, leading to too big step sizes, in preliminary experiments.
+/// The parameters \f$ p_i \f$ are encoded as \f$ p_i = log(\gamma_i) \f$, allowing for unconstrained
+/// optimization. Here, the exposed/visible parameters are transformed by an exp before being used in the
+/// actual computations.
 ///
 /// Note that, like all or most models/kernels designed for unconstrained optimization, the
 /// argument to the constructor corresponds to the value of the true weights, while the set
@@ -88,11 +87,8 @@ public:
 		//initialize self
 		m_inputDimensions = dim;
 		m_gammas.resize(m_inputDimensions);
-		m_params.resize(m_inputDimensions);
-		double sqrt_gamma = std::sqrt( gamma_init );
 		for ( unsigned int i=0; i<m_inputDimensions; i++ ){
 			m_gammas(i) = gamma_init;
-			m_params(i) = sqrt_gamma;
 		}
 	}
 
@@ -101,12 +97,11 @@ public:
 	{ return "ARDKernelUnconstrained"; }
 
 	RealVector parameterVector() const{
-		return m_params;
+		return log(m_gammas);
 	}
 	void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(newParameters.size() == m_inputDimensions);
-		m_params = newParameters;
-		noalias(m_gammas) = sqr(m_params);
+		noalias(m_gammas) = exp(newParameters);
 	}
 	std::size_t numberOfParameters() const{
 		return m_inputDimensions;
@@ -129,7 +124,6 @@ public:
 		}
 #endif
 		m_gammas = newGammas;
-		noalias(m_params) = sqrt(m_gammas);
 	}
 
 	/// \brief evaluates \f$ k(x,z)\f$
@@ -215,10 +209,9 @@ public:
 		for(std::size_t i = 0; i != sizeX1; ++i){
 			for(std::size_t j = 0; j != sizeX2; ++j){
 				double coeff = coefficients(i,j) * s.kxy(i,j);
-				gradient += coeff * m_params * sqr(row(batchX1,i)-row(batchX2,j));
+				gradient -= coeff * m_gammas * sqr(row(batchX1,i)-row(batchX2,j));
 			}
 		}
-		gradient *= -2;
  	}
 
 	/// \brief evaluates \f$ \frac {\partial k(x,z)}{\partial x}\f$
@@ -254,8 +247,6 @@ public:
 	void read(InArchive& ar){
 		ar >> m_gammas;
 		ar >> m_inputDimensions;
-		m_params.resize(m_inputDimensions);
-		noalias(m_params) = sqrt(m_gammas);
 	}
 
 	void write(OutArchive& ar) const{
@@ -264,8 +255,7 @@ public:
 	}
 
 protected:
-	RealVector m_gammas;				///< kernel bandwidth parameters, one for each input dimension. squares of m_params.
-	RealVector m_params;				///< parameters as seen by the external optimizer (for unconstrained optimization). can be negative.
+	RealVector m_gammas;				///< kernel bandwidth parameters, one for each input dimension.
 	std::size_t m_inputDimensions;		///< how many input dimensions = how many bandwidth parameters
 };
 

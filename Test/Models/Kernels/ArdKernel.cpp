@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Parameters )
 	}
 	RealVector check_p = kernel.parameterVector();
 	for ( std::size_t i=0; i<check_p.size(); i++ ) {
-		BOOST_CHECK_SMALL( check_p(i)-std::sqrt(check_gamma(i)), 1E-10);
+		BOOST_CHECK_SMALL( check_p(i)-std::log(check_gamma(i)), 1E-10);
 	}
 
 	// set different parameters
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Parameters )
 	// test if gamma is set correctly
 	RealVector new_gammas = kernel.gammaVector();
 	for ( unsigned int i=0; i<my_params.size(); i++ )
-		BOOST_CHECK_SMALL( my_params(i)*my_params(i) - new_gammas(i), 1e-13 );
+		BOOST_CHECK_SMALL( std::exp(my_params(i)) - new_gammas(i), 1e-13 );
 
 	// everything again with a negative param as well:
 	my_params(0) = -0.1;
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Parameters )
 	// test if gamma is set correctly
 	new_gammas = kernel.gammaVector();
 	for ( unsigned int i=0; i<my_params.size(); i++ )
-		BOOST_CHECK_SMALL( my_params(i)*my_params(i) - new_gammas(i), 1e-13 );
+		BOOST_CHECK_SMALL( std::exp(my_params(i)) - new_gammas(i), 1e-13 );
 }
 
 BOOST_AUTO_TEST_CASE( DenseARDKernel_Value )
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Value )
 
 	// check eval for manual params
 	k_ret = kernel.eval(x, z);
-	my_ret = exp( -my_params(0)*my_params(0)*(x(0)-z(0))*(x(0)-z(0)) - my_params(1)*my_params(1)*(x(1)-z(1))*(x(1)-z(1)) - my_params(2)*my_params(2)*(x(2)-z(2))*(x(2)-z(2)) );
+	my_ret = exp( -std::exp(my_params(0))*(x(0)-z(0))*(x(0)-z(0)) - std::exp(my_params(1))*(x(1)-z(1))*(x(1)-z(1)) - std::exp(my_params(2))*(x(2)-z(2))*(x(2)-z(2)) );
 	BOOST_CHECK_SMALL( k_ret - my_ret, 1E-10);
 
 	//check batches
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Value )
 
 	// check eval for manual params
 	k_ret = kernel.eval(x, z);
-	my_ret = exp( -my_params(0)*my_params(0)*(x(0)-z(0))*(x(0)-z(0)) - my_params(1)*my_params(1)*(x(1)-z(1))*(x(1)-z(1)) - my_params(2)*my_params(2)*(x(2)-z(2))*(x(2)-z(2)) );
+	my_ret = exp( -std::exp(my_params(0))*(x(0)-z(0))*(x(0)-z(0)) - std::exp(my_params(1))*(x(1)-z(1))*(x(1)-z(1)) - std::exp(my_params(2))*(x(2)-z(2))*(x(2)-z(2)) );
 	BOOST_CHECK_SMALL( k_ret - my_ret, 1E-10);
 
 	//check batches

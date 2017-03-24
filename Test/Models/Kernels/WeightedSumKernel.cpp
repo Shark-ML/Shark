@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed )
     RealVector my_params(12);
     my_params(0) = 0.2; my_params(1) = 0.4; my_params(2) = 0.0; my_params(3) = 1.0;
     my_params(4) = -1.0; my_params(5) = 0.1; my_params(6) = -0.1; my_params(7) = 3;
-    my_params(8) = 0.5; my_params(9) = 0.6; my_params(10) = 2.0; my_params(11) = -1.1;
+    my_params(8) = 0.5; my_params(9) = std::log(0.6*0.6); my_params(10) = std::log(4.0); my_params(11) = std::log(1.1*1.1);
     kernel.setParameterVector(my_params);
 
     RealVector test1(3); test1(0) = 1.1; test1(1) = 0.7; test1(2) = -1.3;
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_Unconstrained )
     RealVector my_params(12);
     my_params(0) = 0.2; my_params(1) = 0.4; my_params(2) = 0.0; my_params(3) = 1.0;
     my_params(4) = -1.0; my_params(5) = 0.1; my_params(6) = -0.1; my_params(7) = 3;
-    my_params(8) = -0.5; my_params(9) = 0.6; my_params(10) = 2.0; my_params(11) = -1.1;
+    my_params(8) = -0.5; my_params(9) = std::log(0.6*0.6); my_params(10) = std::log(4.0); my_params(11) = std::log(1.1*1.1);
     kernel.setParameterVector(my_params);
 
     RealVector test1(3); test1(0) = 1.1; test1(1) = 0.7; test1(2) = -1.3;
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_NoDegreeParam )
     RealVector my_params(11);
     my_params(0) = 0.2; my_params(1) = 0.4; my_params(2) = 0.0; my_params(3) = 1.0;
     my_params(4) = -1.0; my_params(5) = 0.1; my_params(6) = -0.1;
-    my_params(7) = 0.5; my_params(8) = 0.6; my_params(9) = 2.0; my_params(10) = -1.1;
+    my_params(7) = 0.5; my_params(8) = std::log(0.6*0.6); my_params(9) = std::log(4.0); my_params(10) = std::log(1.1*1.1);
     kernel.setParameterVector(my_params);
 
     RealVector test1(3); test1(0) = 1.1; test1(1) = 0.7; test1(2) = -1.3;
@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE( DenseWeightedSumKernel_Test_Detailed_NoDegreeParam_Unconst
     RealVector my_params(11);
     my_params(0) = 0.2; my_params(1) = 0.4; my_params(2) = 0.0; my_params(3) = 1.0;
     my_params(4) = -1.0; my_params(5) = 0.1; my_params(6) = -0.1;
-    my_params(7) = -0.5; my_params(8) = 0.6; my_params(9) = 2.0; my_params(10) = -1.1;
+    my_params(7) = -0.5; my_params(8) = std::log(0.6*0.6); my_params(9) = std::log(4.0); my_params(10) = std::log(1.1*1.1);
     kernel.setParameterVector(my_params);
 
     RealVector test1(3); test1(0) = 1.1; test1(1) = 0.7; test1(2) = -1.3;

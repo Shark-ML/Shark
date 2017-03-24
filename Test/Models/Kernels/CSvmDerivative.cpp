@@ -830,9 +830,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 	double ArdParam_eps, C_eps;
 
 	// set up different values for the kernel parameters
-	std::vector< double > ArdParams;
-	ArdParams.push_back(10); ArdParams.push_back(2); ArdParams.push_back(1); ArdParams.push_back(0.5); ArdParams.push_back(0.2);
-	ArdParams.push_back(0.1); ArdParams.push_back(0.05); ArdParams.push_back(0.01); ArdParams.push_back(0.001); ArdParams.push_back(0.0001);
+	RealVector ArdParams = {2,1,0.5,-1,-2,-5};
 	double NUMERICAL_PARAMETER_INCREASE_FACTOR = 1.0001;
 	RealVector tmp_param_manipulator;
 
@@ -843,7 +841,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 		for ( unsigned int i=0; i<Cs.size(); i++ ) {
 			C_eps = Cs[i]*NUMERICAL_PARAMETER_INCREASE_FACTOR;
 			// set up svm with current kernel parameters
-			DenseARDKernel kernel( 2, ArdParams[h]*ArdParams[h] );
+			DenseARDKernel kernel( 2, std::exp(ArdParams[h]) );
 			tmp_param_manipulator = kernel.parameterVector();
 			tmp_param_manipulator(1) *= 0.5;
 			kernel.setParameterVector( tmp_param_manipulator );
@@ -860,7 +858,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			double diff, deriv;
 			RealVector computed_derivative;
 			// set up svm with epsiloned-c_parameter for numerical comparsion
-			DenseARDKernel c_cmp_kernel( 2, ArdParams[h]*ArdParams[h] );
+			DenseARDKernel c_cmp_kernel( 2, std::exp(ArdParams[h])  );
 			tmp_param_manipulator = c_cmp_kernel.parameterVector();
 			tmp_param_manipulator(1) *= 0.5;
 			c_cmp_kernel.setParameterVector( tmp_param_manipulator );
@@ -872,7 +870,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			c_cmp_trainer.train( c_cmp_kc, dataset );
 			RealVector c_cmp_param = c_cmp_svm.parameterVector();
 			// set up svm with epsiloned-kernel-parameters_1 for numerical comparsion
-			DenseARDKernel g1_cmp_kernel( 2, ArdParams[h]*ArdParams[h] );
+			DenseARDKernel g1_cmp_kernel( 2, std::exp(ArdParams[h])  );
 			tmp_param_manipulator = g1_cmp_kernel.parameterVector();
 			tmp_param_manipulator(0) = ArdParam_eps;
 			tmp_param_manipulator(1) *= 0.5;
@@ -887,7 +885,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			RealVector g1_cmp_param = g1_cmp_svm.parameterVector();
 			
 			// set up svm with epsiloned-kernel-parameters_2 for numerical comparsion
-			DenseARDKernel g2_cmp_kernel( 2, ArdParams[h]*ArdParams[h] );
+			DenseARDKernel g2_cmp_kernel( 2, std::exp(ArdParams[h]) );
 			tmp_param_manipulator = g2_cmp_kernel.parameterVector();
 			tmp_param_manipulator(1) *= 0.5;
 			tmp_param_manipulator(1) *= NUMERICAL_PARAMETER_INCREASE_FACTOR;
@@ -911,7 +909,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 				deriv = diff / (C_eps - Cs[i]);
 				svm_deriv.modelCSvmParameterDerivative(input[j], computed_derivative);
 				BOOST_REQUIRE_EQUAL( computed_derivative.size(), 3 );
-				BOOST_REQUIRE_SMALL( deriv - computed_derivative(2) , 1e-6 );
+				BOOST_CHECK_SMALL( deriv - computed_derivative(2) , 1e-6 );
 			}
 			// now also test derivatives of other datapoints
 			for ( unsigned int j=0; j<NUM_QUIZ_POINTS; j++ ) {
@@ -919,7 +917,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 				deriv = diff / (C_eps - Cs[i]);
 				svm_deriv.modelCSvmParameterDerivative(quiz[j], computed_derivative);
 				BOOST_REQUIRE_EQUAL( computed_derivative.size(), 3 );
-				BOOST_REQUIRE_SMALL( deriv - computed_derivative(2) , 1e-6 );
+				BOOST_CHECK_SMALL( deriv - computed_derivative(2) , 1e-6 );
 			}
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -930,7 +928,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 				deriv = diff / (ArdParam_eps - ArdParams[h]);
 				svm_deriv.modelCSvmParameterDerivative(input[j], computed_derivative);
 				BOOST_REQUIRE_EQUAL( computed_derivative.size(), 3 );
-				BOOST_REQUIRE_SMALL( deriv - computed_derivative(0) , 5e-3 );
+				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
 			// now also test derivatives of other datapoints
 			for ( unsigned int j=0; j<NUM_QUIZ_POINTS; j++ ) {
@@ -938,7 +936,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 				deriv = diff / (ArdParam_eps - ArdParams[h]);
 				svm_deriv.modelCSvmParameterDerivative(quiz[j], computed_derivative);
 				BOOST_REQUIRE_EQUAL( computed_derivative.size(), 3 );
-				BOOST_REQUIRE_SMALL( deriv - computed_derivative(0) , 5e-3 );
+				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -946,18 +944,18 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_MULTIPLE_KERNEL_PARAMS )
 			// first, test derivatives of dataset-points themselves
 			for ( unsigned int j=0; j<NUM_DATA_POINTS; j++ ) {
 				diff = g2_cmp_svm(input[j])(0) - svm(input[j])(0);
-				deriv = diff / 0.5 / (ArdParam_eps - ArdParams[h]);
+				deriv = diff / 0.5/(ArdParam_eps - ArdParams[h]);
 				svm_deriv.modelCSvmParameterDerivative(input[j], computed_derivative);
 				BOOST_REQUIRE_EQUAL( computed_derivative.size(), 3 );
-				BOOST_REQUIRE_SMALL( deriv - computed_derivative(1) , 5e-3 );
+				BOOST_CHECK_SMALL( deriv - computed_derivative(1) , 5e-3 );
 			}
 			// now also test derivatives of other datapoints
 			for ( unsigned int j=0; j<NUM_QUIZ_POINTS; j++ ) {
 				diff = g2_cmp_svm(quiz[j])(0) - svm(quiz[j])(0);
-				deriv = diff / 0.5 / (ArdParam_eps - ArdParams[h]);
+				deriv = diff / 0.5/(ArdParam_eps - ArdParams[h]);
 				svm_deriv.modelCSvmParameterDerivative(quiz[j], computed_derivative);
 				BOOST_REQUIRE_EQUAL( computed_derivative.size(), 3 );
-				BOOST_REQUIRE_SMALL( deriv - computed_derivative(1) , 5e-3 );
+				BOOST_CHECK_SMALL( deriv - computed_derivative(1) , 5e-3 );
 			}
 
 		}
