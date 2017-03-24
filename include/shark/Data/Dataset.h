@@ -895,7 +895,7 @@ transform(Data<T> const& data, Functor f){
 	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(batches);
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
-		result.batch(i)= createBatch<T>(
+		result.batch(i)= createBatch<ResultType>(
 			boost::make_transform_iterator(batchBegin(data.batch(i)), f),
 			boost::make_transform_iterator(batchEnd(data.batch(i)), f)
 		);

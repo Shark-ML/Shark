@@ -686,7 +686,7 @@ struct TransformedDataElement{
 private:
 	template<class B>
 	struct TransformedDataElementTypeFromBatch{
-		typedef typename boost::range_value<
+		typedef typename batch_to_element<
 			typename std::result_of<Functor&&(B)>::type 
 		>::type type;
 	};

@@ -33,7 +33,7 @@
  *
  */
 
-#include <boost/mpl/bool.hpp>
+#include <type_traits>
 
  namespace shark{
 
@@ -83,6 +83,17 @@
 			sizeof(no_type) == sizeof(is_private_type( (m_fun(m_arg), 0) ))
 		);
 
-		typedef boost::mpl::bool_<value> type;
+		typedef std::integral_constant<bool, value> type;
+	};
+	
+	template<class R, class T, class Argument>
+	struct CanBeCalled<R(T), Argument>{
+		typedef std::integral_constant<bool, std::is_convertible<T, Argument>::value > type;
+		static bool const value = type::value;
+	};
+	template<class R, class T, class Argument>
+	struct CanBeCalled<R(*)(T), Argument>{
+		typedef std::integral_constant<bool, std::is_convertible<T, Argument>::value > type;
+		static bool const value = type::value;
 	};
 }

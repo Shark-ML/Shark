@@ -75,6 +75,12 @@ struct KeyValuePair{
 	bool operator>=(KeyValuePair<K,V> const& pair) const{
 		return key >= pair.key;
 	}
+	
+	template<class Archive>
+	void serialize(Archive &ar, const unsigned int /*file_version*/) {
+		ar & key;
+		ar & value;
+	}
 };
 
 ///\brief Swaps the contents of two instances of KeyValuePair
