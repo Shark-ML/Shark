@@ -106,12 +106,10 @@ private:
 	typedef typename Batch<LabelType>::type BatchLabelType;
 public:
 	/// \brief Construction of the Kernel Target Alignment (KTA) from a kernel object.
-	///
-	/// Don't forget to provide a data set with the setDataset method
-	/// before using the object.
 	KernelTargetAlignment(
 		LabeledData<InputType, LabelType> const& dataset,
-		AbstractKernelFunction<InputType>* kernel
+		AbstractKernelFunction<InputType>* kernel,
+		bool centering = true
 	){
 		SHARK_RUNTIME_CHECK(kernel != NULL, "[KernelTargetAlignment] kernel must not be NULL");
 
@@ -125,9 +123,9 @@ public:
 
 		m_data = dataset;
 		m_elements = dataset.numberOfElements();
+		m_centering = centering;
 
-
-		setupY(dataset.labels());
+		setupY(dataset.labels(), centering);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -221,6 +219,7 @@ private:
 	double m_meanY;                                  ///< mean label element
 	std::size_t m_numberOfClasses;                  ///< number of classes
 	std::size_t m_elements;                          ///< number of data points
+	bool m_centering;
 
 	struct KernelMatrixResults{
 		RealVector k;
@@ -230,7 +229,7 @@ private:
 		double meanK;
 	};
 
-	void setupY(Data<unsigned int>const& labels){
+	void setupY(Data<unsigned int>const& labels, bool centering){
 		//preprocess Y so calculate column means and overall mean
 		//the most efficient way to do this is via the class counts
 		std::vector<std::size_t> classCount = classSizes(labels);
@@ -248,15 +247,23 @@ private:
 		for(std::size_t i = 0; i != m_elements; ++i){
 			m_columnMeanY(i) = classMean(labels.element(i));
 		}
+		if(!centering){
+			m_meanY = 0;
+			m_columnMeanY.clear();
+		}
 	}
 
-	void setupY(Data<RealVector>const& labels){
+	void setupY(Data<RealVector>const& labels, bool centering){
 		RealVector meanLabel = mean(labels);
 		m_columnMeanY.resize(m_elements);
 		for(std::size_t i = 0; i != m_elements; ++i){
 			m_columnMeanY(i) = inner_prod(labels.element(i),meanLabel);
 		}
 		m_meanY=inner_prod(meanLabel,meanLabel);
+		if(!centering){
+			m_meanY = 0;
+			m_columnMeanY.clear();
+		}
 	}
 
 	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
@@ -345,7 +352,6 @@ private:
 		// + (\langle Kc,Kc \rangle  my-2\langle Y, Kc \rangle mk) u u^T
 		blockW+= KcKc*m_meanY-YcKc*meanK;
 		blockW /= KcKc*std::sqrt(KcKc);
-		//std::cout<<blockW<<std::endl;
 		//symmetry
 		if(i != j)
 			blockW *= 2.0;
@@ -407,6 +413,10 @@ private:
 		double n = (double)m_elements;
 		k /= n;//means
 		double meanK = sum(k)/n;
+		if(!m_centering){
+			k.clear();
+			meanK = 0;
+		}
 		double n2 = sqr(n);
 		double YcKc = YK-2.0*n*inner_prod(k,m_columnMeanY)+n2*m_meanY*meanK;
 		double KcKc = KK - 2.0*n*inner_prod(k,k)+n2*sqr(meanK);

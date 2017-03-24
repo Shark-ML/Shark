@@ -112,21 +112,59 @@ RealMatrix calculateCenteredKernelMatrix(Kernel const& kernel, Data const& data)
 	return K;
 }
 
+//compar enon-centered KTA to definition
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_Non_Centered)
+{
+	DenseLinearKernel kernel;
+	
+	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data.inputs());
+	double YK=sum(K * Y);
+	double KK=sum(K * K);
+	double YY = sum(Y * Y);
+	double truth = -YK/std::sqrt(KK)/std::sqrt(YY);
+	
+	//linear Kernel doesn't have any parameters...
+	RealVector input;
+	
+	KernelTargetAlignment<> kta(data,&kernel,false);
+	double eval = kta.eval(input);
+	BOOST_CHECK_CLOSE(eval,truth,1.e-9);
+}
+
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_Non_Centered_Gauss)
+{
+	GaussianRbfKernel<> kernel(1.0);
+	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data.inputs());
+	double YK=sum(K * Y);
+	double KK=sum(K * K);
+	double YY = sum(Y * Y);
+	double truth = -YK/std::sqrt(KK)/std::sqrt(YY);
+	
+	//linear Kernel doesn't have any parameters...
+	RealVector input;
+	KernelTargetAlignment<> kta(data,&kernel,false);
+	double eval = kta.eval(kernel.parameterVector());
+	BOOST_CHECK_CLOSE(eval,truth,1.e-9);
+}
+
 //just sanity check ensuring, that KTA on pre-centered data on a linear kernel is the same
 //as on uncentered data (this is the only kernel where this equality holds!
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear_Centered )
 {
 	DenseLinearKernel kernel;
 	KernelTargetAlignment<> kta(data,&kernel);
-	KernelTargetAlignment<> ktaCentered(dataCentered,&kernel);
+	KernelTargetAlignment<> ktaCentered(dataCentered,&kernel,true);
+	KernelTargetAlignment<> ktaNonCentered(dataCentered,&kernel,false);
 	
 	
 	//linear Kernel doesn't have any parameters...
 	RealVector input;
 	
 	double evalCentered = ktaCentered.eval(input);
+	double evalNonCentered = ktaNonCentered.eval(input);
 	double eval = kta.eval(input);
 	BOOST_CHECK_CLOSE(eval,evalCentered,1.e-9);
+	BOOST_CHECK_CLOSE(evalNonCentered,evalCentered,1.e-9);
 }
 
 //calculate the centered KTA and check against trivially calculated result 
@@ -220,6 +258,19 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 }
 
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_GaussKernel )
+{
+	GaussianRbfKernel<> kernel(1);
+	KernelTargetAlignment<> kta(data,&kernel,false);
+	
+	for(std::size_t i = 0; i != 100; ++i){
+		RealVector input(1);
+		input(0) = Rng::uni(0.5,2);
+		testDerivative(kta,input,1.e-8);
+	}
+	
+}
+
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_GaussKernel_Centered )
 {
 	GaussianRbfKernel<> kernel(1);
 	KernelTargetAlignment<> kta(data,&kernel);
