@@ -1,8 +1,7 @@
 language: cpp
 
 compiler:
-  - g++-4.6
-  - g++-4.8
+  - g++
   - clang
   
 os:
@@ -27,7 +26,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update; fi
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install cmake; fi 
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then echo "$CXX"; fi 
-#  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then  if [ "$CXX" == "g++" ]; then sudo apt-get install g++-4.8; export CXX="g++-4.8"; fi; fi 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then  if [ "$CXX" == "g++" ]; then sudo apt-get install g++-4.8; export CXX="g++-4.8"; fi; fi 
   #~ - if [ "$TRAVIS_OS_NAME" == "linux" ]; then  if [ "$CXX" == "clang++" ]; then sudo apt-get --force-yes install clang-3.7; export CXX="clang++-3.7"; fi; fi 
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost1.55-dev  libboost-date-time1.55-dev libboost-filesystem1.55-dev; fi 
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-graph1.55-dev libboost-iostreams1.55-dev libboost-math1.55-dev; fi
