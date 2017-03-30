@@ -143,8 +143,7 @@ public:
 		std::size_t n = data.size();
 		double sampleMean = sum(data)/n;
 		double var = sum(sqr(data - sampleMean))/(n-1.0);
-		double std = std::sqrt(var);
-		return std::sqrt(double(n)) * (sampleMean - m_mean)/std;
+		return std::sqrt(double(n)) * (sampleMean - m_mean)/std::sqrt(var);
 	}
 private:
 	double m_mean;
