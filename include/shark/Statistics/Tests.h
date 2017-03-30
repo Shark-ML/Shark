@@ -44,6 +44,16 @@ enum class Tail{
 	TwoSided
 };
 
+
+///\brief Returns the p-value of a single sample test
+///
+/// Computes the test statistic of the supplied test using the data
+/// and computes the probability that the null hypothesis
+/// would generate the same test statistic
+///
+/// \param test the test to perform
+/// \param data the data sample to test
+/// \param tail the tail, or side to evaluate
 template<class Test>
 double p(Test const& test, RealVector const& data, Tail tail){
 	auto dist = test.testDistribution(data);
@@ -57,6 +67,19 @@ double p(Test const& test, RealVector const& data, Tail tail){
 	}
 }
 
+///\brief Returns the p-value of a two-sample test
+///
+/// Computes the test statistic of the supplied test using the data
+/// and computes the probability that the null hypothesis
+/// would generate the same test statistic
+///
+/// Be careful to choose a test fitting to the data, e.g. dependent data
+/// needs a paired test.
+///
+/// \param test the test to perform
+/// \param dataX the first sample to test
+/// \param dataY the second sample to test
+/// \param tail the tail, or side to evaluate
 template<class Test>
 double p(Test const& test, RealVector const& dataX, RealVector const& dataY, Tail tail){
 	auto dist = test.testDistribution(dataX,dataY);
@@ -70,30 +93,32 @@ double p(Test const& test, RealVector const& dataX, RealVector const& dataY, Tai
 	}
 }
 
+
+///\brief Returns whether the test is significant on the data at alpha-level
+///
+/// Equivalent to p(test,data,tail) < alpha
+///
+/// \param test the test to perform
+/// \param data the data sample to test
+/// \param tail the tail, or side to evaluate
+/// \param alpha the Significance threshold
 template<class Test>
 bool isSignificant(Test const& test, RealVector const& data, Tail tail, double alpha){
-	auto dist = test.testDistribution(data);
-	double t = test.statistics(data);
-	if(tail == Tail::Left){
-		return t < quantile(dist, alpha);
-	}else if( tail == Tail::Right){
-		return t > quantile(complement(dist, alpha));
-	}else{
-		return std::abs(t) > quantile(complement(dist, alpha/2));
-	}
+	return p(test,data,tail) < alpha;
 }
 
+///\brief Returns whether the test is significant on the data at alpha-level
+///
+/// Equivalent to p(test,data,tail) < alpha
+///
+/// \param test the test to perform
+/// \param dataX the first sample to test
+/// \param dataY the second sample to test
+/// \param tail the tail, or side to evaluate
+/// \param alpha the Significance threshold
 template<class Test>
 bool isSignificant(Test const& test, RealVector const& dataX, RealVector const& dataY, Tail tail, double alpha){
-	auto dist = test.testDistribution(dataX, dataY);
-	double t = test.statistics(dataX, dataY);
-	if(tail == Tail::Left){
-		return t < quantile(dist, alpha);
-	}else if( tail == Tail::Right){
-		return t > quantile(complement(dist), alpha);
-	}else{
-		return std::abs(t) > quantile(complement(dist), alpha/2);
-	}
+	return p(test, dataX, dataY, tail) < alpha;
 }
 
 /// \brief Class conducting a one-sample student's t-test
@@ -190,6 +215,118 @@ public:
 private:
 	bool m_equalVariance;
 };
+
+/// \brief Implements the Wilcoxon ranksum test
+///
+/// Given two ordinal random variables X and Y with arbitrary distributions,
+/// the test checks whether P(X>Y) = P(Y > X). This is done by computing
+/// the ranks of the samples of X and Y and computing the ranksum of X. 
+/// For large sample sizes > 20, the resulting statistic is approximately normal distributed
+/// and we can perform a test on the resulting z-statistic.
+///
+/// Warning: the current implementation is not suited for small sample sizes.
+/// The normal approximation only holds with a decent number of values and
+/// there is currently no continuity correction implemented.
+class WilcoxonRankSumTest{
+public:
+	boost::math::normal testDistribution(RealVector const& dataX, RealVector const& dataY)const{
+		return boost::math::normal(0.0,1.0);
+	}
+	
+	double statistics(RealVector const& dataX, RealVector const& dataY)const{
+		std::size_t nX = dataX.size();
+		std::size_t nY = dataY.size();
+		std::size_t n = nX + nY;
+		RealVector dataXsorted = dataX;
+		RealVector dataYsorted = dataY;
+		std::sort(dataXsorted.begin(),dataXsorted.end());
+		std::sort(dataYsorted.begin(),dataYsorted.end());
+		
+		double ranksumX = -(nX*(nX+1.0)/2);
+		double var = n +1;
+		for(double x: dataX){
+			//we compute the ranksum, taking ties into account
+			//lower bound gives us the first element that is >=x.
+			//upper bound gives us the first element that is >x
+			//thus upper bound - lower bound gives the number of ties
+			//the rank for ties is the average rank of a random ordering of all ties
+			//therefore it is (upper bound + lower bound)/2
+			//we have to compute this for both ranges
+			auto rankXlower = std::lower_bound(dataXsorted.begin(),dataXsorted.end(),x) -dataXsorted.begin();
+			auto rankXupper = std::upper_bound(dataXsorted.begin(),dataXsorted.end(),x) - dataXsorted.begin();
+			auto rankYlower = std::lower_bound(dataYsorted.begin(),dataYsorted.end(),x) - dataYsorted.begin();
+			auto rankYupper = std::upper_bound(dataYsorted.begin(),dataYsorted.end(),x) - dataYsorted.begin();
+			double numTiesX = rankXupper - rankXlower;//needed for variance correction
+			double numTies = numTiesX + (rankYupper - rankYlower);
+			double rank = 1 + rankXlower + rankYlower+ (numTies-1.0)/2;//if numTies=1 <-> no other point than x has that rank
+			ranksumX += rank;
+			
+			//variance correction for ties. 
+			//formula is (numTies^3- numTies)/(n*(n-1))
+			//however we add this for all x with the same rank so we have to divide
+			//by numTiesX
+			var -= (numTies*numTies * numTies - numTies)/numTiesX/(n*(n-1.0));//0 if numTies==0
+		}
+		var *= nX * nY / 12.0;
+		//compute the u statistic
+		double y = ranksumX - nX * nY/2.0;//subtract the mean rank sum
+		return y/std::sqrt(var); 
+		
+	}
+};
+
+/// \brief Implements the Wilcoxon signed rank test
+///
+/// Given two ordinal random variables X and Y where X and Y are statistically dependent,
+/// we can compute the variable Z=X- from the pairs.
+/// the test checks whether P(Z > 0) = P(Z < 0). This is done by computing
+/// the ranks R of |Z| and computing the signed ranksum E{sign(Z) R}. 
+/// For large sample sizes > 20, the resulting statistic is approximately normal distributed
+/// and we can perform a test on the resulting z-statistic.
+///
+/// Warning: the current implementation is not suited for small sample sizes.
+/// The normal approximation only holds with a decent number of values and
+/// there is currently no continuity correction implemented.
+class WilcoxonSignedRankTest{
+public:
+	boost::math::normal testDistribution(RealVector const& dataX, RealVector const& dataY)const{
+		return boost::math::normal(0.0,1.0);
+	}
+	double statistics(RealVector const& dataX, RealVector const& dataY)const{
+		std::vector<double> diffs;
+		for(std::size_t i = 0; i != dataX.size(); ++i){
+			double diff = dataX[i] - dataY[i];
+			if(diff == 0) continue;
+			diffs.push_back(diff);
+		}
+		auto comp = [](double x, double y){return std::abs(x) < std::abs(y);};
+		std::sort(diffs.begin(),diffs.end(), comp);
+		
+		std::size_t n = diffs.size();
+		
+		double W = 0.0;
+		double var = n*(n+1.0)*(2*n+1.0)/6.0;
+		for(double x: diffs){
+			//we compute the ranksum, taking ties into account
+			//lower bound gives us the first element that is >=x.
+			//upper bound gives us the first element that is >x
+			//thus upper bound - lower bound gives the number of ties
+			//the rank for ties is the average rank of a random ordering of all ties
+			//therefore it is (upper bound + lower bound)/2
+			//we have to compute this for both ranges
+			auto ranklower = std::lower_bound(diffs.begin(),diffs.end(),x, comp) - diffs.begin();
+			auto rankupper = std::upper_bound(diffs.begin(),diffs.end(),x, comp) - diffs.begin();
+			double numTies = rankupper - ranklower;
+			double rank = 1 + ranklower + (numTies - 1.0)/2;
+			double sign = x > 0? 1: -1;
+			W += sign * rank;
+			var -= (numTies*numTies * numTies - numTies)/numTies/12.0;//0 if numTies==0
+		}
+		return W/std::sqrt(var);
+		
+	}
+};
+
 
  }}
  

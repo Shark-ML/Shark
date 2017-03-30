@@ -1,5 +1,6 @@
 
 #include <shark/Statistics/Tests.h>
+#include <shark/Rng/GlobalRng.h>
 
 #define BOOST_TEST_MODULE Statistics_Tests
 #include <boost/test/unit_test.hpp>
@@ -9,7 +10,7 @@ using namespace shark;
 
 BOOST_AUTO_TEST_SUITE (Statistical_Tests)
 
-//all results taken from R
+//all results taken from R. note that the results are without continuity correction for ranksum tests!
 BOOST_AUTO_TEST_CASE( TTest_Test) {
 	//mean is 49
 	RealVector sample = { 46, 48, 51, 49, 46, 51, 52, 47, 49, 48, 48, 51, 49, 50, 52, 47 };
@@ -56,6 +57,45 @@ BOOST_AUTO_TEST_CASE( Paired_TTest_Test) {
 		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Left),0.9321334,1.e-5);
 		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Right),0.06786656,1.e-4);
 		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::TwoSided),0.1357331,1.e-4);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( WilcoxonRankSum_Test_NoTies) {
+	RealVector sampleX = { 0, 5, 5.5,  6, 7, 8, 9, 11, 13, 28, 29, 32, 33 };
+	RealVector sampleY = { 1, 2, 3, 4, 6.5, 8.5, 120 };
+	std::shuffle(sampleX.begin(),sampleX.end(),Rng::globalRng);
+	std::shuffle(sampleY.begin(),sampleY.end(),Rng::globalRng);
+	{
+		statistics::WilcoxonRankSumTest test;
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Left),0.928675,1.e-5);
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Right),0.07132505,1.e-4);
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::TwoSided),0.1426501,1.e-4);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( WilcoxonRankSum_Test_Tied) {
+	RealVector sampleX = { 0, 5, 5.5, 6, 6, 7, 7, 7, 8, 9, 11, 13, 28, 29, 32, 33 };
+	RealVector sampleY = { 1, 2, 3, 4, 6, 6, 6, 6.5, 7, 7,  8.5, 120 };
+	std::shuffle(sampleX.begin(),sampleX.end(),Rng::globalRng);
+	std::shuffle(sampleY.begin(),sampleY.end(),Rng::globalRng);
+	{
+		statistics::WilcoxonRankSumTest test;
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Left),0.9579307,1.e-5);
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Right),0.04206934,1.e-4);
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::TwoSided),0.08413868,1.e-4);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( WilcoxonSignedRank_Test) {
+	//diffs: 1, 3, 2.5, 2,0,1,1,0.5, 2, 2.5, 107
+	//ties:  1 1 2 2 2 1 1
+	RealVector sampleX = { 0, 5, 5.5, 6, 6, 7, 7, 7,   8, 9, 11,  13 };
+	RealVector sampleY = { 1, 2, 3,   4, 6, 6, 6, 6.5, 7, 7, 8.5, 120 };
+	{
+		statistics::WilcoxonSignedRankTest test;
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Left),0.9510063,1.e-5);
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Right),0.04899367,1.e-4);
+		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::TwoSided),0.09798734,1.e-4);
 	}
 }
 
