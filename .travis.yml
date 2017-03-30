@@ -12,9 +12,7 @@ os:
 matrix:
   exclude:
     - os: osx 
-      compiler: 
-        - g++-4.6
-        - g++-4.8
+      compiler: g++
     - os: linux
       compiler: clang
 env:
