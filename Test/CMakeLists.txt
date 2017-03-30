@@ -239,22 +239,21 @@ shark_add_test( RBM/BinaryLayer.cpp RBM_BinaryLayer)
 shark_add_test( RBM/BipolarLayer.cpp RBM_BipolarLayer)
 shark_add_test( RBM/GaussianLayer.cpp RBM_GaussianLayer)
 shark_add_test( RBM/TruncatedExponentialLayer.cpp RBM_TruncatedExponentialLayer)
-
 shark_add_test( RBM/MarkovChain.cpp RBM_MarkovChain)
-#shark_add_test( RBM/GibbsOperator.cpp RBM_GibbsOperator)//not compiling anymore needs rewrite
-
 shark_add_test( RBM/Energy.cpp RBM_Energy)
 shark_add_test( RBM/AverageEnergyGradient.cpp RBM_AverageEnergyGradient)
 shark_add_test( RBM/Analytics.cpp RBM_Analytics)
-
 shark_add_test( RBM/ExactGradient.cpp RBM_ExactGradient)
-#shark_add_test( RBM/ContrastiveDivergence.cpp RBM_ContrastiveDivergence) #does not compile currently
 shark_add_test( RBM/TemperedMarkovChain.cpp RBM_TemperedMarkovChain)
-
 shark_add_test( RBM/ParallelTemperingTraining.cpp RBM_PTTraining)
 shark_add_test( RBM/PCDTraining.cpp RBM_PCDTraining)
 shark_add_test( RBM/ContrastiveDivergenceTraining.cpp RBM_ContrastiveDivergenceTraining)
 shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
+#shark_add_test( RBM/ContrastiveDivergence.cpp RBM_ContrastiveDivergence) #does not compile currently
+#shark_add_test( RBM/GibbsOperator.cpp RBM_GibbsOperator)//not compiling anymore needs rewrite
+
+#Statistics
+shark_add_test( Statistics/Tests.cpp Statistics_Tests)
 
 #marking tests as slow
 set_tests_properties( DirectSearch_HypervolumeContribution PROPERTIES LABELS "slow" )
