@@ -9,9 +9,9 @@ sudo: false
 addons:
   apt:
     sources:
-      - sourceline: 'ppa:ubuntu-toolchain-r/test'
+      - ubuntu-toolchain-r-test
       - sourceline: 'ppa:boost-latest/ppa'
-      - sourceline: 'ppa:kubunut-ppa/backports'
+      - sourceline: 'ppa:kubuntu-ppa/backports'
       - sourceline: 'ppa:roblib/ppa'
     packages:
       - cmake
@@ -36,21 +36,24 @@ matrix:
       addons:
         apt:
           packages: ['g\+\+-4.8']
-      env: COMPILER=g++-4.8
+      env: 
+        - COMPILER=g++-4.8
+        - OMP_NUM_THREADS=2
 
     - os: linux
       compiler: gcc
       addons:
         apt:
           packages: ['g\+\+-4.6']
-      env: COMPILER=g++-4.6
+      env: 
+        - COMPILER=g++-4.6
+        - OMP_NUM_THREADS=2
 
     - os: osx
       compiler: clang
-      env: COMPILER=clang++
-
-env:
-  - OMP_NUM_THREADS=2
+      env: 
+        - COMPILER=clang++
+        - OMP_NUM_THREADS=2
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" != "linux" ]; then brew update && brew unlink cmake && brew install cmake; brew link cmake; fi
