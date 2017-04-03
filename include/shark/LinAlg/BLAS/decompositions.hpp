@@ -95,7 +95,7 @@ public:
 		return m_cholesky;
 	}
 
-	auto upper_factor()const ->decltype(trans(this->lower_factor())){
+	auto upper_factor()const -> decltype(trans(std::declval<cholesky_decomposition>().lower_factor())){
 		return trans(m_cholesky);
 	}
 	
@@ -569,10 +569,9 @@ struct symm_semi_pos_def{ typedef symm_semi_pos_def transposed_orientation;};
 struct indefinite_full_rank{ typedef indefinite_full_rank transposed_orientation;};
 struct conjugate_gradient{
 	typedef conjugate_gradient transposed_orientation;
-	double epsilon = 1.e-10;
-	unsigned max_iterations = 0;
-	conjugate_gradient() = default;
-	conjugate_gradient(double epsilon, unsigned max_iterations = 0)
+	double epsilon;
+	unsigned max_iterations;
+	conjugate_gradient(double epsilon = 1.e-10, unsigned max_iterations = 0)
 	:epsilon(epsilon), max_iterations(max_iterations){}
 };
 

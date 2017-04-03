@@ -358,22 +358,34 @@ struct device_traits<gpu_tag>{
 	}
 	
 	template <class Iterator, class Functor>
-	using transform_iterator = boost::compute::transform_iterator<Iterator, Functor>;
-
+	struct transform_iterator{
+		typedef boost::compute::transform_iterator<Iterator, Functor> type;
+	};
+	
 	template <class Iterator>
-	using subrange_iterator = gpu::detail::subrange_iterator<Iterator>;
+	struct subrange_iterator{
+		typedef gpu::detail::subrange_iterator<Iterator> type;
+	};
 	
-	template<class Iterator1, class Iterator2, class Functor>
-	using binary_transform_iterator = gpu::detail::binary_transform_iterator<Iterator1, Iterator2, Functor>;
+	template <class Iterator1, class Iterator2, class Functor>
+	struct binary_transform_iterator{
+		typedef gpu::detail::binary_transform_iterator<Iterator1,Iterator2, Functor> type;
+	};
 	
 	template<class T>
-	using constant_iterator = boost::compute::constant_iterator<T>;
+	struct constant_iterator{
+		typedef boost::compute::constant_iterator<T> type;
+	};
 	
 	template<class T>
-	using one_hot_iterator = iterators::one_hot_iterator<T>;
+	struct one_hot_iterator{
+		typedef iterators::one_hot_iterator<T> type;
+	};
 	
 	template<class Closure>
-	using indexed_iterator = gpu::detail::indexed_iterator<Closure>;
+	struct indexed_iterator{
+		typedef gpu::detail::indexed_iterator<Closure> type;
+	};
 	
 	//functors
 	

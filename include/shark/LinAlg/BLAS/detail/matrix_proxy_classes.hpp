@@ -87,7 +87,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(i,j)){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(std::declval<M&>()(i,j)){
 		return (*m_expression)(i, j);
 	}
 	
@@ -250,7 +250,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(j,i)){
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(std::declval<M&>()(j,i)){
 		return expression()(j, i);
 	}
 	
@@ -402,11 +402,11 @@ public:
 	
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& j) const -> decltype(this->expression()(this->index(),j)){
+	auto operator()(IndexExpr const& j) const -> decltype(std::declval<M&>()(std::size_t(),j)){
 		return expression()(index(), j);
 	}
 	template <class IndexExpr>
-	auto operator[](IndexExpr const& j) const -> decltype(this->expression()(this->index(),j)){
+	auto operator[](IndexExpr const& j) const -> decltype(std::declval<M&>()(std::size_t(),j)){
 		return (*this)(j);
 	}
 	
@@ -561,9 +561,9 @@ public:
 
 	// Element access
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(this->expression()(
-		device_traits<typename M::device_type>::index_add(this->start1(),i),
-		device_traits<typename M::device_type>::index_add(this->start2(),i)
+	auto operator()(IndexExpr const& i) const -> decltype(std::declval<M&>()(
+		device_traits<typename M::device_type>::index_add(std::size_t(),i),
+		device_traits<typename M::device_type>::index_add(std::size_t(),i)
 	)){
 		return m_expression(
 			device_traits<typename M::device_type>::index_add(start1(),i),
@@ -585,8 +585,8 @@ public:
 		return assign(*this, typename vector_temporary<M>::type(e));
 	}
 
-	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<closure_type> iterator;
-	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<const_closure_type> const_iterator;
+	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<closure_type>::type iterator;
+	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<const_closure_type>::type const_iterator;
 
 	// Element lookup
 	const_iterator begin()const{
@@ -695,9 +695,9 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(this->expression()(
-		device_traits<typename M::device_type>::index_add(this->start1(),i),
-		device_traits<typename M::device_type>::index_add(this->start2(),j)
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(std::declval<matrix_closure_type>()(
+		device_traits<typename M::device_type>::index_add(std::size_t(),i),
+		device_traits<typename M::device_type>::index_add(std::size_t(),j)
 	)){
 		return m_expression(
 			device_traits<typename M::device_type>::index_add(start1(),i),
@@ -716,10 +716,10 @@ public:
 	}
 
 	// Iterator types
-	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename row_iterator<M>::type> row_iterator;
-	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename column_iterator<M>::type> column_iterator;
-	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename M::const_row_iterator> const_row_iterator;
-	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename M::const_column_iterator> const_column_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename row_iterator<M>::type>::type row_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename column_iterator<M>::type>::type column_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename M::const_row_iterator>::type const_row_iterator;
+	typedef typename device_traits<typename M::device_type>:: template subrange_iterator<typename M::const_column_iterator>::type const_column_iterator;
 
 	// Element lookup
 	const_row_iterator row_begin(size_type i) const {

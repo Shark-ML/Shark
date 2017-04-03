@@ -37,7 +37,6 @@
 #include "evaluation_tags.hpp"
 #include "structure.hpp"
 #include "storage.hpp"
-#include "functional.hpp"
 #include "../expression_types.hpp"
 
 #include <boost/mpl/eval_if.hpp>
@@ -245,102 +244,304 @@ struct device_traits<cpu_tag>{
 	}
 	
 	template <class Iterator, class Functor>
-	using transform_iterator = iterators::transform_iterator<Iterator, Functor>;
 
+	struct transform_iterator{
+		typedef iterators::transform_iterator<Iterator, Functor> type;
+	};
+	
 	template <class Iterator>
-	using subrange_iterator = iterators::subrange_iterator<Iterator>;
+	struct subrange_iterator{
+		typedef iterators::subrange_iterator<Iterator> type;
+	};
 	
-	template<class Iterator1, class Iterator2, class Functor>
-	using binary_transform_iterator = iterators::binary_transform_iterator<Iterator1,Iterator2, Functor>;
+	template <class Iterator1, class Iterator2, class Functor>
+	struct binary_transform_iterator{
+		typedef iterators::binary_transform_iterator<Iterator1,Iterator2, Functor> type;
+	};
 	
 	template<class T>
-	using constant_iterator = iterators::constant_iterator<T>;
+	struct constant_iterator{
+		typedef iterators::constant_iterator<T> type;
+	};
 	
 	template<class T>
-	using one_hot_iterator = iterators::one_hot_iterator<T>;
+	struct one_hot_iterator{
+		typedef iterators::one_hot_iterator<T> type;
+	};
 	
 	template<class Closure>
-	using indexed_iterator = iterators::indexed_iterator<Closure>;
+	struct indexed_iterator{
+		typedef iterators::indexed_iterator<Closure> type;
+	};
 	
 	//functors
 	template<class T>
-	using add = functors::scalar_binary_plus<T>;
+	struct add {
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		static const bool right_zero_identity = true;
+		static const bool left_zero_identity = false;
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return x+y;
+		}
+	};
 	template<class T>
-	using subtract = functors::scalar_binary_minus<T>;
+	struct subtract {
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		static const bool right_zero_identity = true;
+		static const bool left_zero_identity = false;
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return x-y;
+		}
+	};
+
 	template<class T>
-	using multiply = functors::scalar_binary_multiply<T>;
+	struct multiply {
+		static const bool left_zero_remains =  true;
+		static const bool right_zero_remains =  true;
+		static const bool right_zero_identity = false;
+		static const bool left_zero_identity = true;
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return x*y;
+		}
+	};
+
 	template<class T>
-	using divide = functors::scalar_binary_divide<T>;
+	struct divide {
+		static const bool left_zero_remains =  true;
+		static const bool right_zero_remains =  false;
+		static const bool right_zero_identity = false;
+		static const bool left_zero_identity = true;
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return x/y;
+		}
+	};
+
 	template<class T>
-	using multiply_and_add = functors::scalar_binary_multiply_and_add<T>;
+	struct multiply_and_add{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		static const bool right_zero_identity = true;
+		static const bool left_zero_identity = false;
+		typedef T result_type;
+		multiply_and_add(T scalar):scalar(scalar){}
+		T operator()(T x, T y)const{
+			return x+scalar * y;
+		}
+	private:
+		T scalar;
+	};
 	template<class T>
-	using multiply_assign = functors::scalar_binary_multiply_assign<T>;
+	struct multiply_assign{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		static const bool right_zero_identity = true;
+		static const bool left_zero_identity = false;
+		typedef T result_type;
+		multiply_assign(T scalar):scalar(scalar){}
+		T operator()(T, T y)const{
+			return scalar * y;
+		}
+	private:
+		T scalar;
+	};
 	template<class T>
-	using pow = functors::scalar_binary_pow<T>;
+	struct pow {
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef T result_type;
+		T operator()(T x, T y)const {
+			using std::pow;
+			return pow(x,y);
+		}
+	};
 	template<class T>
-	using multiply_scalar = functors::scalar_multiply1<T>;
+	struct multiply_scalar{
+		static const bool zero_identity = true;
+		typedef T result_type;
+		multiply_scalar(T scalar):m_scalar(scalar){}
+		T operator()(T x) const{
+			return x * m_scalar;
+		}
+	private:
+		T m_scalar;
+	};
 	template<class T>
-	using safe_divide = functors::scalar_binary_safe_divide<T>;
+	struct safe_divide {
+		static const bool left_zero_remains =  true;
+		static const bool right_zero_remains =  false;
+		safe_divide(T defaultValue):m_defaultValue(defaultValue) {}
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return y == T()? m_defaultValue : x/y;
+		}
+	private:
+		T m_defaultValue;
+	};
 	
 	//math unary functions
-	template<class T>
-	using log = functors::scalar_log<T>;
-	template<class T>
-	using exp = functors::scalar_exp<T>;
-	template<class T>
-	using sin = functors::scalar_sin<T>;
-	template<class T>
-	using cos = functors::scalar_cos<T>;
-	template<class T>
-	using tan = functors::scalar_tan<T>;
-	template<class T>
-	using asin = functors::scalar_asin<T>;
-	template<class T>
-	using acos = functors::scalar_acos<T>;
-	template<class T>
-	using atan = functors::scalar_atan<T>;
+	#define REMORA_STD_UNARY_FUNCTION(func, id)\
+	template<class T>\
+	struct func{\
+		static const bool zero_identity = id;\
+		typedef T result_type;\
+		T operator()(T x)const {\
+			return std::func(x);\
+		}\
+	};
+
+	REMORA_STD_UNARY_FUNCTION(abs, true)
+	REMORA_STD_UNARY_FUNCTION(sqrt, true)
+	REMORA_STD_UNARY_FUNCTION(cbrt, true)
+
+	REMORA_STD_UNARY_FUNCTION(exp, false)
+	REMORA_STD_UNARY_FUNCTION(log, false)
+
+	//trigonometric functions
+	REMORA_STD_UNARY_FUNCTION(cos, false)
+	REMORA_STD_UNARY_FUNCTION(sin, true)
+	REMORA_STD_UNARY_FUNCTION(tan, true)
+
+	REMORA_STD_UNARY_FUNCTION(acos, false)
+	REMORA_STD_UNARY_FUNCTION(asin, true)
+	REMORA_STD_UNARY_FUNCTION(atan, true)
+
+	//sigmoid type functions
+	REMORA_STD_UNARY_FUNCTION(tanh, true)
+	
+	//special functions
+	REMORA_STD_UNARY_FUNCTION(erf, false)
+	REMORA_STD_UNARY_FUNCTION(erfc, false)
+#undef REMORA_STD_UNARY_FUNCTION
 	
 	template<class T>
-	using tanh = functors::scalar_tanh<T>;
+	struct sigmoid {
+		static const bool zero_identity = false;
+		typedef T result_type;
+		T operator()(T x)const {
+			using std::tanh;
+			return (tanh(x/T(2)) + T(1))/T(2);
+		}
+	};
 	template<class T>
-	using sqrt = functors::scalar_sqrt<T>;
-	template<class T>
-	using cbrt = functors::scalar_cbrt<T>;
-	template<class T>
-	using abs = functors::scalar_abs<T>;
-	template<class T>
-	using sqr = functors::scalar_sqr<T>;
-	template<class T>
-	using soft_plus = functors::scalar_soft_plus<T>;
-	template<class T>
-	using sigmoid = functors::scalar_sigmoid<T>;
-	template<class T>
-	using inv = functors::scalar_inverse<T>;
+	struct soft_plus {
+		static const bool zero_identity = false;
+		typedef T result_type;
+		T operator()(T x)const {
+			if(x > 100){
+				return x;
+			}
+			if(x < -100){
+				return 0;
+			}
+			return std::log(1+std::exp(x));
+		}
+	};
 	
 	template<class T>
-	using erf = functors::scalar_erf<T>;
+	struct inv {
+		static const bool zero_identity = false;
+		typedef T result_type;	
+		T operator()(T x)const {
+			return T(1)/x;
+		}
+	};
 	template<class T>
-	using erfc = functors::scalar_erfc<T>;
+	struct sqr{
+		static const bool zero_identity = true;
+		typedef T result_type;
+		T operator()(T x)const {
+			return x*x;
+		}
+	};
+	
 	
 	//min/max
-	template<class T>
-	using min = functors::scalar_binary_min<T>;
-	template<class T>
-	using max = functors::scalar_binary_max<T>;
+	template<class T> 
+	struct min{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return std::min(x,y);
+		}
+	};
+
+	template<class T> 
+	struct max{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef T result_type;
+		T operator()(T x, T y)const{
+			return std::max(x,y);
+		}
+	};
+
 	
 	//comparison
 	template<class T>
-	using less = functors::scalar_less_than<T>;
+	struct less{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef int result_type;
+		int operator()(T x1, T x2)const {
+			return x1 < x2;
+		}
+	};
 	template<class T>
-	using less_equal = functors::scalar_less_equal_than<T>;
+	struct less_equal{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef int result_type;
+		int operator()(T x1, T x2)const {
+			return x1 <= x2;
+		}
+	};
+
 	template<class T>
-	using bigger = functors::scalar_bigger_than<T>;
+	struct bigger{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef int result_type;
+		int operator()(T x1, T x2)const {
+			return x1 > x2;
+		}
+	};
+
 	template<class T>
-	using bigger_equal = functors::scalar_bigger_equal_than<T>;
+	struct bigger_equal{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef int result_type;
+		int operator()(T x1, T x2)const {
+			return x1 >= x2;
+		}
+	};
+
 	template<class T>
-	using equal = functors::scalar_equal<T>;
+	struct equal{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef int result_type;
+		int operator()(T x1, T x2)const {
+			return x1 ==  x2;
+		}
+	};
+
 	template<class T>
-	using not_equal = functors::scalar_not_equal<T>;
+	struct not_equal{
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  false;
+		typedef int result_type;
+		int operator()(T x1, T x2)const {
+			return x1 !=  x2;
+		}
+	};
 };
 
 template<class E1, class E2>

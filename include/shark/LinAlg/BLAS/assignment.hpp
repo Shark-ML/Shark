@@ -36,7 +36,6 @@
 #include "kernels/matrix_assign.hpp"
 #include "kernels/vector_assign.hpp"
 #include "detail/traits.hpp"
-#include "detail/functional.hpp"
 
 #include <boost/mpl/eval_if.hpp>
 #include <boost/mpl/or.hpp>

@@ -84,11 +84,11 @@ public:
 	
 	// Element access
 	template <class IndexExpression>
-	auto operator()(IndexExpression const& i) const -> decltype(this->expression()(i)){
+	auto operator()(IndexExpression const& i) const -> decltype(std::declval<V&>()(i)){
 		return expression()(i);
 	}
 	template <class IndexExpression>
-	auto operator[](IndexExpression const& i) const -> decltype(this->expression()(i)){
+	auto operator[](IndexExpression const& i) const -> decltype(std::declval<V&>()(i)){
 		return expression()(i);
 	}
 	
@@ -220,8 +220,8 @@ public:
 
 	// Element access	
 	template <class IndexExpr>
-	auto operator()(IndexExpr const& i) const -> decltype(this->expression()(
-		device_traits<typename V::device_type>::index_add(this->start(),i)
+	auto operator()(IndexExpr const& i) const -> decltype(std::declval<V&>()(
+		device_traits<typename V::device_type>::index_add(std::size_t(),i)
 	)){
 		return m_expression(
 			device_traits<typename V::device_type>::index_add(start(),i)
@@ -239,9 +239,9 @@ public:
 	}
 
 	typedef typename device_traits<typename V::device_type>:: 
-		template subrange_iterator< typename vector_closure_type::iterator> iterator;
+		template subrange_iterator< typename vector_closure_type::iterator>::type iterator;
 	typedef typename device_traits<typename V::device_type>:: 
-		template subrange_iterator< typename vector_closure_type::const_iterator> const_iterator;
+		template subrange_iterator< typename vector_closure_type::const_iterator>::type const_iterator;
 
 	const_iterator begin() const{
 		return const_iterator(

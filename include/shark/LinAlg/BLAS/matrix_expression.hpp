@@ -117,7 +117,7 @@ template<class MatA, class Device>\
 matrix_unary<MatA,typename device_traits<Device>:: template F<typename MatA::value_type> >\
 name(matrix_expression<MatA, Device> const& v){\
 	typedef typename device_traits<Device>:: template F<typename MatA::value_type> functor_type;\
-	return matrix_unary<MatA, functor_type >(v(), functor_type()); \
+	return matrix_unary<MatA, functor_type >(v(), functor_type());\
 }
 REMORA_UNARY_MATRIX_TRANSFORMATION(abs, abs)
 REMORA_UNARY_MATRIX_TRANSFORMATION(log, log)
