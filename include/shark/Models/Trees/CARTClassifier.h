@@ -64,18 +64,20 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 //	Information about a single split. misclassProp, r and g are variables used in the cost complexity step
 	struct NodeInfo {
-		std::size_t nodeId = 0;
-		std::size_t attributeIndex = 0;
-		double attributeValue = 0.;
-		std::size_t leftNodeId = 0;
-		std::size_t rightNodeId = 0;
+		std::size_t nodeId;
+		std::size_t attributeIndex;
+		double attributeValue;
+		std::size_t leftNodeId;
+		std::size_t rightNodeId;
 		LabelType label;
-		double misclassProp = 0.;//TODO: remove this
-		std::size_t r = 0;//TODO: remove this
-		double g = 0.;//TODO: remove this
+		double misclassProp;//TODO: remove this
+		std::size_t r;//TODO: remove this
+		double g;//TODO: remove this
+		
+		NodeInfo():nodeId(0), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0){}
 
-	   template<class Archive>
-	   void serialize(Archive & ar, const unsigned int version){
+		template<class Archive>
+		void serialize(Archive & ar, const unsigned int version){
 			ar & nodeId;
 			ar & attributeIndex;
 			ar & attributeValue;
@@ -91,14 +93,13 @@ public:
 		NodeInfo(std::size_t nodeId, LabelType label) : nodeId(nodeId), label(std::move(label)) {}
 		NodeInfo(NodeInfo const&) = default;
 		NodeInfo& operator=(NodeInfo const&) = default;
-		NodeInfo(NodeInfo &&n) BOOST_NOEXCEPT_IF(std::is_nothrow_constructible<LabelType>::value)
+		NodeInfo(NodeInfo &&n)
 				: nodeId{n.nodeId}, attributeIndex{n.attributeIndex},
 				  attributeValue{n.attributeValue}, leftNodeId{n.leftNodeId},
 				  rightNodeId{n.rightNodeId}, label(std::move(n.label)),
 				  misclassProp{n.misclassProp}, r{n.r}, g{n.g}
 		{}
-		NodeInfo& operator=(NodeInfo &&n) BOOST_NOEXCEPT_IF((std::is_nothrow_assignable<LabelType,LabelType>::value))
-		{
+		NodeInfo& operator=(NodeInfo &&n){
 			nodeId = n.nodeId;
 			attributeIndex = n.attributeIndex;
 			attributeValue = n.attributeValue;
@@ -390,13 +391,13 @@ protected:
 
 
 	///Number of attributes (set by trainer)
-	std::size_t m_inputDimension = 0;
+	std::size_t m_inputDimension;
 
 	// feature importances
 	RealVector m_featureImportances;
 
 	// oob error
-	double m_OOBerror = 0.;
+	double m_OOBerror;
 };
 
 
