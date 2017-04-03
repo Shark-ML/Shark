@@ -32,17 +32,17 @@ matrix:
       addons:
         apt:
           packages: 
-            -g++-4.8
+            - g++-4.8
       env: 
         - COMPILER=g++-4.8
         - OMP_NUM_THREADS=2
 
     - os: linux
       compiler: gcc
-      addons:
-        apt:
-          packages: 
-            - g++-4.6
+      # addons:
+      #   apt:
+      #     packages: 
+      #       - g++-4.6
       env: 
         - COMPILER=g++-4.6
         - OMP_NUM_THREADS=2
