@@ -242,7 +242,7 @@ void CARTTrainer::measureStrength(TreeType & tree, std::size_t nodeId, std::size
 CARTTrainer::TreeType CARTTrainer::
 buildTree(SortedIndex&& tables,
           ClassificationDataset const &dataset,
-          ClassVector &cFull, std::size_t nodeId) {
+          UIntVector &cFull, std::size_t nodeId) {
     //Construct tree, and
 	// calculate the label of the node, which is the propability of class c
 	// given all points in this split for every class
@@ -287,11 +287,11 @@ buildTree(SortedIndex&& tables,
 CARTTrainer::Split CARTTrainer::findSplit(
 		SortedIndex const& tables,
         ClassificationDataset const& dataset,
-        ClassVector const& cFull) const
+        UIntVector const& cFull) const
 {
 	auto const n = tables.noRows();
 	Split best;
-	ClassVector cAbove(m_labelCardinality);
+	UIntVector cAbove(m_labelCardinality);
 	for (std::size_t attributeIndex=0; attributeIndex < m_inputDimension; ++attributeIndex){
 		auto const& table = tables[attributeIndex];
 		auto cBelow = cFull; cAbove.clear();

@@ -42,8 +42,10 @@
 namespace shark {
 namespace detail {
 namespace cart {
+
 /// ClassVector
 typedef UIntVector ClassVector;
+
 
 class Split{
 	typedef CARTClassifier<RealVector>::NodeInfo NodeInfo;
@@ -64,7 +66,7 @@ public:
 		return node;
 	}
 	inline operator bool(){
-		return impurity < WORST_IMPURITY || purity > 0;
+		return impurity < std::numeric_limits<double>::max() || purity > 0;
 	}
 };
 
@@ -187,7 +189,7 @@ public:
 };
 
 /// Generate a histogram from the count vector.
-inline RealVector hist(ClassVector const& countVector) {
+inline RealVector hist(UIntVector const& countVector) {
 	return countVector/double(sum(countVector));
 }
 
@@ -198,15 +200,15 @@ enum class ImpurityMeasure {
 };
 
 /// Calculate the Gini impurity of the countVector
-double gini(ClassVector const& countVector, std::size_t n);
-double misclassificationError(ClassVector const& countVector, std::size_t n);
-double crossEntropy(ClassVector const& countVector, std::size_t n);
+double gini(UIntVector const& countVector, std::size_t n);
+double misclassificationError(UIntVector const& countVector, std::size_t n);
+double crossEntropy(UIntVector const& countVector, std::size_t n);
 
 ImpurityMeasureFn setImpurityFn(ImpurityMeasure im);
 
 /// Create a count vector as used in the classification case.
-ClassVector createCountVector(DataView<ClassificationDataset const> const& elements, std::size_t labelCardinality);
-ClassVector createCountVector(ClassificationDataset const& dataset, std::size_t labelCardinality);
+UIntVector createCountVector(DataView<ClassificationDataset const> const& elements, std::size_t labelCardinality);
+UIntVector createCountVector(ClassificationDataset const& dataset, std::size_t labelCardinality);
 
 template<class DatasetType>
 class Bag {
@@ -221,8 +223,6 @@ public:
 	std::size_t const bagSize;
 	std::vector<std::size_t> counts;
 	std::vector<size_t> oobIndices, ibIndices; // out-of-bag, in-bag
-	static bool const withReplacement = true;
-	static bool const withoutReplacement = false;
 	explicit Bag<DatasetType>(DatasetType const& dataset)
 			: data(dataset), bagSize(data.size()),
 			  counts(bagSize)
@@ -255,7 +255,7 @@ public:
 };
 
 template<class DatasetType>
-Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, Rng::rng_type rng, std::size_t bagSize = 0, bool withReplacement = Bag<DatasetType>::withoutReplacement) {
+Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, Rng::rng_type rng, std::size_t bagSize = 0, bool withReplacement = false) {
 	if(withReplacement) {
 		if (!bagSize) bagSize = view.size();
 		DiscreteUniform<> discrete(rng, 0, bagSize - 1);
@@ -268,7 +268,7 @@ Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, Rng::rng_typ
 	Bag<DatasetType> bag(view, bagSize);
 	std::vector<std::size_t> subsetIndices(view.size());
 	std::iota(subsetIndices.begin(), subsetIndices.end(), 0);
-	std::random_shuffle(subsetIndices.begin(), subsetIndices.end(), DiscreteUniform<>{rng});
+	std::shuffle(subsetIndices.begin(), subsetIndices.end(), rng);
 	for (std::size_t i = 0; i < bagSize; i++) bag.counts[subsetIndices[i]]++;
 	bag.splitBag();
 	return bag;

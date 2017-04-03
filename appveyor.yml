@@ -10,7 +10,7 @@ configuration:
 
 # set environment variables
 environment:
-  BOOST_ROOT: C:\Libraries\boost_1_59_0
+  BOOST_ROOT: C:\Libraries\boost
   #OMP_NUM_THREADS: 2
 
 # specify branch

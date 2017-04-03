@@ -74,8 +74,8 @@ public:
 		std::size_t r;//TODO: remove this
 		double g;//TODO: remove this
 
-	   template<class Archive>
-	   void serialize(Archive & ar, const unsigned int version){
+		template<class Archive>
+		void serialize(Archive & ar, const unsigned int version){
 			ar & nodeId;
 			ar & attributeIndex;
 			ar & attributeValue;
@@ -94,7 +94,6 @@ public:
 
 		NodeInfo(NodeInfo const&) = default;
 		NodeInfo& operator=(NodeInfo const&) = default;
-
 		NodeInfo(NodeInfo &&n)
 				: nodeId{n.nodeId}, attributeIndex{n.attributeIndex},
 				  attributeValue{n.attributeValue}, leftNodeId{n.leftNodeId},
