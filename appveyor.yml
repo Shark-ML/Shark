@@ -33,10 +33,10 @@ before_build:
   #- cmd: dir 
   - cmd: md build
   - cmd: cd build
-  - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 14
-  - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 14 Win64
-  - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib32-msvc-14.0
-  - cmd: if "%platform%"=="x64"   set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib64-msvc-14.0
+  - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 12
+  - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 12 Win64
+  - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib32-msvc-12.0
+  - cmd: if "%platform%"=="x64"   set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib64-msvc-12.0
 
   - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%"   ..
   #- cmd: type C:\projects\shark\build\shark.sln 
