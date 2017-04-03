@@ -24,14 +24,15 @@ addons:
       - libboost-system1.55-dev
       - libboost-test1.55-dev
       - libboost-thread1.55-dev
-  
+
 matrix:
   include:
     - os: linux
       compiler: gcc
       addons:
         apt:
-          packages: ['g\+\+-4.8']
+          packages: 
+            -g++-4.8
       env: 
         - COMPILER=g++-4.8
         - OMP_NUM_THREADS=2
@@ -40,7 +41,8 @@ matrix:
       compiler: gcc
       addons:
         apt:
-          packages: ['g\+\+-4.6']
+          packages: 
+            - g++-4.6
       env: 
         - COMPILER=g++-4.6
         - OMP_NUM_THREADS=2
