@@ -1,5 +1,0 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
-
-ADD_EXECUTABLE( tut2rst
-	tut2rst.cpp
-)
