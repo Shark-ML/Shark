@@ -82,12 +82,12 @@ class RFTrainer
 {
 
 public:
-	using ModelType = RFClassifier;
-	using LabelType = RealVector;
-	using SubmodelType = CARTClassifier<LabelType>;
-	using CARTType = SubmodelType;
-	using TreeType = CARTType::TreeType;
-	using NodeInfo = CARTType::NodeInfo;
+	typedef RFClassifier ModelType;
+	typedef RealVector LabelType;
+	typedef CARTClassifier<LabelType> SubmodelType;
+	typedef SubmodelType CARTType;
+	typedef CARTType::TreeType TreeType;
+	typedef CARTType::NodeInfo NodeInfo;
 	/// Construct and compute feature importances when training or not
 	SHARK_EXPORT_SYMBOL RFTrainer(bool computeFeatureImportances = false, bool computeOOBerror = false);
 
@@ -149,15 +149,15 @@ public:
 	// set true if trainer should bootstrap with replacement
 	bool m_bootstrapWithReplacement;
 
-	using ImpurityMeasure = detail::cart::ImpurityMeasure;
+	typedef detail::cart::ImpurityMeasure ImpurityMeasure;
 	// set to gini, misclassification or crossEntropy as desired
 	ImpurityMeasure m_impurityMeasure;
 
 protected:
 	/// ClassVector
-	using ClassVector = UIntVector;
-	using LabelVector = std::vector<LabelType>;
-	using Split = detail::cart::Split;
+	typedef UIntVector ClassVector;
+	typedef std::vector<LabelType> LabelVector;
+	typedef detail::cart::Split Split;
 
 	/// Build a decision tree for classification
 	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<ClassificationDataset const> const& elements, ClassVector& cFull, std::size_t nodeId, Rng::rng_type& rng);
@@ -203,7 +203,7 @@ protected:
 	bool m_computeCARTOOBerror;
 
 
-	using ImpurityMeasureFn = detail::cart::ImpurityMeasureFn;
+	typedef detail::cart::ImpurityMeasureFn ImpurityMeasureFn;
 
 	ImpurityMeasureFn m_impurityFn;
 };

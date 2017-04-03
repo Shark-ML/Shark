@@ -70,9 +70,9 @@ class Socket
 {
 public:
 #ifdef _WIN32
-	using SocketType = SOCKET;
+	typedef SOCKET SocketType;
 #else
-	using SocketType = int;
+	typedef int SocketType;
 #endif
 
 	/// \brief Connect to a remote host.

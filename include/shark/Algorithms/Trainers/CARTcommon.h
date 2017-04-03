@@ -43,20 +43,21 @@ namespace shark {
 namespace detail {
 namespace cart {
 /// ClassVector
-using ClassVector = UIntVector;
+typedef UIntVector ClassVector;
 
 class Split{
-	using NodeInfo = CARTClassifier<RealVector>::NodeInfo;
+	typedef CARTClassifier<RealVector>::NodeInfo NodeInfo;
 public:
-	std::size_t splitAttribute = 0, splitRow = 0;
-	double splitValue=0;
+	std::size_t splitAttribute, splitRow;
+	double splitValue;
 
 	//static constexpr
-	double WORST_IMPURITY = std::numeric_limits<double>::max();
-	double impurity = WORST_IMPURITY;
-	double purity = 0;
+	double WORST_IMPURITY;
+	double impurity;
+	double purity;
 	RealVector sumAbove, sumBelow; // for regression
 	ClassVector cAbove, cBelow;    // for classification
+	Split() : splitValue(0), WORST_IMPURITY(std::numeric_limits<double>::max()), impurity(WORST_IMPURITY), purity(0), splitAttribute(0), splitRow(0) {}
 	inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
 		node.attributeIndex = split.splitAttribute;
 		node.attributeValue = split.splitValue;
@@ -82,10 +83,10 @@ struct Attribute {
  */
 class SortedIndex {
 /// attribute table
-	using AttributeTable = std::vector<Attribute>;
+	typedef std::vector<Attribute> AttributeTable;
 /// collection of attribute tables
-	using AttributeTables = std::vector<AttributeTable>;
-	using bit_vector = std::vector<bool>;
+	typedef std::vector<AttributeTable> AttributeTables;
+	typedef std::vector<bool> bit_vector;
 
 	std::size_t const m_noElements, m_totalElements, m_noInputDimensions;
 	AttributeTables m_tables;
@@ -190,7 +191,7 @@ inline RealVector hist(ClassVector const& countVector) {
 	return countVector/double(sum(countVector));
 }
 
-using ImpurityMeasureFn = double (*)(ClassVector const& countVector, std::size_t n);
+typedef double (* ImpurityMeasureFn)(ClassVector const& countVector, std::size_t n);
 
 enum class ImpurityMeasure {
 	gini, misclassification, crossEntropy
@@ -212,10 +213,10 @@ class Bag {
 	DataView<DatasetType const> m_oobDataView; // out-of-bag
 	DataView<DatasetType const> m_dataView; // in-bag
 public:
-	using InputType = typename DatasetType::InputType;
-	using LabelType = typename DatasetType::LabelType;
-	using InputContainer = typename DatasetType::InputContainer;
-	using IndexSet = typename DatasetType::IndexSet;
+	typedef typename DatasetType::InputType InputType;
+	typedef typename DatasetType::LabelType LabelType;
+	typedef typename DatasetType::InputContainer InputContainer;
+	typedef typename DatasetType::IndexSet IndexSet;
 	DataView<DatasetType const> const& data;
 	std::size_t const bagSize;
 	std::vector<std::size_t> counts;

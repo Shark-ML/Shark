@@ -64,15 +64,15 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 //	Information about a single split. misclassProp, r and g are variables used in the cost complexity step
 	struct NodeInfo {
-		std::size_t nodeId = 0;
-		std::size_t attributeIndex = 0;
-		double attributeValue = 0.;
-		std::size_t leftNodeId = 0;
-		std::size_t rightNodeId = 0;
+		std::size_t nodeId;
+		std::size_t attributeIndex;
+		double attributeValue;
+		std::size_t leftNodeId;
+		std::size_t rightNodeId;
 		LabelType label;
-		double misclassProp = 0.;//TODO: remove this
-		std::size_t r = 0;//TODO: remove this
-		double g = 0.;//TODO: remove this
+		double misclassProp;//TODO: remove this
+		std::size_t r;//TODO: remove this
+		double g;//TODO: remove this
 
 	   template<class Archive>
 	   void serialize(Archive & ar, const unsigned int version){
@@ -86,18 +86,22 @@ public:
 			ar & r;
 			ar & g;
 		}
-		NodeInfo() {}
-		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId) {}
-		NodeInfo(std::size_t nodeId, LabelType label) : nodeId(nodeId), label(std::move(label)) {}
+		NodeInfo() : nodeId(0), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0) {}
+
+		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0) {}
+
+		NodeInfo(std::size_t nodeId, LabelType label) : attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0), nodeId(nodeId), label(std::move(label)) {}
+
 		NodeInfo(NodeInfo const&) = default;
 		NodeInfo& operator=(NodeInfo const&) = default;
-		NodeInfo(NodeInfo &&n) BOOST_NOEXCEPT_IF(std::is_nothrow_constructible<LabelType>::value)
+
+		NodeInfo(NodeInfo &&n)
 				: nodeId{n.nodeId}, attributeIndex{n.attributeIndex},
 				  attributeValue{n.attributeValue}, leftNodeId{n.leftNodeId},
 				  rightNodeId{n.rightNodeId}, label(std::move(n.label)),
 				  misclassProp{n.misclassProp}, r{n.r}, g{n.g}
 		{}
-		NodeInfo& operator=(NodeInfo &&n) BOOST_NOEXCEPT_IF((std::is_nothrow_assignable<LabelType,LabelType>::value))
+		NodeInfo& operator=(NodeInfo &&n)
 		{
 			nodeId = n.nodeId;
 			attributeIndex = n.attributeIndex;
@@ -118,19 +122,19 @@ public:
 	typedef std::vector<NodeInfo> TreeType;
 
 	/// Constructor
-	CARTClassifier()
+	CARTClassifier() : m_inputDimension(0), m_OOBerror(0)
 	{}
 
 	/// Constructor taking the tree as argument
 	explicit CARTClassifier(TreeType const& tree)
-			: m_tree(tree)
+		: m_inputDimension(0), m_OOBerror(0), m_tree(tree)
 	{ }
 	explicit CARTClassifier(TreeType&& tree)
-			: m_tree(std::move(tree))
+		: CARTClassifier(), m_tree(std::move(tree))
 	{ }
 
 	/// Constructor taking the tree as argument and optimize it if requested
-	CARTClassifier(TreeType const& tree, bool optimize)
+	CARTClassifier(TreeType const& tree, bool optimize) : CARTClassifier()
 	{
 		if (optimize)
 			setTree(tree);
@@ -139,14 +143,14 @@ public:
 	}
 
 	/// Constructor taking the tree as argument as well as maximum number of attributes
-	CARTClassifier(TreeType const& tree, std::size_t d)
-			: m_tree{tree}, m_inputDimension{d}
+	CARTClassifier(TreeType const& tree, std::size_t d) 
+		: m_OOBerror(0), m_tree{tree}, m_inputDimension{d}
 	{
 		optimizeTree(m_tree);
 	}
 
 	CARTClassifier(TreeType&& tree, std::size_t d) BOOST_NOEXCEPT_IF((std::is_nothrow_constructible<TreeType,TreeType>::value))
-			: m_tree(std::move(tree)), m_inputDimension{d}
+	: m_tree(std::move(tree)), m_inputDimension{d}, m_OOBerror{0}
 	{
 		optimizeTree(m_tree);
 	}
@@ -390,13 +394,13 @@ protected:
 
 
 	///Number of attributes (set by trainer)
-	std::size_t m_inputDimension = 0;
+	std::size_t m_inputDimension;
 
 	// feature importances
 	RealVector m_featureImportances;
 
 	// oob error
-	double m_OOBerror = 0.;
+	double m_OOBerror;
 };
 
 
