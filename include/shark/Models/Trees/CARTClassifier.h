@@ -129,7 +129,7 @@ public:
 		: m_inputDimension(0), m_OOBerror(0), m_tree(tree)
 	{ }
 	explicit CARTClassifier(TreeType&& tree)
-		: CARTClassifier(), m_tree(std::move(tree))
+		: m_inputDimension(0), m_OOBerror(0), m_tree(std::move(tree))
 	{ }
 
 	/// Constructor taking the tree as argument and optimize it if requested
