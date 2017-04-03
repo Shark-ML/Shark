@@ -1,9 +1,5 @@
 language: cpp
   
-os:
-  - linux
-  - osx
-
 sudo: false
 
 addons:
