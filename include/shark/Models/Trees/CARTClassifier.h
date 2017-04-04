@@ -90,7 +90,7 @@ public:
 
 		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0) {}
 
-		NodeInfo(std::size_t nodeId, LabelType label) : attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0), nodeId(nodeId), label(std::move(label)) {}
+		NodeInfo(std::size_t nodeId, LabelType label) :  nodeId(nodeId), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), label(std::move(label)), misclassProp(0), r(0), g(0) {}
 
 		NodeInfo(NodeInfo const&) = default;
 		NodeInfo& operator=(NodeInfo const&) = default;
@@ -127,10 +127,10 @@ public:
 
 	/// Constructor taking the tree as argument
 	explicit CARTClassifier(TreeType const& tree)
-		: m_inputDimension(0), m_OOBerror(0), m_tree(tree)
+		: m_tree(tree), m_inputDimension(0), m_OOBerror(0)
 	{ }
 	explicit CARTClassifier(TreeType&& tree)
-		: CARTClassifier(), m_tree(std::move(tree))
+		: m_tree(std::move(tree)), m_inputDimension(0), m_OOBerror(0)
 	{ }
 
 	/// Constructor taking the tree as argument and optimize it if requested

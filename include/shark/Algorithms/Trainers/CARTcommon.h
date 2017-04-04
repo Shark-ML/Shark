@@ -57,7 +57,7 @@ public:
 	double purity;
 	RealVector sumAbove, sumBelow; // for regression
 	ClassVector cAbove, cBelow;    // for classification
-	Split() : splitValue(0), WORST_IMPURITY(std::numeric_limits<double>::max()), impurity(WORST_IMPURITY), purity(0), splitAttribute(0), splitRow(0) {}
+	Split() : splitAttribute(0), splitRow(0), splitValue(0), WORST_IMPURITY(std::numeric_limits<double>::max()), impurity(WORST_IMPURITY), purity(0) {}
 	inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
 		node.attributeIndex = split.splitAttribute;
 		node.attributeValue = split.splitValue;

@@ -59,13 +59,14 @@ struct ReferenceVectorAdaptation
 		RealVector & minAngles)
 	{
 		auto f = unpenalizedFitness(population);
+		const std::size_t sz = f.size();
 		const std::size_t w = f[0].size();
 		RealVector diff(w);
 		for(std::size_t i = 0; i < w; ++i)
 		{
 			double max = std::numeric_limits<double>::min();
 			double min = std::numeric_limits<double>::max();
-			for(std::size_t j = 0; j < f.size(); ++j)
+			for(std::size_t j = 0; j < sz; ++j)
 			{
 				max = std::max(max, f[j][i]);
 				min = std::min(min, f[j][i]);
