@@ -100,9 +100,6 @@
 #include <shark/Rng/Uniform.h>
 #include <shark/Rng/Weibull.h>
 
-#include <shark/Rng/Entropy.h>
-#include <shark/Rng/KullbackLeiberDivergence.h>
-
 #include <boost/random.hpp>
 #include <vector>
 
