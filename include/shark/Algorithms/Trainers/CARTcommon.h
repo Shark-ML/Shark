@@ -189,7 +189,7 @@ public:
 };
 
 /// Generate a histogram from the count vector.
-inline RealVector hist(UIntVector const& countVector) {
+inline RealVector hist(ClassVector const& countVector) {
 	return countVector/double(sum(countVector));
 }
 
@@ -200,15 +200,15 @@ enum class ImpurityMeasure {
 };
 
 /// Calculate the Gini impurity of the countVector
-double gini(UIntVector const& countVector, std::size_t n);
-double misclassificationError(UIntVector const& countVector, std::size_t n);
-double crossEntropy(UIntVector const& countVector, std::size_t n);
+double gini(ClassVector const& countVector, std::size_t n);
+double misclassificationError(ClassVector const& countVector, std::size_t n);
+double crossEntropy(ClassVector const& countVector, std::size_t n);
 
 ImpurityMeasureFn setImpurityFn(ImpurityMeasure im);
 
 /// Create a count vector as used in the classification case.
-UIntVector createCountVector(DataView<ClassificationDataset const> const& elements, std::size_t labelCardinality);
-UIntVector createCountVector(ClassificationDataset const& dataset, std::size_t labelCardinality);
+ClassVector createCountVector(DataView<ClassificationDataset const> const& elements, std::size_t labelCardinality);
+ClassVector createCountVector(ClassificationDataset const& dataset, std::size_t labelCardinality);
 
 template<class DatasetType>
 class Bag {

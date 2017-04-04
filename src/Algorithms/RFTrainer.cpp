@@ -220,7 +220,7 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 TreeType RFTrainer::
 buildTree(SortedIndex&& tables,
 		  DataView<ClassificationDataset const> const& elements,
-		  UIntVector& cFull, std::size_t nodeId,
+		  ClassVector& cFull, std::size_t nodeId,
 		  Rng::rng_type& rng){
 
 	//Construct tree
@@ -267,12 +267,12 @@ buildTree(SortedIndex&& tables,
 RFTrainer::Split RFTrainer::findSplit(
 		SortedIndex const& tables,
 		DataView<ClassificationDataset const> const& elements,
-		UIntVector const& cFull,
+		ClassVector const& cFull,
 		set<size_t> const& tableIndices) const
 {
 	auto n = tables.noRows();
 	Split best;
-	UIntVector cAbove(m_labelCardinality);
+	ClassVector cAbove(m_labelCardinality);
 	for (std::size_t attributeIndex : tableIndices){
 		auto const& attributeTable = tables[attributeIndex];
 		auto cBelow = cFull; cAbove.clear();
