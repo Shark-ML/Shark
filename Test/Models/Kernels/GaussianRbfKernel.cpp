@@ -204,7 +204,7 @@ void benchmark(std::size_t batchSize1,std::size_t batchSize2, std::size_t dim, s
 	std::vector<RealVector> batchVec2(batchSize2,RealVector(dim));
 	for(std::size_t i = 0; i != batchSize1;++i){
 		for(std::size_t j = 0; j != dim; ++j)
-			batchVec1[i](j)=batch1(i,j)=FastRng::uni(-1,1);
+			batchVec1[i](j)=batch1(i,j)=Rng::uni(-1,1);
 	}
 	for(std::size_t i = 0; i != batchSize2;++i){
 		for(std::size_t j = 0; j != dim; ++j)

@@ -39,9 +39,6 @@ namespace shark {
 
 	/** \brief Default RNG of the shark library. */
 	typedef boost::mt19937	DefaultRngType;
-
-	/** \brief Fast RNG type. */
-	typedef boost::rand48	FastRngType;
 }
 
 #endif 

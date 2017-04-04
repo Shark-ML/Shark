@@ -91,11 +91,9 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
 		Rng::seed( 1 );
-		FastRng::seed( 1 );
 		mocma.step( dtlz1 );
 		MOCMA::SolutionType set1 = mocma.solution();
 		Rng::seed( 1 );
-		FastRng::seed( 1 );
 		mocma2.step( dtlz1 );
 		MOCMA::SolutionType set2 = mocma2.solution();
 
