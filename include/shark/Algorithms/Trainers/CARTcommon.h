@@ -54,7 +54,7 @@ public:
 	double splitValue;
 
 	//static constexpr
-	double WORST_IMPURITY;
+	const double WORST_IMPURITY;
 	double impurity;
 	double purity;
 	RealVector sumAbove, sumBelow; // for regression
@@ -66,7 +66,7 @@ public:
 		return node;
 	}
 	inline operator bool(){
-		return impurity < std::numeric_limits<double>::max() || purity > 0;
+		return impurity < WORST_IMPURITY || purity > 0;
 	}
 };
 
