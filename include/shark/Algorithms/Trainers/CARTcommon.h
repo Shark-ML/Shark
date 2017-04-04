@@ -54,19 +54,18 @@ public:
 	double splitValue;
 
 	//static constexpr
-	const double WORST_IMPURITY;
 	double impurity;
 	double purity;
 	RealVector sumAbove, sumBelow; // for regression
 	ClassVector cAbove, cBelow;    // for classification
-	Split() : splitAttribute(0), splitRow(0), splitValue(0), WORST_IMPURITY(std::numeric_limits<double>::max()), impurity(WORST_IMPURITY), purity(0) {}
+	Split() : splitAttribute(0), splitRow(0), splitValue(0), impurity(std::numeric_limits<double>::max()), purity(0) {}
 	inline friend NodeInfo& operator<<=(NodeInfo& node, Split const& split){
 		node.attributeIndex = split.splitAttribute;
 		node.attributeValue = split.splitValue;
 		return node;
 	}
 	inline operator bool(){
-		return impurity < WORST_IMPURITY || purity > 0;
+		return impurity < std::numeric_limits<double>::max() || purity > 0;
 	}
 };
 
@@ -268,7 +267,7 @@ Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, Rng::rng_typ
 	Bag<DatasetType> bag(view, bagSize);
 	std::vector<std::size_t> subsetIndices(view.size());
 	std::iota(subsetIndices.begin(), subsetIndices.end(), 0);
-	std::shuffle(subsetIndices.begin(), subsetIndices.end(), rng);
+	std::random_shuffle(subsetIndices.begin(), subsetIndices.end(), DiscreteUniform<>{rng});
 	for (std::size_t i = 0; i < bagSize; i++) bag.counts[subsetIndices[i]]++;
 	bag.splitBag();
 	return bag;
