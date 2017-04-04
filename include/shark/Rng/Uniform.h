@@ -32,7 +32,6 @@
 #ifndef SHARK_RNG_UNIFORM_H
 #define SHARK_RNG_UNIFORM_H
 
-#include "shark/Rng/AbstractDistribution.h"
 #include "shark/Rng/Rng.h"
 
 #include <boost/random.hpp>
@@ -44,9 +43,7 @@ namespace shark{
 */
 template<typename RngType = DefaultRngType>
 class Uniform
-:
-	public AbstractDistribution,
-	public boost::variate_generator<RngType*,boost::uniform_real<> >
+: public boost::variate_generator<RngType*,boost::uniform_real<> >
 {
 private:
 

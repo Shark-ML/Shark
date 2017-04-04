@@ -33,7 +33,6 @@
 #define SHARK_RNG_NORMAL_H
 
 #include "shark/Core/Math.h"
-#include "shark/Rng/AbstractDistribution.h"
 #include "shark/Rng/Rng.h"
 
 #include <boost/math/special_functions.hpp>
@@ -50,9 +49,7 @@ namespace shark {
 /// variance=sigma^2 is used as argument.
 template<typename RngType = DefaultRngType>
 class Normal
-:
-	public AbstractDistribution,
-	public boost::variate_generator<RngType*, boost::normal_distribution<> >
+: public boost::variate_generator<RngType*, boost::normal_distribution<> >
 {
 private:
 	typedef boost::variate_generator<RngType*, boost::normal_distribution<> > Base;
