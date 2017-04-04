@@ -96,7 +96,7 @@ public:
 		m_numberOfFolds = folds;
 	}
 protected:
-	using Split = detail::cart::Split;
+	typedef detail::cart::Split Split;
 
 	///Types frequently used
 	struct TableEntry{
@@ -113,8 +113,8 @@ protected:
 	typedef ModelType::TreeType TreeType;
 
 	// LabelVector
-	using ClassVector = UIntVector;
-	using LabelVector = std::vector<RealVector>;
+	typedef UIntVector ClassVector;
+	typedef std::vector<RealVector> LabelVector;
 
 	///Number of attributes in the dataset
 	std::size_t m_inputDimension;

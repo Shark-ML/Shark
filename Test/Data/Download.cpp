@@ -1,8 +1,11 @@
 #define BOOST_TEST_MODULE ML_Download
 #include <boost/test/unit_test.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <shark/Data/Download.h>
 #include <iostream>
+#include <algorithm>
+#include <string>
 
 using namespace shark;
 
@@ -13,6 +16,13 @@ bool verifyConnection()
 	return socket.connected();
 }
 
+
+bool is_error_500(std::runtime_error const & err)
+{
+	std::string msg = std::string(err.what());
+	boost::algorithm::to_lower(msg);
+	return msg.find("500 internal server error") != std::string::npos;
+}
 
 BOOST_AUTO_TEST_SUITE(Data_Download)
 
@@ -36,8 +46,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 	catch(std::runtime_error err)
 	{
 		// Don't count the HTTP 500 error as an actual error...
-		std::string msg500("[download] failed with HTTP status 500 Internal Server Error");
-		BOOST_CHECK_MESSAGE(err.what() == msg500,
+		BOOST_CHECK_MESSAGE(is_error_500(err),
 		                    "Got exception " + std::string(err.what()));
 	}
 }
@@ -62,8 +71,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 	catch(std::runtime_error err)
 	{
 		// Don't count the HTTP 500 error as an actual error...
-		std::string msg500("[download] failed with HTTP status 500 Internal Server Error");
-		BOOST_CHECK_MESSAGE(err.what() == msg500,
+		BOOST_CHECK_MESSAGE(is_error_500(err),
 		                    "Got exception " + std::string(err.what()));
 	}
 }

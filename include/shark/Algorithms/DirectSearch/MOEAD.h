@@ -54,7 +54,7 @@ class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector>
 public:
 	SHARK_EXPORT_SYMBOL MOEAD(DefaultRngType & rng = Rng::globalRng);
 
-	std::string name() const override{
+	std::string name() const{
 		return "MOEA/D";
 	}
 
@@ -114,12 +114,12 @@ public:
 		archive & BOOST_SERIALIZATION_NVP(m_curParentIndex);
 	}
 
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function) override;
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function);
 	SHARK_EXPORT_SYMBOL void init(
 		ObjectiveFunctionType & function,
 		std::vector<SearchPointType> const & initialSearchPoints
-	) override;
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const & function) override;
+	);
+	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const & function);
 protected:
 	typedef shark::Individual<RealVector, RealVector> IndividualType;
 	SHARK_EXPORT_SYMBOL void doInit(

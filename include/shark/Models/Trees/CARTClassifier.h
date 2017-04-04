@@ -73,8 +73,6 @@ public:
 		double misclassProp;//TODO: remove this
 		std::size_t r;//TODO: remove this
 		double g;//TODO: remove this
-		
-		NodeInfo():nodeId(0), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0){}
 
 		template<class Archive>
 		void serialize(Archive & ar, const unsigned int version){
@@ -88,9 +86,12 @@ public:
 			ar & r;
 			ar & g;
 		}
-		NodeInfo() {}
-		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId) {}
-		NodeInfo(std::size_t nodeId, LabelType label) : nodeId(nodeId), label(std::move(label)) {}
+		NodeInfo() : nodeId(0), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0) {}
+
+		explicit NodeInfo(std::size_t nodeId) : nodeId(nodeId), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), misclassProp(0), r(0), g(0) {}
+
+		NodeInfo(std::size_t nodeId, LabelType label) :  nodeId(nodeId), attributeIndex(0), attributeValue(0), leftNodeId(0), rightNodeId(0), label(std::move(label)), misclassProp(0), r(0), g(0) {}
+
 		NodeInfo(NodeInfo const&) = default;
 		NodeInfo& operator=(NodeInfo const&) = default;
 		NodeInfo(NodeInfo &&n)
@@ -99,7 +100,8 @@ public:
 				  rightNodeId{n.rightNodeId}, label(std::move(n.label)),
 				  misclassProp{n.misclassProp}, r{n.r}, g{n.g}
 		{}
-		NodeInfo& operator=(NodeInfo &&n){
+		NodeInfo& operator=(NodeInfo &&n)
+		{
 			nodeId = n.nodeId;
 			attributeIndex = n.attributeIndex;
 			attributeValue = n.attributeValue;
@@ -119,19 +121,19 @@ public:
 	typedef std::vector<NodeInfo> TreeType;
 
 	/// Constructor
-	CARTClassifier()
+	CARTClassifier() : m_inputDimension(0), m_OOBerror(0)
 	{}
 
 	/// Constructor taking the tree as argument
 	explicit CARTClassifier(TreeType const& tree)
-			: m_tree(tree)
+		: m_tree(tree), m_inputDimension(0), m_OOBerror(0)
 	{ }
 	explicit CARTClassifier(TreeType&& tree)
-			: m_tree(std::move(tree))
+		: m_tree(std::move(tree)), m_inputDimension(0), m_OOBerror(0)
 	{ }
 
 	/// Constructor taking the tree as argument and optimize it if requested
-	CARTClassifier(TreeType const& tree, bool optimize)
+	CARTClassifier(TreeType const& tree, bool optimize) : CARTClassifier()
 	{
 		if (optimize)
 			setTree(tree);
@@ -140,14 +142,14 @@ public:
 	}
 
 	/// Constructor taking the tree as argument as well as maximum number of attributes
-	CARTClassifier(TreeType const& tree, std::size_t d)
-			: m_tree{tree}, m_inputDimension{d}
+	CARTClassifier(TreeType const& tree, std::size_t d) 
+		: m_OOBerror(0), m_tree{tree}, m_inputDimension{d}
 	{
 		optimizeTree(m_tree);
 	}
 
 	CARTClassifier(TreeType&& tree, std::size_t d) BOOST_NOEXCEPT_IF((std::is_nothrow_constructible<TreeType,TreeType>::value))
-			: m_tree(std::move(tree)), m_inputDimension{d}
+	: m_tree(std::move(tree)), m_inputDimension{d}, m_OOBerror{0}
 	{
 		optimizeTree(m_tree);
 	}

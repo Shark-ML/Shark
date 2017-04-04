@@ -60,7 +60,8 @@ typedef std::vector<TreeType> ForestInfo;
 class RFClassifier : public MeanModel<CARTClassifier<RealVector> >
 {
 public:
-	using SubmodelType = CARTClassifier<RealVector>;
+	typedef CARTClassifier<RealVector> SubmodelType;
+	RFClassifier() : m_OOBerror(0) {}
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
@@ -161,7 +162,7 @@ protected:
 	std::size_t m_inputDimension;
 
 	// oob error for the forest
-	double m_OOBerror = 0.;
+	double m_OOBerror;
 
 	// feature importances for the forest
 	RealVector m_featureImportances;
