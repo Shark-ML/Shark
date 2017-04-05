@@ -1,19 +1,20 @@
-# specify platforms
-platform: 
+platform:
   - Win32
-  - x64  
+  - x64
 
-# configuration
 configuration: 
-#  - Debug
   - Release
 
-# set environment variables
 environment:
-  BOOST_ROOT: C:\Libraries\boost
-  #OMP_NUM_THREADS: 2
+  matrix:
+    - cmake_generator_vs_name: "Visual Studio 12"
+      msvc_name: msvc-12.0
+      BOOST_ROOT: C:\Libraries\boost
 
-# specify branch
+    - cmake_generator_vs_name: "Visual Studio 14"
+      msvc_name: msvc-14.0
+      BOOST_ROOT: C:\Libraries\boost_1_59_0
+
 branches:
   only:
     - master
@@ -22,7 +23,6 @@ branches:
 init:
   - cmd: cmake --version
   - cmd: msbuild /version
-  #- cmd: dir %BOOST_LIBRARYDIR%
 
 # clone directory
 clone_folder: C:\projects\shark
@@ -30,16 +30,15 @@ clone_folder: C:\projects\shark
 # scripts to run before build
 before_build:
   - cmd: cd C:\projects\shark
-  #- cmd: dir 
   - cmd: md build
   - cmd: cd build
-  - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 12
-  - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 12 Win64
-  - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib32-msvc-12.0
-  - cmd: if "%platform%"=="x64"   set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib64-msvc-12.0
-
-  - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%"   ..
-  #- cmd: type C:\projects\shark\build\shark.sln 
+  - cmd: if "%platform%"=="Win32" set CMAKE_GENERATOR_NAME=%cmake_generator_vs_name%
+  - cmd: if "%platform%"=="x64"   set CMAKE_GENERATOR_NAME=%cmake_generator_vs_name% Win64
+  - cmd: if "%platform%"=="Win32" set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib32-%msvc_name%
+  - cmd: if "%platform%"=="x64"   set BOOST_LIBRARYDIR=%BOOST_ROOT%\lib64-%msvc_name%
+  - cmd: echo %CMAKE_GENERATOR_NAME%
+  - cmd: echo %BOOST_LIBRARYDIR%
+  - cmd: cmake -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%configuration% -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=ON -DBUILD_EXAMPLES=OFF -DBOOST_ROOT="%BOOST_ROOT%" -DBOOST_LIBRARYDIR="%BOOST_LIBRARYDIR%" ..
   
 # actual build process
 build:
