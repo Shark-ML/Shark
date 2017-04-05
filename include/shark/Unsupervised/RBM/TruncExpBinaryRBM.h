@@ -42,9 +42,9 @@
 #include <shark/Unsupervised/RBM/GradientApproximations/ContrastiveDivergence.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/MultiChainApproximator.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/SingleChainApproximator.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 namespace shark{
-typedef RBM<TruncExpBinaryEnergy, Rng::rng_type> TruncExpBinaryRBM;
+typedef RBM<TruncExpBinaryEnergy, random::rng_type> TruncExpBinaryRBM;
 typedef GibbsOperator<TruncExpBinaryRBM> TruncExpBinaryGibbsOperator;
 typedef MarkovChain<TruncExpBinaryGibbsOperator> TruncExpBinaryGibbsChain;
 typedef TemperedMarkovChain<TruncExpBinaryGibbsOperator> TruncExpBinaryPTChain;

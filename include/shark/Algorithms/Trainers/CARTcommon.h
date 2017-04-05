@@ -254,12 +254,12 @@ public:
 };
 
 template<class DatasetType>
-Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, Rng::rng_type rng, std::size_t bagSize = 0, bool withReplacement = false) {
+Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, random::rng_type rng, std::size_t bagSize = 0, bool withReplacement = false) {
 	if(withReplacement) {
 		if (!bagSize) bagSize = view.size();
-		DiscreteUniform<> discrete(rng, 0, bagSize - 1);
 		Bag<DatasetType> bag(view, bagSize);
-		for (std::size_t i = 0; i < bagSize; i++) bag.counts[discrete()]++;
+		for (std::size_t i = 0; i < bagSize; i++) 
+			bag.counts[random::discrete(rng,std::size_t(0),bagSize -1)]++;
 		bag.splitBag();
 		return bag;
 	}
@@ -267,7 +267,7 @@ Bag<DatasetType> bootstrap(DataView<DatasetType const> const& view, Rng::rng_typ
 	Bag<DatasetType> bag(view, bagSize);
 	std::vector<std::size_t> subsetIndices(view.size());
 	std::iota(subsetIndices.begin(), subsetIndices.end(), 0);
-	std::random_shuffle(subsetIndices.begin(), subsetIndices.end(), DiscreteUniform<>{rng});
+	std::shuffle(subsetIndices.begin(), subsetIndices.end(), rng);
 	for (std::size_t i = 0; i < bagSize; i++) bag.counts[subsetIndices[i]]++;
 	bag.splitBag();
 	return bag;

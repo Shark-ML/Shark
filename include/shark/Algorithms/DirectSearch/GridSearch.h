@@ -37,7 +37,7 @@
 
 
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <boost/serialization/vector.hpp>
 
@@ -592,7 +592,7 @@ public:
 			m_points[sample].resize(parameters);
 			for(size_t param=0; param!=parameters; ++param)
 			{
-				m_points[sample](param)=Rng::uni(min,max);
+				m_points[sample](param)=random::uni(random::globalRng, min,max);
 			}
 		}
 		m_configured=true;

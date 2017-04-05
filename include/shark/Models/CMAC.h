@@ -33,7 +33,7 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Models/AbstractModel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <vector>
 
 namespace shark{

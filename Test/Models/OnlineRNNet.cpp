@@ -7,7 +7,7 @@
 #include <sstream>
 
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace std;
 using namespace boost::archive;

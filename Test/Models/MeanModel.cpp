@@ -9,7 +9,7 @@
 #include <sstream>
 
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace std;
 using namespace boost::archive;
@@ -29,13 +29,13 @@ BOOST_AUTO_TEST_CASE( MeanModel_Test )
 	for(std::size_t i = 0; i != 5; ++i){
 		RealMatrix curWeights(2,2,0.0);
 		RealVector curBias(2,0.0);
-		curWeights(0,0) = Rng::gauss(0,1);
-		curWeights(0,1) = Rng::gauss(0,1);
-		curWeights(1,0) = Rng::gauss(0,1);
-		curWeights(1,1) = Rng::gauss(0,1);
-		curBias(0) = Rng::gauss(0,1);
-		curBias(1) = Rng::gauss(0,1);
-		double curAlpha = Rng::uni(0.1,1);
+		curWeights(0,0) = random::gauss(random::globalRng,0,1);
+		curWeights(0,1) = random::gauss(random::globalRng,0,1);
+		curWeights(1,0) = random::gauss(random::globalRng,0,1);
+		curWeights(1,1) = random::gauss(random::globalRng,0,1);
+		curBias(0) = random::gauss(random::globalRng,0,1);
+		curBias(1) = random::gauss(random::globalRng,0,1);
+		double curAlpha = random::uni(random::globalRng,0.1,1);
 		alphaSum +=curAlpha;
 		weights += curAlpha*curWeights;
 		bias +=curAlpha*curBias;
@@ -50,10 +50,10 @@ BOOST_AUTO_TEST_CASE( MeanModel_Test )
 	for(std::size_t i = 0; i != 100; ++i){
 		//the testpoint2
 		RealMatrix point(2,2);
-		point(0,0)=Rng::uni(-5,5);
-		point(0,1)= Rng::uni(-5,5);
-		point(1,0)=Rng::uni(-5,5);
-		point(1,1)= Rng::uni(-5,5);
+		point(0,0)=random::uni(random::globalRng,-5,5);
+		point(0,1)= random::uni(random::globalRng,-5,5);
+		point(1,0)=random::uni(random::globalRng,-5,5);
+		point(1,1)= random::uni(random::globalRng,-5,5);
 		
 		//evaluate ground truth result
 		RealMatrix truth = linear(point);
@@ -79,13 +79,13 @@ BOOST_AUTO_TEST_CASE( MeanModel_Serialize )
 	for(std::size_t i = 0; i != 5; ++i){
 		RealMatrix curWeights(2,2,0.0);
 		RealVector curBias(2,0.0);
-		curWeights(0,0) = Rng::gauss(0,1);
-		curWeights(0,1) = Rng::gauss(0,1);
-		curWeights(1,0) = Rng::gauss(0,1);
-		curWeights(1,1) = Rng::gauss(0,1);
-		curBias(0) = Rng::gauss(0,1);
-		curBias(1) = Rng::gauss(0,1);
-		double curAlpha = Rng::uni(0.1,1);
+		curWeights(0,0) = random::gauss(random::globalRng,0,1);
+		curWeights(0,1) = random::gauss(random::globalRng,0,1);
+		curWeights(1,0) = random::gauss(random::globalRng,0,1);
+		curWeights(1,1) = random::gauss(random::globalRng,0,1);
+		curBias(0) = random::gauss(random::globalRng,0,1);
+		curBias(1) = random::gauss(random::globalRng,0,1);
+		double curAlpha = random::uni(random::globalRng,0.1,1);
 		alphaSum +=curAlpha;
 		weights += curAlpha*curWeights;
 		bias +=curAlpha*curBias;
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( MeanModel_Serialize )
 	{
 		for(size_t j=0;j!=2;++j)
 		{
-			input(j)=Rng::uni(-1,1);
+			input(j)=random::uni(random::globalRng,-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model(input));

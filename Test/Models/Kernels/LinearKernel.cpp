@@ -4,7 +4,7 @@
 
 #include <shark/Models/Kernels/LinearKernel.h>
 #include "KernelDerivativeTestHelper.h"
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 
@@ -31,11 +31,11 @@ BOOST_AUTO_TEST_CASE( DenseLinearKernel_Test )
 	RealMatrix batch2(100,2);
 	for(std::size_t i = 0; i != 50;++i){
 		for(std::size_t j = 0; j != 2; ++j)
-			batch1(i,j)=Rng::uni(-1,1);
+			batch1(i,j)=random::uni(random::globalRng,-1,1);
 	}
 	for(std::size_t i = 0; i != 100;++i){
 		for(std::size_t j = 0; j != 2; ++j)
-			batch2(i,j)=Rng::uni(-1,1);
+			batch2(i,j)=random::uni(random::globalRng,-1,1);
 	}
 	testEval(kernel,batch1,batch2);
 

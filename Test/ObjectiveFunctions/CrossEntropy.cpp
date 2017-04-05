@@ -3,7 +3,7 @@
 
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/Models/LinearModel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include "TestLoss.h"
 
 #define BOOST_TEST_MODULE OBJECTIVEFUNCTIONS_CROSSENTROPY
@@ -23,11 +23,11 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_SINGLE_INPUT ){
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,1);
-		testPoint(0,0) = Rng::uni(-300.0,300.0);
+		testPoint(0,0) = random::uni(random::globalRng, -300.0,300.0);
 
 
 		//sample label
-		unsigned int label = Rng::coinToss();
+		unsigned int label = random::coinToss(random::globalRng);
 		double calcLabel = label ? 1 : -1;
 		UIntVector labelVec(1);
 		labelVec(0) = label;
@@ -54,12 +54,12 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_TWO_INPUT ){
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,2);
-		testPoint(0,0) = Rng::uni(-150.0,150.0);
+		testPoint(0,0) = random::uni(random::globalRng, -150.0,150.0);
 		testPoint(0,1) = -testPoint(0,0);
 
 
 		//sample label
-		unsigned int label = Rng::coinToss();
+		unsigned int label = random::coinToss(random::globalRng);
 		UIntVector labelVec(1);
 		labelVec(0) = label;
 		//the test results
@@ -88,13 +88,13 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_MULTI_CLASS ){
 		RealMatrix testPoint(1,5);
 		double norm = 0;
 		for(std::size_t i = 0; i !=5; ++i){
-			testPoint(0,i) = Rng::uni(-10.0,10.0);
+			testPoint(0,i) = random::uni(random::globalRng, -10.0,10.0);
 			norm+=std::exp(testPoint(0,i));
 		}
 
 
 		//sample label
-		unsigned int label = Rng::discrete(0,4);
+		unsigned int label = random::discrete(random::globalRng, 0,4);
 		UIntVector labelVec(1);
 		labelVec(0) = label;
 		//std::cout<<testPoint(0,0)<<" "<<label<<" "<<calcLabel<<std::endl;

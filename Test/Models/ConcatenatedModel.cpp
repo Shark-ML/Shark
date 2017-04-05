@@ -7,7 +7,6 @@
 #include <shark/Models/FFNet.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Models/Softmax.h>
-#include <shark/Rng/Uniform.h>
 
 #include <sstream>
 
@@ -32,16 +31,16 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 	BOOST_CHECK_EQUAL(model.numberOfParameters(),modelParameters);
 
 	//parameters
-	Uniform< Rng::rng_type > uni( shark::Rng::globalRng,-1,1);
+	
 	RealVector modelParams(modelParameters);
 	RealVector net1Params(net1.numberOfParameters());
 	for(size_t i=0;i!=net1Params.size();++i){
-		net1Params(i)=uni();
+		net1Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
 		modelParams(i)=net1Params(i);
 	}
 	RealVector net2Params(net2.numberOfParameters());
 	for(size_t i=0;i!=net2Params.size();++i){
-		net2Params(i)=uni();
+		net2Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
 		modelParams(i+net1Params.size())=net2Params(i);
 	}
 	//check whether parameter copying is working
@@ -56,7 +55,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 	//test Results;
 	RealVector input(3);
 	for(size_t i=0;i!=3;++i){
-		input(i)=uni();
+		input(i)=shark::random::uni( shark::random::globalRng,-1,1);
 	}
 	RealVector intermediateResult = net1(input);
 	RealVector endResult = net2(intermediateResult);
@@ -86,13 +85,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = Rng::uni(-5,5);
+				parameters(i) = random::uni(random::globalRng,-5,5);
 			}
 			for(size_t i = 0; i != 4;++i){
-				coefficients(i) = Rng::uni(-5,5);
+				coefficients(i) = random::uni(random::globalRng,-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = Rng::uni(-5,5);
+				point(i) = random::uni(random::globalRng,-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -112,13 +111,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = Rng::uni(-5,5);
+				parameters(i) = random::uni(random::globalRng,-5,5);
 			}
 			for(size_t i = 0; i != 4;++i){
-				coefficients(i) = Rng::uni(-5,5);
+				coefficients(i) = random::uni(random::globalRng,-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = Rng::uni(-5,5);
+				point(i) = random::uni(random::globalRng,-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -137,13 +136,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = Rng::uni(-5,5);
+				parameters(i) = random::uni(random::globalRng,-5,5);
 			}
 			for(size_t i = 0; i != 4;++i){
-				coefficients(i) = Rng::uni(-5,5);
+				coefficients(i) = random::uni(random::globalRng,-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = Rng::uni(-5,5);
+				point(i) = random::uni(random::globalRng,-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -171,13 +170,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedInputDerivative )
 	RealVector point(10);
 	for(unsigned int test = 0; test != 100; ++test){
 		for(size_t i = 0; i != modelParameters;++i){
-			parameters(i) = Rng::uni(-10,10);
+			parameters(i) = random::uni(random::globalRng,-10,10);
 		}
 		for(size_t i = 0; i != 10;++i){
-			coefficients(i) = Rng::uni(-10,10);
+			coefficients(i) = random::uni(random::globalRng,-10,10);
 		}
 		for(size_t i = 0; i != 10;++i){
-			point(i) = Rng::uni(-10,10);
+			point(i) = random::uni(random::globalRng,-10,10);
 		}
 		
 		model.setParameterVector(parameters);
@@ -192,10 +191,9 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	ConcatenatedModel<RealVector,RealVector> model (&net1,&net2);
 
 	//parameters
-	Uniform<> uni(Rng::globalRng,-1,1);
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t i=0;i!=model.numberOfParameters();++i){
-		testParameters(i)=uni();
+		testParameters(i)=random::uni(random::globalRng,-1,1);
 	}
 	model.setParameterVector(testParameters);
 
@@ -210,7 +208,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	{
 		for(size_t j=0;j!=10;++j)
 		{
-			input(j)=Rng::uni(-1,1);
+			input(j)=random::uni(random::globalRng,-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model(input));
@@ -259,24 +257,23 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_OPERATOR )
 	BOOST_CHECK_EQUAL(model3.numberOfParameters(),modelParameters3);
 
 	//parameters
-	Uniform< Rng::rng_type > uni( shark::Rng::globalRng,-1,1);
 	RealVector modelParams2(modelParameters2);
 	RealVector modelParams3(modelParameters3);
 	RealVector net1Params(net1.numberOfParameters());
 	for(size_t i=0;i!=net1Params.size();++i){
-		net1Params(i)=uni();
+		net1Params(i)=random::uni(random::globalRng,-1,1);
 		modelParams2(i)=net1Params(i);
 		modelParams3(i)=net1Params(i);
 	}
 	RealVector net2Params(net2.numberOfParameters());
 	for(size_t i=0;i!=net2Params.size();++i){
-		net2Params(i)=uni();
+		net2Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
 		modelParams2(i+net1Params.size())=net2Params(i);
 		modelParams3(i+net1Params.size())=net2Params(i);
 	}
 	RealVector net3Params(net3.numberOfParameters());
 	for(size_t i=0;i!=net3Params.size();++i){
-		net3Params(i)=uni();
+		net3Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
 		modelParams3(i+modelParameters2)=net3Params(i);
 	}
 	//check whether parameter copying is working
@@ -313,7 +310,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_OPERATOR )
 	for(std::size_t trial = 0; trial != 1000; ++trial){
 		RealVector input(2);
 		for(size_t i=0;i!=2;++i){
-			input(i)=uni();
+			input(i)=shark::random::uni( shark::random::globalRng,-1,1);
 		}
 		RealVector intermediateResult1 = net1(input);
 		RealVector intermediateResult2 = net2(intermediateResult1);

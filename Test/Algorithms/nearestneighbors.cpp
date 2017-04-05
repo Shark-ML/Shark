@@ -43,7 +43,7 @@
 #include <shark/Models/Trees/LCTree.h>
 #include <shark/Models/Trees/KHCTree.h>
 #include <shark/Algorithms/NearestNeighbors/TreeNearestNeighbors.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/Timer.h>
 
 
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_SUITE (Algorithms_nearestneighbors)
 BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 {
 	double start;
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	// generate data set and test set
 	std::vector<RealVector> data(TRAINING);
 	std::vector<RealVector> test(10);
@@ -161,18 +161,18 @@ BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 	{
 		// multiple instances of the same point
 		test[i].resize(3);
-		test[i][0] = Rng::gauss();
-		test[i][1] = Rng::gauss();
-		test[i][2] = Rng::gauss();
+		test[i][0] = random::gauss(random::globalRng);
+		test[i][1] = random::gauss(random::globalRng);
+		test[i][2] = random::gauss(random::globalRng);
 	}
 	test[0].clear();//(0,0,0)
 	for (std::size_t i=0; i<TRAINING; i++)
 	{
 		// random data
 		data[i].resize(3);
-		data[i][0] = Rng::gauss();
-		data[i][1] = Rng::gauss();
-		data[i][2] = Rng::gauss();
+		data[i][0] = random::gauss(random::globalRng);
+		data[i][1] = random::gauss(random::globalRng);
+		data[i][2] = random::gauss(random::globalRng);
 	}
 
 	UnlabeledData<RealVector> dataset = createDataFromRange(data);

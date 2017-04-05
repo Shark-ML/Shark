@@ -40,10 +40,10 @@
 #include <shark/Unsupervised/RBM/GradientApproximations/ContrastiveDivergence.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/MultiChainApproximator.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/SingleChainApproximator.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 namespace shark{
 
-typedef ConvolutionalRBM<BinaryLayer,BinaryLayer, Rng::rng_type> ConvolutionalBinaryRBM;
+typedef ConvolutionalRBM<BinaryLayer,BinaryLayer, random::rng_type> ConvolutionalBinaryRBM;
 typedef GibbsOperator<ConvolutionalBinaryRBM> ConvolutionalBinaryGibbsOperator;
 typedef MarkovChain<ConvolutionalBinaryGibbsOperator> ConvolutionalBinaryGibbsChain;
 typedef TemperedMarkovChain<ConvolutionalBinaryGibbsOperator> ConvolutionalBinaryPTChain;

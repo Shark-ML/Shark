@@ -2,7 +2,7 @@
 #include <tuple>
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>
 #include <shark/Models/Converter.h>
@@ -22,9 +22,9 @@ class Problem : public LabeledDataDistribution<RealVector, unsigned int>
 public:
 	void draw(RealVector& input, unsigned int& label)const
 	{
-		label = Rng::discrete(0, 4);
+		label = random::discrete(random::globalRng, 0, 4);
 		input.resize(1);
-		input(0) = Rng::gauss() + 3.0 * label;
+		input(0) = random::gauss(random::globalRng) + 3.0 * label;
 	}
 };
 /// @endcond

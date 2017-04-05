@@ -1,5 +1,5 @@
 #include <shark/ObjectiveFunctions/Loss/SquaredHingeLoss.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include "TestLoss.h"
 
 #define BOOST_TEST_MODULE OBJECTIVEFUNCTIONS_SQUAREDHINGELOSS
@@ -18,8 +18,8 @@ BOOST_AUTO_TEST_CASE( SQUAREDHINGELOSS_EVAL_TWOCLASS ) {
 
 		//sample point between -10,10
 		RealMatrix testPoint(2,1);
-		testPoint(0,0) = Rng::uni(-10.0,10.0);
-		testPoint(1,0) = Rng::uni(-10.0,10.0);
+		testPoint(0,0) = random::uni(random::globalRng, -10.0,10.0);
+		testPoint(1,0) = random::uni(random::globalRng, -10.0,10.0);
 		
 		RealMatrix testPoint2D(2,2);
 		testPoint2D(0,0) = testPoint(0,0);
@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE( SQUAREDHINGELOSS_EVAL_TWOCLASS ) {
 
 		//sample label {-1,1}
 		UIntVector testLabel(2);
-		testLabel(0) = Rng::coinToss(0.5);
-		testLabel(1) = Rng::coinToss(0.5);
+		testLabel(0) = random::coinToss(random::globalRng, 0.5);
+		testLabel(1) = random::coinToss(random::globalRng, 0.5);
 		
 		int label0 = testLabel(0)?1:-1;
 		int label1 = testLabel(1)?1:-1;
@@ -79,17 +79,17 @@ BOOST_AUTO_TEST_CASE( SQUAREDHINGELOSS_EVAL_MULTICLASS ) {
 	for (unsigned int test = 0; test != maxTests; ++test) {
 		SquaredHingeLoss loss;
 
-		std::size_t dim = Rng::discrete(minDim,maxDim);
+		std::size_t dim = random::discrete(random::globalRng, minDim,maxDim);
 		//sample point between -10,10
 		RealMatrix testPoint(5,dim);
 		UIntVector testLabel(5);
 		RealVector valueResultP(5,0);
 		for(std::size_t i = 0; i != 5; ++i){
-			testLabel(i) = Rng::discrete(0,dim-1);
-			testPoint(i,testLabel(i)) = Rng::uni(-10.0,10.0);
+			testLabel(i) = random::discrete(random::globalRng, std::size_t(0),dim-1);
+			testPoint(i,testLabel(i)) = random::uni(random::globalRng, -10.0,10.0);
 			for(std::size_t j = 0; j != dim; ++j){
 				if(j == testLabel(i)) continue;
-				testPoint(i,j) = Rng::uni(-10.0,10.0);
+				testPoint(i,j) = random::uni(random::globalRng, -10.0,10.0);
 				valueResultP[i]+= 0.5*sqr(std::max(0.0, 1-0.5*(testPoint(i,testLabel(i))- testPoint(i,j))));
 			}
 		}

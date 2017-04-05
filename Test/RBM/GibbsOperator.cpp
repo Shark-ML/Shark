@@ -2,7 +2,7 @@
 #include <shark/Unsupervised/RBM/Neuronlayers/BinaryLayer.h>
 #include <shark/Unsupervised/RBM/Energy.h>
 #include <shark/Unsupervised/RBM/RBM.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE RBM_GibbsOperator
 #include <boost/test/unit_test.hpp>
@@ -22,8 +22,8 @@ struct NeuronMockup{
 		statistics(0) = input(0)*beta + statMove;
 	}
 	
-	template<class Rng>
-	void sample(RealVector stat,RealVector& state,Rng& rng){
+	template<class random>
+	void sample(RealVector stat,RealVector& state,random& rng){
 		state(0) = stat(0)*sampleMul;
 	}
 	
@@ -334,8 +334,8 @@ BOOST_AUTO_TEST_CASE( GibbsOperator_Create_Sample)
 
 //BOOST_AUTO_TEST_CASE( GibbsOperator_Energy_Binary)
 //{
-//	typedef RBM<Energy<BinaryLayer,BinaryLayer>,Rng::rng_type > RBMType;
-//	RBMType rbm(Rng::globalRng);
+//	typedef RBM<Energy<BinaryLayer,BinaryLayer>,random::rng_type > RBMType;
+//	RBMType rbm(random::globalrandom);
 //	GibbsOperator<RBMMockup>::HiddenSampleBatch hidden(1,5);
 //	GibbsOperator<RBMMockup>::VisibleSampleBatch visible(1,5);
 //	GibbsOperator<RBMType> gibbsOperator(&rbm);

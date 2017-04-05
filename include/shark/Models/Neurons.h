@@ -194,7 +194,7 @@ struct DropoutNeuron: public detail::NeuronBase<DropoutNeuron<Neuron> >{
 	DropoutNeuron():m_probability(0.5),m_stochastic(true){}
 	template<class T>
 	T function(T x)const{
-		if(m_stochastic && Rng::coinToss(m_probability)){
+		if(m_stochastic && random::coinToss(random::globalRng, m_probability)){
 			return T(0);
 		}
 		else if(!m_stochastic){

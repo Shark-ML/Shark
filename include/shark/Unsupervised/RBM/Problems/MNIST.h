@@ -30,7 +30,7 @@
 
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <sstream>
 #include <fstream>

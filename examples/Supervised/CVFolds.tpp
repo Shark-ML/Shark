@@ -11,7 +11,6 @@
 #include <shark/ObjectiveFunctions/Regularizer.h>
 #include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
-#include <shark/Rng/Uniform.h>
 
 //we use an artifical learning problem
 #include <shark/Data/DataDistribution.h>
@@ -37,8 +36,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 	//initialize with random weights between -5 and 5
 	//todo: find better initialization for cv-error...
 	RealVector startingPoint(network.numberOfParameters());
-	Uniform<> uni( Rng::globalRng, -5, 5 );
-	std::generate(startingPoint.begin(),startingPoint.end(),uni);
+	std::generate(startingPoint.begin(),startingPoint.end(),[&](){return random::uni(random::globalRng, -5,5);});
 
 	//the error function is a combination of MSE and 2-norm error
 	SquaredLoss<> loss;

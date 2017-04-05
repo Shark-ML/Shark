@@ -73,7 +73,7 @@ public:
 	};
 
 	/// \brief Default c'tor.
-	SHARK_EXPORT_SYMBOL CMA(DefaultRngType& rng = Rng::globalRng);
+	SHARK_EXPORT_SYMBOL CMA(random::rng_type& rng = random::globalRng);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -254,7 +254,7 @@ private:
 	double m_rankChangeQuantile;
 
 	MultiVariateNormalDistribution m_mutationDistribution;
-	DefaultRngType* mpe_rng;
+	random::rng_type* mpe_rng;
 };
 }
 

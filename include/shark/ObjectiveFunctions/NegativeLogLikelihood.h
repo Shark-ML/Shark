@@ -34,7 +34,7 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <boost/range/algorithm_ext/iota.hpp>
 #include <boost/range/algorithm/random_shuffle.hpp>

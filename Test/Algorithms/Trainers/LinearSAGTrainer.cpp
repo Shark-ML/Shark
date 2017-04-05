@@ -128,15 +128,19 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_2Classes_Offset )
 	// simple  dataset
 	Chessboard problem;
 	ClassificationDataset dataset = problem.generateDataset(30);
-	testClassification(dataset,0.1,100,true);
-	testClassification(dataset,0.1,100,false);
+	std::cout<<"train 2 classes with offset"<<std::endl;
+	testClassification(dataset,0.1,1000,true);
+	std::cout<<"train 2 classes without offset"<<std::endl;
+	testClassification(dataset,0.1,1000,false);
 	
 	RealVector weights(dataset.numberOfElements());
 	for(auto& weight: weights)
-		weight = Rng::uni(0,1);
+		weight = random::uni(random::globalRng,0.2,4);
 	
 	WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,createDataFromRange(weights));
+	std::cout<<"train 2 classes weighted with offset"<<std::endl;
 	testClassification(weightedDataset,0.1,100,true);
+	std::cout<<"train 2 classes weighted without offset"<<std::endl;
 	testClassification(weightedDataset,0.1,100,false);
 	
 }
@@ -163,15 +167,13 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_Regression)
 	covariance(1,1) = 1;
 	MultiVariateNormalDistribution noise(covariance);
 
-	Uniform<> uniform(Rng::globalRng,-3.0, 3.0);
-
 	// create samples
 	std::vector<RealVector> input(trainExamples,RealVector(2));
 	std::vector<RealVector> trainTarget(trainExamples,RealVector(2));
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = uniform();
-		input[i](1) = uniform();
-		trainTarget[i] = noise(Rng::globalRng).first + model(input[i]);
+		input[i](0) = random::uni(random::globalRng,-3.0,3.0);
+		input[i](1) = random::uni(random::globalRng,-3.0,3.0);
+		trainTarget[i] = noise(random::globalRng).first + model(input[i]);
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input, trainTarget);
 	
@@ -180,7 +182,7 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_Regression)
 	
 	RealVector weights(dataset.numberOfElements());
 	for(auto& weight: weights)
-		weight = Rng::uni(0,1);
+		weight = random::uni(random::globalRng,0,1);
 	
 	WeightedLabeledData<RealVector,RealVector> weightedDataset(dataset,createDataFromRange(weights));
 	testRegression(weightedDataset,0.1,100,true);

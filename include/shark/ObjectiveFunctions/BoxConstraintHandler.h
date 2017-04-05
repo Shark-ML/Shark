@@ -34,7 +34,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BOXCONSTRAINTHANDLER_H
 
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark{
 
@@ -87,7 +87,7 @@ public:
 	virtual void generateRandomPoint( Vector & startingPoint )const {
 		startingPoint.resize(dimensions());
 		for(std::size_t i = 0; i != dimensions(); ++i){
-			startingPoint(i) = Rng::uni(m_lower(i),m_upper(i));
+			startingPoint(i) = random::uni(random::globalRng, m_lower(i),m_upper(i));
 		}
 	}
 	

@@ -61,7 +61,7 @@ class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<Rea
 public:
 
 	/// \brief Default c'tor.
-	IndicatorBasedRealCodedNSGAII(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
+	IndicatorBasedRealCodedNSGAII(random::rng_type& rng = random::globalRng):mpe_rng(&rng){
 		mu() = 100;
 		crossoverProbability() = 0.9;
 		nc() = 20.0;
@@ -224,7 +224,7 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = discrete(*mpe_rng, 0,initialSearchPoints.size()-1);
+			std::size_t index = random::discrete(*mpe_rng, std::size_t(0),initialSearchPoints.size()-1);
 			m_parents[i].searchPoint() = initialSearchPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
 			m_parents[i].unpenalizedFitness() = functionValues[index];
@@ -254,7 +254,7 @@ protected:
 		);
 
 		for( std::size_t i = 0; i < mu()-1; i+=2 ) {
-			if( coinToss(*mpe_rng, m_crossoverProbability ) ) {
+			if( random::coinToss(*mpe_rng, m_crossoverProbability ) ) {
 				m_crossover(*mpe_rng,offspring[i], offspring[i +1] );
 			}
 		}
@@ -290,7 +290,7 @@ private:
 	PolynomialMutator m_mutation; ///< Mutation operator.
 
 	double m_crossoverProbability; ///< Crossover probability.
-	DefaultRngType* mpe_rng; 
+	random::rng_type* mpe_rng; 
 };
 
 typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;

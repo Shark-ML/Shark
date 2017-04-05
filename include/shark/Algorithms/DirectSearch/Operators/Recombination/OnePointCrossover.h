@@ -31,7 +31,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_RECOMBINATION_ONE_POINT_CROSSOVER_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_RECOMBINATION_ONE_POINT_CROSSOVER_H
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 
@@ -42,10 +42,10 @@ namespace shark {
 /// right parent.
 struct OnePointCrossover {
 	/// \brief Performs the one-point crossover
-	template<class RngType, typename PointType>
-	PointType operator()(RngType& rng, const PointType & mom, const PointType & dad ) {
+	template<class randomType, typename PointType>
+	PointType operator()(randomType& rng, const PointType & mom, const PointType & dad ) {
 		SIZE_CHECK(mom.size() == dad.size());
-		std::size_t point = discrete(rng, 0, mom.size() - 1 );
+		std::size_t point = random::discrete(rng, std::size_t(0), mom.size() - 1 );
 	    
 		PointType offspring( mom.size() );
 		std::copy( mom.begin(), mom.begin() + point, offspring.begin() );

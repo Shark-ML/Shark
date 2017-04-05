@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)
 	
 	std::vector<RealVector> input(1000,RealVector(3));
 	for(std::size_t i = 0; i != 1000;++i)
-		input[i]=dist(Rng::globalRng).first+mean;
+		input[i]=dist(random::globalRng).first+mean;
 
 	UnlabeledData<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsWhitening normalizer(1.5);
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 	
 	std::vector<RealVector> input(1000,RealVector(3));
 	for(std::size_t i = 0; i != 1000;++i)
-		input[i]=dist(Rng::globalRng).first+mean;
+		input[i]=dist(random::globalRng).first+mean;
 
 	UnlabeledData<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsWhitening normalizer(1.5);
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_ZCA)
 	
 	std::vector<RealVector> input(1000,RealVector(3));
 	for(std::size_t i = 0; i != 1000;++i)
-		input[i]=dist(Rng::globalRng).first+mean;
+		input[i]=dist(random::globalRng).first+mean;
 
 	UnlabeledData<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsZCA normalizer(1.5);

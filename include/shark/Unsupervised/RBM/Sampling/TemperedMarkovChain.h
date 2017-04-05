@@ -31,7 +31,7 @@
 #define SHARK_UNSUPERVISED_RBM_SAMPLING_TEMPEREDMARKOVCHAIN_H
 
 #include <shark/Data/Dataset.h>
-#include <shark/Rng/DiscreteUniform.h>
+#include <shark/Core/Random.h>
 #include <shark/Unsupervised/RBM/Tags.h>
 #include <vector>
 #include "Impl/SampleTypes.h"
@@ -78,9 +78,7 @@ private:
 		double baseRateDiff = inner_prod(low.visible.state,baseRate) -  inner_prod(high.visible.state,baseRate); 
 		double r = betaDiff * energyDiff + betaDiff*baseRateDiff;
 		
-		
-		Uniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,1);
-		double z = uni();
+		double z = random::uni(m_operator.rbm()->rng(),0,1);
 		if( r >= 0 || (z > 0 && std::log(z) < r) ){
 			swap(high,low);
 		}
@@ -166,12 +164,11 @@ public:
 	/// @param dataSet the data set
 	void initializeChain(Data<RealVector> const& dataSet){
 		SHARK_RUNTIME_CHECK(m_temperedChains.size() != 0,"You did not initialize the number of temperatures bevor initializing the chain!");
-		DiscreteUniform<typename RBM::RngType> uni(m_operator.rbm()->rng(),0,dataSet.numberOfElements()-1);
 		std::size_t visibles = m_operator.rbm()->numberOfVN();
 		RealMatrix sampleData(m_temperedChains.size(),visibles);
 		
 		for(std::size_t i = 0; i != m_temperedChains.size(); ++i){
-			noalias(row(sampleData,i)) = dataSet.element(uni());
+			noalias(row(sampleData,i)) = dataSet.element(random::discrete(m_operator.rbm()->rng(),std::size_t(0),dataSet.numberOfElements()-1));
 		}
 		initializeChain(sampleData);
 	}

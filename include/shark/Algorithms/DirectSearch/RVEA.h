@@ -54,7 +54,7 @@ namespace shark {
 class RVEA : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:
-	SHARK_EXPORT_SYMBOL RVEA(DefaultRngType & rng = Rng::globalRng);
+	SHARK_EXPORT_SYMBOL RVEA(random::rng_type & rng = random::globalRng);
 
 	std::string name() const{
 		return "RVEA";
@@ -207,7 +207,7 @@ protected:
 	std::vector<IndividualType> m_parents;
 
 private:
-	DefaultRngType * m_rng;
+	random::rng_type * m_rng;
 	double m_crossoverProbability; ///< Probability of crossover happening.
 	/// \brief Size of parent population
 	///

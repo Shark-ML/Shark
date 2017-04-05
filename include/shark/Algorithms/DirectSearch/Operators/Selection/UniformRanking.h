@@ -49,9 +49,9 @@ struct UniformRankingSelection {
 	/// \param [in] individualsE Iterator pointing to the first invalid individual.
 	/// \param [in] out Iterator pointing to the first valid element of the output range.
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
-	template<typename InIterator,typename OutIterator> 
+	template<typename RngType, typename InIterator,typename OutIterator> 
 	void operator()( 
-		DefaultRngType& rng,
+		RngType& rng,
 		InIterator individuals,
 		InIterator individualsE,
 		OutIterator out,

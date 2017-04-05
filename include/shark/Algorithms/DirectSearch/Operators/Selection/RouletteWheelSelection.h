@@ -36,7 +36,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ROULETTE_WHEEL_SELECTION_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_SELECTION_ROULETTE_WHEEL_SELECTION_H
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/LinAlg/Base.h>
 
 namespace shark {
@@ -53,11 +53,11 @@ struct RouletteWheelSelection {
 	* \param [in] itE Iterator pointing to the first invalid element.
 	* \param [in] probabilities selection probabilities of the individuals
 	*/
-	template<typename Iterator>
-	Iterator operator()(DefaultRngType& rng, Iterator it, Iterator itE, RealVector const& probabilities) const
+	template<typename Rng, typename Iterator>
+	Iterator operator()(Rng& rng, Iterator it, Iterator itE, RealVector const& probabilities) const
 	{
 		std::size_t n = probabilities.size();
-		double rnd = uni(rng, 0,1);
+		double rnd = random::uni(rng, 0,1);
 		double sum = 0;
 		for(std::size_t pos = 0; pos != n; ++pos,++it){
 			sum += probabilities(pos);

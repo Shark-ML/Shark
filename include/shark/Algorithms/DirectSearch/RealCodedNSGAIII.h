@@ -54,7 +54,7 @@ class RealCodedNSGAIII : public IndicatorBasedRealCodedNSGAII<NSGA3Indicator>{
 public:
 
 	/// \brief Default c'tor.
-	RealCodedNSGAIII(DefaultRngType& rng = Rng::globalRng):IndicatorBasedRealCodedNSGAII<NSGA3Indicator>(rng){}
+	RealCodedNSGAIII(random::rng_type& rng = random::globalRng):IndicatorBasedRealCodedNSGAII<NSGA3Indicator>(rng){}
 
 	std::string name() const {
 		return "RealCodedNSGAIII";

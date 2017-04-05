@@ -33,7 +33,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Scalarizers/Tchebycheff.h>
 using namespace shark;
 
-MOEAD::MOEAD(DefaultRngType & rng) : mpe_rng(&rng){
+MOEAD::MOEAD(random::rng_type & rng) : mpe_rng(&rng){
 	mu() = 100;
 	crossoverProbability() = 0.9;
 	nc() = 20.0; // parameter for crossover operator
@@ -142,7 +142,7 @@ void MOEAD::doInit(
 	}
 	// Copy points randomly
 	for(std::size_t i = numPoints; i < m_mu; ++i){
-		std::size_t index = discrete(*mpe_rng, 0, initialSearchPoints.size() - 1);
+		std::size_t index = random::discrete(*mpe_rng, std::size_t(0), initialSearchPoints.size() - 1);
 		m_parents[i].searchPoint() = initialSearchPoints[index];
 		m_parents[i].penalizedFitness() = functionValues[index];
 		m_parents[i].unpenalizedFitness() = functionValues[index];
@@ -160,15 +160,15 @@ void MOEAD::doInit(
 // Make me an offspring...
 std::vector<MOEAD::IndividualType> MOEAD::generateOffspring() const{
 	// Below should be in its own "selector"...
-	DiscreteUniform<> uniform_int_dist(*mpe_rng, 0, m_neighbourhoods.size2() - 1);
+	
 	// 1. Randomly select two indices k,l from B(i)
-	const std::size_t k = m_neighbourhoods(m_curParentIndex, uniform_int_dist());
-	const std::size_t l = m_neighbourhoods(m_curParentIndex, uniform_int_dist());
+	const std::size_t k = m_neighbourhoods(m_curParentIndex, random::discrete(*mpe_rng, std::size_t(0), m_neighbourhoods.size2() - 1));
+	const std::size_t l = m_neighbourhoods(m_curParentIndex, random::discrete(*mpe_rng, std::size_t(0), m_neighbourhoods.size2() - 1));
 	//    Then generate a new solution y from x_k and x_l
 	IndividualType x_k = m_parents[k];
 	IndividualType x_l = m_parents[l];
 
-	if(coinToss(*mpe_rng, m_crossoverProbability)){
+	if(random::coinToss(*mpe_rng, m_crossoverProbability)){
 		m_crossover(*mpe_rng, x_k, x_l);
 	}
 	m_mutation(*mpe_rng, x_k);

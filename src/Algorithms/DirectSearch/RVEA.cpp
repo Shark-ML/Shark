@@ -37,7 +37,7 @@
 
 using namespace shark;
 
-RVEA::RVEA(DefaultRngType & rng) : m_rng(&rng){
+RVEA::RVEA(random::rng_type & rng) : m_rng(&rng){
 	approxMu() = 100;
 	m_mu = approxMu();
 	crossoverProbability() = 0.9;
@@ -167,7 +167,7 @@ void RVEA::doInit(
 	// Copy points randomly
 	for(std::size_t i = numPoints; i < m_mu; ++i)
 	{
-		std::size_t index = discrete(*m_rng, 0,
+		std::size_t index = random::discrete(*m_rng, std::size_t(0),
 		                             initialSearchPoints.size() - 1);
 		m_parents[i].searchPoint() = initialSearchPoints[index];
 		m_parents[i].penalizedFitness() = functionValues[index];
@@ -194,7 +194,7 @@ std::vector<RVEA::IndividualType> RVEA::generateOffspring() const{
 	          offspring.begin(), offspring.end());
 	for(std::size_t i = 0; i < mu() - 1; i += 2)
 	{
-		if(coinToss(*m_rng, m_crossoverProbability))
+		if(random::coinToss(*m_rng, m_crossoverProbability))
 		{
 			m_crossover(*m_rng, offspring[i], offspring[i + 1]);
 		}

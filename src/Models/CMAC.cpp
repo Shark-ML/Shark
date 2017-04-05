@@ -114,7 +114,7 @@ void CMACMap::setStructure(std::size_t inputs, std::size_t outputs, std::size_t 
 			if (!randomTiles)
 				m_offset(tiling, dim) -= 0.5*m_tileBounds(dim,1)*(1.0+tiling)/m_tilings;
 			else
-				m_offset(tiling, dim) -= 0.5*Rng::uni(0, m_tileBounds(dim,1));
+				m_offset(tiling, dim) -= 0.5*random::uni(random::globalRng, std::size_t(0), m_tileBounds(dim,1));
 		}
 	}
 }

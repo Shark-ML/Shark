@@ -1,6 +1,5 @@
 #include <shark/Unsupervised/RBM/Neuronlayers/TruncatedExponentialLayer.h>
-#include <shark/Rng/GlobalRng.h>
-#include <shark/Rng/TruncatedExponential.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE RBM_TruncatedExponentialLayer
 #include <boost/test/unit_test.hpp>
@@ -16,16 +15,16 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_SufficientStatistics){
 	layer.resize(3);
 	RealMatrix input(10,3);
 	RealMatrix testInput(10,3);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t test = 0; test != 10000; ++test){
-		double beta = Rng::uni(0,1);
+		double beta = random::uni(random::globalRng,0,1);
 		for(std::size_t j = 0; j != 3; ++j){
-			layer.bias()(j) = Rng::gauss(0,10);
+			layer.bias()(j) = random::gauss(random::globalRng,0,10);
 		}
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				input(i,j) = Rng::gauss(0,10);
+				input(i,j) = random::gauss(random::globalRng,0,10);
 			}
 			
 			//calculate result
@@ -47,10 +46,10 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_Parameters){
 	TruncatedExponentialLayer layer;
 	layer.resize(20);
 	RealVector parameters(20);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t j = 0; j != 20; ++j){
-		parameters(j) = Rng::gauss(0,1);
+		parameters(j) = random::gauss(random::globalRng,0,1);
 	}
 	
 	layer.setParameterVector(parameters);
@@ -65,11 +64,11 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_Sample){
 	TruncatedExponentialLayer layer;
 	TruncatedExponentialLayer::StatisticsBatch statistics(10,5);
 	layer.resize(5);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t i = 0; i != 10; ++i){
 		for(std::size_t j = 0; j != 5; ++j){
-			statistics.lambda(i,j) = Rng::uni(-1,1);
+			statistics.lambda(i,j) = random::uni(random::globalRng,-1,1);
 		}
 	}
 	statistics.expMinusLambda = exp(-statistics.lambda);
@@ -79,7 +78,7 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_Sample){
 	mean.clear();
 	for(std::size_t i = 0; i != numSamples; ++i){
 		RealMatrix samples(10,5);
-		layer.sample(statistics,samples,1.0,Rng::globalRng);
+		layer.sample(statistics,samples,1.0,random::globalRng);
 		mean+=samples;
 	}
 	mean/=numSamples;
@@ -95,7 +94,7 @@ BOOST_AUTO_TEST_CASE( TruncatedExponentialLayer_Marginalize){
 	TruncatedExponentialLayer layer;
 	layer.resize(3);
 	RealVector input(3);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t j = 0; j != 3; ++j){
 		layer.bias()(j) = -0.5*j-1;

@@ -3,7 +3,6 @@
 #include <shark/Models/LinearModel.h>
 #include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/FFNet.h>
-#include <shark/Rng/Normal.h>
 #include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
 #include <shark/Algorithms/Trainers/LinearRegression.h>
 //###end<includes>
@@ -36,12 +35,12 @@ public:
 	{
 		input.resize(2);
 		label.resize(1);
-		input(0) = Rng::uni(-5, 5);
-		input(1) = Rng::uni(-5, 5);
+		input(0) = random::uni(random::globalRng, -5, 5);
+		input(1) = random::uni(random::globalRng, -5, 5);
 		if(input(0) != 0)
-			label(0) = sin(input(0)) / input(0) + input(1) + Rng::gauss(0.0, 0.1);
+			label(0) = sin(input(0)) / input(0) + input(1) + random::gauss(random::globalRng, 0.0, 0.1);
 		else
-			label(0) = 1 + input(1) + Rng::gauss(0.0, 0.1);
+			label(0) = 1 + input(1) + random::gauss(random::globalRng, 0.0, 0.1);
 	}
 };
 /// @endcond
@@ -53,7 +52,7 @@ int main(){
 	unsigned int randomSeed = 42;
 	
 	//configure random number generator
-	Rng::seed(randomSeed);
+	random::globalRng.seed(randomSeed);
 	
 	//create the regression problem
 	Problem problem;

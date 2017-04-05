@@ -33,7 +33,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_ACKLEY_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 /**
@@ -68,7 +68,7 @@ struct Ackley : public SingleObjectiveFunction {
 		x.resize(m_numberOfVariables);
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = Rng::uni(-10, 10);
+			x(i) = random::uni(random::globalRng, -10, 10);
 		}
 		return x;
 	}

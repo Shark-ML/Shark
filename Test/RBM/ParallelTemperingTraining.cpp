@@ -26,15 +26,11 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 	UnlabeledData<RealVector> data = problem.data();
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
-		BinaryRBM rbm(Rng::globalRng);
+		BinaryRBM rbm(random::globalRng);
 		rbm.setStructure(16,numHidden);
 		
-		Rng::seed(42+trial);
-		RealVector params(rbm.numberOfParameters());
-		for(std::size_t i = 0; i != params.size();++i){
-			params(i) = Rng::uni(-0.1,0.1);
-		}
-		rbm.setParameterVector(params);
+		random::globalRng.seed(42+trial);
+		initRandomUniform(rbm,-0.1,0.1);
 		BinaryParallelTempering cd(&rbm);
 		cd.chain().setUniformTemperatureSpacing(numTemperatures);
 		cd.numBatches()=2;

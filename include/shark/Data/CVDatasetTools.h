@@ -36,9 +36,8 @@
 #define SHARK_DATA_CVDATASETTOOLS_H
 
 #include <shark/Data/Dataset.h>
-#include <shark/Rng/DiscreteUniform.h>
+#include <shark/Core/Random.h>
 #include <algorithm>
-//
 #include <shark/Data/DataView.h>
 
 #include <utility> //for std::pair
@@ -166,9 +165,8 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 	std::size_t numClasses = members.size();
 
 	//shuffle elements in members
-	DiscreteUniform< Rng::rng_type > uni(shark::Rng::globalRng) ;
 	for (std::size_t c = 0; c != numClasses; c++) {
-		std::random_shuffle(members[c].begin(), members[c].end(), uni);
+		std::shuffle(members[c].begin(), members[c].end(), random::globalRng);
 	}
 
 	//calculate number of elements per validation subset in the new to construct container
@@ -261,7 +259,7 @@ CVFolds<LabeledData<I,L> > createCVIID(LabeledData<I,L> &set,
         std::size_t batchSize=Data<I>::DefaultBatchSize) {
 	std::vector<std::size_t> indices(set.numberOfElements());
 	for (std::size_t i=0; i != set.numberOfElements(); i++)
-		indices[i] = Rng::discrete(0, numberOfPartitions - 1);
+		indices[i] = random::discrete(random::globalRng, std::size_t(0), numberOfPartitions - 1);
 	return createCVIndexed(set,numberOfPartitions,indices,batchSize);
 }
 
@@ -350,8 +348,7 @@ CVFolds<LabeledData<I,L> > createCVBatch (
 	std::vector<std::size_t> indizes(set.numberOfBatches());
 	for(std::size_t i= 0; i != set.numberOfBatches(); ++i)
 		indizes[i] = i;
-	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-	shark::shuffle(indizes.begin(),indizes.end(), uni);
+	shark::shuffle(indizes.begin(),indizes.end(), random::globalRng);
 	
 	typedef typename LabeledData<I,L>::IndexSet IndexSet;
 	
@@ -493,5 +490,4 @@ CVFolds<LabeledData<I,L> > createCVFullyIndexed(
 
 /** @}*/
 }
-#include "Impl/CVDatasetTools.inl"
 #endif

@@ -116,7 +116,7 @@ struct CIGTAB1 : public MultiObjectiveFunction {
 		RealVector x(m_numberOfVariables);
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = Rng::uni(-10.0, 10.0);
+			x(i) = random::uni(random::globalRng, -10.0, 10.0);
 		}
 		return x;
 	}

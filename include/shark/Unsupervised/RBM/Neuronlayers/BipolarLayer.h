@@ -32,7 +32,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Data/BatchInterfaceAdaptStruct.h>
-#include <shark/Rng/Bernoulli.h>
+#include <shark/Core/Random.h>
 #include <shark/Unsupervised/RBM/StateSpaces/TwoStateSpace.h>
 #include <shark/Core/OpenMP.h>
 namespace shark{
@@ -112,11 +112,10 @@ public:
 		SIZE_CHECK(statistics.size2() == state.size2());
 		
 		SHARK_CRITICAL_REGION{
-			Bernoulli<Rng> coinToss(rng,0.5);
 			if(alpha == 0.0){//special case: normal gibbs sampling
 				for(std::size_t s = 0; s != state.size1();++s){
 					for(std::size_t i = 0; i != state.size2();++i){
-						state(s,i) = coinToss(statistics(s,i));
+						state(s,i) = random::coinToss(rng,statistics(s,i));
 						if(state(s,i)==0) state(s,i)=-1.;
 					}
 				}
@@ -138,7 +137,7 @@ public:
 								prob = (1. - alpha) * prob;
 							}
 						}
-						state(s,i) = coinToss(prob);
+						state(s,i) = random::coinToss(rng, prob);
 						if(state(s,i)==0) state(s,i)=-1.;
 					}
 				}

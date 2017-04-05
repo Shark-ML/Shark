@@ -373,26 +373,7 @@ public:
 
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
-		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-		//~ batch_type* b;
-		//~ *(batch(0).begin()) = 0;
-		//~ typename const_batch_reference::iterator x=
-		//~ typename const_batch_reference::reference y= 0;//wrong: const/non
-		//~ typename const_batch_reference::const_reference y1= 0;//right: const/const
-		//~ typename batch_reference::reference z= 0;//right non/non
-		//~ typename batch_reference::const_reference z1= 0; //wrong: non/const
-		//~ const_batch_reference* a;
-		//~ batch_reference* b;
-		//~ *a = *b;
-		//~ (*b)[0] = *x;
-		//~ *x = (*b)[0] ;
-		//~ *x = y;
-		//~ *this->elements().begin() = z1;
-		//~ *this->elements().begin() = y1;
-		//~ *this->elements().begin() = z;
-		//~ *this->elements().begin() = y;
-		//~ y = *this->elements().begin();
-		shark::shuffle(this->elements().begin(),this->elements().end(), uni);
+		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
 	}
 
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
@@ -794,7 +775,7 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 	WeightedLabeledData<InputType,LabelType> bootstrapSet(dataset,0.0);
 
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
-		std::size_t index = Rng::discrete(0,bootStrapSize-1);
+		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
 		bootstrapSet.element(index).weight += 1.0;
 	}
 	return bootstrapSet;
@@ -820,7 +801,7 @@ WeightedUnlabeledData<InputType> bootstrap(
 	WeightedUnlabeledData<InputType> bootstrapSet(dataset,0.0);
 
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
-		std::size_t index = Rng::discrete(0,bootStrapSize-1);
+		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
 		bootstrapSet.element(index).weight += 1.0;
 	}
 	return bootstrapSet;

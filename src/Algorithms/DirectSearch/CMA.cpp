@@ -79,7 +79,7 @@ std::size_t CMA::suggestMu( std::size_t lambda, RecombinationType recomb) {
 	return 0;
 }
 
-CMA::CMA(DefaultRngType& rng)
+CMA::CMA(random::rng_type& rng)
 : m_userSetMu(false)
 , m_userSetLambda(false)
 , m_initSigma(-1)
@@ -349,7 +349,7 @@ void CMA::step(ObjectiveFunctionType const& function){
 		std::size_t lambdaReeval = std::lround(m_rLambda * m_lambda);
 		double rest = reevalFraction - lambdaReeval;
 		if(rest > 0){
-			lambdaReeval += coinToss(*mpe_rng,rest);
+			lambdaReeval += random::coinToss(*mpe_rng,rest);
 		}
 		//only continue if we have at elast one point
 		if(lambdaReeval > 0){

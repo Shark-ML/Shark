@@ -33,7 +33,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/Benchmarks/RotatedErrorFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <shark/LinAlg/rotations.h>
 #include <tuple>
@@ -126,7 +126,7 @@ public:
 		{
 			RealVector translation(numberOfVariables());
 			for(double& v: translation){
-				v=Rng::gauss(0,1)/std::sqrt(double(numberOfVariables()));
+				v=random::gauss(random::globalRng, 0,1)/std::sqrt(double(numberOfVariables()));
 			}
 			m_translations.push_back(translation);
 			f.init();
@@ -136,9 +136,9 @@ public:
 	SearchPointType proposeStartingPoint() const {
 		RealVector x(numberOfVariables());
 
-		std::size_t index = Rng::discrete(0,m_rotations.size()-1);
+		std::size_t index = random::discrete(0,m_rotations.size()-1);
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = m_translations[index](i)+Rng::gauss(0,1)/std::sqrt(double(numberOfVariables()));
+			x(i) = m_translations[index](i)+random::gauss(random::globalRng, 0,1)/std::sqrt(double(numberOfVariables()));
 		}
 		return x;
 	}

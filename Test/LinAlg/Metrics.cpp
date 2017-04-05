@@ -4,7 +4,7 @@
 
 #include <shark/LinAlg/Metrics.h>
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/Timer.h>
 
 using namespace shark;

@@ -4,7 +4,7 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Domination/FastNonDominatedSort.h>
 #include <shark/Algorithms/DirectSearch/Operators/Domination/DCNonDominatedSort.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/Timer.h>
 
 #include <cmath>
@@ -29,9 +29,9 @@ BOOST_AUTO_TEST_CASE( NonDominatedSort_Test )
 			for (std::size_t i = 0; i != numPoints; ++i) {
 				points[i].resize(numDims);
 				for (std::size_t j = 0; j != numDims; ++j) {
-					points[i][j] = Rng::uni(-1,2);
+					points[i][j] = random::uni(random::globalRng,-1,2);
 					// make sure that some values coincide
-					if (Rng::coinToss()) points[i][j] = std::round(points[i][j]);
+					if (random::coinToss(random::globalRng)) points[i][j] = std::round(points[i][j]);
 				}
 			}
 			std::vector<unsigned int> ranks1(numPoints);

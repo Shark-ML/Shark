@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( FISHER_LDA_TEST ){
 	for(size_t i=0;i!=trainExamples;++i) {
 		//create sample
 		target[i] = i % 3;
-		input[i] = dist(Rng::globalRng).first + mean[target[i]];
+		input[i] = dist(random::globalRng).first + mean[target[i]];
 	}
 	//statisticalBayesRisk/=trainExamples;
 

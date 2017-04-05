@@ -36,13 +36,24 @@
 #include <boost/range/numeric.hpp>
 #include <shark/Core/utility/Iterators.h>
 #include <algorithm>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 namespace shark{
+	
+///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
+template<class Iterator, class Rng>
+void shuffle(Iterator begin, Iterator end, Rng& rng){
+	using std::swap;
+	Iterator next = begin;
+	for (std::size_t index = 1; ++next != end; ++index){
+	    swap(*next, *(begin + random::discrete(rng, std::size_t(0),index)));
+	}
+}
+
 	
 ///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
 template<class RandomAccessIterator, class Rng>
 void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccessIterator end, Rng& rng){
-	std::random_shuffle(begin,end,rng);
+	shark::shuffle(begin,end,rng);
 	// todo: test the algorithm below!
 	//~ typedef typename std::iterator_traits<Iterator>::difference_type difference_type;
 	//~ difference_type n = middle - begin;
@@ -53,22 +64,12 @@ void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, Ra
 	//~ }
 }
 
-///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
-template<class Iterator, class Rng>
-void shuffle(Iterator begin, Iterator end, Rng& rng){
-	using std::swap;
-	Iterator next = begin;
-	for (std::size_t index = 2; ++next != end; ++index){
-	    swap(*next, *(begin + rng(index)));
-	}
-}
 
 
 ///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
 template<class RandomAccessIterator>
 void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccessIterator end){
-	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng,0,1);
-	partial_shuffle(begin,middle,end,uni);
+	partial_shuffle(begin,middle,end,random::globalRng);
 }
 
 ///\brief Returns the iterator to the median element. after this call, the range is partially ordered.

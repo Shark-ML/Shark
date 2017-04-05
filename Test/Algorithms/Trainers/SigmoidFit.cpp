@@ -3,7 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/Trainers/SigmoidFit.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Models/Converter.h>
 
 using namespace shark;
@@ -188,9 +188,9 @@ BOOST_AUTO_TEST_CASE( SIGMOID_FIT_TEST_PLATT ){
 		// classes 0 and 1 are balanced
 		// values of class 0 are normally distributed with mean 0 and unit variance
 		// values of class 1 are normally distributed with mean -2 and unit variance
-		target[i] = Rng::coinToss() ? 1 : 0;
+		target[i] = random::coinToss(random::globalRng);
 		input[i].resize(1);
-		input[i](0) = Rng::gauss() - 2.0 * target[i];
+		input[i](0) = random::gauss(random::globalRng) - 2.0 * target[i];
 	}
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
 

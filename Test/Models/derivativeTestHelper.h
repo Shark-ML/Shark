@@ -5,7 +5,7 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Models/AbstractModel.h>
 
-#include  <shark/Rng/GlobalRng.h>
+#include  <shark/Core/Random.h>
 
 namespace shark{
 //estimates Derivative using the formula:
@@ -195,13 +195,13 @@ void testWeightedDerivative(Model& net,unsigned int numberOfTests = 1000, double
 	RealVector point(net.inputSize());
 	for(unsigned int test = 0; test != numberOfTests; ++test){
 		for(size_t i = 0; i != net.numberOfParameters();++i){
-			parameters(i) = Rng::uni(-5,5);
+			parameters(i) = random::uni(random::globalRng,-5,5);
 		}
 		for(size_t i = 0; i != net.outputSize();++i){
-			coefficients(i) = Rng::uni(-5,5);
+			coefficients(i) = random::uni(random::globalRng,-5,5);
 		}
 		for(size_t i = 0; i != net.inputSize();++i){
-			point(i) = Rng::uni(-5,5);
+			point(i) = random::uni(random::globalRng,-5,5);
 		}
 
 		net.setParameterVector(parameters);
@@ -220,13 +220,13 @@ void testWeightedInputDerivative(Model& net,unsigned int numberOfTests = 1000, d
 	RealVector point(net.inputSize());
 	for(unsigned int test = 0; test != numberOfTests; ++test){
 		for(size_t i = 0; i != net.numberOfParameters();++i){
-			parameters(i) = Rng::uni(-10,10);
+			parameters(i) = random::uni(random::globalRng,-10,10);
 		}
 		for(size_t i = 0; i != net.outputSize();++i){
-			coefficients(i) = Rng::uni(-10,10);
+			coefficients(i) = random::uni(random::globalRng,-10,10);
 		}
 		for(size_t i = 0; i != net.inputSize();++i){
-			point(i) = Rng::uni(-10,10);
+			point(i) = random::uni(random::globalRng,-10,10);
 		}
 
 		net.setParameterVector(parameters);
@@ -244,14 +244,14 @@ void testWeightedDerivativesSame(Model& net,unsigned int numberOfTests = 100, do
 	RealMatrix pointBatch(10,net.inputSize());
 	for(unsigned int test = 0; test != numberOfTests; ++test){
 		for(size_t i = 0; i != net.numberOfParameters();++i){
-			parameters(i) = Rng::uni(-10,10);
+			parameters(i) = random::uni(random::globalRng,-10,10);
 		}
 		for(std::size_t j = 0; j != 10; ++j){
 			for(size_t i = 0; i != net.outputSize();++i){
-				coeffBatch(j,i) = Rng::uni(-10,10);
+				coeffBatch(j,i) = random::uni(random::globalRng,-10,10);
 			}
 			for(size_t i = 0; i != net.inputSize();++i){
-				pointBatch(j,i) = Rng::uni(-10,10);
+				pointBatch(j,i) = random::uni(random::globalRng,-10,10);
 			}
 		}
 		net.setParameterVector(parameters);

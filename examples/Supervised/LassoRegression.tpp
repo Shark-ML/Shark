@@ -65,16 +65,16 @@ public:
 		label.resize(1);
 
 		// we have one informative component per example
-		double g = Rng::gauss();;
-		size_t i = Rng::discrete(0, m_informative-1);
+		double g = random::gauss(random::globalRng);
+		size_t i = random::discrete(random::globalRng, std::size_t(0), m_informative-1);
 		input(i) = g;
 		label(0) = g;
 
 		// the rest is non-informative
 		for (size_t n=1; n<m_nnz; n++)
 		{
-			size_t i = Rng::discrete(m_informative, m_dim-1);
-			input(i) = Rng::gauss();
+			size_t i = random::discrete(random::globalRng, m_informative, m_dim-1);
+			input(i) = random::gauss(random::globalRng);
 		}
 	}
 

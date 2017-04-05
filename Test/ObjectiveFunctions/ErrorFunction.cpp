@@ -3,7 +3,6 @@
 #include <shark/Algorithms/Trainers/LinearRegression.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
-#include <shark/Rng/Uniform.h>
 #include <shark/Data/DataDistribution.h>
 
 #define BOOST_TEST_MODULE ObjFunct_ErrorFunction
@@ -119,18 +118,16 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	covariance(1,1) = 1;
 	MultiVariateNormalDistribution noise(covariance);
 
-	Uniform<> uniform(Rng::globalRng,-3.0, 3.0);
-
 	// create samples
 	std::vector<RealVector> input(trainExamples,RealVector(2));
 	std::vector<RealVector> trainTarget(trainExamples,RealVector(2));
 	std::vector<RealVector> testTarget(trainExamples,RealVector(2));
 	double optimalMSE = 0;
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = uniform();
-		input[i](1) = uniform();
+		input[i](0) = random::uni(random::globalRng, -3.0,3.0);
+		input[i](1) = random::uni(random::globalRng, -3.0,3.0);
 		testTarget[i] =  model(input[i]);
-		RealVector noiseVal = noise(Rng::globalRng).first;
+		RealVector noiseVal = noise(random::globalRng).first;
 		trainTarget[i] = noiseVal + testTarget[i];
 		optimalMSE+=norm_sqr(noiseVal);
 	}
@@ -229,7 +226,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 		unweightedData.batch(0).input.resize(100,1);
 		unweightedData.batch(0).label.resize(100,1);
 		for(std::size_t i = 0; i != 100; ++i){
-			std::size_t e = Rng::discrete(0,49);
+			std::size_t e = random::discrete(random::globalRng, 0,49);
 			unweightedData.element(i).input = data.element(e).input;
 			unweightedData.element(i).label = data.element(e).label;
 			weights.element(e) += 1.0;

@@ -52,7 +52,7 @@ namespace shark {
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:
-	SHARK_EXPORT_SYMBOL MOEAD(DefaultRngType & rng = Rng::globalRng);
+	SHARK_EXPORT_SYMBOL MOEAD(random::rng_type & rng = random::globalRng);
 
 	std::string name() const{
 		return "MOEA/D";
@@ -140,7 +140,7 @@ protected:
 	std::vector<IndividualType> m_parents;
 
 private:
-	DefaultRngType * mpe_rng;
+	random::rng_type * mpe_rng;
 	double m_crossoverProbability; ///< Probability of crossover happening.
 	std::size_t m_mu; ///< Size of parent population and the "N" from the paper
 

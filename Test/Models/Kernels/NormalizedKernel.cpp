@@ -6,7 +6,7 @@
 #include <shark/Models/Kernels/NormalizedKernel.h>
 #include <shark/Models/Kernels/PolynomialKernel.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 

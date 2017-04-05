@@ -378,7 +378,7 @@ namespace shark {
 		* @return The hypercube.
 		*/
 // 		iterator randomOccupiedHypercube(){
-// 			return( m_denseGrid.begin() + Rng::discrete( 0, m_denseGrid.size() ) );
+// 			return( m_denseGrid.begin() + random::discrete( 0, m_denseGrid.size() ) );
 // 		} //randomOccupiedHypercube
 	}; //AdaptativeGrid
 }

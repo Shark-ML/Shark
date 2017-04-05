@@ -6,7 +6,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include  <shark/Rng/GlobalRng.h>
+#include  <shark/Core/Random.h>
 
 namespace shark{
 //estimates Derivative using the formula:

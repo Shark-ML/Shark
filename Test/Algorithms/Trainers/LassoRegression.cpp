@@ -4,7 +4,7 @@
 
 #include <shark/Algorithms/Trainers/LassoRegression.h>
 #include <shark/Data/DataDistribution.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <iostream>
 
 using namespace shark;
@@ -20,8 +20,8 @@ public:
 	{
 		input.resize(10);
 		label.resize(1);
-		double g = Rng::gauss();
-		for (size_t i=0; i<10; i++) input(i) = Rng::gauss();
+		double g = random::gauss(random::globalRng);
+		for (size_t i=0; i<10; i++) input(i) = random::gauss(random::globalRng);
 		input(5) += g;
 		label(0) = g;
 	}

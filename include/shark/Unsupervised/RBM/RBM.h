@@ -39,15 +39,15 @@
 namespace shark{
 
 ///\brief stub for the RBM class. at the moment it is just a holder of the parameter set and the Energy.
-template<class VisibleLayerT,class HiddenLayerT, class RngT>
+template<class VisibleLayerT,class HiddenLayerT, class randomT>
 class RBM : public AbstractModel<RealVector, RealVector>{
 private:
 	typedef AbstractModel<RealVector, RealVector> base_type;
 public:
 	typedef HiddenLayerT HiddenType; ///< type of the hidden layer
 	typedef VisibleLayerT VisibleType; ///< type of the visible layer
-	typedef RngT RngType;
-	typedef Energy<RBM<VisibleType,HiddenType,RngT> > EnergyType;///< Type of the energy function
+	typedef randomT randomType;
+	typedef Energy<RBM<VisibleType,HiddenType,randomT> > EnergyType;///< Type of the energy function
 	typedef detail::AverageEnergyGradient<RBM> GradientType;///< Type of the gradient calculator
 	
 	typedef typename base_type::BatchInputType BatchInputType;
@@ -63,7 +63,7 @@ private:
 	///The Layer of visible Neurons
 	VisibleType m_visibleNeurons;
 
-	RngType* mpe_rng;
+	randomType* mpe_rng;
 	bool m_forward;
 	bool m_evalMean;
 
@@ -109,7 +109,7 @@ private:
 		}
 	}
 public:
-	RBM(RngType& rng):mpe_rng(&rng),m_forward(true),m_evalMean(true)
+	RBM(randomType& rng):mpe_rng(&rng),m_forward(true),m_evalMean(true)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -182,7 +182,7 @@ public:
 	}
 	
 	///\brief Returns the random number generator associated with this RBM.
-	RngType& rng(){
+	randomType& rng(){
 		return *mpe_rng;
 	}
 	

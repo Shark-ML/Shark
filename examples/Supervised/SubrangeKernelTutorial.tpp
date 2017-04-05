@@ -5,7 +5,7 @@
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/Models/Kernels/SubrangeKernel.h>
 #include <shark/Data/DataDistribution.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 
@@ -20,7 +20,7 @@ public:
 	void draw(RealVector& input)const{
 		input.resize(m_dimensions);
 		for ( std::size_t j=0; j<m_dimensions; j++ ) {
-			input(j) = Rng::uni(-1,1);
+			input(j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 

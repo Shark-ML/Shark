@@ -34,7 +34,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Data/BatchInterfaceAdaptStruct.h>
-#include <shark/Rng/Bernoulli.h>
+#include <shark/Core/Random.h>
 #include <shark/Unsupervised/RBM/StateSpaces/TwoStateSpace.h>
 #include <shark/Core/OpenMP.h>
 namespace shark{
@@ -113,7 +113,6 @@ public:
 		
 		for(std::size_t i = 0; i != input.size1(); ++i){
 			noalias(row(statistics,i)) = sigmoid((row(input,i)+m_bias)*beta(i)+(1.0-beta(i))*m_baseRate);
-			//~ noalias(row(statistics,i)) = sigmoid((row(input,i)+m_bias)*beta(i));
 		}
 	}
 	
@@ -135,11 +134,10 @@ public:
 		SIZE_CHECK(statistics.size2() == state.size2());
 		
 		SHARK_CRITICAL_REGION{
-			Bernoulli<Rng> coinToss(rng,0.5);
 			if(alpha == 0.0){//special case: normal gibbs sampling
 				for(std::size_t s = 0; s != state.size1();++s){
 					for(std::size_t i = 0; i != state.size2();++i){
-						state(s,i) = coinToss(statistics(s,i));
+						state(s,i) = random::coinToss(rng, statistics(s,i));
 					}
 				}
 			}
@@ -160,7 +158,7 @@ public:
 								prob = (1. - alpha) * prob;
 							}
 						}
-						state(s,i) = coinToss(prob);
+						state(s,i) = random::coinToss(rng, prob);
 					}
 				}
 			}

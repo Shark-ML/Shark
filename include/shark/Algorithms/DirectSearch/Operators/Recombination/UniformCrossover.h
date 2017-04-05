@@ -32,7 +32,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_RECOMBINATION_UNIFORM_CROSSOVER_H
 #define SHARK_ALGORITHMS_DIRECTSEARCH_OPERATORS_RECOMBINATION_UNIFORM_CROSSOVER_H
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 
@@ -54,12 +54,12 @@ public:
 	/// \brief Executes the uniform crossover.
 	///	
 	/// \return The offspring individual.
-	template<class RngType, typename Point>
-	Point operator()(RngType& rng, const Point & mom, const Point & dad ) const {
+	template<class randomType, typename Point>
+	Point operator()(randomType& rng, const Point & mom, const Point & dad ) const {
 		Point result( mom );
 
 		for( std::size_t i = 0; i < std::min( mom.size(), dad.size() ); i++ ) {
-			if( coinToss(rng, m_mixingRatio ) )
+			if( random::coinToss(rng, m_mixingRatio ) )
 				result( i ) = dad( i );
 		}
 

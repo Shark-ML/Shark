@@ -60,7 +60,7 @@ public:
 	};
 public:
 	
-	IndicatorBasedMOCMA(DefaultRngType& rng= Rng::globalRng):mpe_rng(&rng) {
+	IndicatorBasedMOCMA(random::rng_type& rng= random::globalRng):mpe_rng(&rng) {
 		m_individualSuccessThreshold = 0.44;
 		initialSigma() = 1.0;
 		mu() = 100;
@@ -193,7 +193,7 @@ protected:
 		}
 		//copy points randomly
 		for(std::size_t i = numPoints; i != mu; ++i){
-			std::size_t index = discrete(*mpe_rng,0,initialSearchPoints.size()-1);
+			std::size_t index = random::discrete(*mpe_rng,std::size_t(0),initialSearchPoints.size()-1);
 			m_parents[i] = IndividualType(noVariables,m_individualSuccessThreshold,m_initialSigma);
 			m_parents[i].searchPoint() = initialSearchPoints[index];
 			m_parents[i].penalizedFitness() = functionValues[index];
@@ -261,7 +261,7 @@ private:
 	NotionOfSuccess m_notionOfSuccess; ///< Flag for deciding whether the improved step-size adaptation shall be used.
 	double m_individualSuccessThreshold;
 	double m_initialSigma;
-	DefaultRngType* mpe_rng;
+	random::rng_type* mpe_rng;
 };
 
 typedef IndicatorBasedMOCMA< HypervolumeIndicator > MOCMA;

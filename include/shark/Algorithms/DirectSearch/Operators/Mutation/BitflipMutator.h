@@ -32,7 +32,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_BITFLIP_MUTATION_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_MUTATION_BITFLIP_MUTATION_H
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 
@@ -57,11 +57,11 @@ struct BitflipMutator {
 	/// \brief Mutates the supplied individual.
 	/// 
 	/// \param [in,out] ind Individual to be mutated.
-	template<typename IndividualType>
-	void operator()(DefaultRngType& rng, IndividualType &ind) {
+	template<typename Rng, typename IndividualType>
+	void operator()(Rng& rng, IndividualType &ind) {
 
 		for (unsigned int i = 0; i < ind.searchPoint().size(); i++) {
-			if (coinToss(rng,m_mutationStrength)) {
+			if (random::coinToss(rng,m_mutationStrength)) {
 				ind.searchPoint()[ i ] = !ind.searchPoint()[ i ];
 			}
 		}

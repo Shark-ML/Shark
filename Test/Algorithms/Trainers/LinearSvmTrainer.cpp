@@ -96,16 +96,16 @@ BOOST_AUTO_TEST_CASE( Binary_CSVM_TRAINER_TEST )
 	for (unsigned int run=0; run<10; run++)
 	{
 		// generate random training set
-		Rng::seed(run);
+		random::globalRng.seed(run);
 		cout << endl << "generating test problem " << (run+1) << " out of 10" << endl;
 		vector<CompressedRealVector> input(ell, CompressedRealVector(dim));
 		vector<unsigned int> target(ell);
 		for (size_t i=0; i<ell; i++)
 		{
-			unsigned int label = Rng::coinToss();
+			unsigned int label = random::coinToss(random::globalRng);
 			for (unsigned int d=0; d<dim; d++)
 			{
-				input[i](d) = 0.3 * Rng::gauss() + 2*label-1;
+				input[i](d) = 0.3 * random::gauss(random::globalRng) + 2*label-1;
 			}
 			target[i] = label;
 		}
@@ -182,17 +182,17 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	for (unsigned int run=0; run<10; run++)
 	{
 		// generate random training set
-		Rng::seed(run);
+		random::globalRng.seed(42+run);
 		cout << endl << "generating test problem " << (run+1) << " out of 10" << endl;
 		vector<CompressedRealVector> input(ell, CompressedRealVector(dim));
 		vector<unsigned int> target(ell);
 		for (size_t i=0; i<ell; i++)
 		{
-			unsigned int label = (unsigned int)Rng::discrete(0, classes - 1);
+			unsigned int label = (unsigned int)random::discrete(random::globalRng, std::size_t(0), classes - 1);
 			for (unsigned int d=0; d<dim; d++)
 			{
-				if ((d / var_per_class) == label) input[i](d) = 0.3 * Rng::gauss() + 1.0;
-				else input[i](d) = 0.3 * Rng::gauss() - 1.0;
+				if ((d / var_per_class) == label) input[i](d) = 0.3 * random::gauss(random::globalRng) + 1.0;
+				else input[i](d) = 0.3 * random::gauss(random::globalRng) - 1.0;
 			}
 			target[i] = label;
 		}
@@ -211,12 +211,19 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			LinearClassifier<CompressedRealVector> linear;
 			linearTrainer.stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			linearTrainer.train(linear, dataset);
+			
+			//Extract linear weights
+			RealMatrix linear_w = linear.decisionFunction().matrix();
+			ZeroSum(linear_w);
+			cout << "      linear trainer weight vectors: " << endl;
+			for (size_t j=0; j<classes; j++) cout << "        " << row(linear_w, j) << endl;
+			
 			KernelClassifier<CompressedRealVector> nonlinear;
 			nonlinearTrainer.stoppingCondition().minAccuracy = MAX_KKT_VIOLATION;
 			nonlinearTrainer.train(nonlinear, dataset);
 
-			// extract weight matrices
-			RealMatrix linear_w = linear.decisionFunction().matrix();
+			// extract nonlinear weight matrices
+			
 			RealMatrix nonlinear_w(classes, dim);
 			for (size_t j=0; j<dim; j++)
 			{
@@ -224,12 +231,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 				v(j) = 1.0;
 				column(nonlinear_w, j) = nonlinear.decisionFunction()(v);
 			}
-			ZeroSum(linear_w);
 			ZeroSum(nonlinear_w);
-
-			// output weight vectors for manual inspection
-			cout << "      linear trainer weight vectors: " << endl;
-			for (size_t j=0; j<classes; j++) cout << "        " << row(linear_w, j) << endl;
 			cout << "      nonlinear trainer weight vectors: " << endl;
 			for (size_t j=0; j<classes; j++) cout << "        " << row(nonlinear_w, j) << endl;
 

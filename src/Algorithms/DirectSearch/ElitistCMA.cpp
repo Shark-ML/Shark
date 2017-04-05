@@ -34,7 +34,7 @@
 
 using namespace shark;
 
-ElitistCMA::ElitistCMA(DefaultRngType& rng): m_activeUpdate(true),mpe_rng(&rng){
+ElitistCMA::ElitistCMA(random::rng_type& rng): m_activeUpdate(true),mpe_rng(&rng){
 	m_features |= REQUIRES_VALUE;
 }
 

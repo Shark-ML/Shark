@@ -116,7 +116,7 @@ public:
 
 	using Base::train;
 	void train(ModelType& model, WeightedDatasetType const& dataset){
-		trainImpl(model,dataset,*mep_loss);
+		trainImpl(random::globalRng, model,dataset,*mep_loss);
 	}
 	
 
@@ -169,6 +169,7 @@ public:
 private:
 	//initializes the model in the classification case and calls iterate to train it
 	void trainImpl(
+		random::rng_type& rng,
 		LinearClassifier<InputType>& classifier,
 		WeightedLabeledData<InputType, unsigned int> const& dataset,
 		AbstractLoss<unsigned int,RealVector> const& loss
@@ -180,11 +181,12 @@ private:
 		auto& model = classifier.decisionFunction();
 		model.setStructure(dim,classes, m_offset);
 		
-		iterate(model,dataset,loss);
+		iterate(rng, model,dataset,loss);
 	}
 	//initializes the model in the regression case and calls iterate to train it
 	template<class LabelT>
 	void trainImpl(
+		random::rng_type& rng,
 		LinearModel<InputType>& model,
 		WeightedLabeledData<InputType, LabelT> const& dataset,
 		AbstractLoss<LabelT,RealVector> const& loss
@@ -193,12 +195,13 @@ private:
 		std::size_t labelDim = labelDimension(dataset);
 		std::size_t dim = inputDimension(dataset);
 		model.setStructure(dim,labelDim, m_offset);
-		iterate(model,dataset,loss);
+		iterate(rng, model,dataset,loss);
 	}
 	
 	//dense vector case is easier, mostly implemented for simple exposition of the algorithm
 	template<class T>
 	void iterate(
+		random::rng_type& rng,
 		LinearModel<blas::vector<T> >& model,
 		WeightedLabeledData<blas::vector<T>, LabelType> const& dataset,
 		AbstractLoss<LabelType,RealVector> const& loss
@@ -237,7 +240,7 @@ private:
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// choose data point
-			std::size_t b = dist(Rng::globalRng);
+			std::size_t b = dist(rng);
 			
 			// compute prediction
 			noalias(f_b) = prod(model.matrix(), data[b].input);
@@ -274,6 +277,7 @@ private:
 	
 	template<class T>
 	void iterate(
+		random::rng_type& rng,
 		LinearModel<blas::compressed_vector<T> >& model,
 		WeightedLabeledData<blas::compressed_vector<T>, LabelType> const& dataset,
 		AbstractLoss<LabelType,RealVector> const& loss
@@ -319,7 +323,7 @@ private:
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// choose data point
-			std::size_t b = dist(Rng::globalRng);
+			std::size_t b = dist(rng);
 			auto point = data[b];
 			
 			//just in time update of the previous steps for every nonzero element of point b

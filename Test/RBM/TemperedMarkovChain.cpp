@@ -34,13 +34,9 @@ BOOST_AUTO_TEST_CASE( TemperedMarkovChain_Distribution )
 	RealMatrix stateMatrix = blas::adapt_matrix(16,4,states);
 	
 	//create rbm and pt object
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,4);
-	RealVector params(rbm.numberOfParameters());
-	for(std::size_t i = 0; i != params.size();++i){
-		params(i) = Rng::uni(-1,1);
-	}
-	rbm.setParameterVector(params);
+	initRandomUniform(rbm,-1,1);
 	
 	TemperedMarkovChain<GibbsOperator<BinaryRBM> > pt(&rbm);
 	pt.setNumberOfTemperatures(numTemperatures);

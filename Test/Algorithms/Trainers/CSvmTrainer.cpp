@@ -320,7 +320,7 @@ BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
 		unweightedDataset.batch(0).input.resize(DatasetSize,inputDimension(dataset));
 		unweightedDataset.batch(0).label.resize(DatasetSize);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
-			std::size_t index = Rng::discrete(0,29);
+			std::size_t index = random::discrete(random::globalRng,0,29);
 			weightedDataset.element(index).weight +=1.0;
 			unweightedDataset.element(i) = dataset.element(index);
 		}

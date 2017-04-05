@@ -50,10 +50,10 @@ public:
 	void draw(RealVector& point) const
 	{
 		point.resize(2);
-		size_t cluster = Rng::discrete(0, 4);
+		size_t cluster = random::discrete(random::globalRng,0, 4);
 		double alpha = 0.4 * M_PI * cluster;
-		point(0) = 3.0 * cos(alpha) + 0.75 * Rng::gauss();
-		point(1) = 3.0 * sin(alpha) + 0.75 * Rng::gauss();
+		point(0) = 3.0 * cos(alpha) + 0.75 * random::gauss(random::globalRng);
+		point(1) = 3.0 * sin(alpha) + 0.75 * random::gauss(random::globalRng);
 	}
 };
 

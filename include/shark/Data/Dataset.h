@@ -51,7 +51,7 @@
 #include <shark/Core/OpenMP.h>
 #include <shark/Core/utility/functional.h>
 #include <boost/iterator/transform_iterator.hpp>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include "Impl/Dataset.inl"
 
 namespace shark {
@@ -430,8 +430,7 @@ public:
 
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
-		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-		shark::shuffle(this->elements().begin(),this->elements().end(), uni);
+		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
 	}
 };
 
@@ -631,8 +630,7 @@ public:
 
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
 	virtual void shuffle(){
-		DiscreteUniform<Rng::rng_type> uni(Rng::globalRng);
-		shark::shuffle(this->elements().begin(),this->elements().end(), uni);
+		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
 	}
 
 	void splitBatch(std::size_t batch, std::size_t elementIndex){

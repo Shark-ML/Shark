@@ -51,8 +51,7 @@ RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batc
 		for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
 			batchIds[i] = i;
 		}
-		DiscreteUniform<typename RBM::RngType> uni(rbm.rng(),0,1);
-		std::random_shuffle(batchIds.begin(),batchIds.end(),uni);
+		std::shuffle(batchIds.begin(),batchIds.end(),rbm.rng());
 		for(std::size_t i = 0; i != batchesForTraining; ++i){
 			elements += data.batch(batchIds[i]).size1();
 		}

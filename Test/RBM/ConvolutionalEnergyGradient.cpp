@@ -1,7 +1,7 @@
 #include <shark/Unsupervised/RBM/ConvolutionalBinaryRBM.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE RBM_ConvolutionalEnergyGradient
 #include <boost/test/unit_test.hpp>
@@ -17,14 +17,14 @@ BOOST_AUTO_TEST_SUITE (RBM_ConvolutionalEnergyGradient)
 
 BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Visible )
 {
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,4,1,3);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,16);
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 16; ++k){
-			batch(j,k)=Rng::coinToss(0.5);
+			batch(j,k)=random::coinToss(random::globalRng,0.5);
 		}
 	}
 	
@@ -48,14 +48,14 @@ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Visible )
 //test1 is with weight 1
 BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Hidden )
 {
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,4,1,3);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 4; ++k){
-			batch(j,k)=Rng::coinToss(0.5);
+			batch(j,k)=random::coinToss(random::globalRng,0.5);
 		}
 	}
 	
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Hidden )
 //~ //test2 is with different weights
 //~ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_Visible )
 //~ {
-	//~ ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	//~ ConvolutionalBinaryRBM rbm(random::globalRng);
 	//~ rbm.setStructure(4,4);
 	//~ initRandomNormal(rbm,2);
 	
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Hidden )
 	//~ RealVector weights(10);
 	//~ for(std::size_t j = 0; j != 10; ++j){
 		//~ for(std::size_t k = 0; k != 4; ++k){
-			//~ batch(j,k)=Rng::coinToss(0.5);
+			//~ batch(j,k)=random::coinToss(random::globalRng,0.5);
 		//~ }
 		//~ weights(j)=j;
 	//~ }
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Hidden )
 //~ //test2 is with different weights
 //~ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_Hidden )
 //~ {
-	//~ ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	//~ ConvolutionalBinaryRBM rbm(random::globalRng);
 	//~ rbm.setStructure(4,4);
 	//~ initRandomNormal(rbm,2);
 	
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_Weighted_One_Hidden )
 	//~ RealVector weights(10);
 	//~ for(std::size_t j = 0; j != 10; ++j){
 		//~ for(std::size_t k = 0; k != 4; ++k){
-			//~ batch(j,k)=Rng::coinToss(0.5);
+			//~ batch(j,k)=random::coinToss(random::globalRng,0.5);
 		//~ }
 		//~ weights(j)=j;
 	//~ }
@@ -230,13 +230,13 @@ private:
 
 BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_DerivativeVH )
 {
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,4,2,3);
 	
 	std::vector<RealVector> dataVec(50,RealVector(16));
 	for(std::size_t j = 0; j != 16; ++j){
 		for(std::size_t k = 0; k != 10; ++k){
-			dataVec[j](k)=Rng::coinToss(0.5);
+			dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 		}
 	}
 	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
@@ -313,13 +313,13 @@ private:
 
 BOOST_AUTO_TEST_CASE( ConvolutionalEnergyGradient_DerivativeHV )
 {
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,4,2,3);
 	
 	std::vector<RealVector> dataVec(10,RealVector(8));
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 8; ++k){
-			dataVec[j](k)=Rng::coinToss(0.5);
+			dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 		}
 	}
 	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);

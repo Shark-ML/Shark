@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_SingleObjective_Infeasible ) {
 		BOOST_REQUIRE(objective.isFeasible(corrected));
 		
 		double fitness = objective(corrected);
-		evaluator.m_penaltyFactor = Rng::uni(0.1,1);//make errors obvious!
+		evaluator.m_penaltyFactor = random::uni(random::globalRng,0.1,1);//make errors obvious!
 		evaluator(objective,tester);
 		
 		//calculate the expected penalty
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_MultiObjective_Infeasible ) {
 		BOOST_REQUIRE(objective.isFeasible(corrected));
 		
 		RealVector fitness = objective(corrected);
-		evaluator.m_penaltyFactor = Rng::uni(0.1,1);//make errors obvious!
+		evaluator.m_penaltyFactor = random::uni(random::globalRng,0.1,1);//make errors obvious!
 		evaluator(objective,tester);
 		BOOST_REQUIRE_EQUAL(tester.m_penalizedFitness.size(), fitness.size());
 		BOOST_REQUIRE_EQUAL(tester.m_unpenalizedFitness.size(), fitness.size());

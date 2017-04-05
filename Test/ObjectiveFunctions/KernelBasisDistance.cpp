@@ -35,7 +35,7 @@
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/Data/DataDistribution.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/LinAlg/BLAS/solve.hpp>
 
 #define BOOST_TEST_MODULE ObjectiveFunctions_KernelBasisDistance
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Derivative_Optimal )
 		KernelExpansion<RealVector> expansion(&kernel,dataset.inputs(),false,3);
 		for(std::size_t i = 0; i != 50; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				expansion.alpha()(i,j) = Rng::gauss(0,1);
+				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
 			}
 		}
 		
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_Value_Linear )
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
 		RealVector alpha(100);
 		for(std::size_t i = 0; i != 100; ++i){
-			alpha(i) = expansion.alpha()(i,0) = Rng::gauss(0,1);
+			alpha(i) = expansion.alpha()(i,0) = random::gauss(random::globalRng, 0,1);
 		}
 
 		//construct the target vector in explicit form
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Linear)
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
 		for(std::size_t i = 0; i != 100; ++i){
 			for(std::size_t j = 0; j != 1; ++j){
-				expansion.alpha()(i,j) = Rng::gauss(0,1);
+				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
 			}
 		}
 		KernelBasisDistance distance(&expansion,10);
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Linear)
 		for(std::size_t test = 0; test != 10; ++test){
 			RealVector point(30*10);
 			for(std::size_t i = 0; i != point.size(); ++i){
-				point(i) = Rng::gauss(0,1);
+				point(i) = random::gauss(random::globalRng, 0,1);
 			}
 
 			testDerivative(distance,point,1.e-6,0,0.1);
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Gaussian
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
 		for(std::size_t i = 0; i != 100; ++i){
 			for(std::size_t j = 0; j != 1; ++j){
-				expansion.alpha()(i,j) = Rng::gauss(0,1);
+				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
 			}
 		}
 		KernelBasisDistance distance(&expansion,10);
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Gaussian
 		for(std::size_t test = 0; test != 10; ++test){
 			RealVector point(30*10);
 			for(std::size_t i = 0; i != point.size(); ++i){
-				point(i) = Rng::gauss(0,1);
+				point(i) = random::gauss(random::globalRng, 0,1);
 			}
 
 			testDerivative(distance,point,1.e-6,0,0.1);

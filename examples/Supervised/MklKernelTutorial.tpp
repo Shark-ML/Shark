@@ -1,6 +1,6 @@
 //###begin<includes_namespaces>
 #include <shark/Data/Dataset.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Algorithms/Trainers/NormalizeKernelUnitVariance.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Models/Kernels/WeightedSumKernel.h>
@@ -386,7 +386,7 @@ int main(int argc, char** argv)
     RealVector v(num_dims);
     for ( std::size_t i=0; i<num_points; i++ ) {
         for ( std::size_t j=0; j<num_dims; j++ )
-            v(j) = Rng::uni(-1,1);
+            v(j) = random::uni(random::globalRng, -1,1);
         input[i] = v;
     }
     UnlabeledData<RealVector> rand_data = createDataFromRange( input );

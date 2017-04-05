@@ -31,7 +31,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_DIFFPOWERS_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 struct DiffPowers : public SingleObjectiveFunction {
@@ -63,7 +63,7 @@ struct DiffPowers : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = Rng::uni(0,1);
+			x(i) = random::uni(random::globalRng, 0,1);
 		}
 		return x;
 	}

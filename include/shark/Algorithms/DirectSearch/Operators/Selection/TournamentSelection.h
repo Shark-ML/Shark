@@ -34,7 +34,7 @@
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_SELECTION_TOURNAMENT_SELECTION_H
 
 #include <shark/Core/Exception.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 
@@ -54,7 +54,7 @@ struct TournamentSelection {
 	
 	template<typename IteratorType1, typename IteratorType2>
 	void operator()(
-		DefaultRngType& rng,
+		random::rng_type& rng,
 		IteratorType1 inIt,
 		IteratorType1 inItE,
 		IteratorType2 outIt,
@@ -70,16 +70,16 @@ struct TournamentSelection {
 	/// \param [in] itE Iterator pointing to the first invalid element.
 	/// \return An iterator pointing to the selected individual.
 	template< typename Iterator>
-	Iterator operator()(DefaultRngType& rng, Iterator it, Iterator itE) const
+	Iterator operator()(random::rng_type& rng, Iterator it, Iterator itE) const
 	{
 		std::size_t n = std::distance( it, itE );
 		SHARK_RUNTIME_CHECK(tournamentSize > 0, " Tournament size k needs to be larger than 0");
 		SHARK_RUNTIME_CHECK(n > tournamentSize, " Size of population needs to be larger than size of tournament");
 		
 		Predicate predicate;
-		Iterator result = it + discrete(rng, 0, n-1 );
+		Iterator result = it + random::discrete(rng, std::size_t(0), n-1 );
 		for( std::size_t i = 1; i < tournamentSize; i++ ) {
-			Iterator itt = it + discrete(rng, 0,n-1);
+			Iterator itt = it + random::discrete(rng, std::size_t(0),n-1);
 			if( predicate(*itt, *result) ){
 				result = itt;
 			}

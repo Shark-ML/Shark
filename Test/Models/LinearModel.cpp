@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( LinearModel_SERIALIZE )
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t param=0;param!=model.numberOfParameters();++param)
 	{
-		 testParameters(param)=Rng::gauss(0,1);
+		 testParameters(param)=random::gauss(random::globalRng,0,1);
 	}
 	model.setParameterVector( testParameters);
 	//the test is, that after deserialization, the results must be identical
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( LinearModel_SERIALIZE )
 	{
 		for(size_t j=0;j!=model.inputSize();++j)
 		{
-			input(j)=Rng::uni(-1,1);
+			input(j)=random::uni(random::globalRng,-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model(input));

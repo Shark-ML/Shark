@@ -33,7 +33,7 @@
 #define SHARK_STATISTICS_MULTIVARIATENORMALDISTRIBUTION_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 namespace shark {
 
 /// \brief Implements a multi-variate normal distribution with zero mean.
@@ -102,12 +102,12 @@ public:
 	}
 
 	/// \brief Samples the distribution.
-	template<class RngType>
-	result_type operator()(RngType& rng) const {
+	template<class randomType>
+	result_type operator()(randomType& rng) const {
 		RealVector z( m_covarianceMatrix.size1() );
 		
 		for( std::size_t i = 0; i < z.size(); i++ ) {
-			z( i ) = gauss(rng, 0., 1. );
+			z( i ) = random::gauss(rng, 0., 1. );
 		}
 		
 		RealVector result = m_decomposition.Q() % to_diagonal(sqrt(max(eigenValues(),0))) % z;
@@ -177,12 +177,12 @@ public:
 		m_cholesky.update(alpha,beta,v);
 	}
 	
-	template<class RngType, class Vector1, class Vector2>
-	void generate(RngType& rng, Vector1& y, Vector2& z)const{
+	template<class randomType, class Vector1, class Vector2>
+	void generate(randomType& rng, Vector1& y, Vector2& z)const{
 		z.resize(size());
 		y.resize(size());
 		for( std::size_t i = 0; i != size(); i++ ) {
-			z( i ) = gauss(rng, 0, 1 );
+			z( i ) = random::gauss(rng, 0, 1 );
 		}
 		noalias(y) = blas::triangular_prod<blas::lower>(m_cholesky.lower_factor(),z);
 	}
@@ -191,8 +191,8 @@ public:
 	///
 	/// Returns a vector pair (y,z) where  y=Lz and, L is the lower cholesky factor and z is a vector
 	/// of normally distributed numbers. Thus y is the real sampled point.
-	template<class RngType>
-	result_type operator()(RngType& rng) const {
+	template<class randomType>
+	result_type operator()(randomType& rng) const {
 		result_type result;
 		RealVector& z = result.second;
 		RealVector& y = result.first;

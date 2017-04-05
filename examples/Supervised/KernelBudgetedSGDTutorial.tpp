@@ -18,9 +18,9 @@ class myProblem : public LabeledDataDistribution<RealVector, unsigned int>
 public:
     void draw(RealVector& input, unsigned int& label)const
     {
-        label = Rng::discrete(0, 4);
+        label = random::discrete(random::globalRng, 0, 4);
         input.resize(1);
-        input(0) = Rng::gauss() + 3.0 * label;
+        input(0) = random::gauss(random::globalRng) + 3.0 * label;
     }
 };
 /// @endcond

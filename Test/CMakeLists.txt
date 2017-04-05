@@ -232,10 +232,9 @@ shark_add_test( ObjectiveFunctions/TukeyBiweightLoss.cpp ObjFunct_TukeyBiweightL
 shark_add_test( ObjectiveFunctions/AUC.cpp ObjFunct_AUC )
 shark_add_test( ObjectiveFunctions/NegativeGaussianProcessEvidence.cpp ObjFunct_NegativeGaussianProcessEvidence )
 
-#Rng
-shark_add_test( Rng/Rng.cpp Rng_Distributions )
-shark_add_test( Rng/MultiVariateNormal.cpp Rng_MultiVariateNormal )
-shark_add_test( Rng/MultiNomial.cpp Rng_MultiNomialDistribution )
+#random
+shark_add_test( Rng/MultiVariateNormal.cpp random_MultiVariateNormal )
+shark_add_test( Rng/MultiNomial.cpp random_MultiNomialDistribution )
 
 #RBM
 shark_add_test( RBM/BinaryLayer.cpp RBM_BinaryLayer)

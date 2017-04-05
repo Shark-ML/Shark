@@ -3,7 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Models/RNNet.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <sstream>
 
 using namespace shark;
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 	//initialize parameters
 	RealVector parameters(numberOfParameters);
 	for(size_t i=0;i!=numberOfParameters;++i){
-		parameters(i)= Rng::gauss(0,1);
+		parameters(i)= random::gauss(random::globalRng,0,1);
 	}
 	net.setParameterVector(parameters);
 

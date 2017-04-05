@@ -1,5 +1,5 @@
 //###begin<includes>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 
 using namespace shark;
@@ -11,18 +11,18 @@ int main(int argc, char** argv)
 {
 
 //###begin<seed>
-	Rng::seed( 1234 );
+	random::seed( 1234 );
 //###end<seed>
 
 	// Get random "numbers" for all subsumed random number generators:
 //###begin<draw>
-	bool   rn1 = Rng::coinToss( );
-	long   rn2 = Rng::discrete( );
-	double rn3 = Rng::uni( );
-	double rn4 = Rng::gauss( );
-	double rn5 = Rng::cauchy( );
-	long   rn6 = Rng::geom( );
-	long   rn7 = Rng::diffGeom( );
+	bool   rn1 = random::coinToss( );
+	long   rn2 = random::discrete( );
+	double rn3 = random::uni( );
+	double rn4 = random::gauss( );
+	double rn5 = random::cauchy( );
+	long   rn6 = random::geom( );
+	long   rn7 = random::diffGeom( );
 //###end<draw>
 
 	// Output of random numbers:
@@ -35,26 +35,26 @@ int main(int argc, char** argv)
 	cout << "Differential Geometric distribution number   = " << rn7 << endl;
 
 //###begin<list>
-	Weibull<> dist1( shark::Rng::globalRng );
-	Bernoulli<> dist2( shark::Rng::globalRng );
-	Binomial<> dist3( shark::Rng::globalRng );
-	Cauchy<> dist4( shark::Rng::globalRng );
-	DiffGeometric<> dist5( shark::Rng::globalRng );
-	Dirichlet<> dist6( shark::Rng::globalRng );
-	DiscreteUniform<> dist7( shark::Rng::globalRng );
-	Erlang<> dist8( shark::Rng::globalRng );
-	Gamma<> dist9( shark::Rng::globalRng );
-	Geometric<> dist10( shark::Rng::globalRng );
-	HyperGeometric<> dist12( shark::Rng::globalRng );
-	LogNormal<> dist13( shark::Rng::globalRng );
-	NegExponential<> dist14( shark::Rng::globalRng );
-	Normal<> dist15( shark::Rng::globalRng );
-	Poisson<> dist16( shark::Rng::globalRng );
-	Uniform<> dist17( shark::Rng::globalRng );
+	Weibull<> dist1( shark::random::globalrandom );
+	Bernoulli<> dist2( shark::random::globalrandom );
+	Binomial<> dist3( shark::random::globalrandom );
+	Cauchy<> dist4( shark::random::globalrandom );
+	DiffGeometric<> dist5( shark::random::globalrandom );
+	Dirichlet<> dist6( shark::random::globalrandom );
+	DiscreteUniform<> dist7( shark::random::globalrandom );
+	Erlang<> dist8( shark::random::globalrandom );
+	Gamma<> dist9( shark::random::globalrandom );
+	Geometric<> dist10( shark::random::globalrandom );
+	HyperGeometric<> dist12( shark::random::globalrandom );
+	LogNormal<> dist13( shark::random::globalrandom );
+	NegExponential<> dist14( shark::random::globalrandom );
+	Normal<> dist15( shark::random::globalrandom );
+	Poisson<> dist16( shark::random::globalrandom );
+	Uniform<> dist17( shark::random::globalrandom );
 //###end<list>
 
 //###begin<normal>
-	Normal< Rng::rng_type > normal( Rng::globalRng, 1., 1. );
+	Normal< random::rng_type > normal( random::globalrandom, 1., 1. );
 
         double mean = normal.mean();
         double variance = normal.variance();
@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 //###end<normal>
 
 //###begin<uniform>
-	Uniform< shark::Rng::rng_type > uniform( shark::Rng::globalRng, 1, 5 );
+	Uniform< shark::random::rng_type > uniform( shark::random::globalrandom, 1, 5 );
 //###end<uniform>
 
 //###begin<multivariate>

@@ -349,8 +349,8 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_SECOND_DATASET )
 	std::vector<RealVector> quiz(NUM_QUIZ_POINTS);
 	for (size_t i=0; i<NUM_QUIZ_POINTS; i++) {
 		quiz[i].resize(2);
-		quiz[i](0) = Rng::uni(-10,10);
-		quiz[i](1) = Rng::uni(-10,10);
+		quiz[i](0) = random::uni(random::globalRng,-10,10);
+		quiz[i](1) = random::uni(random::globalRng,-10,10);
 	}
 
 	// set up different values for C

@@ -33,11 +33,9 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_LATTICE
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_LATTICE
 
-// #include <boost/math/special_functions/binomial.hpp>
-
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/Metrics.h>
-#include <shark/Rng/DiscreteUniform.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 
@@ -87,11 +85,12 @@ bool isLatticeCorner(Iterator begin, Iterator end){
  * have n points or the same number of points as the original matrix if n is
  * smaller.
  */
-template <typename Matrix, typename RngType = shark::DefaultRngType>
+template <typename Matrix, typename randomType = shark::random::rng_type>
 Matrix sampleLatticeUniformly(
-	RngType & rng, Matrix const & matrix,
+	randomType & rng, Matrix const & matrix,
 	std::size_t const n,
-	bool const keep_corners = true){
+	bool const keep_corners = true
+){
 	// No need to do all the below stuff if we're gonna grab it all anyway.
 	if(matrix.size1() <= n){
 		return matrix;
@@ -106,10 +105,9 @@ Matrix sampleLatticeUniformly(
 			}
 		}
 	}
-	DiscreteUniform<RngType> uni(rng, 0, matrix.size1() - 1);
 	while(added_rows.size() < n){
 		// If we sample an existing index it doesn't alter the set.
-		added_rows.insert(uni());
+		added_rows.insert(random::discrete(rng, std::size_t(0), matrix.size1() - 1));
 	}
 	std::size_t i = 0;
 	for(std::size_t row_idx : added_rows)
@@ -132,7 +130,7 @@ Matrix sampleLatticeUniformly(
 /// grid -- a line -- with size n are the points (0,n-1), (1,n-2), ... (n-1,0).
 std::size_t computeOptimalLatticeTicks(
 	std::size_t const n, std::size_t const target_count
-	);
+);
 
 /// \brief Returns a set of evenly spaced n-dimensional points on the "unit simplex".
 RealMatrix weightLattice(std::size_t const n, std::size_t const sum);

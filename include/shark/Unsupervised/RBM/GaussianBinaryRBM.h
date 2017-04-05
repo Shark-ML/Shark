@@ -42,10 +42,10 @@
 #include <shark/Unsupervised/RBM/GradientApproximations/ContrastiveDivergence.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/MultiChainApproximator.h>
 #include <shark/Unsupervised/RBM/GradientApproximations/SingleChainApproximator.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 namespace shark{
 
-typedef RBM<GaussianLayer,BinaryLayer, Rng::rng_type> GaussianBinaryRBM;
+typedef RBM<GaussianLayer,BinaryLayer, random::rng_type> GaussianBinaryRBM;
 typedef GibbsOperator<GaussianBinaryRBM> GaussianBinaryGibbsOperator;
 typedef MarkovChain<GaussianBinaryGibbsOperator> GaussianBinaryGibbsChain;
 typedef TemperedMarkovChain<GaussianBinaryGibbsOperator> GaussianBinaryPTChain;

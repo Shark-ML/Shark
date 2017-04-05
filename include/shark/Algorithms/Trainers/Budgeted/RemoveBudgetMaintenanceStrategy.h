@@ -112,7 +112,7 @@ public:
 		{
 			// though we have found the smallest one,  we want to remove
 			// a random element.
-			index = Rng::discrete(0, model.basis().numberOfElements() - 1);
+			index = random::discrete(0, model.basis().numberOfElements() - 1);
 			break;
 		}
 		case SMALLEST:

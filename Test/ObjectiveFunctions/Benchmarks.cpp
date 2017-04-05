@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
 	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = ellipsoid.proposeStartingPoint();
-		shark::testDerivative(ellipsoid, point,1.e-5,1.e-9);
+		shark::testDerivative(ellipsoid, point,1.e-4,1.e-9);
 	}
 }
 

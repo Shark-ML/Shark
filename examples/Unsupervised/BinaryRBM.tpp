@@ -14,15 +14,6 @@
 using namespace shark;
 using namespace std;
 
-//initialize weights of rbm to be between -0.1 and 0.1
-void initializeWeights(BinaryRBM& rbm){
-	RealVector weights(rbm.numberOfParameters());
-	for(size_t i = 0; i != weights.size(); ++i){
-		weights(i) = Rng::uni(-0.1,0.1);
-	}
-	rbm.setParameterVector(weights);
-}
-
 int main(){
 
 	//we first create the problem. in this tutorial, we use BarsAndStripes
@@ -37,7 +28,7 @@ int main(){
 	size_t numberOfVisible = problem.inputDimension();//visible units of the inputs
 
 	//create rbm with simple binary units
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(numberOfVisible,numberOfHidden);
 	//###end<RBM>
 	
@@ -62,7 +53,7 @@ int main(){
 	unsigned int numTrials = 10;//number of trials for training
 	double meanResult = 0;
 	for(unsigned int trial = 0; trial != numTrials; ++trial) {
-		initializeWeights(rbm);
+		initRandomUniform(rbm, -0.1,0.1);
 		cd.init();
 		optimizer.init(cd);
 

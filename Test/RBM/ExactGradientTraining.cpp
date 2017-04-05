@@ -26,14 +26,10 @@ BOOST_AUTO_TEST_CASE( ExactGradientTraining_Bars ){
 	
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
-		Rng::seed(42+trial);
-		BinaryRBM rbm(Rng::globalRng);
+		random::globalRng.seed(42+trial);
+		BinaryRBM rbm(random::globalRng);
 		rbm.setStructure(16,8);
-		RealVector params(rbm.numberOfParameters());
-		for(std::size_t i = 0; i != params.size();++i){
-			params(i) = Rng::uni(-0.1,0.1);
-		}
-		rbm.setParameterVector(params);
+		initRandomUniform(rbm,-0.1,0.1);
 		ExactGradient<BinaryRBM> gradient(&rbm);
 		gradient.setData(data);
 		SteepestDescent optimizer;

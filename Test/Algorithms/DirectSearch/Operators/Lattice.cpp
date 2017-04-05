@@ -5,7 +5,7 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
-#include <shark/Rng/Rng.h>
+#include <shark/Core/Random.h>
 #include <shark/LinAlg/Metrics.h>
 
 #include <iostream>
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(computeOptimalLatticeTicks_2d_correct)
 
 
 BOOST_AUTO_TEST_CASE(sampleUniformly_correct){
-	DefaultRngType rng;
+	random::rng_type rng;
 	for(std::size_t n = 2; n < 5; ++n){
 		for(std::size_t sum = n; sum < 15; ++sum){
 			RealMatrix m = weightLattice(n, sum);

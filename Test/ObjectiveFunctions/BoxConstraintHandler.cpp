@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( BoxConstraintHandler_Infeasible ) {
 		RealVector corrected(10);
 		bool feasible = true;
 		for(std::size_t i = 0; i != 10; ++i){
-			point(i) = Rng::uni(-30,40);
+			point(i) = random::uni(random::globalRng, -30,40);
 			corrected(i) = point(i);
 			if(point(i) < handler.lower()(i)){
 				corrected(i) = handler.lower()(i);

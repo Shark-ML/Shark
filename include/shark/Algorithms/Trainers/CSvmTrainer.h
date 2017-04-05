@@ -902,7 +902,7 @@ private:
 		std::size_t dim = inputDimension(dataset);
 
 		Solver solver(dataset, dim, classes);
-		RealMatrix w = solver.solve(this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
+		RealMatrix w = solver.solve(random::globalRng, this->C(), this->stoppingCondition(), &this->solutionProperties(), this->verbosity() > 0);
 		model.decisionFunction().setStructure(w);
 	}
 	

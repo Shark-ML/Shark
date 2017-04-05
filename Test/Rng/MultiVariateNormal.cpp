@@ -2,13 +2,13 @@
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Data/Statistics.h>
 
-#define BOOST_TEST_MODULE Rng_MultivariateNormal
+#define BOOST_TEST_MODULE random_MultivariateNormal
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Rng_MultiVariateNormal)
+BOOST_AUTO_TEST_SUITE (random_MultiVariateNormal)
 
 BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	std::size_t Dimensions = 5;
@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	RealMatrix base(Dimensions,2*Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
 		for(std::size_t j = 0; j != 2*Dimensions; ++j){//2* to guarantue full rank.
-			base(i,j) = Rng::gauss(0,1);
+			base(i,j) = random::gauss(random::globalRng, 0,1);
 		}
 	}
 	RealMatrix covariance=prod(base,trans(base));
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
 	
 	for(std::size_t i = 0; i != Samples; ++i){
-		MultiVariateNormalDistribution::result_type sample = dist(Rng::globalRng);
+		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
 		sampleSet.element(i) = sample.first;
 		normalSampleSet.element(i) = sample.second;
 	}
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	RealMatrix base(Dimensions,2*Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
 		for(std::size_t j = 0; j != 2*Dimensions; ++j){//2* to guarantue full rank.
-			base(i,j) = Rng::gauss(0,1);
+			base(i,j) = random::gauss(random::globalRng, 0,1);
 		}
 	}
 	RealMatrix covariance=prod(base,trans(base));
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
 	
 	for(std::size_t i = 0; i != Samples; ++i){
-		MultiVariateNormalDistribution::result_type sample = dist(Rng::globalRng);
+		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
 		sampleSet.element(i) = sample.first;
 		normalSampleSet.element(i) = sample.second;
 	}

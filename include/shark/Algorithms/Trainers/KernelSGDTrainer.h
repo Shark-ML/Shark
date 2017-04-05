@@ -168,7 +168,7 @@ public:
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
-			std::size_t b = Rng::discrete(0, ell - 1);
+			std::size_t b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
 
 			// learning rate
 			const double eta = 1.0 / (lambda * (iter + ell));

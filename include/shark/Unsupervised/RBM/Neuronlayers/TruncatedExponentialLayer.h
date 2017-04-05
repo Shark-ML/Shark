@@ -36,8 +36,8 @@
 #include <shark/Data/BatchInterfaceAdaptStruct.h>
 #include <shark/Unsupervised/RBM/StateSpaces/RealSpace.h>
 #include <shark/Unsupervised/RBM/Tags.h>
-#include <shark/Rng/TruncatedExponential.h>
 #include <shark/Core/OpenMP.h>
+#include <shark/Core/Random.h>
 namespace shark{
 namespace detail{
 template<class VectorType>
@@ -145,9 +145,7 @@ public:
 		SHARK_CRITICAL_REGION{
 			for(std::size_t i = 0; i != state.size1();++i){
 				for(std::size_t j = 0; j != state.size2();++j){
-					double integral = 1.0 - statistics.expMinusLambda(i,j);
-					TruncatedExponential<Rng> truncExp(integral,rng,statistics.lambda(i,j));
-					state(i,j) = truncExp();
+					state(i,j) = random::truncExp(rng,statistics.lambda(i,j),1.0,1.0 - statistics.expMinusLambda(i,j));
 				}
 			}
 		}

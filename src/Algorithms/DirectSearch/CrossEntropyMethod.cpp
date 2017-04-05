@@ -63,7 +63,6 @@ unsigned int CrossEntropyMethod::suggestSelectionSize( unsigned int populationSi
 CrossEntropyMethod::CrossEntropyMethod()
 : m_variance( 0 )
 , m_counter( 0 )
-, m_distribution( Normal< Rng::rng_type >( Rng::globalRng, 0, 1.0 ) )
 , m_noise (boost::shared_ptr<INoiseType> (new ConstantNoise(0.0)))
 {
 	m_features |= REQUIRES_VALUE;
@@ -185,9 +184,8 @@ void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 	PenalizingEvaluator penalizingEvaluator;
 	for( std::size_t i = 0; i < offspring.size(); i++ ) {
 		RealVector sample(m_numberOfVariables);
-		for (std::size_t j = 0; j < m_numberOfVariables; j++)
-		{
-			sample(j) = m_distribution(m_mean(j), m_variance(j)); // N (0, 100)
+		for (std::size_t j = 0; j < m_numberOfVariables; j++){
+			sample(j) = random::gauss(random::globalRng,m_mean(j), m_variance(j)); // N (0, 100)
 		}
 		offspring[i].searchPoint() = sample;
 	}

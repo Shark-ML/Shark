@@ -33,7 +33,7 @@
 #define SHARK_MODELS_ImpulseNOISEMODEL_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/OpenMP.h>
 namespace shark {
 
@@ -105,7 +105,7 @@ public:
 			outputs = inputs;
 			for(std::size_t i = 0; i != outputs.size1(); ++i){
 				for(std::size_t j = 0; j != outputs.size2(); ++j){
-					if(Rng::coinToss(m_prob)){
+					if(random::coinToss(random::globalRng, m_prob)){
 						outputs(i,j) = m_value;
 					}
 				}

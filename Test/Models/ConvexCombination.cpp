@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_Parameters)
 		RealMatrix paramWUnnorm(outputDim,inputDim);
 		for(std::size_t i = 0; i != outputDim; ++i){
 			for(std::size_t j = 0; j != inputDim; ++j){
-				paramWUnnorm(i,j) = std::abs(Rng::gauss(0,1));
+				paramWUnnorm(i,j) = std::abs(random::gauss(random::globalRng,0,1));
 				paramW(i,j) = paramWUnnorm(i,j);
 			}
 			row(paramW,i) /= sum(row(paramW,i));
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_Value)
 		BOOST_REQUIRE_EQUAL(model.outputSize(),outputDim);
 		RealVector params(inputDim * outputDim);
 		for(std::size_t i = 0; i != params.size(); ++i){
-			params(i) = Rng::gauss(0,1);
+			params(i) = random::gauss(random::globalRng,0,1);
 		}
 		model.setParameterVector(params);
 		
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_Value)
 		RealMatrix inputs(numPoints,inputDim);
 		for(std::size_t i = 0; i != numPoints; ++i){
 			for(std::size_t j = 0; j != inputDim; ++j){
-				inputs(i,j) = Rng::gauss(0,1);
+				inputs(i,j) = random::gauss(random::globalRng,0,1);
 			}
 		}
 		
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_SERIALIZE )
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t param=0;param!=model.numberOfParameters();++param)
 	{
-		testParameters(param)=Rng::gauss(0,1);
+		testParameters(param)=random::gauss(random::globalRng,0,1);
 	}
 	model.setParameterVector( testParameters);
 	testParameters = model.parameterVector(); //allow transformation of parameters
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_SERIALIZE )
 	{
 		for(size_t j=0;j!=model.inputSize();++j)
 		{
-			input(j)=Rng::uni(-1,1);
+			input(j)=random::uni(random::globalRng,-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model(input));

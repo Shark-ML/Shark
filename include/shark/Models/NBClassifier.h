@@ -89,7 +89,7 @@ public:
 		{
 			std::vector<AbstractDistPtr> featureDist;
 			for (std::size_t j = 0; j < featureSize; ++j)
-				featureDist.push_back(AbstractDistPtr(new Normal<DefaultRngType>(Rng::globalRng)));
+				featureDist.push_back(AbstractDistPtr(new Normal<random::rng_type>(random::globalRng)));
 			m_featureDistributions.push_back(featureDist);
 		}
 	}

@@ -133,8 +133,8 @@ struct NSGA3Indicator {
 		}
 	}
 	
-	template<class Rng>
-	void init(std::size_t numOfObjectives, std::size_t mu, Rng& rng){
+	template<class random>
+	void init(std::size_t numOfObjectives, std::size_t mu, random& rng){
 		std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
 		RealMatrix refs = sampleLatticeUniformly(
 			rng,

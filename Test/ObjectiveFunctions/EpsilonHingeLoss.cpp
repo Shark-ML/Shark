@@ -1,5 +1,5 @@
 #include <shark/ObjectiveFunctions/Loss/EpsilonHingeLoss.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include "TestLoss.h"
 
 #define BOOST_TEST_MODULE OBJECTIVEFUNCTIONS_EPSILONHINGELOSS
@@ -16,18 +16,18 @@ BOOST_AUTO_TEST_CASE( EPSILONHINGELOSS_EVAL ) {
 	unsigned int minDim = 3;
 	unsigned int maxDim = 10;
 	for (unsigned int test = 0; test != maxTests; ++test) {
-		double epsilon = Rng::uni(0,5);
+		double epsilon = random::uni(random::globalRng, 0,5);
 		EpsilonHingeLoss loss(epsilon);
 
-		std::size_t dim = Rng::discrete(minDim,maxDim);
+		std::size_t dim = random::discrete(random::globalRng, minDim,maxDim);
 		//sample point between -10,10
 		RealMatrix testPoint(5,dim);
 		RealMatrix testLabel(5,dim);
 		RealMatrix valueResultM(5,dim,0);
 		for(std::size_t i = 0; i != 5; ++i){
 			for(std::size_t j = 0; j != dim; ++j){
-				testPoint(i,j) = Rng::uni(-10.0,10.0);
-				testLabel(i,j) = Rng::uni(-10.0,10.0);
+				testPoint(i,j) = random::uni(random::globalRng, -10.0,10.0);
+				testLabel(i,j) = random::uni(random::globalRng, -10.0,10.0);
 				valueResultM(i,j) = std::max(0.0, std::abs(testPoint(i,j)-testLabel(i,j))-epsilon);
 			}
 		}

@@ -38,7 +38,7 @@
 
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <sstream>
 
@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_BATCH_VALUE )
 
 	std::vector<RealVector> data(100,RealVector(3));
 	for(std::size_t i = 0; i != 100; ++i){
-		data[i](0) = Rng::uni(-1,1);
-		data[i](1) = Rng::uni(-1,1);
-		data[i](2) = Rng::uni(-1,1);
+		data[i](0) = random::uni(random::globalRng,-1,1);
+		data[i](1) = random::uni(random::globalRng,-1,1);
+		data[i](2) = random::uni(random::globalRng,-1,1);
 	}
 	//BatchSize 10 to check whether complex structured bases also work
 	Data<RealVector> basis = createDataFromRange(data,10);
@@ -100,9 +100,9 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_BATCH_VALUE )
 	
 	RealMatrix inputBatch(100,3);
 	for(std::size_t i = 0; i != 100; ++i){
-		inputBatch(i,0) = Rng::uni(-1,1);
-		inputBatch(i,1) = Rng::uni(-1,1);
-		inputBatch(i,2) = Rng::uni(-1,1);
+		inputBatch(i,0) = random::uni(random::globalRng,-1,1);
+		inputBatch(i,1) = random::uni(random::globalRng,-1,1);
+		inputBatch(i,2) = random::uni(random::globalRng,-1,1);
 	}
 	
 	//create expansions
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_BATCH_VALUE )
 	
 	RealVector parameters(simpleExpansion.numberOfParameters());
 	for(std::size_t i = 0; i != parameters.size(); ++i){
-		parameters(i) = Rng::uni(-1,1);
+		parameters(i) = random::uni(random::globalRng,-1,1);
 	}
 	simpleExpansion.setParameterVector(parameters);
 	expansion.setParameterVector(parameters);

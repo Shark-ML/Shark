@@ -61,7 +61,7 @@ namespace shark {
 /// the algorithm will run for many iterations, until the bound above holds. The same holds if the point with the smallest contribution
 /// has a very large potential contribution as many samples are required to establish that allmost all of the box is covered.
 ///
-///\tparam Rng The type of the Rng for sampling random points.
+///\tparam random The type of the random for sampling random points.
 struct HypervolumeContributionApproximator{
 	/// \brief Models a point and associated information for book-keeping purposes.
 	template<typename VectorType>
@@ -322,7 +322,7 @@ private:
 			//sample a point inside the box
 			point.sample.resize(point.point.size());
 			for( unsigned int i = 0; i < point.sample.size(); i++ ) {
-				point.sample[ i ] =  Rng::uni( point.point[ i ], point.boundingBox[ i ] );
+				point.sample[ i ] =  random::uni(random::globalRng, point.point[ i ], point.boundingBox[ i ] );
 			}
 			++point.noSamples;
 			//check if the point is not dominated by any of the influencing points

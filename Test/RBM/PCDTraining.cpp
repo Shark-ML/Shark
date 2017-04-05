@@ -16,15 +16,11 @@ BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	BarsAndStripes problem;
 	UnlabeledData<RealVector> data = problem.data();
 	
-	Rng::seed(0);
+	random::globalRng.seed(0);
 	
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(16,8);
-	RealVector params(rbm.numberOfParameters());
-	for(std::size_t i = 0; i != params.size();++i){
-		params(i) = Rng::gauss(0,1);
-	}
-	rbm.setParameterVector(params);
+	initRandomUniform(rbm,-0.1,0.1);
 	BinaryPCD cd(&rbm);
 	cd.setNumberOfSamples(32);
 	cd.setBatchSize(16);

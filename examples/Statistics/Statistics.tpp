@@ -32,7 +32,7 @@
 
 //###begin<includes>
 #include <shark/Statistics/Statistics.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 //###end<includes>
 
 using namespace shark;
@@ -51,9 +51,9 @@ int main(int argc, char** argv)
 	for(std::size_t k = 1; k != 10; ++k){
 		double var= 10.0*k;
 		for (std::size_t i = 0; i < 10000; i++){
-			double value1=Rng::gauss(0,var);
-			double value2=Rng::gauss(0,var);
-			if(Rng::coinToss() == 1)
+			double value1=random::gauss(random::globalRng, 0,var);
+			double value2=random::gauss(random::globalRng, 0,var);
+			if(random::coinToss(random::globalRng) == 1)
 				value2=statistics::missingValue();
 			table.update(var,value1,value2 );
 		}

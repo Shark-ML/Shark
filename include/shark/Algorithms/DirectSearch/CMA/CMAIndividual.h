@@ -64,8 +64,8 @@ public:
 	void updateAsOffspring(){
 		chromosome().updateAsOffspring();
 	}
-	template<class RngType>
-	void mutate(RngType& rng){
+	template<class randomType>
+	void mutate(randomType& rng){
 		chromosome().m_mutationDistribution.generate(
 			rng, chromosome().m_lastStep,chromosome().m_lastZ
 		);

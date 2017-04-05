@@ -17,9 +17,9 @@ using namespace shark;
 // w and h from the data.
 //###begin<data_generation>
 const unsigned int numsamples = 10000; //number of generated patches
-const unsigned int w = 512;//width of loaded image
-const unsigned int h = 512;//height of loaded image
-const unsigned int psize = 8;//size of a patch
+const std::size_t w = 512;//width of loaded image
+const std::size_t h = 512;//height of loaded image
+const std::size_t psize = 8;//size of a patch
 //###end<data_generation>
 
 // FFNet parameters
@@ -62,8 +62,8 @@ UnlabeledData<RealVector> getSamples()
 	for (ElRef it = images.elements().begin(); it != images.elements().end(); ++it) {
 		for (size_t i = 0; i < patchesPerImg; ++i) {
 			// Upper left corner of image
-			unsigned int ulx = Rng::discrete(0,w-psize-1);
-			unsigned int uly = Rng::discrete(0,w-psize-1);
+			unsigned int ulx = random::discrete(random::globalRng, std::size_t(0),w-psize-1);
+			unsigned int uly = random::discrete(random::globalRng, std::size_t(0),w-psize-1);
 			// Transform 2d coordinate into 1d coordinate and get the sample
 			unsigned int ul = ulx * h + uly;
 			RealVector sample(psize * psize);
@@ -101,15 +101,15 @@ void initializeFFNet(Autoencoder<LogisticNeuron, LogisticNeuron>& model){
 	std::size_t hiddenWeights = model.inputSize()+model.outputSize();
 	hiddenWeights *= model.numberOfHiddenNeurons();
 	for(std::size_t i = 0; i != hiddenWeights;++i){
-		params(i) = Rng::uni(-r,r);
+		params(i) = random::uni(random::globalRng, -r,r);
 	}
 	model.setParameterVector(params);
 }
 
 int main()
 {
-	// Random needs a seed
-	Rng::seed(42);
+	// Rng needs a seed
+	random::globalRng.seed(42);
 	
 	// Read the data
 	//###begin<create_dataset>

@@ -267,7 +267,7 @@ public:
 			for(size_t j = 0; j < m_budgetSize; j++)
 			{
 				// choose a random vector
-				std::size_t b = Rng::discrete(0, ell - 1);
+				std::size_t b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
 
 				// copy over the vector
 				preinitializedBudgetVectors.element(j) = dataset.element(b);
@@ -343,7 +343,7 @@ public:
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
-			b = Rng::discrete(0, ell - 1);
+			b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
 
 			// for smaller datasets instead of choosing randomly a sample
 			// permuting the dataset can be a valid strategy. We do not implement

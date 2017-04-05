@@ -52,7 +52,7 @@ struct EPTournamentSelection {
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
 	template<typename InIterator,typename OutIterator>
 	void operator()(
-		DefaultRngType& rng,
+		rng_type& rng,
 		InIterator it, InIterator itE,
 		OutIterator out,  OutIterator outE
 	){
@@ -73,7 +73,7 @@ struct EPTournamentSelection {
 	/// \param [in] mu number of individuals to select
 	template<typename Population>
 	void operator()(
-		DefaultRngType& rng,
+		rng_type& rng,
 		Population& population,std::size_t mu
 	){
 		SHARK_RUNTIME_CHECK(population.size() >= mu, "Population Size must be at least mu");
@@ -95,7 +95,7 @@ private:
 	///Returns a sorted range of pairs indicating, how often every individual won.
 	/// The best individuals are in the front of the range.
 	template<class InIterator>
-	std::vector<KeyValuePair<int, InIterator> > performTournament(DefaultRngType& rng, InIterator it, InIterator itE){
+	std::vector<KeyValuePair<int, InIterator> > performTournament(rng_type& rng, InIterator it, InIterator itE){
 		std::size_t size = std::distance( it, itE );
 		UIntVector selectionProbability(size,0.0);
 		std::vector<KeyValuePair<int, InIterator> > individualPerformance(size);
@@ -103,7 +103,7 @@ private:
 		for( std::size_t i = 0; i != size(); ++i ) {
 			individualPerformance[i].value = it+i;
 			for( std::size_t round = 0; round < tournamentSize; round++ ) {
-				std::size_t idx = discrete(rng, 0,size-1 );
+				std::size_t idx = random::discrete(rng, 0,size-1 );
 				if(smaller(*it, *(it+idx)){
 					individualPerformance[i].key -= 1;
 				}

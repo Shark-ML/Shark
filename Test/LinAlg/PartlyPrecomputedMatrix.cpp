@@ -43,7 +43,7 @@
 #include <shark/LinAlg/PartlyPrecomputedMatrix.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <algorithm>
 
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_SUITE (LinAlg_PartlyPrecomputedMatrix)
 
 BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 {
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	// FIXME: need a test for 1x1?? ;)
 
 	size_t maxDimension = 120;
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 	for(size_t i = 0; i < repeats; i++)
 	{
 		// some random dimension
-		size_t currentDimension = Rng::discrete(2, maxDimension);
+		size_t currentDimension = random::discrete(random::globalRng,std::size_t(2), maxDimension);
 
 		if(verbose) std::cout << i << std::endl;
 		if(verbose) std::cout << currentDimension << std::endl;
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		if(verbose)  std::cout << "cache size: " << cacheSize << std::endl;
 
 		// now cache this with a kernel with random gamma
-		double gamma = Rng::uni(1, maxGamma);
+		double gamma = random::uni(random::globalRng,1, maxGamma);
 		if(verbose)
 			std::cout << "g:" << gamma << std::endl;
 
@@ -313,14 +313,14 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 ///\brief test if we can cache a gigantic matrix and still can access all rows
 BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 {
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	// FIXME: need a test for 1x1?? ;)
 
 	size_t maxDimension = 120;
 	size_t repeats = 2000;
 
 	// create that 'gigantic' matrix
-	size_t currentDimension = Rng::discrete(2, maxDimension) + 1000000;
+	size_t currentDimension = random::discrete(random::globalRng, std::size_t(2), maxDimension) + 1000000;
 
 	// compute a cache that should hold a few rows at most
 	typedef DummyKernelMatrix<RealVector, double > KernelMatrixType;
@@ -364,8 +364,8 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_GiganticKernel)
 	for(size_t i = 0; i < repeats; i++)
 	{
 		// find a random entry
-		size_t r = Rng::discrete(0, currentDimension - 1);
-		size_t c = Rng::discrete(0, currentDimension - 1);
+		size_t r = random::discrete(random::globalRng, std::size_t(0), currentDimension - 1);
+		size_t c = random::discrete(random::globalRng, std::size_t(0), currentDimension - 1);
 
 		BOOST_CHECK((K.entry(r, c) == (double)(r + 1) / (double)(c + 1)));
 	}

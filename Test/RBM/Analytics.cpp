@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( Energy_Partition_VisibleGreaterHidden )
 	hiddenStateSpace(3,1)=1;
 	
 	//create RBM with 4 visible and 2 hidden units and initialize it randomly
-	RBM<BinaryLayer,BinaryLayer,Rng::rng_type > rbm(Rng::globalRng);
+	RBM<BinaryLayer,BinaryLayer,random::rng_type > rbm(random::globalRng);
 	rbm.setStructure(4,2);
 	initRandomNormal(rbm,2);
 	
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( Energy_Partition_HiddenGreaterVisible )
 	visibleStateSpace(3,1)=1;
 	
 	//create RBM with 2 visible and 4 hidden units and initialize it randomly
-	RBM<BinaryLayer,BinaryLayer,Rng::rng_type > rbm(Rng::globalRng);
+	RBM<BinaryLayer,BinaryLayer,random::rng_type > rbm(random::globalRng);
 	rbm.setStructure(2,4);
 	initRandomNormal(rbm,2);
 	
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 {
 	
 	//create RBM with 8 visible and 16 hidden units
-	RBM<BinaryLayer,BinaryLayer,Rng::rng_type > rbm(Rng::globalRng);
+	RBM<BinaryLayer,BinaryLayer,random::rng_type > rbm(random::globalRng);
 	rbm.setStructure(8,16);
 	
 	
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 		std::vector<RealVector> dataVec(50,RealVector(8));
 		for(std::size_t j = 0; j != 50; ++j){
 			for(std::size_t k = 0; k != 8; ++k){
-				dataVec[j](k)=Rng::coinToss(0.5);
+				dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 			}
 		}
 		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);

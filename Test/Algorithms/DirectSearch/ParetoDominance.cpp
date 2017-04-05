@@ -3,7 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( ParetoDominance_Random_Test ) {
 		for(std::size_t i = 0; i != numPoints; ++i){
 			population[i].resize(numDims);
 			for(std::size_t j = 0; j != numDims; ++j){
-				population[i][j]= Rng::uni(-1,2);
+				population[i][j]= random::uni(random::globalRng,-1,2);
 			}
 		}
 

@@ -2,7 +2,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMDWFG.h>
 
 #include <shark/Core/Timer.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <iostream>
 using namespace shark;
 
@@ -13,7 +13,7 @@ std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t num
 		double norm = 0;
 		double sum = 0;
 		for(std::size_t j = 0; j != numObj; ++j){
-			points[i](j) = 1- Rng::uni(0.0, 1.0-sum);
+			points[i](j) = 1- random::uni(0.0, 1.0-sum);
 			sum += 1-points[i](j);
 			norm += std::pow(points[i](j),p);
 		}
@@ -26,7 +26,7 @@ std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t num
 int main(int argc, char **argv) {
 	
 	
-	Rng::seed(42);
+	random::seed(42);
 	for(std::size_t dim = 4; dim != 9; ++dim){
 		std::cout<<"dimensions = " <<dim<<std::endl;
 		RealVector reference(dim,1.0);

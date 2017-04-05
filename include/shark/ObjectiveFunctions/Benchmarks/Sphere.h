@@ -32,7 +32,7 @@
 #define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_SPHERE_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 /**
@@ -65,7 +65,7 @@ struct Sphere : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = Rng::gauss(0,1);
+			x(i) = random::gauss(random::globalRng, 0,1);
 		}
 		return x;
 	}

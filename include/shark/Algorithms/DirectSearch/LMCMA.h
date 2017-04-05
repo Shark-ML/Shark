@@ -199,7 +199,7 @@ class LMCMA: public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:
 	/// \brief Default c'tor.
-	LMCMA(DefaultRngType& rng = Rng::globalRng):mpe_rng(&rng){
+	LMCMA(random::rng_type& rng = random::globalRng):mpe_rng(&rng){
 		m_features |= REQUIRES_VALUE;
 	}
 	
@@ -389,7 +389,7 @@ private:
 
 	RealVector m_evolutionPathC;///< evolution path
 	
-	DefaultRngType* mpe_rng;
+	random::rng_type* mpe_rng;
 	
 };
 

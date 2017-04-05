@@ -101,14 +101,14 @@ void RFTrainer::train(RFClassifier& model, RegressionDataset const& dataset)
 	auto const n_elements = elements.size();
 	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 
-	auto seed = Rng::discrete(0,(unsigned)-1);
+	auto seed = random::globalRng();
 
 	auto oobPredictions = RealMatrix{n_elements,m_labelDimension};
 	std::vector<std::size_t> n_predictions(n_elements);
 
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
-		Rng::rng_type rng{static_cast<unsigned>(seed + b)};
+		random::rng_type rng{static_cast<unsigned>(seed + b)};
 
 		auto bag = bootstrap(elements, rng, subsetSize, m_bootstrapWithReplacement);
 
@@ -169,13 +169,13 @@ void RFTrainer::train(RFClassifier& model, ClassificationDataset const& dataset)
 	auto const n_elements = elements.size();
 	std::size_t subsetSize = static_cast<std::size_t>(n_elements*m_OOBratio);
 
-	auto seed = Rng::discrete(0,(unsigned)-1);
+	auto seed = random::globalRng();
 
 	UIntMatrix oobClassTally(n_elements,m_labelCardinality);
 
 	//Generate m_B trees
 	SHARK_PARALLEL_FOR(long b = 0; b < m_B; ++b){
-		Rng::rng_type rng{static_cast<unsigned>(seed + b)};
+		random::rng_type rng{static_cast<unsigned>(seed + b)};
 
 		auto bag = bootstrap(elements, rng, subsetSize, m_bootstrapWithReplacement);
 
@@ -221,7 +221,7 @@ TreeType RFTrainer::
 buildTree(SortedIndex&& tables,
 		  DataView<ClassificationDataset const> const& elements,
 		  ClassVector& cFull, std::size_t nodeId,
-		  Rng::rng_type& rng){
+		  random::rng_type& rng){
 
 	//Construct tree
 	TreeType tree;
@@ -307,7 +307,7 @@ TreeType RFTrainer::
 buildTree(SortedIndex&& tables,
 		  DataView<RegressionDataset const> const& elements,
 		  LabelType const& sumFull,
-		  std::size_t nodeId, Rng::rng_type& rng){
+		  std::size_t nodeId, random::rng_type& rng){
 
 	//Construct tree
 	TreeType tree;
@@ -383,12 +383,12 @@ RFTrainer::Split RFTrainer::findSplit (
 
 
 ///Generates a random set of indices
-set<std::size_t> RFTrainer::generateRandomTableIndices(Rng::rng_type &rng) const {
+set<std::size_t> RFTrainer::generateRandomTableIndices(random::rng_type &rng) const {
 	set<std::size_t> tableIndices;
-	DiscreteUniform<> discrete{rng,0,m_inputDimension-1};
+	std::uniform_int_distribution<std::size_t> dist{0,m_inputDimension-1};
 	//Draw the m_try Generate the random attributes to search for the split
 	while(tableIndices.size()<m_try){
-		tableIndices.insert(discrete());
+		tableIndices.insert(dist(rng));
 	}
 	return tableIndices;
 }

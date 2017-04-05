@@ -1,6 +1,6 @@
 #include <shark/Unsupervised/RBM/BinaryRBM.h>
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE RBM_Energy
 #include <boost/test/unit_test.hpp>
@@ -10,7 +10,7 @@ using namespace shark;
 
 //structure of values which is used for the tests
 struct RBMFixture {
-	RBMFixture():rbm(Rng::globalRng) {
+	RBMFixture():rbm(random::globalRng) {
 		rbm.setStructure(5,5);
 		rbm.weightMatrix().clear();
 		hiddenState.resize(1,5);
@@ -85,19 +85,19 @@ BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 
 	//now some random sampling to get the energy
 	{
-		BinaryRBM bigRBM(Rng::globalRng);
+		BinaryRBM bigRBM(random::globalRng);
 		bigRBM.setStructure(10,18);
-		initRandomNormal(bigRBM,2);
+		initRandomNormal(bigRBM,1);
 
 		RealMatrix inputBatch(10,10);
 		RealMatrix hiddenBatch(10,18);
 		RealVector energies(10);
 		for(std::size_t j = 0; j != 10; ++j) {
 			for(std::size_t k = 0; k != 10; ++k) {
-				inputBatch(j,k)=Rng::coinToss(0.5);
+				inputBatch(j,k)=random::coinToss(random::globalRng,0.5);
 			}
 			for(std::size_t k = 0; k != 18; ++k) {
-				hiddenBatch(j,k)=Rng::coinToss(0.5);
+				hiddenBatch(j,k)=random::coinToss(random::globalRng,0.5);
 			}
 			energies(j) = - inner_prod(bigRBM.hiddenNeurons().bias(),row(hiddenBatch,j));
 			energies(j)-= inner_prod(bigRBM.visibleNeurons().bias(),row(inputBatch,j));
@@ -126,9 +126,9 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityHidden )
 	visibleStateSpace(3,1)=1;
 
 	//create RBM with 2 visible and 4 hidden units and initialize it randomly
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(2,4);
-	initRandomNormal(rbm,2);
+	initRandomNormal(rbm,1);
 
 	//the hiddenstate to test is the most complex (1,1,1,1) case
 	RealMatrix hiddenState = blas::repeat(1.0,4,4);
@@ -161,9 +161,9 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityVisible )
 	hiddenStateSpace(3,1)=1;
 
 	//create RBM with 4 visible and 2 hidden units and initialize it randomly
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,2);
-	initRandomNormal(rbm,2);
+	initRandomNormal(rbm,1);
 
 	//the hiddenstate to test is the most complex (1,1,1,1) case
 	RealMatrix visibleState = blas::repeat(1.0,4,4);

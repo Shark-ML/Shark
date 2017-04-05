@@ -57,7 +57,7 @@ private:
 public:
 
 	/// \brief Default c'tor.
-	VDCMA(DefaultRngType& rng = Rng::globalRng):m_initialSigma(0.0), mpe_rng(&rng){
+	VDCMA(random::rng_type& rng = random::globalRng):m_initialSigma(0.0), mpe_rng(&rng){
 		m_features |= REQUIRES_VALUE;
 	}
 	
@@ -111,7 +111,7 @@ public:
 		m_mean = blas::repeat(0.0,m_numberOfVariables);
 		m_vn.resize(m_numberOfVariables);
 		for(std::size_t i = 0; i != m_numberOfVariables;++i){
-			m_vn(i) = uni(*mpe_rng,0,1.0/m_numberOfVariables);
+			m_vn(i) = random::uni(*mpe_rng,0,1.0/m_numberOfVariables);
 		}
 		m_normv = norm_2(m_vn);
 		m_vn /= m_normv;
@@ -293,7 +293,7 @@ private:
 		x.resize(m_numberOfVariables);
 		y.resize(m_numberOfVariables);
 		for(std::size_t i = 0; i != m_numberOfVariables; ++i){
-			y(i) = gauss(*mpe_rng,0,1);
+			y(i) = random::gauss(*mpe_rng,0,1);
 		}
 		double a = std::sqrt(1+sqr(m_normv))-1;
 		a *= inner_prod(y,m_vn);
@@ -366,7 +366,7 @@ private:
 
 	unsigned m_counter; ///< counter for generations
 	
-	DefaultRngType* mpe_rng;
+	random::rng_type* mpe_rng;
 	
 	
 };

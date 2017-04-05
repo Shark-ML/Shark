@@ -179,7 +179,7 @@ BOOST_AUTO_TEST_CASE( PointSearch_initialized )
 	{
 		for(size_t j=0;j<2;++j)
 		{
-			points[i](j)=Rng::gauss(0,1);
+			points[i](j)=random::gauss(random::globalRng,0,1);
 		}
 	}
 	points[10](0)=0.0;

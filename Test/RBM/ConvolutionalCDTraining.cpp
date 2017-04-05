@@ -26,16 +26,16 @@ BOOST_AUTO_TEST_CASE( ConvolutionalCDTraining_Bars ){
 	BarsAndStripes problem(9);
 	UnlabeledData<RealVector> data = problem.data();
 	
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,4,5,3);
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
-		Rng::seed(42+trial);
+		random::globalRng.seed(42+trial);
 		RealVector params(rbm.numberOfParameters());
 		for(std::size_t i = 0; i != params.size();++i){
-			params(i) = Rng::uni(-0.1,0.1);
+			params(i) = random::uni(random::globalRng,-0.1,0.1);
 		}
 		rbm.setParameterVector(params);
 		ConvolutionalBinaryCD cd(&rbm);

@@ -6,7 +6,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include  <shark/Rng/GlobalRng.h>
+#include  <shark/Core/Random.h>
 #include  <shark/Models/Kernels/AbstractKernelFunction.h>
 namespace shark{
 
@@ -65,9 +65,9 @@ void testKernelDerivative(AbstractKernelFunction<T>& kernel,std::size_t inputSiz
 		typename Batch<T>::type batch2(2*batchSize,inputSize);
 		for(std::size_t  i = 0; i != batchSize; ++i){
 			for(std::size_t j = 0; j != inputSize;++j) {
-				batch1(i,j) = Rng::uni(-3,3);
-				batch2(i,j) = Rng::uni(-3,3);
-				batch2(i+batchSize,j) = Rng::uni(-3,3);
+				batch1(i,j) = random::uni(random::globalRng,-3,3);
+				batch2(i,j) = random::uni(random::globalRng,-3,3);
+				batch2(i+batchSize,j) = random::uni(random::globalRng,-3,3);
 			}
 		}
 		
@@ -116,12 +116,12 @@ void testKernelInputDerivative(AbstractKernelFunction<T>& kernel,std::size_t inp
 		typename Batch<T>::type batch2(batchSize+1,inputSize);
 		for(std::size_t  i = 0; i != batchSize; ++i){
 			for(std::size_t j = 0; j != inputSize;++j) {
-				batch1(i,j) = Rng::uni(-3,3);
-				batch2(i,j) = Rng::uni(-3,3);
+				batch1(i,j) = random::uni(random::globalRng,-3,3);
+				batch2(i,j) = random::uni(random::globalRng,-3,3);
 			}
 		}
 		for(std::size_t j = 0; j != inputSize;++j) {
-			batch2(batchSize,j) = Rng::uni(-3,3);
+			batch2(batchSize,j) = random::uni(random::globalRng,-3,3);
 		}
 		
 		

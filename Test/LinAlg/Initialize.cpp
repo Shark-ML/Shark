@@ -487,7 +487,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_split_test_parameterSet ){
 	std::size_t n = networks[0].numberOfParameters();
 	RealVector input(3*n);
 	for(std::size_t i = 0; i != 3*n;++i){
-		input(i) = Rng::uni(0,1);
+		input(i) = random::uni(random::globalRng,0,1);
 	}
 	
 	init(input) >> blas::parameterSet(networks);

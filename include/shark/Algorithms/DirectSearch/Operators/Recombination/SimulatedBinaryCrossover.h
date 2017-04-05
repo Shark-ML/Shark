@@ -32,7 +32,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_CROSSOVER_SBX_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_CROSSOVER_SBX_H
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
 namespace shark {
@@ -57,14 +57,14 @@ namespace shark {
 		/// 
 		/// \param [in,out] i1 Individual to be mated.
 		/// \param [in,out] i2 Individual to be mated.
-		template<class RngType, typename IndividualType>
-		void operator()(RngType& rng, IndividualType & i1, IndividualType & i2 )const{	
+		template<class randomType, typename IndividualType>
+		void operator()(randomType& rng, IndividualType & i1, IndividualType & i2 )const{	
 			RealVector& point1 = i1.searchPoint();
 			RealVector& point2 = i2.searchPoint();
 
 			for( unsigned int i = 0; i < point1.size(); i++ ) {
 
-				if( !coinToss(rng, m_prob ) )
+				if( !random::coinToss(rng, m_prob ) )
 					continue;
 				
 				double y1 = 0;
@@ -89,7 +89,7 @@ namespace shark {
 				double alpha1 = 2. - std::pow(beta1 , -expp);
 				double alpha2 = 2. - std::pow(beta2 , -expp);
 
-				double u = uni(rng, 0., 1. );
+				double u = random::uni(rng, 0., 1. );
 				alpha1 *=u;
 				alpha2 *=u;
 				if( u > 1. / alpha1 ) {
@@ -105,7 +105,7 @@ namespace shark {
 				point1[i] = 0.5 * ((y1 + y2) - betaQ1 * (y2 - y1));
 				point2[i] = 0.5 * ((y1 + y2) + betaQ2 * (y2 - y1));
 				// randomly swap loci
-				if( coinToss(rng,0.5) ) std::swap(point1[i], point2[i]);
+				if( random::coinToss(rng,0.5) ) std::swap(point1[i], point2[i]);
 
 
 				//  -> from Deb's implementation, not contained in any paper

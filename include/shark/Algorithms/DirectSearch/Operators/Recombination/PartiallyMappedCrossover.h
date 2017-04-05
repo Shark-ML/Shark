@@ -1,7 +1,7 @@
 #ifndef SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_RECOMBINATION_PARTIALLYMAPPEDCROSSOVER_H
 #define SHARK_ALGORITHMS_DIRECT_SEARCH_OPERATORS_RECOMBINATION_PARTIALLYMAPPEDCROSSOVER_H
 
-#include <shark/Rng/DiscreteUniform.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/Exception.h>
 
 namespace shark {
@@ -16,8 +16,8 @@ struct PartiallyMappedCrossover {
 	/// 
 	/// \param [in,out] individual1 Individual to be mated.
 	/// \param [in,out] individual2 Individual to be mated.
-	template<class RngType, typename IndividualType>
-	void operator()(RngType& rng, IndividualType & individual1, IndividualType & individual2 )const{	
+	template<class Rng, typename IndividualType>
+	void operator()(Rng& rng, IndividualType & individual1, IndividualType & individual2 )const{	
 		SIZE_CHECK(individual1.searchPoint().size() == individual2.searchPoint().size());
 		
 		typedef typename IndividualType::SearchPointType PointType;
@@ -29,8 +29,8 @@ struct PartiallyMappedCrossover {
 		
 		
 		//compute cuttingpoints 0 <= cuttingPoint1 < cuttingPoint2 <= n
-		std::size_t cuttingPoint1 = discrete(rng,0, n - 2);
-		std::size_t cuttingPoint2 = discrete(rng,cuttingPoint1+1,n-1);
+		std::size_t cuttingPoint1 = random::discrete(rng, std::size_t(0), n - 2);
+		std::size_t cuttingPoint2 = random::discrete(rng,cuttingPoint1+1,n-1);
 
 		PointType r1(n, unset), r2(n, unset);
 		PointType p1(n, unset), p2(n, unset);

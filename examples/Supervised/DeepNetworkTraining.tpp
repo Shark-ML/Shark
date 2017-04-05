@@ -28,7 +28,7 @@ LabeledData<RealVector,unsigned int> createProblem(){
 			for(size_t j=0; j != 4; j++) {
 				bool val = (x & (1<<j)) > 0;
 				line(j) = val;
-				if(Rng::coinToss(0.3))
+				if(random::coinToss(random::globalRng, 0.3))
 					line(j) = !val;
 			}
 

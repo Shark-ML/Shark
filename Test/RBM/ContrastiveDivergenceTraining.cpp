@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 	UnlabeledData<RealVector> dataBatched = problem2.data();
 	std::size_t inputs = data.numberOfElements();
 	
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(16,4);
 	BinaryCD cd(&rbm);
 	cd.setData(dataBatched);
@@ -185,27 +185,21 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 BOOST_AUTO_TEST_CASE( ContrastiveDivergenceTraining_Bars ){
 	
 	unsigned int trials = 1;
-	unsigned int steps = 12001;
+	unsigned int steps = 8001;
 	unsigned int updateStep = 2000;
 	
 	BarsAndStripes problem(9);
 	UnlabeledData<RealVector> data = problem.data();
 	
-	Rng::seed(42);
-	
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(16,8);
 	BinaryCD cd(&rbm);
 	cd.numBatches() =1;
 	cd.setData(data);
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
-		Rng::seed(42+trial);
-		RealVector params(rbm.numberOfParameters());
-		for(std::size_t i = 0; i != params.size();++i){
-			params(i) = Rng::uni(-0.1,0.1);
-		}
-		rbm.setParameterVector(params);
+		random::globalRng.seed(42+trial);
+		initRandomUniform(rbm,-0.1,0.1);
 		BinaryCD cd(&rbm);
 		cd.setData(data);
 		SteepestDescent optimizer;

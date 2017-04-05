@@ -39,7 +39,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Data/Dataset.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <cmath>
 #include <iostream>
 
@@ -123,7 +123,7 @@ public:
 			for (unsigned int i=0; i<batchsize; i++)
 			{
 				// select the active variable (sample with replacement)
-				std::size_t active = Rng::discrete(0, ell-1);
+				std::size_t active = random::discrete(0, ell-1);
 				VectorType const& x = data(active).input;
 				unsigned int y = data(active).label;
 				SHARK_ASSERT(y < 2);
@@ -341,7 +341,7 @@ public:
 			for (unsigned int i=0; i<batchsize; i++)
 			{
 				// select the active variable (sample with replacement)
-				std::size_t active = Rng::discrete(0, ell-1);
+				std::size_t active = random::discrete(0, ell-1);
 				VectorType const& x = data(active).input;
 				unsigned int y = data(active).label;
 				SHARK_ASSERT(y < classes);

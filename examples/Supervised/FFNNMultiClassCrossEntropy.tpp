@@ -21,10 +21,10 @@ public:
 	Problem(double noise):m_noise(noise){}
 	void draw(RealVector& input, unsigned int& label)const
 	{
-		label = Rng::discrete(0, 4);
+		label = random::discrete(random::globalRng, 0, 4);
 		input.resize(2);
-		input(0) = m_noise * Rng::gauss() + 3.0 * std::cos((double)label);
-		input(1) = m_noise * Rng::gauss() + 3.0 * std::sin((double)label);
+		input(0) = m_noise * random::gauss(random::globalRng) + 3.0 * std::cos((double)label);
+		input(1) = m_noise * random::gauss(random::globalRng) + 3.0 * std::sin((double)label);
 	}
 };
 /// @endcond

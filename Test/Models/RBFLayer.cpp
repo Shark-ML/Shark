@@ -112,8 +112,8 @@ BOOST_AUTO_TEST_CASE( RBFLayer_Value )
 	double pi = boost::math::constants::pi<double>();
 	for(std::size_t i = 0; i != 1000; ++i){
 		RealVector point(2);
-		point(0)=Rng::gauss(0,2);
-		point(1)=Rng::gauss(0,2);
+		point(0)=random::gauss(random::globalRng,0,2);
+		point(1)=random::gauss(random::globalRng,0,2);
 		
 		double dist0 = sqr(point(0)-0.5)+sqr(point(1)-1);
 		double dist1 = sqr(point(0)-1.5)+sqr(point(1)-2);
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE( RBFLayer_Value )
 	//batch eval
 	RealMatrix inputBatch(100,2);
 	for(std::size_t i = 0; i != 100; ++i){
-		inputBatch(i,0) = Rng::uni(-1,1);
-		inputBatch(i,1) = Rng::uni(-1,1);
+		inputBatch(i,0) = random::uni(random::globalRng,-1,1);
+		inputBatch(i,1) = random::uni(random::globalRng,-1,1);
 	}
 	testBatchEval(net,inputBatch);
 }
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE( RBFLayer_SERIALIZE )
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t param=0;param!=model.numberOfParameters();++param)
 	{
-		 testParameters(param) = Rng::uni(0,1);
+		 testParameters(param) = random::uni(random::globalRng,0,1);
 	}
 	model.setParameterVector( testParameters);
 	model.setTrainingParameters(true,false);
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( RBFLayer_SERIALIZE )
 	{
 		for(size_t j=0;j!=model.inputSize();++j)
 		{
-			input(j)=Rng::uni(-1,1);
+			input(j)=random::uni(random::globalRng,-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model(input));

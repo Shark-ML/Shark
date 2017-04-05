@@ -33,7 +33,7 @@
 #define SHARK_MODELS_GAUSSIANNOISEMODEL_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/OpenMP.h>
 namespace shark {
 
@@ -124,7 +124,7 @@ public:
 	/// \brief Add noise to the input
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
 		SIZE_CHECK(inputs.size2() == inputSize());
-		//we use the global Rng here so if this is a threaded region, we might
+		//we use the global random here so if this is a threaded region, we might
 		//run into troubles when multiple threads run this. This should not be a bottle neck
 		//as this routine should be quite fast, while very expensive routines are likely to
 		//follow in the networks following this.
@@ -132,7 +132,7 @@ public:
 			outputs = inputs;
 			for(std::size_t i = 0; i != outputs.size1(); ++i){
 				for(std::size_t j = 0; j != outputs.size2(); ++j){
-					outputs(i,j) += Rng::gauss(0,m_variances(j));
+					outputs(i,j) += random::gauss(0,m_variances(j));
 				}
 			}
 		}

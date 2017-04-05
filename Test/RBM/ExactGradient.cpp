@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_MoreHidden )
 {
 	
 	//create RBM with 8 visible and 16 hidden units
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(8,16);
 	
 	
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_MoreHidden )
 		std::vector<RealVector> dataVec(50,RealVector(8));
 		for(std::size_t j = 0; j != 50; ++j){
 			for(std::size_t k = 0; k != 8; ++k){
-				dataVec[j](k)=Rng::coinToss(0.5);
+				dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 			}
 		}
 		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_LessHidden )
 {
 	
 	//create RBM with 8 visible and 16 hidden units
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(8,4);
 	
 	
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_LessHidden )
 		std::vector<RealVector> dataVec(50,RealVector(8));
 		for(std::size_t j = 0; j != 50; ++j){
 			for(std::size_t k = 0; k != 8; ++k){
-				dataVec[j](k)=Rng::coinToss(0.5);
+				dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 			}
 		}
 		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
@@ -77,13 +77,13 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_LessHidden )
 BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_MoreHidden )
 {
 
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(4,8);
 	
 	std::vector<RealVector> dataVec(50,RealVector(4));
 	for(std::size_t j = 0; j != 50; ++j){
 		for(std::size_t k = 0; k != 4; ++k){
-			dataVec[j](k)=Rng::coinToss(0.5);
+			dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 		}
 	}
 	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
@@ -101,13 +101,13 @@ BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_MoreHidden )
 BOOST_AUTO_TEST_CASE( ExactGradient_NegLogLikelihood_Gradient_LessHidden )
 {
 
-	BinaryRBM rbm(Rng::globalRng);
+	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(8,4);
 	
 	std::vector<RealVector> dataVec(50,RealVector(8));
 	for(std::size_t j = 0; j != 50; ++j){
 		for(std::size_t k = 0; k != 8; ++k){
-			dataVec[j](k)=Rng::coinToss(0.5);
+			dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 		}
 	}
 	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);

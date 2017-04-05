@@ -33,7 +33,7 @@
 #define SHARK_STATISTICS_MULTINOMIALDISTRIBUTION_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 namespace shark {
 
@@ -86,13 +86,13 @@ public:
 	}
 
 	/// \brief Samples the distribution.
-	template<class RngType>
-	result_type operator()(RngType& rng) const {
+	template<class randomType>
+	result_type operator()(randomType& rng) const {
 		std::size_t numStates = m_probabilities.size();
  
-		std::size_t index = discrete(rng,0,numStates-1);
+		std::size_t index = random::discrete(rng,std::size_t(0),numStates-1);
  
-		if(coinToss(rng, m_q[index]))
+		if(random::coinToss(rng, m_q[index]))
 			return index;
 		else
 			return m_J[index];

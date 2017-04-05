@@ -72,7 +72,7 @@ class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 
 	/// \brief Default c'tor.
-	CMSA(DefaultRngType& rng = Rng::globalRng)
+	CMSA(random::rng_type& rng = random::globalRng)
 	: m_mu( 100 )
 	, m_lambda( 200 )
 	, m_userSetMu(false)
@@ -177,7 +177,7 @@ private:
 	RealVector m_mean; ///< The current cog of the population.
 
 	MultiVariateNormalDistributionCholesky m_mutationDistribution; ///< Multi-variate normal mutation distribution.   
-	DefaultRngType* mpe_rng;
+	random::rng_type* mpe_rng;
 };
 }
 

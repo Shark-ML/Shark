@@ -51,9 +51,9 @@ public:
 	void draw(RealVector& input, unsigned int& label) const
 	{
 		input.resize(2);
-		label = Rng::coinToss();
-		input(0) = Rng::uni(-1,1);
-		input(1) = Rng::uni(-1,1) + label;
+		label = random::coinToss(random::globalRng);
+		input(0) = random::uni(random::globalRng, -1,1);
+		input(1) = random::uni(random::globalRng, -1,1) + label;
 	}
 };
 //###end<distribution>

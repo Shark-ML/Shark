@@ -35,7 +35,7 @@
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Rng/DiscreteUniform.h>
+#include <shark/Core/Random.h>
 #include "Impl/FunctionWrapperBase.h"
 
 #include <boost/scoped_ptr.hpp>

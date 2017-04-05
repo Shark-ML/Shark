@@ -35,7 +35,7 @@
 #define SHARK_LINALG_ROTATIONS_H
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 namespace shark{ namespace blas{
 /**
  * \ingroup shark_globals
@@ -164,12 +164,11 @@ void applyHouseholderOnTheLeft(
 /// H_1 is generated from a random vector on the n-dimensional unit sphere.
 /// this requires less operations and is thus preferable. Also only half the
 /// random numbers need to be generated
-template< class MatrixT, typename RngType >
-void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,RngType& rng){
+template< class MatrixT, typename randomType >
+void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,randomType& rng){
 	MatrixT& matrix = matrixC();
 	SIZE_CHECK(matrix.size1() == matrix.size2());
 	SIZE_CHECK(matrix.size1() > 0);
-	Normal< RngType > normal( rng, 0, 1 );
 	size_t size = matrix.size1();
 	diag(matrix) = repeat(1.0,size);
 
@@ -178,7 +177,7 @@ void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,RngType& r
 	for(std::size_t i = 2; i != size+1;++i){
 		//create the random vector on the unit-sphere for the i-dimensional subproblem
 		for(std::size_t j=0;j != i; ++j){
-			v(j) = normal();
+			v(j) = random::gauss(rng);
 		}
 		subrange(v,0,i) /=norm_2(subrange(v,0,i));//project on sphere
 		
@@ -201,12 +200,12 @@ void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,RngType& r
 ///(e.g. call matrix::resize before) uses the global RNG.
 template<class MatrixT>
 void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC){
-	randomRotationMatrix( matrixC, Rng::globalRng );
+	randomRotationMatrix( matrixC, random::globalRng );
 }
 
 //! Creates a random rotation matrix with a certain size using the random number generator rng.
-template<typename RngType>
-RealMatrix randomRotationMatrix(size_t size,RngType& rng){
+template<typename randomType>
+RealMatrix randomRotationMatrix(size_t size,randomType& rng){
 	RealMatrix mat(size,size);
 	randomRotationMatrix(mat,rng);
 	return mat;
@@ -214,7 +213,7 @@ RealMatrix randomRotationMatrix(size_t size,RngType& rng){
 
 //! Creates a random rotation matrix with a certain size using the global random number gneerator.
 inline RealMatrix randomRotationMatrix(size_t size){
-	return randomRotationMatrix( size, shark::Rng::globalRng );
+	return randomRotationMatrix( size, shark::random::globalRng );
 }
 
 /** @}*/

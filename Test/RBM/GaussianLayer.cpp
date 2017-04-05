@@ -1,5 +1,5 @@
 #include <shark/Unsupervised/RBM/Neuronlayers/GaussianLayer.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE RBM_GaussianLayer
 #include <boost/test/unit_test.hpp>
@@ -15,16 +15,16 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_SufficientStatistics){
 	layer.resize(3);
 	RealMatrix input(10,3);
 	RealMatrix testInput(10,3);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t test = 0; test != 10000; ++test){
-		double beta = Rng::uni(0,1);
+		double beta = random::uni(random::globalRng,0,1);
 		for(std::size_t j = 0; j != 3; ++j){
-			layer.bias()(j) = Rng::gauss(0,10);
+			layer.bias()(j) = random::gauss(random::globalRng,0,10);
 		}
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				input(i,j) = Rng::gauss(0,10);
+				input(i,j) = random::gauss(random::globalRng,0,10);
 			}
 			
 			//calculate result
@@ -44,10 +44,10 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Parameters){
 	GaussianLayer layer;
 	layer.resize(20);
 	RealVector parameters(20);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t j = 0; j != 20; ++j){
-		parameters(j) = Rng::gauss(0,1);
+		parameters(j) = random::gauss(random::globalRng,0,1);
 	}
 	
 	layer.setParameterVector(parameters);
@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Sample){
 	GaussianLayer layer;
 	GaussianLayer::StatisticsBatch statistics(3,5);
 	layer.resize(5);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	for(std::size_t i = 0; i != 3; ++i){
 		for(std::size_t j = 0; j != 5; ++j){
-			statistics(i,j) = Rng::uni(0.0,1.0);
+			statistics(i,j) = random::uni(random::globalRng,0.0,1.0);
 		}
 	}
 	
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Sample){
 	variance.clear();
 	RealMatrix samples(3,5);
 	for(std::size_t s = 0; s != numSamples; ++s){
-		layer.sample(statistics,samples,0.0,Rng::globalRng);
+		layer.sample(statistics,samples,0.0,random::globalRng);
 		mean +=samples;
 		noalias(variance) += sqr(samples-statistics);
 	}
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Marginalize){
 	GaussianLayer layer;
 	layer.resize(3);
 	RealVector input(3);
-	Rng::seed(42);
+	random::globalRng.seed(42);
 	
 	//set distribution, sample input and calculate statistics
 	for(std::size_t j = 0; j != 3; ++j){

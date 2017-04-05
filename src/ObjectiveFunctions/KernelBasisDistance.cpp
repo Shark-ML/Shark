@@ -28,7 +28,7 @@
  */
 #define SHARK_COMPILE_DLL
 #include <shark/ObjectiveFunctions/KernelBasisDistance.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 using namespace blas;
@@ -54,7 +54,7 @@ RealVector KernelBasisDistance::proposeStartingPoint() const {
 	std::size_t elems = mep_expansion->alpha().size1();
 	RealVector startingPoint(m_numApproximatingVectors * dim);
 	for(std::size_t i = 0; i != m_numApproximatingVectors; ++i){
-		std::size_t k = Rng::discrete(0,elems-1);
+		std::size_t k = random::discrete(random::globalRng, std::size_t(0),elems-1);
 		noalias(subrange(startingPoint,i*dim,(i+1)*dim)) = expansionBasis.element(k);
 	}
 	return startingPoint;

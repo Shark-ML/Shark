@@ -1,12 +1,13 @@
+//===========================================================================
 /*!
  * 
  *
- * \brief       Basic types and definitions of the Rng component.
+ * \brief       external object definition for global rng
  * 
  * 
  *
- * \author      T. Voss
- * \date        2011-07-02
+ * \author      O.Krause
+ * \date        2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -29,16 +30,9 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_RNG_RNG_H
-#define SHARK_RNG_RNG_H
+//===========================================================================
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/linear_congruential.hpp>
 
-namespace shark {
+#include <shark/Core/Random.h>
 
-	/** \brief Default RNG of the shark library. */
-	typedef boost::mt19937	DefaultRngType;
-}
-
-#endif 
+SHARK_EXPORT_SYMBOL shark::random::rng_type shark::random::globalRng;

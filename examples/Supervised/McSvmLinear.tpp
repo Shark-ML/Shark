@@ -24,10 +24,10 @@ class Problem : public LabeledDataDistribution<VectorType, unsigned int>
 public:
 	void draw(VectorType& input, unsigned int& label)const
 	{
-		label = Rng::discrete(0, 4);
+		label = random::discrete(random::globalRng, 0, 4);
 		input.resize(1000002);
-		input(1000000) = noise * Rng::gauss() + 3.0 * std::cos((double)label);
-		input(1000001) = noise * Rng::gauss() + 3.0 * std::sin((double)label);
+		input(1000000) = noise * random::gauss(random::globalRng) + 3.0 * std::cos((double)label);
+		input(1000001) = noise * random::gauss(random::globalRng) + 3.0 * std::sin((double)label);
 	}
 };
 /// @endcond

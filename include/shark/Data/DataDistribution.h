@@ -38,7 +38,7 @@
 #define SHARK_DATA_DATADISTRIBUTION_H
 
 #include <shark/Data/Dataset.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <utility>
 
@@ -166,12 +166,12 @@ public:
 		unsigned int j, t = 0;
 		for (j = 0; j < 2; j++)
 		{
-			double v = Rng::uni(0.0, (double)m_size);
+			double v = random::uni(random::globalRng, 0.0, (double)m_size);
 			t += (int)floor(v);
 			input(j) = v;
 		}
 		label = (t & 1);
-		if (Rng::uni(0.0, 1.0) < m_noiselevel) label = 1 - label;
+		if (random::uni(random::globalRng, 0.0, 1.0) < m_noiselevel) label = 1 - label;
 	}
 
 protected:
@@ -195,11 +195,11 @@ public:
 	void draw(RealVector& input, RealVector& label)const{
 		input.resize(1);
 		label.resize(1);
-		input(0) = Rng::uni(-m_range, m_range);
+		input(0) = random::uni(random::globalRng, -m_range, m_range);
 		if(input(0) != 0)
-            label(0) = sin(input(0)) / input(0) + Rng::gauss(0.0, m_stddev);
+            label(0) = sin(input(0)) / input(0) + random::gauss(random::globalRng, 0.0, m_stddev);
         else
-            label(0) = Rng::gauss(0.0, m_stddev);
+            label(0) = random::gauss(random::globalRng, 0.0, m_stddev);
 	}
 
 protected:
@@ -227,15 +227,15 @@ public:
 
 	void draw(RealVector& input, unsigned int& label)const{
 		input.resize( m_size );
-		label =  (unsigned int) Rng::discrete(0,1); //fix label first
+		label =  (unsigned int) random::discrete(random::globalRng, 0,1); //fix label first
 		double y2 = label - 0.5; //"clean" informative feature values
 		// now fill the informative features..
 		for ( unsigned int i=0; i<m_sizeUseful; i++ ) {
-			input(i) = y2 + Rng::gauss( m_noisePos, m_noiseVar );
+			input(i) = y2 + random::gauss(random::globalRng, m_noisePos, m_noiseVar );
 		}
 		// ..and the uninformative ones
 		for ( unsigned int i=m_sizeUseful; i<m_size; i++ ) {
-			input(i) = Rng::gauss( m_noisePos, m_noiseVar );
+			input(i) = random::gauss(random::globalRng, m_noisePos, m_noiseVar );
 		}
 	}
 
@@ -283,15 +283,15 @@ public:
 		double v, dist;
 		
 		if ( m_equal_class_prob ) { //each class has equal probability - this implementation is brute-force and gorgeously inefficient :/
-			bool this_label = Rng::coinToss();
+			bool this_label = random::coinToss(random::globalRng);
 			label = ( this_label ? 1 : 0 );
-			if ( Rng::uni(0.0, 1.0) < m_noiselevel )
+			if ( random::uni(random::globalRng, 0.0, 1.0) < m_noiselevel )
 				label = 1 - label;
 			if ( this_label ) {
 				do {
 					dist = 0.0;
 					for ( unsigned int i=0; i<m_dimensions; i++ ) {
-						v = Rng::uni( m_lowerLimit, m_upperLimit );
+						v = random::uni(random::globalRng, m_lowerLimit, m_upperLimit );
 						input(i) = v;
 						dist += (v-m_centerpoint)*(v-m_centerpoint);
 					}
@@ -301,7 +301,7 @@ public:
 				do {
 					dist = 0.0;
 					for ( unsigned int i=0; i<m_dimensions; i++ ) {
-						v = Rng::uni( m_lowerLimit, m_upperLimit );
+						v = random::uni(random::globalRng, m_lowerLimit, m_upperLimit );
 						input(i) = v;
 						dist += (v-m_centerpoint)*(v-m_centerpoint);
 					}
@@ -312,12 +312,12 @@ public:
 			do {
 				dist = 0.0;
 				for ( unsigned int i=0; i<m_dimensions; i++ ) {
-					v = Rng::uni( m_lowerLimit, m_upperLimit );
+					v = random::uni(random::globalRng, m_lowerLimit, m_upperLimit );
 					input(i) = v;
 					dist += (v-m_centerpoint)*(v-m_centerpoint);
 				}
 				label = ( dist < m_inner_radius2 ? 1 : 0 );
-				if ( Rng::uni(0.0, 1.0) < m_noiselevel )
+				if ( random::uni(random::globalRng, 0.0, 1.0) < m_noiselevel )
 					label = 1 - label;
 			} while( dist > m_inner_radius2 && dist < m_outer_radius2 );
 		}
@@ -351,8 +351,8 @@ public:
 	{
 		input.resize( 2 );
 		double x,y;
-		x = Rng::uni( 0, 4 ); //zero is left
-		y = Rng::uni( 0, 4 ); //zero is bottom
+		x = random::uni(random::globalRng, 0, 4 ); //zero is left
+		y = random::uni(random::globalRng, 0, 4 ); //zero is bottom
 		// assign label according to position w.r.t. the diagonal
 		if ( x+y < 4 )
 			label = 1;
@@ -363,7 +363,7 @@ public:
 			label = 1;
 		
 		// add noise
-		if ( Rng::uni(0.0, 1.0) < m_noiselevel )
+		if ( random::uni(random::globalRng, 0.0, 1.0) < m_noiselevel )
 			label = 1 - label;
 		input(0) = x;
 		input(1) = y;
@@ -392,7 +392,7 @@ public:
 	void draw(RealVector& input) const{
 		input.resize(m_offset.size());
 		noalias(input) = m_offset;
-		noalias(input) += m_dist(Rng::globalRng).first;
+		noalias(input) += m_dist(random::globalRng).first;
 	}
 private:
 	MultiVariateNormalDistributionCholesky m_dist;
@@ -415,11 +415,11 @@ public:
 		
 	void draw(RealVector& input) const{
 		//sample image
-		std::size_t imageNum = Rng::discrete(0,m_numImages-1);
+		std::size_t imageNum = random::discrete(random::globalRng, std::size_t(0),m_numImages-1);
 		Data<RealVector>::const_element_reference image = m_images.element(imageNum);
 		//draw the upper left corner of the image
-		std::size_t m_startX = Rng::discrete(0,m_imageWidth-m_patchWidth);
-		std::size_t m_startY = Rng::discrete(0,m_imageHeight-m_patchHeight);
+		std::size_t m_startX = random::discrete(random::globalRng, std::size_t(0),m_imageWidth-m_patchWidth);
+		std::size_t m_startY = random::discrete(random::globalRng, std::size_t(0),m_imageHeight-m_patchHeight);
 		
 		
 		//copy patch

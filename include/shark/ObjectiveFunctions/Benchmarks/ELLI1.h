@@ -42,7 +42,7 @@
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #include <shark/LinAlg/rotations.h>
 
@@ -113,7 +113,7 @@ struct ELLI1 : public MultiObjectiveFunction{
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = Rng::uni(-10,10);
+			x(i) = random::uni(random::globalRng, -10,10);
 		}
 		return x;
 	}

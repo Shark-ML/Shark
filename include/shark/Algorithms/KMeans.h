@@ -152,8 +152,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 	for(unsigned int i = 0; i != n; ++i){
 		clusterMembership(i) = i % k;
 	}
-	DiscreteUniform<Rng::rng_type> uni(Rng::globalRng,0,k-1);
-	std::random_shuffle(clusterMembership.begin(),clusterMembership.end(),uni);
+	std::shuffle(clusterMembership.begin(),clusterMembership.end(),random::globalRng);
 	for(std::size_t i = 0; i != n; ++i){
 		++clusterSizes(clusterMembership(i));
 	}
@@ -204,7 +203,7 @@ KernelExpansion<InputType> kMeans(Data<InputType> const& dataset, std::size_t k,
 		//if a cluster is empty then assign a random point to it
 		for(unsigned int i = 0; i != k; ++i){
 			if(clusterSizes(i) == 0){
-				std::size_t elem = uni(n-1);
+				std::size_t elem = random::uni(random::globalRng, std::size_t(0), n-1);
 				--clusterSizes(clusterMembership(elem));
 				clusterMembership(elem)=i;
 				clusterSizes(i) = 1;

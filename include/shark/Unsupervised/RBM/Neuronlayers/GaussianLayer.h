@@ -32,7 +32,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Unsupervised/RBM/StateSpaces/RealSpace.h>
-#include <shark/Rng/Normal.h>
+#include <shark/Core/Random.h>
 #include <shark/Core/ISerializable.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/Math.h>
@@ -115,8 +115,7 @@ public:
 		SHARK_CRITICAL_REGION{
 			for(std::size_t i = 0; i != state.size1();++i){
 				for(std::size_t j = 0; j != state.size2();++j){
-					Normal<Rng> normal(rng,statistics(i,j),1.0);
-					state(i,j) = normal();
+					state(i,j) = random::gauss(rng,statistics(i,j), 1.0);
 				}
 			}
 		}

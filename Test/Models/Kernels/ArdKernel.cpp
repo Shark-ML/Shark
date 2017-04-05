@@ -4,7 +4,7 @@
 #include "KernelDerivativeTestHelper.h"
 
 #include <shark/Models/Kernels/ArdKernel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 
@@ -81,14 +81,14 @@ BOOST_AUTO_TEST_CASE( DenseARDKernel_Value )
 	RealMatrix xBatch(10,cur_dims);
 	RealMatrix zBatch(13,cur_dims);
 	for(std::size_t i = 0; i != 10; ++i){
-		xBatch(i,0) = Rng::uni(-3,3);
-		xBatch(i,1) = Rng::uni(-3,3);
-		xBatch(i,2) = Rng::uni(-3,3);
+		xBatch(i,0) = random::uni(random::globalRng,-3,3);
+		xBatch(i,1) = random::uni(random::globalRng,-3,3);
+		xBatch(i,2) = random::uni(random::globalRng,-3,3);
 	}
 	for(std::size_t i = 0; i != 13; ++i){
-		zBatch(i,0) = Rng::uni(-3,3);
-		zBatch(i,1) = Rng::uni(-3,3);
-		zBatch(i,2) = Rng::uni(-3,3);
+		zBatch(i,0) = random::uni(random::globalRng,-3,3);
+		zBatch(i,1) = random::uni(random::globalRng,-3,3);
+		zBatch(i,2) = random::uni(random::globalRng,-3,3);
 	}
 
 	// check eval for default params

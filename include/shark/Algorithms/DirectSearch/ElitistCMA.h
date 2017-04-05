@@ -69,7 +69,7 @@ namespace shark {
 class ElitistCMA : public AbstractSingleObjectiveOptimizer<RealVector >{	    
 public:
 
-	SHARK_EXPORT_SYMBOL ElitistCMA(DefaultRngType& rng = Rng::globalRng);
+	SHARK_EXPORT_SYMBOL ElitistCMA(random::rng_type& rng = random::globalRng);
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -126,7 +126,7 @@ private:
 	std::vector<double> m_ancestralFitness; ///< stores the last k fitness values (by default 5).
 	bool m_activeUpdate;///< Should bad individuals be actively purged from the strategy?
 
-	DefaultRngType* mpe_rng;///< the internal random number generator
+	random::rng_type* mpe_rng;///< the internal random number generator
 };
 }
 

@@ -123,8 +123,7 @@ public:
 			for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
 				batchIds[i] = i;
 			}
-			DiscreteUniform<typename RBM::RngType> uni(mpe_rbm->rng(),0,1);
-			std::random_shuffle(batchIds.begin(),batchIds.end(),uni);
+			std::shuffle(batchIds.begin(),batchIds.end(),mpe_rbm->rng());
 			for(std::size_t i = 0; i != batchesForTraining; ++i){
 				elements += m_data.batch(batchIds[i]).size1();
 			}

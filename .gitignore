@@ -26,6 +26,7 @@ SharkTargets.cmake
 
 /Testing
 /build
+examples/Benchmark/shark/build/
 
 # /Test/
 /Test/test_output
@@ -200,7 +201,7 @@ SharkTargets.cmake
 /doc/ReClaM
 /doc/Mixture
 /doc/Fuzzy
-/doc/Rng
+/doc/random
 /doc/LinAlg
 /doc/MOO-EALib
 /doc/FileUtil

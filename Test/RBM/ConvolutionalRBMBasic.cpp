@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( Structure ){
 	
 	
 	//init RBMs and set structure
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(inputSize1,inputSize2,numFilters,filterSize);
 	
 	
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( Input ){
 	};
 	
 	//init RBMs and set structure
-	ConvolutionalBinaryRBM rbm(Rng::globalRng);
+	ConvolutionalBinaryRBM rbm(random::globalRng);
 	rbm.setStructure(inputSize1,inputSize2,numFilters,filterSize);
 	initRandomNormal(rbm,1.0);
 	
@@ -122,10 +122,10 @@ BOOST_AUTO_TEST_CASE( Input ){
 	
 	for(std::size_t i = 0; i != 10; ++i){
 		for(std::size_t j = 0; j != 16; ++j){
-			batchV(i,j)=Rng::coinToss();
+			batchV(i,j)=random::coinToss(random::globalRng);
 		}
 		for(std::size_t j = 0; j != 8; ++j){
-			batchH(i,j)=Rng::coinToss();
+			batchH(i,j)=random::coinToss(random::globalRng);
 		}
 	}
 	

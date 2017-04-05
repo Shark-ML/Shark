@@ -33,7 +33,7 @@
 //===========================================================================
 
 #include <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Algorithms/Trainers/EpsilonSvmTrainer.h>
 #include <shark/Algorithms/Trainers/RegularizationNetworkTrainer.h>

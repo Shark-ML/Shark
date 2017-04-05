@@ -78,7 +78,8 @@ public:
 		RealMatrix const& linearMat,
 		double C
 	)
-	: m_kernelMatrix(kernel)
+	: bUnshrinked(false)
+	, m_kernelMatrix(kernel)
 	, m_M(M)
 	, m_C(C)
 	, m_classes(numberOfClasses(target))
@@ -127,7 +128,7 @@ public:
 	///enable/disable shrinking
 	void setShrinking(bool shrinking = true)
 	{
-		m_useShrinking = shrinking; 
+		m_useShrinking = shrinking;
 	}
 	
 	/// \brief Return the solution found.

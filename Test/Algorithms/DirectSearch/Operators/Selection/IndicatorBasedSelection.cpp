@@ -6,7 +6,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 using namespace shark;
 
@@ -24,11 +24,11 @@ BOOST_AUTO_TEST_CASE( IndicatorBasedSelection_Test ) {
 		for(std::size_t i = 0; i != numPoints; ++i){
 			population[i].penalizedFitness().resize(numDims);
 			for(std::size_t j = 0; j != numDims; ++j){
-				population[i].penalizedFitness()[j]= Rng::uni(-1,2);
+				population[i].penalizedFitness()[j]= random::uni(random::globalRng,-1,2);
 			}
 		}
 		
-		std::size_t mu = Rng::discrete(1,numPoints-2);
+		std::size_t mu = random::discrete(random::globalRng,std::size_t(1),numPoints-2);
 		
 		//store copy and compute ranks
 		std::vector<Individual<RealVector,RealVector> > popCopy = population;

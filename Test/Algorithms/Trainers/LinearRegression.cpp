@@ -4,7 +4,6 @@
 
 #include <shark/Algorithms/Trainers/LinearRegression.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
-#include <shark/Rng/Uniform.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <shark/LinAlg/rotations.h>
 
@@ -34,17 +33,15 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	covariance(1,1) = 1;
 	MultiVariateNormalDistribution noise(covariance);
 
-	Uniform<> uniform(Rng::globalRng,-3.0, 3.0);
-
 	// create samples
 	std::vector<RealVector> input(trainExamples,RealVector(2));
 	std::vector<RealVector> trainTarget(trainExamples,RealVector(2));
 	std::vector<RealVector> testTarget(trainExamples,RealVector(2));
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = uniform();
-		input[i](1) = uniform();
+		input[i](0) = random::uni(random::globalRng,-3.0, 3.0);
+		input[i](1) = random::uni(random::globalRng,-3.0, 3.0);
 		testTarget[i] =  model(input[i]);
-		trainTarget[i] = noise(Rng::globalRng).first + testTarget[i];
+		trainTarget[i] = noise(random::globalRng).first + testTarget[i];
 	}
 
 	// let the model forget...

@@ -38,7 +38,7 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
-#include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
+#include <shark/Core/Random.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
 #include <boost/shared_ptr.hpp>
@@ -251,7 +251,6 @@ namespace shark {
 
 		unsigned m_counter; ///< Counter for generations.
 
-		Normal< Rng::rng_type > m_distribution; ///< Normal distribution.
 		StrongNoisePtr m_noise; ///< Noise type to apply in the update of distribution parameters.
 	};
 }

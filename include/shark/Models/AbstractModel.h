@@ -39,7 +39,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/State.h>
-#include <shark/Rng/Normal.h>
+#include <shark/Core/Random.h>
 #include<shark/Data/Dataset.h>
 
 namespace shark {
@@ -323,26 +323,22 @@ public:
 /// \param model: model to be initialized
 /// \param s: variance of mean-free normal distribution
 template <class InputType, class OutputType>
-void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s)
-{
-	Normal<> gauss(Rng::globalRng,0, s);
+void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s){
 	RealVector weights(model.numberOfParameters());
-	std::generate(weights.begin(), weights.end(), gauss);
+	std::generate(weights.begin(), weights.end(), [&](){return random::gauss(random::globalRng,0,s);});
 	model.setParameterVector(weights);
 }
 
 
 /// \brief Initialize model parameters uniformly at random.
 ///
-/// \param model: model to be initialized
-/// \param l: lower bound of initialization interval
-/// \param h: upper bound of initialization interval
+/// \param model model to be initialized
+/// \param lower lower bound of initialization interval
+/// \param upper upper bound of initialization interval
 template <class InputType, class OutputType>
-void initRandomUniform(AbstractModel<InputType, OutputType>& model, double l, double h)
-{
-	Uniform<> uni(Rng::globalRng,l, h);
+void initRandomUniform(AbstractModel<InputType, OutputType>& model, double lower, double upper){
 	RealVector weights(model.numberOfParameters());
-	std::generate(weights.begin(), weights.end(), uni);
+	std::generate(weights.begin(), weights.end(), [&](){return random::uni(random::globalRng,lower,upper);});
 	model.setParameterVector(weights);
 }
 

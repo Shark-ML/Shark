@@ -30,7 +30,7 @@
 
 #include  <shark/Data/Dataset.h>
 #include  <shark/LinAlg/Base.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <shark/Models/AbstractModel.h>
 
 namespace shark{
@@ -65,7 +65,7 @@ private:
 	///@param p the flipping probability
 	void perturbate(RealVector& pattern, double p)const{
 		for (std::size_t i = 0; i < pattern.size(); ++i){
-			if (Rng::uni(0,1) > p){
+			if (random::uni(0,1) > p){
 				pattern(i) = !pattern(i);
 			}
 		}

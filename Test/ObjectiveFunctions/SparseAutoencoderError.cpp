@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value ){
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);;
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value ){
 	NullLoss loss;
 
 	for(std::size_t iter = 0; iter != Iterations; ++iter){
-		double roh = Rng::uni(0.1,0.9);
-		double beta = Rng::uni(0.1,0.9);
+		double roh = random::uni(random::globalRng, 0.1,0.9);
+		double beta = random::uni(random::globalRng, 0.1,0.9);
 		
 		SparseAutoencoderError error(dataset, &model,&loss,roh,beta);
 		
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value_Tied ){
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Value_Tied ){
 	NullLoss loss;
 
 	for(std::size_t iter = 0; iter != Iterations; ++iter){
-		double roh = Rng::uni(0.1,0.9);
-		double beta = Rng::uni(0.1,0.9);
+		double roh = random::uni(random::globalRng, 0.1,0.9);
+		double beta = random::uni(random::globalRng, 0.1,0.9);
 		
 		SparseAutoencoderError error(dataset, &model,&loss,roh,beta);
 		
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Loss ){
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,5);
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_Loss){
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_Loss){
 	SquaredLoss<> loss;
 
 	for(std::size_t i = 0; i != Iterations; ++i){
-		double roh = Rng::uni(0.1,0.9);
-		double beta = Rng::uni(0.1,0.9);
+		double roh = random::uni(random::globalRng, 0.1,0.9);
+		double beta = random::uni(random::globalRng, 0.1,0.9);
 	
 		SparseAutoencoderError error(dataset,&model,&loss,roh,beta);
 		initRandomNormal(model,0.1);
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative){
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
@@ -227,8 +227,8 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative){
 	NullLoss loss;
 
 	for(std::size_t i = 0; i != Iterations; ++i){
-		double roh = Rng::uni(0.1,0.9);
-		double beta = Rng::uni(0.1,0.9);
+		double roh = random::uni(random::globalRng, 0.1,0.9);
+		double beta = random::uni(random::globalRng, 0.1,0.9);
 	
 		SparseAutoencoderError error(dataset,&model,&loss,roh,beta);
 		initRandomNormal(model,0.1);
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_Tied){
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input,25);
@@ -259,8 +259,8 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_Tied){
 	NullLoss loss;
 
 	for(std::size_t i = 0; i != Iterations; ++i){
-		double roh = Rng::uni(0.1,0.9);
-		double beta = Rng::uni(0.1,0.9);
+		double roh = random::uni(random::globalRng, 0.1,0.9);
+		double beta = random::uni(random::globalRng, 0.1,0.9);
 	
 		SparseAutoencoderError error(dataset,&model,&loss,roh,beta);
 		initRandomNormal(model,0.1);
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE( SparseAutoencoderError_Derivative_GradDesc)
 	std::vector<RealVector> input(Inputs,RealVector(Dimensions));
 	for(std::size_t i = 0; i != Inputs; ++i){
 		for(std::size_t j = 0; j != Dimensions; ++j){
-			input[i](j) = Rng::uni(-1,1);;
+			input[i](j) = random::uni(random::globalRng, -1,1);
 		}
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input,input);

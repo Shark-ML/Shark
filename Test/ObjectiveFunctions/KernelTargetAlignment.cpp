@@ -50,15 +50,15 @@ class KTAFixture
 public:
 
 	KTAFixture():numInputs(100),dims(10){
-		Rng::seed(42);
+		random::globalRng.seed(42);
 		std::vector<RealVector> inputs(numInputs, RealVector(dims));
 		std::vector<unsigned int> labels(numInputs);
 		std::vector<RealVector> labelsRegression(numInputs,RealVector(1));
 		for(std::size_t i = 0; i != numInputs; ++i){
-			labels[i] = Rng::coinToss(0.2);
-			labelsRegression[i](0) = Rng::gauss(1,2);
+			labels[i] = random::coinToss(random::globalRng, 0.2);
+			labelsRegression[i](0) = random::gauss(random::globalRng, 1,2);
 			for(std::size_t j = 0; j != dims; ++j)
-				inputs[i](j) = Rng::uni(j-1.0+3*labels[i],j+1.0+3*labels[i]);
+				inputs[i](j) = random::uni(random::globalRng, j-1.0+3*labels[i],j+1.0+3*labels[i]);
 		}
 		data  = createLabeledDataFromRange(inputs,labels,10);
 		dataRegression  = createLabeledDataFromRange(inputs,labelsRegression,10);
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
-		input(0) = Rng::uni(0.5,2);
+		input(0) = random::uni(random::globalRng, 0.5,2);
 		testDerivative(kta,input,1.e-8);
 	}
 	
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
-		input(0) = Rng::uni(0.5,2);
+		input(0) = random::uni(random::globalRng, 0.5,2);
 		testDerivative(kta,input,1.e-8);
 	}
 	
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
-		input(0) = Rng::uni(0.1,1);
+		input(0) = random::uni(random::globalRng, 0.1,1);
 		testDerivative(kta,input);
 	}
 	

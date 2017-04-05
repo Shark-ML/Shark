@@ -47,7 +47,7 @@
 #include <shark/Models/Trees/KHCTree.h>
 #include <shark/Models/Trees/KDTree.h>
 
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 #include <queue>
 
 using namespace shark;
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
 	for(std::size_t i = 0; i != Points; ++i){
 		target[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			input[i][d]=Rng::gauss(3*target[i],1);
+			input[i][d]=random::gauss(random::globalRng,3*target[i],1);
 		}
 	}
 	std::vector<RealVector> testInput(Points, RealVector(Dimension));
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
 	for(std::size_t i = 0; i != TestPoints; ++i){
 		testTarget[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			testInput[i][d]=Rng::gauss(3*testTarget[i],1);
+			testInput[i][d]=random::gauss(random::globalRng,3*testTarget[i],1);
 		}
 	}
 
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 	for(std::size_t i = 0; i != Points; ++i){
 		target[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			input[i][d]=Rng::gauss(3*target[i],1);
+			input[i][d]=random::gauss(random::globalRng,3*target[i],1);
 		}
 	}
 	std::vector<RealVector> testInput(Points, RealVector(Dimension));
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 	for(std::size_t i = 0; i != TestPoints; ++i){
 		testTarget[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			testInput[i][d]=Rng::gauss(3*testTarget[i],1);
+			testInput[i][d]=random::gauss(random::globalRng,3*testTarget[i],1);
 		}
 	}
 

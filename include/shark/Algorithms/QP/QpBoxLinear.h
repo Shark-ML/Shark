@@ -164,7 +164,7 @@ public:
 				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
 				std::size_t n = (std::size_t)std::floor(num);
 				double prob = num - n;
-				if (Rng::uni() < prob) n++;
+				if (random::coinToss(random::globalRng,prob)) n++;
 				for (std::size_t j=0; j<n; j++)
 				{
 					schedule[pos] = i;
@@ -174,7 +174,7 @@ public:
 				prefsum += p;
 			}
 			SHARK_ASSERT(pos == ell);
-			for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+			std::shuffle(schedule.begin(),schedule.end(),random::globalRng);
 
 			// inner loop
 			max_violation = 0.0;
@@ -453,7 +453,7 @@ protected:
 				//~ double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
 				//~ std::size_t n = (std::size_t)std::floor(num);
 				//~ double prob = num - n;
-				//~ if (Rng::uni() < prob) n++;
+				//~ if (random::uni() < prob) n++;
 				//~ for (std::size_t j=0; j<n; j++)
 				//~ {
 					//~ schedule[pos] = i;
@@ -463,7 +463,7 @@ protected:
 				//~ prefsum += p;
 			//~ }
 			//~ SHARK_ASSERT(pos == ell);
-			//~ for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[Rng::discrete(0, ell - 1)]);
+			//~ for (std::size_t i=0; i<ell; i++) std::swap(schedule[i], schedule[random::discrete(0, ell - 1)]);
 
 			//~ // inner loop
 			//~ max_violation = 0.0;

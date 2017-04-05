@@ -2,7 +2,7 @@
 #include <shark/ObjectiveFunctions/NoisyErrorFunction.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <shark/Models/LinearModel.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE ML_NoisyErrorFunction
 #include <boost/test/unit_test.hpp>
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	{
 		for(size_t j=0;j!=3;++j)
 		{
-			input(j)=Rng::uni(-1,1);
+			input(j)=random::uni(random::globalRng, -1,1);
 		}
 		data.push_back(input);
 		output(0)=function.eval(input);
