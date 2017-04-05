@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE( HINGELOSS_EVAL_MULTICLASS ) {
 		RealVector valueResultP(5,0);
 		for(std::size_t i = 0; i != 5; ++i){
 			testLabel(i) = (unsigned int)random::discrete(random::globalRng, std::size_t(0),dim-1);
-			testPoint(i,testLabel(i)) = random::uni(random::globalRng, -10.0,10.0);
+			testPoint(i,testLabel(i)) = random::uni(random::globalRng, -1.0,1.0);
 			for(std::size_t j = 0; j != dim; ++j){
 				if(j == testLabel(i)) continue;
-				testPoint(i,j) = random::uni(random::globalRng, -10.0,10.0);
+				testPoint(i,j) = random::uni(random::globalRng, -1.0,1.0);
 				valueResultP[i]+= std::max(0.0, 1-0.5*(testPoint(i,testLabel(i))- testPoint(i,j)));
 			}
 		}

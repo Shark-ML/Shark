@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	RegressionDataset testset = createLabeledDataFromRange(input, testTarget);
 	SquaredLoss<> loss;
 	double error=loss(testset.labels(),model(testset.inputs()));
-	BOOST_CHECK_SMALL(error, 1e-4);
+	BOOST_CHECK_SMALL(error, 2e-4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

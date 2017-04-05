@@ -69,12 +69,12 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL_Classification ) {
 
 		//test eval
 		double value = loss.eval(testLabelDisc,testPoint);
-		BOOST_CHECK_SMALL(value-valueResult, 1.e-13);
+		BOOST_CHECK_SMALL(value-valueResult, 1.e-12);
 
 		//test evalDerivative (first)
 		RealMatrix derivative;
 		value = loss.evalDerivative(testLabelDisc, testPoint, derivative);
-		BOOST_CHECK_SMALL(value - valueResult, 1.e-13);
+		BOOST_CHECK_SMALL(value - valueResult, 1.e-12);
 		BOOST_CHECK_SMALL(norm_2(row(derivative,0) - estimatedDerivative), 1.e-5);
 	}
 }

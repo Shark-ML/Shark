@@ -314,9 +314,9 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 {
 	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(16,10);
-	initRandomNormal(rbm,2);
+	initRandomNormal(rbm,1);
 	RealVector parameters = rbm.parameterVector();
-	initRandomNormal(rbm,2);
+	initRandomNormal(rbm,1);
 	
 	std::vector<RealVector> dataVec(1,RealVector(10));
 	for(std::size_t j = 0; j != 1; ++j){

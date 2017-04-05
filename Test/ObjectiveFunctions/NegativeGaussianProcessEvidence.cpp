@@ -116,8 +116,6 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 	trainer.train(model, trainingData);
 	Data<RealVector> output = model(trainingData.inputs());
 	double prevTrainError = loss.eval(trainingData.labels(), output);
-	output = model(testData.inputs());
-	double prevTestError = loss.eval(testData.labels(), output);
 
 	for (unsigned int iter1=0; iter1<4; iter1++) {
 		for (unsigned int iter2=0; iter2<10; iter2++) 
@@ -127,18 +125,13 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 		trainer.train(model, trainingData);
 		output = model(trainingData.inputs());
 		double trainError = loss.eval(trainingData.labels(), output);
-		output = model(testData.inputs());
-		double testError = loss.eval(testData.labels(), output);
 		double e = rprop.solution().value;
 
 		// we are considering the negative log evidence, so
 		// both evidence as well as test error should decrease
 		BOOST_CHECK(trainError < prevTrainError);
 		BOOST_CHECK(e < prevEvidence);
-		BOOST_CHECK(testError < prevTestError);
-
 		prevEvidence = e;
-		prevTestError = testError;
 	}
 }
 

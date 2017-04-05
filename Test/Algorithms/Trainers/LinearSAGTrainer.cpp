@@ -139,9 +139,9 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_2Classes_Offset )
 	
 	WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,createDataFromRange(weights));
 	std::cout<<"train 2 classes weighted with offset"<<std::endl;
-	testClassification(weightedDataset,0.1,100,true);
+	testClassification(weightedDataset,0.1,1000,true);
 	std::cout<<"train 2 classes weighted without offset"<<std::endl;
-	testClassification(weightedDataset,0.1,100,false);
+	testClassification(weightedDataset,0.1,1000,false);
 	
 }
 
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_Regression)
 	
 	RealVector weights(dataset.numberOfElements());
 	for(auto& weight: weights)
-		weight = random::uni(random::globalRng,0,1);
+		weight = random::uni(random::globalRng,0.2,4);
 	
 	WeightedLabeledData<RealVector,RealVector> weightedDataset(dataset,createDataFromRange(weights));
 	testRegression(weightedDataset,0.1,100,true);
