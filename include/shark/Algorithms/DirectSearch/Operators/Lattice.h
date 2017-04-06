@@ -37,6 +37,8 @@
 #include <shark/LinAlg/Metrics.h>
 #include <shark/Core/Random.h>
 
+#include <numeric>
+
 namespace shark {
 
 namespace detail {
