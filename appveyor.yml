@@ -18,6 +18,7 @@ environment:
 branches:
   only:
     - master
+    - msvc_linker_errors
   
 # before everything
 init:
