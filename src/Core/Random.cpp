@@ -35,4 +35,4 @@
 
 #include <shark/Core/Random.h>
 
-SHARK_EXPORT_SYMBOL shark::random::rng_type shark::random::globalRng;
+shark::random::rng_type shark::random::globalRng;
