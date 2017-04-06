@@ -41,7 +41,7 @@ namespace random{
 	/** \brief Default RNG of the shark library. */
 	typedef std::mt19937 rng_type;
 	
-	SHARK_EXPORT_SYMBOL rng_type globalRng;
+	SHARK_EXPORT_SYMBOL extern rng_type globalRng;
 	
 	///\brief Flips a coin with probability of heads being pHeads by drawing random numbers from rng.
 	template<class RngType>
