@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( TEST_NSGAIII) {
 		double volume = 128.748470;
 		RealCodedNSGAIII optimizer;
 		optimizer.mu() = mu;
-		testFunction(optimizer, function, reference, volume,10, 1000,5.e-3);
+		testFunction(optimizer, function, reference, volume,10, 2000,5.e-3);
 	}
 	{
 		ZDT6 function(5);
