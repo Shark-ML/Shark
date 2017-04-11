@@ -129,6 +129,7 @@ public:
 	RealVector parameterVector() const
 	{
 		RealVector ret(1,(double)m_B);
+		return ret;
 	}
 
 	/// Set the parameter vector.
