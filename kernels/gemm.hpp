@@ -82,7 +82,7 @@ namespace kernels{
 /// If bindings are included and the matrix combination allow for a specific binding
 /// to be applied, the binding is called automatically from {binding}/gemm.h
 /// otherwise default/gemm.h is used which is fully implemented for all dense/sparse combinations.
-/// if a combination is optimized, bindings::has_optimized_gemm<M,E1,E2>::type evaluates to boost::mpl::true_
+/// if a combination is optimized, bindings::has_optimized_gemm<M,E1,E2>::type evaluates to std::true_type
 /// The kernels themselves are implemented in bindings::gemm.
 template<class M, class E1, class E2>
 void gemm(

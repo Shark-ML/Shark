@@ -29,9 +29,9 @@
 #define REMORA_VECTOR_HPP
 
 #include "detail/vector_proxy_classes.hpp"
-#include <boost/container/vector.hpp>
-#include <array>
 #include <initializer_list>
+#include <vector>
+#include <boost/serialization/vector.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>
@@ -48,17 +48,17 @@ template<class T>
 class vector: public vector_container<vector<T>, cpu_tag > {
 
 	typedef vector<T> self_type;
-	typedef boost::container::vector<T> array_type;
+	typedef std::vector<typename std::conditional<std::is_same<T,bool>::value,char,T>::type > array_type;
 public:
-	typedef T value_type;
+	typedef typename array_type::value_type value_type;
 	typedef typename array_type::const_reference const_reference;
 	typedef typename array_type::reference reference;
 	typedef typename array_type::size_type size_type;
 
 	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
-	typedef dense_vector_storage<T> storage_type;
-	typedef dense_vector_storage<T const> const_storage_type;
+	typedef dense_vector_storage<value_type> storage_type;
+	typedef dense_vector_storage<value_type const> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction

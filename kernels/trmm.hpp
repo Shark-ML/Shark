@@ -39,7 +39,7 @@
 namespace remora{ namespace bindings{
 template<class M1, class M2>
 struct  has_optimized_trmm
-: public boost::mpl::false_{};
+: public std::false_type{};
 }}
 #endif
 

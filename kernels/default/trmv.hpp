@@ -36,8 +36,7 @@
 #include "../../detail/vector_proxy_classes.hpp" //vector_range, dense_vector_adaptor
 #include "../gemv.hpp" //gemv kernel
 #include "../dot.hpp" //dot kernel
-#include <boost/mpl/bool.hpp>
-
+#include <type_traits> //std::false_type marker for unoptimized
 namespace remora{ namespace bindings{
 
 //Lower triangular(row-major) - vector
@@ -45,7 +44,7 @@ template<bool Unit, class MatA, class V>
 void trmv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-    boost::mpl::false_, row_major
+	lower, row_major
 ){
 	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
@@ -93,7 +92,7 @@ template<bool Unit, class MatA, class V>
 void trmv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag>& b,
-    boost::mpl::true_, row_major
+	upper, row_major
 ){
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
@@ -115,7 +114,7 @@ template<bool Unit, class MatA, class V>
 void trmv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-    boost::mpl::false_, column_major
+	lower, column_major
 ){
 
 	std::size_t size = A().size1();
@@ -135,7 +134,7 @@ template<bool Unit, class MatA, class V>
 void trmv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag>& b,
-    boost::mpl::true_, column_major
+	upper, column_major
 ){
 	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
@@ -182,11 +181,11 @@ template <bool Upper,bool Unit,typename MatA, typename V>
 void trmv(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> & b,
-	boost::mpl::false_//unoptimized
+	std::false_type//unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());
-	trmv_impl<Unit>(A, b, boost::mpl::bool_<Upper>(), typename MatA::orientation());
+	trmv_impl<Unit>(A, b,  triangular_tag<Upper,false>(), typename MatA::orientation());
 }
 
 }}

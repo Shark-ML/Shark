@@ -36,8 +36,7 @@
 #include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
 #include "simd.hpp"
 #include "mgemm.hpp" //block macro kernel for dense syrk
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
-#include <type_traits> //std::common_type
+#include <type_traits> //std::false_type marker for unoptimized, std::common_type
 namespace remora{ namespace bindings {
 
 template <typename T>
@@ -171,7 +170,7 @@ template <bool Upper,bool Unit,typename MatA, typename MatB>
 void trmm(
 	matrix_expression<MatA, cpu_tag> const& A,
 	matrix_expression<MatB, cpu_tag>& B,
-	boost::mpl::false_ //unoptimized
+	std::false_type //unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == B().size1());

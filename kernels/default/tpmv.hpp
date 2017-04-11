@@ -33,7 +33,7 @@
 
 #include "../../expression_types.hpp" //matrix/vector_expression
 #include "../../detail/traits.hpp" //orientations and triangular types
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::false_type marker for unoptimized
 
 
 namespace remora{ namespace bindings{
@@ -149,7 +149,7 @@ template <typename MatA, typename V>
 void tpmv(
 	matrix_expression<MatA, cpu_tag> const& A, 
 	vector_expression<V, cpu_tag>& b,
-	boost::mpl::false_//unoptimized
+	std::false_type//unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == b().size());	

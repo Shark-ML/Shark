@@ -78,7 +78,7 @@ struct vector_container:public vector_expression<C, Device> {
 /// it does not model the Matrix Expression concept but all derived types should.
 /// The class defines a common base type and some common interface for all
 /// statically derived Matrix Expression classes
-/// We iboost::mplement the casts to the statically derived type.
+/// We implement the casts to the statically derived type.
 template<class E, class Device>
 struct matrix_expression {
 	typedef E expression_type;
@@ -103,7 +103,7 @@ struct matrix_expression {
 /// it does not model the Matrix Expression concept but all derived types should.
 /// The class defines a common base type and some common interface for all
 /// statically derived Matrix Expression classes
-/// We iboost::mplement the casts to the statically derived type.
+/// We implement the casts to the statically derived type.
 template<class E>
 struct vector_set_expression {
 	typedef E expression_type;

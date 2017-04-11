@@ -88,11 +88,11 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		m_expression.assign_to(x,alpha*m_scalar);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		m_expression.plus_assign_to(x,alpha*m_scalar);
 	}
 	
@@ -259,12 +259,12 @@ public:
 	}	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		plus_assign_to(x,eval_block(m_expression), alpha);
 	}
 
@@ -292,7 +292,7 @@ private:
 	void plus_assign_to(
 		vector_expression<VecX, device_type>& x,
 		vector_expression<VecV, device_type> const& v,
-		value_type alpha
+		typename VecX::value_type alpha
 	)const{
 		vector_unary<VecV, F> e(v(), m_functor);
 		vector_scalar_multiply<vector_unary<VecV,F> > e1(e,alpha);
@@ -357,12 +357,12 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		assign(x,m_lhs, alpha);
 		plus_assign(x,m_rhs, alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha )const{
 		plus_assign(x,m_lhs, alpha);
 		plus_assign(x,m_rhs, alpha);
 	}
@@ -448,12 +448,12 @@ public:
 	}
 	
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		x().clear();
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		plus_assign_to(x,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 
@@ -490,7 +490,7 @@ private:
 	void plus_assign_to(
 		vector_expression<VecX, device_type>& x,
 		vector_expression<LHS, device_type> const& lhs, vector_expression<RHS, device_type> const& rhs,
-		value_type alpha
+		typename VecX::value_type alpha
 	)const{
 		//we know that lhs and rhs are elementwise expressions so we can now create the elementwise expression and assign it.
 		vector_binary<LHS,RHS, F> e(lhs(),rhs(), m_functor);
@@ -549,14 +549,14 @@ public:
 	
 	//computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		vector_range<VecX> left(x(),0,m_lhs.size()); 
 		vector_range<VecX> right(x(),m_lhs.size(),x().size()); 
 		assign(left,m_lhs, alpha);
 		assign(right,m_rhs, alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		vector_range<VecX> left(x(),0,m_lhs.size()); 
 		vector_range<VecX> right(x(),m_lhs.size(),x().size()); 
 		plus_assign(left,m_lhs, alpha);

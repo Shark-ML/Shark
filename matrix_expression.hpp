@@ -29,7 +29,6 @@
 #define REMORA_MATRIX_EXPRESSION_HPP
 
 #include "detail/expression_optimizers.hpp"
-#include <boost/utility/enable_if.hpp>
 #include "kernels/matrix_fold.hpp"
 #include "matrix_proxy.hpp"
 #include "vector_proxy.hpp"
@@ -74,7 +73,7 @@ vector_repeater<VecV> repeat(vector_expression<VecV, Device> const& vector, std:
 ///@param rows the number of rows of the resulting vector
 ///@param columns the number of columns of the resulting vector
 template<class T>
-typename boost::enable_if<std::is_arithmetic<T>, scalar_matrix<T,cpu_tag> >::type
+typename std::enable_if<std::is_arithmetic<T>::value, scalar_matrix<T,cpu_tag> >::type
 repeat(T scalar, std::size_t rows, std::size_t columns){
 	return scalar_matrix<T,cpu_tag>(rows, columns, scalar);
 }
@@ -84,8 +83,8 @@ repeat(T scalar, std::size_t rows, std::size_t columns){
 ///
 /// \f$ (A*t)_{ij} = e_{ij}*t \f$
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type >,
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type >::value,
         matrix_scalar_multiply<MatA> 
 >::type
 operator* (matrix_expression<MatA, Device> const& A, T scalar){
@@ -96,8 +95,8 @@ operator* (matrix_expression<MatA, Device> const& A, T scalar){
 ///
 /// \f$ (t*A)_{ij} = t*e_{ij} \f$
 template<class T, class MatA, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type >,
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type >::value,
         matrix_scalar_multiply<MatA> 
 >::type
 operator* (T scalar, matrix_expression<MatA, Device> const& A){
@@ -163,8 +162,8 @@ matrix_addition<MatA, matrix_scalar_multiply<MatB> > operator- (
 
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>, 
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value, 
 	matrix_addition<MatA, scalar_matrix<T,Device> >
 >::type operator+ (
 	matrix_expression<MatA, Device> const& A,
@@ -175,8 +174,8 @@ typename boost::enable_if<
 
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class T, class MatA, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>,
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value,
 	matrix_addition<MatA, scalar_matrix<T,Device> >
 >::type operator+ (
 	T t,
@@ -187,8 +186,8 @@ typename boost::enable_if<
 
 ///\brief Subtracts a scalar which is interpreted as a constant matrix from a matrix.
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type> ,
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value ,
 	matrix_addition<MatA, matrix_scalar_multiply<scalar_matrix<T,Device> > >
 >::type operator- (
 	matrix_expression<MatA, Device> const& A,
@@ -199,8 +198,8 @@ typename boost::enable_if<
 
 ///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>,
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value,
 	matrix_addition<scalar_matrix<T,Device>, matrix_scalar_multiply<MatA> >
 >::type operator- (
 	T t,
@@ -230,8 +229,8 @@ REMORA_BINARY_MATRIX_EXPRESSION(max,max)
 
 #define REMORA_MATRIX_SCALAR_TRANSFORMATION(name, F)\
 template<class T, class MatA, class Device> \
-typename boost::enable_if< \
-	std::is_convertible<T, typename MatA::value_type >,\
+typename std::enable_if< \
+	std::is_convertible<T, typename MatA::value_type >::value,\
         matrix_binary<MatA, scalar_matrix<typename MatA::value_type,Device>,typename device_traits<Device>:: template  F<typename MatA::value_type> > \
 >::type \
 name (matrix_expression<MatA, Device> const& m, T t){ \
@@ -254,8 +253,8 @@ REMORA_MATRIX_SCALAR_TRANSFORMATION(pow, pow)
 // operations of the form op(t,v)[i,j] = op(t,v[i,j])
 #define REMORA_MATRIX_SCALAR_TRANSFORMATION_2(name, F)\
 template<class T, class MatA, class Device> \
-typename boost::enable_if< \
-	std::is_convertible<T, typename MatA::value_type >,\
+typename std::enable_if< \
+	std::is_convertible<T, typename MatA::value_type >::value,\
 	matrix_binary<scalar_matrix< typename MatA::value_type,Device>, MatA, typename device_traits<Device>:: template F< typename MatA::value_type> > \
 >::type \
 name (T t, matrix_expression<MatA, Device> const& m){ \
@@ -541,8 +540,8 @@ auto operator|(
 ///
 /// The scalar t is interpreted as column vector
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>, 
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value, 
 	matrix_concat<MatA, scalar_matrix<T, Device>, true > 
 >::type operator|(
 	matrix_expression<MatA, Device> const& A,
@@ -555,8 +554,8 @@ typename boost::enable_if<
 ///
 /// The scalar t is interpreted as column vector
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>, 
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value, 
 	matrix_concat<scalar_matrix<T, Device>, MatA, true > 
 >::type operator|(
 	T const& t,
@@ -596,8 +595,8 @@ auto operator&(
 ///
 /// The scalar t is interpreted as row vector
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>, 
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value, 
 	matrix_concat<MatA, scalar_matrix<T, Device>, false > 
 >::type operator&(
 	matrix_expression<MatA, Device> const& A,
@@ -610,8 +609,8 @@ typename boost::enable_if<
 ///
 /// The scalar t is interpreted as row vector
 template<class MatA, class T, class Device>
-typename boost::enable_if<
-	std::is_convertible<T, typename MatA::value_type>, 
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type>::value, 
 	matrix_concat<scalar_matrix<T, Device>, MatA, false > 
 >::type operator&(
 	T const& t,

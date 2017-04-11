@@ -30,14 +30,13 @@
 
 #include "../../detail/traits.hpp" //orientations, major_begin/end
 #include "../../expression_types.hpp"
-#include <boost/mpl/if.hpp>
 #include <type_traits>
 namespace remora{namespace bindings{
 	
 template<class F, class M, class Orientation, class Tag>
 void matrix_fold(matrix_expression<M, cpu_tag> const& m, typename F::result_type& value, Orientation, Tag) {
-	typedef typename boost::mpl::if_<
-		std::is_same<Orientation,unknown_orientation>,
+	typedef typename std::conditional<
+		std::is_same<Orientation,unknown_orientation>::value,
 		row_major,
 		Orientation
 	>::type chosen_orientation;

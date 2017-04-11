@@ -34,8 +34,7 @@
 #include "../../expression_types.hpp"//for matrix_expression
 #include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
 #include "mgemm.hpp" //block macro kernel for dense syrk
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
-#include <type_traits> //std::common_type
+#include <type_traits> //std::false_type marker for unoptimized, std::common_Type
 
 namespace remora { namespace bindings {
 
@@ -138,7 +137,7 @@ void syrk(
 	matrix_expression<E, cpu_tag> const& e,
 	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type& alpha,
-	boost::mpl::false_ //unoptimized
+	std::false_type //unoptimized
 ){
 	SIZE_CHECK(m().size1() == m().size2());
 	SIZE_CHECK(m().size2() == e().size1());

@@ -77,7 +77,7 @@ void syev(
 	std::size_t n = A().size1();
 	bool upper = false;
 	//lapack is column major storage.
-	if(boost::is_same<typename MatA::orientation, row_major>::value){
+	if(std::is_same<typename MatA::orientation, row_major>::value){
 		upper = !upper;
 	}
 	auto storageA = A().raw_storage();

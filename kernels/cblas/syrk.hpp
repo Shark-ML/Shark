@@ -33,6 +33,7 @@
 #define REMORA_KERNELS_CBLAS_SYRK_HPP
 
 #include "cblas_inc.hpp"
+#include <type_traits>
 
 namespace remora{ namespace bindings {
 
@@ -71,7 +72,7 @@ void syrk(
 	matrix_expression<MatA, cpu_tag> const& A,
 	matrix_expression<MatC, cpu_tag>& C,
 	typename MatC::value_type alpha,
-	boost::mpl::true_
+	std::true_type
 ) {
 	SIZE_CHECK(A().size1() == C().size1());
 	SIZE_CHECK(C().size1() == C().size2());
@@ -98,21 +99,21 @@ void syrk(
 
 template<class Storage1, class Storage2, class T1, class T2>
 struct optimized_syrk_detail{
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_syrk_detail<
 	dense_tag, dense_tag,
 	double, double
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_syrk_detail<
 	dense_tag, dense_tag,
 	float, float
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M1, class M2>

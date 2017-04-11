@@ -34,7 +34,6 @@
 #define REMORA_MATRIX_PROXY_HPP
 
 #include "detail/expression_optimizers.hpp"
-#include <boost/utility/enable_if.hpp>
 #include <type_traits>
 namespace remora{
 	
@@ -281,8 +280,8 @@ temporary_proxy<dense_matrix_adaptor<T> > adapt_matrix(T (&array)[M][N]){
 
 /// \brief Converts a dense vector to a matrix of a given size
 template <class V>
-typename boost::enable_if<
-	std::is_same<typename V::storage_type::storage_tag,dense_tag>,
+typename std::enable_if<
+	std::is_same<typename V::storage_type::storage_tag,dense_tag>::value,
 	temporary_proxy< dense_matrix_adaptor<
 		typename std::remove_reference<typename V::reference>::type
 	> >
@@ -297,8 +296,8 @@ to_matrix(
 
 /// \brief Converts a dense vector to a matrix of a given size
 template <class V>
-typename boost::enable_if<
-	std::is_same<typename V::storage_type::storage_tag,dense_tag>,
+typename std::enable_if<
+	std::is_same<typename V::storage_type::storage_tag,dense_tag>::value,
 	temporary_proxy< dense_matrix_adaptor<typename V::value_type const> >
 >::type 
 to_matrix(
@@ -309,8 +308,8 @@ to_matrix(
 }
 
 template <class E>
-typename boost::enable_if<
-	std::is_same<typename E::storage_type::storage_tag,dense_tag>,
+typename std::enable_if<
+	std::is_same<typename E::storage_type::storage_tag,dense_tag>::value,
 	temporary_proxy< dense_matrix_adaptor<
 		typename std::remove_reference<typename E::reference>::type
 	> >
@@ -320,6 +319,33 @@ to_matrix(
 	std::size_t size1, std::size_t size2
 ){
 	return to_matrix(static_cast<E&>(v),size1,size2);
+}
+
+/// \brief Converts a dense matrix to a vector
+///
+/// The matrix is linearized along its fast index as indicated by the orientation.
+/// e.g. a row-major matrix is lienarized by concatenating its rows to one large vector.
+template<class E, class Device>
+typename std::enable_if<
+	std::is_same<typename E::evaluation_category::tag,dense_tag>::value,
+	temporary_proxy< linearized_matrix<typename const_expression<E>::type> >
+>::type 
+to_vector(matrix_expression<E, Device> const& e){
+	return linearized_matrix<typename const_expression<E>::type>(e());
+}
+
+template<class E, class Device>
+typename std::enable_if<
+	std::is_same<typename E::evaluation_category::tag,dense_tag>::value,
+	temporary_proxy< linearized_matrix<E> >
+>::type 
+to_vector(matrix_expression<E,Device>& e){
+	return linearized_matrix<E>(e());
+}
+
+template<class E>
+auto to_vector(temporary_proxy<E> e)->decltype(to_vector(static_cast<E&>(e))){
+	return to_vector(static_cast<E&>(e));
 }
 
 }

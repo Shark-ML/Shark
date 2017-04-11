@@ -33,6 +33,7 @@
 
 #include "cblas_inc.hpp"
 #include "../../detail/matrix_proxy_classes.hpp"
+#include <type_traits>
 ///solves systems of triangular matrices
 
 namespace remora{namespace bindings {
@@ -85,7 +86,7 @@ template <class Triangular, typename MatA, typename MatB>
 void trsm_impl(
 	matrix_expression<MatA, cpu_tag> const &A,
 	matrix_expression<MatB, cpu_tag> &B,
-	boost::mpl::true_, left
+	std::true_type, left
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size1() == B().size1());
@@ -115,39 +116,39 @@ template <class Triangular, typename MatA, typename MatB>
 void trsm_impl(
 	matrix_expression<MatA, cpu_tag> const &A,
 	matrix_expression<MatB, cpu_tag> &B,
-	boost::mpl::true_, right
+	std::true_type, right
 ){
 	matrix_transpose<typename const_expression<MatA>::type> transA(A());
 	matrix_transpose<MatB> transB(B());
-	trsm_impl<typename Triangular::transposed_orientation>(transA, transB, boost::mpl::true_(),  left());
+	trsm_impl<typename Triangular::transposed_orientation>(transA, transB, std::true_type(),  left());
 }
 
 template <class Triangular, class Side, typename MatA, typename MatB>
 void trsm(
 	matrix_expression<MatA, cpu_tag> const &A,
 	matrix_expression<MatB, cpu_tag> &B,
-	boost::mpl::true_
+	std::true_type
 ){
-	trsm_impl<Triangular>(A,B, boost::mpl::true_(),  Side());
+	trsm_impl<Triangular>(A,B, std::true_type(),  Side());
 }
 
 template<class Storage1, class Storage2, class T1, class T2>
 struct optimized_trsm_detail{
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_trsm_detail<
 	dense_tag, dense_tag,
 	double, double
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_trsm_detail<
 	dense_tag, dense_tag, 
 	float, float
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<>
@@ -155,14 +156,14 @@ struct optimized_trsm_detail<
 	dense_tag, dense_tag,
 	std::complex<double>, std::complex<double>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_trsm_detail<
 	dense_tag, dense_tag,
 	std::complex<float>, std::complex<float>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M1, class M2>

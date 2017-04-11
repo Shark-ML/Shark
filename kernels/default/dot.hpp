@@ -32,7 +32,6 @@
 
 #include "../../expression_types.hpp"//vector_expression
 #include "../../detail/traits.hpp"//storage tags
-#include <boost/mpl/bool.hpp>
 
 namespace remora{namespace bindings{
 

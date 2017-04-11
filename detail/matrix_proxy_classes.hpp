@@ -31,8 +31,6 @@
 #include "../expression_types.hpp"
 #include "../assignment.hpp"
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/mpl/or.hpp>
 #include <type_traits>
 namespace remora{
 	
@@ -210,11 +208,9 @@ public:
 	template<class E>
 	matrix_transpose(
 		matrix_transpose<E> const& m,
-		typename boost::disable_if<
-			boost::mpl::or_<
-				std::is_same<matrix_transpose<E>,matrix_transpose>,
-				std::is_same<matrix_transpose<E>,matrix_closure_type>
-			> 
+		typename std::enable_if<
+			!(std::is_same<matrix_transpose<E>,matrix_transpose>::value
+			|| std::is_same<matrix_transpose<E>,matrix_closure_type>::value)
 		>::type* dummy = 0
 	):m_expression(m.expression()) {}
 
@@ -614,6 +610,105 @@ private:
 	size_type m_size;
 };
 
+/// \brief Linearizes a matrix as a vector along its preferred orientation
+template<class M>
+class linearized_matrix: public vector_expression<linearized_matrix<M>, typename M::device_type > {
+private:
+	typedef typename closure<M>::type matrix_closure_type;
+	typedef typename std::conditional<
+		std::is_same<typename M::orientation::orientation, unknown_orientation>::value,
+		row_major,
+		typename M::orientation::orientation
+	>::type orientation;
+public:
+	typedef typename M::value_type value_type;
+	typedef typename M::const_reference const_reference;
+	typedef typename reference<M>::type reference;
+	typedef typename M::size_type size_type;
+
+	typedef linearized_matrix<M> closure_type;
+	typedef linearized_matrix<typename const_expression<M>::type> const_closure_type;
+	typedef unknown_storage storage_type;
+	typedef storage_type const_storage_type;
+	typedef typename M::evaluation_category evaluation_category;
+
+	// Construction and destruction
+	linearized_matrix(matrix_closure_type expression)
+	:m_expression(expression){}
+	
+	template<class E>
+	linearized_matrix(linearized_matrix<E> const& other)
+	: m_expression(other.expression()){}
+	
+	matrix_closure_type const& expression() const {
+		return m_expression;
+	}
+	matrix_closure_type& expression() {
+		return m_expression;
+	}
+	
+	///\brief Returns the size of the vector
+	size_type size() const {
+		return m_expression.size1() * m_expression.size2();
+	}
+	
+	typename device_traits<typename M::device_type>::queue_type& queue()const{
+		return m_expression.queue();
+	}
+
+	// ---------
+	// High level interface
+	// ---------
+
+	// Element access
+	template <class IndexExpr>
+	reference operator()(IndexExpr const& i) const{
+		std::size_t leading_dimension = orientation::index_m(m_expression.size1(), m_expression.size2());
+		std::size_t i1 = i / leading_dimension;
+		std::size_t i2 = i % leading_dimension;
+		return m_expression(orientation::index_M(i1,i2), orientation::index_m(i1,i2));
+	}
+	reference operator [](size_type i) const{
+		return (*this)(i);
+	}
+	
+	void set_element(size_type i,value_type t){
+		(*this)(i) = t;
+	}
+
+	// Assignment
+	
+	template<class E>
+	linearized_matrix& operator = (vector_expression<E, typename M::device_type> const& e) {
+		return assign(*this, typename vector_temporary<M>::type(e));
+	}
+
+	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<closure_type>::type iterator;
+	typedef typename device_traits<typename M::device_type>:: template indexed_iterator<const_closure_type>::type const_iterator;
+
+	// Element lookup
+	const_iterator begin()const{
+		return const_iterator(*this, 0);
+	}
+	const_iterator end()const{
+		return const_iterator(*this, size());
+	}
+
+	iterator begin() {
+		return iterator(*this, 0);
+	}
+	iterator end() {
+		return iterator(*this, size());
+	}
+	
+	void reserve(){}
+	void reserve_row(size_type, size_type) {}
+	void reserve_column(size_type, size_type ){}
+
+private:
+	matrix_closure_type m_expression;
+};
+
 // Matrix based range class
 template<class M>
 class matrix_range:public matrix_expression<matrix_range<M>, typename M::device_type > {
@@ -648,8 +743,8 @@ public:
 	template<class E>
 	matrix_range(
 		matrix_range<E> const& other,
-		typename boost::disable_if<
-			std::is_same<E,matrix_range>
+		typename std::enable_if<
+			!std::is_same<E,matrix_range>::value
 		>::type* dummy = 0
 	):m_expression(other.expression())
 	, m_start1(other.start1()), m_size1(other.size1())

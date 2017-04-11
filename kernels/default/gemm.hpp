@@ -35,11 +35,7 @@
 #include "../../assignment.hpp"//plus_assign
 #include "../../vector.hpp"//sparse gemm needs temporary vector
 #include "../../detail/matrix_proxy_classes.hpp"//matrix row,column,transpose,range
-
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
-
-#include <type_traits> //std::common_type
-
+#include <type_traits> //std::false_type marker for unoptimized, std::common_type
 
 namespace remora{namespace bindings {
 

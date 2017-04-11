@@ -28,7 +28,6 @@
 #ifndef REMORA_DETAIL_ITERATOR_HPP
 #define REMORA_DETAIL_ITERATOR_HPP
 
-#include <boost/mpl/if.hpp> 
 #include <iterator>
 #include <type_traits>
 #include <limits>
@@ -223,8 +222,8 @@ public:
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
 	typedef typename Closure::value_type value_type;
-	typedef typename boost::mpl::if_<
-		std::is_const<Closure>,
+	typedef typename std::conditional<
+		std::is_const<Closure>::value,
 		typename Closure::const_reference,
 		typename Closure::reference
 	>::type reference;

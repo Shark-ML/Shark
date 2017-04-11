@@ -72,7 +72,7 @@ inline int potrf(
 template <typename Triangular, typename SymmA>
 inline int potrf(
 	matrix_container<SymmA, cpu_tag>& A,
-	boost::mpl::true_
+	std::true_type
 ) {
 	CBLAS_UPLO const uplo = Triangular::is_upper ? CblasUpper : CblasLower;
 	CBLAS_ORDER const stor_ord =
@@ -91,28 +91,28 @@ inline int potrf(
 
 template<class Storage, class T>
 struct optimized_potrf_detail {
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_potrf_detail <
 	dense_tag,
 	double
 > {
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_potrf_detail <
 	dense_tag,
 	float
 > {
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_potrf_detail <
 	dense_tag,
 	std::complex<double>
 > {
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<>
@@ -120,7 +120,7 @@ struct optimized_potrf_detail <
 	dense_tag,
 	std::complex<float>
 > {
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M>

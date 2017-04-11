@@ -35,7 +35,7 @@
 #include "../../detail/traits.hpp" //matrix orientations
 #include "../dot.hpp" //inner product
 #include "../../assignment.hpp" //plus_assign
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::false_type marker for unoptimized
 
 namespace remora{namespace bindings {
 	
@@ -100,7 +100,7 @@ void gemv(
         vector_expression<V, cpu_tag> const& x,
         vector_expression<ResultV, cpu_tag>& result, 
 	typename ResultV::value_type alpha,
-	boost::mpl::false_
+	std::false_type
 ) {
 	typedef typename MatA::orientation orientation;
 

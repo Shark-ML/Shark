@@ -31,6 +31,7 @@
 #ifndef REMORA_KERNELS_TRSV_HPP
 #define REMORA_KERNELS_TRSV_HPP
 
+#include <type_traits>
 #ifdef REMORA_USE_CBLAS
 #include "cblas/trsv.hpp"
 #else
@@ -39,7 +40,7 @@
 namespace remora {namespace bindings{
 template<class M1, class M2>
 struct  has_optimized_trsv
-: public boost::mpl::false_{};
+: public std::false_type{};
 }}
 #endif
 

@@ -185,7 +185,7 @@ public:
 	class major1_iterator:
 	public iterators::random_access_iterator_base<
 		major1_iterator<TIter>,
-		typename boost::remove_const<T>::type,
+		typename std::remove_const<T>::type,
 		iterators::packed_random_access_iterator_tag
 	>{
 	private:
@@ -200,7 +200,7 @@ public:
 			}
 		}
 	public:
-		typedef typename boost::remove_const<TIter>::type value_type;
+		typedef typename std::remove_const<TIter>::type value_type;
 		typedef TIter& reference;
 		typedef TIter* pointer;
 
@@ -279,7 +279,7 @@ public:
 	class major2_iterator:
 	public iterators::random_access_iterator_base<
 		major2_iterator<TIter>,
-		typename boost::remove_const<T>::type,
+		typename std::remove_const<T>::type,
 		iterators::packed_random_access_iterator_tag
 	>{
 	private:
@@ -294,7 +294,7 @@ public:
 			}
 		}
 	public:
-		typedef typename boost::remove_const<TIter>::type value_type;
+		typedef typename std::remove_const<TIter>::type value_type;
 		typedef TIter& reference;
 		typedef TIter* pointer;
 
@@ -371,18 +371,18 @@ public:
 		template<class> friend class major2_iterator;
 	};
 
-	typedef typename boost::mpl::if_<
-		boost::is_same<Orientation,row_major>,
+	typedef typename std::conditional<
+		std::is_same<Orientation,row_major>::value,
 		iterators::dense_storage_iterator<value_type,iterators::packed_random_access_iterator_tag>,
-		typename boost::mpl::if_c<
+		typename std::conditional<
 			TriangularType::is_upper,
 			major1_iterator<value_type>,
 			major2_iterator<value_type>
 		>::type
 	>::type row_iterator;
-	typedef typename boost::mpl::if_<
-		boost::is_same<Orientation,row_major>,
-		typename boost::mpl::if_c<
+	typedef typename std::conditional<
+		std::is_same<Orientation,row_major>::value,
+		typename std::conditional<
 			TriangularType::is_upper,
 			major2_iterator<value_type>,
 			major1_iterator<value_type>
@@ -390,18 +390,18 @@ public:
 		iterators::dense_storage_iterator<value_type,iterators::packed_random_access_iterator_tag>
 	>::type column_iterator;
 
-	typedef typename boost::mpl::if_<
-		boost::is_same<Orientation,row_major>,
+	typedef typename std::conditional<
+		std::is_same<Orientation,row_major>::value,
 		iterators::dense_storage_iterator<value_type const,iterators::packed_random_access_iterator_tag>,
-		typename boost::mpl::if_c<
+		typename std::conditional<
 			TriangularType::is_upper,
 			major1_iterator<value_type const>,
 			major2_iterator<value_type const>
 		>::type
 	>::type const_row_iterator;
-	typedef typename boost::mpl::if_<
-		boost::is_same<Orientation,row_major>,
-		typename boost::mpl::if_c<
+	typedef typename std::conditional<
+		std::is_same<Orientation,row_major>::value,
+		typename std::conditional<
 			TriangularType::is_upper,
 			major2_iterator<value_type const>,
 			major1_iterator<value_type const>
@@ -504,6 +504,11 @@ struct const_expression<triangular_matrix<T,Orientation, TriangularType> >{
 template<class T, class Orientation, class TriangularType>
 struct const_expression<triangular_matrix<T,Orientation, TriangularType> const>{
 	typedef triangular_matrix<T,Orientation, TriangularType> const type;
+};
+
+template<class T, class Orientation, class TriangularType>
+struct matrix_temporary_type<T,triangular<Orientation, TriangularType >,packed_tag, cpu_tag> {
+	typedef triangular_matrix<T,Orientation, TriangularType> type;
 };
 
 }
