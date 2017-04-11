@@ -120,11 +120,6 @@ the Shark library. It consists of the following modules:
 
 GENERAL INFRASTRUCTURE:
 
-Rng                 Random number generator. The interface of this
-                    component has remained nearly unchanged since
-                    early versions of Shark, but under the hood
-                    Shark 3 has switched to Boost as the back-end.
-
 LinAlg              Data structures and algorithms for typical
                     linear algebra computations. For (dense and
                     sparse) vector and matrix classes Shark relies
