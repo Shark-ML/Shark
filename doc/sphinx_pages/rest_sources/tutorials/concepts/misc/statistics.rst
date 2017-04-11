@@ -17,7 +17,7 @@ For this experiment, we need the following header files: ::
 
 
 	#include <shark/Statistics/Statistics.h>
-	#include <shark/Rng/GlobalRng.h>
+	#include <shark/Core/Random.h>
 	
 
 We start out by creating an object of class :doxy:`ResultTable`.
@@ -42,9 +42,9 @@ and mark this input as missing. Finally, we insert the values into the table::
 		for(std::size_t k = 1; k != 10; ++k){
 			double var= 10.0*k;
 			for (std::size_t i = 0; i < 10000; i++){
-				double value1=Rng::gauss(0,var);
-				double value2=Rng::gauss(0,var);
-				if(Rng::coinToss() == 1)
+				double value1=random::gauss(random::globalRng, 0,var);
+				double value2=random::gauss(random::globalRng, 0,var);
+				if(random::coinToss(random::globalRng) == 1)
 					value2=statistics::missingValue();
 				table.update(var,value1,value2 );
 			}
