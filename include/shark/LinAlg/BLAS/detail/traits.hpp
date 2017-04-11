@@ -39,8 +39,6 @@
 #include "storage.hpp"
 #include "../expression_types.hpp"
 
-#include <boost/mpl/eval_if.hpp>
-
 #include <complex>
 #include <type_traits>
 
@@ -57,14 +55,14 @@ struct real_traits<std::complex<T> >{
 };
 
 template<class E>
-struct closure: public boost::mpl::if_<
-	std::is_const<E>,
+struct closure: public std::conditional<
+	std::is_const<E>::value,
 	typename E::const_closure_type,
 	typename E::closure_type
 >{};
 	
 template<class E>
-struct const_expression : public boost::mpl::if_c<
+struct const_expression : public std::conditional<
 	std::is_base_of<vector_container<typename std::remove_const<E>::type,typename E::device_type>, E >::value
 	||std::is_base_of<matrix_container<typename std::remove_const<E>::type,typename E::device_type>, E >::value,
 	E const,
@@ -72,36 +70,36 @@ struct const_expression : public boost::mpl::if_c<
 >{};
 
 template<class E>
-struct reference: public boost::mpl::if_<
-	std::is_const<E>,
+struct reference: public std::conditional<
+	std::is_const<E>::value,
 	typename E::const_reference,
 	typename E::reference
 >{};
 
 template<class E>
-struct storage: public boost::mpl::if_<
-	std::is_const<E>,
+struct storage: public std::conditional<
+	std::is_const<E>::value,
 	typename E::const_storage_type,
 	typename E::storage_type
 >{};
 	
 template<class M>
-struct row_iterator: public boost::mpl::if_<
-	std::is_const<M>,
+struct row_iterator: public std::conditional<
+	std::is_const<M>::value,
 	typename M::const_row_iterator,
 	typename M::row_iterator
 >{};
 	
 template<class M>
-struct column_iterator: public boost::mpl::if_<
-	std::is_const<M>,
+struct column_iterator: public std::conditional<
+	std::is_const<M>::value,
 	typename M::const_column_iterator,
 	typename M::column_iterator
 >{};
 
 template<class Matrix> 
-struct major_iterator:public boost::mpl::if_<
-	std::is_same<typename Matrix::orientation, column_major>,
+struct major_iterator:public std::conditional<
+	std::is_same<typename Matrix::orientation, column_major>::value,
 	typename column_iterator<Matrix>::type,
 	typename row_iterator<Matrix>::type
 >{};	

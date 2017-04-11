@@ -92,11 +92,11 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		m_expression.assign_to(X,alpha*m_scalar);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		m_expression.plus_assign_to(X,alpha*m_scalar);
 	}
 
@@ -146,15 +146,15 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef typename boost::mpl::if_< //the orientation is only known if E1 and E2 have the same
-		std::is_same<typename E1::orientation, typename E2::orientation>,
+	typedef typename std::conditional< //the orientation is only known if E1 and E2 have the same
+		std::is_same<typename E1::orientation, typename E2::orientation>::value,
 		typename E1::orientation,
 		unknown_orientation
 	>::type orientation;
 	//the evaluation category is blockwise if one of the expressions is blockwise or
 	// if the orientation is unknown (efficient for expressions like A=B+C^T
-	typedef typename boost::mpl::if_<
-		std::is_same<orientation, unknown_orientation>,
+	typedef typename std::conditional<
+		std::is_same<orientation, unknown_orientation>::value,
 		blockwise<typename evaluation_restrict_traits<E1,E2>::type::tag>,
 		typename evaluation_restrict_traits<E1,E2>::type
 	>::type evaluation_category;
@@ -193,12 +193,12 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		assign(X, m_lhs,alpha);
 		plus_assign(X,m_rhs,alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		plus_assign(X,m_lhs,alpha);
 		plus_assign(X,m_rhs,alpha);
 	}
@@ -443,12 +443,12 @@ public:
 	
 	//computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha) const {
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha) const {
 		X().clear();
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha) const {
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha) const {
 		plus_assign_to(X,eval_block(m_expression), alpha);
 	}
 
@@ -486,7 +486,7 @@ private:
 	void plus_assign_to(
 		matrix_expression<MatX, device_type>& X,
 		matrix_expression<MatA, device_type> const& A,
-		value_type alpha
+		typename MatX::value_type alpha
 	)const{
 		matrix_unary<MatA, F> e(A(), m_functor);
 		plus_assign(X,e,alpha);
@@ -510,8 +510,8 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef typename boost::mpl::if_< //the orientation is only known if E1 and E2 have the same
-		std::is_same<typename E1::orientation, typename E2::orientation>,
+	typedef typename std::conditional< //the orientation is only known if E1 and E2 have the same
+		std::is_same<typename E1::orientation, typename E2::orientation>::value,
 		typename E1::orientation,
 		unknown_orientation
 	>::type orientation;
@@ -555,12 +555,12 @@ public:
 	}
 	
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha )const{
 		X().clear();
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		plus_assign_to(X,eval_block(m_lhs), eval_block(m_rhs), alpha);
 	}
 
@@ -669,6 +669,22 @@ public:
 	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(functor_type_op()(std::declval<E1 const&>()(i),std::declval<E2 const&>()(j))){
 		return functor_type_op()(lhs()(i),rhs()(j));
 	}
+	
+	
+	template<class VecX>
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha )const{
+		auto const& lhs_eval = eval_block(m_lhs);
+		auto const& rhs_eval = eval_block(m_rhs);
+		outer_product<decltype(lhs_eval), decltype(rhs_eval)> e(lhs_eval,rhs_eval); 
+		e.assign_to(alpha, x);
+	}
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
+		auto const& lhs_eval = eval_block(m_lhs);
+		auto const& rhs_eval = eval_block(m_rhs);
+		outer_product<decltype(lhs_eval), decltype(rhs_eval)> e(lhs_eval,rhs_eval); 
+		e.plus_assign_to(alpha, x);
+	}
 
 	typedef typename device_traits<device_type>:: template transform_iterator<typename E2::const_iterator,functor_type>::type const_row_iterator;
 	typedef typename device_traits<device_type>:: template transform_iterator<typename E1::const_iterator,functor_type>::type const_column_iterator;
@@ -751,33 +767,33 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha )const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha )const{
 		assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		plus_assign_to(x, alpha, typename MatA::orientation(), typename MatA::evaluation_category::tag());
 	}
 	
 private:
 	//gemv
 	template<class VecX, class Category>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha, linear_structure, Category c)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha, linear_structure, Category c)const{
 		x().clear();
 		plus_assign_to(x,alpha, linear_structure(), c);
 	}
 	template<class VecX, class Category>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha, linear_structure, Category )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha, linear_structure, Category )const{
 		kernels::gemv(eval_block(m_matrix), eval_block(m_vector), x, alpha);
 	}
 	//tpmv
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, packed_tag )const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha, triangular_structure, packed_tag )const{
 		noalias(x) = eval_block(alpha * m_vector);
 		kernels::tpmv(eval_block(m_matrix), x);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, packed_tag )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha, triangular_structure, packed_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
 		kernels::tpmv(eval_block(m_matrix), temp);
@@ -785,12 +801,12 @@ private:
 	}
 	//trmv
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, dense_tag )const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha, triangular_structure, dense_tag )const{
 		noalias(x) = eval_block(alpha * m_vector);
 		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), x);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha, triangular_structure, dense_tag )const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha, triangular_structure, dense_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename vector_temporary<VecX>::type temp( eval_block(alpha * m_vector));
 		kernels::trmv<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_matrix.expression(), temp);
@@ -840,12 +856,12 @@ public:
 
 	//dispatcher to computation kernels for blockwise case
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		x().clear();
 		plus_assign_to(x,alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		kernels::sum_rows(eval_block(m_matrix), x, alpha);
 	}
 private:
@@ -968,33 +984,33 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		plus_assign_to(X, alpha, typename MatA::orientation(), typename MatA::storage_type::storage_tag());
 	}
 	
 private:
 	//gemm
 	template<class MatX, class Category>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, linear_structure, Category c )const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha, linear_structure, Category c )const{
 		X().clear();
 		plus_assign_to(X,alpha, linear_structure(), c);
 	}
 	template<class MatX, class Category>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, linear_structure, Category )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha, linear_structure, Category )const{
 		kernels::gemm(eval_block(m_lhs), eval_block(m_rhs), X, alpha);
 	}
 	//trmv
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, triangular_structure, dense_tag)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha, triangular_structure, dense_tag)const{
 		noalias(X) = eval_block(alpha * m_rhs);
 		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_lhs.expression(), X);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha, triangular_structure, dense_tag )const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha, triangular_structure, dense_tag )const{
 		//computation of tpmv is in-place so we need a temporary for plus-assign.
 		typename matrix_temporary<MatX>::type temp( eval_block(alpha * m_rhs));
 		kernels::trmm<MatA::orientation::is_upper, MatA::orientation::is_unit>(m_lhs.expression(), temp);
@@ -1137,7 +1153,7 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		if(add_right){
 			matrix_range<MatX> left(X(),0, X().size1(), 0, m_lhs.size2()); 
 			matrix_range<MatX> right(X(),0, X().size1(), m_lhs.size2(), X().size2()); 
@@ -1151,7 +1167,7 @@ public:
 		}
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		if(add_right){
 			matrix_range<MatX> left(X(),0, X().size1(), 0, m_lhs.size2()); 
 			matrix_range<MatX> right(X(),0, X().size1(), m_lhs.size2(), X().size2()); 

@@ -31,7 +31,7 @@
 #ifndef REMORA_KERNELS_TRSM_HPP
 #define REMORA_KERNELS_TRSM_HPP
 
-#include <boost/mpl/bool.hpp>
+#include <type_traits> //std::false_type marker for unoptimized
 #ifdef REMORA_USE_CBLAS
 #include "cblas/trsm.hpp"
 #else
@@ -40,7 +40,7 @@
 namespace remora{ namespace bindings{
 template<class M1, class M2>
 struct  has_optimized_trsm
-: public boost::mpl::false_{};
+: public std::false_type{};
 }}
 #endif
 

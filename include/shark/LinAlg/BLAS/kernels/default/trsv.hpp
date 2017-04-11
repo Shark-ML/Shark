@@ -37,7 +37,7 @@
 #include "../../detail/matrix_proxy_classes.hpp" //matrix_row, matrix_transpose
 #include "../../detail/structure.hpp" //structure tags
 #include <stdexcept> //exception when matrix is singular
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::false_type marker for unoptimized
 
 namespace remora {namespace bindings {
 
@@ -183,7 +183,7 @@ template <class Triangular, class Side,typename MatA, typename V>
 void trsv(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> & b,
-	boost::mpl::false_//unoptimized
+	std::false_type//unoptimized
 ){
 	trsv_impl<Triangular::is_unit>(
 		A, b,

@@ -31,7 +31,6 @@
 #include "iterator.hpp"
 #include "traits.hpp"
 
-#include <boost/utility/enable_if.hpp>
 #include <type_traits>
 namespace remora{
 
@@ -104,8 +103,8 @@ public:
 
 	// Iterator types
 	typedef typename V::const_iterator const_iterator;
-	typedef typename  boost::mpl::if_<
-		std::is_const<V>,
+	typedef typename  std::conditional<
+		std::is_const<V>::value,
 		typename V::const_iterator,
 		typename V::iterator
 	>::type iterator;
@@ -151,7 +150,7 @@ private:
  * the \c vector_range is not a well formed \c vector_expression and access to an
  * element outside of index range of the vector is \b undefined.
  *
- * \tparam V the type of vector referenced (for exaboost::mple \c vector<double>)
+ * \tparam V the type of vector referenced (for example \c vector<double>)
  */
 template<class V>
 class vector_range:public vector_expression<vector_range<V>, typename V::device_type >{
@@ -180,8 +179,8 @@ public:
 	template<class E>
 	vector_range(
 		vector_range<E> const& other,
-		typename boost::disable_if<
-			std::is_same<E,vector_range>
+		typename std::enable_if<
+			!std::is_same<E,vector_range>::value
 		>::type* dummy = 0
 	):m_expression(other.expression())
 	, m_start(other.start()), m_size(other.size()){}

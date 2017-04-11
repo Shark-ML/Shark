@@ -36,7 +36,7 @@
 #include <stdexcept> //exception when matrix is singular
 #include "../gemm.hpp" //gemm kernel
 #include "simple_proxies.hpp"
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::false_type marker for unoptimized
 
 namespace remora{namespace bindings {
 
@@ -276,7 +276,7 @@ template <class Triangular, class Side, typename MatA, typename MatB>
 void trsm(
 	matrix_expression<MatA, cpu_tag> const& A,
 	matrix_expression<MatB, cpu_tag>& B,
-	boost::mpl::false_ //unoptimized
+	std::false_type //unoptimized
 ){
 
 	bindings::trsm_recursive(A,B,0,A().size1(), Triangular(), Side());

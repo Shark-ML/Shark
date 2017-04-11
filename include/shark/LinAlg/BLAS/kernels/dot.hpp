@@ -42,7 +42,7 @@ namespace remora{namespace kernels{
 /// If bindings are included and the vector combination allows for a specific binding
 /// to be applied, the binding is called automatically from {binding}/dot.h
 /// otherwise default/dot.h is used which is fully implemented for all dense/sparse combinations.
-/// if a combination is optimized, bindings::has_optimized_dot<E1,E2,R>::type evaluates to boost::mpl::true_
+/// if a combination is optimized, bindings::has_optimized_dot<E1,E2,R>::type evaluates to std::true_type
 /// The kernels themselves are implemented in bindings::dot.
 template<class E1, class E2, class result_type, class Device>
 void dot(

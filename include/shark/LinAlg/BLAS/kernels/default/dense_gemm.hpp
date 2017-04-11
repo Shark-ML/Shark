@@ -97,7 +97,7 @@ void dense_gemm(
 	> block_size;
 
 	static const std::size_t MC = block_size::mc;
-    static const std::size_t NC = block_size::nc;
+	static const std::size_t NC = block_size::nc;
 	static const std::size_t KC = block_size::kc;
 
 	//obtain uninitialized aligned storage
@@ -105,17 +105,17 @@ void dense_gemm(
 	value_type* A = allocator.allocate(MC * KC);
 	value_type* B = allocator.allocate(NC * KC);
 
-    const std::size_t M = m().size1();
-    const std::size_t N = m().size2();
-    const std::size_t K = e1().size2 ();
-    const std::size_t mb = (M+MC-1) / MC;
-    const std::size_t nb = (N+NC-1) / NC;
-    const std::size_t kb = (K+KC-1) / KC;
+	const std::size_t M = m().size1();
+	const std::size_t N = m().size2();
+	const std::size_t K = e1().size2 ();
+	const std::size_t mb = (M+MC-1) / MC;
+	const std::size_t nb = (N+NC-1) / NC;
+	const std::size_t kb = (K+KC-1) / KC;
 
 	auto storageM = m().raw_storage();
-    auto C_ = storageM.values;
-    const std::size_t ldc = storageM.leading_dimension;
-    for (std::size_t j=0; j<nb; ++j) {
+	auto C_ = storageM.values;
+	const std::size_t ldc = storageM.leading_dimension;
+	for (std::size_t j=0; j<nb; ++j) {
 		std::size_t nc = std::min(NC, N - j*NC);
 
 		for (std::size_t l=0; l<kb; ++l) {

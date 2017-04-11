@@ -33,6 +33,7 @@
 #define REMORA_KERNELS_CBLAS_GEMV_HPP
 
 #include "cblas_inc.hpp"
+#include <type_traits>
 
 namespace remora{namespace bindings {
 
@@ -103,7 +104,7 @@ void gemv(
 	vector_expression<VectorX, cpu_tag> const &x,
         vector_expression<VectorY, cpu_tag> &y,
 	typename VectorY::value_type alpha,
-	boost::mpl::true_
+	std::true_type
 ){
 	std::size_t m = A().size1();
 	std::size_t n = A().size2();
@@ -129,21 +130,21 @@ void gemv(
 
 template<class Storage1, class Storage2, class Storage3, class T1, class T2, class T3>
 struct optimized_gemv_detail{
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_gemv_detail<
 	dense_tag, dense_tag, dense_tag, 
 	double, double, double
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_gemv_detail<
 	dense_tag, dense_tag, dense_tag, 
 	float, float, float
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<>
@@ -151,14 +152,14 @@ struct optimized_gemv_detail<
 	dense_tag, dense_tag, dense_tag,
 	std::complex<double>, std::complex<double>, std::complex<double>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_gemv_detail<
 	dense_tag, dense_tag, dense_tag,
 	std::complex<float>, std::complex<float>, std::complex<float>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M1, class M2, class M3>

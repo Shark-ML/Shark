@@ -39,7 +39,7 @@
 namespace remora {namespace bindings {
 template<class M>
 struct  has_optimized_potrf
-	: public boost::mpl::false_ {};
+	: public std::false_type {};
 }}
 #endif
 

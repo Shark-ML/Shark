@@ -32,6 +32,7 @@
 #ifdef REMORA_USE_GPU
 #include "gpu/matrix_assign.hpp"
 #endif
+#include <type_traits>
 
 namespace remora {namespace kernels{
 //////////////////////////////////////////////////////
@@ -63,9 +64,9 @@ void matrix_assign(
 	matrix_expression<E, Device> const& e,
 	row_major, EOrientation ,TagE tagE, TagM tagM
 ) {
-	typedef typename boost::mpl::if_<
-		std::is_same<EOrientation, unknown_orientation>,
-		row_major,
+	typedef typename std::conditional<
+		std::is_same<EOrientation, unknown_orientation>::value,
+		typename M::orientation,//always row_major
 		typename E::orientation
 	>::type Orientation;
 	bindings::matrix_assign(m,e,typename M::orientation(),Orientation(),tagE,tagM);
@@ -116,9 +117,9 @@ void matrix_assign_functor(
 	F f,
 	row_major, EOrientation ,TagE tagE, TagM tagM
 ) {
-	typedef typename boost::mpl::if_<
-		std::is_same<EOrientation, unknown_orientation>,
-		row_major,
+	typedef typename std::conditional<
+		std::is_same<EOrientation, unknown_orientation>::value,
+		typename M::orientation,//always row_major
 		typename E::orientation
 	>::type Orientation;
 	bindings::matrix_assign_functor(m,e,f,typename M::orientation(),Orientation(),tagE,tagM);

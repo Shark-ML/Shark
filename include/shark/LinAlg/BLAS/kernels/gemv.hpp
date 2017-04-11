@@ -40,7 +40,7 @@
 namespace remora{ namespace bindings{
 template<class M1, class M2, class M3>
 struct  has_optimized_gemv
-: public boost::mpl::false_{};
+: public std::false_type{};
 }}
 #endif
 
@@ -53,7 +53,7 @@ namespace remora{namespace kernels{
 /// If bindings are included and the matrix/vector combination allows for a specific binding
 /// to be applied, the binding is called automatically from {binding}/gemv.h
 /// otherwise default/gemv.h is used which is fully implemented for all dense/sparse combinations.
-/// if a combination is optimized, bindings::has_optimized_gemv<M,E1,E2>::type evaluates to boost::mpl::true_
+/// if a combination is optimized, bindings::has_optimized_gemv<M,E1,E2>::type evaluates to std::true_type
 /// The kernels themselves are implemented in bindings::gemv.
 template<class M, class E1, class E2>
 void gemv(

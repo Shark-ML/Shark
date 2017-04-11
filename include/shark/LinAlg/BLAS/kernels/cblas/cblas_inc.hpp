@@ -77,7 +77,6 @@ extern "C" {
 //so we prevent multiple includes in all atlas using functions
 //which should decrease compile time a small bit
 #include <complex>
-#include <boost/mpl/bool.hpp>
 #include "../../detail/traits.hpp"
 
 namespace remora {namespace bindings {

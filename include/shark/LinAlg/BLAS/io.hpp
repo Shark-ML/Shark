@@ -39,7 +39,7 @@ namespace remora{
     /** \brief output stream operator for vector expressions
      *
      * Any vector expressions can be written to a standard output stream
-     * as defined in the C++ standard library. For exaboost::mple:
+     * as defined in the C++ standard library. For example:
      * \code
      * vector<float> v1(3),v2(3);
      * for(size_t i=0; i<3; i++)
@@ -84,7 +84,7 @@ namespace remora{
      * stream using the following format:
      * \c [ (rows),)(columns)](((m00),(m01),...,(m0N)),...,((mM0),(mM1),...,(mMN)))
      *
-     * For exaboost::mple:
+     * For example:
      * \code
      * matrix<float> m(3,3) = scalar_matrix<float>(3,3,1.0) - diagonal_matrix<float>(3,3,1.0);
      * cout << m << endl;
@@ -93,7 +93,7 @@ namespace remora{
      * \code
      * [3,3]((0,1,1),(1,0,1),(1,1,0))
      * \endcode
-     * This output is made for storing and retrieving matrices in a siboost::mple way but you can
+     * This output is made for storing and retrieving matrices in a simple way but you can
      * easily recognize the following:
      * \f[ \left( \begin{array}{ccc} 1 & 1 & 1\\ 1 & 1 & 1\\ 1 & 1 & 1 \end{array} \right) - \left( \begin{array}{ccc} 1 & 0 & 0\\ 0 & 1 & 0\\ 0 & 0 & 1 \end{array} \right) = \left( \begin{array}{ccc} 0 & 1 & 1\\ 1 & 0 & 1\\ 1 & 1 & 0 \end{array} \right) \f]
      *

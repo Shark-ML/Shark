@@ -33,7 +33,7 @@
 #define REMORA_KERNELS_CBLAS_TPMV_HPP
 
 #include "cblas_inc.hpp"
-#include <boost/mpl/bool.hpp>
+#include <type_traits>
 
 namespace remora{namespace bindings {
 
@@ -102,7 +102,7 @@ template <typename MatA, typename VectorX>
 void tpmv(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<VectorX, cpu_tag> &x,
-	boost::mpl::true_
+	std::true_type
 ){
 	SIZE_CHECK(x().size() == A().size2());
 	SIZE_CHECK(A().size2() == A().size1());
@@ -124,21 +124,21 @@ void tpmv(
 
 template<class Storage1, class Storage2, class T1, class T2>
 struct optimized_tpmv_detail{
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_tpmv_detail<
 	packed_tag, dense_tag,
 	double, double
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_tpmv_detail<
 	packed_tag, dense_tag,
 	float, float
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<>
@@ -146,14 +146,14 @@ struct optimized_tpmv_detail<
 	packed_tag, dense_tag,
 	std::complex<double>, std::complex<double>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_tpmv_detail<
 	packed_tag, dense_tag,
 	std::complex<float>, std::complex<float>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M, class V>

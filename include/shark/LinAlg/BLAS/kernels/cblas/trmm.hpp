@@ -33,7 +33,7 @@
 #define REMORA_KERNELS_CBLAS_TRMM_HPP
 
 #include "cblas_inc.hpp"
-#include <boost/mpl/bool.hpp>
+#include <type_traits>
 
 namespace remora{namespace bindings {
 
@@ -116,7 +116,7 @@ template <bool upper, bool unit, typename MatA, typename MatB>
 void trmm(
 	matrix_expression<MatA, cpu_tag> const& A,
 	matrix_expression<MatB, cpu_tag>& B,
-	boost::mpl::true_
+	std::true_type
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	SIZE_CHECK(A().size2() == B().size1());
@@ -148,21 +148,21 @@ void trmm(
 
 template<class Storage1, class Storage2, class T1, class T2>
 struct optimized_trmm_detail{
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_trmm_detail<
 	dense_tag, dense_tag,
 	double, double
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_trmm_detail<
 	dense_tag, dense_tag,
 	float, float
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<>
@@ -170,14 +170,14 @@ struct optimized_trmm_detail<
 	dense_tag, dense_tag,
 	std::complex<double>, std::complex<double>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_trmm_detail<
 	dense_tag, dense_tag,
 	std::complex<float>, std::complex<float>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M1, class M2>

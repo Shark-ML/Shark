@@ -33,7 +33,7 @@
 #include "simple_proxies.hpp"
 #include "../trsm.hpp" //trsm kernel
 #include "../syrk.hpp" //syrk kernel
-#include <boost/mpl/bool.hpp> //boost::mpl::false_ marker for unoptimized
+#include <type_traits> //std::false_type marker for unoptimized
 
 namespace remora{namespace bindings {
 
@@ -148,7 +148,7 @@ std::size_t potrf_recursive(
 template <class Triangular, typename MatA>
 std::size_t potrf(
 	matrix_container<MatA, cpu_tag>& A,
-	boost::mpl::false_//unoptimized
+	std::false_type//unoptimized
 ){
 	SIZE_CHECK(A().size1() == A().size2());
 	return potrf_recursive(A,0,A().size1(), Triangular());

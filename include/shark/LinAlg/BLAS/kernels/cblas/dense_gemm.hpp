@@ -35,6 +35,7 @@
 #include "cblas_inc.hpp"
 #include "../../detail/matrix_proxy_classes.hpp"
 #include "../default/simd.hpp"
+#include <type_traits>
 namespace remora{ namespace bindings {
 
 inline void dense_gemm(
@@ -122,7 +123,7 @@ void dense_gemm(
 	matrix_expression<MatB, cpu_tag> const& B,
 	matrix_expression<MatC, cpu_tag>& C,
 	typename MatC::value_type alpha,
-	boost::mpl::true_
+	std::true_type
 ){
 	static_assert(std::is_same<typename MatC::orientation,row_major>::value,"C must be row major");
 
@@ -153,7 +154,7 @@ void dense_gemm(
 	matrix_expression<MatB, cpu_tag> const& B,
 	matrix_expression<MatC, cpu_tag>& C,
 	typename MatC::value_type alpha,
-	boost::mpl::false_
+	std::false_type
 ){
 	typedef typename MatC::value_type value_type;
 	std::size_t const tile_size = 512;
@@ -173,7 +174,7 @@ void dense_gemm(
 		matrix_range<MatB const> B_range(B(), start_k, start_k + current_size, 0, size2);
 		noalias(A_block) = A_range;
 		noalias(B_block) = B_range;
-		dense_gemm(A_block, B_block, C, alpha, boost::mpl::true_());
+		dense_gemm(A_block, B_block, C, alpha, std::true_type());
 	}
 	allocator.deallocate(A_pointer, size1 * tile_size);
 	allocator.deallocate(B_pointer, size1 * tile_size);
@@ -182,21 +183,21 @@ void dense_gemm(
 
 template<class Storage1, class Storage2, class Storage3, class T1, class T2, class T3>
 struct optimized_gemm_detail{
-	typedef boost::mpl::false_ type;
+	typedef std::false_type type;
 };
 template<>
 struct optimized_gemm_detail<
 	dense_tag, dense_tag, dense_tag,
 	double, double, double
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_gemm_detail<
 	dense_tag, dense_tag, dense_tag,
 	float, float, float
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<>
@@ -204,14 +205,14 @@ struct optimized_gemm_detail<
 	dense_tag, dense_tag, dense_tag,
 	std::complex<double>, std::complex<double>, std::complex<double>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 template<>
 struct optimized_gemm_detail<
 	dense_tag, dense_tag, dense_tag,
 	std::complex<float>, std::complex<float>, std::complex<float>
 >{
-	typedef boost::mpl::true_ type;
+	typedef std::true_type type;
 };
 
 template<class M1, class M2, class M3>

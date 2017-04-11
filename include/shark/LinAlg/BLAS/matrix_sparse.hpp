@@ -441,13 +441,8 @@ private:
 	value_type m_zero;
 };
 
-template<class T>
-struct matrix_temporary_type<T,row_major,sparse_tag, cpu_tag> {
-	typedef compressed_matrix<T> type;
-};
-
-template<class T>
-struct matrix_temporary_type<T,unknown_orientation,sparse_tag, cpu_tag> {
+template<class T, class O>
+struct matrix_temporary_type<T,O,sparse_tag, cpu_tag> {
 	typedef compressed_matrix<T> type;
 };
 
