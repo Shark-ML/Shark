@@ -57,13 +57,22 @@ Centroids::Centroids(Data<RealVector> const& centroids)
 
 RealVector Centroids::parameterVector() const{
 	RealVector param(numberOfParameters());
-	init(param) << matrixSet(m_centroids.batches());
+	std::size_t pos = 0;
+	for(auto const& mat:m_centroids.batches()){
+		auto vec = to_vector(mat);
+		noalias(subrange(param,pos,pos+vec.size())) = vec;
+		pos += vec.size();
+	}
 	return param;
 }
 
 void Centroids::setParameterVector(RealVector const& newParameters){
-	Data<RealVector>::batch_range batches = m_centroids.batches();
-	init(newParameters) >> matrixSet(batches);
+	std::size_t pos = 0;
+	for(auto& mat:m_centroids.batches()){
+		auto vec = to_vector(mat);
+		noalias(vec) = subrange(newParameters,pos,pos+vec.size());
+		pos += vec.size();
+	}
 }
 
 std::size_t Centroids::numberOfParameters() const{

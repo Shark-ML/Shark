@@ -177,9 +177,7 @@ public:
 
 	///\brief Writes the derivatives of all parameters into a vector and returns it.
 	RealVector result()const{
-		RealVector derivative(mpe_rbm->numberOfParameters());
-		init(derivative) << toVector(m_deltaWeights),m_deltaBiasHidden,m_deltaBiasVisible;
-		return derivative;
+		return to_vector(m_deltaWeights) | m_deltaBiasHidden | m_deltaBiasVisible;
 	}
 	
 	///\brief Resets the internal state. 

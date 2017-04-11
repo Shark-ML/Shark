@@ -79,13 +79,11 @@ public:
 
 
 	/// get internal parameters of the model
-	virtual RealVector parameterVector() const
-	{
+	virtual RealVector parameterVector() const{
 		std::size_t total = numberOfParameters();
 		RealVector ret(total);
 		std::size_t used = 0;
-		for (std::size_t i=0; i<m_binary.size(); i++)
-		{
+		for (std::size_t i=0; i<m_binary.size(); i++){
 			std::size_t n = m_binary[i]->numberOfParameters();
 			noalias(subrange(ret, used, used + n)) = m_binary[i]->parameterVector();
 			used += n;
@@ -95,20 +93,17 @@ public:
 
 	/// set internal parameters of the model
 	virtual void setParameterVector(RealVector const& newParameters) {
+		SHARK_RUNTIME_CHECK(numberOfParameters() == newParameters.size(),"Invalid number of parameters");
 		std::size_t used = 0;
-		for (std::size_t i=0; i<m_binary.size(); i++)
-		{
+		for (std::size_t i=0; i<m_binary.size(); i++){
 			std::size_t n = m_binary[i]->numberOfParameters();
 			m_binary[i]->setParameterVector(subrange(newParameters, used, used + n));
 			used += n;
 		}
-		SHARK_RUNTIME_CHECK(used == newParameters.size(),
-				"[OneVersusOneClassifier::setParameterVector] invalid number of parameters");
 	}
 
 	/// return the size of the parameter vector
-	virtual std::size_t numberOfParameters() const
-	{
+	virtual std::size_t numberOfParameters() const{
 		std::size_t ret = 0;
 		for (std::size_t i=0; i<m_binary.size(); i++) 
 			ret += m_binary[i]->numberOfParameters();
@@ -127,8 +122,7 @@ public:
 	/// is used (the inverse classifier can be constructed from this one
 	/// by flipping the labels). The binary classifier outputs a value
 	/// of 1 for class_one and a value of zero for class_zero.
-	binary_classifier_type const& binary(unsigned int class_one, unsigned int class_zero) const
-	{
+	binary_classifier_type const& binary(unsigned int class_one, unsigned int class_zero) const{
 		SHARK_ASSERT(class_zero < class_one);
 		SHARK_ASSERT(class_one < m_classes);
 		unsigned int index = class_one * (class_zero - 1) / 2 + class_zero;

@@ -101,16 +101,13 @@ public:
 
 	/// obtain the parameter vector
 	RealVector parameterVector() const{
-		RealVector ret(numberOfParameters());
-		init(ret) << toVector(log(m_w));
-		return ret;
+		return to_vector(log(m_w));
 	}
 
 	/// overwrite the parameter vector
 	void setParameterVector(RealVector const& newParameters)
 	{
-		init(newParameters) >> toVector(m_w);
-		noalias(m_w) = exp(m_w);
+		noalias(m_w) = exp(to_matrix(newParameters,m_w.size1(),m_w.size2()));
 		for(std::size_t i = 0; i != outputSize(); ++i){
 			row(m_w,i) /= sum(row(m_w,i));
 		}

@@ -81,9 +81,9 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Rosenbrock )
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Reflection )
 {
 	TestObjective function;
-	RealVector p0(2); init(p0) << +1.0, -0.5;
-	RealVector p1(2); init(p1) << -0.5, +1.0;
-	RealVector p2(2); init(p2) << -0.5, -0.5;
+	RealVector p0 = {+1.0, -0.5};
+	RealVector p1 = {-0.5, +1.0};
+	RealVector p2 = {-0.5, -0.5};
 	function.m_point.push_back(p0); function.m_value.push_back(0.0);
 	function.m_point.push_back(p1); function.m_value.push_back(1.0);
 	function.m_point.push_back(p2); function.m_value.push_back(2.0);
@@ -103,9 +103,9 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Reflection )
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Expansion_1 )
 {
 	TestObjective function;
-	RealVector p0(2); init(p0) << +1.0, -0.5;
-	RealVector p1(2); init(p1) << -0.5, +1.0;
-	RealVector p2(2); init(p2) << -0.5, -0.5;
+	RealVector p0 = {+1.0, -0.5};
+	RealVector p1 = {-0.5, +1.0};
+	RealVector p2 = {-0.5, -0.5};
 	function.m_point.push_back(p0); function.m_value.push_back(0.0);
 	function.m_point.push_back(p1); function.m_value.push_back(1.0);
 	function.m_point.push_back(p2); function.m_value.push_back(2.0);
@@ -127,9 +127,9 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Expansion_1 )
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Expansion_2 )
 {
 	TestObjective function;
-	RealVector p0(2); init(p0) << +1.0, -0.5;
-	RealVector p1(2); init(p1) << -0.5, +1.0;
-	RealVector p2(2); init(p2) << -0.5, -0.5;
+	RealVector p0 = {+1.0, -0.5};
+	RealVector p1 = {-0.5, +1.0};
+	RealVector p2 = {-0.5, -0.5};
 	function.m_point.push_back(p0); function.m_value.push_back(0.0);
 	function.m_point.push_back(p1); function.m_value.push_back(1.0);
 	function.m_point.push_back(p2); function.m_value.push_back(2.0);
@@ -151,9 +151,9 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Expansion_2 )
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Contraction )
 {
 	TestObjective function;
-	RealVector p0(2); init(p0) << +1.0, -0.5;
-	RealVector p1(2); init(p1) << -0.5, +1.0;
-	RealVector p2(2); init(p2) << -0.5, -0.5;
+	RealVector p0 = {+1.0, -0.5};
+	RealVector p1 = {-0.5, +1.0};
+	RealVector p2 = {-0.5, -0.5};
 	function.m_point.push_back(p0); function.m_value.push_back(0.0);
 	function.m_point.push_back(p1); function.m_value.push_back(1.0);
 	function.m_point.push_back(p2); function.m_value.push_back(2.0);
@@ -175,9 +175,9 @@ BOOST_AUTO_TEST_CASE( SimplexDownhill_Contraction )
 BOOST_AUTO_TEST_CASE( SimplexDownhill_Reduction )
 {
 	TestObjective function;
-	RealVector p0(2); init(p0) << +1.0, -0.5;
-	RealVector p1(2); init(p1) << -0.5, +1.0;
-	RealVector p2(2); init(p2) << -0.5, -0.5;
+	RealVector p0 = {+1.0, -0.5};
+	RealVector p1 = {-0.5, +1.0};
+	RealVector p2 = {-0.5, -0.5};
 	function.m_point.push_back(p0); function.m_value.push_back(0.0);
 	function.m_point.push_back(p1); function.m_value.push_back(1.0);
 	function.m_point.push_back(p2); function.m_value.push_back(2.0);

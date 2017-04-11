@@ -93,8 +93,7 @@ BOOST_AUTO_TEST_CASE( DenseMklKernel_Test_Eval )
     BOOST_REQUIRE_EQUAL(kernel.numberOfParameters(),numParameters);
 
     // test kernel evals. first set weighting factors
-    RealVector parameters(3);
-    init(parameters)<<0.3,0.1,0.3; //weights are 1, 0.5 and 0.1 and the gauss kernel parameter is 0.3
+    RealVector parameters = {0.3,0.1,0.3}; //weights are 1, 0.5 and 0.1 and the gauss kernel parameter is 0.3
     kernel.setParameterVector(parameters);
 
     //process kernel matrices for each element separately and weight the results to get ground-truth data

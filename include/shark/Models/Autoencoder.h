@@ -120,14 +120,19 @@ public:
 
 	//! returns the vector of used parameters inside the weight matrix
 	RealVector parameterVector() const{
-		RealVector parameters(numberOfParameters());
-		init(parameters) << toVector(m_encoderMatrix),toVector(m_decoderMatrix),m_hiddenBias,m_outputBias;
-		return parameters;
+		return to_vector(m_encoderMatrix) | to_vector(m_decoderMatrix) | m_hiddenBias | m_outputBias;
 	}
 	//! uses the values inside the parametervector to set the used values inside the weight matrix
 	void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(newParameters.size() == numberOfParameters());
-		init(newParameters) >> toVector(m_encoderMatrix),toVector(m_decoderMatrix),m_hiddenBias,m_outputBias;
+		
+		std::size_t endWeights1 = m_encoderMatrix.size1() * m_encoderMatrix.size2();
+		std::size_t endWeights2 = endWeights1 +  m_decoderMatrix.size1() * m_decoderMatrix.size2();
+		std::size_t endBias = endWeights2 + m_hiddenBias.size();
+		noalias(to_vector(m_encoderMatrix)) = subrange(newParameters,0,endWeights1);
+		noalias(to_vector(m_decoderMatrix)) = subrange(newParameters,endWeights1,endWeights2);
+		noalias(m_hiddenBias) = subrange(newParameters,endWeights2,endBias);
+		noalias(m_outputBias) = subrange(newParameters,endBias,endBias+m_outputBias.size());
 	}
 
 	//! \brief Returns the output of all neurons after the last call of eval

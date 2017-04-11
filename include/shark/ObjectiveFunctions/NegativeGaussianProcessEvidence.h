@@ -104,12 +104,10 @@ public:
 		m_evaluationCounter++;
 		
 		//set parameters
-		RealVector kernelParams(kp);
-		double betaInv = 0;
-		blas::init(parameters) >> kernelParams, betaInv;
+		double betaInv = parameters.back();
 		if(m_unconstrained)
 			betaInv = std::exp(betaInv); // for unconstraint optimization
-		mep_kernel->setParameterVector(kernelParams);
+		mep_kernel->setParameterVector(subrange(parameters,0,kp));
 		
 		
 		//generate kernel matrix and label vector
@@ -154,13 +152,10 @@ public:
 		m_evaluationCounter++;
 
 		//set parameters
-		RealVector kernelParams(kp);
-		double betaInv = 0;
-		blas::init(parameters) >> kernelParams, betaInv;
+		double betaInv = parameters.back();
 		if(m_unconstrained)
 			betaInv = std::exp(betaInv); // for unconstraint optimization
-		mep_kernel->setParameterVector(kernelParams);
-		
+		mep_kernel->setParameterVector(subrange(parameters,0,kp));
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
@@ -206,8 +201,7 @@ public:
 			betaInvDerivative *= betaInv;
 		
 		//merge both derivatives and since we return the negative evidence, multiply with -1
-		blas::init(derivative)<<kernelGradient,betaInvDerivative;
-		derivative *= -1.0;
+		noalias(derivative) = - (kernelGradient | betaInvDerivative);
 
 		// truncate gradient vector 
 		for(std::size_t i=0; i<derivative.size(); i++) 

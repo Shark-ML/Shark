@@ -79,16 +79,16 @@ public:
 	{ return "ModelKernel"; }
 
 	std::size_t numberOfParameters()const{
-		return mpe_kernel->numberOfParameters()+mpe_model->numberOfParameters();
+		return mpe_kernel->numberOfParameters() + mpe_model->numberOfParameters();
 	}
 	RealVector parameterVector() const{ 
-		RealVector params(numberOfParameters());
-		init(params) << parameters(*mpe_kernel),parameters(*mpe_model);
-		return params;
+		return mpe_kernel->parameterVector() | mpe_model->parameterVector();
 	}
 	void setParameterVector(RealVector const& newParameters){ 
-		SIZE_CHECK(newParameters.size() == numberOfParameters()); 
-		init(newParameters) >> parameters(*mpe_kernel),parameters(*mpe_model);
+		SIZE_CHECK(newParameters.size() == numberOfParameters());
+		std::size_t kParams =mpe_kernel->numberOfParameters();
+		mpe_kernel->setParameterVector(subrange(newParameters,0,kParams));
+		mpe_model->setParameterVector(subrange(newParameters,kParams,newParameters.size()));
 	}
 	
 	boost::shared_ptr<State> createState()const{
@@ -149,7 +149,7 @@ public:
 		RealVector modelGradX1,modelGradX2;
 		mpe_model->weightedParameterDerivative(batchX1,inputDerivativeX1,*s.modelStateX1,modelGradX1);
 		mpe_model->weightedParameterDerivative(batchX2,inputDerivativeX2,*s.modelStateX2,modelGradX2);
-		init(gradient) << kernelGrad, (modelGradX1+modelGradX2);
+		noalias(gradient) = kernelGrad | (modelGradX1+modelGradX2);
 	}
 	
 	void read(InArchive& ar){

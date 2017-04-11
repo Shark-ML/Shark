@@ -111,17 +111,13 @@ public:
 	{ m_epsilon = epsilon; }
 
 	/// get the hyper-parameter vector
-	RealVector parameterVector() const
-	{
-		size_t sp = base_type::numberOfParameters();
-		RealVector ret(sp + 1);
-		blas::init(ret)<< base_type::parameterVector(),(base_type::m_unconstrained ? std::log(m_epsilon) : m_epsilon);
-		return ret;
+	RealVector parameterVector() const{
+		double pEps = base_type::m_unconstrained ? std::log(m_epsilon) : m_epsilon;
+		return base_type::parameterVector() | pEps;
 	}
 
 	/// set the vector of hyper-parameters
-	void setParameterVector(RealVector const& newParameters)
-	{
+	void setParameterVector(RealVector const& newParameters){
 		size_t sp = base_type::numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == sp + 1);
 		base_type::setParameterVector(subrange(newParameters, 0, sp));

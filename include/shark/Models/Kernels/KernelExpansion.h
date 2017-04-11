@@ -195,23 +195,20 @@ public:
 	// //////////////////////////////////////////////////////////
 
 	RealVector parameterVector() const{
-		RealVector ret(numberOfParameters());
 		if (hasOffset()){
-			init(ret) << toVector(m_alpha), m_b;
+			return  to_vector(m_alpha) | m_b;
 		}
 		else{
-			init(ret) << toVector(m_alpha);
+			return to_vector(m_alpha);
 		}
-		return ret;
 	}
 
 	void setParameterVector(RealVector const& newParameters){
-		SHARK_RUNTIME_CHECK(newParameters.size() == numberOfParameters(), "[KernelExpansion::setParameterVector] invalid size of the parameter vector");
-
+		SHARK_RUNTIME_CHECK(newParameters.size() == numberOfParameters(), "Invalid size of the parameter vector");
+		std::size_t numParams = m_alpha.size1() * m_alpha.size2();
+		noalias(to_vector(m_alpha)) = subrange(newParameters, 0, numParams);
 		if (hasOffset())
-			init(newParameters) >> toVector(m_alpha), m_b;
-		else
-			init(newParameters) >> toVector(m_alpha);
+			noalias(m_b) = subrange(newParameters, numParams, numParams + m_b.size());
 	}
 
 	std::size_t numberOfParameters() const{

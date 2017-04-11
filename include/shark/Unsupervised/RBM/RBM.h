@@ -126,16 +126,21 @@ public:
 	
 	///\brief Returns the parameters of the Model as parameter vector.
 	RealVector parameterVector () const {
-		RealVector ret(numberOfParameters());
-		init(ret) << toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
-		return ret;
+		return  to_vector(m_weightMatrix) 
+		| m_hiddenNeurons.parameterVector() 
+		| m_visibleNeurons.parameterVector();
 	};
 
 	///\brief Sets the parameters of the model.
 	///
 	/// @param newParameters vector of parameters  
  	void setParameterVector(const RealVector& newParameters) {
-		init(newParameters) >> toVector(m_weightMatrix),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
+		std::size_t endW = numberOfVN()*numberOfHN();
+		std::size_t endH = endW + m_hiddenNeurons.numberOfParameters();
+		std::size_t endV = endH + m_visibleNeurons.numberOfParameters();
+		noalias(to_vector(m_weightMatrix)) = subrange(newParameters,0,endW);
+		m_hiddenNeurons.setParameterVector(subrange(newParameters,endW,endH));
+		m_visibleNeurons.setParameterVector(subrange(newParameters,endH,endV));		
  	}
 	
 	///\brief Creates the structure of the RBM.

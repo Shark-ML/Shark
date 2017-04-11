@@ -125,20 +125,21 @@ public:
 	}
 
 	RealVector parameterVector() const {
-		RealVector params(numberOfParameters());
 		if(m_optimizeFirst && m_optimizeSecond)
-			init(params) << parameters(*m_firstModel), parameters(*m_secondModel);
+			return m_firstModel->parameterVector() | m_secondModel->parameterVector();
 		else if (m_optimizeFirst)
-			params = m_firstModel->parameterVector();
+			return m_firstModel->parameterVector();
 		else if (m_optimizeSecond)
-			params = m_secondModel->parameterVector();
-		return params;
+			return m_secondModel->parameterVector();
+		return RealVector();
 	}
 
-	void setParameterVector(RealVector const& newParameters) {
-		if(m_optimizeFirst && m_optimizeSecond)
-			init(newParameters) >> parameters(*m_firstModel), parameters(*m_secondModel);
-		else if (m_optimizeFirst)
+	void setParameterVector(RealVector const& newParameters){
+		if(m_optimizeFirst && m_optimizeSecond){
+			std::size_t numFirst = m_firstModel->numberOfParameters();
+			m_firstModel->setParameterVector(subrange(newParameters,0,numFirst));
+			m_secondModel->setParameterVector(subrange(newParameters,numFirst,newParameters.size()));
+		}else if (m_optimizeFirst)
 			m_firstModel->setParameterVector(newParameters);
 		else if (m_optimizeSecond)
 			m_secondModel->setParameterVector(newParameters);
@@ -195,7 +196,7 @@ public:
 			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,firstParameterDerivative);
 			
 			gradient.resize(numberOfParameters());
-			init(gradient)<<firstParameterDerivative,secondParameterDerivative;
+			noalias(gradient) = firstParameterDerivative | secondParameterDerivative;
 		}else if(m_optimizeFirst && numParamsFirst != 0){
 			RealVector firstParameterDerivative;
 			BatchIntermediateType secondInputDerivative;
@@ -259,7 +260,7 @@ public:
 		}
 
 		parameterDerivative.resize(firstParam+secondParam);
-		init(parameterDerivative)<<firstParameterDerivative,secondParameterDerivative;
+		noalias(parameterDerivative) = firstParameterDerivative | secondParameterDerivative;
 	}
 	/// From ISerializable
 	void read( InArchive & archive ){

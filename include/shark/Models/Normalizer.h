@@ -100,16 +100,14 @@ public:
 	{ return "Normalizer"; }
 
 	/// swap
-	friend void swap(const Normalizer& model1, const Normalizer& model2)
-	{
+	friend void swap(const Normalizer& model1, const Normalizer& model2){
 		std::swap(model1.m_A, model2.m_A);
 		std::swap(model1.m_b, model2.m_b);
 		std::swap(model1.m_hasOffset, model2.m_hasOffset);
 	}
 
 	/// assignment operator
-	const self_type operator = (const self_type& model)
-	{
+	const self_type operator = (const self_type& model){
 		m_A = model.m_A;
 		m_b = model.m_b;
 		m_hasOffset = model.m_hasOffset;
@@ -120,110 +118,70 @@ public:
 	{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
-
-
-	/// check if the model is properly initialized
-	bool isValid() const
-	{
-		return (m_A.size() != 0);
-	}
-
+	
 	/// check for the presence of an offset term
-	bool hasOffset() const
-	{
+	bool hasOffset() const{
 		return m_hasOffset;
 	}
 
 	/// return the diagonal of the matrix
-	RealVector const& diagonal() const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::matrix] model is not initialized");
+	RealVector const& diagonal() const{
 		return m_A;
 	}
 
 	/// return the offset vector
-	RealVector const& offset() const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::vector] model is not initialized");
+	RealVector const& offset() const{
 		return m_b;
 	}
 
 	/// obtain the input dimension
-	std::size_t inputSize() const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::inputSize] model is not initialized");
+	std::size_t inputSize() const{
 		return m_A.size();
 	}
 
 	/// obtain the output dimension
-	std::size_t outputSize() const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::outputSize] model is not initialized");
+	std::size_t outputSize() const{
 		return m_A.size();
 	}
 
 	/// obtain the parameter vector
-	RealVector parameterVector() const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::parameterVector] model is not initialized");
-		std::size_t dim = m_A.size();
+	RealVector parameterVector() const{
 		if (hasOffset())
-		{
-			RealVector param(2 * dim);
-			init(param)<<m_A,m_b;
-			return param;
-		}
+			return m_A | m_b;
 		else
-		{
-			RealVector param(dim);
-			init(param)<<m_A;
-			return param;
-		}
+			return m_A;
 	}
 
 	/// overwrite the parameter vector
-	void setParameterVector(RealVector const& newParameters)
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::setParameterVector] model is not initialized");
+	void setParameterVector(RealVector const& newParameters){
+		SIZE_CHECK(newParameters.size() == numberOfParameters());
 		std::size_t dim = m_A.size();
-		if (hasOffset())
-		{
-			SIZE_CHECK(newParameters.size() == 2 * dim);
-			init(newParameters)>>m_A,m_b;
-		}
-		else
-		{
-			SIZE_CHECK(newParameters.size() == dim);
-			init(newParameters)>>m_A;
+		noalias(m_A) = subrange(newParameters,0,dim);
+		if (hasOffset()){
+			noalias(m_b) = subrange(newParameters,dim, 2*dim);
 		}
 	}
 
 	/// return the number of parameter
-	std::size_t numberOfParameters() const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::numberOfParameters] model is not initialized");
+	std::size_t numberOfParameters() const{
 		return (m_hasOffset) ? m_A.size() + m_b.size() : m_A.size();
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealVector const& diagonal)
-	{
+	void setStructure(RealVector const& diagonal){
 		m_A = diagonal;
 		m_hasOffset = false;
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(std::size_t dimension, bool hasOffset = false)
-	{
+	void setStructure(std::size_t dimension, bool hasOffset = false){
 		m_A.resize(dimension);
 		m_hasOffset = hasOffset;
 		if (hasOffset) m_b.resize(dimension);
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealVector const& diagonal, RealVector const& offset)
-	{
-		SHARK_RUNTIME_CHECK(diagonal.size() == offset.size(), "[Normalizer::setStructure] dimension conflict");
+	void setStructure(RealVector const& diagonal, RealVector const& offset){
 		m_A = diagonal;
 		m_b = offset;
 		m_hasOffset = true;
@@ -232,9 +190,8 @@ public:
 	using base_type::eval;
 
 	/// \brief Evaluate the model: output = matrix * input + offset.
-	void eval(BatchInputType const& input, BatchOutputType& output) const
-	{
-		SHARK_RUNTIME_CHECK(isValid(), "[Normalizer::eval] model is not initialized");
+	void eval(BatchInputType const& input, BatchOutputType& output) const{
+		SIZE_CHECK(input.size1() == m_A.size());
 		output.resize(input.size1(), input.size2());
 		noalias(output) = input * repeat(m_A,input.size1());
 		if (hasOffset())
@@ -244,22 +201,19 @@ public:
 	}
 
 	/// \brief Evaluate the model: output = matrix * input + offset.
-	void eval(BatchInputType const& input, BatchOutputType& output, State& state) const
-	{
+	void eval(BatchInputType const& input, BatchOutputType& output, State& state) const{
 		eval(input, output);
 	}
 
 	/// from ISerializable
-	void read(InArchive& archive)
-	{
+	void read(InArchive& archive){
 		archive & m_A;
 		archive & m_b;
 		archive & m_hasOffset;
 	}
 
 	/// from ISerializable
-	void write(OutArchive& archive) const
-	{
+	void write(OutArchive& archive) const{
 		archive & m_A;
 		archive & m_b;
 		archive & m_hasOffset;

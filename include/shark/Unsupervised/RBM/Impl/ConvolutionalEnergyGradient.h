@@ -176,7 +176,12 @@ public:
 	///\brief Writes the derivatives of all parameters into a vector and returns it.
 	RealVector result()const{
 		RealVector derivative(mpe_rbm->numberOfParameters());
-		init(derivative) << matrixSet(m_deltaWeights),m_deltaBiasHidden,m_deltaBiasVisible;
+		std::size_t pos = 0;
+		for(auto const& mat: m_deltaWeights){
+			auto vec = to_vector(mat);
+			noalias(subrange(derivative,pos,pos+vec.size()) = vec;
+			pos += vec.size();
+		}		
 		return derivative;
 	}
 	

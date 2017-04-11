@@ -61,7 +61,6 @@ shark_add_test( LinAlg/permute.cpp LinAlg_Permutations )
 shark_add_test( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )
 shark_add_test( LinAlg/Metrics.cpp LinAlg_Metrics)
 
-shark_add_test( LinAlg/Initialize.cpp LinAlg_Initialize)
 shark_add_test( LinAlg/LRUCache.cpp LinAlg_LRUCache )
 shark_add_test( LinAlg/PartlyPrecomputedMatrix.cpp LinAlg_PartlyPrecomputedMatrix )
 

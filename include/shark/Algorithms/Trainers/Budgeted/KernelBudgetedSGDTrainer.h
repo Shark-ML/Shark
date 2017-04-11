@@ -453,17 +453,11 @@ public:
 	}
 
 	///\brief  Returns the vector of hyper-parameters.
-	RealVector parameterVector() const
-	{
-		size_t kp = m_kernel->numberOfParameters();
-		RealVector ret(kp + 1);
-
+	RealVector parameterVector() const	{
 		if(m_unconstrained)
-			init(ret) << parameters(m_kernel), log(m_C);
+			return m_kernel->parameterVector() | log(m_C);
 		else
-			init(ret) << parameters(m_kernel), m_C;
-
-		return ret;
+			return m_kernel->parameterVector() | m_C;
 	}
 
 	///\brief  Sets the vector of hyper-parameters.
@@ -471,8 +465,8 @@ public:
 	{
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
-		init(newParameters) >> parameters(m_kernel), m_C;
-
+		m_kernel->setParameterVector(subrange(newParameters,0,kp));
+		m_C = newParameters.back();
 		if(m_unconstrained) m_C = exp(m_C);
 	}
 

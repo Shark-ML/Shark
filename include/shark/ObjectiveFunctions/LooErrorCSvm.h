@@ -87,8 +87,8 @@ public:
 	double eval(const RealVector& params, QpStoppingCondition &stop){
 		this->m_evaluationCounter++;
 
-		double C;
-		blas::init(params)>>parameters(*mep_kernel),C;
+		double C = params.back();
+		mep_kernel->setParameterVector(subrange(params,0,params.size() - 1));
 		
 		ZeroOneLoss<unsigned int, RealVector> loss;
 

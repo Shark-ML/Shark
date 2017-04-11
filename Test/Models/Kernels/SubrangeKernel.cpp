@@ -55,8 +55,7 @@ BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 	BOOST_REQUIRE_EQUAL(kernel.numberOfParameters(),numParameters);
 	
 	// test kernel evals. first set weighting factors
-	RealVector parameters(2);
-	init(parameters)<<0.3,0.5; //weights are 1 and 0.3 and the gauss kernel parameter is 0.5
+	RealVector parameters = {0.3,0.5}; //weights are 1 and 0.3 and the gauss kernel parameter is 0.5
 	kernel.setParameterVector(parameters);
 	
 	//process kernel matrices for each element separately and weight the results to get ground-truth data

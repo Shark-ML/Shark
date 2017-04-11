@@ -236,29 +236,22 @@ public:
 	{ return m_offset; }
 
 	///\brief  Returns the vector of hyper-parameters.
-	RealVector parameterVector() const
-	{
-		size_t kp = m_kernel->numberOfParameters();
-		RealVector ret(kp + 1);
-		if(m_unconstrained)
-			init(ret) << parameters(m_kernel), log(m_C);
-		else
-			init(ret) << parameters(m_kernel), m_C;
-		return ret;
+	RealVector parameterVector() const{
+		double parC= m_unconstrained? std::log(m_C): m_C;
+		return m_kernel->parameterVector() | parC;
 	}
 
 	///\brief  Sets the vector of hyper-parameters.
-	void setParameterVector(RealVector const& newParameters)
-	{
+	void setParameterVector(RealVector const& newParameters){
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + 1);
-		init(newParameters) >> parameters(m_kernel), m_C;
+		m_kernel->setParameterVector(subrange(newParameters,0,kp));
+		m_C = newParameters.back();
 		if(m_unconstrained) m_C = exp(m_C);
 	}
 
 	///\brief Returns the number of hyper-parameters.
-	size_t numberOfParameters() const
-	{
+	size_t numberOfParameters() const{
 		return m_kernel->numberOfParameters() + 1;
 	}
 

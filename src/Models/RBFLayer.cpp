@@ -51,28 +51,25 @@ void RBFLayer::setStructure( std::size_t numInput, std::size_t numOutput ){
 }
 
 RealVector RBFLayer::parameterVector()const{
-	RealVector parameters(numberOfParameters());
 	if(m_trainCenters && m_trainWidth)
-		init(parameters) << toVector(m_centers), log(m_gamma);
+		return  to_vector(m_centers) | log(m_gamma);
 	else if( m_trainCenters)
-		init(parameters) << toVector(m_centers);
+		return to_vector(m_centers);
 	else if(m_trainWidth)
-		parameters = log(m_gamma);
-	return parameters;
+		return log(m_gamma);
+	return RealVector();
 }
 
 
 void RBFLayer::setParameterVector(RealVector const& newParameters){
 	SIZE_CHECK(newParameters.size() == numberOfParameters());
-	
-	if(m_trainCenters && m_trainWidth){
-		RealVector logGamma(outputSize());
-		init(newParameters) >> toVector(m_centers), logGamma;
-		setGamma(exp(logGamma));
-	}else if( m_trainCenters)
-		init(newParameters) >> toVector(m_centers);
-	else if(m_trainWidth){
-		setGamma(exp(newParameters));
+	std::size_t pos = 0;
+	if( m_trainCenters){
+		pos = inputSize() * outputSize();
+		noalias(to_vector(m_centers)) = subrange(newParameters,0,pos);
+	}
+	if(m_trainWidth){
+		setGamma(exp(subrange(newParameters,pos,newParameters.size())));
 	}
 }
 
@@ -94,7 +91,6 @@ void RBFLayer::setGamma(RealVector const& gamma){
 	double logPi = std::log(boost::math::constants::pi<double>());
 	m_logNormalization=  inputSize()*0.5*(logPi - log(gamma));
 }
-
 
 void RBFLayer::eval(BatchInputType const& patterns, BatchOutputType& output, State& state)const{
 	SIZE_CHECK(patterns.size2() == inputSize());

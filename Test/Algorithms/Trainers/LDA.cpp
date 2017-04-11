@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 		double dist1=inner_prod(diff,prod(inverse,diff)) + prior[1];
 		unsigned int bayesTarget = dist0>dist1;
 		statisticalBayesRisk+= bayesTarget != target[i];
-		init(input[i])<<vec,0;//add third zero
+		input[i] = vec | 0;//add third zero
 	}
 	statisticalBayesRisk/=TrainExamples;
 

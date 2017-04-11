@@ -122,14 +122,16 @@ public:
 
 	//! returns the vector of used parameters inside the weight matrix
 	RealVector parameterVector() const{
-		RealVector parameters(numberOfParameters());
-		init(parameters) << toVector(m_weightMatrix),m_hiddenBias,m_outputBias;
-		return parameters;
+		return to_vector(m_weightMatrix) | m_hiddenBias | m_outputBias;
 	}
 	//! uses the values inside the parametervector to set the used values inside the weight matrix
 	void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(newParameters.size() == numberOfParameters());
-		init(newParameters) >> toVector(m_weightMatrix),m_hiddenBias,m_outputBias;
+		std::size_t endWeights = m_weightMatrix.size1() * m_weightMatrix.size2();
+		std::size_t endBias = endWeights + m_hiddenBias.size();
+		noalias(to_vector(m_weightMatrix)) = subrange(newParameters,0,endWeights);
+		noalias(m_hiddenBias) = subrange(newParameters,endWeights,endBias);
+		noalias(m_outputBias) = subrange(newParameters,endBias,endBias+m_outputBias.size());
 	}
 	
 	/// \brief Returns the activation function of the hidden units.

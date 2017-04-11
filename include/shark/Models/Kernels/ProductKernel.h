@@ -113,13 +113,24 @@ public:
 
 	RealVector parameterVector() const{
 		RealVector ret(m_numberOfParameters);
-		init(ret) << parameterSet(m_kernels);
+		std::size_t pos = 0;
+		for(auto kernel: m_kernels){
+			auto const& params = kernel->parameterVector();
+			noalias(subrange(ret,pos, pos + params.size())) = params;
+			pos += params.size();
+		}
 		return ret;
 	}
 
 	void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(newParameters.size() == m_numberOfParameters);
-		init(newParameters) >> parameterSet(m_kernels);
+		
+		std::size_t pos = 0;
+		for(auto kernel: m_kernels){
+			std::size_t numParams = kernel->numberOfParameters();
+			kernel->setParameterVector(subrange(newParameters,pos, pos + numParams));
+			pos += numParams;
+		}
 	}
 
 	std::size_t numberOfParameters() const{

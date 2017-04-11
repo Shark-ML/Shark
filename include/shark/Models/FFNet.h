@@ -208,13 +208,27 @@ public:
 	//! returns the vector of used parameters inside the weight matrix
 	RealVector parameterVector() const{
 		RealVector parameters(numberOfParameters());
-		init(parameters) << matrixSet(m_layerMatrix),m_bias,toVector(m_inputOutputShortcut);
+		std::size_t pos = 0;
+		for(auto const& mat: m_layerMatrix){
+			auto vec = to_vector(mat);
+			noalias(subrange(parameters,pos,pos+vec.size())) = vec;
+			pos += vec.size();
+		}
+		noalias(subrange(parameters,pos,parameters.size())) = m_bias | to_vector(m_inputOutputShortcut);
 		return parameters;
 	}
 	//! uses the values inside the parameter vector to set the used values inside the weight matrix
 	void setParameterVector(RealVector const& newParameters){
-		//set the normal forward propagation weights
-		init(newParameters) >> matrixSet(m_layerMatrix),m_bias,toVector(m_inputOutputShortcut);
+		//set the forward propagation weights
+		std::size_t pos = 0;
+		for(auto& mat: m_layerMatrix){
+			auto vec = to_vector(mat);
+			
+			noalias(vec) = subrange(newParameters,pos,pos+vec.size());
+			pos += vec.size();
+		}
+		noalias(m_bias) = subrange(newParameters,pos, pos + m_bias.size());
+		noalias(to_vector(m_inputOutputShortcut)) = subrange(newParameters,pos + m_bias.size(), newParameters.size());
 		
 		//we also have to update the backpropagation weights
 		//this is more or less an inversion. for all connections of a neuron i with a neuron j, i->j

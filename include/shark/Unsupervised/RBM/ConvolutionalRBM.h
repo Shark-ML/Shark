@@ -131,17 +131,35 @@ public:
 	}
 	
 	///\brief Returns the parameters of the Model as parameter vector.
-	RealVector parameterVector () const {
-		RealVector ret(numberOfParameters());
-		init(ret) << matrixSet(m_filters),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
-		return ret;
+	RealVector parameterVector() const {
+		RealVector filterParams(numFilters()*filterSize1()*filterSize2());
+		std::size_t pos = 0;
+		for(auto const& mat: m_filters){
+			auto vec = to_vector(mat);
+			noalias(subrange(filterParams,pos,pos+vec.size()) = vec;
+			pos += vec.size();
+		}
+		
+		return filterParams 
+		| m_hiddenNeurons.parameterVector()
+		| m_visibleNeurons.parameterVector();
 	};
 
 	///\brief Sets the parameters of the model.
 	///
 	/// @param newParameters vector of parameters  
- 	void setParameterVector(const RealVector& newParameters) {
-		init(newParameters) >>matrixSet(m_filters),blas::parameters(m_hiddenNeurons),blas::parameters(m_visibleNeurons);
+ 	void setParameterVector(RealVector const& newParameters) {
+		std::size_t pos = 0;
+		for(auto& mat: m_filters){
+			auto vec = to_vector(mat);
+			noalias(vec) = subrange(newParameters,pos,pos+vec.size();
+			pos += vec.size();
+		}
+		std::size_t endH = pos + m_hiddenNeurons.numberOfParameters();
+		std::size_t endV = endH + m_visibleNeurons.numberOfParameters();
+		m_hiddenNeurons.setParameterVector(subrange(newParameters,endW,endH));
+		m_visibleNeurons.setParameterVector(subrange(newParameters,endH,endV));	s
+
  	}
 	
 	///\brief Creates the structure of the ConvolutionalRBM.

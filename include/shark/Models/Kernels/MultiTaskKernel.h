@@ -151,7 +151,7 @@ public:
 			double gamma)
 	: DiscreteKernel(RealMatrix(tasks, tasks,0.0))
 	, m_data(data)
-	, m_inputkernel(inputkernel)
+	, mpe_inputKernel(&inputkernel)
 	, m_gamma(gamma){
 		computeMatrix();
 	}
@@ -160,21 +160,19 @@ public:
 	std::string name() const
 	{ return "GaussianTaskKernel"; }
 
-	RealVector parameterVector() const
-	{
-		const std::size_t n = m_inputkernel.numberOfParameters();
-		RealVector ret(n + 1);
-		init(ret)<<parameters(m_inputkernel),m_gamma;
-		return ret;
+	RealVector parameterVector() const{
+		return mpe_inputKernel->parameterVector() | m_gamma;
 	}
 
 	void setParameterVector(RealVector const& newParameters){
-		init(newParameters)>>parameters(m_inputkernel),m_gamma;
+		std::size_t kParams = mpe_inputKernel->numberOfParameters();
+		mpe_inputKernel->setParameterVector(subrange(newParameters,0,kParams));
+		m_gamma = newParameters.back();
 		computeMatrix();
 	}
 
 	std::size_t numberOfParameters() const{
-		return m_inputkernel.numberOfParameters() + 1;
+		return mpe_inputKernel->numberOfParameters() + 1;
 	}
 
 	std::size_t numberOfTasks() const
@@ -248,24 +246,20 @@ protected:
 			ell[m_data.element(i).task]++;
 
 		// compute inner products between mean elements of empirical distributions
-		for (std::size_t i=0; i<elements; i++)
-		{
+		for (std::size_t i=0; i<elements; i++){
 			const std::size_t task_i = m_data.element(i).task;
-			for (std::size_t j=0; j<i; j++)
-			{
+			for (std::size_t j=0; j<i; j++){
 				const std::size_t task_j = m_data.element(j).task;
-				const double k = m_inputkernel.eval(m_data.element(i).input, m_data.element(j).input);
+				const double k = mpe_inputKernel->eval(m_data.element(i).input, m_data.element(j).input);
 				base_type::m_matrix(task_i, task_j) += k;
 				base_type::m_matrix(task_j, task_i) += k;
 			}
-			const double k = m_inputkernel.eval(m_data.element(i).input, m_data.element(i).input);
+			const double k = mpe_inputKernel->eval(m_data.element(i).input, m_data.element(i).input);
 			base_type::m_matrix(task_i, task_i) += k;
 		}
-		for (std::size_t i=0; i<tasks; i++)
-		{
+		for (std::size_t i=0; i<tasks; i++){
 			if (ell[i] == 0) continue;
-			for (std::size_t j=0; j<tasks; j++)
-			{
+			for (std::size_t j=0; j<tasks; j++){
 				if (ell[j] == 0) continue;
 				base_type::m_matrix(i, j) /= (double)(ell[i] * ell[j]);
 			}
@@ -288,7 +282,7 @@ protected:
 
 
 	Data<MultiTaskSampleType > const& m_data;  ///< multi-task data
-	KernelType& m_inputkernel;            ///< kernel on inputs
+	KernelType* mpe_inputKernel;            ///< kernel on inputs
 	double m_gamma;                        ///< bandwidth of the Gaussian task kernel
 };
 

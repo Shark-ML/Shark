@@ -270,20 +270,18 @@ public:
 
 	/// get the hyper-parameter vector
 	RealVector parameterVector() const{
-		size_t kp = m_kernel->numberOfParameters();
-		RealVector ret(kp + m_regularizers.size());
 		if(m_unconstrained)
-			init(ret) << parameters(m_kernel), log(m_regularizers);
+			return m_kernel->parameterVector() | log(m_regularizers);
 		else
-			init(ret) << parameters(m_kernel), m_regularizers;
-		return ret;
+			return m_kernel->parameterVector() | m_regularizers;
 	}
 
 	/// set the vector of hyper-parameters
 	void setParameterVector(RealVector const& newParameters){
 		size_t kp = m_kernel->numberOfParameters();
 		SHARK_ASSERT(newParameters.size() == kp + m_regularizers.size());
-		init(newParameters) >> parameters(m_kernel), m_regularizers;
+		m_kernel->setParameterVector(subrange(newParameters,0,kp));
+		noalias(m_regularizers) = subrange(newParameters,kp,newParameters.size()); 
 		if(m_unconstrained)
 			m_regularizers = exp(m_regularizers);
 	}

@@ -111,10 +111,7 @@ public:
 
 	/// set internal parameters of the model
 	virtual void setParameterVector(RealVector const& newParameters){
-		SHARK_RUNTIME_CHECK(newParameters.size() == 1,
-			"[SoftNearestNeighborClassifier::setParameterVector] invalid number of parameters");
-		//~ SHARK_RUNTIME_CHECK((std::size_t)newParameters(0) == newParameters(0) && newParameters(0) >= 1.0,
-			//~ "[SoftNearestNeighborClassifier::setParameterVector] invalid number of neighbors");
+		SHARK_RUNTIME_CHECK(newParameters.size() == 1, "Invalid number of parameters");
 		m_neighbors = (std::size_t)newParameters(0);
 	}
 

@@ -130,10 +130,6 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		
 		
 		{
-			RealVector testVisibleGrad(16,0.0);
-			RealVector testHiddenGrad(4,0.0);
-			RealMatrix testWeightGrad(4,16,0.0);
-			
 			//compute the real gradient of CD
 			RealVector approxCDGrad(rbm.numberOfParameters(),0.0);
 			RealVector params = rbm.parameterVector();
@@ -143,7 +139,9 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 				approxCDGrad+=der;
 			}
 			approxCDGrad /=5000;
-			init(approxCDGrad) >> toVector(testWeightGrad),testHiddenGrad,testVisibleGrad;
+			RealMatrix testWeightGrad = to_matrix(subrange(approxCDGrad,0,64),4,16); 
+			RealVector testHiddenGrad = subrange(approxCDGrad,64,68);
+			RealVector testVisibleGrad = subrange(approxCDGrad,68,84);
 			
 			double diffH=norm_inf(hiddenGrad-testHiddenGrad);
 			double diffV=norm_inf(visibleGrad-testVisibleGrad);
@@ -155,10 +153,6 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		
 		//now perform the same test  with  minibatch learning
 		{
-			RealVector testVisibleGrad(16,0.0);
-			RealVector testHiddenGrad(4,0.0);
-			RealMatrix testWeightGrad(4,16,0.0);
-			
 			//compute the real gradient of CD
 			RealVector approxCDGrad(rbm.numberOfParameters(),0.0);
 			RealVector params = rbm.parameterVector();
@@ -169,7 +163,9 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 				approxCDGrad+=der;
 			}
 			approxCDGrad /=5000;
-			init(approxCDGrad) >> toVector(testWeightGrad),testHiddenGrad,testVisibleGrad;
+			RealMatrix testWeightGrad = to_matrix(subrange(approxCDGrad,0,64),4,16); 
+			RealVector testHiddenGrad = subrange(approxCDGrad,64,68);
+			RealVector testVisibleGrad = subrange(approxCDGrad,68,84);
 			
 			std::cout<<hiddenGrad<<" "<<testHiddenGrad<<std::endl;
 			double diffH=norm_inf(hiddenGrad-testHiddenGrad);

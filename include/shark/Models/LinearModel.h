@@ -123,16 +123,13 @@ public:
 
 	/// obtain the parameter vector
 	RealVector parameterVector() const{
-		RealVector ret(numberOfParameters());
-		init(ret) << toVector(m_matrix),m_offset;
-
-		return ret;
+		return to_vector(m_matrix) | m_offset;
 	}
 
 	/// overwrite the parameter vector
-	void setParameterVector(RealVector const& newParameters)
-	{
-		init(newParameters) >> toVector(m_matrix),m_offset;
+	void setParameterVector(RealVector const& newParameters){
+		noalias(to_vector(m_matrix)) = subrange(newParameters,0,inputSize() * outputSize());
+		noalias(m_offset) = subrange(newParameters,inputSize() * outputSize(),newParameters.size());
 	}
 
 	/// return the number of parameter

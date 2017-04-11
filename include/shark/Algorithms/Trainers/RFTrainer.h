@@ -128,9 +128,7 @@ public:
 	/// Return the parameter vector.
 	RealVector parameterVector() const
 	{
-		RealVector ret(1); // number of trees
-		init(ret) << (double)m_B;
-		return ret;
+		RealVector ret(1,(double)m_B);
 	}
 
 	/// Set the parameter vector.
