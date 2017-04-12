@@ -45,7 +45,7 @@
 #define BOOST_TEST_MODULE ObjectiveFunctions_SvmLogisticInterpretation
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
-
+#include "TestObjectiveFunction.h"
 using namespace shark;
 
 const char test[] = "3.2588947676e+00 5.4190801643e-01 1\n\
@@ -67,22 +67,11 @@ const char test[] = "3.2588947676e+00 5.4190801643e-01 1\n\
 3.9715252072e+00 3.8300273186e+00 0\n\
 3.8595541352e+00 3.8707797471e+00 0\n";
 
-
-
-// mtq: TODO: add some trivial tests when the kernel-feasibility issue is settled, along the lines of:
-//////	mlms_score.proposeStartingPoint( params );
-//////	BOOST_CHECK( mlms_score.isFeasible( params) );
-
-
-
-
 // on the above mini chessboard problem, optimize CSVM parameters using rprop on the SvmLogisticInterpretation.
 // after every rprop step, assert that the numerical and analytical derivative coincide.
 BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_SvmLogisticInterpretation)
 
-BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard )
-{
-	double NUMERICAL_INCREASE_FACTOR = 1.00001;
+BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard ){
 	
 	ClassificationDataset training_dataset;
 	csvStringToData(training_dataset,test,LAST_COLUMN,0);
@@ -105,28 +94,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	unsigned int its = 50;
 	for (unsigned int i=0; i<its; i++) {
 		rprop.step( mlms_score );
-		// compare analytical and numerical derivative
-		RealVector params(2);
-		params(0) = rprop.solution().point(0); params(1) = rprop.solution().point(1);
-		double result = mlms_score.eval( params );
-		RealVector deriv;
-		double der_result = mlms_score.evalDerivative( params, deriv );
-		RealVector cmp_C_params(2);
-		cmp_C_params(0) = params(0)*NUMERICAL_INCREASE_FACTOR; cmp_C_params(1) = params(1);
-		double cmp_C_result = mlms_score.eval( cmp_C_params );
-		RealVector cmp_gamma_params(2);
-		cmp_gamma_params(0) = params(0); cmp_gamma_params(1) = params(1)*NUMERICAL_INCREASE_FACTOR;
-		double cmp_gamma_result = mlms_score.eval( cmp_gamma_params );
-		double diff_C = cmp_C_result - result;
-		double diff_gamma = cmp_gamma_result - result;
-		double denominator_C = cmp_C_params(0) - params(0);
-		double denominator_gamma = cmp_gamma_params(1) - params(1);
-		double ds_dC = diff_C / denominator_C;
-		double ds_dgamma = diff_gamma / denominator_gamma;
-
-		BOOST_CHECK_SMALL( ds_dC - deriv(0), 5e-4 );
-		BOOST_CHECK_SMALL( ds_dgamma - deriv(1), 5e-4 );
-		BOOST_CHECK_SMALL( result - der_result, 1e-12 );
+		testDerivative(mlms_score, rprop.solution().point, 1.e-6);
 
 	}
 }
@@ -158,30 +126,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	unsigned int its = 50;
 	for (unsigned int i=0; i<its; i++) {
 		rprop.step( mlms_score );
-
-		// compare analytical and numerical derivative
-		RealVector params(2);
-		params(0) = rprop.solution().point(0); params(1) = rprop.solution().point(1);
-		double result = mlms_score.eval( params );
-		RealVector deriv;
-		double der_result = mlms_score.evalDerivative( params, deriv );
-		RealVector cmp_C_params(2);
-		cmp_C_params(0) = params(0)*NUMERICAL_INCREASE_FACTOR; cmp_C_params(1) = params(1);
-		double cmp_C_result = mlms_score.eval( cmp_C_params );
-		RealVector cmp_gamma_params(2);
-		cmp_gamma_params(0) = params(0); cmp_gamma_params(1) = params(1)*NUMERICAL_INCREASE_FACTOR;
-		double cmp_gamma_result = mlms_score.eval( cmp_gamma_params );
-		double diff_C = cmp_C_result - result;
-		double diff_gamma = cmp_gamma_result - result;
-		double denominator_C = cmp_C_params(0) - params(0);
-		double denominator_gamma = cmp_gamma_params(1) - params(1);
-		double ds_dC = diff_C / denominator_C;
-		double ds_dgamma = diff_gamma / denominator_gamma;
-
-		BOOST_CHECK_SMALL( ds_dC - deriv(0), 5e-4 );
-		BOOST_CHECK_SMALL( ds_dgamma - deriv(1), 5e-4 );
-		BOOST_CHECK_SMALL( result - der_result, 1e-12 );
-
+		testDerivative(mlms_score, rprop.solution().point, 1.e-6);
 	}
 }
 
@@ -209,37 +154,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 	for ( unsigned int i=0; i<td; i++ ) {
 		start(i+1) = 0.5/td;
 	}
-	double result, eps_result, der_result, eval_diff, param_diff, num_deriv;
 	// original params
-	result = mlms.eval( start );
-	RealVector der;
-	der_result = mlms.evalDerivative( start, der );
-	BOOST_CHECK_SMALL( result - der_result, 1e-12 );
-
-	// c-deriv
-	{
-		RealVector params = start;
-		params(0) *= NUMERICAL_INCREASE_FACTOR;
-		eps_result = mlms.eval( params );
-		RealVector eps_deriv;
-		mlms.evalDerivative( params, eps_deriv );
-		eval_diff = eps_result - result;
-		param_diff = params(0) - start(0);
-		num_deriv = eval_diff / param_diff;
-		BOOST_CHECK_SMALL( num_deriv - der(0), 5e-4 );
-	}
-	// kernel derivs
-	for ( unsigned int i=1; i<td+1; i++ ) {
-		RealVector params = start;
-		params(i) *= NUMERICAL_INCREASE_FACTOR;
-		eps_result = mlms.eval( params );
-		RealVector eps_deriv;
-		mlms.evalDerivative( params, eps_deriv );
-		eval_diff = eps_result - result;
-		param_diff = params(i) - start(i);
-		num_deriv = eval_diff / param_diff;
-		BOOST_CHECK_SMALL( num_deriv - der(i), 5e-4 );
-	}
+	testDerivative(mlms, start, 1.e-6);
 
 	// optimize NCLL using rprop
 	IRpropPlus rprop;

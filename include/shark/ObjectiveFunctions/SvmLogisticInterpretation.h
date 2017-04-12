@@ -34,11 +34,11 @@
 
 #include <shark/Data/CVDatasetTools.h>
 #include <shark/Models/Kernels/CSvmDerivative.h>
-#include <shark/Algorithms/Trainers/SigmoidFit.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
-#include <boost/math/special_functions/log1p.hpp>
+#include <shark/ObjectiveFunctions/Loss/CrossEntropy.h>
+#include <shark/Algorithms/GradientDescent/BFGS.h>
 
 namespace shark {
 
@@ -74,8 +74,6 @@ protected:
 	std::size_t m_inputDims;   ///< input dimensionality
 	bool m_svmCIsUnconstrained; ///< the SVM regularization parameter C is passed for unconstrained optimization, and the derivative should compensate for that
 	QpStoppingCondition *mep_svmStoppingCondition; ///< the stopping criterion that is to be passed to the SVM trainer.
-	bool m_sigmoidSlopeIsUnconstrained; ///< whether or not to use the unconstrained variant of the sigmoid. currently always true, not user-settable, existing for safety.
-
 public:
 
 	//! constructor.
@@ -95,7 +93,6 @@ public:
 	,  m_inputDims(inputDimension(folds.dataset()))
 	,  m_svmCIsUnconstrained(unconstrained)
 	,  mep_svmStoppingCondition(stop_cond)
-	,  m_sigmoidSlopeIsUnconstrained(true)
 	{
 		SHARK_RUNTIME_CHECK(kernel != NULL, "[SvmLogisticInterpretation::SvmLogisticInterpretation] kernel is not allowed to be NULL");  //mtq: necessary despite indirect check via call in initialization list?
 		SHARK_RUNTIME_CHECK(m_numFolds > 1, "[SvmLogisticInterpretation::SvmLogisticInterpretation] please provide a meaningful number of folds for cross validation");
@@ -136,65 +133,31 @@ public:
 		// initialize, copy parameters
 		double C_reg = (m_svmCIsUnconstrained ? std::exp(parameters(m_nkp)) : parameters(m_nkp));   //set up regularization parameter
 		mep_kernel->setParameterVector(subrange(parameters, 0, m_nkp));   //set up kernel parameters
-		// these two will be filled in order corresp. to all CV validation partitions stacked
-		// behind one another, and then used to create datasets with
-		std::vector< unsigned int > tmp_helper_labels(m_numSamples);
-		std::vector< RealVector > tmp_helper_preds(m_numSamples);
-		unsigned int next_label = 0; //helper index counter to monitor the next position to be filled in the above vectors
-
+		// Stores the stacked CV predictions for every fold.
+		ClassificationDataset validation_dataset;
 		// for each fold, train an svm and get predictions on the validation data
 		for (std::size_t i=0; i<m_numFolds; i++) {
-			// get current train/validation partitions as well as corresponding labels
-			ClassificationDataset cur_train_data = m_folds.training(i);
-			ClassificationDataset cur_valid_data = m_folds.validation(i);
-			std::size_t cur_vsize = cur_valid_data.numberOfElements();
-			Data< unsigned int > cur_vlabels = cur_valid_data.labels(); //validation labels of this fold
-			Data< RealVector > cur_vscores; //will hold SVM output scores for current validation partition
 			// init SVM
 			KernelClassifier<InputType> svm;
 			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
 			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
-			} else {
-				csvm_trainer.stoppingCondition().minAccuracy = 1e-3; //mtq: is this necessary? i think it could be set via long chain of default ctors..
-				csvm_trainer.stoppingCondition().maxIterations = 200 * m_inputDims; //mtq: need good/better heuristics to determine a good value for this
 			}
 
-			// train SVM on current fold
-			csvm_trainer.train(svm, cur_train_data);
-			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
-			// copy the scores and corresponding labels to the dataset-wide storage
-			for (std::size_t j=0; j<cur_vsize; j++) {
-				tmp_helper_labels[next_label] = cur_vlabels.element(j);
-				tmp_helper_preds[next_label] = cur_vscores.element(j);
-				++next_label;
-			}
+			// train SVM on current training fold
+			csvm_trainer.train(svm, m_folds.training(i));
+			
+			//append validation predictions
+			validation_dataset.append(transformInputs(m_folds.validation(i),svm.decisionFunction()));
 		}
-		Data< unsigned int > all_validation_labels = createDataFromRange(tmp_helper_labels);
-		Data< RealVector > all_validation_predictions = createDataFromRange(tmp_helper_preds);
 
-		// now we got it all: the predictions across the validation folds, plus the correct corresponding
-		// labels. so we go ahead and fit a sigmoid to be as good as possible a model between the two:
-		SigmoidModel sigmoid_model(m_sigmoidSlopeIsUnconstrained);   //use the unconstrained variant?
-		SigmoidFitRpropNLL sigmoid_trainer(100);   //number of rprop iterations
-		ClassificationDataset validation_dataset(all_validation_predictions, all_validation_labels);
-		sigmoid_trainer.train(sigmoid_model, validation_dataset);
-		// we're basically done. now only get the final cost value of the best fit, and return it:
-		Data< RealVector > sigmoid_predictions = sigmoid_model(all_validation_predictions);
+		// Fit a logistic regression to the prediction
+		LinearModel<> logistic_model = fitLogistic(validation_dataset);
 		
-		double error = 0;
-		for (std::size_t i=0; i<m_numSamples; i++) {
-			double p = sigmoid_predictions.element(i)(0);
-			if (all_validation_labels.element(i) == 1){   //positive class
-				error -= std::log(p);
-			}
-			else{ //negative class
-				error -= boost::math::log1p(-p);
-			}
-		}
-		
-		return error/m_numSamples;
+		//to evaluate, we use cross entropy loss on the fitted model 
+		CrossEntropy logistic_loss;
+		return logistic_loss(validation_dataset.labels(),logistic_model(validation_dataset.inputs()));
 	}
 
 	//! the derivative of the error() function above w.r.t. the parameters.
@@ -232,8 +195,6 @@ public:
 			csvm_trainer.setComputeBinaryDerivative(true);
 			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
-			} else {
-				csvm_trainer.stoppingCondition().maxIterations = 200 * m_inputDims; //mtq: need good/better heuristics to determine a good value for this
 			}
 			// train SVM on current fold
 			csvm_trainer.train(svm, cur_train_data);
@@ -250,48 +211,44 @@ public:
 				++next_label;
 			}
 		}
-		Data< unsigned int > all_validation_labels = createDataFromRange(tmp_helper_labels);
-		Data< RealVector > all_validation_predictions = createDataFromRange(tmp_helper_preds);
-
+		
 		// now we got it all: the predictions across the validation folds, plus the correct corresponding
-		// labels. so we go ahead and fit a sigmoid to be as good as possible a model between the two:
-		SigmoidModel sigmoid_model(m_sigmoidSlopeIsUnconstrained);   //use the unconstrained variant?
-		SigmoidFitRpropNLL sigmoid_trainer(100);   //number of rprop iterations
-		ClassificationDataset validation_dataset(all_validation_predictions, all_validation_labels);
-		sigmoid_trainer.train(sigmoid_model, validation_dataset);
-		// we're basically done. now only get the final cost value of the best fit, and return it:
-		Data< RealVector > sigmoid_predictions = sigmoid_model(all_validation_predictions);
-
-		// finally compute the derivative of the sigmoid model predictions:
-		// (we're here a bit un-shark-ish in that we do some of the derivative calculations by hand where they
-		//  would also and more consistently be offered by their respective classes. one reason we're doing it
-		//  like this might be the missing batch processing for the evalDerivatives)
+		// labels. so we go ahead and fit a logistic regression
+		ClassificationDataset validation_dataset= createLabeledDataFromRange(tmp_helper_preds, tmp_helper_labels);
+		LinearModel<> logistic_model = fitLogistic(validation_dataset);
+		
+		// to evaluate, we use cross entropy loss on the fitted model  and compute 
+		// the derivative wrt the svm model parameters.
 		derivative.resize(m_nhp);
 		derivative.clear();
-
-		double ss = (m_sigmoidSlopeIsUnconstrained ? std::exp(sigmoid_model.parameterVector()(0)) : sigmoid_model.parameterVector()(0));
 		double error = 0;
-		for (std::size_t i=0; i<m_numSamples; i++) {
-			double p = sigmoid_predictions.element(i)(0);
-			// compute derivative of the negative log likelihood
-			double dL_dsp; //derivative of likelihood wrt sigmoid predictions
-			if (all_validation_labels.element(i) == 1){   //positive class
-				error -= std::log(p);
-				dL_dsp = -1.0/p;
-			}
-			else{ //negative class
-				error -= boost::math::log1p(-p);
-				dL_dsp = 1.0/(1.0-p);
-			}
-			// compute derivative of the sigmoid
-			// derivative of sigmoid predictions wrt svm predictions
-			double dsp_dsvmp = ss * p * (1.0-p); //severe sign confusion potential: p(1-p) is deriv. w.r.t. t in 1/(1+e**(-t))!
-			for (std::size_t j=0; j<m_nhp; j++) {
-				derivative(j) += dL_dsp * dsp_dsvmp * all_validation_predict_derivs(i,j);
-			}
+		std::size_t start = 0;
+		for(auto const& batch: validation_dataset.batches()){
+			std::size_t end = start+batch.size();
+			CrossEntropy logistic_loss;
+			RealMatrix lossGradient;
+			error += logistic_loss.evalDerivative(batch.label,logistic_model(batch.input),lossGradient);
+			noalias(derivative) += column(lossGradient,0) % rows(all_validation_predict_derivs,start,end);
+			start = end;
 		}
+		derivative *= logistic_model.parameterVector()(0);
 		derivative /= m_numSamples;
 		return error / m_numSamples;
+	}
+private:
+	LinearModel<> fitLogistic(ClassificationDataset const& data)const{
+		LinearModel<> logistic_model;
+		logistic_model.setStructure(1,1, true);//1 input, 1 output, bias = 2 parameters
+		CrossEntropy logistic_loss;
+		ErrorFunction error(data, &logistic_model, & logistic_loss);
+		BFGS optimizer;
+		optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
+		optimizer.init(error);
+		while(error.evaluationCounter()<500){
+			optimizer.step(error);
+		}
+		logistic_model.setParameterVector(optimizer.solution().point);
+		return logistic_model;
 	}
 };
 
