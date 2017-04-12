@@ -244,7 +244,7 @@ private:
 		BFGS optimizer;
 		optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
 		optimizer.init(error);
-		while(error.evaluationCounter()<500){
+		while(error.evaluationCounter()<100){
 			optimizer.step(error);
 		}
 		logistic_model.setParameterVector(optimizer.solution().point);

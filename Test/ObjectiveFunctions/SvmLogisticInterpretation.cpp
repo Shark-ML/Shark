@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 		start(i+1) = 0.5/td;
 	}
 	// original params
-	testDerivative(mlms, start, 1.e-6);
+	testDerivative(mlms, start, 1.e-6,1.e-10,0.01);
 
 	// optimize NCLL using rprop
 	IRpropPlus rprop;
