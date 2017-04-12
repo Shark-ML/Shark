@@ -242,10 +242,12 @@ private:
 		CrossEntropy logistic_loss;
 		ErrorFunction error(data, &logistic_model, & logistic_loss);
 		BFGS optimizer;
-		optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
 		optimizer.init(error);
-		while(error.evaluationCounter()<100){
+		//this converges after very few iterations (typically 20 function evaluations)
+		while(norm_2(optimizer.derivative())> 1.e-8){
+			double lastValue = optimizer.solution().value;
 			optimizer.step(error);
+			if(lastValue == optimizer.solution().value) break;//we are done due to numerical precision
 		}
 		logistic_model.setParameterVector(optimizer.solution().point);
 		return logistic_model;

@@ -89,6 +89,11 @@ public:
 	LineSearch &lineSearch() {
 		return m_linesearch;
 	}
+	
+	/// \brief Returns the derivative at the current point. Can be used for stopping criteria.
+	RealVector const& derivative()const{
+		return m_derivative;
+	}
 
 
 protected: // Instance vars

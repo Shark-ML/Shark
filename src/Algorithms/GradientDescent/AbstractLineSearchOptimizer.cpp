@@ -40,6 +40,7 @@ using namespace shark;
 AbstractLineSearchOptimizer::AbstractLineSearchOptimizer() {
 	m_features |= REQUIRES_VALUE;
 	m_features |= REQUIRES_FIRST_DERIVATIVE;
+	m_linesearch.lineSearchType() = LineSearch::WolfeCubic;
 }
 
 void AbstractLineSearchOptimizer::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {

@@ -97,7 +97,7 @@ Training the autoencoder
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 In order to train the autoencoder we use the limited memory BFGS (L-BFGS)
-algorithm with a line search satisfying the Wolfe conditions. We also need
+algorithm. We also need
 to chose a starting point for the optimization. For this we use values
 uniformly taken from :math:`[-r, r]` for the weights and :math:`0` for the
 biases, with

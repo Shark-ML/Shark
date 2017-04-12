@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
 	//solving
 	Timer time;
 	LBFGS optimizer;
-	optimizer.lineSearch().lineSearchType() = LineSearch::WolfeCubic;
 	optimizer.init(error);
 	while(error.evaluationCounter()<200){
 		optimizer.step(error);
