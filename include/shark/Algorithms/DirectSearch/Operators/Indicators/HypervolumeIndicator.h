@@ -38,6 +38,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <numeric>
 
 namespace shark {
 
