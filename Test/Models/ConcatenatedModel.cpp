@@ -72,8 +72,6 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 	net1.setStructure(3,5,2);
 	net2.setStructure(2,4);
 	ConcatenatedModel<RealVector,RealVector> model (&net1,&net2);
-	BOOST_CHECK_EQUAL(model.optimizeFirstModelParameters(),true);
-	BOOST_CHECK_EQUAL(model.optimizeSecondModelParameters(),true);
 
 	//test1: all activated
 	{
@@ -103,8 +101,8 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 	{
 		//parameters
 		size_t modelParameters = net1.numberOfParameters();
-		model.optimizeFirstModelParameters() = true;
-		model.optimizeSecondModelParameters() = false;
+		model.enableModelOptimization(0,true);
+		model.enableModelOptimization(1,false);
 		BOOST_REQUIRE_EQUAL(model.numberOfParameters(), modelParameters);
 		RealVector parameters(modelParameters);
 		RealVector coefficients(4);
@@ -128,8 +126,8 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 	{
 		//parameters
 		size_t modelParameters = net2.numberOfParameters();
-		model.optimizeFirstModelParameters() = false;
-		model.optimizeSecondModelParameters() = true;
+		model.enableModelOptimization(0,false);
+		model.enableModelOptimization(1,true);
 		BOOST_REQUIRE_EQUAL(model.numberOfParameters(),modelParameters);
 		RealVector parameters(modelParameters);
 		RealVector coefficients(4);
@@ -153,8 +151,8 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 	//test3: no parameters
 	{
 		//parameters
-		model.optimizeFirstModelParameters() = false;
-		model.optimizeSecondModelParameters() = false;
+		model.enableModelOptimization(0,false);
+		model.enableModelOptimization(1,false);
 		BOOST_REQUIRE_EQUAL(model.numberOfParameters(), 0);
 	}
 }

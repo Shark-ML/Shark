@@ -51,27 +51,10 @@ namespace detail{
 template<class InputType, class OutputType>
 class ConcatenatedModelWrapperBase:public AbstractModel<InputType,OutputType>{
 public:
-	ConcatenatedModelWrapperBase():m_optimizeFirst(true), m_optimizeSecond(true){}
 	virtual ConcatenatedModelWrapperBase<InputType,OutputType>* clone() const = 0;
 
-	bool optimizeFirstModelParameters()const{
-		return m_optimizeFirst;
-	}
-	
-	bool& optimizeFirstModelParameters(){
-		return m_optimizeFirst;
-	}
-	
-	bool optimizeSecondModelParameters()const{
-		return m_optimizeSecond;
-	}
-	
-	bool& optimizeSecondModelParameters(){
-		return m_optimizeSecond;
-	}
-protected:
-	bool m_optimizeFirst;
-	bool m_optimizeSecond;
+	virtual void enableModelOptimization(std::size_t index, bool opt)=0;
+	virtual std::size_t numModels()=0;
 };
 
 ///\brief Internal Wrappertype to connect the output of the first model with the input of the second model.
@@ -85,14 +68,42 @@ protected:
 	AbstractModel<IntermediateType,OutputType>* m_secondModel;
 
 	typedef ConcatenatedModelWrapperBase<InputType, OutputType> base_type;
-	using base_type::m_optimizeFirst;
-	using base_type::m_optimizeSecond;
+	bool m_optimizeFirst;
+	bool m_optimizeSecond;
 
 	struct InternalState: public State{
 		BatchIntermediateType intermediateResult;
 		boost::shared_ptr<State> firstModelState;
 		boost::shared_ptr<State> secondModelState;
 	};
+	
+	void enableModelOptimization(std::size_t index, bool opt){
+		SHARK_RUNTIME_CHECK(index < 2, "index supplied that is larger than the number of concatenated models");
+		if(index == 1) m_optimizeSecond = opt;
+		else m_optimizeFirst = opt;
+		this->m_features.reset();
+		bool secondDiff=false;
+		if (!m_optimizeSecond || m_secondModel->hasFirstParameterDerivative()){
+			secondDiff=true;
+		}
+		
+		bool firstDiff=false;
+		if(
+			!m_optimizeFirst 
+			||(m_firstModel->hasFirstParameterDerivative()
+			&& m_secondModel ->hasFirstInputDerivative())
+		){
+			firstDiff = true;
+		}
+
+		if (firstDiff && secondDiff){ 
+			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		}
+		
+		if (m_firstModel ->hasFirstInputDerivative() && m_secondModel ->hasFirstInputDerivative()){ 
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		}
+	}
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	
@@ -102,18 +113,9 @@ public:
 		AbstractModel<IntermediateType, OutputType>* secondModel)
 	: m_firstModel(firstModel), m_secondModel(secondModel)
 	{
-		if (firstModel->hasFirstParameterDerivative()
-			&& secondModel->hasFirstParameterDerivative()
-			&& secondModel ->hasFirstInputDerivative())
-		{ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		}
-
-		if (firstModel->hasFirstInputDerivative()
-			&& secondModel->hasFirstInputDerivative())
-		{ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		}
+		
+		enableModelOptimization(0,true);
+		enableModelOptimization(1,true);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -123,6 +125,8 @@ public:
 	ConcatenatedModelWrapperBase<InputType, OutputType>* clone()const{
 		return new ConcatenatedModelWrapper<InputType, IntermediateType, OutputType>(*this);
 	}
+	
+	std::size_t numModels(){return 2;}
 
 	RealVector parameterVector() const {
 		if(m_optimizeFirst && m_optimizeSecond)
@@ -294,23 +298,23 @@ public:
 	ConcatenatedModelList(
 		const FirstModelType& firstModel,
 		AbstractModel<IntermediateType, OutputType>* secondModel
-	):base_type(firstModel.clone(),secondModel){
-		if (base_type::m_firstModel->hasFirstParameterDerivative()
-			&& secondModel->hasFirstParameterDerivative()
-			&& secondModel ->hasFirstInputDerivative())
-		{ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		}
-
-		if (base_type::m_firstModel->hasFirstInputDerivative()
-			&& secondModel->hasFirstInputDerivative())
-		{ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		}
-	}
+	):base_type(firstModel.clone(),secondModel){}
 
 	~ConcatenatedModelList(){
 		delete base_type::m_firstModel;
+	}
+	
+	std::size_t numModels(){return static_cast<FirstModelType*>(base_type::m_firstModel)->numModels() +1;}
+	
+	void enableModelOptimization(std::size_t index, bool opt){
+		std::size_t models = numModels();
+		SHARK_RUNTIME_CHECK(index < models, "index supplied that is larger than the number of concatenated models");
+		if(index + 1 == models){
+			base_type::enableModelOptimization(1,opt);
+		}else{
+			static_cast<FirstModelType*>(base_type::m_firstModel)->enableModelOptimization(index,opt);
+			base_type::enableModelOptimization(0,true);//update own flags
+		}
 	}
 
 	/// \brief From INameable: return the class name.
@@ -396,6 +400,7 @@ public:
 	///operator =  to allow concModel = model1 >> model2 >> model3; for a previously declared concatenadel model
 	ConcatenatedModel<InputType,OutputType>& operator = ( detail::ConcatenatedModelWrapperBase<InputType,OutputType>& wrapper ){
 		m_wrapper.reset(wrapper.clone());
+		this->m_features.reset();
 		if (m_wrapper->hasFirstParameterDerivative()){ 
 			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE; 
 		}
@@ -407,32 +412,25 @@ public:
 		return *this;
 	}
 	
-	/// \brief Returns whether the parameters of the first model are going to be optimized
-	///
-	/// Remember that concatModel = first >> second, so it is the lower layer.
-	bool optimizeFirstModelParameters()const{
-		return m_wrapper->optimizeFirstModelParameters();
-	}
+	///\brief Returns the number of concatenated models
+	std::size_t numModels(){return m_wrapper->numModels();}
 	
-	/// \brief Returns a variable indicting whether the parameters of the first model are going to be optimized
+	///\brief sets whether the parameters of the index-th model should be optimized
 	///
-	/// Remember that concatModel = first >> second, so it is the lower layer.
-	bool& optimizeFirstModelParameters(){
-		return m_wrapper->optimizeFirstModelParameters();
-	}
+	/// If the model has non-differentiable submodels disabling those will make
+	/// the whole model differentiable.
+	/// Note that the models are ordered as model0 >> model1>> model2>>...
+	void enableModelOptimization(std::size_t index, bool opt){
+		this->m_features.reset();
+		m_wrapper->enableModelOptimization(index,opt);
+		if (m_wrapper->hasFirstParameterDerivative()){ 
+			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE; 
+		}
+
+		if (m_wrapper->hasFirstInputDerivative()){ 
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
+		}
 	
-	/// \brief Returns whether the parameters of the second model are going to be optimized
-	///
-	/// Remember that concatModel = first >> second, so it is the upper layer.
-	bool optimizeSecondModelParameters()const{
-		return m_wrapper->optimizeSecondModelParameters();
-	}
-	
-	/// \brief Returns a variable indicting whether the parameters of the second model are going to be optimized
-	///
-	/// Remember that concatModel = first >> second, so it is the upper layer.
-	bool& optimizeSecondModelParameters(){
-		return m_wrapper->optimizeSecondModelParameters();
 	}
 
 	ConcatenatedModel(const ConcatenatedModel<InputType, OutputType>& src)

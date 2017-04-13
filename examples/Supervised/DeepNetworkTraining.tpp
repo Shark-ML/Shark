@@ -2,7 +2,6 @@
 //noisy AutoencoderModel model and deep network
 #include <shark/Models/FFNet.h>// neural network for supervised training
 #include <shark/Models/Autoencoder.h>// the autoencoder to train unsupervised
-#include <shark/Models/ImpulseNoiseModel.h>// model adding noise to the inputs
 #include <shark/Models/ConcatenatedModel.h>// to concatenate Autoencoder with noise adding model
 
 //training the  model
@@ -54,18 +53,15 @@ AutoencoderModel trainAutoencoderModel(
 	UnlabeledData<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
 	double regularisation,//strength of the regularisation
-	double noiseStrength, // strength of the added noise
 	std::size_t iterations //number of iterations to optimize
 ){
 //###end<function>
 //###begin<model>	
 	//create the model
 	std::size_t inputs = dataDimension(data);
-	AutoencoderModel baseModel;
-	baseModel.setStructure(inputs, numHidden);
-	initRandomUniform(baseModel,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
-	ImpulseNoiseModel noise(inputs,noiseStrength,0.0);//set an input pixel with probability p to 0
-	ConcatenatedModel<RealVector,RealVector> model = noise>> baseModel;
+	AutoencoderModel model;
+	model.setStructure(inputs, numHidden);
+	initRandomUniform(model,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
 //###end<model>	
 //###begin<objective>		
 	//create the objective function
@@ -87,7 +83,7 @@ AutoencoderModel trainAutoencoderModel(
 	}
 //###end<optimizer>
 	model.setParameterVector(optimizer.solution().point);
-	return baseModel;
+	return model;
 }
 
 //###begin<network_types>
@@ -100,13 +96,13 @@ typedef FFNet<RectifierNeuron,LinearNeuron> Network;//final supervised trained s
 Network unsupervisedPreTraining(
 	UnlabeledData<RealVector> const& data,
 	std::size_t numHidden1,std::size_t numHidden2, std::size_t numOutputs,
-	double regularisation, double noiseStrength, std::size_t iterations
+	double regularisation, std::size_t iterations
 ){
 	//train the first hidden layer
 	std::cout<<"training first layer"<<std::endl;
 	AutoencoderModel layer =  trainAutoencoderModel<AutoencoderModel>(
 		data,numHidden1,
-		regularisation, noiseStrength,
+		regularisation,
 		iterations
 	);
 	//compute the mapping onto the features of the first hidden layer
@@ -116,7 +112,7 @@ Network unsupervisedPreTraining(
 	std::cout<<"training second layer"<<std::endl;
 	AutoencoderModel layer2 =  trainAutoencoderModel<AutoencoderModel>(
 		intermediateData,numHidden2,
-		regularisation, noiseStrength,
+		regularisation,
 		iterations
 	);
 //###end<pretraining_autoencoder>
@@ -140,7 +136,6 @@ int main()
 	std::size_t numHidden2 = 8;
 	//unsupervised hyper parameters
 	double unsupRegularisation = 0.001;
-	double noiseStrength = 0.3;
 	std::size_t unsupIterations = 100;
 	//supervised hyper parameters
 	double regularisation = 0.0001;
@@ -154,7 +149,7 @@ int main()
 	//unsupervised pre training
 	Network network = unsupervisedPreTraining(
 		data.inputs(),numHidden1, numHidden2,numberOfClasses(data),
-		unsupRegularisation, noiseStrength, unsupIterations
+		unsupRegularisation, unsupIterations
 	);
 	
 	//create the supervised problem. Cross Entropy loss with one norm regularisation
