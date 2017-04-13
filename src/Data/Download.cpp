@@ -1,8 +1,13 @@
+//===========================================================================
 /*!
- * \brief       This file provides a simplistic TCP/IP socket class and an HTTP download function.
  * 
- * \author      T. Glasmachers
- * \date        2016-2017
+ *
+ * \brief       implementation of data downloading
+ * 
+ * 
+ *
+ * \author      T.Glasmachers, O.Krause
+ * \date        2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -25,8 +30,9 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_DATA_IMPL_DOWNLOADER_HPP
-#define SHARK_DATA_IMPL_DOWNLOADER_HPP
+//===========================================================================
+#define SHARK_COMPILE_DLL
+#include <shark/Data/Download.h>
 
 #include <string>
 #include <map>
@@ -56,9 +62,7 @@
 	#endif
 #endif
 
-namespace shark {
-
-namespace detail {
+namespace {
 
 /// \brief Simple TCP/IP socket abstraction.
 ///
@@ -227,15 +231,10 @@ private:
 	SocketType m_handle;               ///< POSIX socket handle
 };
 
-} // namespace detail
+} // namespace <anonymous>
 
-/// \brief Split a URL into its domain and resource parts.
-///
-/// Returns a std::pair where the first element is the domain and the second is
-/// the resource. With std::tie you can do pattern-matching:
-/// std::tie(domain, resource) = splitUrl(url);
-/// will fill the std::string variables domain and resource.
-std::pair<std::string, std::string> splitUrl(std::string const & url)
+
+std::pair<std::string, std::string> shark::splitUrl(std::string const & url)
 {
 	std::size_t start = 0;
 	if(url.size() >= 7 && url.substr(0, 7) == "http://")
@@ -261,27 +260,17 @@ std::pair<std::string, std::string> splitUrl(std::string const & url)
 	return std::make_pair(domain, resource);
 }
 
-/// \brief Download a document with the HTTP protocol.
-///
-/// \param  url       download URL, for example "www.shark-ml.org/index.html"
-/// \param  port      TCP/IP port, defaults to 80
-///
-/// The function requests the document with a HTTP request and returns
-/// the body of the corresponding HTTP reply. In case of success this
-/// is the requested document. In case of an error the function throws
-/// an exception. Note that the function does not perform standard
-/// actions of web browsers, e.g., execute javascript or follow http
-/// redirects. All HTTP response status codes other than 200 are
-/// reported as failure to download the document and trigger an
-/// exception.
-std::string download(std::string const& url, unsigned short port = 80)
-{
+
+std::string shark::download(std::string const& url, unsigned short port){
 	// split the URL into domain and resource
 	std::string domain, resource;
 	std::tie(domain, resource) = splitUrl(url);
 
 	// open a TCP/IP socket connection
-	detail::Socket socket(domain, port);
+	Socket socket(domain, port);
+	if(!socket.connected()){
+		throw std::runtime_error("[download] can not connect to url");
+	}
 	std::string request = "GET " + resource + " HTTP/1.1\r\nhost: " + domain + "\r\n\r\n";
 	socket.writeAll(request.c_str(), request.size());
 
@@ -338,6 +327,3 @@ std::string download(std::string const& url, unsigned short port = 80)
 
 	return body;
 }
-
-} // namespace shark
-#endif

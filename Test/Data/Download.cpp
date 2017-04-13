@@ -9,14 +9,6 @@
 
 using namespace shark;
 
-
-bool verifyConnection()
-{
-	detail::Socket socket("mldata.org", 80);
-	return socket.connected();
-}
-
-
 bool is_error_500(std::runtime_error const & err)
 {
 	std::string msg = std::string(err.what());
@@ -28,12 +20,6 @@ BOOST_AUTO_TEST_SUITE(Data_Download)
 
 BOOST_AUTO_TEST_CASE(Data_Download_URL)
 {
-	if (! verifyConnection())
-	{
-		std::cout << "cannot reach mldata.org server; skipping data download test" << std::endl;
-		return;
-	}
-
 	// test the download of a data file from a given URL
 	LabeledData<RealVector, unsigned int> dataset;
 	try
@@ -45,6 +31,10 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 	}
 	catch(std::runtime_error err)
 	{
+		if(err.what() == "[download] can not connect to url"){
+			std::cout << "cannot reach mldata.org server; skipping data download test" << std::endl;
+			return;
+		}
 		// Don't count the HTTP 500 error as an actual error...
 		BOOST_CHECK_MESSAGE(is_error_500(err),
 		                    "Got exception " + std::string(err.what()));
@@ -53,12 +43,6 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 
 BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 {
-	if (! verifyConnection())
-	{
-		std::cout << "cannot reach mldata.org server; skipping data download test" << std::endl;
-		return;
-	}
-
 	// test the download of a data file from openml.org given a data set name
 	LabeledData<RealVector, unsigned int> dataset;
 	try
@@ -68,8 +52,12 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 		BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
 		BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
 	}
-	catch(std::runtime_error err)
-	{
+	catch(std::runtime_error err){
+		if(err.what() == "[download] can not connect to url"){
+			std::cout << "cannot reach mldata.org server; skipping data download test" << std::endl;
+			return;
+		}
+		
 		// Don't count the HTTP 500 error as an actual error...
 		BOOST_CHECK_MESSAGE(is_error_500(err),
 		                    "Got exception " + std::string(err.what()));

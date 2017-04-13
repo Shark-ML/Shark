@@ -41,7 +41,6 @@
 #ifndef SHARK_DATA_DOWNLOAD_H
 #define SHARK_DATA_DOWNLOAD_H
 
-#include "Impl/Downloader.hpp"
 #include <shark/Data/Dataset.h>
 #include <shark/Data/SparseData.h>
 #include <shark/Data/Csv.h>
@@ -54,8 +53,30 @@ namespace shark {
  *
  * @{
  */
-
-
+	
+	
+/// \brief Split a URL into its domain and resource parts.
+///
+/// Returns a std::pair where the first element is the domain and the second is
+/// the resource. With std::tie you can do pattern-matching:
+/// std::tie(domain, resource) = splitUrl(url);
+/// will fill the std::string variables domain and resource.
+SHARK_EXPORT_SYMBOL std::pair<std::string, std::string> splitUrl(std::string const & url);
+	
+/// \brief Download a document with the HTTP protocol.
+///
+/// \param  url       download URL, for example "www.shark-ml.org/index.html"
+/// \param  port      TCP/IP port, defaults to 80
+///
+/// The function requests the document with a HTTP request and returns
+/// the body of the corresponding HTTP reply. In case of success this
+/// is the requested document. In case of an error the function throws
+/// an exception. Note that the function does not perform standard
+/// actions of web browsers, e.g., execute javascript or follow http
+/// redirects. All HTTP response status codes other than 200 are
+/// reported as failure to download the document and trigger an
+/// exception.
+SHARK_EXPORT_SYMBOL std::string download(std::string const& url, unsigned short port = 80);
 
 /// \brief Download and import a sparse data (libSVM) file.
 ///
@@ -64,7 +85,7 @@ namespace shark {
 /// \param  port          TCP/IP port, default is 80
 /// \param  highestIndex  highest feature index, or 0 for auto-detection
 /// \param  batchSize     size of batch
-SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadSparseData(
+template <class InputType, class LabelType> void downloadSparseData(
 	LabeledData<InputType, LabelType>& dataset,
 	std::string const& url,
 	unsigned short port = 80,
