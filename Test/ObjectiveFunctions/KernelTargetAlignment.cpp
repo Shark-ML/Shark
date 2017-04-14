@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
 		input(0) = random::uni(random::globalRng, 0.5,2);
-		testDerivative(kta,input,1.e-8);
+		testDerivative(kta,input,1.e-8,0,0.01);
 	}
 	
 }
@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
 		input(0) = random::uni(random::globalRng, 0.5,2);
-		testDerivative(kta,input,1.e-8);
+		testDerivative(kta,input,1.e-8,0,0.01);
 	}
 	
 }
@@ -291,7 +291,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_evalDerivative_Ga
 	for(std::size_t i = 0; i != 100; ++i){
 		RealVector input(1);
 		input(0) = random::uni(random::globalRng, 0.1,1);
-		testDerivative(kta,input);
+		testDerivative(kta,input,1.e-8,0,0.01);
 	}
 	
 }

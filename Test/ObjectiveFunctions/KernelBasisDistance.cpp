@@ -169,23 +169,22 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Linear)
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelBasisDistance_Derivative_Gaussian)
 {
 	for(std::size_t trial = 0; trial != 10; ++trial){
-		NormalDistributedPoints problem(30);
-		Data<RealVector> dataset = problem.generateDataset(100,10);
+		NormalDistributedPoints problem(3);
+		Data<RealVector> dataset = problem.generateDataset(10,3);
 		GaussianRbfKernel<> kernel(0.5);
 		KernelExpansion<RealVector> expansion(&kernel,dataset,false,1);
-		for(std::size_t i = 0; i != 100; ++i){
+		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 1; ++j){
 				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
 			}
 		}
-		KernelBasisDistance distance(&expansion,10);
+		KernelBasisDistance distance(&expansion,3);
 
 		for(std::size_t test = 0; test != 10; ++test){
-			RealVector point(30*10);
+			RealVector point(3*3);
 			for(std::size_t i = 0; i != point.size(); ++i){
 				point(i) = random::gauss(random::globalRng, 0,1);
 			}
-
 			testDerivative(distance,point,1.e-6,0,0.1);
 		}
 	}

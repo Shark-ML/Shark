@@ -91,10 +91,10 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	RealVector start(2);
 	start(0) = 1.0; start(1) = 0.5;
 	rprop.init( mlms_score, start );
-	unsigned int its = 50;
+	unsigned int its = 20;
 	for (unsigned int i=0; i<its; i++) {
 		rprop.step( mlms_score );
-		testDerivative(mlms_score, rprop.solution().point, 1.e-6);
+		testDerivative(mlms_score, rprop.solution().point, 1.e-6,0,0.1);
 
 	}
 }
@@ -123,10 +123,10 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	RealVector start(2);
 	start(0) = 1.0; start(1) = 0.5;
 	rprop.init( mlms_score, start );
-	unsigned int its = 50;
+	unsigned int its = 20;
 	for (unsigned int i=0; i<its; i++) {
 		rprop.step( mlms_score );
-		testDerivative(mlms_score, rprop.solution().point, 1.e-6);
+		testDerivative(mlms_score, rprop.solution().point, 1.e-6,0,0.1);
 	}
 }
 

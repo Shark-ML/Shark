@@ -74,7 +74,7 @@ void testDerivative(
 	//std::cout<<estimatedDerivative<<std::endl;
 	//std::cout<<derivative<<std::endl;
 	for(std::size_t i=0;i != estimatedDerivative.size(); ++i){
-		if(derivative(i) > 0.01 && estimatedDerivative(i)>0.001){
+		if(std::abs(derivative(i)) > 1.e-8 && std::abs(estimatedDerivative(i))>1.e-8){
 			BOOST_CHECK_CLOSE(estimatedDerivative(i),derivative(i),maxErrorPercentage);
 		}
 		//BOOST_CHECK_SMALL(estimatedDerivative(i) -derivative(i),maxError);
