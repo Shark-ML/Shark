@@ -101,12 +101,12 @@ public:
 		typename WeightBatchTraits::value_type
 	> value_type;
 	typedef WeightedDataPair<
-		typename detail::batch_to_reference<DataBatchType>::type,
-		typename detail::batch_to_reference<WeightBatchType>::type
+		decltype(getBatchElement(std::declval<DataBatchType&>(),0)),
+		decltype(getBatchElement(std::declval<WeightBatchType&>(),0))
 	> reference;
 	typedef WeightedDataPair<
-		typename DataBatchTraits::const_reference,
-		typename WeightBatchTraits::const_reference
+		decltype(getBatchElement(std::declval<typename std::add_const<DataBatchType>::type&>(),0)),
+		decltype(getBatchElement(std::declval<typename std::add_const<WeightBatchType>::type&>(),0))
 	> const_reference;
 	typedef IndexingIterator<WeightedDataBatch> iterator;
 	typedef IndexingIterator<WeightedDataBatch const> const_iterator;

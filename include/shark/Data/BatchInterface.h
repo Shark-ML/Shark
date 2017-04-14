@@ -72,6 +72,8 @@ struct SimpleBatch{
 	template<class Iterator>
 	static type createBatchFromRange(Iterator const& begin, Iterator const& end){
 		type batch = createBatch(*begin,end-begin);
+		typename type::reference c=batch[0];
+		c=*begin;
 		std::copy(begin,end,batch.begin());
 		return batch;
 	}
@@ -89,7 +91,7 @@ struct SimpleBatch{
 		return batch[i];
 	}
 	template<class T>
-	static const_reference get(T const& batch, std::size_t i){
+	static typename T::const_reference get(T const& batch, std::size_t i){
 		return batch[i];
 	}
 	template<class T>
@@ -97,7 +99,7 @@ struct SimpleBatch{
 		return batch.begin();
 	}
 	template<class T>
-	static const_iterator begin(T const& batch){
+	static typename T::const_iterator begin(T const& batch){
 		return batch.begin();
 	}
 	template<class T>
@@ -105,7 +107,7 @@ struct SimpleBatch{
 		return batch.end();
 	}
 	template<class T>
-	static const_iterator end(T const& batch){
+	static typename T::const_iterator end(T const& batch){
 		return batch.end();
 	}
 };
@@ -222,8 +224,8 @@ template<class T>
 //see detail above for implementations, we just choose the correct implementations based on
 //whether T is arithmetic or not
 struct Batch
-:public boost::mpl::if_<
-	std::is_arithmetic<T>,
+:public std::conditional<
+	std::is_arithmetic<T>::value,
 	detail::SimpleBatch<blas::vector<T> >,
 	detail::SimpleBatch<std::vector<T> >
 >::type{};
@@ -398,7 +400,7 @@ auto getBatchElement(BatchT& batch, std::size_t i)->decltype(BatchTraits<BatchT>
 }
 
 template<class BatchT>
-typename BatchTraits<BatchT>::type::const_reference getBatchElement(BatchT const& batch, std::size_t i){
+auto getBatchElement(BatchT const& batch, std::size_t i)->decltype(BatchTraits<BatchT>::type::get(batch,i)){
 	return BatchTraits<BatchT>::type::get(batch,i);
 }
 
@@ -413,7 +415,7 @@ auto batchBegin(BatchT& batch)->decltype(BatchTraits<BatchT>::type::begin(batch)
 }
 
 template<class BatchT>
-typename BatchTraits<BatchT>::type::const_iterator batchBegin(BatchT const& batch){
+auto batchBegin(BatchT const& batch)->decltype(BatchTraits<BatchT>::type::begin(batch)){
 	return BatchTraits<BatchT>::type::begin(batch);
 }
 
@@ -423,9 +425,10 @@ auto batchEnd(BatchT& batch)->decltype(BatchTraits<BatchT>::type::end(batch)){
 }
 
 template<class BatchT>
-typename BatchTraits<BatchT>::type::const_iterator batchEnd(BatchT const& batch){
+auto batchEnd(BatchT const& batch)->decltype(BatchTraits<BatchT>::type::end(batch)){
 	return BatchTraits<BatchT>::type::end(batch);
 }
+
 
 }
 #endif

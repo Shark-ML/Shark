@@ -240,11 +240,6 @@ public:
 	explicit Data(std::size_t numBatches) : m_data( numBatches )
 	{ }
 
-	///\brief Construct a dataset with different batch sizes as a copy of another dataset
-	explicit Data(Data const& container, std::vector<std::size_t> batchSizes)
-	: m_data( container.m_data, batchSizes, true )
-	{ }
-
 	///\brief Construction with size and a single element
 	///
 	/// Optionally the desired batch Size can be set
@@ -477,8 +472,8 @@ public:
 		typename Batch<LabelType>::type const&
 	> const_batch_reference;
 	
-	typedef typename Batch<element_type>::reference element_reference;
-	typedef typename Batch<element_type>::const_reference const_element_reference;
+	typedef typename batch_reference::reference element_reference;
+	typedef typename const_batch_reference::const_reference const_element_reference;
 
 	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> > > element_range;
 	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> const> > const_element_range;

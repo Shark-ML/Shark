@@ -164,14 +164,12 @@ public:
 	reference operator[](std::size_t position){
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		auto&& batch = m_dataset.batch(index.batch);
-		return getBatchElement(batch,index.positionInBatch);
+		return getBatchElement(m_dataset.batch(index.batch),index.positionInBatch);
 	}
 	const_reference operator[](std::size_t position) const{
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		auto&& batch = m_dataset.batch(index.batch);
-		return getBatchElement(batch,index.positionInBatch);
+		return getBatchElement(m_dataset.batch(index.batch),index.positionInBatch);
 	}
 	
 	reference front(){

@@ -220,23 +220,6 @@ public:
 		}
 	}
 
-	//~ ///\brief Creates a shared container form another with different batch architecture
-	//~ ///
-	//~ ///@param container The old container from which to create the one with the new batch sizes
-	//~ ///@param batchSizes vector with the size of every batch of this container
-	//~ ///@param dummy to distinguish this call from the subset call
-	//~ SharedContainer(SharedContainer const& container, std::vector<std::size_t> batchSizes, bool dummy){
-		//~ //create batches
-		//~ for(std::size_t i = 0; i != batchSizes.size(); ++i){
-			//~ m_data.push_back(
-				//~ boost::make_shared<BatchType>(BatchTraits::createBatch(*container.elemBegin(),batchSizes[i]))
-			//~ );
-		//~ }
-
-		//~ //copy data into batches
-		//~ std::copy(container.elemBegin(),container.elemEnd(), elemBegin());
-	//~ }
-
 	/// \brief Clear the contents of this container without affecting the others.
 	void clear(){
 		m_data.clear();
@@ -760,7 +743,6 @@ struct InputLabelBatch{
 private:
 	typedef typename BatchTraits<typename std::decay<Batch1Type>::type >::type Batch1Traits;
 	typedef typename BatchTraits<typename std::decay<Batch2Type>::type >::type Batch2Traits;
-	typedef typename std::is_const<typename std::remove_reference<Batch1Type>::type>::type IsConstant;
 public:
 	Batch1Type input;
 	Batch2Type label;
@@ -769,13 +751,16 @@ public:
 		typename Batch1Traits::value_type,
 		typename Batch2Traits::value_type
 	> value_type;
+	//the decltype below adds correct const semantic if the template arguments are references.
+	//the behaviour is the same as mimiking the pair {getBatchElement(input,i), getBatchElement(label,i)}
+	//depending on whether input or label are const or not (which for reference types should not make any difference)
 	typedef InputLabelPair<
-		typename detail::batch_to_reference<Batch1Type>::type,
-		typename detail::batch_to_reference<Batch2Type>::type
+		decltype(getBatchElement(std::declval<Batch1Type&>(),0)),
+		decltype(getBatchElement(std::declval<Batch2Type&>(),0))
 	> reference;
 	typedef InputLabelPair<
-		typename Batch1Traits::const_reference,
-		typename Batch2Traits::const_reference
+		decltype(getBatchElement(std::declval<typename std::add_const<Batch1Type>::type&>(),0)),
+		decltype(getBatchElement(std::declval<typename std::add_const<Batch2Type>::type&>(),0))
 	> const_reference;
 	typedef IndexingIterator<InputLabelBatch> iterator;
 	typedef IndexingIterator<InputLabelBatch const> const_iterator;
