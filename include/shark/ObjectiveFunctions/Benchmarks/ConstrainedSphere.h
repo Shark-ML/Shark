@@ -73,7 +73,7 @@ struct ConstrainedSphere : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < m_constraints; i++) {
-			x(i) = std::abs(random::gauss(random::globalRng, 0, 1))+1;
+			x(i) = std::abs(random::gauss(*mep_rng, 0, 1))+1;
 		}
 		for (std::size_t i = m_constraints; i < x.size(); i++) {
 			x(i) = random::gauss(0, 1);

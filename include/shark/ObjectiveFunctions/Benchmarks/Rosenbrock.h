@@ -89,7 +89,7 @@ struct Rosenbrock : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(random::globalRng, 0, m_initialSpread );
+			x(i) = random::uni(*mep_rng, 0, m_initialSpread );
 		}
 		return x;
 	}

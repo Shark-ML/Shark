@@ -35,6 +35,7 @@
 
 #include <shark/Core/Exception.h>
 #include <shark/Core/Flags.h>
+#include <shark/Core/Random.h>
 
 namespace shark{
 
@@ -70,7 +71,10 @@ public:
 	}
 	
 	/// \brief If supported, generates a random point inside the feasible region.
-	virtual void generateRandomPoint( SearchPointType & startingPoint )const {
+	///
+	/// \param rng The random number generator used for generating the point
+	/// \param startingPoint The proposed point
+	virtual void generateRandomPoint( random::rng_type& rng, SearchPointType & startingPoint )const {
 		SHARK_FEATURE_EXCEPTION(CAN_GENERATE_RANDOM_POINT);
 	}
 	

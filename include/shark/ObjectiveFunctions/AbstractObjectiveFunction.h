@@ -161,7 +161,7 @@ public:
 	}
 
 	/// \brief Default ctor.
-	AbstractObjectiveFunction():m_evaluationCounter(0) {
+	AbstractObjectiveFunction():m_evaluationCounter(0), mep_rng(&random::globalRng){
 	    m_features |=HAS_VALUE;
 	}
 	/// \brief Virtual destructor
@@ -169,6 +169,19 @@ public:
 
 	virtual void init() {
 		m_evaluationCounter=0;
+	}
+	
+	///\brief Sets the Rng used by the objective function.
+	///
+	/// Objective functions need random numbers for different tasks,
+	/// e.g. to provide a first starting point or for example
+	/// mini batch learning where batches are chosen randomly. 
+	/// By default, shark::random::globalRng is used.
+	/// In a multi-threaded environment this might not be safe as 
+	/// the Rng is not thread safe. In this case, every thread should use its
+	/// own Rng.
+	void setRng(random::rng_type* rng){
+		mep_rng = rng;
 	}
 	
 	/// \brief Accesses the number of variables
@@ -239,7 +252,7 @@ public:
 	virtual SearchPointType proposeStartingPoint()const {
 		if(hasConstraintHandler()&& getConstraintHandler().canGenerateRandomPoint()){
 			SearchPointType startingPoint;
-			getConstraintHandler().generateRandomPoint(startingPoint);
+			getConstraintHandler().generateRandomPoint(*mep_rng, startingPoint);
 			return startingPoint;
 		}
 		else{
@@ -284,6 +297,7 @@ public:
 protected:
 	mutable std::size_t m_evaluationCounter; ///< Evaluation counter, default value: 0.
 	AbstractConstraintHandler<SearchPointType> const* m_constraintHandler;
+	random::rng_type* mep_rng;
 	
 	/// \brief helper function which is called to announce the presence of an constraint handler.
 	///

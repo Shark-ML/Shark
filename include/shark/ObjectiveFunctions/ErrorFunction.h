@@ -90,6 +90,11 @@ public:
 	std::size_t numberOfVariables()const{
 		return mp_wrapper -> numberOfVariables();
 	}
+	
+	void init(){
+		mp_wrapper->setRng(this->mep_rng);
+		mp_wrapper-> init();
+	}
 
 	double eval(RealVector const& input) const;
 	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;

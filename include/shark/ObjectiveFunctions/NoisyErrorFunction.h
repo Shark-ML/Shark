@@ -94,6 +94,11 @@ public:
 		return mp_wrapper -> numberOfVariables();
 	}
 	
+	void init(){
+		mp_wrapper->setRng(this->mep_rng);
+		mp_wrapper-> init();
+	}
+	
 	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
 		m_regularizer = regularizer;
 		m_regularizationStrength = factor;

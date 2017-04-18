@@ -140,8 +140,10 @@ public:
 	{ return mep_objective; }
 
 	/// \brief Wrapper function.
-	void init()
-	{ mep_objective->init(); }
+	void init(){
+		mep_objective->setRng(this->mep_rng);
+		mep_objective->init();
+	}
 
 	/// \brief Wrapper function.
 	virtual std::size_t numberOfObjectives() const

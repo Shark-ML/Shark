@@ -159,13 +159,13 @@ void applyHouseholderOnTheLeft(
 /// matrix and ensures that the signs of Q are correct by multiplying every column of Q
 /// with the sign of the diagonal of R. 
 ///
-/// We use nother algorithm implemented in the paper which works similarly, but 
+/// We use another algorithm implemented in the paper which works similarly, but 
 /// reversed. We apply Householder rotations H_N H_{N-1}..H_1 where
 /// H_1 is generated from a random vector on the n-dimensional unit sphere.
 /// this requires less operations and is thus preferable. Also only half the
 /// random numbers need to be generated
-template< class MatrixT, typename randomType >
-void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,randomType& rng){
+template< class MatrixT>
+void randomRotationMatrix(random::rng_type& rng, matrix_container<MatrixT, cpu_tag>& matrixC){
 	MatrixT& matrix = matrixC();
 	SIZE_CHECK(matrix.size1() == matrix.size2());
 	SIZE_CHECK(matrix.size1() > 0);
@@ -194,27 +194,13 @@ void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC,randomType
 	}
 }
 
-/// \brief Initializes a matrix such that it forms a random rotation
-///
-///matrix.  The matrix needs to be quadratic and have the proper size
-///(e.g. call matrix::resize before) uses the global RNG.
-template<class MatrixT>
-void randomRotationMatrix(matrix_container<MatrixT, cpu_tag>& matrixC){
-	randomRotationMatrix( matrixC, random::globalRng );
-}
-
 //! Creates a random rotation matrix with a certain size using the random number generator rng.
-template<typename randomType>
-RealMatrix randomRotationMatrix(size_t size,randomType& rng){
+RealMatrix randomRotationMatrix(random::rng_type& rng, size_t size){
 	RealMatrix mat(size,size);
-	randomRotationMatrix(mat,rng);
+	randomRotationMatrix(rng, mat);
 	return mat;
 }
 
-//! Creates a random rotation matrix with a certain size using the global random number gneerator.
-inline RealMatrix randomRotationMatrix(size_t size){
-	return randomRotationMatrix( size, shark::random::globalRng );
-}
 
 /** @}*/
 }}

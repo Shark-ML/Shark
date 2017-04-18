@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Random_Rotation_Matrix ){
 	for(std::size_t test = 0;test!=NumTests;++test){
 
 		//test whether R^TR = RR^T = I
-		RealMatrix R = blas::randomRotationMatrix(Dimensions);
+		RealMatrix R = blas::randomRotationMatrix(random::globalRng, Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
 			BOOST_CHECK_SMALL(norm_2(row(R,i))-1,1.e-12);
 			BOOST_CHECK_SMALL(norm_2(column(R,i))-1,1.e-12);

@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_SingleObjective_Infeasible ) {
 	std::size_t trials = 0;
 	while(trials < 1000){
 		TestIndividualSOO tester;
-		generator.generateRandomPoint(tester.m_point);
+		generator.generateRandomPoint(random::globalRng, tester.m_point);
 		
 		RealVector corrected=tester.m_point;
 		objective.closestFeasible(corrected);
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_MultiObjective_Infeasible ) {
 	std::size_t trials = 0;
 	while(trials < 1000){
 		TestIndividualMOO tester;
-		generator.generateRandomPoint(tester.m_point);
+		generator.generateRandomPoint(random::globalRng, tester.m_point);
 		if(objective.isFeasible(tester.m_point)) continue;//don't increase trial counters
 		
 		RealVector corrected=tester.m_point;

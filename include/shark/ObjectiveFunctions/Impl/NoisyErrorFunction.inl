@@ -54,7 +54,7 @@ public:
 		AbstractLoss<LabelType,OutputType>* loss,
 		std::size_t batchSize=1
 	): mep_model(model), mep_loss(loss), m_dataset(dataset)
-	, m_batchSize(batchSize), m_dataSize(dataset.numberOfElements()), mpe_rng(&random::globalRng)
+	, m_batchSize(batchSize), m_dataSize(dataset.numberOfElements())
 	{
 		SHARK_ASSERT(model!=NULL);
 		SHARK_ASSERT(loss!=NULL);
@@ -84,12 +84,12 @@ public:
 		if(m_batchSize > 0){
 			//prepare batch for the current iteration
 			std::vector<std::size_t> indices(m_batchSize);
-			std::generate(indices.begin(),indices.end(),[&](){return random::discrete(*mpe_rng, std::size_t(0), m_dataSize -1);});
+			std::generate(indices.begin(),indices.end(),[&](){return random::discrete(*mep_rng, std::size_t(0), m_dataSize -1);});
 			BatchDataType  batch = subBatch(m_dataset,indices);
 			
 			return evalForBatch(input,batch);
 		}else{
-			std::size_t batchIndex = random::discrete(*mpe_rng, std::size_t(0),m_dataset.dataset().numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.dataset().numberOfBatches()-1);
 			return evalForBatch(input,m_dataset.dataset().batch(batchIndex));
 		}
 	}
@@ -98,12 +98,12 @@ public:
 		if(m_batchSize > 0){
 			//prepare batch for the current iteration
 			std::vector<std::size_t> indices(m_batchSize);
-			std::generate(indices.begin(),indices.end(),[&](){return random::discrete(*mpe_rng, std::size_t(0), m_dataSize -1);});
+			std::generate(indices.begin(),indices.end(),[&](){return random::discrete(*mep_rng, std::size_t(0), m_dataSize -1);});
 			BatchDataType  batch = subBatch(m_dataset,indices);
 			
 			return evalDerivativeForBatch(input, derivative, batch);
 		}else{
-			std::size_t batchIndex = random::discrete(*mpe_rng, std::size_t(0),m_dataset.dataset().numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.dataset().numberOfBatches()-1);
 			return evalDerivativeForBatch(input, derivative, m_dataset.dataset().batch(batchIndex));
 		}
 		

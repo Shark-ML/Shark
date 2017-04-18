@@ -60,7 +60,8 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 	}
 	
 	void init(){
-		m_rotation = blas::randomRotationMatrix(numberOfVariables());
+		m_rotation = blas::randomRotationMatrix(*mep_rng, numberOfVariables());
+		m_objective->setRng(mep_rng);
 		m_objective->init();
 	}
 	
@@ -78,7 +79,7 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 		return prod(trans(m_rotation),y);
 	}
 
-	double eval( const SearchPointType & p ) const {
+	double eval( SearchPointType const& p ) const {
 		m_evaluationCounter++;
 		RealVector x = prod(m_rotation,p);
 		return m_objective->eval(x);

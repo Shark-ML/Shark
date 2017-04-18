@@ -69,13 +69,13 @@ public:
 
 	/// Adds a new objective function with a
 	/// weight of one to the linear combination.
-	void add(element const& e){
+	void add(element& e){
 		add(1.0, e);
 	}
 
 	/// Adds a new objective function with
 	/// a weight to the linear combination.
-	void add(double weight, element const& e)
+	void add(double weight, element& e)
 	{
 		SHARK_RUNTIME_CHECK(weight >= 0.0, "[CombinedObjectiveFunction::add] weight must be non-negative");
 
@@ -95,6 +95,13 @@ public:
 			if (! m_elements[i]->isFeasible(input))
 				return false;
 		return true;
+	}
+	
+	void init(){
+		for ( std::size_t i=0; i<m_elements.size(); i++){
+			m_elements[i]->setRng(this->mep_rng);
+			m_elements[i]->init();
+		}
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -154,7 +161,7 @@ protected:
 	std::vector<double> m_weight;
 
 	/// list of "base" objective functions
-	std::vector<const element*> m_elements;
+	std::vector<element*> m_elements;
 };
 
 

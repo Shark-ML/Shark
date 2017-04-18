@@ -84,10 +84,10 @@ public:
 		}
 	}
 	
-	virtual void generateRandomPoint( Vector & startingPoint )const {
+	virtual void generateRandomPoint(random::rng_type& rng, Vector & startingPoint )const {
 		startingPoint.resize(dimensions());
 		for(std::size_t i = 0; i != dimensions(); ++i){
-			startingPoint(i) = random::uni(random::globalRng, m_lower(i),m_upper(i));
+			startingPoint(i) = random::uni(rng, m_lower(i),m_upper(i));
 		}
 	}
 	

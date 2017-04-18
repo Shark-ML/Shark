@@ -68,7 +68,7 @@ struct Ackley : public SingleObjectiveFunction {
 		x.resize(m_numberOfVariables);
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(random::globalRng, -10, 10);
+			x(i) = random::uni(*mep_rng, -10, 10);
 		}
 		return x;
 	}
