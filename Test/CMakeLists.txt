@@ -133,6 +133,7 @@ shark_add_test( Algorithms/GridSearch.cpp Algorithms_GridSearch )
 shark_add_test( Algorithms/Hypervolume.cpp Algorithms_Hypervolume )
 shark_add_test( Algorithms/nearestneighbors.cpp Algorithms_NearestNeighbor )
 shark_add_test( Algorithms/KMeans.cpp Algorithms_KMeans )
+shark_add_test( Algorithms/ApproximateKernelExpansion.cpp Algorithms_ApproximateKernelExpansion )
 shark_add_test( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
 
 # Models
@@ -208,7 +209,6 @@ shark_add_test( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFun
 shark_add_test( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )
 shark_add_test( ObjectiveFunctions/Benchmarks.cpp ObjFunct_Benchmarks )
 shark_add_test( ObjectiveFunctions/KernelTargetAlignment.cpp ObjFunct_KernelTargetAlignment )
-shark_add_test( ObjectiveFunctions/KernelBasisDistance.cpp ObjFunct_KernelBasisDistance )
 shark_add_test( ObjectiveFunctions/RadiusMarginQuotient.cpp ObjFunct_RadiusMarginQuotient )
 shark_add_test( ObjectiveFunctions/LooError.cpp ObjFunct_LooError )
 shark_add_test( ObjectiveFunctions/LooErrorCSvm.cpp ObjFunct_LooErrorCSvm )
@@ -258,7 +258,6 @@ shark_add_test( RBM/ExactGradientTraining.cpp RBM_ExactGradientTraining)
 #marking tests as slow
 set_tests_properties( DirectSearch_HypervolumeContribution PROPERTIES LABELS "slow" )
 set_tests_properties( Models_CMAC PROPERTIES LABELS "slow" )
-set_tests_properties( ObjFunct_KernelBasisDistance PROPERTIES LABELS "slow" )
 set_tests_properties( ObjFunct_SvmLogisticInterpretation PROPERTIES LABELS "slow" )
 set_tests_properties( ObjFunct_NegativeLogLikelihood PROPERTIES LABELS "slow" )
 set_tests_properties( ObjFunct_LooErrorCSvm PROPERTIES LABELS "slow" )

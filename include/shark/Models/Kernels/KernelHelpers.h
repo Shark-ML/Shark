@@ -119,7 +119,7 @@ void calculateMixedKernelMatrix(
 	for (std::size_t i=0; i<B1; i++){
 		std::size_t startX = batchStart1[i];
 		std::size_t endX = batchStart1[i+1];
-		SHARK_PARALLEL_FOR(int j=0; j < B2; j++){
+		SHARK_PARALLEL_FOR(int j=0; j < (int)B2; j++){
 			std::size_t startY = batchStart2[j];
 			std::size_t endY = batchStart2[j+1];
 			RealMatrix submatrix = kernel(dataset1.batch(i), dataset2.batch(j));

@@ -7,6 +7,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include  <shark/Core/Random.h>
+#include  <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark{
 //estimates Derivative using the formula:

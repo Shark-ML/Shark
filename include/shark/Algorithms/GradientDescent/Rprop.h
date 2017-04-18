@@ -152,6 +152,11 @@ public:
 	double maxDelta() const {
 		return *std::max_element(m_delta.begin(),m_delta.end());
 	}
+	
+	/// \brief Returns the derivative at the current point. Can be used for stopping criteria.
+	RealVector const& derivative()const{
+		return m_derivative;
+	}
 protected:
 	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
 
