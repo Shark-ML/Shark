@@ -39,13 +39,9 @@ using namespace shark;
 
 void BFGS::initModel(){
 	m_hessian.resize(m_dimension, m_dimension);
-	m_hessian.clear();
-	for (size_t i = 0; i < m_dimension; ++i)
-	{
-		m_hessian(i, i) = 1.;
-	}
+	noalias(m_hessian) = blas::identity_matrix<double>(m_dimension);
 }
-void BFGS::computeSearchDirection(){
+void BFGS::computeSearchDirection(ObjectiveFunctionType const&){
 	RealVector gamma = m_derivative - m_lastDerivative;
 	RealVector delta = m_best.point - m_lastPoint;
 	double d = inner_prod(gamma,delta);
@@ -55,7 +51,7 @@ void BFGS::computeSearchDirection(){
 	//update hessian
 	if (d < 1e-20)
 	{
-		initModel();
+		noalias(m_hessian) = blas::identity_matrix<double>(m_dimension);
 	}
 	else
 	{

@@ -49,7 +49,7 @@ class BFGS : public AbstractLineSearchOptimizer
 {
 protected:
 	SHARK_EXPORT_SYMBOL void initModel();
-	SHARK_EXPORT_SYMBOL void computeSearchDirection();
+	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const&);
 public:
 	std::string name() const
 	{ return "BFGS"; }

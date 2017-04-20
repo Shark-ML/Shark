@@ -45,6 +45,11 @@ AbstractLineSearchOptimizer::AbstractLineSearchOptimizer() {
 
 void AbstractLineSearchOptimizer::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 	checkFeatures(objectiveFunction);
+	if(objectiveFunction.isConstrained()){
+		//backtracking is the only alorithm that can handle constraints (e.g. initial bracketing phases are going to be nasty)
+		m_linesearch.lineSearchType() = LineSearch::Backtracking;
+		SHARK_RUNTIME_CHECK(objectiveFunction.isFeasible(startingPoint), "Initial point is not feasible");
+	}
 
 	m_linesearch.init(objectiveFunction);
 	m_dimension = startingPoint.size();
@@ -61,6 +66,9 @@ void AbstractLineSearchOptimizer::init(ObjectiveFunctionType const& objectiveFun
 	for (size_t i = 0; i < m_derivative.size(); ++i)
 		m_initialStepLength += std::abs(m_derivative(i));
 	m_initialStepLength = std::min(1.0, 1.0 / m_initialStepLength);
+	while(!objectiveFunction.isFeasible(m_best.point + m_initialStepLength * m_searchDirection)){
+		m_initialStepLength /= 2.0;
+	}
 	
 	initModel();
 }
@@ -72,7 +80,7 @@ void AbstractLineSearchOptimizer::step(ObjectiveFunctionType const& objectiveFun
 	m_lastValue = m_best.value;
 	m_linesearch(m_best.point, m_best.value, m_searchDirection, m_derivative, m_initialStepLength);
 	m_initialStepLength = 1.0;
-	computeSearchDirection();
+	computeSearchDirection(objectiveFunction);
 }
 
 //from ISerializable

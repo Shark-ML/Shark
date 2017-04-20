@@ -36,10 +36,10 @@
 
 using namespace shark;
 
-void CG::initModel() {
+void CG::initModel(){
 	m_count = 0;
 }
-void CG::computeSearchDirection(){
+void CG::computeSearchDirection(ObjectiveFunctionType const&){
 	//after numReset conjugent gradient steps, we reset automatically to the original gradient.
 	//this ensure numerical stability near the optimum.
 	m_count++;

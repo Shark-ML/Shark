@@ -58,7 +58,7 @@ namespace shark {
 class CG : public AbstractLineSearchOptimizer{
 protected:
 	SHARK_EXPORT_SYMBOL void initModel();
-	SHARK_EXPORT_SYMBOL void computeSearchDirection();
+	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const& objectiveFunction);
 public:
 	std::string name() const
 	{ return "CG"; }
