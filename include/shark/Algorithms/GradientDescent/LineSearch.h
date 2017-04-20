@@ -39,6 +39,7 @@
 #include <shark/Core/ISerializable.h>
 #include "Impl/wolfecubic.inl"
 #include "Impl/dlinmin.inl"
+#include "Impl/backtracking.inl"
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark {
@@ -50,8 +51,9 @@ namespace shark {
 class LineSearch:public ISerializable {
 public:
 	enum LineSearchType {
-	    Dlinmin,
-	    WolfeCubic
+		Dlinmin,
+		WolfeCubic,
+		Backtracking,
 	};
 	typedef AbstractObjectiveFunction<RealVector,double> ObjectiveFunction;
 
@@ -105,6 +107,9 @@ public:
 			break;
 		case WolfeCubic:
 			detail::wolfecubic(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
+			break;
+		case Backtracking:
+			detail::backtracking(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
 			break;
 		}
 	}
