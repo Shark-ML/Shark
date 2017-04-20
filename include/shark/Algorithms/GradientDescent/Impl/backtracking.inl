@@ -47,8 +47,8 @@ void backtracking(
 	SIZE_CHECK(point.size() == gradient.size());
 
 	// Constants
-	const std::size_t maxIter = 50; //maximum number of iterations to try
-	const double shrinking = 0.7;//shrinking factor when condition is not yet fulfilled
+	const std::size_t maxIter = 100; //maximum number of iterations to try
+	const double shrinking = 0.5;//shrinking factor when condition is not yet fulfilled
 	const double c1 = 1e-4;//constant for weak wolfe condition
 	
 	double gtd = inner_prod(gradient, searchDirection);
