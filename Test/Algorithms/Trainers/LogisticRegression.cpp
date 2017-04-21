@@ -153,5 +153,51 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_Lone){
 	}
 }
 
+BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone_Weighted){
+	random::globalRng.seed(42);
+	PamiToy problem;
+	ClassificationDataset const& baseDataset = problem.generateDataset(50);
+	WeightedLabeledData<RealVector, unsigned int> dataset(baseDataset, 1.0);
+	for(double& weight: dataset.weights().elements()){
+		weight = random::uni(random::globalRng, 0.1,2);
+	}
+	double lambda1 = 0.1;
+	LogisticRegression<> trainer(lambda1,0.1);
+	BOOST_CHECK_EQUAL(trainer.lambda1(),lambda1);
+	BOOST_CHECK_EQUAL(trainer.lambda2(),0.1);
+	BOOST_CHECK_EQUAL(trainer.parameterVector()(0),lambda1);
+	BOOST_CHECK_EQUAL(trainer.parameterVector()(1),0.1);
+	BOOST_CHECK_EQUAL(trainer.accuracy(), 1.e-8);
+	LogisticRegression<>::ModelType model;
+	trainer.train(model,dataset);
+	
+	BOOST_CHECK_EQUAL(model.numberOfParameters(),11);
+	
+	//check gradient
+	{
+		RealVector point = model.parameterVector();
+		CrossEntropy loss;
+		ErrorFunction error(dataset, &model.decisionFunction(),&loss);
+		RealVector derivative;
+		error.evalDerivative(point,derivative);
+		RealVector penalty = 0.1 * point;
+		penalty(10) = 0;
+		derivative += penalty;
+		
+		//create subgradient derivative
+		for(std::size_t i = 0; i != 10; ++i){
+			if(std::abs(point(i)) > 1.e-13)
+				derivative(i) += lambda1 * (point(i) > 0? 1.0 : -1.0);
+			else//otherwise choose the proper subgradient that makes the resulting gradient smallest
+				derivative(i) -= std::min(lambda1,std::abs(derivative(i))) * (derivative(i) > 0? 1.0 : -1.0);
+		}
+		
+		std::cout<<point<<std::endl;
+		std::cout<<derivative<<std::endl;
+		
+		BOOST_CHECK_SMALL(norm_inf(derivative),1.e-8);
+	}
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

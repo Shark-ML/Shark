@@ -37,7 +37,7 @@
 #define SHARK_ALGORITHMS_TRAINERS_LOGISTICREGRESSION_H
 
 #include <shark/Models/LinearClassifier.h>
-#include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Algorithms/GradientDescent/LBFGS.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h>
@@ -51,8 +51,9 @@ namespace shark {
 /// \brief Trainer for Logistic regression
 ///
 /// Logistic regression solves the following optimization problem:
-/// \f[ \min_{w,b} \sum_i l(y_i,f(x_i^Tw+b)) +\lambda_1 |w|_1 +\lambda_2 |w|^2_2 \f]
-/// Where \f$l\f$ is the cross-entropy loss. Logistic regression is one of the most well known
+/// \f[ \min_{w,b} \sum_i u_i l(y_i,f(x_i^Tw+b)) +\lambda_1 |w|_1 +\lambda_2 |w|^2_2 \f]
+/// Where \f$l\f$ is the cross-entropy loss and \f$u_i\f$ are individual weuights for each point(assumed to be 1).
+/// Logistic regression is one of the most well known
 /// machine learning algorithms for classification using linear models.
 ///
 /// The solver is based on LBFGS for the case where no l1-regularization is used. Otherwise
@@ -60,11 +61,14 @@ namespace shark {
 /// is used. This is one of the most efficient solvers for logistic regression as long as the
 /// number of data points is not too large.
 template <class InputVectorType = RealVector>
-class LogisticRegression : public AbstractTrainer<LinearClassifier<InputVectorType> >, public IParameterizable
+class LogisticRegression : public AbstractWeightedTrainer<LinearClassifier<InputVectorType> >, public IParameterizable
 {
+private:
+	typedef AbstractWeightedTrainer<LinearClassifier<InputVectorType> > base_type;
 public:
-	typedef LinearClassifier<InputVectorType> ModelType;
-	typedef LabeledData<InputVectorType, unsigned int> DataType;
+	typedef typename base_type::ModelType ModelType;
+	typedef typename base_type::DatasetType DatasetType;
+	typedef typename base_type::WeightedDatasetType WeightedDatasetType;
 
 	/// \brief Constructor.
 	///
@@ -133,9 +137,20 @@ public:
 		return 2;
 	}
 
-	/// \brief Train a linear model with LASSO regression.
-	void train(ModelType& model, DataType const& dataset){
-		
+	/// \brief Train a linear model with logistic regression.
+	void train(ModelType& model, DatasetType const& dataset){
+		optimize(model, dataset);
+	}
+	
+	/// \brief Train a linear model with logistic regression using weights.
+	void train(ModelType& model, WeightedDatasetType const& dataset){
+		optimize(model, dataset);
+	}
+	
+private:
+	
+	template<class DatasetT>
+	void optimize(ModelType& model, DatasetT const& dataset){
 		//initialize model
 		std::size_t numOutputs = numberOfClasses(dataset);
 		if(numOutputs == 2) numOutputs = 1;
@@ -146,7 +161,7 @@ public:
 		
 		//setup error function
 		CrossEntropy loss;
-		ErrorFunction error(dataset, &innerModel, &loss);
+		ErrorFunction error(dataset, &innerModel, &loss);//note: chooses a different implementation depending on the dataset type
 		
 		//handle two-norm regularization
 		TwoNormRegularizer regularizer;
