@@ -79,6 +79,10 @@ public:
 		return m_mu;
 	}
 	
+	std::size_t numInitPoints() const{
+		return m_mu;
+	}
+	
 	double initialSigma()const{
 		return m_initialSigma;
 	}

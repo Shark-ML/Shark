@@ -112,6 +112,10 @@ public:
 	std::size_t mu() const{
 		return m_mu;
 	}
+	
+	std::size_t numInitPoints() const{
+		return m_mu;
+	}
 
 	std::size_t approxMu() const{
 		return m_approxMu;

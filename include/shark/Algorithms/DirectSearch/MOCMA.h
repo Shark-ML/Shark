@@ -82,6 +82,11 @@ public:
 		return m_mu;
 	}
 	
+	/// \brief The number of points used for initialization of the algorithm.
+	std::size_t numInitPoints() const{
+		return m_mu;
+	}
+	
 	double initialSigma()const{
 		return m_initialSigma;
 	}

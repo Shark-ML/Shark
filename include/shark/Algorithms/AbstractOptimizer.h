@@ -38,34 +38,32 @@
 
 namespace shark {
 
-/**
-* \brief An optimizer that optimizes general objective functions
-* 
-* After construction and configurationg the optimizer, init() is called with the objective function
-* to be used. After that step() can be called until the required solution is found. The solution can be queried
-* using solution(). The type of the solution depends on the optimisation problem at hand.
-* It is allowed to add constrains on the features the objective function needs to offer
-* 
-* These are:
-*	- REQUIRES_VALUE: The function is evaluated to use the optimizer and
-*	  the HAS_VALUE-flag must be set
-*	- REQUIRES_FIRST_DERIVATIVE: The first derivative needs to be evaluated and
-*	- HAS_FIRST_DERIVATIVE must be set
-*	- REQUIRES_SECOND_DERIVATIVE: The second derivative needs to be evaluated and
-*	- HAS_SECOND_DERIVATIVE must be set
-*	- CAN_SOLVE_CONSTRAINED: The optimizer can solve functions which are constrained and
-*	  where the IS_CONSTRAINED_FEATURE is set.
-*	- REQUIRES_CLOSEST_FEASIBLE: If the function is constrained, it must offer a way to
-*	construct the closest feasible point and
-*	- CAN_PROVIDE_CLOSEST_FEASIBLE must be set
-* 
-* Also when init() is called as offered by the AbstractOptimizer interface, the function
-* is required to have the CAN_PROPOSE_STARTING_POINT flag.
-* 
-* \tparam PointType The type of search space the optimizer works upon.
-* \tparam ResultT The objective space the optimizer works upon.
-* \tparam SolutionTypeT The type of the final solution.
-*/
+/// \brief An optimizer that optimizes general objective functions
+/// 
+/// After construction and configurationg the optimizer, init() is called with the objective function
+/// to be used. After that step() can be called until the required solution is found. The solution can be queried
+/// using solution(). The type of the solution depends on the optimisation problem at hand.
+/// It is allowed to add constrains on the features the objective function needs to offer
+/// 
+/// These are:
+///	- REQUIRES_VALUE: The function is evaluated to use the optimizer and
+///	  the HAS_VALUE-flag must be set
+///	- REQUIRES_FIRST_DERIVATIVE: The first derivative needs to be evaluated and
+///	- HAS_FIRST_DERIVATIVE must be set
+///	- REQUIRES_SECOND_DERIVATIVE: The second derivative needs to be evaluated and
+///	- HAS_SECOND_DERIVATIVE must be set
+///	- CAN_SOLVE_CONSTRAINED: The optimizer can solve functions which are constrained and
+///	  where the IS_CONSTRAINED_FEATURE is set.
+///	- REQUIRES_CLOSEST_FEASIBLE: If the function is constrained, it must offer a way to
+///	construct the closest feasible point and
+///	- CAN_PROVIDE_CLOSEST_FEASIBLE must be set
+/// 
+/// Also when init() is called as offered by the AbstractOptimizer interface, the function
+/// is required to have the CAN_PROPOSE_STARTING_POINT flag.
+/// 
+/// \tparam PointType The type of search space the optimizer works upon.
+/// \tparam ResultT The objective space the optimizer works upon.
+/// \tparam SolutionTypeT The type of the final solution.
 template <typename PointType, typename ResultT, typename SolutionTypeT>
 class AbstractOptimizer : public INameable, public ISerializable {
 public:
@@ -74,10 +72,8 @@ public:
 	typedef SolutionTypeT SolutionType;
 	typedef AbstractObjectiveFunction<PointType,ResultType> ObjectiveFunctionType;
 
-	/**
-	* \brief Models features that the optimizer requires from the objective function.
-	* \sa AbstractObjectiveFunction
-	*/
+	/// \brief Models features that the optimizer requires from the objective function.
+	/// \sa AbstractObjectiveFunction
 	enum Feature {
 		REQUIRES_VALUE          	=  1,
 		REQUIRES_FIRST_DERIVATIVE	=  2,
@@ -105,37 +101,54 @@ public:
 		return features()& REQUIRES_CLOSEST_FEASIBLE;
 	}
 
-	/**
-	* \brief Empty virtual d'tor.
-	*/
 	virtual ~AbstractOptimizer() {}
+	
+	/// \brief Returns the number of points this method requires for initialisation
+	///
+	/// The number of points supplied is allowed to be smaller, however in this case
+	/// the optimizer will resort to techniques generating additional points if needed.
+	virtual std::size_t numInitPoints() const = 0;
 
-	/**
-	* \brief Initialize the optimizer for the supplied objective function.
-	*
-	* Be aware that function.init() has to be called before calling this function!
-	* \param [in] function The objective function to initialize for.
-	*/
-	virtual void init( ObjectiveFunctionType& function ) = 0;
+	/// \brief Initialize the optimizer for the supplied objective function.
+	///
+	/// Be aware that function.init() has to be called before calling this function!
+	/// This function will initialize the algorithm with a number of points proposed
+	/// by the function. Note that this must fail if the function can not propose starting point(s).
+	///
+	/// \param [in] function The objective function to initialize for.
+	virtual void init( ObjectiveFunctionType& function ){
+		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
+		std::vector<SearchPointType> initPoints(numInitPoints());
+		for(SearchPointType& point: initPoints){
+			point = function.proposeStartingPoint();
+		}
+		init(function,initPoints);
+	}
+	
+	
+	/// \brief Initialize the optimizer for the supplied objective function using a set of initialisation points
+	///
+	/// Most single objective algorithms only require a single point. However multi-objective algorithms
+	/// need a set of initialisation points. The number of points required should be numInitPoints().
+	/// Otherwise the algorithm might use heuristics to generate additional points if needed.
+	///
+	/// Be aware that function.init() has to be called before calling this function!
+	/// \param [in] function The objective function to initialize for.
+	/// \param [in] initPoints points used for initialisation. Should be at least numInitPoints().
+	virtual void init( ObjectiveFunctionType& function, std::vector<SearchPointType> const& initPoints ) = 0;
 
-	/**
-	* \brief Carry out one step of the optimizer for the supplied objective function.
-	* \param [in] function The objective function to initialize for.
-	*/
+	/// \brief Carry out one step of the optimizer for the supplied objective function.
+	/// \param [in] function The objective function to initialize for.
 	virtual void step( ObjectiveFunctionType const& function ) = 0;
 
-	/**
-	* \brief Accesses the best solution obtained so far. 
-	* \returns An immutable reference to the best solution obtained so far.
-	*/
+	/// \brief Accesses the best solution obtained so far. 
+	/// \return An immutable reference to the best solution obtained so far.
 	virtual SolutionType const& solution() const = 0; //mt_hint: try accessing this thing via solution().point and solution().value..
 
 protected:
-	/**
-	* \brief Convenience function that checks whether the features of the supplied objective function match with the required features of the optimizer.
-	* \param [in] objectiveFunction The function to match with.
-	* \throws shark::Exception
-	*/
+	/// \brief Convenience function that checks whether the features of the supplied objective function match with the required features of the optimizer.
+	/// \param [in] objectiveFunction The function to match with.
+	/// \throws shark::Exception
 	void checkFeatures (ObjectiveFunctionType const& objectiveFunction){
 		//test whether the function can be evaluated
 		SHARK_RUNTIME_CHECK(!requiresValue() || objectiveFunction.hasValue(), name()+" Requires value of objective function");

@@ -92,6 +92,10 @@ public:
 		return m_mu;
 	}
 	
+	std::size_t numInitPoints() const{
+		return m_mu;
+	}
+	
 	HypervolumeIndicator& indicator(){
 		return m_selection.indicator();
 	}

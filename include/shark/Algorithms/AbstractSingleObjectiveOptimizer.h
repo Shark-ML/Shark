@@ -40,11 +40,11 @@
 namespace shark {
 	///\brief Base class for all single objective optimizer
 	///
-	///This class is a spezialization of the AbstractOptimizer itnerface for the class of single objective optimizers. A single objective optimizer is an optimizer
-	///which can only optimize functions with a single objective. This is the default case for most optimisation problems. 
-	///the class requires the ObjectiveFunction to provide a feasible starting point. If this is not possible, a second version of init is provided where the starting point can be 
-	///explicitely defined. 
-	///The Return type of an SingleObjectiveOptimizer is the SingleObjectiveResultSet which is a struct returning the best value of the function and together with it's point.
+	/// This class is a spezialization of the AbstractOptimizer itnerface for the class of single objective optimizers. A single objective optimizer is an optimizer
+	/// which can only optimize functions with a single objective. This is the default case for most optimisation problems. 
+	/// the class requires the ObjectiveFunction to provide a feasible starting point. If this is not possible, a second version of init is provided where the starting point can be 
+	/// explicitely defined. 
+	/// The Return type of an SingleObjectiveOptimizer is the SingleObjectiveResultSet which is a struct returning the best value of the function and together with it's point.
 	template<class PointType>
 	class AbstractSingleObjectiveOptimizer: public AbstractOptimizer<PointType,double,SingleObjectiveResultSet<PointType> >{
 	private:
@@ -55,12 +55,29 @@ namespace shark {
 		typedef typename base_type::ResultType ResultType;
 		typedef typename base_type::ObjectiveFunctionType ObjectiveFunctionType;
 
-		///initializes the optimizer. The objectivefunction is required to provide a starting point, so CAN_PROPOSE_STARTING_POINT
-		///must be set. If this is not the case, an exception is thrown
-		virtual void init(ObjectiveFunctionType& function ){
-			SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
-			init(function,function.proposeStartingPoint());
+		///\brief By default most single objective optimizers only require a single point
+		std::size_t numInitPoints() const{
+			return 1;
 		}
+		
+		using base_type::init;
+		
+		/// \brief Initialize the optimizer for the supplied objective function using a set of initialisation points
+		///
+		/// The default implementation picks either the first point in the set, or if it is enmpty, trys
+		/// to generate one from the function.
+		///
+		/// Be aware that function.init() has to be called before calling this function!
+		///
+		/// \param [in] function The objective function to initialize for.
+		/// \param [in] initPoints points used for initialisation. Should be at least numInitPoints().
+		virtual void init( ObjectiveFunctionType& function, std::vector<SearchPointType> const& initPoints ){
+			if(initPoints.empty())
+				init(function);
+			else
+				init(function,initPoints[0]);
+		}
+		
 		///initializes the optimizer using a predefined starting point
 		virtual void init(ObjectiveFunctionType& function, SearchPointType const& startingPoint)=0;
 		///returns the current solution of the optimizer
@@ -69,8 +86,8 @@ namespace shark {
 		}
 
 	protected:
-		///current solution of the optimizer
-		SolutionType m_best;
+		
+		SolutionType m_best; ///<Current solution of the optimizer
 	};
 
 }

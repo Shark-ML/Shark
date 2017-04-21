@@ -37,14 +37,12 @@
 
 namespace shark {
 
-/**
- * \brief base class for abstract multi-objective optimizers for arbitrary search spaces.
- *
- * Models an abstract multi-objective optimizer for arbitrary search spaces. The objective space
- * is assumed to be \f$ \mathbb{R}^m\f$.
- *
- * \tparam PointType The type of the points that make up the searchspace.
- */
+/// \brief base class for abstract multi-objective optimizers for arbitrary search spaces.
+///
+/// Models an abstract multi-objective optimizer for arbitrary search spaces. The objective space
+/// is assumed to be \f$ \mathbb{R}^m\f$.
+///
+/// \tparam PointType The type of the points that make up the searchspace.
 template<typename PointTypeT>
 class AbstractMultiObjectiveOptimizer : 
 public AbstractOptimizer<
@@ -63,43 +61,9 @@ public:
 	typedef typename super::SolutionType SolutionType;
 	typedef typename super::ObjectiveFunctionType ObjectiveFunctionType;
 
-	/**
-	* \brief Virtual empty d'tor.
-	*/
-	virtual ~AbstractMultiObjectiveOptimizer() {}
-
-	/**
-	* \brief Initializes the optimizer for the supplied objective function.
-	*
-	* Tries to sample an initial starting point. If the function does not
-	* implement this feature, an exception is thrown. Otherwise, the call is dispatched
-	* to the pure-virtual function.
-	*
-	* \param function The function to be initialized for.
-	* \throws Exception if the function does not feature the proposal of starting points.
-	*/
-	virtual void init(ObjectiveFunctionType & function ) {
-		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
-		std::vector<RealVector> startingPoints(1);
-		startingPoints[0] = function.proposeStartingPoint();
-		init(function,startingPoints);
-	}
-
-	/**
-	* \brief Optimizer-specific init-function. Needs to be implemented by subclasses.
-	* \param [in] function The function to initialize the optimizer for.
-	* \param [in] startingPoints An initial population of points
-	*/
-	virtual void init( 
-		ObjectiveFunctionType& function, 
-		std::vector<SearchPointType> const& startingPoints
-	) = 0;
-
-	/**
-	* \brief Accesses the current approximation of the Pareto-set and -front, respectively.
-	* \returns The current set of candidate solutions.
-	*/
-	const SolutionType & solution() const {
+	/// \brief Accesses the current approximation of the Pareto-set and -front, respectively.
+	/// \returns The current set of candidate solutions.
+	SolutionType const& solution() const {
 		return m_best;
 	}
 

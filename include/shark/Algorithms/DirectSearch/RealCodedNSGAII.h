@@ -107,6 +107,12 @@ public:
 	std::size_t& mu(){
 		return m_mu;
 	}
+	
+	/// \brief The number of points used for initialization of the algorithm.
+	std::size_t numInitPoints() const{
+		return m_mu;
+	}
+	
 	/// \brief Returns the indicator used.
 	Indicator& indicator(){
 		return m_selection.indicator();
