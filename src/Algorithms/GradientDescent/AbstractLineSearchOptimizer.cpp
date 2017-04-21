@@ -1,13 +1,7 @@
 /*!
  * 
  *
- * \brief       BFGS
- * 
- * The Broyden, Fletcher, Goldfarb, Shannon (BFGS) algorithm is a
- * quasi-Newton method for unconstrained real-valued optimization.
- * 
- * 
- *
+ * \brief
  * \author      O. Krause 
  * \date        2010
  *

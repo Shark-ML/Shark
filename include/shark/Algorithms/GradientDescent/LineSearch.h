@@ -7,7 +7,7 @@
  * 
  *
  * \author      O. Krause, S. Dahlgaard
- * \date        2010-2013
+ * \date        2010-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -37,9 +37,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/ISerializable.h>
-#include "Impl/wolfecubic.inl"
-#include "Impl/dlinmin.inl"
-#include "Impl/backtracking.inl"
+#include <shark/Core/DLLSupport.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark {
@@ -99,20 +97,7 @@ public:
 	///@param newtonDirection the search direction of the line search
 	///@param derivative the derivative of the function at searchPoint
 	///@param stepLength initial step length guess for guiding the line search
-	virtual void operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const {
-		switch (m_lineSearchType) {
-		case Dlinmin:
-			detail::dlinmin(searchPoint, newtonDirection, pointValue, *m_function, m_minInterval, m_maxInterval);
-			m_function->evalDerivative(searchPoint, derivative);
-			break;
-		case WolfeCubic:
-			detail::wolfecubic(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
-			break;
-		case Backtracking:
-			detail::backtracking(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
-			break;
-		}
-	}
+	SHARK_EXPORT_SYMBOL void operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const;
 
 	//ISerializable
 	virtual void read(InArchive &archive) {
