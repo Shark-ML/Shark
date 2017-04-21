@@ -672,23 +672,6 @@ std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>
 
 //Stuff for Dimensionality and querying of basic information
 
-template<class InputType>
-double sumOfWeights(WeightedUnlabeledData<InputType> const& dataset){
-	double weightSum = 0;
-	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-		weightSum += sum(dataset.batch(i).weight);
-	}
-	return weightSum;
-}
-template<class InputType, class LabelType>
-double sumOfWeights(WeightedLabeledData<InputType,LabelType> const& dataset){
-	double weightSum = 0;
-	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-		weightSum += sum(dataset.batch(i).weight);
-	}
-	return weightSum;
-}
-
 inline std::size_t numberOfClasses(WeightedUnlabeledData<unsigned int> const& labels){
 	return numberOfClasses(labels.data());
 }
@@ -725,6 +708,35 @@ std::size_t numberOfClasses(WeightedLabeledData<InputType, unsigned int> const& 
 template<class InputType, class LabelType>
 inline std::vector<std::size_t> classSizes(WeightedLabeledData<InputType, LabelType> const& dataset){
 	return classSizes(dataset.labels());
+}
+
+///\brief Returns the total sum of weights.
+template<class InputType>
+double sumOfWeights(WeightedUnlabeledData<InputType> const& dataset){
+	double weightSum = 0;
+	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
+		weightSum += sum(dataset.batch(i).weight);
+	}
+	return weightSum;
+}
+///\brief Returns the total sum of weights.
+template<class InputType, class LabelType>
+double sumOfWeights(WeightedLabeledData<InputType,LabelType> const& dataset){
+	double weightSum = 0;
+	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
+		weightSum += sum(dataset.batch(i).weight);
+	}
+	return weightSum;
+}
+
+/// \brief Computes the cumulative weight of every class.
+template<class InputType>
+RealVector classWeight(WeightedLabeledData<InputType,unsigned int> const& dataset){
+	RealVector weights(numberOfClasses(dataset),0.0);
+	for(auto const& elem: dataset.elements()){
+		weights(elem.data.label) += elem.weight;
+	}
+	return weights;
 }
 
 //creation of weighted datasets

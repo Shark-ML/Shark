@@ -36,66 +36,68 @@
 
 
 #include <shark/Models/Kernels/KernelExpansion.h>
-#include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Data/Dataset.h>
 
 namespace shark {
 
-/*! \brief Kernelized mean-classifier
- *
- * Computes the mean of the training data in feature space for each
- * class and assigns a new data point to the class with the nearest
- * mean.
- */
+/// \brief Kernelized mean-classifier
+///
+/// Computes the mean of the training data in feature space for each
+/// class and assigns a new data point to the class with the nearest
+/// mean. The trainer supports multi-class and weighted data
+///
+/// The resulting classifier is a kernel expansion as assigning the label
+/// with minimum distance (or maximum  negative distance by convention for classifiers)
+/// \f[ max -1/2 ||\phi(x) - m_i||^2 = <\phi(x), m_i> - 1/2<m_i,m_i> \f]
 template<class InputType>
-class KernelMeanClassifier : public AbstractTrainer<KernelClassifier<InputType>, unsigned int>
-{
+class KernelMeanClassifier : public AbstractWeightedTrainer<KernelClassifier<InputType>, unsigned int>{
 public:
 	KernelMeanClassifier(AbstractKernelFunction<InputType>* kernel):mpe_kernel(kernel){}
 		
 	std::string name() const
 	{ return "KernelMeanClassifier"; }
 
-	void train(KernelClassifier<InputType>& model, LabeledData<InputType, unsigned int> const& dataset){
-		SHARK_RUNTIME_CHECK(numberOfClasses(dataset) ==2, "Not a binary classification problem");
-		
-		model.decisionFunction().setStructure(mpe_kernel,dataset.inputs(),true);
-
+	using AbstractWeightedTrainer<KernelClassifier<InputType>, unsigned int>::train;
+	void train(KernelClassifier<InputType>& model, WeightedLabeledData<InputType, unsigned int> const& dataset){
+		RealVector normalization = classWeight(dataset);
 		std::size_t patterns = dataset.numberOfElements();
-		std::vector<std::size_t> numClasses = classSizes(dataset);
-		double coeffs[]     = {0,0};
-		
-		SHARK_RUNTIME_CHECK(numClasses[0] > 0, "Class 0 has no class members" );
-		SHARK_RUNTIME_CHECK(numClasses[1] > 0, "Class 1 has no class members" );
-		
-		coeffs[0] =  1.0 / numClasses[0];
-		coeffs[1] = -1.0 / numClasses[1];
+		std::size_t numClasses = normalization.size();
+		SHARK_RUNTIME_CHECK(min(normalization) > 0, "One class has no member" );
 
-		// compute coefficients and bias term
-		double classBias[]={0.0,0.0};
-		RealVector params(patterns + 1);
+		// compute coefficients and offset term
+		RealVector offset(numClasses,0.0);
+		RealMatrix alpha(patterns, numClasses,0.0);
 		
 		//todo: slow implementation without batch processing!
 		std::size_t i  = 0; 
-		for(auto element: dataset.elements()){
+		for(auto const& element: dataset.elements()){
 		
-			unsigned int y = element.label;
+			unsigned int y = element.data.label;
+			double w = element.weight;
 
 			// compute and set coefficients
-			params(i) = coeffs[y];
+			alpha(i,y) = w / normalization(y);
 			++i;
-			// compute values to calculate bias
+			// compute values to calculate offset
 			for(auto element2: dataset.elements()){
-				if (element2.label != y) 
+				if (element2.data.label != y) 
 					continue;
 				//todo: fast implementation should create batches of same class elements and process them!
-				classBias[y] += mpe_kernel->eval(element.input, element2.input);
+				offset(y) += w * element2.weight * mpe_kernel->eval(element.data.input, element2.data.input);
 			}
 		}
-		// set bias
-		params(patterns) = 0.5 * (classBias[0] * sqr(coeffs[0]) - classBias[1] * sqr(coeffs[1]));
-		// pass parameters to model, note the negation
-		model.setParameterVector(-params); 
+		noalias(offset) /= sqr(normalization);
+		
+		if(numClasses == 2){
+			model.decisionFunction().setStructure(mpe_kernel,dataset.inputs(),true);
+			noalias(column(model.decisionFunction().alpha(),0)) = column(alpha,1) - column(alpha,0);
+			model.decisionFunction().offset()(0) = (offset(0) - offset(1))/2;
+		}else{
+			model.decisionFunction().setStructure(mpe_kernel,dataset.inputs(),true, numClasses);
+			noalias(model.decisionFunction().alpha()) = alpha;
+			noalias(model.decisionFunction().offset()) = -offset/2;
+		}
 	}
 	
 	AbstractKernelFunction<InputType>* mpe_kernel;
