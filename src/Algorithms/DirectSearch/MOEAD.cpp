@@ -42,19 +42,8 @@ MOEAD::MOEAD(random::rng_type & rng) : mpe_rng(&rng){
 	m_features |= CAN_SOLVE_CONSTRAINED;
 }
 
-void MOEAD::init(ObjectiveFunctionType & function){
-	checkFeatures(function);
-	SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(),"Function can not propose a starting point");
-	std::vector<SearchPointType> points(mu());
-	for(std::size_t i = 0; i < mu(); ++i)
-	{
-		points[i] = function.proposeStartingPoint();
-	}
-	init(function, points);
-}
-
 void MOEAD::init(
-	ObjectiveFunctionType & function,
+	ObjectiveFunctionType const& function,
 	std::vector<SearchPointType> const & initialSearchPoints
 ){
 	checkFeatures(function);

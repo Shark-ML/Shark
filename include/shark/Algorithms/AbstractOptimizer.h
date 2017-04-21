@@ -116,7 +116,7 @@ public:
 	/// by the function. Note that this must fail if the function can not propose starting point(s).
 	///
 	/// \param [in] function The objective function to initialize for.
-	virtual void init( ObjectiveFunctionType& function ){
+	virtual void init( ObjectiveFunctionType const& function ){
 		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
 		std::vector<SearchPointType> initPoints(numInitPoints());
 		for(SearchPointType& point: initPoints){
@@ -135,7 +135,7 @@ public:
 	/// Be aware that function.init() has to be called before calling this function!
 	/// \param [in] function The objective function to initialize for.
 	/// \param [in] initPoints points used for initialisation. Should be at least numInitPoints().
-	virtual void init( ObjectiveFunctionType& function, std::vector<SearchPointType> const& initPoints ) = 0;
+	virtual void init( ObjectiveFunctionType const& function, std::vector<SearchPointType> const& initPoints ) = 0;
 
 	/// \brief Carry out one step of the optimizer for the supplied objective function.
 	/// \param [in] function The objective function to initialize for.

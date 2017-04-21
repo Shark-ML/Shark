@@ -77,7 +77,7 @@ public:
 
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
-	void init( ObjectiveFunctionType& function, SearchPointType const& p) {
+	void init( ObjectiveFunctionType const& function, SearchPointType const& p) {
 		checkFeatures(function);
 		
 		std::size_t lambda = suggestLambda( p.size() );

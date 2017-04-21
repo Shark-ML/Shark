@@ -119,9 +119,9 @@ public:
 		archive & BOOST_SERIALIZATION_NVP(m_curParentIndex);
 	}
 
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType & function);
+	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	SHARK_EXPORT_SYMBOL void init(
-		ObjectiveFunctionType & function,
+		ObjectiveFunctionType const& function,
 		std::vector<SearchPointType> const & initialSearchPoints
 	);
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const & function);

@@ -132,7 +132,7 @@ TrustRegionNewton::TrustRegionNewton()
 	m_features |= REQUIRES_SECOND_DERIVATIVE;
 }
 
-void TrustRegionNewton::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initialDelta) {
+void TrustRegionNewton::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initialDelta) {
 	checkFeatures(objectiveFunction);
 
 	m_delta = initialDelta;

@@ -54,11 +54,11 @@ RpropMinus::RpropMinus(){
 	m_minDelta = 0.0;
 }
 
-void RpropMinus::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
+void RpropMinus::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
 void RpropMinus::init(
-	ObjectiveFunctionType & objectiveFunction, 
+	ObjectiveFunctionType const& objectiveFunction, 
 	SearchPointType const& startingPoint, 
 	double initDelta
 ) {
@@ -136,10 +136,10 @@ RpropPlus::RpropPlus()
 {
 }
 
-void RpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
+void RpropPlus::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
-void RpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint, double initDelta)
+void RpropPlus::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta)
 {
 	RpropMinus::init(objectiveFunction,startingPoint,initDelta);
 	m_deltaw.resize(m_parameterSize);
@@ -199,10 +199,10 @@ IRpropPlus::IRpropPlus()
 	m_derivativeThreshold = 0.;
 }
 
-void IRpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
+void IRpropPlus::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
-void IRpropPlus::init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
+void IRpropPlus::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
 	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
 	m_oldError = std::numeric_limits<double>::max();
 }
@@ -266,10 +266,10 @@ IRpropPlusFull::IRpropPlusFull()
 	m_derivativeThreshold = 0.;
 }
 
-void IRpropPlusFull::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
+void IRpropPlusFull::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 	init(objectiveFunction,startingPoint,0.01);
 }
-void IRpropPlusFull::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
+void IRpropPlusFull::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta) {
 	RpropPlus::init(objectiveFunction,startingPoint,initDelta);
 	m_oldError = std::numeric_limits<double>::max();
 }

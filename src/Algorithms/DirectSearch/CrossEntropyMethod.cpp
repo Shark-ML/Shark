@@ -93,7 +93,7 @@ void CrossEntropyMethod::write( OutArchive & archive ) const {
 }
 
 
-void CrossEntropyMethod::init( ObjectiveFunctionType & function, SearchPointType const& p) {
+void CrossEntropyMethod::init( ObjectiveFunctionType const& function, SearchPointType const& p) {
 	
 	unsigned int populationSize = CrossEntropyMethod::suggestPopulationSize( );
 	unsigned int selectionSize = CrossEntropyMethod::suggestSelectionSize( populationSize );
@@ -112,7 +112,7 @@ void CrossEntropyMethod::init( ObjectiveFunctionType & function, SearchPointType
 * \brief Initializes the algorithm for the supplied objective function.
 */
 void CrossEntropyMethod::init(
-	ObjectiveFunctionType& function, 
+	ObjectiveFunctionType const& function, 
 	SearchPointType const& initialSearchPoint,
 	unsigned int populationSize,
 	unsigned int selectionSize,
@@ -202,10 +202,5 @@ void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 
 	m_best.point= parents[ 0 ].searchPoint();
 	m_best.value= parents[ 0 ].unpenalizedFitness();
-}
-
-void CrossEntropyMethod::init(ObjectiveFunctionType& function ){
-	SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
-	CrossEntropyMethod::init(function,function.proposeStartingPoint());
 }
 

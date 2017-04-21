@@ -71,7 +71,7 @@ namespace shark {
 		///
 		/// \param [in] function The objective function to initialize for.
 		/// \param [in] initPoints points used for initialisation. Should be at least numInitPoints().
-		virtual void init( ObjectiveFunctionType& function, std::vector<SearchPointType> const& initPoints ){
+		virtual void init( ObjectiveFunctionType const& function, std::vector<SearchPointType> const& initPoints ){
 			if(initPoints.empty())
 				init(function);
 			else
@@ -79,7 +79,7 @@ namespace shark {
 		}
 		
 		///initializes the optimizer using a predefined starting point
-		virtual void init(ObjectiveFunctionType& function, SearchPointType const& startingPoint)=0;
+		virtual void init(ObjectiveFunctionType const& function, SearchPointType const& startingPoint)=0;
 		///returns the current solution of the optimizer
 		virtual const SolutionType& solution() const{
 			return m_best;

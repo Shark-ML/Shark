@@ -49,21 +49,8 @@ RVEA::RVEA(random::rng_type & rng) : m_rng(&rng){
 	this->m_features |= CAN_SOLVE_CONSTRAINED;
 }
 
-void RVEA::init(RVEA::ObjectiveFunctionType & function){
-	checkFeatures(function);
-	SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(),
-	                    "[" + name() + "::init] Objective function " +
-	                    "does not propose a starting point");
-	std::vector<SearchPointType> points(mu());
-	for(std::size_t i = 0; i < mu(); ++i)
-	{
-		points[i] = function.proposeStartingPoint();
-	}
-	init(function, points);
-}
-
 void RVEA::init(
-	ObjectiveFunctionType & function,
+	ObjectiveFunctionType const& function,
 	std::vector<SearchPointType> const & initialSearchPoints){
 
 	checkFeatures(function);

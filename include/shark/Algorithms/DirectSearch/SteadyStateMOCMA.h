@@ -125,15 +125,7 @@ public:
 		archive << BOOST_SERIALIZATION_NVP(m_initialSigma);
 	}
 	
-	void init( ObjectiveFunctionType& function){
-		checkFeatures(function);
-		SHARK_RUNTIME_CHECK(function.canProposeStartingPoint(), "Objective function does not propose a starting point");
-		std::vector<RealVector> points(mu());
-		for(std::size_t i = 0; i != mu(); ++i){
-			points[i] = function.proposeStartingPoint();
-		}
-		init(function,points);
-	}
+	using AbstractMultiObjectiveOptimizer<RealVector >::init;
 	/**
 	 * \brief Initializes the algorithm for the supplied objective function.
 	 * 
@@ -141,7 +133,7 @@ public:
 	 * \param [in] initialSearchPoints A set of intiial search points.
 	 */
 	void init( 
-		ObjectiveFunctionType& function, 
+		ObjectiveFunctionType const& function, 
 		std::vector<SearchPointType> const& initialSearchPoints
 	){
 		checkFeatures(function);

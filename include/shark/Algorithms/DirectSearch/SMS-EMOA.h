@@ -132,7 +132,7 @@ public:
 	 * \param [in] initialSearchPoints A set of intiial search points.
 	 */
 	void init( 
-		ObjectiveFunctionType& function, 
+		ObjectiveFunctionType const& function, 
 		std::vector<SearchPointType> const& initialSearchPoints
 	){
 		checkFeatures(function);

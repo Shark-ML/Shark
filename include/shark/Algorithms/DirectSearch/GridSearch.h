@@ -219,7 +219,7 @@ public:
 	 *  so don't forget to scale the parameter-ranges of the objective function!
 	 *  The startingPoint can actually be anything, only its dimension has to be correct.
 	 */
-	virtual void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
+	virtual void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
 
 		if(!m_configured)
@@ -462,8 +462,7 @@ public:
 	}
 
 	//! if NestedGridSearch was not configured before this call, it is default initialized ti the range[-1,1] for every parameter
-	virtual void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
-		objectiveFunction.init();
+	virtual void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
 
 		if(!m_configured)
@@ -615,8 +614,7 @@ public:
 	}
 
 	//! If the class wasn't configured before, this method samples random uniform distributed points in [-1,1]^n.
-	void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
-		objectiveFunction.init();
+	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
 
 		if(!m_configured)

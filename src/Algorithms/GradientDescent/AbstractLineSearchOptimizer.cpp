@@ -43,7 +43,7 @@ AbstractLineSearchOptimizer::AbstractLineSearchOptimizer() {
 	m_linesearch.lineSearchType() = LineSearch::WolfeCubic;
 }
 
-void AbstractLineSearchOptimizer::init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint) {
+void AbstractLineSearchOptimizer::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 	checkFeatures(objectiveFunction);
 
 	m_linesearch.init(objectiveFunction);

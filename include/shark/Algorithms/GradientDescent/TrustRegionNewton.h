@@ -79,7 +79,7 @@ public:
 		init(objectiveFunction,startingPoint,0.1);
 	}
 	/// \brief Initialize the iterative optimizer with a problem (objective function), a starting point and an initial value for the trust-region
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint,double initialDelta);
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint,double initialDelta);
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief From INameable: return the class name.

@@ -53,7 +53,7 @@ public:
 	std::string name() const
 	{ return "SteepestDescent"; }
 
-	void init(ObjectiveFunctionType & objectiveFunction, SearchPointType const& startingPoint) {
+	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
 		checkFeatures(objectiveFunction);
 		SHARK_RUNTIME_CHECK(startingPoint.size() == objectiveFunction.numberOfVariables(), "Initial starting point and dimensionality of function do not agree");
 		

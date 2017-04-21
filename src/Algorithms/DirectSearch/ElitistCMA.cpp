@@ -51,7 +51,7 @@ void ElitistCMA::write( OutArchive & archive ) const {
 }
 
 
-void ElitistCMA::init( ObjectiveFunctionType& function, SearchPointType const& p){
+void ElitistCMA::init( ObjectiveFunctionType const& function, SearchPointType const& p){
 	checkFeatures(function);
 
 	//create and evaluate individual

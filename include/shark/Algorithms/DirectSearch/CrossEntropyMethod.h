@@ -145,18 +145,13 @@ namespace shark {
 		/**
 		* \brief Initializes the algorithm for the supplied objective function and the initial mean p.
 		*/
-		SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType& function, SearchPointType const& p);
-
-		/**
-		 * \brief Inits the Cross Entropy, only with the objective function
-		 */
-		SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType& function );
+		SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType const& function, SearchPointType const& p);
 
 		/**
 		* \brief Initializes the algorithm for the supplied objective function.
 		*/
 		SHARK_EXPORT_SYMBOL void init(
-			ObjectiveFunctionType& function,
+			ObjectiveFunctionType const& function,
 			SearchPointType const& initialSearchPoint,
 			unsigned int populationSize,
 			unsigned int selectionSize,

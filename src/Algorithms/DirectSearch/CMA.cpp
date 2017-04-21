@@ -163,7 +163,7 @@ void CMA::write( OutArchive & archive ) const {
 }
 
 
-void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
+void CMA::init( ObjectiveFunctionType const& function, SearchPointType const& p) {
 	SIZE_CHECK(p.size() == function.numberOfVariables());
 	checkFeatures(function);
 	std::vector<RealVector> points(1,p);
@@ -183,7 +183,7 @@ void CMA::init( ObjectiveFunctionType & function, SearchPointType const& p) {
 }
 
 void CMA::init( 
-	ObjectiveFunctionType& function, 
+	ObjectiveFunctionType const& function, 
 	SearchPointType const& p,
 	std::size_t lambda,
 	std::size_t mu,

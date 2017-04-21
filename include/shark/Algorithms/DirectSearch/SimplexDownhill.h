@@ -86,7 +86,7 @@ public:
 	///
 	/// The initial simplex is created is a distance of about one around the proposed starting point.
 	///
-	virtual void init(ObjectiveFunctionType& objectiveFunction, SearchPointType const& startingPoint)
+	virtual void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint)
 	{
 		checkFeatures(objectiveFunction);
 		size_t dim = startingPoint.size();

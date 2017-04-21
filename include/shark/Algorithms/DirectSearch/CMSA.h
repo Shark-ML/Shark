@@ -92,13 +92,13 @@ public:
 	using AbstractSingleObjectiveOptimizer<RealVector >::init;
 	
 	/// \brief Initializes the algorithm for the supplied objective function.
-	SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType& function, SearchPointType const& p);
+	SHARK_EXPORT_SYMBOL void init( ObjectiveFunctionType const& function, SearchPointType const& p);
 	
 	/**
 	* \brief Initializes the algorithm for the supplied objective function.
 	*/
 	SHARK_EXPORT_SYMBOL void init( 
-		ObjectiveFunctionType& function, 
+		ObjectiveFunctionType const& function, 
 		SearchPointType const& initialSearchPoint,
 		std::size_t lambda,
 		std::size_t mu,

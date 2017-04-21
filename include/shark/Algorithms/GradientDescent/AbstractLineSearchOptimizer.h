@@ -71,7 +71,7 @@ protected:
 public:
 	SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer();
 
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType& objectiveFunction,  SearchPointType const& startingPoint) ;
+	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction,  SearchPointType const& startingPoint) ;
 	
 	using AbstractSingleObjectiveOptimizer< RealVector >::init;
 
