@@ -5,7 +5,6 @@
 #include <shark/Core/Random.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>
-#include <shark/Models/Converter.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>

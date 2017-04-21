@@ -41,7 +41,7 @@
 #ifndef SHARK_MODELS_KERNELEXPANSION_H
 #define SHARK_MODELS_KERNELEXPANSION_H
 
-#include <shark/Models/Converter.h>
+#include <shark/Models/Classifier.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
@@ -305,18 +305,17 @@ protected:
 /// of the outputs of the model. This is the model used by kernel classifier models like SVMs.
 ///
 template<class InputType>
-struct KernelClassifier: public ArgMaxConverter<KernelExpansion<InputType> >{
-	typedef ArgMaxConverter<KernelExpansion<InputType> > base_type;
+struct KernelClassifier: public Classifier<KernelExpansion<InputType> >{
 	typedef AbstractKernelFunction<InputType> KernelType;
 	typedef KernelExpansion<InputType> KernelExpansionType;
 
 	KernelClassifier()
 	{ }
 	KernelClassifier(KernelType* kernel)
-	: base_type(KernelExpansionType(kernel))
+	: Classifier<KernelExpansion<InputType> >(KernelExpansionType(kernel))
 	{ }
 	KernelClassifier(KernelExpansionType const& decisionFunction)
-	: base_type(decisionFunction)
+	: Classifier<KernelExpansion<InputType> >(decisionFunction)
 	{ }
 
 	std::string name() const

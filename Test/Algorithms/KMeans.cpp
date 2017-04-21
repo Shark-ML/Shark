@@ -40,7 +40,6 @@
 #include <shark/Algorithms/KMeans.h>
 #include <shark/Models/Clustering/HardClusteringModel.h>
 #include <shark/Models/Kernels/LinearKernel.h>
-#include <shark/Models/Converter.h>
 
 using namespace shark;
 
@@ -215,7 +214,7 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		
 		//now check proper convergence of the algorithms, that means that cluster assignment
 		//is stable.
-		ArgMaxConverter<KernelExpansion<RealVector> > model;
+		KernelClassifier<RealVector> model;
 		model.decisionFunction() = clusteringModel;
 		//assign centers
 		Data<unsigned int> clusters = model(dataset);

@@ -42,7 +42,6 @@
 #ifndef SHARK_MODELS_REMOVEBUDGETMAINTENANCESTRATEGY_H
 #define SHARK_MODELS_REMOVEBUDGETMAINTENANCESTRATEGY_H
 
-#include <shark/Models/Converter.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>

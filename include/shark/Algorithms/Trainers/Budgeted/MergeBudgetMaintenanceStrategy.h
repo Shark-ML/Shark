@@ -53,7 +53,6 @@
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
-#include <shark/Models/Converter.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 
 #include <shark/Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy.h>

@@ -98,7 +98,7 @@ a linear classifier in feature space::
 
 ..sharkcode<Supervised/CSvmTutorial.tpp,model>
 
-A `KernelClassifier` can be understood as an :doxy:`ArgMaxConverter` which converts the output
+A `KernelClassifier` can be understood as an :doxy:`Classifier` which converts the output
 of a :doxy:`KernelExpansion` to a class label by choosing the index of the maximum output.
 The `KernelExpansion` specifies a model from
 :math:`\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}` or

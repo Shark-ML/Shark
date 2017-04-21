@@ -29,7 +29,7 @@
 #define SHARK_ML_MODEL_LINEARCLASSIFIER_H
 
 #include <shark/Models/LinearModel.h>
-#include <shark/Models/Converter.h>
+#include <shark/Models/Classifier.h>
 namespace shark {
 
 /*! \brief Basic linear classifier.
@@ -44,7 +44,7 @@ namespace shark {
  *  The internal linear model can be queried using decisionFunction().
  */ 
 template<class VectorType = RealVector>
-class LinearClassifier : public ArgMaxConverter<LinearModel<VectorType> >
+class LinearClassifier : public Classifier<LinearModel<VectorType> >
 {
 public:
 	LinearClassifier(){}

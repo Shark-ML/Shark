@@ -63,42 +63,39 @@ e.g., the mean-squared error measure on the output of neural networks
 for classification.
 
 
-Conversions
+Conversions of class labels
 -----------
 
 Often Models in Shark do not produce the correct output format for
 classification. For example, a neural network for a ``d``-class
 classification problem usually encodes its prediction into an output
-layer of size ``d``, with the prediction being understood as the
+of size ``d``, with the prediction being understood as the
 index of the output neuron with highest activity. The network output
 is thus a ``RealVector`` of dimension ``d``, not an unsigned integer.
-This is most often not a problem, the loss function can interpret
+This is often not a problem, the loss function can interpret
 outputs accordingly and thus a neural network can easily be trained
 in a classification setting, even though the network only returns
 vectors instead of (integer) labels.
 However, if integer labels are indeed needed for further
 post-processing then the output of a Network needs to be transformed.
-The following converters exist for this purpose:
+This can be done with a helper model
 
-* :doxy:`ThresholdConverter`: The class converts single dimensional
-  ``RealVector`` input to binary 0/1 class-labels by assigning the value
-  1 if the value of the input is higher than a certain threshold.
-  This is useful, for example, for converting the output of a support
-  vector machine or neural network for binary classification into a
-  discrete class label.
-
-* :doxy:`ArgMaxConverter`:  This is a generalization of the ThresholdConverter
-  to the multi-class setting. As input it assumes a d-dimensional
+* :doxy:`Classifier`:   As input it assumes a d-dimensional
   ``RealVector`` for classification. It converts the vector to a
   discrete label in the range 0,...,d-1 by finding the index of the
   largest component (the arg max). This is useful for turning the output
   of a support vector machine or neural network for multi-category
-  classification into a discrete class label.
+  classification into a discrete class label. In the case of d=2 it will transform
+  the output to an output based on the sign of the label. positive sign is transformed
+  to label, a negative sign to label 0. Additionally the decision thresholds can be adapted
+  using bias weights for each model output.
+  
+The classifier holds the trained model as its decision function. Therefore creating 
+a Classifier from a model can be done via::
 
-The converters are actual (parameter-free) models, i.e., sub-classes of
-:doxy:`AbstractModel`. Hence they can be concatenated with other models
-that output a ``RealVector``, such as :doxy:`KernelExpansion` (e.g.,
-support vector machines models), decision trees, or neural networks.
-An instance of such a concatenation is the :doxy:`KernelClassifier`,
-which is essentially a :doxy:`KernelExpansion` model that feeds its
-output directly into an :doxy:`ArgMaxConverter`.
+  Classifier<ModelType> classifier;//used after training for classification
+  ModelType& model = classifier.decisionFunction();//used -during training
+
+Some models are predefined for convenience:
+The :doxy:`KernelClassifier` is a classifier using a :doxy:`KernelExpansion`
+and the :doxy:`LinearClassifier` is a classifier using a :doxy:`LinearModel`.

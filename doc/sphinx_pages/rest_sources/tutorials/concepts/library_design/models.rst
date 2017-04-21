@@ -14,37 +14,17 @@ and then the process of learning corresponds to optimizing model
 parameters. After learning, the model with the optimized parameters
 represents the solution.
 
-However, models can be more general than parameterized families of
-functions, since they may have an internal state. In models with a
-non-trivial state, the computation of the output depends on the input
-and the state, and the state may change based on the input. Stateful
-models are attractive for processing sequence information, in contrast
-to independent data instances. Refer to the :doxy:`RNNet` class
-implementing recurrent multi-layer perceptrons (which are rather
-functionals than functions) for an example.
-
-But back to simpler models for now. A simple model is
-the threshold classifier, which receives a real value as input. If the
-value is higher than the internal threshold (the model parameter),
-then the model assigns a class label of 1, and of 0 otherwise. A
-second example is a linear model, which can for example map vectorial
+A simple model is a linear model, which can for example map vectorial
 input to a lower dimensional subspace:
 
 .. math::
   f(x) = Ax+b
 
 In this case, we can say that all entries of the matrix *A* and of the
-vector *b* form the parameters of the model *f*. Clearly, the linear
-model has more parameters than the threshold converter.
-
-The way a model's parameters should be optimized of course depends on
-the criterion, or objective function, according to which the model
-should be tuned. Whether or not the optimal parameters can be found
-analytically will thus depend on both the model as well as of the
-objective function. Many algorithms in Shark are gradient-based
-optimization methods, which require the model to be differentiable
+vector *b* form the parameters of the model *f*. 
+Optimizing parameters often requires derivatives
+which requires the model to be differentiable
 with respect to its own parameters.
-
 
 
 The base class 'AbstractModel'
@@ -59,7 +39,7 @@ introduced above are represented by the interface, and how models can
 be used in Shark.
 
 In general, most routines are optimized for batch computation (see the
-tutorial on :doc:`batches`), that is, for precessing many
+tutorial on :doc:`batches`), that is, for processing many
 elements at one time. For example, models support to be evaluated on a
 batch of inputs and to compute their weighted derivatives for a batch
 of inputs at once (also see
@@ -88,12 +68,8 @@ Types                 Description
 The basic capabilities of a model are managed through a set of flags. If a model
 can for example calculate the first input derivative, the flag
 ``HAS_FIRST_INPUT_DERIVATIVE`` is set. If the flag is not set and a function relying on
-it is called, an exception is thrown. Flags can be queried using the somewhat
-lengthy expression
-``model.features().flag()&AbstractModel<InputTypeT,OutputTypeT>::FLAG`` or via
+it is called, an exception is thrown. Flags can be queried via
 convenience functions summarized in the table below:
-
-
 
 =======================================================================   ========================================================
 Flag and accessor function name                                           Description
@@ -290,24 +266,16 @@ Model                                   Description
                                         of such a combination if all models implement it.
 :doxy:`LinearNorm`                      For positive inputs, normalize them to unit L_1-norm
 :doxy:`Softmax`                         Standard softmax activation/weighting function.
-:doxy:`SigmoidModel`                    Maps a real valued input to the unit interval via a sigmoid function.
-:doxy:`ThresholdConverter`              If the input is higher than a threshold, assign 1, otherwise 0.
-:doxy:`ThresholdVectorConverter`        For every value of the input vector apply a ThresholdConverter.
-:doxy:`ArgMaxConverter`                 Assigns the index (e.g., a class label) of the largest component in
+:doxy:`Classifier`	                Assigns the index (e.g., a class label) of the largest component in
                                         the input vector.
 :doxy:`Autoencoder`			Special case of the FFNet with a single hidden layer with special 
 					functionality that is guided  towards unsupervised pre-training
 :doxy:`TiedAutoencoder`			Special Autoencoder where the weights of the output layer are 
 					constrained to be the transpose of the input. Has the same interface
 					as the Autoencoder for easy replacement.
-:doxy:`GaussianNoiseModel`		Takes the input and corrupts it using gaussian noise.
-:doxy:`ImpulseNoiseModel`		Takes the input and corrupts it using a noise where every dimension
-					is set to a value - for example 0- with a certain probability.
 :doxy:`MeanModel`			Computes the mean output of a set of models.
 :doxy:`Normalizer`			Special case of the :doxy:`LinearModel` which only has a diagonal
 					matrix and an optional offset. Used for normalisation
-:doxy:`SigmoidModel`			Simple model with a single input and a weight and offset parameter
-					which returns a sigmoidal output.
 ======================================  ======================================================================
 
 

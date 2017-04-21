@@ -35,10 +35,10 @@ With this definition in place we instanciate a linear classifier model::
 ..sharkcode<Supervised/CSvmLinear.tpp,model>
 
 mapping inputs to `unsigned int` class labels. This is just a standard
-:doxy:`LinearModel`, concatenated with an :doxy:`ArgMaxConverter`. So it
-computes one linear function per class and predicts the class that got
-the highest score (a single value is computed and thresholded at zero in
-case of only two classes).
+:doxy:`LinearModel`, whose outputs are converted to a class label
+with an :doxy:`Classifier`. So it computes one linear function per class 
+and predicts the class that got the highest score (a single value is 
+computed and thresholded at zero in case of only two classes).
 
 
 Machine Training
