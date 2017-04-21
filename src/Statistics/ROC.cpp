@@ -32,7 +32,7 @@
  */
 //===========================================================================
 #define SHARK_COMPILE_DLL
-#include <shark/ObjectiveFunctions/ROC.h>
+#include <shark/Statistics/ROC.h>
 
 using namespace shark;
 
