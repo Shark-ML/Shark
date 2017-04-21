@@ -104,7 +104,6 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 // this test uses the unconstrained formulation for the C-SVMs.
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessboard_C_unconstrained )
 {
-	double NUMERICAL_INCREASE_FACTOR = 1.00001;
 	ClassificationDataset training_dataset;
 	csvStringToData(training_dataset,test,LAST_COLUMN,0);
 	std::size_t num_eles = training_dataset.numberOfElements();
@@ -135,7 +134,6 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 // automatically test derivatives for all components along an entire optimization path
 BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 {
-	double NUMERICAL_INCREASE_FACTOR = 1.00001;
 	// create dataset
 	unsigned int ud, nd, td, ntrain = 500;
 	unsigned int ntest = 4000;
