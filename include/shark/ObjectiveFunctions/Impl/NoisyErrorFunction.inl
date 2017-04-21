@@ -43,7 +43,6 @@ private:
 	DataView<LabeledData<InputType,LabelType> const> m_dataset;
 	std::size_t m_batchSize;
 	std::size_t m_dataSize;
-	random::rng_type* mpe_rng;
 	typedef typename AbstractModel<InputType, OutputType>::BatchOutputType BatchOutputType;
 	typedef typename LabeledData<InputType,LabelType>::batch_type BatchDataType;
 
