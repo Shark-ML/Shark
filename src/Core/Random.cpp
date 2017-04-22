@@ -32,7 +32,7 @@
  */
 //===========================================================================
 
-
+#define SHARK_EXPORT_SYMBOL
 #include <shark/Core/Random.h>
 
 shark::random::rng_type shark::random::globalRng;
