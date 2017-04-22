@@ -31,15 +31,6 @@
  *
  */
 //===========================================================================
-#define SHARK_COMPILE_DLL
-#include <shark/Data/Download.h>
-
-#include <string>
-#include <map>
-#include <stdexcept>
-#include <cstring>
-#include <cctype>
-
 #ifdef _WIN32
 	#define _WINSOCK_DEPRECATED_NO_WARNINGS
 	#include <winsock2.h>
@@ -61,6 +52,15 @@
 		#define MSG_NOSIGNAL SO_NOSIGPIPE
 	#endif
 #endif
+
+#define SHARK_COMPILE_DLL
+#include <shark/Data/Download.h>
+
+#include <string>
+#include <map>
+#include <stdexcept>
+#include <cstring>
+#include <cctype>
 
 namespace {
 
