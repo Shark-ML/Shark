@@ -76,7 +76,7 @@ public:
 	/// \param  lambda2    value of the 2-norm regularization parameter (see class description)
 	/// \param  lbias          whether to train with bias or not
 	/// \param  accuracy  stopping criterion for the iterative solver, maximal gradient component of the objective function (see class description)
-	LogisticRegression(double lambda1 = 0, double lambda2 = 0, bool bias= 1, double accuracy = 1.e-8)
+	LogisticRegression(double lambda1 = 0, double lambda2 = 0, bool bias = true, double accuracy = 1.e-8)
 	: m_bias(bias){
 		setLambda1(lambda1);
 		setLambda2(lambda2);
@@ -246,7 +246,7 @@ private:
 			m_features |= HAS_FIRST_DERIVATIVE;
 			
 			std::size_t dim = numberOfVariables();
-			double unconstrained = std::numeric_limits<double>::max();
+			double unconstrained =  1e100;
 			RealVector lower(dim,0.0);
 			subrange(lower, 2 * m_regularizedParams,dim) = blas::repeat(-unconstrained,dim - 2 * m_regularizedParams);
 			RealVector upper(dim,unconstrained);

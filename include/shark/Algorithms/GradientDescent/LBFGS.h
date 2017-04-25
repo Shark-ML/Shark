@@ -117,7 +117,7 @@ private:
 	/// first, all variables with active constraints (e.g. x_i = l_i and g_i > 0)
 	/// are fixed, i.e. p_i = 0. For the remaining variables, the unconstrained optimization
 	/// problem is solved. If the solution does not statisfy the box constraints, in the next step
-	/// the cauchy point is computed. If the cauchy point is feasible, we search the the point
+	/// the cauchy point is computed. If the cauchy point is feasible, we search the point
 	/// along the line between unconstrained optimum and cauchy point that lies exactly on the constraint.
 	/// This is the point with smallest value along the path.
 	SHARK_EXPORT_SYMBOL void getBoxConstrainedDirection(

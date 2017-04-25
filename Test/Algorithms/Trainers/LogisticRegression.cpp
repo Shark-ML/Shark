@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE TRAINERS_LDA
+#define BOOST_TEST_MODULE TRAINERS_LOGISTIC_REGRESSION
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
