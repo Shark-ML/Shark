@@ -91,7 +91,7 @@ CMA::CMA(random::rng_type& rng)
 , m_cSigma( 0 )
 , m_dSigma( 0 )
 , m_muEff( 0 )
-, m_lowerBound( 1E-20)
+, m_lowerBound( 1E-40)
 , m_counter( 0 )
 , mpe_rng(&rng){
 	m_features |= REQUIRES_VALUE;
@@ -268,7 +268,7 @@ void CMA::doInit(
 	m_mean = initialSearchPoints[pos];
 	m_best.point = initialSearchPoints[pos];
 	m_best.value = initialValues[pos];
-	m_lowerBound = 1E-20;
+	m_lowerBound = 1E-40;
 	m_counter = 0;
 }
 

@@ -152,9 +152,14 @@ public:
 		return m_recombinationType;
 	}
 
-	///\brief Returns a const reference tothe lower bound on sigma times smalles eigenvalue.
+	///\brief Returns a const reference to the lower bound on sigma times smalles eigenvalue.
 	const double & lowerBound() const {
 		return m_lowerBound;
+	}
+
+	///\brief Set the lower bound on sigma times smalles eigenvalue.
+	void setLowerBound(double lowerBound) {
+		m_lowerBound = lowerBound;
 	}
 
 	/// \brief Returns the size of the parent population \f$\mu\f$.
