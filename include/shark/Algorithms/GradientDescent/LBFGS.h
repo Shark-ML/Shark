@@ -46,13 +46,34 @@
 
 namespace shark {
 
-//! \brief Limited-Memory Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstrained optimization
+/// \brief Limited-Memory Broyden, Fletcher, Goldfarb, Shannon algorithm.
+///
+/// BFGS is one of the best performing quasi-newton methods. However for large scale
+/// optimization, storing the full hessian approximation is infeasible due to O(n^2) memory requirement.
+/// The L-BFGS algorithm does not store the full hessian approximation but only stores the
+/// data used for updating in the last steps. The matrix itself is then regenerated on-the-fly in
+/// an implicit matrix scheme. This brings runtime and memory rquirements
+/// of a single step down to O(n*hist_size).
+///
+/// The number of steps stored can be set with setHistCount. This is 100 as default.
+///
+/// The algorithm is implemented for unconstrained and constrained optimization
+/// in the case of box constraints. When box constraints are present and the algorithm
+/// encounters a constraint, a dog-leg style algorithm is used:
+///
+/// first, all variables with active constraints (e.g. x_i = l_i and g_i > 0)
+/// are fixed, i.e. p_i = 0. For the remaining variables, the unconstrained optimization
+/// problem is solved. If the solution does not statisfy the box constraints, in the next step
+/// the cauchy point is computed. If the cauchy point is feasible, we search the point
+/// along the line between unconstrained optimum and cauchy point that lies exactly on the constraint.
+/// This is the point with smallest value along the path.
+/// This does not find the true optimal step in the unconstrained problem, however a cheap and reasonably good optimum
+/// which often improves over naive coordinate descent.
 class LBFGS : public AbstractLineSearchOptimizer{
-protected:
-	SHARK_EXPORT_SYMBOL void initModel();
-	SHARK_EXPORT_SYMBOL void computeSearchDirection();
 public:
-	LBFGS() :m_numHist(100){}
+	LBFGS() :m_numHist(100){
+		m_features |= CAN_SOLVE_CONSTRAINED;
+	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -69,34 +90,54 @@ public:
 	//from ISerializable
 	SHARK_EXPORT_SYMBOL void read(InArchive &archive);
 	SHARK_EXPORT_SYMBOL void write(OutArchive &archive) const;
-protected: // Methods
-
+protected: // Methods inherited from AbstractLineSearchOptimizer
+	SHARK_EXPORT_SYMBOL void initModel();
+	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const&);
+private:
 	///\brief Stores another step and searchDirection, discarding the oldest on if necessary.
 	///
 	/// \param step Last performed step
 	/// \param y difference in gradients
 	SHARK_EXPORT_SYMBOL void updateHist(RealVector& y, RealVector &step);
-	/// \brief Get the LBFGS direction. 
+	/// \brief Compute B^{-1}x
 	///
-	/// This approximates the inverse hessian multiplied by the gradient.
-	/// This uses the rho, alpha and beta vectors. Description of these
-	/// can be seen in ie. the wiki page of LBFGS.
-	SHARK_EXPORT_SYMBOL void getDirection(RealVector& searchDirection);
+	/// The history is used to define B which is easy to invert
+	SHARK_EXPORT_SYMBOL void multBInv(RealVector& searchDirection)const;
 
+	/// \brief Compute Bx
+	SHARK_EXPORT_SYMBOL void multB(RealVector& searchDirection)const;
 
-protected: // Instance vars
+	/// \brief Get the box-constrained LBFGS direction. 
+	///
+	/// Approximately solves the constrained optimization problem
+	/// min_p 1/2 p^TBp +g^Tp
+	/// s.t. l_i <= x_i + p_i <= u_i
+	/// This is done using a constrained dogleg approach.
+	///
+	/// first, all variables with active constraints (e.g. x_i = l_i and g_i > 0)
+	/// are fixed, i.e. p_i = 0. For the remaining variables, the unconstrained optimization
+	/// problem is solved. If the solution does not statisfy the box constraints, in the next step
+	/// the cauchy point is computed. If the cauchy point is feasible, we search the point
+	/// along the line between unconstrained optimum and cauchy point that lies exactly on the constraint.
+	/// This is the point with smallest value along the path.
+	SHARK_EXPORT_SYMBOL void getBoxConstrainedDirection(
+		RealVector& searchDirection,
+		RealVector const& lower,
+		RealVector const& upper
+	)const;
+
 	double m_updThres;///<Threshold for when to update history.
 	unsigned int m_numHist; ///< Number of steps to use for LBFGS.
 	// Initial Hessian approximation. We use a diagonal matrix, where each element is
 	// the same, so we only need to store one double.
-	double          m_hdiag;
+	double          m_bdiag;
 
 	// Saved steps for creating the approximation.
 	// Use deque as it gives fast pop.front, push.back and access. Supposedly.
 	// steps holds the values x_(k+1) - x_k
 	// gradientDifferences holds the values g_(k+1) - g_k
 	std::deque<RealVector> m_steps;
-	std::deque<RealVector> m_gradientDifferences;
+	std::deque<RealVector> m_gradientDifferences;	
 };
 
 }

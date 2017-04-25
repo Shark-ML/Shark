@@ -66,7 +66,7 @@ protected:
 	/// search direction. This usually involves updating the internal model using the 
 	/// new and old step information. Afterwards m_searchDirection should contain
 	/// the next search direction.
-	virtual void computeSearchDirection() = 0;
+	virtual void computeSearchDirection(ObjectiveFunctionType const& objectiveFunction) = 0;
 
 public:
 	SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer();
