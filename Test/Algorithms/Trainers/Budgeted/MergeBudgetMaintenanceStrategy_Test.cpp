@@ -54,8 +54,10 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     // setup
     MergeBudgetMaintenanceStrategy<RealVector> ms;
     RealVector h(1);     // initial search starting point
+    RealVector d(1);     // initial search starting point
     RealVector xi(1);    // direction of search
     h(0) = 0.0;
+    d(0) = 0.0;
     xi(0) = 0.5;
 
     // test for the minimum of the easy function  1 + 1=2=const between 0 and 1
@@ -65,8 +67,12 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     double b = 1.0;
     {
         MergeBudgetMaintenanceStrategy<RealVector>::MergingProblemFunction mergingProblemFunction(a, b, k);
-        detail::dlinmin(h, xi, fret, mergingProblemFunction, 0.0, 1.0);
-        BOOST_REQUIRE_EQUAL(h(0), 0);
+	fret = mergingProblemFunction.evalDerivative(h,d);
+        LineSearch lineSearch;
+	lineSearch.lineSearchType() = LineSearch::Dlinmin;
+	lineSearch.init(mergingProblemFunction);
+	lineSearch(h,fret,xi,d,1.0);
+        BOOST_CHECK_EQUAL(h(0), 0);
     }
 
     // test for the minimum of the easy function  0.5^{h*h} between 0 and 1
@@ -78,8 +84,11 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     xi(0) = 0.00001;
     {
         MergeBudgetMaintenanceStrategy<RealVector>::MergingProblemFunction mergingProblemFunction(a, b, k);
-        detail::dlinmin(h, xi, fret, mergingProblemFunction, 0.0, 1.0);
-        BOOST_REQUIRE_SMALL(h(0), 0.000001);
+	LineSearch lineSearch;
+	lineSearch.lineSearchType() = LineSearch::Dlinmin;
+	lineSearch.init(mergingProblemFunction);
+	lineSearch(h,fret,xi,d,1.0);
+        BOOST_CHECK_SMALL(h(0), 0.000001);
     }
     
     // minimize ( -0.2*(0.2)^{x*x} - 0.1* (0.2)^{ (1-x) * (1-x)})  over [0,1]
@@ -91,8 +100,11 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     xi(0) = 0.00001;
     {
         MergeBudgetMaintenanceStrategy<RealVector>::MergingProblemFunction mergingProblemFunction(a, b, k);
-        detail::dlinmin(h, xi, fret, mergingProblemFunction, 0.0, 1.0);
-        BOOST_REQUIRE_SMALL(h(0) -0.133040685 , 0.000001);
+       LineSearch lineSearch;
+	lineSearch.lineSearchType() = LineSearch::Dlinmin;
+	lineSearch.init(mergingProblemFunction);
+	lineSearch(h,fret,xi,d,1.0);
+        BOOST_CHECK_SMALL(h(0) -0.133040685 , 0.000001);
     }
 }
 

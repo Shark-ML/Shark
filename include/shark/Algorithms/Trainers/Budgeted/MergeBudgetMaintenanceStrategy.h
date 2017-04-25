@@ -199,6 +199,7 @@ public:
 		double fret(0.);
 		RealVector h(1);     // initial search starting point
 		RealVector xi(1);    // direction of search
+		RealVector d(1);    // derivative ater line-search (not needed)
 
 		// save the parameter at the minimum
 		double minDegradation = std::numeric_limits<double>::infinity();
@@ -230,13 +231,14 @@ public:
 			// Initialize search starting point and direction:
 			h(0) = 0.0;
 			xi(0) = 0.5;
-
 			double k = kernelRow(currentIndex);
 			MergingProblemFunction mergingProblemFunction(a, b, k);
-
-			// minimize function
-			// search between 0 and 1
-			detail::dlinmin(h, xi, fret, mergingProblemFunction, 0.0, 1.0);
+			fret = mergingProblemFunction.evalDerivative(h,d);
+			//perform a line-search
+			LineSearch lineSearch;
+			lineSearch.lineSearchType() = LineSearch::Dlinmin;
+			lineSearch.init(mergingProblemFunction);
+			lineSearch(h,fret,xi,d,1.0);
 
 			// the optimal point is now given by h.
 			// the vector that corresponds to this is
