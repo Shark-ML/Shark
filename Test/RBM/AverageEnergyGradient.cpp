@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 		for(std::size_t k = 0; k != 4; ++k){
 			batch(j,k)=random::coinToss(random::globalRng, 0.5);
 		}
-		weights(j)=j;
+		weights(j)=(j+1.0);
 	}
 	double logWeightSum=std::log(sum(weights));
 	
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 		for(std::size_t k = 0; k != 4; ++k){
 			batch(j,k)=random::coinToss(random::globalRng, 0.5);
 		}
-		weights(j)=j;
+		weights(j)=(j+1.0);
 	}
 	double logWeightSum=std::log(sum(weights));
 	

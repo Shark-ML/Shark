@@ -42,7 +42,7 @@ class AverageEnergyGradient{
 public:	
 	AverageEnergyGradient(RBM const* rbm)
 	:mpe_rbm(rbm),
-	m_logWeightSum(-std::numeric_limits<double>::infinity()){
+	m_logWeightSum(-1e100){
 		SHARK_RUNTIME_CHECK(mpe_rbm != 0, "rbm is not allowed to be 0");
 		std::size_t const hiddens = mpe_rbm->numberOfHN();
 		std::size_t const visibles = mpe_rbm->numberOfVN();
@@ -186,7 +186,7 @@ public:
 		m_deltaWeights.clear();
 		m_deltaBiasVisible.clear();
 		m_deltaBiasHidden.clear();
-		m_logWeightSum = -std::numeric_limits<double>::infinity();
+		m_logWeightSum = -1e100;
 	}
 	
 private:
@@ -211,7 +211,7 @@ private:
 			batchLogWeightSum += softPlus(diff);
 		}
 		
-		if(m_logWeightSum == -std::numeric_limits<double>::infinity()){
+		if(m_logWeightSum == -1e100){
 			m_logWeightSum = batchLogWeightSum;
 		}else{
 		
