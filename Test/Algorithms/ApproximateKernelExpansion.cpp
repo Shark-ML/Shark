@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear_Single ){
 		RealMatrix approxW = trans(approx.alpha()) % approx.basis().batch(0);
 		
 		BOOST_CHECK_SMALL(norm_inf(truthZ-Z),1.e-4);
-		BOOST_CHECK_SMALL(norm_inf(truthApproxW-approxW),1.e-4);
+		BOOST_CHECK_SMALL(norm_inf(truthApproxW-approxW),1.e-3);
 	}
 }
 
