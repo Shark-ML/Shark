@@ -51,6 +51,7 @@ public:
 		m_deltaWeights.resize(hiddens,visibles);
 		m_deltaBiasHidden.resize(hiddenParameters);
 		m_deltaBiasVisible.resize(visibleParameters);
+		clear();
 	}
 	
 	///\brief Calculates the weighted expectation of the energy gradient with respect to p(h|v) for a complete Batch.
@@ -207,26 +208,14 @@ private:
 		double batchLogWeightSum = logWeights(0);
 		for(std::size_t i = 1; i != size; ++i){
 			double const diff = logWeights(i) - batchLogWeightSum;
-			if(diff >= maxExp || diff <= minExp){
-				if(logWeights(i) > batchLogWeightSum)
-					batchLogWeightSum = logWeights(i);
-			}
-			else
-				batchLogWeightSum += softPlus(diff);
+			batchLogWeightSum += softPlus(diff);
 		}
 		
-		double weightSumDiff = batchLogWeightSum-m_logWeightSum;
-		//check whether any new weight is big enough to have an effect
-		if(weightSumDiff <= minExp )
-			return RealVector();
-		
-		//if the old weights are to small, there is no use in keeping them
-		if(weightSumDiff >= maxExp ){
-			clear();
+		if(m_logWeightSum == -std::numeric_limits<double>::infinity()){
 			m_logWeightSum = batchLogWeightSum;
-		}
-		else
-		{
+		}else{
+		
+			double weightSumDiff = batchLogWeightSum-m_logWeightSum;
 			double weightSumUpdate = softPlus(weightSumDiff);
 			m_logWeightSum = m_logWeightSum + weightSumUpdate;
 
