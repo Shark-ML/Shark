@@ -395,12 +395,12 @@ typename Batch<T>::type createBatch(Iterator const& begin, Iterator const& end){
 }
 
 template<class BatchT>
-auto getBatchElement(BatchT& batch, std::size_t i)->decltype(BatchTraits<BatchT>::type::get(batch,i)){
+auto getBatchElement(BatchT& batch, std::size_t i)->decltype(BatchTraits<BatchT>::type::get(std::declval<BatchT&>(),i)){
 	return BatchTraits<BatchT>::type::get(batch,i);
 }
 
 template<class BatchT>
-auto getBatchElement(BatchT const& batch, std::size_t i)->decltype(BatchTraits<BatchT>::type::get(batch,i)){
+auto getBatchElement(BatchT const& batch, std::size_t i)->decltype(BatchTraits<BatchT>::type::get(std::declval<BatchT const&>(),i)){
 	return BatchTraits<BatchT>::type::get(batch,i);
 }
 

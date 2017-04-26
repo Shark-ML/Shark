@@ -41,6 +41,7 @@
 #ifndef SHARK_DATA_DOWNLOAD_H
 #define SHARK_DATA_DOWNLOAD_H
 
+#include <shark/Core/DLLSupport.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/SparseData.h>
 #include <shark/Data/Csv.h>
@@ -104,7 +105,7 @@ template <class InputType, class LabelType> void downloadSparseData(
 /// \param  dataset       container storing the loaded data
 /// \param  name          data set name
 /// \param  batchSize     size of batch
-SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadFromMLData(
+template <class InputType, class LabelType> void downloadFromMLData(
 	LabeledData<InputType, LabelType>& dataset,
 	std::string const& name,
 	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
@@ -131,7 +132,7 @@ SHARK_EXPORT_SYMBOL template <class InputType, class LabelType> void downloadFro
 /// \param  comment       Trailing character indicating comment line. By dfault it is '#'
 /// \param  port          TCP/IP port, default is 80
 /// \param  maximumBatchSize   size of batches in the dataset
-SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
+template <class InputType> void downloadCsvData(
 	LabeledData<InputType, unsigned int>& dataset,
 	std::string const& url,
 	LabelPosition lp,
@@ -156,7 +157,7 @@ SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
 /// \param  comment       Trailing character indicating comment line. By dfault it is '#'
 /// \param  port          TCP/IP port, default is 80
 /// \param  maximumBatchSize   size of batches in the dataset
-SHARK_EXPORT_SYMBOL template <class InputType> void downloadCsvData(
+template <class InputType> void downloadCsvData(
 	LabeledData<InputType, RealVector>& dataset,
 	std::string const& url,
 	LabelPosition lp,
