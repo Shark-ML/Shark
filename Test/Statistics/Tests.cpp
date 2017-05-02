@@ -1,6 +1,6 @@
 
 #include <shark/Statistics/Tests.h>
-#include <shark/Rng/GlobalRng.h>
+#include <shark/Core/Random.h>
 
 #define BOOST_TEST_MODULE Statistics_Tests
 #include <boost/test/unit_test.hpp>
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE( Paired_TTest_Test) {
 BOOST_AUTO_TEST_CASE( WilcoxonRankSum_Test_NoTies) {
 	RealVector sampleX = { 0, 5, 5.5,  6, 7, 8, 9, 11, 13, 28, 29, 32, 33 };
 	RealVector sampleY = { 1, 2, 3, 4, 6.5, 8.5, 120 };
-	std::shuffle(sampleX.begin(),sampleX.end(),Rng::globalRng);
-	std::shuffle(sampleY.begin(),sampleY.end(),Rng::globalRng);
+	std::shuffle(sampleX.begin(),sampleX.end(),random::globalRng);
+	std::shuffle(sampleY.begin(),sampleY.end(),random::globalRng);
 	{
 		statistics::WilcoxonRankSumTest test;
 		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Left),0.928675,1.e-5);
@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE( WilcoxonRankSum_Test_NoTies) {
 BOOST_AUTO_TEST_CASE( WilcoxonRankSum_Test_Tied) {
 	RealVector sampleX = { 0, 5, 5.5, 6, 6, 7, 7, 7, 8, 9, 11, 13, 28, 29, 32, 33 };
 	RealVector sampleY = { 1, 2, 3, 4, 6, 6, 6, 6.5, 7, 7,  8.5, 120 };
-	std::shuffle(sampleX.begin(),sampleX.end(),Rng::globalRng);
-	std::shuffle(sampleY.begin(),sampleY.end(),Rng::globalRng);
+	std::shuffle(sampleX.begin(),sampleX.end(),random::globalRng);
+	std::shuffle(sampleY.begin(),sampleY.end(),random::globalRng);
 	{
 		statistics::WilcoxonRankSumTest test;
 		BOOST_CHECK_CLOSE(p(test,sampleX, sampleY, statistics::Tail::Left),0.9579307,1.e-5);
