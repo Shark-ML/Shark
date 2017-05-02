@@ -183,7 +183,7 @@ namespace detail{
 		typedef typename  GibbsOperator<RBMType>::VisibleSampleBatch Visible;
 		
 		//sample and store Energies batchwise
-		std::size_t batchSize  = 512;
+		std::size_t batchSize  = 1024;
 		std::size_t numBatches = samples/batchSize;
 		if(numBatches*batchSize < samples)
 			++numBatches;
@@ -266,10 +266,13 @@ namespace detail{
 	template<class RBMType, class Enumeration>
 	double logPartitionFunctionImplFactHidden(const RBMType& rbm, Enumeration, double beta){
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfVN());
-		std::size_t batchSize = std::min(values, std::size_t(500));
+		std::size_t const batchSize=4096;
 		
+		std::size_t batchNum = values/batchSize;
+		if(values % batchSize > 0)
+			++batchNum;
 		//over all possible values of the visible neurons
-		double logZ = -std::numeric_limits<double>::infinity();
+		RealVector logZ(std::min(batchNum, SHARK_NUM_THREADS),-std::numeric_limits<double>::infinity());
 		SHARK_PARALLEL_FOR(int x = 0;x <  (int)values; x+= (int)batchSize) {
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-static_cast<std::size_t>(x));
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfVN());
@@ -278,20 +281,20 @@ namespace detail{
 				//generation of the x+elem-th state vector
 				Enumeration::state(row(stateMatrix,elem),x+elem);
 			}
-			
 			RealVector p =rbm.energy().logUnnormalizedProbabilityVisible(
 				stateMatrix, blas::repeat(beta,currentBatchSize)
 			);
-	
 			//accumulate changes to the log partition
-			SHARK_CRITICAL_REGION{
-				logZ = boost::accumulate(
-					-p,
-					logZ,updateLogPartition
-				);
-			}
+			logZ(SHARK_THREAD_NUM) = boost::accumulate(
+				-p,
+				logZ(SHARK_THREAD_NUM),updateLogPartition
+			);
 		}
-		return logZ;
+		return boost::accumulate(
+			-logZ,
+			-std::numeric_limits<double>::infinity(),
+			updateLogPartition
+		);
 	}
 	
 	
@@ -310,9 +313,13 @@ namespace detail{
 	template<class RBMType, class Enumeration>
 	double logPartitionFunctionImplFactVisible(const RBMType& rbm, Enumeration, double beta){		
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfHN());
-		std::size_t batchSize=std::min(values,std::size_t(500));
+		std::size_t const batchSize=4096;
+		
+		std::size_t batchNum = values/batchSize;
+		if(values % batchSize > 0)
+			++batchNum;
 		//over all possible values of the visible neurons
-		double logZ = -std::numeric_limits<double>::infinity();
+		RealVector logZ(std::min(batchNum, SHARK_NUM_THREADS),-std::numeric_limits<double>::infinity());
 		SHARK_PARALLEL_FOR(int x = 0;x <  (int)values; x+= (int)batchSize) {
 			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-static_cast<std::size_t>(x));
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfHN());
@@ -328,14 +335,16 @@ namespace detail{
 			);
 			
 			//accumulate changes to the log partition
-			SHARK_CRITICAL_REGION{
-				logZ = boost::accumulate(
-					-p,
-					logZ,updateLogPartition
-				);
-			}
+			logZ(SHARK_THREAD_NUM) = boost::accumulate(
+				-p,
+				logZ(SHARK_THREAD_NUM),updateLogPartition
+			);
 		}
-		return logZ;
+		return boost::accumulate(
+			-logZ,
+			-std::numeric_limits<double>::infinity(),
+			updateLogPartition
+		);
 	}
 	
 	//===========Warning=========
