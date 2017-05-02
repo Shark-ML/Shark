@@ -162,6 +162,7 @@ public:
 		return m_cholesky.lower_factor().size1();
 	}
 
+	/// \brief Returns the matrix holding the lower cholesky factor A
 	blas::matrix<double,blas::column_major> const& lowerCholeskyFactor()const{
 		return m_cholesky.lower_factor();
 	}
