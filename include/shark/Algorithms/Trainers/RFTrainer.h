@@ -42,7 +42,7 @@
 #include <shark/Models/Trees/RFClassifier.h>
 #include <shark/Algorithms/Trainers/CARTcommon.h>
 
-#include <set>
+#include <vector>
 
 namespace shark {
 /*!
@@ -165,13 +165,13 @@ protected:
 	SHARK_EXPORT_SYMBOL TreeType buildTree(detail::cart::SortedIndex&& tables, DataView<RegressionDataset const> const& elements, LabelType const& sumFull, std::size_t nodeId, random::rng_type& rng);
 
 
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::set<size_t> const& tableIndices) const;
-	SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::set<size_t> const& tableIndices) const;
+  SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<RegressionDataset const> const& elements, RealVector const& sumFull, std::vector<size_t> const& tableIndices) const;
+  SHARK_EXPORT_SYMBOL RFTrainer::Split findSplit(detail::cart::SortedIndex const& tables, DataView<ClassificationDataset const> const& elements, ClassVector const& cFull, std::vector<size_t> const& tableIndices) const;
 
-	/// Generate random table indices.
-	SHARK_EXPORT_SYMBOL std::set<std::size_t> generateRandomTableIndices(random::rng_type &rng) const;
+  /// Generate random table indices.
+  SHARK_EXPORT_SYMBOL std::vector<std::size_t> generateRandomTableIndices(random::rng_type &rng) const;
 
-	/// Reset the training to its default parameters.
+  /// Reset the training to its default parameters.
 	void setDefaults();
 
 	/// Number of attributes in the dataset
