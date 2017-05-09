@@ -7,13 +7,13 @@ configuration:
 
 environment:
   matrix:
-    - cmake_generator_vs_name: "Visual Studio 12"
-      msvc_name: msvc-12.0
-      BOOST_ROOT: C:\Libraries\boost
+    #~ - cmake_generator_vs_name: "Visual Studio 12"
+      #~ msvc_name: msvc-12.0
+      #~ BOOST_ROOT: C:/Libraries/boost
 
     - cmake_generator_vs_name: "Visual Studio 14"
       msvc_name: msvc-14.0
-      BOOST_ROOT: C:\Libraries\boost_1_59_0
+      BOOST_ROOT: C:/Libraries/boost_1_59_0
 
 branches:
   only:
