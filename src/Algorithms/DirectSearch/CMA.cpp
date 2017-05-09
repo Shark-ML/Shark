@@ -256,8 +256,8 @@ void CMA::doInit(
 	m_muEff = 1. / sum(sqr(m_weights)); // equal to sum(m_weights)^2 / sum(sqr(m_weights))
 
 	// Step size control
-	m_cSigma = (m_muEff + 2.)/(m_numberOfVariables + m_muEff + 5.); // eq. (46)
-	m_dSigma = 1. + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma; // eq. (46)
+	m_cSigma = (m_muEff + 2.)/(m_numberOfVariables + m_muEff + 3.); // eq. (46)
+	m_dSigma = .5 + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma; // eq. (46)
 
 	m_cC = (4. + m_muEff / m_numberOfVariables) / (m_numberOfVariables + 4. +  2 * m_muEff / m_numberOfVariables); // eq. (47)
 	m_c1 = 2 / (sqr(m_numberOfVariables + 1.3) + m_muEff); // eq. (48)
