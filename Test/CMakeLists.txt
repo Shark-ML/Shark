@@ -100,6 +100,7 @@ shark_add_test( Algorithms/GradientDescent/LineSearch.cpp GradDesc_LineSearch )
 shark_add_test( Algorithms/GradientDescent/BFGS.cpp GradDesc_BFGS )
 shark_add_test( Algorithms/GradientDescent/LBFGS.cpp GradDesc_LBFGS )
 shark_add_test( Algorithms/GradientDescent/CG.cpp GradDesc_CG )
+shark_add_test( Algorithms/GradientDescent/Adam.cpp GradDesc_Adam )
 shark_add_test( Algorithms/GradientDescent/Rprop.cpp GradDesc_Rprop )
 shark_add_test( Algorithms/GradientDescent/SteepestDescent.cpp GradDesc_SteepestDescent )
 
