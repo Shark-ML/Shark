@@ -59,7 +59,7 @@ void sum_rows(
 	vector_expression<V, Device>& b,
 	typename V::value_type alpha
 ){
-	SIZE_CHECK(A().size2() == b().size());
+	REMORA_SIZE_CHECK(A().size2() == b().size());
 	
 	bindings::sum_rows(A,b,alpha,typename M::orientation(),
 	typename M::evaluation_category::tag(), typename V::evaluation_category::tag());

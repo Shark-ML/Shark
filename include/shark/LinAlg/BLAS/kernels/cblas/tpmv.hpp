@@ -104,8 +104,8 @@ void tpmv(
 	vector_expression<VectorX, cpu_tag> &x,
 	std::true_type
 ){
-	SIZE_CHECK(x().size() == A().size2());
-	SIZE_CHECK(A().size2() == A().size1());
+	REMORA_SIZE_CHECK(x().size() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == A().size1());
 	bool upper = MatA::orientation::triangular_type::is_upper;
 	bool unit = MatA::orientation::triangular_type::is_unit;
 	std::size_t n = A().size1();

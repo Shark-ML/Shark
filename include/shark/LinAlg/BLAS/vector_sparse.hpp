@@ -160,7 +160,7 @@ public:
 	}
 
 	void set_filled(size_type filled) {
-		SIZE_CHECK(filled <= nnz_capacity());
+		REMORA_SIZE_CHECK(filled <= nnz_capacity());
 		m_nnz = filled;
 	}
 	
@@ -191,7 +191,7 @@ public:
 
 	// Element access
 	const_reference operator()(size_type i) const {
-		SIZE_CHECK(i < m_size);
+		REMORA_SIZE_CHECK(i < m_size);
 		std::size_t pos = lower_bound(i);
 		if (pos == nnz() || m_indices[pos] != i)
 			return m_zero;
@@ -269,7 +269,7 @@ public:
 	
 	// Element assignment
 	iterator set_element(iterator pos, size_type index, value_type value) {
-		RANGE_CHECK(size_type(pos - begin()) <=m_size);
+		REMORA_RANGE_CHECK(size_type(pos - begin()) <=m_size);
 		
 		if(pos != end() && pos.index() == index){
 			*pos = value;

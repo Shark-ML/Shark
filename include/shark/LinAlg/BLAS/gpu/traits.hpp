@@ -33,7 +33,6 @@
 #ifndef REMORA_GPU_TRAITS_HPP
 #define REMORA_GPU_TRAITS_HPP
 
-#include "../detail/traits.hpp"
 #include <boost/compute/command_queue.hpp>
 #include <boost/compute/core.hpp>
 #include <boost/compute/functional/detail/unpack.hpp>
@@ -47,10 +46,13 @@
 
 namespace remora{namespace gpu{
 	
+template<class Device>
+struct device_traits;
+	
 template<class T>
 struct dense_vector_storage{
 	typedef dense_tag storage_tag;
-	boost::compute::vector<T> const& buffer;
+	boost::compute::buffer buffer;
 	std::size_t offset;
 	std::size_t stride;
 	
@@ -63,7 +65,7 @@ template<class T>
 struct dense_matrix_storage{
 	typedef dense_tag storage_tag;
 	typedef dense_vector_storage<T> row_storage;
-	boost::compute::vector<T> const& buffer;
+	boost::compute::buffer buffer;
 	std::size_t offset;
 	std::size_t leading_dimension;
 	
@@ -85,6 +87,7 @@ struct dense_matrix_storage{
 
 
 namespace detail{
+	
 template<class Arg1, class T>
 struct invoked_multiply_scalar{
 	typedef T result_type;
@@ -160,6 +163,29 @@ boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_ker
 template<class Arg1, class Arg2, class T>
 boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_safe_div<Arg1,Arg2,T> const& e){
 	return k << "(("<<e.arg2<<"!=0)?"<<e.arg1<<'/'<<e.arg2<<':'<<e.default_value<<')';
+}
+
+template<class M, class Index, class Orientation>
+struct invoked_linearized_matrix{
+	typedef typename M::value_type result_type;
+	M mat_closure;
+	Index index;
+};
+
+template<class M, class Index>
+boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_linearized_matrix<M, Index, row_major> const& e){
+	std::string index_str = k.expr_to_string(e.index);
+	std::string i1 = "(("+index_str+")/"+std::to_string(e.mat_closure.size2())+")";
+	std::string i2 = "(("+index_str+")%"+std::to_string(e.mat_closure.size2())+")";
+	return k << e.mat_closure(k.expr<std::size_t>(i1),k.expr<std::size_t>(i2));
+}
+
+template<class M, class Index>
+boost::compute::detail::meta_kernel& operator<<(boost::compute::detail::meta_kernel& k, invoked_linearized_matrix<M, Index, column_major> const& e){
+	std::string index_str = k.expr_to_string(e.index);
+	std::string i1 = "(("+index_str+")/"+std::to_string(e.mat_closure.size1())+")";
+	std::string i2 = "(("+index_str+")%"+std::to_string(e.mat_closure.size1())+")";
+	return k << '('<<e.mat_closure(k.expr<std::size_t>(i2),k.expr<std::size_t>(i1)) << ')';
 }
 
 template<class Iterator1, class Iterator2, class Functor>
@@ -356,6 +382,13 @@ struct device_traits<gpu_tag>{
 	static auto index_add(Expr1 const& expr1, Expr2 const& expr2) -> decltype(boost::compute::plus<std::size_t>()(expr1,expr2)){
 		return boost::compute::plus<std::size_t>()(expr1,expr2);
 	}
+	
+	template<class E, class Index>
+	static gpu::detail::invoked_linearized_matrix<typename E::const_closure_type,Index, typename E::orientation>
+	linearized_matrix_element(matrix_expression<E, gpu_tag> const& e, Index const& index){
+		return {e(),index};
+	}
+	
 	
 	template <class Iterator, class Functor>
 	struct transform_iterator{

@@ -88,8 +88,8 @@ void trsm_impl(
 	matrix_expression<MatB, cpu_tag> &B,
 	std::true_type, left
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	
 	//orientation is defined by the second argument
 	CBLAS_ORDER const storOrd = (CBLAS_ORDER)storage_order<typename MatB::orientation>::value;

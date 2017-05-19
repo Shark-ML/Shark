@@ -73,7 +73,9 @@ void gemv(
 
 }}
 
-#ifdef REMORA_USE_GPU
+#ifdef REMORA_USE_CLBLAST
+#include "clBlast/gemv.hpp"
+#elif REMORA_USE_GPU
 #include "gpu/gemv.hpp"
 #endif
 

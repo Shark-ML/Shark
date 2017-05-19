@@ -42,8 +42,8 @@ void eigensort
 	matrix_expression<MatA, cpu_tag>& matA,
 	vector_expression<V, cpu_tag>& eigenValues
 ){
-	SIZE_CHECK(eigenValues().size() == matA().size1());
-	SIZE_CHECK(matA().size1() == matA().size2());
+	REMORA_SIZE_CHECK(eigenValues().size() == matA().size1());
+	REMORA_SIZE_CHECK(matA().size1() == matA().size2());
 
 	std::size_t n = eigenValues().size();
 
@@ -66,8 +66,8 @@ void syev(
 	matrix_expression<MatA, cpu_tag>& vmatA,
 	vector_expression<V, cpu_tag>& dvecA
 ) {
-	SIZE_CHECK(vmatA().size1() == vmatA().size2());
-	SIZE_CHECK(vmatA().size1() == dvecA().size());
+	REMORA_SIZE_CHECK(vmatA().size1() == vmatA().size2());
+	REMORA_SIZE_CHECK(vmatA().size1() == dvecA().size());
 	
 	const std::size_t maxIterC = 50;
 	std::size_t n = vmatA().size1();

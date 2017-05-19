@@ -109,8 +109,8 @@ void gemv(
 	std::size_t m = A().size1();
 	std::size_t n = A().size2();
 	
-	SIZE_CHECK(x().size() == A().size2());
-	SIZE_CHECK(y().size() == A().size1());
+	REMORA_SIZE_CHECK(x().size() == A().size2());
+	REMORA_SIZE_CHECK(y().size() == A().size1());
 
 	CBLAS_ORDER const stor_ord= (CBLAS_ORDER)storage_order<typename MatA::orientation>::value;
 	

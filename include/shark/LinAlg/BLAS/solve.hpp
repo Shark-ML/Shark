@@ -465,8 +465,8 @@ solve(
 	vector_expression<VecB, Device> const& b,
 	SystemType t, system_tag<Left>
 ){
-	SIZE_CHECK(A().size1() ==  A().size2());
-	SIZE_CHECK(A().size1() ==  b().size());
+	REMORA_SIZE_CHECK(A().size1() ==  A().size2());
+	REMORA_SIZE_CHECK(A().size1() ==  b().size());
 	typedef detail::matrix_vector_solve_optimizer<MatA,VecB, SystemType, system_tag<Left> > opt;
 	return opt::create(A(),b(), t);
 }
@@ -478,7 +478,7 @@ solve(
 	matrix_expression<MatB, Device> const& B,
 	SystemType t, system_tag<Left>
 ){
-	SIZE_CHECK(A().size1() ==  A().size2());
+	REMORA_SIZE_CHECK(A().size1() ==  A().size2());
 	typedef detail::matrix_matrix_solve_optimizer<MatA,MatB, SystemType, system_tag<Left> > opt;
 	return opt::create(A(),B(), t);
 }
@@ -489,7 +489,7 @@ typename detail::matrix_inverse_optimizer<MatA, SystemType>::type
 inv(
 	matrix_expression<MatA, Device> const& A, SystemType t
 ){
-	SIZE_CHECK(A().size1() ==  A().size2());
+	REMORA_SIZE_CHECK(A().size1() ==  A().size2());
 	typedef detail::matrix_inverse_optimizer<MatA,SystemType> opt;
 	return opt::create(A(), t);
 }

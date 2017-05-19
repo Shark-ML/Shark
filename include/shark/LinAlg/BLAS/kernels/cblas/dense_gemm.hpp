@@ -233,9 +233,9 @@ void dense_gemm(
 	matrix_expression<MatC, cpu_tag>& C,
 	typename MatC::value_type alpha
 ){
-	SIZE_CHECK(A().size1() == C().size1());
-	SIZE_CHECK(B().size2() == C().size2());
-	SIZE_CHECK(A().size2()== B().size1());
+	REMORA_SIZE_CHECK(A().size1() == C().size1());
+	REMORA_SIZE_CHECK(B().size2() == C().size2());
+	REMORA_SIZE_CHECK(A().size2()== B().size1());
 	dense_gemm(
 		A,B,C,alpha,
 		typename has_optimized_gemm<MatA,MatB,MatC>::type()

@@ -172,8 +172,8 @@ void trmm(
 	matrix_expression<MatB, cpu_tag>& B,
 	std::false_type //unoptimized
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == B().size1());
 
 	trmm_impl(A,B, triangular_tag<Upper,Unit>());
 }

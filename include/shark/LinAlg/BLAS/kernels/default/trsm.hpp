@@ -48,7 +48,7 @@ void trsm_block(
     lower,
 	row_major // B is row-major
 ){
-	SIZE_CHECK(A().size1() <= maxBlockSize1);
+	REMORA_SIZE_CHECK(A().size1() <= maxBlockSize1);
 	typedef typename MatA::value_type value_typeA;
 	typedef typename MatB::value_type value_typeB;
 
@@ -139,7 +139,7 @@ void trsm_block(
     upper,
 	row_major // B is row-major
 ){
-	SIZE_CHECK(A().size1() <= maxBlockSize1);
+	REMORA_SIZE_CHECK(A().size1() <= maxBlockSize1);
 	typedef typename MatA::value_type value_typeA;
 	typedef typename MatB::value_type value_typeB;
 

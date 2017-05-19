@@ -28,14 +28,14 @@
 #ifndef REMORA_GPU_COPY_HPP
 #define REMORA_GPU_COPY_HPP
 
-#include "traits.hpp"
+#include "../detail/traits.hpp"
 //includes required for storage->vector/matrix and for scalar multiplication
 #include "../detail/vector_proxy_classes.hpp"
 #include "../detail/vector_expression_classes.hpp"
 #include "../detail/matrix_proxy_classes.hpp"
 #include "../detail/matrix_expression_classes.hpp"
 
-namespace remora{ namespace gpu{
+namespace remora{
 
 ///////////////////////////////////////
 //////// Vector Transport
@@ -101,7 +101,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer.get_buffer();
+		auto& buffer = storageE.buffer;
 		//map buffer to host memory
 		typename VecE::value_type* p = (typename VecE::value_type*) e().queue().enqueue_map_buffer(
 			buffer, CL_MAP_READ, 0, buffer.size()
@@ -121,7 +121,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer.get_buffer();
+		auto& buffer = storageE.buffer;
 		//map buffer to host memory
 		typename VecE::value_type* p = (typename VecE::value_type*) e().queue().enqueue_map_buffer(
 			buffer, CL_MAP_READ, 0, buffer.size()
@@ -223,7 +223,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storagex = x().raw_storage();
-		auto& buffer = storagex.buffer.get_buffer();
+		auto& buffer = storagex.buffer;
 		//map buffer to host memory
 		typename VecX::value_type* p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
 			buffer, CL_MAP_WRITE, 0, buffer.size()
@@ -242,7 +242,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storagex = x().raw_storage();
-		auto& buffer = storagex.buffer.get_buffer();
+		auto& buffer = storagex.buffer;
 		//map buffer to host memory
 		typename VecX::value_type* p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
 			buffer, CL_MAP_WRITE, storagex.offset, buffer.size() - storagex.offset
@@ -328,7 +328,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer.get_buffer();
+		auto& buffer = storageE.buffer;
 		//map buffer to host memory
 		typename MatE::value_type* p = (typename MatE::value_type*) e().queue().enqueue_map_buffer(
 			buffer, CL_MAP_READ, 0, buffer.size()
@@ -352,7 +352,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer.get_buffer();
+		auto& buffer = storageE.buffer;
 		//map buffer to host memory
 		typename MatE::value_type* p = (typename MatE::value_type*) e().queue().enqueue_map_buffer(
 			buffer, CL_MAP_READ, 0, buffer.size()
@@ -463,7 +463,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storageX = X().raw_storage();
-		auto& buffer = storageX.buffer.get_buffer();
+		auto& buffer = storageX.buffer;
 		//map buffer to host memory
 		typename MatX::value_type* p = (typename MatX::value_type*) X().queue().enqueue_map_buffer(
 			buffer, CL_MAP_WRITE, 0, buffer.size()
@@ -485,7 +485,7 @@ private:
 		value_type const& alpha, dense_tag
 	)const{
 		auto storageX = X().raw_storage();
-		auto& buffer = storageX.buffer.get_buffer();
+		auto& buffer = storageX.buffer;
 		//map buffer to host memory
 		typename MatX::value_type* p = (typename MatX::value_type*) X().queue().enqueue_map_buffer(
 			buffer, CL_MAP_WRITE, 0, buffer.size()
@@ -511,6 +511,7 @@ private:
 ///////////////////////////////////////////////
 ////////Proxy expressions
 ///////////////////////////////////////////////
+
 template<class E>
 vector_transport_to_cpu<E> copy_to_cpu(vector_expression<E, gpu_tag> const& e){
 	return vector_transport_to_cpu<E>(e());
@@ -535,7 +536,25 @@ matrix_transport_to_gpu<E> copy_to_gpu(
 ){
 	return matrix_transport_to_gpu<E>(e(),queue);
 }
+
+
+//moving gpu->gpu is for free
+template<class E>
+E const& copy_to_gpu(
+	vector_expression<E, gpu_tag> const& e,
+	boost::compute::command_queue& queue = boost::compute::system::default_queue()
+){
+	return e();
+}
+
+template<class E>
+E const& copy_to_gpu(
+	matrix_expression<E, gpu_tag> const& e,
+	boost::compute::command_queue& queue = boost::compute::system::default_queue()
+){
+	return e();
+}
 	
-}}
+}
 
 #endif

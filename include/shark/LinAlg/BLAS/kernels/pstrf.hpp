@@ -62,8 +62,8 @@ std::size_t pstrf(
 	matrix_expression<MatA, cpu_tag>&A,
 	vector_expression<VecP, cpu_tag>& P
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(P().size() == A().size1());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(P().size() == A().size1());
 	return bindings::pstrf(A,P, Triangular());
 }
 

@@ -55,7 +55,7 @@ template <class Triangular, typename MatA>
 std::size_t potrf(
     matrix_container<MatA, cpu_tag>& A
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	return bindings::potrf<Triangular>(A, typename bindings::has_optimized_potrf<MatA>::type());
 }
 

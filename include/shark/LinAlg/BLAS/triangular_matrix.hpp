@@ -119,7 +119,7 @@ public:
 	}
 
 	void resize(size_type size1, size_type size2) {
-		SIZE_CHECK(size1 == size2);
+		REMORA_SIZE_CHECK(size1 == size2);
 		resize(size1);
 		(void)size2;
 	}
@@ -130,25 +130,25 @@ public:
 
 	// Element access read only
 	const_reference operator()(size_type i, size_type j) const {
-		SIZE_CHECK(i < size1());
-		SIZE_CHECK(j < size2());
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_SIZE_CHECK(j < size2());
 		if(!orientation::non_zero(i,j))
 			return value_type();
-		SIZE_CHECK(orientation::element(i,j,size1(),packed_tag())<m_data.size());
+		REMORA_SIZE_CHECK(orientation::element(i,j,size1(),packed_tag())<m_data.size());
 		return m_data [orientation::element(i,j,size1(),packed_tag())];
 	}
 
 	// separate write access
 	void set_element(size_type i,size_type j, value_type t){
-		SIZE_CHECK(i < size1());
-		SIZE_CHECK(j < size2());
-		SIZE_CHECK(orientation::non_zero(i,j));
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_SIZE_CHECK(j < size2());
+		REMORA_SIZE_CHECK(orientation::non_zero(i,j));
 		m_data [orientation::element(i,j,size1(),packed_tag())] = t;
 	}
 
 	bool non_zero(size_type i,size_type j)const{
-		SIZE_CHECK(i < size1());
-		SIZE_CHECK(j < size2());
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_SIZE_CHECK(j < size2());
 		return orientation::non_zero(i,j);
 	}
 
@@ -159,7 +159,7 @@ public:
 	}
 	template<class C>          // Container assignment without temporary
 	triangular_matrix& operator = (matrix_container<C, cpu_tag> const& m) {
-		SIZE_CHECK(m().size1()==m().size2());
+		REMORA_SIZE_CHECK(m().size1()==m().size2());
 		resize(m().size1());
 		assign(*this, m);
 		return *this;

@@ -108,10 +108,10 @@ void vector_assign(
 	EIterator vend = v.end();
 	
 	//check for compatible layout
-	SIZE_CHECK(vend-viter);//empty ranges can't be compatible
+	REMORA_SIZE_CHECK(vend-viter);//empty ranges can't be compatible
 	//check whether the right hand side range is included in the left hand side range
-	SIZE_CHECK(viter.index() <= eiter.index());
-	SIZE_CHECK(viter.index()+(vend-viter) >= eiter.index()+(eend-eiter));
+	REMORA_SIZE_CHECK(viter.index() <= eiter.index());
+	REMORA_SIZE_CHECK(viter.index()+(vend-viter) >= eiter.index()+(eend-eiter));
 	
 	//copy contents of right-hand side
 	viter += eiter.index()-viter.index();
@@ -146,7 +146,7 @@ void vector_assign(
 	v().clear();
 	v().reserve(e().size());
 	typename V::iterator targetPos = v().begin();
-	RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
+	REMORA_RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
 	for(std::size_t i = 0; i != e().size(); ++i,++targetPos){
 		targetPos = v().set_element(targetPos,i,e()(i));
 	}
@@ -162,7 +162,7 @@ void vector_assign(
 	v().clear();
 	typedef typename E::const_iterator iteratorE;
 	typename V::iterator targetPos = v().begin();
-	RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
+	REMORA_RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
 	iteratorE end = e().end();
 	for(iteratorE it = e().begin(); it != end; ++it,++targetPos){
 		targetPos = v().set_element(targetPos,it.index(),*it);
@@ -238,10 +238,10 @@ void vector_assign_functor(
 	if(eiter != eend){
 		
 		//check for compatible layout
-		SIZE_CHECK(vend-viter);//empty ranges can't be compatible
+		REMORA_SIZE_CHECK(vend-viter);//empty ranges can't be compatible
 		//check whether the right hand side range is included in the left hand side range
-		SIZE_CHECK(viter.index() <= eiter.index());
-		SIZE_CHECK(viter.index()+(vend-viter) >= eiter.index()+(eend-eiter));
+		REMORA_SIZE_CHECK(viter.index() <= eiter.index());
+		REMORA_SIZE_CHECK(viter.index()+(vend-viter) >= eiter.index()+(eend-eiter));
 		
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
 		for(;viter.index() != eiter.index() &&!F::right_zero_identity; ++viter){

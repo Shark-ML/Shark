@@ -139,8 +139,8 @@ void syrk(
 	typename M::value_type& alpha,
 	std::false_type //unoptimized
 ){
-	SIZE_CHECK(m().size1() == m().size2());
-	SIZE_CHECK(m().size2() == e().size1());
+	REMORA_SIZE_CHECK(m().size1() == m().size2());
+	REMORA_SIZE_CHECK(m().size2() == e().size1());
 
 	syrk_impl(e,m, alpha, triangular_tag<Upper,false>());
 }

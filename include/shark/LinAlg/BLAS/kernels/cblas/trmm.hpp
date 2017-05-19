@@ -118,8 +118,8 @@ void trmm(
 	matrix_expression<MatB, cpu_tag>& B,
 	std::true_type
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == B().size1());
 	std::size_t n = A().size1();
 	std::size_t m = B().size2();
 	CBLAS_DIAG cblasUnit = unit?CblasUnit:CblasNonUnit;

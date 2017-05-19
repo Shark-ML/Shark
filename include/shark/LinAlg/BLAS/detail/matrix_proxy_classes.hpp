@@ -360,7 +360,7 @@ public:
 
 	// Construction and destruction
 	matrix_row(matrix_closure_type const& expression, size_type i):m_expression(expression), m_i(i) {
-		SIZE_CHECK (i < expression.size1());
+		REMORA_SIZE_CHECK (i < expression.size1());
 	}
 	
 	template<class E>
@@ -471,7 +471,7 @@ private:
 	}
 	//dense row major case
 	iterator set_element(iterator pos, size_type index, value_type value, column_major ) {
-		RANGE_CHECK(pos.index() == index);
+		REMORA_RANGE_CHECK(pos.index() == index);
 		*pos = value;
 		return pos;
 	}
@@ -509,11 +509,11 @@ public:
 	// Construction and destruction
 	matrix_vector_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
 	:m_expression(expression), m_start1(start1), m_start2(start2), m_size(end1-start1){
-		SIZE_CHECK(start1 <= expression.size1());
-		SIZE_CHECK(end1 <= expression.size1());
-		SIZE_CHECK(start2 <= expression.size2());
-		SIZE_CHECK(end2 <= expression.size2());
-		SIZE_CHECK(m_size == end2-start2);
+		REMORA_SIZE_CHECK(start1 <= expression.size1());
+		REMORA_SIZE_CHECK(end1 <= expression.size1());
+		REMORA_SIZE_CHECK(start2 <= expression.size2());
+		REMORA_SIZE_CHECK(end2 <= expression.size2());
+		REMORA_SIZE_CHECK(m_size == end2-start2);
 	}
 	
 	template<class E>
@@ -610,7 +610,6 @@ private:
 	size_type m_size;
 };
 
-/// \brief Linearizes a matrix as a vector along its preferred orientation
 template<class M>
 class linearized_matrix: public vector_expression<linearized_matrix<M>, typename M::device_type > {
 private:
@@ -620,6 +619,13 @@ private:
 		row_major,
 		typename M::orientation::orientation
 	>::type orientation;
+
+	template<class IndexExpr>
+	struct OperatorReturn{//workaround for gcc 4.6 which would not like the type below inside a function signature.
+		typedef decltype(device_traits<typename matrix_closure_type::device_type>::linearized_matrix_element(
+			std::declval<matrix_closure_type const&>(),std::declval<IndexExpr const&>()
+		)) type;
+	};
 public:
 	typedef typename M::value_type value_type;
 	typedef typename M::const_reference const_reference;
@@ -662,11 +668,8 @@ public:
 
 	// Element access
 	template <class IndexExpr>
-	reference operator()(IndexExpr const& i) const{
-		std::size_t leading_dimension = orientation::index_m(m_expression.size1(), m_expression.size2());
-		std::size_t i1 = i / leading_dimension;
-		std::size_t i2 = i % leading_dimension;
-		return m_expression(orientation::index_M(i1,i2), orientation::index_m(i1,i2));
+	typename OperatorReturn<IndexExpr>::type operator()(IndexExpr const& i) const{
+		return device_traits<typename M::device_type>::linearized_matrix_element(m_expression,i);
 	}
 	reference operator [](size_type i) const{
 		return (*this)(i);
@@ -731,12 +734,12 @@ public:
 
 	matrix_range(matrix_closure_type expression, size_type start1, size_type end1, size_type start2, size_type end2)
 	:m_expression(expression), m_start1(start1), m_size1(end1-start1), m_start2(start2), m_size2(end2-start2){
-		SIZE_CHECK(start1 <= expression.size1());
-		SIZE_CHECK(end1 <= expression.size1());
-		SIZE_CHECK(start2 <= expression.size2());
-		SIZE_CHECK(end2 <= expression.size2());
-		SIZE_CHECK(start1 <= end1);
-		SIZE_CHECK(start2 <= end2);
+		REMORA_SIZE_CHECK(start1 <= expression.size1());
+		REMORA_SIZE_CHECK(end1 <= expression.size1());
+		REMORA_SIZE_CHECK(start2 <= expression.size2());
+		REMORA_SIZE_CHECK(end2 <= expression.size2());
+		REMORA_SIZE_CHECK(start1 <= end1);
+		REMORA_SIZE_CHECK(start2 <= end2);
 	}
 	
 	//conversion closure->const_closure
@@ -907,9 +910,9 @@ private:
 	size_type m_size2;
 };
 
-template<class T,class Orientation=row_major>
-class dense_matrix_adaptor: public matrix_expression<dense_matrix_adaptor<T,Orientation>, cpu_tag > {
-	typedef dense_matrix_adaptor<T,Orientation> self_type;
+template<class T,class Orientation=row_major, class Tag = cpu_tag>
+class dense_matrix_adaptor: public matrix_expression<dense_matrix_adaptor<T,Orientation, Tag>, Tag > {
+	typedef dense_matrix_adaptor<T,Orientation, Tag> self_type;
 public:
 	typedef std::size_t size_type;
 	typedef typename std::remove_const<T>::type value_type;
@@ -988,6 +991,28 @@ public:
 			m_stride2= Orientation::stride2(m_size1,m_size2);
 	}
 	
+	
+	template<class E>
+	dense_matrix_adaptor(vector_expression<E, cpu_tag> const& expression, std::size_t size1, std::size_t size2)
+	: m_values(expression().raw_storage().values)
+	, m_size1(size1)
+	, m_size2(size2)
+	{
+		m_stride1= Orientation::stride1(m_size1,m_size2);
+		m_stride2= Orientation::stride2(m_size1,m_size2);
+	}
+	
+	template<class E>
+	dense_matrix_adaptor(vector_expression<E, cpu_tag>& expression, std::size_t size1, std::size_t size2)
+	: m_values(expression().raw_storage().values)
+	, m_size1(size1)
+	, m_size2(size2)
+	{
+		m_stride1= Orientation::stride1(m_size1,m_size2);
+		m_stride2= Orientation::stride2(m_size1,m_size2);
+	}
+	
+	
 	// ---------
 	// Dense low level interface
 	// ---------
@@ -1019,14 +1044,14 @@ public:
 	// -------
 	
 	self_type& operator = (self_type const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
+		REMORA_SIZE_CHECK(size1() == e().size1());
+		REMORA_SIZE_CHECK(size2() == e().size2());
 		return assign(*this, typename matrix_temporary<self_type>::type(e));
 	}
 	template<class E>
 	self_type& operator = (matrix_expression<E, cpu_tag> const& e) {
-		SIZE_CHECK(size1() == e().size1());
-		SIZE_CHECK(size2() == e().size2());
+		REMORA_SIZE_CHECK(size1() == e().size1());
+		REMORA_SIZE_CHECK(size2() == e().size2());
 		return assign(*this, typename matrix_temporary<self_type>::type(e));
 	}
 	
@@ -1082,7 +1107,7 @@ public:
 	typedef typename major_iterator<self_type>::type major_iterator;
 	
 	major_iterator set_element(major_iterator pos, size_type index, value_type value) {
-		RANGE_CHECK(pos.index() == index);
+		REMORA_RANGE_CHECK(pos.index() == index);
 		*pos=value;
 		return pos;
 	}
@@ -1126,4 +1151,10 @@ private:
 };
 
 }
+
+
+#ifdef REMORA_USE_GPU
+#include "../gpu/matrix_proxy_classes.hpp"
+#endif
+
 #endif

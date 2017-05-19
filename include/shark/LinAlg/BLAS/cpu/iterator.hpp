@@ -34,9 +34,13 @@
 #include <algorithm>
 #include <cstdlib>
 
-#include "check.hpp"
+#include "../detail/check.hpp"
 
 namespace remora{ namespace iterators{
+
+//pure block expressions do not have an iterator but the interface still requires one.
+// this is our cheap way out.
+struct no_iterator{};
 
 // Iterator tags -- hierarchical definition of storage characteristics
 struct sparse_bidirectional_iterator_tag: public std::bidirectional_iterator_tag{};
@@ -261,11 +265,11 @@ public:
 
 	// Dereference
 	reference operator *() const {
-		RANGE_CHECK(m_index < m_closure.size());
+		REMORA_RANGE_CHECK(m_index < m_closure.size());
 		return m_closure(m_index);
 	}
 	reference operator [](difference_type n) const {
-		RANGE_CHECK(m_index+n < m_closure.size());
+		REMORA_RANGE_CHECK(m_index+n < m_closure.size());
 		return m_closure(m_index+n);
 	}
 
@@ -352,7 +356,7 @@ public:
 	}
 	template<class U>
 	difference_type operator - (dense_storage_iterator<U,Tag> const& it) const {
-		//RANGE_CHECK(m_pos == it.m_pos);
+		//REMORA_RANGE_CHECK(m_pos == it.m_pos);
 		return (difference_type)m_index - (difference_type)it.m_index;
 	}
 
@@ -372,13 +376,13 @@ public:
 	// Comparison
 	template<class U>
 	bool operator == (dense_storage_iterator<U,Tag> const& it) const {
-		//RANGE_CHECK(m_pos == it.m_pos);
-		//~ RANGE_CHECK(m_index < it.m_index);
+		//REMORA_RANGE_CHECK(m_pos == it.m_pos);
+		//~ REMORA_RANGE_CHECK(m_index < it.m_index);
 		return m_index == it.m_index;
 	}
 	template<class U>
 	bool operator <  (dense_storage_iterator<U,Tag> const& it) const {
-		//RANGE_CHECK(m_pos == it.m_pos);
+		//REMORA_RANGE_CHECK(m_pos == it.m_pos);
 		return m_index < it.m_index;
 	}
 
@@ -432,7 +436,7 @@ public:
 		return *this;
 	}
 	compressed_storage_iterator &operator -- () {
-		RANGE_CHECK(m_position > 0);
+		REMORA_RANGE_CHECK(m_position > 0);
 		--m_position;
 		return *this;
 	}
@@ -447,8 +451,8 @@ public:
 	
 	template<class U,class V>
 	difference_type operator - (compressed_storage_iterator<U,V> const& it) const {
-		RANGE_CHECK(m_values == it.m_values);
-		RANGE_CHECK(m_indices == it.m_indices);
+		REMORA_RANGE_CHECK(m_values == it.m_values);
+		REMORA_RANGE_CHECK(m_indices == it.m_indices);
 		return difference_type(m_position) - difference_type(it.m_position);
 	}
 	
@@ -458,8 +462,8 @@ public:
 
 	template<class U,class V>
 	bool operator == (compressed_storage_iterator<U,V> const &it) const {
-		RANGE_CHECK(m_values == it.m_values);
-		RANGE_CHECK(m_indices == it.m_indices);
+		REMORA_RANGE_CHECK(m_values == it.m_values);
+		REMORA_RANGE_CHECK(m_indices == it.m_indices);
 		return m_position == it.m_position;
 	}
 
@@ -480,7 +484,7 @@ private:
 	Iterator incrementToIndex(
 		Iterator iter, Iterator end, std::size_t index, dense_random_access_iterator_tag
 	) {
-		SIZE_CHECK(iter.index()<= index);
+		REMORA_SIZE_CHECK(iter.index()<= index);
 		return iter+(index-iter.index());
 	}
 	template<class Iterator>
@@ -488,7 +492,7 @@ private:
 		Iterator iter, Iterator end, std::size_t index, packed_random_access_iterator_tag
 	) {
 		if(iter < end ){
-			RANGE_CHECK(iter.index() < index);
+			REMORA_RANGE_CHECK(iter.index() < index);
 			return iter+std::min<std::ptrdiff_t>(std::ptrdiff_t(index-iter.index()),end-iter);
 		}
 		return end;
@@ -782,7 +786,7 @@ public:
 
 	// Comparison
 	bool operator == (one_hot_iterator const& it) const {
-		RANGE_CHECK(m_index == it.m_index);
+		REMORA_RANGE_CHECK(m_index == it.m_index);
 		return m_isEnd == it.m_isEnd;
 	}
 
