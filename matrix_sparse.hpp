@@ -144,7 +144,7 @@ public:
 		return m_values.size();
 	}
 	std::size_t row_capacity(size_type row)const {
-		RANGE_CHECK(row < size1());
+		REMORA_RANGE_CHECK(row < size1());
 		return m_rowStart[row+1] - m_rowStart[row];
 	}
 	std::size_t nnz() const {
@@ -173,8 +173,8 @@ public:
 	}
 	
 	void set_row_filled(size_type i,std::size_t non_zeros) {
-		SIZE_CHECK(i < size1());
-		SIZE_CHECK(non_zeros <=row_capacity(i));
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_SIZE_CHECK(non_zeros <=row_capacity(i));
 		
 		m_rowEnd[i] = m_rowStart[i]+non_zeros;
 		//correct end pointers
@@ -200,7 +200,7 @@ public:
 	}
 
 	void reserve_row(size_type row, std::size_t non_zeros) {
-		RANGE_CHECK(row < size1());
+		REMORA_RANGE_CHECK(row < size1());
 		non_zeros = std::min(m_size2,non_zeros);
 		if (non_zeros <= row_capacity(row)) return;
 		std::size_t spaceDifference = non_zeros - row_capacity(row);
@@ -221,7 +221,7 @@ public:
 			m_rowEnd[i]+=spaceDifference;
 		}
 		m_rowStart.back() +=spaceDifference;
-		SIZE_CHECK(row_capacity(row) == non_zeros);
+		REMORA_SIZE_CHECK(row_capacity(row) == non_zeros);
 	}
 
 	void clear() {
@@ -231,8 +231,8 @@ public:
 
 	// Element access
 	const_reference operator()(size_type i, size_type j) const {
-		SIZE_CHECK(i < size1());
-		SIZE_CHECK(j < size2());
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_SIZE_CHECK(j < size2());
 		//get array bounds
 		size_type const *start = m_indices.data() + m_rowStart[i];
 		size_type const *end = m_indices.data() + m_rowEnd[i];
@@ -246,8 +246,8 @@ public:
 	}
 
 	reference operator()(size_type i, size_type j) {
-		SIZE_CHECK(i < size1());
-		SIZE_CHECK(j < size2());
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_SIZE_CHECK(j < size2());
 		return reference(*this,i,j);
 	}
 
@@ -281,9 +281,9 @@ public:
 	}
 
 	friend void swap_rows(compressed_matrix& a, size_type i, compressed_matrix& b, size_type j) {
-		SIZE_CHECK(i < a.size1());
-		SIZE_CHECK(j < b.size1());
-		SIZE_CHECK(a.size2() == b.size2());
+		REMORA_SIZE_CHECK(i < a.size1());
+		REMORA_SIZE_CHECK(j < b.size1());
+		REMORA_SIZE_CHECK(a.size2() == b.size2());
 		
 		//rearrange (i,j) such that i has equal or more elements than j
 		if(a.inner_nnz(i) < b.inner_nnz(j)){
@@ -296,8 +296,8 @@ public:
 		
 		//reserve enough space for swapping
 		b.reserve_row(j,nnzi);
-		SIZE_CHECK(b.row_capacity(j) >= nnzi);
-		SIZE_CHECK(a.row_capacity(i) >= nnzj);
+		REMORA_SIZE_CHECK(b.row_capacity(j) >= nnzi);
+		REMORA_SIZE_CHECK(a.row_capacity(i) >= nnzj);
 		
 		size_type* indicesi = a.m_indices.data() + a.m_rowStart[i];
 		size_type* indicesj = b.m_indices.data() + b.m_rowStart[j];
@@ -326,26 +326,26 @@ public:
 	typedef iterators::compressed_storage_iterator<value_type, size_type const> row_iterator;
 
 	const_row_iterator row_begin(size_type i) const {
-		SIZE_CHECK(i < size1());
-		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return const_row_iterator(m_values.data(), m_indices.data(), m_rowStart[i],i);
 	}
 
 	const_row_iterator row_end(size_type i) const {
-		SIZE_CHECK(i < size1());
-		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return const_row_iterator(m_values.data(), m_indices.data(), m_rowEnd[i],i);
 	}
 
 	row_iterator row_begin(size_type i) {
-		SIZE_CHECK(i < size1());
-		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return row_iterator(m_values.data(), m_indices.data(), m_rowStart[i],i);
 	}
 
 	row_iterator row_end(size_type i) {
-		SIZE_CHECK(i < size1());
-		RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
+		REMORA_SIZE_CHECK(i < size1());
+		REMORA_RANGE_CHECK(m_rowStart[i] <= m_rowEnd[i]);//internal check
 		return row_iterator(m_values.data(), m_indices.data(), m_rowEnd[i],i);
 	}
 	
@@ -354,8 +354,8 @@ public:
 	
 	row_iterator set_element(row_iterator pos, size_type index, value_type value) {
 		std::size_t row = pos.row();
-		RANGE_CHECK(row < size1());
-		RANGE_CHECK(size_type(row_end(row) - pos) <= row_capacity(row));
+		REMORA_RANGE_CHECK(row < size1());
+		REMORA_RANGE_CHECK(size_type(row_end(row) - pos) <= row_capacity(row));
 		//todo: check in debug, that iterator position is valid
 
 		//shortcut: element already exists.
@@ -393,7 +393,7 @@ public:
 
 	row_iterator clear_range(row_iterator start, row_iterator end) {
 		std::size_t row = start.row();
-		RANGE_CHECK(row == end.row());
+		REMORA_RANGE_CHECK(row == end.row());
 		//get position of the elements in the array.
 		size_type rowEndPos = m_rowEnd[row];
 		size_type rowStartPos = m_rowStart[row];
@@ -415,7 +415,7 @@ public:
 	}
 
 	row_iterator clear_element(row_iterator elem) {
-		RANGE_CHECK(elem != row_end());
+		REMORA_RANGE_CHECK(elem != row_end());
 		row_iterator next = elem;
 		++next;
 		clear_range(elem,next);

@@ -42,7 +42,7 @@ template<class E, class Device>
 std::size_t vector_max(
 	vector_expression<E, Device> const& e
 ) {
-	SIZE_CHECK(e().size() == e().size());
+	REMORA_SIZE_CHECK(e().size() == e().size());
 	return bindings::vector_max(e,typename E::evaluation_category::tag());
 }
 

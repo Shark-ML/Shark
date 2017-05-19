@@ -74,8 +74,8 @@ void syrk(
 	typename MatC::value_type alpha,
 	std::true_type
 ) {
-	SIZE_CHECK(A().size1() == C().size1());
-	SIZE_CHECK(C().size1() == C().size2());
+	REMORA_SIZE_CHECK(A().size1() == C().size1());
+	REMORA_SIZE_CHECK(C().size1() == C().size2());
 	
 	CBLAS_ORDER stor_ord = (CBLAS_ORDER) storage_order<typename MatC::orientation >::value;
 	CBLAS_UPLO uplo = Upper?CblasUpper: CblasLower;

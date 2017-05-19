@@ -222,7 +222,7 @@ void matrix_assign(
 		MIter mpos = m().row_begin(i);
 		EIter epos = e().row_begin(i);
 		MIter mend = m().row_end(i);
-		SIZE_CHECK(mpos.index() == epos.index());
+		REMORA_SIZE_CHECK(mpos.index() == epos.index());
 		for(; mpos!=mend; ++mpos,++epos){
 			*mpos = *epos;
 		}
@@ -427,7 +427,7 @@ void matrix_assign_functor(
 		MIter mpos = m().row_begin(i);
 		EIter epos = e().row_begin(i);
 		MIter mend = m().row_end(i);
-		SIZE_CHECK(mpos.index() == epos.index());
+		REMORA_SIZE_CHECK(mpos.index() == epos.index());
 		for(; mpos!=mend; ++mpos,++epos){
 			*mpos = f(*mpos,*epos);
 		}

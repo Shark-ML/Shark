@@ -29,8 +29,8 @@
  *
  */
 //===========================================================================
-#ifndef REMORA_KERNELS_CLBLAS_GEMM_HPP
-#define REMORA_KERNELS_CLBLAS_GEMM_HPP
+#ifndef REMORA_KERNELS_GPU_GEMM_HPP
+#define REMORA_KERNELS_GPU_GEMM_HPP
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
@@ -48,9 +48,9 @@ void gemm(
 	matrix_expression<MatC, gpu_tag>& C, 
 	typename MatC::value_type const& alpha
 ) {
-	SIZE_CHECK(A().size1() == C().size1());
-	SIZE_CHECK(B().size2() == C().size2());
-	SIZE_CHECK(A().size2()== B().size1());
+	REMORA_SIZE_CHECK(A().size1() == C().size1());
+	REMORA_SIZE_CHECK(B().size2() == C().size2());
+	REMORA_SIZE_CHECK(A().size2()== B().size1());
 	
 	// TUNING VARIABLES:
 	// TILE_SIZE: width and height of a tile computed in C

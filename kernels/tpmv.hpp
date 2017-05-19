@@ -55,8 +55,8 @@ void tpmv(
 	matrix_expression<MatA, cpu_tag> const &A, 
 	vector_expression<VecB, cpu_tag>& b
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size1() == b().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1() == b().size());
 	
 	bindings::tpmv(A,b,typename bindings::has_optimized_tpmv<MatA, VecB>::type());
 }

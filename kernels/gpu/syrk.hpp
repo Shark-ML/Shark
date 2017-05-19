@@ -47,8 +47,8 @@ void syrk(
 	matrix_expression<MatC, gpu_tag>& C, 
 	typename MatC::value_type const& alpha
 ) {
-	SIZE_CHECK(A().size1() == C().size1());
-	SIZE_CHECK(C().size1()== C().size2());
+	REMORA_SIZE_CHECK(A().size1() == C().size1());
+	REMORA_SIZE_CHECK(C().size1()== C().size2());
 	
 	// TUNING VARIABLES:
 	// TILE_SIZE: width and height of a tile computed in C

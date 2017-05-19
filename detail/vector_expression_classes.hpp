@@ -29,7 +29,6 @@
 #define REMORA_VECTOR_EXPRESSION_CLASSES_HPP
 
 #include "../assignment.hpp"
-#include "iterator.hpp"
 #include "traits.hpp"
 
 namespace remora{
@@ -194,7 +193,7 @@ public:
 
 	// Element access
 	const_reference operator()(size_type const& i) const {
-		SIZE_CHECK(i < m_size);
+		REMORA_SIZE_CHECK(i < m_size);
 		return (i == m_index)? value_type(1) : value_type(0);
 	}
 	typename device_traits<Device>::queue_type& queue()const{
@@ -328,7 +327,7 @@ public:
 		lhs_closure_type e1, 
 		rhs_closure_type e2
 	):m_lhs(e1),m_rhs(e2){
-		SIZE_CHECK(e1.size() == e2.size());
+		REMORA_SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
@@ -351,7 +350,7 @@ public:
 	// Element access
 	template <class IndexExpr>
 	auto operator()(IndexExpr const& i) const -> decltype(functor_type()(std::declval<E1 const&>()(i),std::declval<E2 const&>()(i))){
-		SIZE_CHECK(i < size());
+		REMORA_SIZE_CHECK(i < size());
 		return functor_type()(m_lhs(i),m_rhs(i));
 	}
 	
@@ -416,7 +415,7 @@ public:
 		rhs_closure_type e2,
 		F functor
 	):m_lhs(e1),m_rhs(e2), m_functor(functor) {
-		SIZE_CHECK(e1.size() == e2.size());
+		REMORA_SIZE_CHECK(e1.size() == e2.size());
 	}
 
 	// Accessors
@@ -443,7 +442,7 @@ public:
 	// Element access
 	template <class IndexExpr>
 	auto operator()(IndexExpr const& i) const -> decltype(std::declval<F>()(std::declval<E1 const&>()(i),std::declval<E2 const&>()(i))){
-		SIZE_CHECK(i < size());
+		REMORA_SIZE_CHECK(i < size());
 		return m_functor(m_lhs(i),m_rhs(i));
 	}
 	
@@ -564,8 +563,8 @@ public:
 	}
 
 	// Iterator types
-	typedef typename E1::const_iterator const_iterator;
-	typedef const_iterator iterator;
+	typedef iterators::no_iterator const_iterator;
+	typedef iterators::no_iterator iterator;
 
 private:
 	lhs_closure_type m_lhs;

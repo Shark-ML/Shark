@@ -144,8 +144,8 @@ matrix_addition<MatA, MatB > operator+ (
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	return matrix_addition<MatA, MatB>(A(),B());
 }
 
@@ -155,8 +155,8 @@ matrix_addition<MatA, matrix_scalar_multiply<MatB> > operator- (
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	return matrix_addition<MatA, matrix_scalar_multiply<MatB> >(A(),-B());
 }
 
@@ -212,8 +212,8 @@ typename std::enable_if<
 template<class MatA, class MatB, class Device>\
 matrix_binary<MatA, MatB, typename device_traits<Device>:: template F<typename common_value_type<MatA,MatB>::type> >\
 name(matrix_expression<MatA, Device> const& m1, matrix_expression<MatB, Device> const& m2){\
-	SIZE_CHECK(m1().size1() == m2().size1());\
-	SIZE_CHECK(m1().size2() == m2().size2());\
+	REMORA_SIZE_CHECK(m1().size1() == m2().size1());\
+	REMORA_SIZE_CHECK(m1().size2() == m2().size2());\
 	typedef typename common_value_type<MatA,MatB>::type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
 	return matrix_binary<MatA, MatB, functor_type >(m1(),m2(), functor_type());\
@@ -275,8 +275,8 @@ safe_div(
 	matrix_expression<MatB, Device> const& B, 
 	typename common_value_type<MatA,MatB>::type defaultValue
 ){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typedef typename common_value_type<MatA,MatB>::type result_type;
 	typedef typename device_traits<Device>:: template safe_divide<result_type> functor_type;
 	return matrix_binary<MatA, MatB, functor_type>(A(),B(), functor_type(defaultValue));
@@ -292,7 +292,7 @@ template<class MatA, class VecV, class Device>
 typename detail::matrix_vector_prod_optimizer<MatA,VecV>::type prod(
 	matrix_expression<MatA, Device> const& A,vector_expression<VecV, Device> const& v
 ) {
-	SIZE_CHECK(A().size2() == v().size());
+	REMORA_SIZE_CHECK(A().size2() == v().size());
 	return detail::matrix_vector_prod_optimizer<MatA,VecV>::create(A(),v());
 }
 
@@ -305,7 +305,7 @@ typename detail::matrix_vector_prod_optimizer<MatA,VecV>::type prod(
 /// this expression is optimized to make use of well known mathematical identities to reduce run time of the algorithm.
 template<class MatA, class VecV, class Device>
 auto prod(vector_expression<VecV, Device> const& v,matrix_expression<MatA, Device> const& A) -> decltype(prod(trans(A),v)){
-	SIZE_CHECK(A().size1() == v().size());
+	REMORA_SIZE_CHECK(A().size1() == v().size());
 	return prod(trans(A),v);
 }
 
@@ -314,7 +314,7 @@ auto prod(vector_expression<VecV, Device> const& v,matrix_expression<MatA, Devic
 /// v%A= prod(v,A).
 template<class MatA, class VecV, class Device>
 auto operator%(vector_expression<VecV, Device> const& v,matrix_expression<MatA, Device> const& A) -> decltype(prod(trans(A),v)){
-	SIZE_CHECK(A().size1() == v().size());
+	REMORA_SIZE_CHECK(A().size1() == v().size());
 	return prod(trans(A),v);
 }
 
@@ -323,7 +323,7 @@ auto operator%(vector_expression<VecV, Device> const& v,matrix_expression<MatA, 
 /// A%v = prod(A,v).
 template<class MatA, class VecV, class Device>
 auto operator%(matrix_expression<MatA, Device> const& A,vector_expression<VecV, Device> const& v) -> decltype(prod(A,v)){
-	SIZE_CHECK(A().size2() == v().size());
+	REMORA_SIZE_CHECK(A().size2() == v().size());
 	return prod(A,v);
 }
 
@@ -335,12 +335,13 @@ auto operator%(matrix_expression<MatA, Device> const& A,vector_expression<VecV, 
 ///
 ///Example: x += triangular_prod<lower>(A,v);
 template<class TriangularType, class MatA, class VecV, class Device>
-matrix_vector_prod<detail::dense_triangular_proxy<MatA const,TriangularType> ,VecV> triangular_prod(
+matrix_vector_prod<detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> ,VecV>
+triangular_prod(
 	matrix_expression<MatA, Device> const& A,
 	vector_expression<VecV, Device>& v
 ) {
-	SIZE_CHECK(A().size2() == v().size());
-	typedef detail::dense_triangular_proxy<MatA const,TriangularType> Wrapper;
+	REMORA_SIZE_CHECK(A().size2() == v().size());
+	typedef detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> Wrapper;
 	return matrix_vector_prod<Wrapper ,VecV>(Wrapper(A()), v());
 }
 
@@ -350,7 +351,7 @@ typename detail::matrix_matrix_prod_optimizer<MatA,MatB>::type prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ) {
-	SIZE_CHECK(A().size2() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size1());
 	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
 	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
 	return detail::matrix_matrix_prod_optimizer<MatA,MatB>::create(A(),B());
@@ -364,7 +365,7 @@ auto operator%(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ) -> decltype(prod(A,B)){
-	SIZE_CHECK(A().size2() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size1());
 	return prod(A,B);
 }
 
@@ -382,7 +383,7 @@ triangular_prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ) {
-	SIZE_CHECK(A().size2() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size1());
 	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
 	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
 	typedef detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> Wrapper;
@@ -441,8 +442,8 @@ frobenius_prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
 ) {
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	return sum(eval_block(A*B));
 }
 
@@ -484,7 +485,7 @@ norm_inf(matrix_expression<MatA, Device> const& A) {
 template < class MatA, class Device>
 typename MatA::value_type trace(matrix_expression<MatA, Device> const& A)
 {
-	SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	return sum(diag(A));
 }
 
@@ -619,6 +620,18 @@ typename std::enable_if<
 	return repeat(t,1, A().size2()) & A;
 }
 
+
+//copy between cpu and device
+template<class E>
+E const&  copy_to_cpu(matrix_expression<E, cpu_tag> const& e){
+	return e();
 }
+
+}
+
+#ifdef REMORA_USE_GPU
+#include "gpu/copy.hpp"
+#endif
+
 
 #endif

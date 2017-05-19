@@ -175,8 +175,8 @@ void trmv(
 	matrix_expression<MatA, gpu_tag> const& A, 
 	vector_expression<VecV, gpu_tag>& v
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == v().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == v().size());
 	
 	std::size_t const TileSizeA = 32;//size of the diagonal blocks where the single kernel runs
 	char const* options ="-DTILE_SIZE=32ul";

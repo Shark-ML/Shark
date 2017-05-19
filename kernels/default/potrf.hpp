@@ -150,7 +150,7 @@ std::size_t potrf(
 	matrix_container<MatA, cpu_tag>& A,
 	std::false_type//unoptimized
 ){
-	SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	return potrf_recursive(A,0,A().size1(), Triangular());
 }
 

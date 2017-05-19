@@ -48,8 +48,8 @@ void trsv_impl(
 	vector_expression<V, cpu_tag> &b,
     lower, column_major, left
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == b().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
 	typedef matrix_transpose<typename const_expression<MatA>::type> TransA;
@@ -77,8 +77,8 @@ void trsv_impl(
 	vector_expression<V, cpu_tag> &b,
     lower, row_major, left
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == b().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
 
@@ -107,8 +107,8 @@ void trsv_impl(
 	vector_expression<V, cpu_tag> &b,
     upper, column_major, left
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == b().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
 	typedef matrix_transpose<typename const_expression<MatA>::type> TransA;
@@ -137,8 +137,8 @@ void trsv_impl(
 	vector_expression<V, cpu_tag> &b,
     upper, row_major, left
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == b().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
 

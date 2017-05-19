@@ -104,7 +104,7 @@ vector_addition<VecV1, VecV2 > operator+ (
 	vector_expression<VecV1, Device> const& v1,
 	vector_expression<VecV2, Device> const& v2
 ){
-	SIZE_CHECK(v1().size() == v2().size());
+	REMORA_SIZE_CHECK(v1().size() == v2().size());
 	return vector_addition<VecV1, VecV2>(v1(),v2());
 }
 ///\brief Subtracts two vectors
@@ -113,7 +113,7 @@ vector_addition<VecV1, vector_scalar_multiply<VecV2> > operator- (
 	vector_expression<VecV1, Device> const& v1,
 	vector_expression<VecV2, Device> const& v2
 ){
-	SIZE_CHECK(v1().size() == v2().size());
+	REMORA_SIZE_CHECK(v1().size() == v2().size());
 	return vector_addition<VecV1, vector_scalar_multiply<VecV2> >(v1(),-v2());
 }
 
@@ -169,7 +169,7 @@ typename std::enable_if<
 template<class VecV1, class VecV2, class Device>\
 vector_binary<VecV1, VecV2, typename device_traits<Device>:: template F<typename common_value_type<VecV1,VecV2>::type> >\
 name(vector_expression<VecV1, Device> const& v1, vector_expression<VecV2, Device> const& v2){\
-	SIZE_CHECK(v1().size() == v2().size());\
+	REMORA_SIZE_CHECK(v1().size() == v2().size());\
 	typedef typename common_value_type<VecV1,VecV2>::type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
 	return vector_binary<VecV1, VecV2, functor_type >(v1(),v2(), functor_type());\
@@ -234,7 +234,7 @@ safe_div(
 	vector_expression<VecV2, Device> const& v2, 
 	typename common_value_type<VecV1,VecV2>::type defaultValue
 ){
-	SIZE_CHECK(v1().size() == v2().size());
+	REMORA_SIZE_CHECK(v1().size() == v2().size());
 	typedef typename common_value_type<VecV1,VecV2>::type result_type;
 	
 	typedef typename device_traits<Device>:: template safe_divide<result_type> functor_type;
@@ -282,7 +282,7 @@ min(vector_expression<VecV, Device> const& v) {
 /// \brief arg_max v = arg max_i v_i
 template<class VecV, class Device>
 std::size_t arg_max(vector_expression<VecV, Device> const& v) {
-	SIZE_CHECK(v().size() > 0);
+	REMORA_SIZE_CHECK(v().size() > 0);
 	auto const& elem_result = eval_block(v);
 	return kernels::vector_max(elem_result);
 }
@@ -290,7 +290,7 @@ std::size_t arg_max(vector_expression<VecV, Device> const& v) {
 /// \brief arg_min v = arg min_i v_i
 template<class VecV, class Device>
 std::size_t arg_min(vector_expression<VecV, Device> const& v) {
-	SIZE_CHECK(v().size() > 0);
+	REMORA_SIZE_CHECK(v().size() > 0);
 	return arg_max(-v);
 }
 
@@ -356,7 +356,7 @@ inner_prod(
 	vector_expression<VecV1, Device> const& v1,
 	vector_expression<VecV2, Device> const& v2
 ) {
-	SIZE_CHECK(v1().size() == v2().size());
+	REMORA_SIZE_CHECK(v1().size() == v2().size());
 	typedef decltype(
 		typename VecV1::value_type() * typename VecV2::value_type()
 	) value_type;
@@ -408,6 +408,15 @@ typename std::enable_if<
 	return scalar_vector<T, Device>(1,t) | v;
 }
 
+template<class E>
+E const& copy_to_cpu(vector_expression<E, cpu_tag> const& e){
+	return e();
 }
+
+}
+
+#ifdef REMORA_USE_GPU
+#include "gpu/copy.hpp"
+#endif
 
 #endif

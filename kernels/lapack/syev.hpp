@@ -71,8 +71,8 @@ void syev(
 	matrix_expression<MatA, cpu_tag>& A,
 	vector_expression<VectorB, cpu_tag>& eigenValues
 ) {
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size1() == eigenValues().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1() == eigenValues().size());
 	
 	std::size_t n = A().size1();
 	bool upper = false;

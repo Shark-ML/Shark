@@ -50,7 +50,7 @@ void dot(
 	vector_expression<E2, Device> const& e2,
 	result_type& result
 ) {
-	SIZE_CHECK(e1().size() == e2().size());
+	REMORA_SIZE_CHECK(e1().size() == e2().size());
 	
 	bindings::dot(
 		e1, e2,result,typename E1::evaluation_category::tag(), typename E2::evaluation_category::tag()

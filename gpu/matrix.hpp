@@ -28,14 +28,13 @@
 #ifndef REMORA_GPU_MATRIX_HPP
 #define REMORA_GPU_MATRIX_HPP
 
-#include "traits.hpp"
-//~ #include "scalar.hpp"
+#include "../detail/traits.hpp"
 #include "../assignment.hpp"
 #include "../detail/matrix_proxy_classes.hpp"
 #include <boost/compute/container/vector.hpp>
 #include <boost/compute/iterator/strided_iterator.hpp>
 
-namespace remora{namespace gpu{
+namespace remora{
 	
 namespace detail{
 template<class Arg1, class Arg2, class T>
@@ -68,8 +67,8 @@ boost::compute::detail::meta_kernel& operator<< (
 ///
 /// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
 /// \tparam L the storage organization. It can be either \c row_major or \c column_major. Default is \c row_major
-template<class T, class L = row_major>
-class matrix: public matrix_container<matrix<T,L>, gpu_tag > {
+template<class T, class L>
+class matrix<T,L, gpu_tag> : public matrix_container<matrix<T,L, gpu_tag>, gpu_tag > {
 private:
 	template<class IndexExpr1, class IndexExpr2>
 	detail::induced_matrix_element<IndexExpr1, IndexExpr2, T> get_element(
@@ -87,7 +86,6 @@ private:
 	}
 public:
 	typedef T value_type;
-	//~ typedef scalar<T> value_type;
 	typedef value_type const_reference;
 	typedef value_type reference;
 	typedef std::size_t size_type;
@@ -95,7 +93,7 @@ public:
 	typedef matrix_reference<matrix const> const_closure_type;
 	typedef matrix_reference<matrix> closure_type;
 	typedef gpu::dense_matrix_storage<T> storage_type;
-	typedef gpu::dense_matrix_storage<T> const_storage_type;
+	typedef gpu::dense_matrix_storage<T const> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 	typedef L orientation;
 
@@ -221,7 +219,12 @@ public:
 	}
 	///\brief Returns the underlying storage structure for low level access
 	const_storage_type raw_storage() const{
-		return {m_storage,0,orientation::index_m(m_size1,m_size2)};
+		return {m_storage.get_buffer(),0,orientation::index_m(m_size1,m_size2)};
+	}
+	
+	///\brief Returns the underlying storage structure for low level access
+	storage_type raw_storage(){
+		return {m_storage.get_buffer(),0,orientation::index_m(m_size1,m_size2)};
 	}
 	
 	// Element access
@@ -323,17 +326,7 @@ private:
 	size_type m_size1;
 	size_type m_size2;
 };
-}
 
-template<class T, class L>
-struct matrix_temporary_type<T,L,dense_tag, gpu_tag>{
-	typedef gpu::matrix<T, L> type;
-};
-
-template<class T>
-struct matrix_temporary_type<T,unknown_orientation,dense_tag, gpu_tag>{
-	typedef gpu::matrix<T, row_major> type;
-};
 }
 
 #endif

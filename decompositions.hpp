@@ -203,7 +203,7 @@ public:
 	
 	template<class E>
 	void decompose(matrix_expression<E,device_type> const& e){
-		SIZE_CHECK(e().size1() ==  e().size2());
+		REMORA_SIZE_CHECK(e().size1() ==  e().size2());
 		m_eigenvectors.resize(e().size1(),e().size1());
 		m_eigenvalues.resize(e().size1());
 		noalias(m_eigenvectors) = e;
@@ -343,8 +343,8 @@ public:
 	// m must be of size rank x n
 	template<class Mat>
 	void compute_inverse_factor(matrix_expression<Mat,device_type>& C)const{
-		SIZE_CHECK(C().size1() == m_rank);
-		SIZE_CHECK(C().size2() == m_factor.size1());
+		REMORA_SIZE_CHECK(C().size1() == m_rank);
+		REMORA_SIZE_CHECK(C().size2() == m_factor.size1());
 		if(m_rank == m_factor.size1()){//matrix has full rank
 			//initialize as identity matrix and solve
 			noalias(C) = identity_matrix<double>( m_factor.size1());
@@ -459,9 +459,9 @@ private:
 		double epsilon,
 		unsigned int max_iterations
 	)const{
-		SIZE_CHECK(A().size1() == A().size2());
-		SIZE_CHECK(A().size1() == b().size());
-		SIZE_CHECK(A().size1() == x().size());
+		REMORA_SIZE_CHECK(A().size1() == A().size2());
+		REMORA_SIZE_CHECK(A().size1() == b().size());
+		REMORA_SIZE_CHECK(A().size1() == x().size());
 		typedef typename vector_temporary<VecX>::type vector_type;
 		
 		std::size_t dim = b().size();
@@ -502,10 +502,10 @@ private:
 		double epsilon,
 		unsigned int max_iterations
 	)const{
-		SIZE_CHECK(A().size1() == A().size2());
-		SIZE_CHECK(A().size1() == B().size1());
-		SIZE_CHECK(A().size1() == X().size1());
-		SIZE_CHECK(B().size2() == X().size2());
+		REMORA_SIZE_CHECK(A().size1() == A().size2());
+		REMORA_SIZE_CHECK(A().size1() == B().size1());
+		REMORA_SIZE_CHECK(A().size1() == X().size1());
+		REMORA_SIZE_CHECK(B().size2() == X().size2());
 		typedef typename vector_temporary<MatX>::type vector_type;
 		typedef typename matrix_temporary<MatX>::type matrix_type;
 		

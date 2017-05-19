@@ -28,7 +28,7 @@
  #ifndef REMORA_VECTOR_PROXY_CLASSES_HPP
 #define REMORA_VECTOR_PROXY_CLASSES_HPP
 
-#include "iterator.hpp"
+#include "../cpu/iterator.hpp"
 #include "traits.hpp"
 
 #include <type_traits>
@@ -170,9 +170,9 @@ public:
 	// Construction and destruction
 	vector_range(vector_closure_type const& data, size_type start, size_type end):
 		m_expression(data), m_start(start), m_size(end-start){
-		RANGE_CHECK(start <= end);
-		RANGE_CHECK(start <= m_expression.size());
-		RANGE_CHECK(end <= m_expression.size());
+		REMORA_RANGE_CHECK(start <= end);
+		REMORA_RANGE_CHECK(start <= m_expression.size());
+		REMORA_RANGE_CHECK(end <= m_expression.size());
 	}
 	
 	//non-const-> const conversion
@@ -295,9 +295,9 @@ private:
 /// \brief Represents a given chunk of memory as a dense vector of elements of type T.
 ///
 /// This adaptor is read/write if T is non-const and read-only if T is const.
-template<class T>
-class dense_vector_adaptor: public vector_expression<dense_vector_adaptor<T>, cpu_tag > {
-	typedef dense_vector_adaptor<T> self_type;
+template<class T, class Tag = cpu_tag>
+class dense_vector_adaptor: public vector_expression<dense_vector_adaptor<T, Tag>, Tag > {
+	typedef dense_vector_adaptor<T, Tag> self_type;
 public:
 
 	typedef std::size_t size_type;
@@ -445,13 +445,13 @@ public:
 	
 	//insertion and erasing of elements
 	iterator set_element(iterator pos, size_type index, value_type value) {
-		SIZE_CHECK(pos.index() == index);
+		REMORA_SIZE_CHECK(pos.index() == index);
 		(*this)(index) = value;
 		return pos;
 	}
 
 	iterator clear_element(iterator pos) {
-		SIZE_CHECK(pos != end());
+		REMORA_SIZE_CHECK(pos != end());
 		v(pos.index()) = value_type();
 		
 		//return new iterator to the next element
@@ -459,7 +459,7 @@ public:
 	}
 	
 	iterator clear_range(iterator start, iterator end) {
-		RANGE_CHECK(start < end);
+		REMORA_RANGE_CHECK(start < end);
 		for(; start != end; ++start){
 			*start = value_type/*zero*/();
 		}
@@ -536,7 +536,7 @@ public:
 	/// \brief Return a const reference to the element \f$i\f$
 	/// \param i index of the element
 	value_type operator()(size_type i) const {
-		SIZE_CHECK(i < m_size);
+		REMORA_SIZE_CHECK(i < m_size);
 		size_type const* pos = std::lower_bound(m_indices,m_indices+m_nonZeros, i);
 		std::ptrdiff_t diff = pos-m_indices;
 		if(diff == (std::ptrdiff_t) m_nonZeros || *pos != i)

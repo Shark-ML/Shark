@@ -139,14 +139,14 @@ auto column(temporary_proxy<M> expression, typename M::size_type j) -> decltype(
 /// diag(A) = (1,5,9)
 template<class M, class Device>
 matrix_vector_range<typename const_expression<M>::type > diag(matrix_expression<M, Device> const& mat){
-	SIZE_CHECK(mat().size1() == mat().size2());
+	REMORA_SIZE_CHECK(mat().size1() == mat().size2());
 	matrix_vector_range<typename const_expression<M>::type > diagonal(mat(),0,mat().size1(),0,mat().size1());
 	return diagonal;
 }
 
 template<class M, class Device>
 temporary_proxy< matrix_vector_range<M> > diag(matrix_expression<M, Device>& mat){
-	SIZE_CHECK(mat().size1() == mat().size2());
+	REMORA_SIZE_CHECK(mat().size1() == mat().size2());
 	matrix_vector_range<M> diagonal(mat(),0,mat().size1(),0,mat().size1());
 	return diagonal;
 }
@@ -178,10 +178,10 @@ temporary_proxy< typename detail::matrix_range_optimizer<M>::type > subrange(
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
 ){
-	RANGE_CHECK(start1 <= stop1);
-	RANGE_CHECK(start2 <= stop2);
-	SIZE_CHECK(stop1 <= expression().size1());
-	SIZE_CHECK(stop2 <= expression().size2());
+	REMORA_RANGE_CHECK(start1 <= stop1);
+	REMORA_RANGE_CHECK(start2 <= stop2);
+	REMORA_SIZE_CHECK(stop1 <= expression().size1());
+	REMORA_SIZE_CHECK(stop2 <= expression().size2());
 	return detail::matrix_range_optimizer<M>::create(expression(), start1, stop1, start2, stop2);
 }
 template<class M, class Device>
@@ -190,10 +190,10 @@ typename detail::matrix_range_optimizer<typename const_expression<M>::type>::typ
 	std::size_t start1, std::size_t stop1,
 	std::size_t start2, std::size_t stop2
 ){
-	RANGE_CHECK(start1 <= stop1);
-	RANGE_CHECK(start2 <= stop2);
-	SIZE_CHECK(stop1 <= expression().size1());
-	SIZE_CHECK(stop2 <= expression().size2());
+	REMORA_RANGE_CHECK(start1 <= stop1);
+	REMORA_RANGE_CHECK(start2 <= stop2);
+	REMORA_SIZE_CHECK(stop1 <= expression().size1());
+	REMORA_SIZE_CHECK(stop2 <= expression().size2());
 	return detail::matrix_range_optimizer<typename const_expression<M>::type>::create(expression(), start1, stop1, start2, stop2);
 }
 
@@ -211,8 +211,8 @@ auto rows(
 	matrix_expression<M, Device>& expression, 
 	std::size_t start, std::size_t stop
 ) -> decltype(subrange(expression, start, stop, 0,expression().size2())){
-	RANGE_CHECK(start <= stop);
-	SIZE_CHECK(stop <= expression().size1());
+	REMORA_RANGE_CHECK(start <= stop);
+	REMORA_SIZE_CHECK(stop <= expression().size1());
 	return subrange(expression, start, stop, 0,expression().size2());
 }
 
@@ -221,8 +221,8 @@ auto rows(
 	matrix_expression<M, Device> const& expression, 
 	std::size_t start, std::size_t stop
 ) -> decltype(subrange(expression, start, stop, 0,expression().size2())){
-	RANGE_CHECK(start <= stop);
-	SIZE_CHECK(stop <= expression().size1());
+	REMORA_RANGE_CHECK(start <= stop);
+	REMORA_SIZE_CHECK(stop <= expression().size1());
 	return subrange(expression, start, stop, 0,expression().size2());
 }
 
@@ -239,8 +239,8 @@ auto columns(
 	matrix_expression<M, Device>& expression, 
 	typename M::size_type start, typename M::size_type stop
 ) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
-	RANGE_CHECK(start <= stop);
-	SIZE_CHECK(stop <= expression().size2());
+	REMORA_RANGE_CHECK(start <= stop);
+	REMORA_SIZE_CHECK(stop <= expression().size2());
 	return subrange(expression, 0,expression().size1(), start, stop);
 }
 
@@ -249,8 +249,8 @@ auto columns(
 	matrix_expression<M, Device> const& expression, 
 	typename M::size_type start, typename M::size_type stop
 ) -> decltype(subrange(expression, 0,expression().size1(), start, stop)){
-	RANGE_CHECK(start <= stop);
-	SIZE_CHECK(stop <= expression().size2());
+	REMORA_RANGE_CHECK(start <= stop);
+	REMORA_SIZE_CHECK(stop <= expression().size2());
 	return subrange(expression, 0,expression().size1(), start, stop);
 }
 
@@ -279,46 +279,39 @@ temporary_proxy<dense_matrix_adaptor<T> > adapt_matrix(T (&array)[M][N]){
 }
 
 /// \brief Converts a dense vector to a matrix of a given size
-template <class V>
+template <class V, class Tag>
 typename std::enable_if<
 	std::is_same<typename V::storage_type::storage_tag,dense_tag>::value,
 	temporary_proxy< dense_matrix_adaptor<
-		typename std::remove_reference<typename V::reference>::type
+		typename std::remove_reference<typename V::reference>::type,row_major, Tag
 	> >
 >::type
 to_matrix(
-	vector_expression<V, cpu_tag>& v,
+	vector_expression<V, Tag>& v,
 	std::size_t size1, std::size_t size2
 ){
+	REMORA_SIZE_CHECK(size1 * size2 == v().size());
 	typedef typename std::remove_reference<typename V::reference>::type ElementType;
-	return dense_matrix_adaptor<ElementType>(v().raw_storage().values, size1, size2);
+	return dense_matrix_adaptor<ElementType, row_major, Tag>(v, size1, size2);
 }
 
 /// \brief Converts a dense vector to a matrix of a given size
-template <class V>
+template <class V, class Tag>
 typename std::enable_if<
 	std::is_same<typename V::storage_type::storage_tag,dense_tag>::value,
-	temporary_proxy< dense_matrix_adaptor<typename V::value_type const> >
+	temporary_proxy< dense_matrix_adaptor<typename V::value_type const,row_major, Tag> >
 >::type 
 to_matrix(
-	vector_expression<V, cpu_tag> const& v,
+	vector_expression<V, Tag> const& v,
 	std::size_t size1, std::size_t size2
 ){
-	return dense_matrix_adaptor<typename V::value_type const>(v().raw_storage().values, size1, size2);
+	REMORA_SIZE_CHECK(size1 * size2 == v().size());
+	return dense_matrix_adaptor<typename V::value_type const, row_major, Tag>(v, size1, size2);
 }
 
-template <class E>
-typename std::enable_if<
-	std::is_same<typename E::storage_type::storage_tag,dense_tag>::value,
-	temporary_proxy< dense_matrix_adaptor<
-		typename std::remove_reference<typename E::reference>::type
-	> >
->::type 
-to_matrix(
-	temporary_proxy<E> v,
-	std::size_t size1, std::size_t size2
-){
-	return to_matrix(static_cast<E&>(v),size1,size2);
+template<class E>
+auto to_matrix(temporary_proxy<E> e, std::size_t size1, std::size_t size2)->decltype(to_matrix(static_cast<E&>(e),size1, size2)){
+	return to_matrix(static_cast<E&>(e), size1, size2);
 }
 
 /// \brief Converts a dense matrix to a vector
@@ -349,4 +342,5 @@ auto to_vector(temporary_proxy<E> e)->decltype(to_vector(static_cast<E&>(e))){
 }
 
 }
+
 #endif

@@ -84,8 +84,8 @@ void trsv_impl(
 	vector_expression<V, cpu_tag> &b,
 	std::true_type, left
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size1()== b().size());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size1()== b().size());
 	CBLAS_DIAG cblasUnit = Triangular::is_unit?CblasUnit:CblasNonUnit;
 	CBLAS_ORDER const storOrd= (CBLAS_ORDER)storage_order<typename MatA::orientation>::value;
 	CBLAS_UPLO uplo = Triangular::is_upper?CblasUpper:CblasLower;

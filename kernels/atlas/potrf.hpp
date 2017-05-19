@@ -79,7 +79,7 @@ inline int potrf(
 		(CBLAS_ORDER)storage_order<typename SymmA::orientation>::value;
 
 	std::size_t n = A().size1();
-	SIZE_CHECK(n == A().size2());
+	REMORA_SIZE_CHECK(n == A().size2());
 
 	auto storageA = A().raw_storage();
 	return potrf(

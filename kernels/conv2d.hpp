@@ -60,11 +60,11 @@ void conv2d(
 	std::size_t num_channels,
 	std::size_t num_filters
 ){
-	SIZE_CHECK(filter().size1() % (num_filters * num_channels)  == 0);
-	SIZE_CHECK(image().size1() % num_channels  == 0);
-	SIZE_CHECK(output().size1() % num_filters  == 0);
-	SIZE_CHECK(output().size1()/num_filters + filter().size1()/(num_filters * num_channels) -1 == image().size1() / num_channels);
-	SIZE_CHECK(output().size2() + filter().size2() -1 == image().size2());
+	REMORA_SIZE_CHECK(filter().size1() % (num_filters * num_channels)  == 0);
+	REMORA_SIZE_CHECK(image().size1() % num_channels  == 0);
+	REMORA_SIZE_CHECK(output().size1() % num_filters  == 0);
+	REMORA_SIZE_CHECK(output().size1()/num_filters + filter().size1()/(num_filters * num_channels) -1 == image().size1() / num_channels);
+	REMORA_SIZE_CHECK(output().size2() + filter().size2() -1 == image().size2());
 	
 	bindings::conv2d(
 		image, filter, output, num_channels, num_filters

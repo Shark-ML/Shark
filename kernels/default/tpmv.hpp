@@ -151,8 +151,8 @@ void tpmv(
 	vector_expression<V, cpu_tag>& b,
 	std::false_type//unoptimized
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == b().size());	
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == b().size());	
 	tpmv_impl(
 		A, b,
 		typename MatA::orientation::orientation(),

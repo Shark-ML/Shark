@@ -118,10 +118,10 @@ public:
 	}
 
 	const_column_iterator column_begin(size_type i) const {
-		return const_row_iterator(m_expression.column_begin(i),functor_type(m_scalar));
+		return const_column_iterator(m_expression.column_begin(i),functor_type(m_scalar));
 	}
 	const_column_iterator column_end(size_type i) const {
-		return const_row_iterator(m_expression.column_end(i),functor_type(m_scalar));
+		return const_column_iterator(m_expression.column_end(i),functor_type(m_scalar));
 	}
 
 private:
@@ -301,20 +301,20 @@ public:
 	// Element lookup
 	
 	const_row_iterator row_begin(size_type i) const {
-		RANGE_CHECK( i < size1());
+		REMORA_RANGE_CHECK( i < size1());
 		return m_vector.begin();
 	}
 	const_row_iterator row_end(size_type i) const {
-		RANGE_CHECK( i < size1());
+		REMORA_RANGE_CHECK( i < size1());
 		return m_vector.end();
 	}
 	
 	const_column_iterator column_begin(size_type j) const {
-		RANGE_CHECK( j < size2());
+		REMORA_RANGE_CHECK( j < size2());
 		return const_column_iterator(m_vector(j),0);
 	}
 	const_column_iterator column_end(size_type j) const {
-		RANGE_CHECK( j < size2());
+		REMORA_RANGE_CHECK( j < size2());
 		return const_column_iterator(m_vector(j),size1());
 	}
 private:
@@ -379,11 +379,11 @@ public:
 		return const_row_iterator(m_value, size2());
 	}
 	
-	const_row_iterator column_begin(size_type j) const {
-		return const_row_iterator(m_value, 0);
+	const_column_iterator column_begin(size_type j) const {
+		return const_column_iterator(m_value, 0);
 	}
-	const_row_iterator column_end(size_type j) const {
-		return const_row_iterator(m_value, size1());
+	const_column_iterator column_end(size_type j) const {
+		return const_column_iterator(m_value, size1());
 	}
 private:
 	size_type m_size1;
@@ -757,8 +757,8 @@ public:
 		return m_vector;
 	}
 	
-	typedef typename MatA::const_row_iterator const_iterator;
-	typedef const_iterator iterator;
+	typedef iterators::no_iterator const_iterator;
+	typedef iterators::no_iterator iterator;
 
 
 	typename device_traits<device_type>::queue_type& queue()const{
@@ -851,8 +851,8 @@ public:
 		return m_matrix.queue();
 	}
 	
-	typedef typename MatA::const_row_iterator const_iterator;
-	typedef const_iterator iterator;
+	typedef iterators::no_iterator const_iterator;
+	typedef iterators::no_iterator iterator;
 
 	//dispatcher to computation kernels for blockwise case
 	template<class VecX>
@@ -890,7 +890,7 @@ public:
 	// Construction and destruction
 	explicit dense_triangular_proxy(matrix_closure_type const& m)
 	: m_expression(m) {
-		SIZE_CHECK(m.size1() == m.size2());
+		REMORA_SIZE_CHECK(m.size1() == m.size2());
 	}
 
 	// Expression accessors
@@ -975,12 +975,10 @@ public:
 		return m_lhs.queue();
 	}
 	
-	//FIXME: This workaround is required
-	//as other expressions might query the iterator type
-	typedef typename MatA::const_row_iterator const_row_iterator;
-	typedef typename MatA::const_column_iterator const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
+	typedef iterators::no_iterator const_row_iterator;
+	typedef iterators::no_iterator const_column_iterator;
+	typedef iterators::no_iterator row_iterator;
+	typedef iterators::no_iterator column_iterator;
 	
 	//dispatcher to computation kernels
 	template<class MatX>
@@ -1144,12 +1142,10 @@ public:
 		return m_lhs.queue();
 	}
 	
-	//FIXME: This workaround is required
-	//as other expressions might query the iterator type
-	typedef typename MatA::const_row_iterator const_row_iterator;
-	typedef typename MatA::const_column_iterator const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
+	typedef iterators::no_iterator const_row_iterator;
+	typedef iterators::no_iterator const_column_iterator;
+	typedef iterators::no_iterator row_iterator;
+	typedef iterators::no_iterator column_iterator;
 	
 	//dispatcher to computation kernels
 	template<class MatX>

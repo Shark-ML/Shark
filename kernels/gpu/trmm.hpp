@@ -191,8 +191,8 @@ void trmm(
 	matrix_expression<MatA, gpu_tag> const& A, 
 	matrix_expression<MatB, gpu_tag>& B
 ){
-	SIZE_CHECK(A().size1() == A().size2());
-	SIZE_CHECK(A().size2() == B().size1());
+	REMORA_SIZE_CHECK(A().size1() == A().size2());
+	REMORA_SIZE_CHECK(A().size2() == B().size1());
 	
 	std::size_t const TileSizeA = 32;//size of the diagonal blocks where the single kernel runs
 	std::size_t const TileSizeB = 32;// size of the blocks B is partitioned into along the number of columns

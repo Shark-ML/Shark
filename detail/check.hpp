@@ -4,11 +4,11 @@
 #include <cassert>
 
 #ifndef NDEBUG
-#define RANGE_CHECK(cond) assert(cond)
-#define SIZE_CHECK(cond) assert(cond)
+#define REMORA_RANGE_CHECK(cond) assert(cond)
+#define REMORA_SIZE_CHECK(cond) assert(cond)
 #else
-#define RANGE_CHECK(cond) do { (void)sizeof(cond); } while (false)
-#define SIZE_CHECK(cond) do { (void)sizeof(cond); } while (false)
+#define REMORA_RANGE_CHECK(cond) do { (void)sizeof(cond); } while (false)
+#define REMORA_SIZE_CHECK(cond) do { (void)sizeof(cond); } while (false)
 #endif
 
 #endif

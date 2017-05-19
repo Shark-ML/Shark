@@ -78,6 +78,42 @@ typename std::conditional<
 eval_block(matrix_expression<E, Device> const& e){
 	return e();//either casts to E const& or returns the copied expression
 }
+
+
+///\brief Evaluates an expression if it does not have a standard storage layout
+///
+/// This function evaluates an expression to a temporary if it does not have
+/// a known storage type. i.e. proxy expressions and containers are not evaluated but passed
+/// through while everything else is evaluated.
+template<class E, class Device>
+typename std::conditional<
+	std::is_same<
+		unknown_storage,
+		typename E::storage_type
+	>::value,
+	typename vector_temporary<E>::type,
+	E const&
+>::type
+eval_expression(vector_expression<E, Device> const& e){
+	return e();//either casts to E const& or returns the evaluated expression
+}
+///\brief Evaluates an expression if it does not have a standard storage layout
+///
+/// This function evaluates an expression to a temporary if it does not have
+/// a known storage type. i.e. proxy expressions and containers are not evaluated but passed
+/// through while everything else is evaluated.
+template<class E, class Device>
+typename std::conditional<
+	std::is_same<
+		unknown_storage,
+		typename E::storage_type
+	>::value,
+	typename matrix_temporary<E>::type,
+	E const&
+>::type
+eval_expression(matrix_expression<E, Device> const& e){
+	return e();//either casts to E const& or returns the evaluated expression
+}
 	
 /////////////////////////////////////////////////////////////////////////////////////
 ////// Vector Assign
@@ -131,7 +167,7 @@ namespace detail{
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
 VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	detail::assign(x,v,typename VecV::evaluation_category());
 	return x();
 }
@@ -142,7 +178,7 @@ VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device>
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
 VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	detail::assign(x,v,typename VecV::evaluation_category(),alpha);
 	return x();
 }
@@ -153,7 +189,7 @@ VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device>
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
 VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	detail::plus_assign(x,v,typename VecV::evaluation_category());
 	return x();
 }
@@ -164,7 +200,7 @@ VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, De
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
 VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	detail::plus_assign(x,v,typename VecV::evaluation_category(),alpha);
 	return x();
 }
@@ -175,7 +211,7 @@ VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, De
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
 VecX& multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	auto&& veval = eval_block(v);
 	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<VecX,VecV>::type>> (x, veval);
 	return x();
@@ -187,7 +223,7 @@ VecX& multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
 VecX& divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	auto&& veval = eval_block(v);
 	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<VecX,VecV>::type>> (x, veval);
 	return x();
@@ -245,8 +281,8 @@ namespace detail{
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
 MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	detail::assign(A,B, typename MatB::evaluation_category());
 	return A();
 }
@@ -257,8 +293,8 @@ MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device>
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
 MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	detail::assign(A,B, typename MatB::evaluation_category(),alpha);
 	return A();
 }
@@ -269,8 +305,8 @@ MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device>
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
 MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	detail::plus_assign(A,B, typename MatB::evaluation_category());
 	return A();
 }
@@ -281,8 +317,8 @@ MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, De
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
 MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	detail::plus_assign(A,B, typename MatB::evaluation_category(),alpha);
 	return A();
 }
@@ -293,8 +329,8 @@ MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, De
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
 MatA& multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	auto&& Beval = eval_block(B);
 	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, Beval);
 	return A();
@@ -306,8 +342,8 @@ MatA& multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
 MatA& divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	auto&& Beval = eval_block(B);
 	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, Beval);
 	return A();
@@ -325,7 +361,7 @@ MatA& divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, 
 /// use noalias as in noalias(x)+=v to avoid this if A and B do not alias
 template<class VecX, class VecV, class Device>
 VecX& operator+=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return plus_assign(x,temporary);
 }
@@ -338,7 +374,7 @@ VecX& operator+=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 /// use noalias as in noalias(x)-=v to avoid this if A and B do not alias
 template<class VecX, class VecV, class Device>
 VecX& operator-=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return plus_assign(x,temporary, typename VecX::value_type(-1.0));
 }
@@ -351,7 +387,7 @@ VecX& operator-=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 /// use noalias as in noalias(x)*=v to avoid this if A and B do not alias
 template<class VecX, class VecV, class Device>
 VecX& operator*=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return multiply_assign(x,temporary);
 }
@@ -364,7 +400,7 @@ VecX& operator*=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 /// use noalias as in noalias(x)/=v to avoid this if A and B do not alias
 template<class VecX, class VecV, class Device>
 VecX& operator/=(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	SIZE_CHECK(x().size() == v().size());
+	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return divide_assign(x,temporary);
 }
@@ -423,8 +459,8 @@ operator/=(vector_expression<VecX, Device>& x, T t){
 /// use noalias as in noalias(A)+=B to avoid this if A and B do not alias
 template<class MatA, class MatB, class Device>
 MatA& operator+=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
 	return plus_assign(A,temporary);
 }
@@ -437,8 +473,8 @@ MatA& operator+=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 /// use noalias as in noalias(A)-=B to avoid this if A and B do not alias
 template<class MatA, class MatB, class Device>
 MatA& operator-=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
 	return plus_assign(A,temporary, typename MatA::value_type(-1.0));
 }
@@ -451,8 +487,8 @@ MatA& operator-=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 /// use noalias as in noalias(A)*=B to avoid this if A and B do not alias
 template<class MatA, class MatB, class Device>
 MatA& operator*=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
 	return multiply_assign(A,temporary);
 }
@@ -465,8 +501,8 @@ MatA& operator*=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 /// use noalias as in noalias(A)/=B to avoid this if A and B do not alias
 template<class MatA, class MatB, class Device>
 MatA& operator/=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	SIZE_CHECK(A().size1() == B().size1());
-	SIZE_CHECK(A().size2() == B().size2());
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
 	return divide_assign(A,temporary);
 }
