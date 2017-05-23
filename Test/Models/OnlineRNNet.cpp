@@ -57,12 +57,12 @@ public:
 	}
 	
 	void weightedParameterDerivative(
-		RealMatrix const& patterns, RealMatrix const& coefficients,
+		RealMatrix const& patterns,RealMatrix const& outputs, RealMatrix const& coefficients,
 		State const& state, RealVector& gradient
 	)const{
 		std::size_t start = patterns.size2() - m_structure.inputs();
 		RealMatrix pattern = columns(patterns,start,patterns.size2());
-		m_network.weightedParameterDerivative(pattern,coefficients,state,gradient);
+		m_network.weightedParameterDerivative(pattern, outputs, coefficients,state,gradient);
 	}
 	
 private:

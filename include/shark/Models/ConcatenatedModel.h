@@ -182,7 +182,8 @@ public:
 	}
 
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs,  
+		BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const{
 		InternalState const& s = state.toState<InternalState>();
 
@@ -194,10 +195,10 @@ public:
 			RealVector secondParameterDerivative;
 			
 			m_secondModel->weightedDerivatives(
-				s.intermediateResult,coefficients,*s.secondModelState,
+				s.intermediateResult, outputs, coefficients,*s.secondModelState,
 				secondParameterDerivative,secondInputDerivative
 			);
-			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,firstParameterDerivative);
+			m_firstModel->weightedParameterDerivative(patterns,s.intermediateResult, secondInputDerivative,*s.firstModelState,firstParameterDerivative);
 			
 			gradient.resize(numberOfParameters());
 			noalias(gradient) = firstParameterDerivative | secondParameterDerivative;
@@ -206,12 +207,12 @@ public:
 			BatchIntermediateType secondInputDerivative;
 			
 			m_secondModel->weightedInputDerivative(
-				s.intermediateResult,coefficients,*s.secondModelState,secondInputDerivative
+				s.intermediateResult, outputs, coefficients,*s.secondModelState,secondInputDerivative
 			);
-			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,gradient);
+			m_firstModel->weightedParameterDerivative(patterns,s.intermediateResult, secondInputDerivative,*s.firstModelState,gradient);
 		}else if(m_optimizeSecond){
 			m_secondModel->weightedParameterDerivative(
-				s.intermediateResult,coefficients,*s.secondModelState,
+				s.intermediateResult, outputs, coefficients,*s.secondModelState,
 				gradient
 			);
 		}else {
@@ -220,17 +221,19 @@ public:
 	}
 
 	void weightedInputDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs, 
+		BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
 	)const{
 		InternalState const& s = state.toState<InternalState>();
 		BatchIntermediateType secondInputDerivative;
-		m_secondModel->weightedInputDerivative(s.intermediateResult, coefficients, *s.secondModelState, secondInputDerivative);
-		m_firstModel->weightedInputDerivative(patterns, secondInputDerivative, *s.firstModelState, gradient);
+		m_secondModel->weightedInputDerivative(s.intermediateResult,outputs, coefficients, *s.secondModelState, secondInputDerivative);
+		m_firstModel->weightedInputDerivative(patterns, s.intermediateResult, secondInputDerivative, *s.firstModelState, gradient);
 	}
 	
 	//special implementation, because we can reuse the input derivative of the second model for the calculation of both derivatives of the first
 	virtual void weightedDerivatives(
-		BatchInputType const & patterns, 
+		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients, 
 		State const& state,
 		RealVector& parameterDerivative,
@@ -246,20 +249,20 @@ public:
 		RealVector secondParameterDerivative;
 		if(m_optimizeSecond){
 			m_secondModel->weightedDerivatives(
-				s.intermediateResult, coefficients, *s.firstModelState, secondParameterDerivative, secondInputDerivative
+				s.intermediateResult, outputs, coefficients, *s.firstModelState, secondParameterDerivative, secondInputDerivative
 			);
 		}else{
 			m_secondModel->weightedInputDerivative(
-				s.intermediateResult, coefficients, *s.firstModelState, secondInputDerivative
+				s.intermediateResult, outputs, coefficients, *s.firstModelState, secondInputDerivative
 			);
 		}
 		if(m_optimizeFirst){
 			m_firstModel->weightedDerivatives(
-				patterns, secondInputDerivative, *s.secondModelState, parameterDerivative, inputDerivative
+				patterns, s.intermediateResult, secondInputDerivative, *s.secondModelState, parameterDerivative, inputDerivative
 			);
 		}else{
 			m_firstModel->weightedInputDerivative(
-				patterns, secondInputDerivative, *s.secondModelState, inputDerivative
+				patterns, s.intermediateResult, secondInputDerivative, *s.secondModelState, inputDerivative
 			);
 		}
 
@@ -474,25 +477,34 @@ public:
 	}
 	
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns,
+		BatchOutputType const & outputs,
+		BatchOutputType const& coefficients,
+		State const& state,
+		RealVector& gradient
 	)const{
-		m_wrapper->weightedParameterDerivative(patterns, coefficients, state, gradient);
+		m_wrapper->weightedParameterDerivative(patterns, outputs, coefficients, state, gradient);
 	}
 
 	void weightedInputDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, BatchOutputType& derivatives
+		BatchInputType const& patterns,
+		BatchOutputType const & outputs,
+		BatchOutputType const& coefficients,
+		State const& state, 
+		BatchOutputType& derivatives
 	)const{
-		m_wrapper->weightedInputDerivative(patterns, coefficients, state, derivatives);
+		m_wrapper->weightedInputDerivative(patterns, outputs, coefficients, state, derivatives);
 	}
 
 	virtual void weightedDerivatives(
 		BatchInputType const & patterns,
+		BatchOutputType const & outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& parameterDerivative,
 		BatchInputType& inputDerivative
 	)const{
-		m_wrapper->weightedDerivatives(patterns, coefficients, state, parameterDerivative,inputDerivative);
+		m_wrapper->weightedDerivatives(patterns, outputs, coefficients, state, parameterDerivative,inputDerivative);
 	}
 
 	/// From ISerializable

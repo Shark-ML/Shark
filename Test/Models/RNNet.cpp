@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE( RNNET_WEIGHTED_PARAMETER_DERIVATIVE ){
 
 	//now calculate the derivative
 	RealVector derivative;
-	net.weightedParameterDerivative(testInputBatch,coefficientsBatch,*state,derivative);
+	net.weightedParameterDerivative(testInputBatch,testOutputBatch, coefficientsBatch,*state,derivative);
 	BOOST_REQUIRE_EQUAL(derivative.size(),numberOfParameters);
 
 	//estimate derivative.

@@ -66,7 +66,8 @@ void LinearNorm::eval(BatchInputType const& patterns, BatchOutputType& output, S
 }
 
 void LinearNorm::weightedInputDerivative(
-	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
+	BatchInputType const& patterns, BatchOutputType const& outputs,
+	BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
 )const{
 	SIZE_CHECK(patterns.size2() == inputSize());
 	SIZE_CHECK(coefficients.size1()==patterns.size1());

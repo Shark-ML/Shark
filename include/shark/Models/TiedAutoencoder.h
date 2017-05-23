@@ -165,7 +165,7 @@ public:
 		return boost::shared_ptr<State>(new InternalState());
 	}
 
-	void evalLayer(std::size_t layer,RealMatrix const& patterns,RealMatrix& outputs)const{
+	void evalLayer(std::size_t layer,RealMatrix const& patterns, RealMatrix& outputs)const{
 		SIZE_CHECK(layer < 2);
 		std::size_t numPatterns = patterns.size1();
 		
@@ -230,7 +230,8 @@ public:
 	using AbstractModel<RealVector,RealVector>::eval;
 
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns, RealMatrix const& outputs,  
+		RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
@@ -242,7 +243,8 @@ public:
 	}
 	
 	void weightedInputDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, BatchInputType& inputDerivative
+		BatchInputType const& patterns, RealMatrix const& outputs,  
+		RealMatrix const& coefficients, State const& state, BatchInputType& inputDerivative
 	)const{
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
@@ -254,6 +256,7 @@ public:
 	
 	virtual void weightedDerivatives(
 		BatchInputType const & patterns,
+		RealMatrix const& outputs, 
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& parameterDerivative,

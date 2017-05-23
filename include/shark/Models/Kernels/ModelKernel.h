@@ -147,8 +147,8 @@ public:
 		
 		//compute derivative of model wrt parameters
 		RealVector modelGradX1,modelGradX2;
-		mpe_model->weightedParameterDerivative(batchX1,inputDerivativeX1,*s.modelStateX1,modelGradX1);
-		mpe_model->weightedParameterDerivative(batchX2,inputDerivativeX2,*s.modelStateX2,modelGradX2);
+		mpe_model->weightedParameterDerivative(batchX1,s.intermediateX1, inputDerivativeX1,*s.modelStateX1,modelGradX1);
+		mpe_model->weightedParameterDerivative(batchX2,s.intermediateX2, inputDerivativeX2,*s.modelStateX2,modelGradX2);
 		noalias(gradient) = kernelGrad | (modelGradX1+modelGradX2);
 	}
 	

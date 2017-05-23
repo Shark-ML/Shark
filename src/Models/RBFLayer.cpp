@@ -106,16 +106,15 @@ void RBFLayer::eval(BatchInputType const& patterns, BatchOutputType& output, Sta
 	//every center has it's own value of gamma, so we need to multiply the i-th column 
 	//of the norm with m_gamma(i) and to normalize it, we have to subtract the normalization
 	// constant.
-	noalias(s.p) = exp(
+	noalias(output) = exp(
 		-element_prod(repeat(m_gamma,numPatterns),s.norm2) 
 		- repeat(m_logNormalization,numPatterns)
 	);
-	
-	noalias(output) = s.p;
 }
 
 void RBFLayer::weightedParameterDerivative(
-	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state,  RealVector& gradient
+	BatchInputType const& patterns, BatchOutputType const& outputs, 
+	BatchOutputType const& coefficients, State const& state,  RealVector& gradient
 )const{
 	SIZE_CHECK(patterns.size1() == coefficients.size1());
 	SIZE_CHECK(coefficients.size2() == outputSize());
@@ -123,7 +122,7 @@ void RBFLayer::weightedParameterDerivative(
 	InternalState const& s = state.toState<InternalState>();
 
 	//compute d_ij = c_ij * p(x_i|j)
-	RealMatrix delta = element_prod(coefficients,s.p);
+	RealMatrix delta = element_prod(coefficients,outputs);
 	RealVector deltaSum = sum_rows(delta);
 	
 	std::size_t currentParameter = 0;

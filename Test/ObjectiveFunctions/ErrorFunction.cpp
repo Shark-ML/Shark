@@ -53,7 +53,7 @@ public:
 		}
 		using AbstractModel<RealVector,RealVector>::eval;
 
-		virtual void weightedParameterDerivative( RealMatrix const& input, RealMatrix const& coefficients, State const& state, RealVector& derivative)const
+		virtual void weightedParameterDerivative( RealMatrix const& input, RealMatrix const&, RealMatrix const& coefficients, State const& state, RealVector& derivative)const
 		{
 			derivative.resize(1);
 			derivative(0)=0;

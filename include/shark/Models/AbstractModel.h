@@ -213,6 +213,7 @@ public:
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
 	virtual void weightedParameterDerivative(
 		BatchInputType const & pattern,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& derivative
@@ -228,6 +229,7 @@ public:
 	/// \param  derivative    the calculated derivative for every pattern
 	virtual void weightedInputDerivative(
 		BatchInputType const & pattern,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative
@@ -248,13 +250,14 @@ public:
 	/// \param inputDerivative    the calculated derivative for every pattern
 	virtual void weightedDerivatives(
 		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& parameterDerivative,
 		BatchInputType& inputDerivative
 	)const{
-		weightedParameterDerivative(patterns,coefficients,state,parameterDerivative);
-		weightedInputDerivative(patterns,coefficients,state,inputDerivative);
+		weightedParameterDerivative(patterns, outputs, coefficients,state,parameterDerivative);
+		weightedInputDerivative(patterns, outputs, coefficients,state,inputDerivative);
 	}
 };
 

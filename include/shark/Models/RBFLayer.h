@@ -57,11 +57,9 @@ class RBFLayer : public AbstractModel<RealVector,RealVector>
 private:
 	struct InternalState: public State{
 		RealMatrix norm2;
-		RealMatrix p;
 		
 		void resize(std::size_t numPatterns, std::size_t numNeurons){
 			norm2.resize(numPatterns,numNeurons);
-			p.resize(numPatterns,numNeurons);
 		}
 	};
 
@@ -129,7 +127,8 @@ public:
 	
 
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
-		BatchInputType const& pattern, BatchOutputType const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& pattern, BatchOutputType const& outputs, 
+		BatchOutputType const& coefficients, State const& state, RealVector& gradient
 	)const;
 
 	///\brief Enables or disables parameters for learning.

@@ -80,13 +80,15 @@ public:
 	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output, State& state)const;
 
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients,  State const& state, RealVector& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs, 
+		BatchOutputType const& coefficients,  State const& state, RealVector& gradient
 	)const{
 		SIZE_CHECK(patterns.size1()==coefficients.size1());
 		gradient.resize(0);
 	}
 	SHARK_EXPORT_SYMBOL void weightedInputDerivative(
-		BatchInputType const& pattern,BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
+		BatchInputType const& pattern, BatchOutputType const& outputs, 
+		BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
 	)const;
 
 	/// From ISerializable, reads a model from an archive

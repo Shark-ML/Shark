@@ -136,6 +136,7 @@ public:
 	}
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		RealMatrix const& pattern, 
+		BatchOutputType const& outputs,
 		RealMatrix const& coefficients,  
 		State const& state,
 		RealVector& gradient)const;

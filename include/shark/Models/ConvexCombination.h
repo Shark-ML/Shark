@@ -148,7 +148,8 @@ public:
 	
 	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch 
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs, 
+		RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
 		SIZE_CHECK(coefficients.size2()==outputSize());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
@@ -173,6 +174,7 @@ public:
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch 
 	void weightedInputDerivative(
 		BatchInputType const & patterns,
+		BatchOutputType const& outputs, 
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative

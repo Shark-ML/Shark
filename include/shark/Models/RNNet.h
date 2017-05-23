@@ -146,7 +146,7 @@ public:
 	//! \param state the last state stord during eval
 	//! \param gradient the calculated gradient
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchInputType const& coefficients,  State const& state, 
+		BatchInputType const& patterns, BatchOutputType const& outputs, BatchInputType const& coefficients,  State const& state, 
 		RealVector& gradient
 	)const;
 	

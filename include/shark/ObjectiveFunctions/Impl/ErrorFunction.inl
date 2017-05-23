@@ -107,7 +107,7 @@ public:
 			error += mep_loss->evalDerivative(batch.label, prediction,errorDerivative);
 
 			//calculate the gradient using the chain rule
-			mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,dataGradient);
+			mep_model->weightedParameterDerivative(batch.input,prediction, errorDerivative,*state,dataGradient);
 			derivative+=dataGradient;
 		}
 		error /= dataSize;
@@ -304,7 +304,7 @@ public:
 			
 			//calculate the gradient using the chain rule
 			RealVector dataGradient(mep_model->numberOfParameters());
-			mep_model->weightedParameterDerivative(data.input,errorDerivative,*state,dataGradient);
+			mep_model->weightedParameterDerivative(data.input, prediction, errorDerivative,*state,dataGradient);
 			SHARK_CRITICAL_REGION{
 				derivative += dataGradient;
 				error += batchError;

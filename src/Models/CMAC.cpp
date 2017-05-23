@@ -137,6 +137,7 @@ void CMACMap::eval(RealMatrix const& patterns,RealMatrix &output) const{
 
 void CMACMap::weightedParameterDerivative(
 	RealMatrix const& patterns, 
+	BatchOutputType const& outputs,
 	RealMatrix const& coefficients, 
 	State const&,//not needed
 	RealVector &gradient

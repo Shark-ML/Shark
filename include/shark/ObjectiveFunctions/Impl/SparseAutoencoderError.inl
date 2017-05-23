@@ -151,7 +151,7 @@ public:
 			error += mep_loss->evalDerivative(batch.label, prediction,errorDerivative);
 
 			//calculate gradient
-			mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,dataGradient);
+			mep_model->weightedParameterDerivative(batch.input,prediction, errorDerivative,*state,dataGradient);
 			noalias(gradient) += dataGradient;
 
 			//now prepare KL-divergence step

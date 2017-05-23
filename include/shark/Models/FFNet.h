@@ -369,7 +369,8 @@ public:
 	using AbstractModel<RealVector,RealVector>::eval;
 
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs, 
+		RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
 		SIZE_CHECK(coefficients.size2() == m_outputNeurons);
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
@@ -387,7 +388,8 @@ public:
 	}
 	
 	void weightedInputDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, BatchInputType& inputDerivative
+		BatchInputType const& patterns, BatchOutputType const& outputs, 
+		RealMatrix const& coefficients, State const& state, BatchInputType& inputDerivative
 	)const{
 		SIZE_CHECK(coefficients.size2() == m_outputNeurons);
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
@@ -405,7 +407,7 @@ public:
 	}
 	
 	virtual void weightedDerivatives(
-		BatchInputType const & patterns,
+		BatchInputType const & patterns, BatchOutputType const& outputs, 
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& parameterDerivative,

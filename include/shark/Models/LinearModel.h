@@ -197,28 +197,33 @@ public:
 
 	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns,
+		BatchOutputType const& outputs,
+		BatchOutputType const& coefficients,
+		State const& state,
+		RealVector& gradient
 	)const{
 		SIZE_CHECK(coefficients.size2()==outputSize());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
 		gradient.resize(numberOfParameters());
-		std::size_t inputs = inputSize();
-		std::size_t outputs = outputSize();
+		std::size_t numInputs = inputSize();
+		std::size_t numOutputs = outputSize();
 		gradient.clear();
 
-		auto weightGradient = blas::to_matrix(gradient, outputs,inputs);
+		auto weightGradient = blas::to_matrix(gradient, numOutputs,numInputs);
 		//sum_i coefficients(output,i)*pattern(i))
 		noalias(weightGradient) = trans(coefficients) % patterns;
 
 		if (hasOffset()){
-			std::size_t start = inputs*outputs;
-			noalias(subrange(gradient, start, start + outputs)) = sum_rows(coefficients);
+			std::size_t start = numInputs*numOutputs;
+			noalias(subrange(gradient, start, start + numOutputs)) = sum_rows(coefficients);
 		}
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
 	void weightedInputDerivative(
 		RealMatrix const & patterns,
+		RealMatrix const & outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative

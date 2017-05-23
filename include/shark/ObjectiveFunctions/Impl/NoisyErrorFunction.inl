@@ -135,7 +135,7 @@ private:
 		double error= mep_loss->evalDerivative(batch.label, predictions,errorDerivative);
 
 		//chain rule
-		mep_model->weightedParameterDerivative(batch.input,errorDerivative,*state,derivative);
+		mep_model->weightedParameterDerivative(batch.input,predictions, errorDerivative,*state,derivative);
 	
 		error /= shark::batchSize(batch);
 		derivative /= shark::batchSize(batch);

@@ -79,7 +79,7 @@ void RNNet::eval(BatchInputType const& patterns, BatchOutputType& outputs, State
 }
 
 void RNNet::weightedParameterDerivative(
-	BatchInputType const& patterns, BatchInputType const& coefficients, 
+	BatchInputType const& patterns, BatchOutputType const& outputs, BatchInputType const& coefficients, 
 	State const& state, RealVector& gradient
 )const{
 	//SIZE_CHECK(pattern.size() == coefficients.size());

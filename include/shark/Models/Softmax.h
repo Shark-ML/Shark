@@ -64,15 +64,6 @@ namespace shark {
 	
 class Softmax : public AbstractModel<RealVector,RealVector>
 {
-private:
-	struct InternalState : public State{
-		RealMatrix results;
-
-		void resize(std::size_t numPatterns,std::size_t inputs){
-			results.resize(numPatterns,inputs);
-		}
-	};
-
 public:
 	/// Constructor
 	SHARK_EXPORT_SYMBOL Softmax(size_t inputs);
@@ -101,7 +92,7 @@ public:
 	}
 
 	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
+		return boost::shared_ptr<State>(new EmptyState());
 	}
 
 	SHARK_EXPORT_SYMBOL void eval(BatchInputType const& patterns,BatchOutputType& output)const;
@@ -109,10 +100,12 @@ public:
 	using AbstractModel<RealVector,RealVector>::eval;
 	
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients,  State const& state, RealVector& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs,
+		BatchOutputType const& coefficients,  State const& state, RealVector& gradient
 	)const;
 	SHARK_EXPORT_SYMBOL void weightedInputDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients,  State const& state, BatchOutputType& gradient
+		BatchInputType const& patterns, BatchOutputType const& outputs, 
+		RealMatrix const& coefficients,  State const& state, BatchOutputType& gradient
 	)const;
 
 	void setStructure(std::size_t inputSize){

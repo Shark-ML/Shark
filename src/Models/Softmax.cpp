@@ -69,13 +69,11 @@ void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs)const
 
 void Softmax::eval(BatchInputType const& patterns,BatchOutputType& outputs, State& state)const{
 	eval(patterns,outputs);
-	InternalState& s = state.toState<InternalState>();
-	s.resize(patterns.size1(),outputSize());
-	noalias(s.results) = outputs;
 }
 
 void Softmax::weightedParameterDerivative(
-	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
+	BatchInputType const& patterns, BatchOutputType const& outputs,
+	BatchOutputType const& coefficients, State const& state, RealVector& gradient
 )const{
 	SIZE_CHECK(patterns.size2() == inputSize());
 	SIZE_CHECK(coefficients.size2()==outputSize());
@@ -84,25 +82,25 @@ void Softmax::weightedParameterDerivative(
 	gradient.resize(0);
 }
 void Softmax::weightedInputDerivative(
-	BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
+	BatchInputType const& patterns, BatchOutputType const& outputs, 
+	BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
 )const{
 	SIZE_CHECK(patterns.size2() == inputSize());
 	SIZE_CHECK(coefficients.size2()==patterns.size2());
 	SIZE_CHECK(coefficients.size1()==patterns.size1());
-	InternalState const& s = state.toState<InternalState>();
 	gradient.resize(patterns.size1(),inputSize());
 	gradient.clear();
 	if(inputSize() ==1){
 		for(size_t i = 0; i != patterns.size1(); ++i){
-			double sdx= s.results(i,0)*(1-s.results(i,0));
+			double sdx= outputs(i,0)*(1-outputs(i,0));
 			gradient(i,0) = coefficients(i,1)+(coefficients(i,0)-coefficients(i,1))*sdx;
 		}
 	}
 	else{
 		for(size_t i = 0; i != patterns.size1(); ++i){
-			double mass=inner_prod(row(coefficients,i),row(s.results,i));
+			double mass=inner_prod(row(coefficients,i),row(outputs,i));
 			//(c_k-m)*f_k
-			noalias(row(gradient,i)) = (row(coefficients,i) - mass) *row(s.results,i);
+			noalias(row(gradient,i)) = (row(coefficients,i) - mass) *row(outputs,i);
 		}
 	}
 }

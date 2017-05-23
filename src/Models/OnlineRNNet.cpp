@@ -115,7 +115,9 @@ void OnlineRNNet::eval(RealMatrix const& pattern, RealMatrix& output, State& sta
 }
 
 
-void OnlineRNNet::weightedParameterDerivative(RealMatrix const& pattern, const RealMatrix& coefficients,  State const& state, RealVector& gradient)const{
+void OnlineRNNet::weightedParameterDerivative(
+	RealMatrix const& pattern, BatchOutputType const& outputs,
+	const RealMatrix& coefficients,  State const& state, RealVector& gradient)const{
 	SHARK_RUNTIME_CHECK(m_computeGradient, "Network is configured to not computing gradients!");
 	SIZE_CHECK(pattern.size1()==1);//we can only process a single input at a time.
 	SIZE_CHECK(coefficients.size1()==1);

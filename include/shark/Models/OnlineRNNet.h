@@ -131,7 +131,7 @@ public:
 	//! \param gradient the calculated gradient
 	//! \param state the current state of the RNN
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
-		RealMatrix const& pattern, RealMatrix const& coefficients,
+		RealMatrix const& pattern, BatchOutputType const& outputs, RealMatrix const& coefficients,
 		State const& state, RealVector& gradient
 	)const;
 
