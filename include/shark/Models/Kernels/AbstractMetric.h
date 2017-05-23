@@ -44,7 +44,7 @@ namespace shark {
 	
 	
 template<class InputTypeT>
-class AbstractMetric: public INameable, public IParameterizable, public ISerializable{
+class AbstractMetric: public INameable, public IParameterizable<>, public ISerializable{
 public:
 	/// \brief  Input type of the Kernel.
 	typedef InputTypeT InputType;

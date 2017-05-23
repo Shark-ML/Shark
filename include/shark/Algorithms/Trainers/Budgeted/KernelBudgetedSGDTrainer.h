@@ -94,7 +94,7 @@ namespace shark
 /// from that class. Therefore this class is perhaps numerically not as robust as SGD.
 ///
 template <class InputType, class CacheType = float>
-class KernelBudgetedSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
+class KernelBudgetedSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable<>
 {
 public:
 	typedef AbstractTrainer< KernelExpansion<InputType> > base_type;

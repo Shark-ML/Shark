@@ -87,7 +87,7 @@ namespace shark
 /// losses, e.g., the hinge loss for SVM training.
 ///
 template <class InputType, class CacheType = float>
-class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable
+class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable<>
 {
 public:
 	typedef AbstractTrainer< KernelExpansion<InputType> > base_type;

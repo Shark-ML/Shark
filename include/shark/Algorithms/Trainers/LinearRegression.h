@@ -58,7 +58,7 @@ namespace shark {
  *  \f$ \sum_i (f(x_i) - y_i)^2 \f$ is minimized.
  *  The solution to this problem is found analytically.
  */
-class LinearRegression : public AbstractTrainer<LinearModel<> >, public IParameterizable
+class LinearRegression : public AbstractTrainer<LinearModel<> >, public IParameterizable<>
 {
 public:
 	SHARK_EXPORT_SYMBOL LinearRegression(double regularization = 0.0);

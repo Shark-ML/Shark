@@ -88,7 +88,7 @@ namespace detail{
 /// "Minimizing finite sums with the stochastic average gradient."
 /// arXiv preprint arXiv:1309.2388 (2013).
 template <class InputType, class LabelType>
-class LinearSAGTrainer : public detail::LinearSAGTrainerBase<InputType,LabelType>::type, public IParameterizable
+class LinearSAGTrainer : public detail::LinearSAGTrainerBase<InputType,LabelType>::type, public IParameterizable<>
 {
 private:
 	typedef typename detail::LinearSAGTrainerBase<InputType,LabelType>::type Base;

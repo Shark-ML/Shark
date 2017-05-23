@@ -67,10 +67,9 @@ namespace shark {
  * For detailed information about Random Forest, see Random Forest
  * by L. Breiman et al. 2001.
  */
+
 template<class LabelType>
 class RFTrainer;
-
-
 
 template<>
 class RFTrainer<unsigned int>

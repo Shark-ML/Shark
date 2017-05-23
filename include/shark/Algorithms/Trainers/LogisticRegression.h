@@ -61,7 +61,7 @@ namespace shark {
 /// is used. This is one of the most efficient solvers for logistic regression as long as the
 /// number of data points is not too large.
 template <class InputVectorType = RealVector>
-class LogisticRegression : public AbstractWeightedTrainer<LinearClassifier<InputVectorType> >, public IParameterizable
+class LogisticRegression : public AbstractWeightedTrainer<LinearClassifier<InputVectorType> >, public IParameterizable<>
 {
 private:
 	typedef AbstractWeightedTrainer<LinearClassifier<InputVectorType> > base_type;

@@ -66,7 +66,7 @@ namespace shark {
  *  single dimension.
  */
 template <class InputVectorType = RealVector>
-class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType> >, public IParameterizable
+class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType> >, public IParameterizable<>
 {
 public:
 	typedef LinearModel<InputVectorType> ModelType;

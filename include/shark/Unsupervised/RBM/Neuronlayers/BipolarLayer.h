@@ -42,7 +42,7 @@ namespace shark{
 ///A neuron in a BipolarLayer takes values in {-1,1} and the conditional probability to be 1 
 ///given the states of the neurons in the connected layer is determined by the sigmoid function
 ///and the input it gets from the connected layer.  
-class BipolarLayer : public ISerializable, public IParameterizable{
+class BipolarLayer : public ISerializable, public IParameterizable<>{
 private:
 	///\brief The bias terms associated with the neurons.
 	RealVector m_bias; 

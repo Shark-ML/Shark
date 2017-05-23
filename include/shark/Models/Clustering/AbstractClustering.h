@@ -89,7 +89,7 @@ namespace shark {
 /// SoftClusteringModel.
 ///
 template <class InputT>
-class AbstractClustering : public INameable, public IParameterizable, public ISerializable
+class AbstractClustering : public INameable, public IParameterizable<>, public ISerializable
 {
 public:
 	typedef InputT InputType;

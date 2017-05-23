@@ -46,18 +46,23 @@ namespace shark {
 /// This interface is inherited by AbstractModel for unified
 /// access to the parameters of models, but also by objective
 /// functions and algorithms with hyper-parameters.
+///
+/// the type of parameter vector can be chosen, e.g. to change precision
+/// or port parameters to GPU
+template<class VectorType= RealVector>
 class IParameterizable {
 public:
+	typedef VectorType ParameterVectorType;
 	virtual ~IParameterizable () { }
 
 	/// Return the parameter vector.
-	virtual RealVector parameterVector() const
+	virtual ParameterVectorType parameterVector() const
 	{
-		return RealVector();
+		return ParameterVectorType();
 	}
 
 	/// Set the parameter vector.
-	virtual void setParameterVector(RealVector const& newParameters)
+	virtual void setParameterVector(ParameterVectorType const& newParameters)
 	{
 		SHARK_ASSERT(newParameters.size() == 0);
 	}
