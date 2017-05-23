@@ -50,17 +50,22 @@ namespace shark {
 /// good behavior. Check for example Normalizer for a class which is designed for sparse
 /// inputs and outputs.
 template <class InputType = RealVector>
-class LinearModel : public AbstractModel<InputType,RealVector>
-{
+class LinearModel : public AbstractModel<
+	InputType,
+	blas::vector<typename InputType::value_type, typename InputType::device_type>,//type of output uses same device and precision as input
+	blas::vector<typename InputType::value_type, typename InputType::device_type>//type of parameters uses same device and precision as input
+>{
 private:
-	typedef AbstractModel<InputType,RealVector> base_type;
+	typedef blas::vector<typename InputType::value_type, typename InputType::device_type> VectorType;
+	typedef blas::matrix<typename InputType::value_type, blas::row_major, typename InputType::device_type> MatrixType;
+	typedef AbstractModel<InputType,VectorType, VectorType> base_type;
 	typedef LinearModel<InputType> self_type;
-	/// Wrapper for the type erasure
-	RealMatrix m_matrix;
-	RealVector m_offset;
+	MatrixType m_matrix;
+	VectorType m_offset;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
-	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::BatchOutputType BatchOutputType;//same as MatrixType
+	typedef typename base_type::ParameterVectorType ParameterVectorType;//same as VectorType
 
 	/// CDefault Constructor; use setStructure later
 	LinearModel(){
@@ -100,7 +105,7 @@ public:
 	}
 
 	/// Construction from matrix (and vector)
-	LinearModel(RealMatrix const& matrix, RealVector const& offset = RealVector())
+	LinearModel(MatrixType const& matrix, VectorType const& offset = VectorType())
 	:m_matrix(matrix),m_offset(offset){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
@@ -122,12 +127,12 @@ public:
 	}
 
 	/// obtain the parameter vector
-	RealVector parameterVector() const{
+	ParameterVectorType parameterVector() const{
 		return to_vector(m_matrix) | m_offset;
 	}
 
 	/// overwrite the parameter vector
-	void setParameterVector(RealVector const& newParameters){
+	void setParameterVector(ParameterVectorType const& newParameters){
 		noalias(to_vector(m_matrix)) = subrange(newParameters,0,inputSize() * outputSize());
 		noalias(m_offset) = subrange(newParameters,inputSize() * outputSize(),newParameters.size());
 	}
@@ -144,25 +149,25 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealMatrix const& matrix, RealVector const& offset = RealVector()){
+	void setStructure(MatrixType const& matrix, VectorType const& offset = VectorType()){
 		m_matrix = matrix;
 		m_offset = offset;
 	}
 
 	/// return a copy of the matrix in dense format
-	RealMatrix const& matrix() const{
+	MatrixType const& matrix() const{
 		return m_matrix;
 	}
 
-	RealMatrix& matrix(){
+	MatrixType& matrix(){
 		return m_matrix;
 	}
 
 	/// return the offset
-	RealVector const& offset() const{
+	VectorType const& offset() const{
 		return m_offset;
 	}
-	RealVector& offset(){
+	VectorType& offset(){
 		return m_offset;
 	}
 
@@ -182,7 +187,7 @@ public:
 		}
 	}
 
-	void eval(InputType const& input, RealVector& output)const {
+	void eval(InputType const& input, VectorType& output)const {
 		output.resize(m_matrix.size1());
 		//we multiply with a set of row vectors from the left
 		noalias(output) = m_matrix % input;
@@ -201,7 +206,7 @@ public:
 		BatchOutputType const& outputs,
 		BatchOutputType const& coefficients,
 		State const& state,
-		RealVector& gradient
+		ParameterVectorType& gradient
 	)const{
 		SIZE_CHECK(coefficients.size2()==outputSize());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
@@ -222,8 +227,8 @@ public:
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
 	void weightedInputDerivative(
-		RealMatrix const & patterns,
-		RealMatrix const & outputs,
+		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative
@@ -232,7 +237,7 @@ public:
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
 		derivative.resize(patterns.size1(),inputSize());
-		noalias(derivative) = coefficients % m_matrix;
+		noalias(derivative) = MatrixType(coefficients % m_matrix);//TODO: bug in remora will lead to compile error if derivative is sparse
 	}
 
 	/// From ISerializable
