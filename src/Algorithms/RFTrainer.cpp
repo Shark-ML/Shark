@@ -384,11 +384,11 @@ RFTrainer::Split RFTrainer::findSplit (
 
 ///Generates a random set of indices
 std::vector<std::size_t> RFTrainer::generateRandomTableIndices(random::rng_type &rng) const {
-  std::vector<std::size_t> tableIndices(m_inputDimension);
-  std::iota(tableIndices.begin(), tableIndices.end(), 0);
-  std::shuffle(tableIndices.begin(), tableIndices.end(), rng);
-  tableIndices.resize(m_try);
-  return tableIndices;
+	std::vector<std::size_t> tableIndices(m_inputDimension);
+	std::iota(tableIndices.begin(), tableIndices.end(), 0);
+	std::shuffle(tableIndices.begin(), tableIndices.end(), rng);
+	tableIndices.resize(m_try);
+	return tableIndices;
 }
 
 
