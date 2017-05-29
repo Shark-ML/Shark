@@ -38,7 +38,7 @@
 #include <shark/Core/OpenMP.h>
 
 using namespace shark;
-using std::set;
+using std::vector;
 using detail::cart::SortedIndex;
 using detail::cart::createCountVector;
 using detail::cart::hist;
@@ -268,7 +268,7 @@ RFTrainer::Split RFTrainer::findSplit(
 		SortedIndex const& tables,
 		DataView<ClassificationDataset const> const& elements,
 		ClassVector const& cFull,
-		set<size_t> const& tableIndices) const
+		vector<size_t> const& tableIndices) const
 {
 	auto n = tables.noRows();
 	Split best;
@@ -348,7 +348,7 @@ RFTrainer::Split RFTrainer::findSplit (
 		SortedIndex const& tables,
 		DataView<RegressionDataset const> const &elements,
 		RealVector const& sumFull,
-		set<size_t> const &tableIndices) const
+		vector<size_t> const &tableIndices) const
 {
 	auto n = tables.noRows();
 	Split best{};
@@ -383,13 +383,11 @@ RFTrainer::Split RFTrainer::findSplit (
 
 
 ///Generates a random set of indices
-set<std::size_t> RFTrainer::generateRandomTableIndices(random::rng_type &rng) const {
-	set<std::size_t> tableIndices;
-	std::uniform_int_distribution<std::size_t> dist{0,m_inputDimension-1};
-	//Draw the m_try Generate the random attributes to search for the split
-	while(tableIndices.size()<m_try){
-		tableIndices.insert(dist(rng));
-	}
+std::vector<std::size_t> RFTrainer::generateRandomTableIndices(random::rng_type &rng) const {
+	std::vector<std::size_t> tableIndices(m_inputDimension);
+	std::iota(tableIndices.begin(), tableIndices.end(), 0);
+	std::shuffle(tableIndices.begin(), tableIndices.end(), rng);
+	tableIndices.resize(m_try);
 	return tableIndices;
 }
 
