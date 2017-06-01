@@ -151,6 +151,7 @@ shark_add_test( Models/RBFLayer.cpp Models_RBFLayer )
 shark_add_test( Models/RNNet.cpp Models_RNNet ) 
 shark_add_test( Models/CMAC.cpp Models_CMAC )
 shark_add_test( Models/MeanModel.cpp Models_MeanModel )
+shark_add_test( Models/DropoutLayer.cpp Models_DropoutLayer )
 
 shark_add_test( Models/Softmax.cpp Models_Softmax )
 shark_add_test( Models/SoftNearestNeighborClassifier.cpp Models_SoftNearestNeighborClassifier )
