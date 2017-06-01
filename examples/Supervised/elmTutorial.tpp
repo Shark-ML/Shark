@@ -92,7 +92,7 @@ int main(){
 
 	
 	//###begin<elm>
-	ConcatenatedModel<RealVector,RealVector> elm = normalizer >> elmNetwork;
+	ConcatenatedModel<RealVector> elm = normalizer >> elmNetwork;
 	//###end<elm>
 	//to test whether everything works, we will evaluate the elm and the elmOutput layer separately
 	//both results should be identical

@@ -29,8 +29,9 @@
 #define SHARK_MODELS_AUTOENCODER_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Models/Neurons.h>
-#include <boost/serialization/vector.hpp>
+#include <shark/Models/ConcatenatedModel.h>
+#include <shark/Models/LinearModel.h>
+#include <shark/Models/NeuronLayers.h>
 
 namespace shark{
 
@@ -45,14 +46,11 @@ namespace shark{
 template<class HiddenNeuron,class OutputNeuron>
 class Autoencoder :public AbstractModel<RealVector,RealVector>
 {
-	struct InternalState: public State{
-		RealMatrix hiddenResponses;
-		RealMatrix outputResponses;
-	};
-	
-
 public:
-	Autoencoder(){
+	Autoencoder()
+	: m_fullNetwork(m_encoder >> m_hiddenNeurons >> m_decoder >> m_outputNeurons)
+	, m_encoderNetwork(m_encoder >> m_hiddenNeurons)
+	, m_decoderNetwork(m_decoder >> m_outputNeurons){
 		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 		m_features|=HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -63,76 +61,72 @@ public:
 	}
 
 	//! \brief Number of input neurons.
-	std::size_t inputSize()const{
-		return outputSize();
+	std::size_t inputSize() const{
+		return m_encoder.inputSize();
 	}
 	//! \brief Number of output neurons.
-	std::size_t outputSize()const{
-		return outputBias().size();
+	std::size_t outputSize() const{
+		return m_decoder.outputSize();
 	}
 	
 	//! \brief Total number of hidden neurons.
 	std::size_t numberOfHiddenNeurons()const{
-		return encoderMatrix().size1();
+		return m_encoder.outputSize();
 	}
 	
 	/// \brief Returns the hidden bias weight vector.
 	RealVector const& hiddenBias()const{
-		return m_hiddenBias;
+		return m_encoder.offset();
 	}
 	
 	/// \brief Returns the hidden bias weight vector.
 	RealVector& hiddenBias(){
-		return m_hiddenBias;
+		return m_encoder.offset();
 	}
 	
 	/// \brief Returns the output bias weight vector.
 	RealVector const& outputBias()const{
-		return m_outputBias;
+		return m_decoder.offset();
 	}
 	/// \brief Returns the output bias weight vector.
 	RealVector& outputBias(){
-		return m_outputBias;
+		return m_decoder.offset();
 	}
 	
 	/// \brief Weight matrix for the direction input->hidden.
 	RealMatrix const& encoderMatrix()const{
-		return m_encoderMatrix;
+		return m_encoder.matrix();
 	}
 	/// \brief Weight matrix for the direction input->hidden.
 	RealMatrix& encoderMatrix(){
-		return m_encoderMatrix;
+		return m_encoder.matrix();
 	}
 	/// \brief Weight matrix for the direction hidden->output
 	///
 	RealMatrix const& decoderMatrix()const{
-		return m_decoderMatrix;
+		return m_decoder.matrix();
 	}
 	/// \brief Weight matrix for the direction hidden->output
 	RealMatrix& decoderMatrix(){
-		return m_decoderMatrix;
+		return m_decoder.matrix();
 	}
 	
 	//! \brief Returns the total number of parameters of the network. 
 	std::size_t numberOfParameters()const{
-		return 2*inputSize()*numberOfHiddenNeurons()+inputSize()+numberOfHiddenNeurons();
+		return m_encoder.numberOfParameters() + m_decoder.numberOfParameters();
 	}
 
 	//! returns the vector of used parameters inside the weight matrix
 	RealVector parameterVector() const{
-		return to_vector(m_encoderMatrix) | to_vector(m_decoderMatrix) | m_hiddenBias | m_outputBias;
+		return m_encoder.parameterVector() | m_decoder.parameterVector();
 	}
 	//! uses the values inside the parametervector to set the used values inside the weight matrix
 	void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(newParameters.size() == numberOfParameters());
 		
-		std::size_t endWeights1 = m_encoderMatrix.size1() * m_encoderMatrix.size2();
-		std::size_t endWeights2 = endWeights1 +  m_decoderMatrix.size1() * m_decoderMatrix.size2();
-		std::size_t endBias = endWeights2 + m_hiddenBias.size();
-		noalias(to_vector(m_encoderMatrix)) = subrange(newParameters,0,endWeights1);
-		noalias(to_vector(m_decoderMatrix)) = subrange(newParameters,endWeights1,endWeights2);
-		noalias(m_hiddenBias) = subrange(newParameters,endWeights2,endBias);
-		noalias(m_outputBias) = subrange(newParameters,endBias,endBias+m_outputBias.size());
+		std::size_t endWeights1 = m_encoder.numberOfParameters();
+		m_encoder.setParameterVector(subrange(newParameters,0,endWeights1));
+		m_decoder.setParameterVector(subrange(newParameters,endWeights1,newParameters.size()));
 	}
 
 	//! \brief Returns the output of all neurons after the last call of eval
@@ -140,74 +134,37 @@ public:
 	//!     \param  state last result of eval
 	//!     \return Output value of the neurons.
 	RealMatrix const& hiddenResponses(State const& state)const{
-		InternalState const& s = state.toState<InternalState>();
-		return s.hiddenResponses;
+		return m_fullNetwork.hiddenResponses(state,1);
 	}
 	
 	/// \brief Returns the activation function of the hidden units.
 	HiddenNeuron const& hiddenActivationFunction()const{
-		return m_hiddenNeuron;
+		return m_hiddenNeurons.neuron();
 	}
 	/// \brief Returns the activation function of the output units.
 	OutputNeuron const& outputActivationFunction()const{
-		return m_outputNeuron;
+		return m_outputNeurons.neuron();
 	}
 	
 	/// \brief Returns the activation function of the hidden units.
 	HiddenNeuron& hiddenActivationFunction(){
-		return m_hiddenNeuron;
+		return m_hiddenNeurons.neuron();
 	}
 	/// \brief Returns the activation function of the output units.
 	OutputNeuron& outputActivationFunction(){
-		return m_outputNeuron;
+		return m_outputNeurons.neuron();
 	}
 	
 	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new InternalState());
-	}
-
-	void evalLayer(std::size_t layer,RealMatrix const& patterns,RealMatrix& outputs)const{
-		SIZE_CHECK(layer < 2);
-		std::size_t numPatterns = patterns.size1();
-		
-		if(layer == 0){//input->hidden
-			SIZE_CHECK(patterns.size2() == encoderMatrix().size2());
-			std::size_t numOutputs = encoderMatrix().size1();
-			outputs.resize(numPatterns,numOutputs);
-			outputs.clear();
-			noalias(outputs) = prod(patterns,trans(encoderMatrix())) + repeat(hiddenBias(),numPatterns);
-			noalias(outputs) = m_hiddenNeuron(outputs);
-		}
-		else{//hidden->output
-			SIZE_CHECK(patterns.size2() == decoderMatrix().size2());
-			std::size_t numOutputs = decoderMatrix().size1();
-			outputs.resize(numPatterns,numOutputs);
-			outputs.clear();
-			noalias(outputs) = prod(patterns,trans(decoderMatrix())) + repeat(outputBias(),numPatterns);
-			noalias(outputs) = m_outputNeuron(outputs);
-		}
-	}
-	
-	///\brief Returns the response of the i-th layer given the input of that layer.
-	///
-	/// this is usefull if only a portion of the network needs to be evaluated
-	/// be aware that this only works without shortcuts in the network
-	Data<RealVector> evalLayer(std::size_t layer, Data<RealVector> const& patterns)const{
-		SIZE_CHECK(layer < 2);
-		int batches = (int) patterns.numberOfBatches();
-		Data<RealVector> result(batches);
-		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
-			evalLayer(layer,patterns.batch(i),result.batch(i));
-		}
-		return result;
+		return m_fullNetwork.createState();
 	}
 	
 	Data<RealVector> encode(Data<RealVector> const& patterns)const{
-		return evalLayer(0,patterns);
+		return m_encoderNetwork(patterns);
 	}
 	
 	Data<RealVector> decode(Data<RealVector> const& patterns)const{
-		return evalLayer(1,patterns);
+		return m_decoderNetwork(patterns);
 	}
 	
 	template<class Label>
@@ -226,10 +183,7 @@ public:
 	
 	
 	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
-		InternalState& s = state.toState<InternalState>();
-		evalLayer(0,patterns,s.hiddenResponses);//propagate input->hidden
-		evalLayer(1,s.hiddenResponses,s.outputResponses);//propagate hidden->output
-		output = s.outputResponses;
+		m_fullNetwork.eval(patterns,output,state);
 	}
 	using AbstractModel<RealVector,RealVector>::eval;
 
@@ -239,11 +193,7 @@ public:
 	)const{
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
-		
-		RealMatrix outputDelta = coefficients;
-		RealMatrix hiddenDelta;
-		computeDelta(state,outputDelta,hiddenDelta);
-		computeParameterDerivative(patterns,outputDelta,hiddenDelta,state,gradient);
+		m_fullNetwork.weightedParameterDerivative(patterns,outputs, coefficients, state, gradient);
 	}
 	
 	void weightedInputDerivative(
@@ -253,9 +203,7 @@ public:
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 		
-		RealMatrix outputDelta = coefficients;
-		RealMatrix hiddenDelta;
-		computeDelta(state,outputDelta,hiddenDelta,inputDerivative);
+		m_fullNetwork.weightedInputDerivative(patterns,outputs, coefficients, state, inputDerivative);
 	}
 	
 	virtual void weightedDerivatives(
@@ -269,91 +217,45 @@ public:
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
-		RealMatrix outputDelta = coefficients;
-		RealMatrix hiddenDelta;
-		computeDelta(state,outputDelta,hiddenDelta,inputDerivative);
-		computeParameterDerivative(patterns,outputDelta,hiddenDelta,state,parameterDerivative);
+		m_fullNetwork.weightedDerivatives(patterns,outputs, coefficients, state, parameterDerivative, inputDerivative);
 	}
 	
 	void setStructure(
 		std::size_t in,std::size_t hidden
 	){
-		m_encoderMatrix.resize(hidden,in);
-		m_decoderMatrix.resize(in,hidden);
-		m_hiddenBias.resize(hidden);
-		m_outputBias.resize(in);
+		m_encoder.setStructure(in,hidden, true);
+		m_decoder.setStructure(hidden,in, true);
 	}
 	
 	//! From ISerializable, reads a model from an archive
 	void read( InArchive & archive ){
-		archive>>m_encoderMatrix;
-		archive>>m_decoderMatrix;
-		archive>>m_hiddenBias;
-		archive>>m_outputBias;
+		archive >> m_encoder;
+		archive >> m_decoder;
+		archive >> m_hiddenNeurons;
+		archive >> m_outputNeurons;
 	}
 
 	//! From ISerializable, writes a model to an archive
 	void write( OutArchive & archive ) const{
-		archive<<m_encoderMatrix;
-		archive<<m_decoderMatrix;
-		archive<<m_hiddenBias;
-		archive<<m_outputBias;
+		archive << m_encoder;
+		archive << m_decoder;
+		archive << m_hiddenNeurons;
+		archive << m_outputNeurons;
 	}
 
 
 private:
-	
-	void computeDelta(
-		State const& state, RealMatrix& outputDelta, RealMatrix& hiddenDelta
-	)const{
-		InternalState const& s = state.toState<InternalState>();
-
-		noalias(outputDelta) *= m_outputNeuron.derivative(s.outputResponses);
-		hiddenDelta.resize(outputDelta.size1(),numberOfHiddenNeurons());
-		noalias(hiddenDelta) = prod(outputDelta,decoderMatrix());
-		noalias(hiddenDelta) *= m_hiddenNeuron.derivative(s.hiddenResponses);
-	}
-	
-	void computeDelta(
-		State const& state, RealMatrix& outputDelta, RealMatrix& hiddenDelta, RealMatrix& inputDelta
-	)const{
-		computeDelta(state,outputDelta,hiddenDelta);
-		inputDelta.resize(outputDelta.size1(),inputSize());
-		noalias(inputDelta) = prod(hiddenDelta,encoderMatrix());
-	}
-	
-	void computeParameterDerivative(
-		RealMatrix const& patterns, RealMatrix const& outputDelta, RealMatrix const& hiddenDelta,
-		State const& state, RealVector& gradient
-	)const{
-		InternalState const& s = state.toState<InternalState>();
-		std::size_t hiddenParams = inputSize()*numberOfHiddenNeurons();
-		std::size_t numHidden = numberOfHiddenNeurons();
-		gradient.resize(numberOfParameters());
-		auto  gradEncoder  = to_matrix(subrange(gradient,0,hiddenParams),numHidden,inputSize());
-		auto  gradDecoder  = to_matrix(subrange(gradient,hiddenParams,2*hiddenParams),outputSize(),numHidden);
-		noalias(gradDecoder) = prod(trans(outputDelta),s.hiddenResponses);
-		noalias(gradEncoder) = prod(trans(hiddenDelta),patterns);
-		
-		std::size_t hiddenBiasPos = 2*hiddenParams;
-		std::size_t outputBiasPos = hiddenBiasPos+numHidden;
-		subrange(gradient,hiddenBiasPos,outputBiasPos) = sum_rows(hiddenDelta);
-		subrange(gradient,outputBiasPos,outputBiasPos+inputSize()) = sum_rows(outputDelta);
-	}
-
-	//! weight matrix between input and hidden layer. 
-	RealMatrix m_encoderMatrix;
-	//! weight matrix between hiddenand output layer. 
-	RealMatrix m_decoderMatrix;
-	//! bias weights of the hidden neurons
-	RealVector m_hiddenBias;
-	//! bias weights of the visible neurons
-	RealVector m_outputBias;
+	LinearModel<> m_encoder;
+	LinearModel<> m_decoder;
 
 	//!Type of hidden neuron. See Models/Neurons.h for a few choices
-	HiddenNeuron m_hiddenNeuron;
+	NeuronLayer<HiddenNeuron> m_hiddenNeurons;
 	//! Type of output neuron. See Models/Neurons.h for a few choices
-	OutputNeuron m_outputNeuron;
+	NeuronLayer<OutputNeuron> m_outputNeurons;
+	
+	ConcatenatedModel<RealVector> m_fullNetwork;
+	ConcatenatedModel<RealVector> m_encoderNetwork;
+	ConcatenatedModel<RealVector> m_decoderNetwork;
 };
 
 

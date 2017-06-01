@@ -215,14 +215,14 @@ public:
 		std::size_t numInputs = inputSize();
 		std::size_t numOutputs = outputSize();
 		gradient.clear();
+		std::size_t matrixParams = numInputs*numOutputs;
 
-		auto weightGradient = blas::to_matrix(gradient, numOutputs,numInputs);
+		auto weightGradient = blas::to_matrix(subrange(gradient,0,matrixParams), numOutputs,numInputs);
 		//sum_i coefficients(output,i)*pattern(i))
 		noalias(weightGradient) = trans(coefficients) % patterns;
 
 		if (hasOffset()){
-			std::size_t start = numInputs*numOutputs;
-			noalias(subrange(gradient, start, start + numOutputs)) = sum_rows(coefficients);
+			noalias(subrange(gradient, matrixParams, matrixParams + numOutputs)) = sum_rows(coefficients);
 		}
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch

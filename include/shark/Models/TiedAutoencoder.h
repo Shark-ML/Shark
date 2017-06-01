@@ -2,7 +2,7 @@
  * \brief   Implements the autoencoder with tied weights
  * 
  * \author      O. Krause
- * \date        2010-2014
+ * \date        2010-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -29,9 +29,7 @@
 #define SHARK_MODELS_TIEDAUTOENCODER_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Models/Neurons.h>
-#include <shark/Models/FFNet.h>
-#include <boost/serialization/vector.hpp>
+#include <shark/Models/NeuronLayers.h>
 
 namespace shark{
 
@@ -136,20 +134,20 @@ public:
 	
 	/// \brief Returns the activation function of the hidden units.
 	HiddenNeuron const& hiddenActivationFunction()const{
-		return m_hiddenNeuron;
+		return m_hiddenNeurons;
 	}
 	/// \brief Returns the activation function of the output units.
 	OutputNeuron const& outputActivationFunction()const{
-		return m_outputNeuron;
+		return m_outputNeurons;
 	}
 	
 	/// \brief Returns the activation function of the hidden units.
 	HiddenNeuron& hiddenActivationFunction(){
-		return m_hiddenNeuron;
+		return m_hiddenNeurons;
 	}
 	/// \brief Returns the activation function of the output units.
 	OutputNeuron& outputActivationFunction(){
-		return m_outputNeuron;
+		return m_outputNeurons;
 	}
 
 	//! \brief Returns the output of all neurons after the last call of eval
@@ -173,15 +171,15 @@ public:
 			SIZE_CHECK(patterns.size2() == encoderMatrix().size2());
 			std::size_t numOutputs = encoderMatrix().size1();
 			outputs.resize(numPatterns,numOutputs);
-			noalias(outputs) = prod(patterns,trans(encoderMatrix())) + repeat(hiddenBias(),numPatterns);
-			noalias(outputs) = m_hiddenNeuron(outputs);
+			noalias(outputs) = patterns % trans(encoderMatrix()) + repeat(hiddenBias(),numPatterns);
+			m_hiddenNeurons.function(outputs,outputs);
 		}
 		else{//hidden->output
 			SIZE_CHECK(patterns.size2() == decoderMatrix().size2());
 			std::size_t numOutputs = decoderMatrix().size1();
 			outputs.resize(numPatterns,numOutputs);
-			noalias(outputs) = prod(patterns,trans(decoderMatrix())) + repeat(outputBias(),numPatterns);
-			noalias(outputs) = m_outputNeuron(outputs);
+			noalias(outputs) = patterns % trans(decoderMatrix()) + repeat(outputBias(),numPatterns);
+			m_outputNeurons.function(outputs,outputs);
 		}
 	}
 	
@@ -236,9 +234,9 @@ public:
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 		
-		RealMatrix outputDelta = coefficients;
+		RealMatrix outputDelta;
 		RealMatrix hiddenDelta;
-		computeDelta(state,outputDelta,hiddenDelta);
+		computeDelta(state, coefficients, outputDelta,hiddenDelta);
 		computeParameterDerivative(patterns,outputDelta,hiddenDelta,state,gradient);
 	}
 	
@@ -249,9 +247,9 @@ public:
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 		
-		RealMatrix outputDelta = coefficients;
+		RealMatrix outputDelta;
 		RealMatrix hiddenDelta;
-		computeDelta(state,outputDelta,hiddenDelta,inputDerivative);
+		computeDelta(state,coefficients, outputDelta,hiddenDelta,inputDerivative);
 	}
 	
 	virtual void weightedDerivatives(
@@ -265,10 +263,10 @@ public:
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
-		RealMatrix outputDelta = coefficients;
+		RealMatrix outputDelta;
 		RealMatrix hiddenDelta;
-		computeDelta(state,outputDelta,hiddenDelta,inputDerivative);
-		computeParameterDerivative(patterns,outputDelta,hiddenDelta,state,parameterDerivative);
+		computeDelta(state, coefficients, outputDelta,hiddenDelta,inputDerivative);
+		computeParameterDerivative(patterns, outputDelta,hiddenDelta,state,parameterDerivative);
 	}
 	
 	void setStructure(
@@ -297,22 +295,25 @@ public:
 private:
 	
 	void computeDelta(
-		State const& state, RealMatrix& outputDelta, RealMatrix& hiddenDelta
+		State const& state, RealMatrix const& coefficients, RealMatrix& outputDelta, RealMatrix& hiddenDelta
 	)const{
 		InternalState const& s = state.toState<InternalState>();
-
-		noalias(outputDelta) *= m_outputNeuron.derivative(s.outputResponses);
+		outputDelta.resize(coefficients.size1(), coefficients.size2());
+		noalias(outputDelta) = coefficients;
+		m_outputNeurons.multiplyDerivative(s.outputResponses,outputDelta);
+		
 		hiddenDelta.resize(outputDelta.size1(),numberOfHiddenNeurons());
-		noalias(hiddenDelta) = prod(outputDelta,decoderMatrix());
-		noalias(hiddenDelta) *= m_hiddenNeuron.derivative(s.hiddenResponses);
+		noalias(hiddenDelta) = outputDelta % decoderMatrix();
+		m_hiddenNeurons.multiplyDerivative(s.hiddenResponses,hiddenDelta);
+		
 	}
 	
 	void computeDelta(
-		State const& state, RealMatrix& outputDelta, RealMatrix& hiddenDelta, RealMatrix& inputDelta
+		State const& state, RealMatrix const& coefficients, RealMatrix& outputDelta, RealMatrix& hiddenDelta, RealMatrix& inputDelta
 	)const{
-		computeDelta(state,outputDelta,hiddenDelta);
+		computeDelta(state, coefficients, outputDelta,hiddenDelta);
 		inputDelta.resize(outputDelta.size1(),inputSize());
-		noalias(inputDelta) = prod(hiddenDelta,encoderMatrix());
+		noalias(inputDelta) = hiddenDelta % encoderMatrix();
 	}
 	
 	void computeParameterDerivative(
@@ -320,12 +321,12 @@ private:
 		State const& state, RealVector& gradient
 	)const{
 		InternalState const& s = state.toState<InternalState>();
-		std::size_t hiddenParams = inputSize()*numberOfHiddenNeurons();
+		std::size_t hiddenParams = inputSize() * numberOfHiddenNeurons();
 		std::size_t numHidden = numberOfHiddenNeurons();
 		gradient.resize(numberOfParameters());
 		auto  gradEncoder  = to_matrix(subrange(gradient,0,hiddenParams),numHidden,inputSize());
-		noalias(gradEncoder) = prod(trans(s.hiddenResponses),outputDelta);
-		noalias(gradEncoder) += prod(trans(hiddenDelta),patterns);
+		noalias(gradEncoder) = trans(s.hiddenResponses) % outputDelta;
+		noalias(gradEncoder) += trans(hiddenDelta) % patterns;
 		
 		std::size_t hiddenBiasPos = hiddenParams;
 		std::size_t outputBiasPos = hiddenBiasPos+numHidden;
@@ -341,9 +342,9 @@ private:
 	RealVector m_outputBias;
 
 	//!Type of hidden neuron. See Models/Neurons.h for a few choices
-	HiddenNeuron m_hiddenNeuron;
+	HiddenNeuron m_hiddenNeurons;
 	//! Type of output neuron. See Models/Neurons.h for a few choices
-	OutputNeuron m_outputNeuron;
+	OutputNeuron m_outputNeurons;
 };
 
 

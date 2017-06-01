@@ -106,7 +106,7 @@ Network unsupervisedPreTraining(
 		iterations
 	);
 	//compute the mapping onto the features of the first hidden layer
-	UnlabeledData<RealVector> intermediateData = layer.evalLayer(0,data);
+	UnlabeledData<RealVector> intermediateData = layer.encode(data);
 	
 	//train the next layer
 	std::cout<<"training second layer"<<std::endl;

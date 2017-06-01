@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
 	gaussians.setStructure(inputs,hiddens);
 	ConvexCombination combination;
 	combination.setStructure(hiddens);
-	ConcatenatedModel<RealVector,RealVector> mixture= gaussians >> combination;
+	ConcatenatedModel<RealVector> mixture= gaussians >> combination;
 	initRandomUniform(mixture,-0.1,0.1);
 	kMeans(data, gaussians);
 	

@@ -33,7 +33,7 @@
 #define SHARK_MODELS_FFNET_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Models/Neurons.h>
+#include <shark/Models/NeuronLayers.h>
 #include <boost/serialization/vector.hpp>
 
 namespace shark{
@@ -296,10 +296,10 @@ public:
 		}
 		// if this is the last layer, use output neuron response
 		if(layer < m_layerMatrix.size()-1) {
-			noalias(outputs) = m_hiddenNeuron(outputs);
+			m_hiddenNeuron.function(outputs,outputs);
 		}
 		else {
-			noalias(outputs) = m_outputNeuron(outputs);
+			m_outputNeuron.function(outputs,outputs);
 		}
 	}
 	
@@ -346,14 +346,14 @@ public:
 			SHARK_CRITICAL_REGION{//beware Dropout Neurons!
 				// if this is the last layer, use output neuron response instead
 				if(layer < m_layerMatrix.size()-1) {
-					noalias(responses) = m_hiddenNeuron(responses);
+					m_hiddenNeuron.function(responses,responses);
 				}
 				else {
 					//add shortcuts if necessary
 					if(m_inputOutputShortcut.size1() != 0){
 						noalias(responses) += prod(m_inputOutputShortcut,trans(patterns));
 					}
-					noalias(responses) = m_outputNeuron(responses);
+					m_outputNeuron.function(responses,responses);
 				}
 			}
 			//go to the next layer
@@ -618,7 +618,7 @@ private:
 		//initialize output neurons using coefficients
 		auto outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
 		auto outputResponse = rows(s.responses,delta.size1()-outputSize(),delta.size1());
-		noalias(outputDelta) *= m_outputNeuron.derivative(outputResponse);
+		m_outputNeuron.multiplyDerivative(outputResponse,outputDelta);
 
 		//iterate backwards using the backprop matrix and propagate the errors to get the needed delta values
 		//we stop until we have filled all delta values. Thus we might not necessarily compute all layers.
@@ -639,7 +639,7 @@ private:
 
 			noalias(layerDelta) += prod(weights,layerDeltaInput);//add the values to the maybe non-empty delta part
 			if(layer != 0){
-				noalias(layerDelta) *= m_hiddenNeuron.derivative(layerResponse);
+				m_hiddenNeuron.multiplyDerivative(layerResponse,layerDelta);
 			}
 			//go a layer backwards
 			endNeuron=beginNeuron;

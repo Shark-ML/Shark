@@ -161,7 +161,8 @@ public:
  			// update mean activation of hidden neurons
 			meanActivation += sum_rows(hiddenActivation);
 			// calculate gradient of the hidden neurons
-			RealMatrix hiddenDerivative = mep_model->hiddenActivationFunction().derivative(hiddenActivation);
+			RealMatrix hiddenDerivative(hiddenActivation.size1(), hiddenActivation.size2(),1.0);
+			mep_model->hiddenActivationFunction().multiplyDerivative(hiddenActivation, hiddenDerivative);
 			//update sum of derivatives
 			noalias(hiddenDerivativeSum) += sum_rows(hiddenDerivative);
 
@@ -192,8 +193,7 @@ public:
 			noalias(to_matrix(subrange(gradient,0,W1params),hiddens,inputs)) += W1Derivatives;
 
 			//adjust bias units
-			std::size_t biasStart = mep_model->numberOfParameters()-inputs-hiddens;
-			noalias(subrange(gradient,biasStart,biasStart+hiddens)) += hiddenDerivativeSum;
+			noalias(subrange(gradient,W1params,W1params+hiddens)) += hiddenDerivativeSum;
 
 		}
 

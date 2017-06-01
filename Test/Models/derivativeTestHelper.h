@@ -86,8 +86,6 @@ void testWeightedDerivative(Model& net,const Point& point,const RealVector& coef
 			BOOST_CHECK_SMALL(error,epsilon);
 		}
 	}
-//	double error=norm_2(testGradient-resultGradient);
-//	BOOST_CHECK_SMALL(error,epsilon);
 }
 
 template<class Model,class Point>

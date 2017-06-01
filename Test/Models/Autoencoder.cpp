@@ -47,14 +47,15 @@ BOOST_AUTO_TEST_CASE( AUTOENCODER_Structure)
 			BOOST_CHECK_EQUAL(net.encoderMatrix()(i,j), newParams(param));
 		}
 	}
+	for(std::size_t i = 0; i != 3; ++i,++param){
+		BOOST_CHECK_EQUAL(net.hiddenBias()(i), newParams(param));
+	}
 	for(std::size_t i = 0; i != net.decoderMatrix().size1(); ++i){
 		for(std::size_t j = 0; j != net.decoderMatrix().size2(); ++j,++param){
 			BOOST_CHECK_EQUAL(net.decoderMatrix()(i,j), newParams(param));
 		}
 	}
-	for(std::size_t i = 0; i != 3; ++i,++param){
-		BOOST_CHECK_EQUAL(net.hiddenBias()(i), newParams(param));
-	}
+	
 	BOOST_CHECK_EQUAL(net.outputBias()(0), newParams(param));
 	BOOST_CHECK_EQUAL(net.outputBias()(1), newParams(param+1));
 }

@@ -79,7 +79,7 @@ AutoencoderModel trainAutoencoderModel(
 	baseModel.setStructure(inputs, numHidden);
 	initRandomUniform(baseModel,-0.1*std::sqrt(1.0/inputs),0.1*std::sqrt(1.0/inputs));
 	NoiseModel noise(noiseStrength);//set an input pixel with probability p to 0
-	ConcatenatedModel<RealVector,RealVector> model = noise>> baseModel;
+	ConcatenatedModel<RealVector> model = noise>> baseModel;
 	//we have not implemented the derivatives of the noise model which turns the
 	//whole composite model to be not differentiable. we fix this by not optimizing the noise model
 	model.enableModelOptimization(0,false);

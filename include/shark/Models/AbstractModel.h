@@ -182,7 +182,7 @@ public:
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
 	Data<OutputType> operator()(Data<InputType> const& patterns)const{
-		return transform(patterns,*this);//todo this leads to compiler errors.
+		return transform(patterns,*this);
 	}
 
 	/// \brief Model evaluation as an operator for a single pattern. This is a convenience function
