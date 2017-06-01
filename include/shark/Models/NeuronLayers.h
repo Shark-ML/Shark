@@ -78,7 +78,7 @@ struct LogisticNeuron{
 struct FastSigmoidNeuron{
 	template<class Input, class Output>
 	void function(Input const& input, Output& output)const{
-		noalias(input)  = output/(typename Input::value_type(1)+abs(output));
+		noalias(output)  = input/(typename Input::value_type(1)+abs(input));
 	}
 	template<class Output, class Derivative>
 	void multiplyDerivative(Output const& output, Derivative& der)const{
@@ -122,12 +122,13 @@ private:
 	typedef AbstractModel<VectorType,VectorType, VectorType> base_type;
 
 	NeuronType m_neuron;
+	std::size_t m_inputSize;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
-	NeuronLayer(){
+	NeuronLayer(std::size_t inputSize = 0): m_inputSize(inputSize){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -138,6 +139,18 @@ public:
 	
 	NeuronType const& neuron()const{ return m_neuron;}
 	NeuronType& neuron(){ return m_neuron;}
+	
+	std::size_t inputSize()const{
+		return m_inputSize;
+	}
+	
+	std::size_t outputSize()const{
+		return m_inputSize;
+	}
+	
+	void setStructure(std::size_t inputSize){
+		m_inputSize = inputSize;
+	}
 
 	/// obtain the parameter vector
 	ParameterVectorType parameterVector() const{
@@ -161,41 +174,44 @@ public:
 	using base_type::eval;
 
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
+		SIZE_CHECK(inputs.size2() == inputSize());
 		outputs.resize(inputs.size1(),inputs.size2());
 		m_neuron.function(inputs,outputs);
 	}
 
-	void eval(VectorType const& input, VectorType& output)const {
+	void eval(VectorType const& input, VectorType& output)const{
+		SIZE_CHECK(input.size() == inputSize());
 		output.resize(input.size());
 		m_neuron.function(input,output);
 	}
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
+		SIZE_CHECK(inputs.size2() == inputSize());
 		eval(inputs,outputs);
 	}
 
-	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch
+	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all inputs of the last computed batch
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, 
+		BatchInputType const& inputs, 
 		BatchOutputType const& outputs,
 		BatchOutputType const& coefficients,
 		State const& state, 
 		ParameterVectorType& gradient
 	)const{
-		SIZE_CHECK(coefficients.size1()==patterns.size1());
-		SIZE_CHECK(coefficients.size2()==patterns.size2());
+		SIZE_CHECK(coefficients.size1()==inputs.size1());
+		SIZE_CHECK(coefficients.size2()==inputs.size2());
 	}
-	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
+	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all inputs of the last computed batch
 	void weightedInputDerivative(
-		BatchInputType const & patterns,
+		BatchInputType const & inputs,
 		BatchOutputType const & outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative
 	)const{
-		SIZE_CHECK(coefficients.size1() == patterns.size1());
-		SIZE_CHECK(coefficients.size2() == patterns.size2());
+		SIZE_CHECK(coefficients.size1() == inputs.size1());
+		SIZE_CHECK(coefficients.size2() == inputs.size2());
 
-		derivative.resize(patterns.size1(),patterns.size2());
+		derivative.resize(inputs.size1(),inputs.size2());
 		noalias(derivative) = coefficients;
 		m_neuron.multiplyDerivative(outputs, derivative);
 		

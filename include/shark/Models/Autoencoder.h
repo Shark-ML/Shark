@@ -225,6 +225,8 @@ public:
 	){
 		m_encoder.setStructure(in,hidden, true);
 		m_decoder.setStructure(hidden,in, true);
+		m_hiddenNeurons.setStructure(hidden);
+		m_outputNeurons.setStructure(in);
 	}
 	
 	//! From ISerializable, reads a model from an archive
