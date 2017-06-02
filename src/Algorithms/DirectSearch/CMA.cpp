@@ -312,7 +312,7 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 	double hSigRHS = (1.4 + 2 / (m_numberOfVariables + 1.)) * expectedChi;
 	double hSig = 0;
 	if(hSigLHS < hSigRHS) hSig = 1.;
-	double deltaHSig = (1.-hSig) * m_cC * (2. - m_cC);
+	double deltaHSig = (1.-hSig*hSig) * m_cC * (2. - m_cC);
 
 	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + hSig * std::sqrt( m_cC * (2. - m_cC) * m_muEff ) * y; // eq. (42)
 	noalias(C) = (1.-m_c1 - m_cMu) * C + m_c1 * ( blas::outer_prod( m_evolutionPathC, m_evolutionPathC ) + deltaHSig * C) + m_cMu * 1./sqr( m_sigma ) * Z; // eq. (43)
