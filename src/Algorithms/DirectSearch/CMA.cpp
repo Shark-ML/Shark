@@ -257,13 +257,14 @@ void CMA::doInit(
 
 	// Step size control
 	m_cSigma = (m_muEff + 2.)/(m_numberOfVariables + m_muEff + 3.); // eq. (46)
-	m_dSigma = .5 + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma; // eq. (46)
+	m_dSigma = 1.0 + 2. * std::max(0., ::sqrt((m_muEff-1.)/(m_numberOfVariables+1)) - 1.) + m_cSigma; // eq. (46)
 
 	m_cC = (4. + m_muEff / m_numberOfVariables) / (m_numberOfVariables + 4. +  2 * m_muEff / m_numberOfVariables); // eq. (47)
 	m_c1 = 2 / (sqr(m_numberOfVariables + 1.3) + m_muEff); // eq. (48)
 	double alphaMu = 2.;
-	m_cMu = std::min(1. - m_c1, alphaMu * (m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + alphaMu * m_muEff / 2)); // eq. (49)
-
+	double rankMuAlpha = 0.3;//but is it really?
+	m_cMu = std::min(1. - m_c1, alphaMu * ( rankMuAlpha + m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + alphaMu * m_muEff / 2)); // eq. (49)
+	
 	std::size_t pos = std::min_element(initialValues.begin(),initialValues.end())-initialValues.begin();
 	m_mean = initialSearchPoints[pos];
 	m_best.point = initialSearchPoints[pos];
