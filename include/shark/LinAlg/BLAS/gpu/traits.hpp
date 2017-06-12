@@ -568,6 +568,20 @@ struct device_traits<gpu_tag>{
 	template<class T>
 	using max = boost::compute::fmax<T>;
 	
+	//comparison
+	template<class T>
+	using less = boost::compute::less<T>;
+	template<class T>
+	using less_equal  = boost::compute::less_equal<T>;
+	template<class T>
+	using greater = boost::compute::greater<T>;
+	template<class T>
+	using greater_equal  = boost::compute::greater_equal<T>;
+	template<class T>
+	using equal = boost::compute::equal_to<T>;
+	template<class T>
+	using not_equal  = boost::compute::not_equal_to<T>;
+	
 };
 
 }

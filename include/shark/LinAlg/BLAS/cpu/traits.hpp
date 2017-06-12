@@ -325,7 +325,7 @@ struct device_traits<cpu_tag>{
 	};
 
 	template<class T>
-	struct bigger{
+	struct greater{
 		static const bool left_zero_remains =  false;
 		static const bool right_zero_remains =  false;
 		typedef int result_type;
@@ -335,7 +335,7 @@ struct device_traits<cpu_tag>{
 	};
 
 	template<class T>
-	struct bigger_equal{
+	struct greater_equal{
 		static const bool left_zero_remains =  false;
 		static const bool right_zero_remains =  false;
 		typedef int result_type;

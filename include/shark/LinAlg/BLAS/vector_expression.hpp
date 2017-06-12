@@ -198,10 +198,10 @@ name (vector_expression<VecV, Device> const& v, T t){ \
 	return  vector_binary<VecV, scalar_vector<type, Device>, functor_type >(v(), scalar_vector<type, Device>(v().size(),(type)t), functor_type()); \
 }
 REMORA_VECTOR_SCALAR_TRANSFORMATION(operator/, divide)
-REMORA_VECTOR_SCALAR_TRANSFORMATION(operator<, less_than)
-REMORA_VECTOR_SCALAR_TRANSFORMATION(operator<=, less_equal_than)
-REMORA_VECTOR_SCALAR_TRANSFORMATION(operator>, bigger_than)
-REMORA_VECTOR_SCALAR_TRANSFORMATION(operator>=, bigger_equal_than)
+REMORA_VECTOR_SCALAR_TRANSFORMATION(operator<, less)
+REMORA_VECTOR_SCALAR_TRANSFORMATION(operator<=, less_equal)
+REMORA_VECTOR_SCALAR_TRANSFORMATION(operator>, greater)
+REMORA_VECTOR_SCALAR_TRANSFORMATION(operator>=, greater_equal)
 REMORA_VECTOR_SCALAR_TRANSFORMATION(operator==, equal)
 REMORA_VECTOR_SCALAR_TRANSFORMATION(operator!=, not_equal)
 REMORA_VECTOR_SCALAR_TRANSFORMATION(min, min)

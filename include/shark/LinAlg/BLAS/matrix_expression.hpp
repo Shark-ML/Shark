@@ -239,10 +239,10 @@ name (matrix_expression<MatA, Device> const& m, T t){ \
 	return matrix_binary<MatA, scalar_matrix<type,Device>, functor_type >(m(), scalar_matrix<type,Device>(m().size1(), m().size2(), t) ,functor_type()); \
 }
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator/, divide)
-REMORA_MATRIX_SCALAR_TRANSFORMATION(operator<, less_than)
-REMORA_MATRIX_SCALAR_TRANSFORMATION(operator<=, less_equal_than)
-REMORA_MATRIX_SCALAR_TRANSFORMATION(operator>, bigger_than)
-REMORA_MATRIX_SCALAR_TRANSFORMATION(operator>=, bigger_equal_than)
+REMORA_MATRIX_SCALAR_TRANSFORMATION(operator<, less)
+REMORA_MATRIX_SCALAR_TRANSFORMATION(operator<=, less_equal)
+REMORA_MATRIX_SCALAR_TRANSFORMATION(operator>, greater)
+REMORA_MATRIX_SCALAR_TRANSFORMATION(operator>=, greater_equal)
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator==, equal)
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator!=, not_equal)
 REMORA_MATRIX_SCALAR_TRANSFORMATION(min, min)

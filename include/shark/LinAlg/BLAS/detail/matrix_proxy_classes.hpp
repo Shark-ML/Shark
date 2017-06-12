@@ -1060,12 +1060,18 @@ public:
 	// --------------
 	
 	const_reference operator() (size_type i, size_type j) const {
+		REMORA_SIZE_CHECK( i < m_size1);
+		REMORA_SIZE_CHECK( j < m_size2);
 		return m_values[i*m_stride1+j*m_stride2];
         }
         reference operator() (size_type i, size_type j) {
+		REMORA_SIZE_CHECK( i < m_size1);
+		REMORA_SIZE_CHECK( j < m_size2);
 		return m_values[i*m_stride1+j*m_stride2];
         }
 	void set_element(size_type i, size_type j,value_type t){
+		REMORA_SIZE_CHECK( i < m_size1);
+		REMORA_SIZE_CHECK( j < m_size2);
 		m_values[i*m_stride1+j*m_stride2]  = t;
 	}
 
