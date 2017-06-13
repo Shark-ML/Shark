@@ -264,6 +264,7 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef row_major orientation;
 	typedef typename V::evaluation_category evaluation_category;
+	typedef typename V::device_type device_type;
 
 	// Construction and destruction
 	explicit vector_repeater (expression_closure_type const& e, size_type rows):
@@ -280,6 +281,16 @@ public:
 	// Expression accessors
 	const expression_closure_type& expression() const {
 		return m_vector;
+	}
+	
+	template<class MatX>
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha) const {
+		X().clear();
+		plus_assign_to(X,eval_block(m_vector), alpha);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha) const {
+		plus_assign_to(X,eval_block(m_vector), alpha);
 	}
 
 	// Element access
@@ -318,6 +329,17 @@ public:
 		return const_column_iterator(m_vector(j),size1());
 	}
 private:
+	
+	template<class MatX, class VecV>
+	void plus_assign_to(
+		matrix_expression<MatX, device_type>& X,
+		vector_expression<VecV, device_type> const& v,
+		typename MatX::value_type alpha
+	)const{
+		vector_repeater<VecV> e(v(),m_rows);
+		plus_assign(X,e,alpha);
+	}
+
 	expression_closure_type m_vector;
 	size_type m_rows;
 };
