@@ -143,7 +143,7 @@ public:
 	typename HiddenNeuron::State const& hiddenState(State const& state)const{
 		//this hack uses knowledge of that the state of the linear model is the same as the state of the neuron
 		//it stores
-		return m_fullNetwork.hiddenState(state,0).toState<typename HiddenNeuron::State>();
+		return m_fullNetwork.hiddenState(state,0).template toState<typename HiddenNeuron::State>();
 	}
 	
 	
