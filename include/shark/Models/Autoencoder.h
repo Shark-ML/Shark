@@ -48,9 +48,7 @@ class Autoencoder :public AbstractModel<RealVector,RealVector>
 {
 public:
 	Autoencoder()
-	: m_fullNetwork(m_encoder >> m_hiddenNeurons >> m_decoder >> m_outputNeurons)
-	, m_encoderNetwork(m_encoder >> m_hiddenNeurons)
-	, m_decoderNetwork(m_decoder >> m_outputNeurons){
+	: m_fullNetwork(m_encoder >> m_decoder ){
 		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 		m_features|=HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -134,25 +132,37 @@ public:
 	//!     \param  state last result of eval
 	//!     \return Output value of the neurons.
 	RealMatrix const& hiddenResponses(State const& state)const{
-		return m_fullNetwork.hiddenResponses(state,1);
+		return m_fullNetwork.hiddenResponses(state,0);
 	}
+	
+	//! \brief Returns the stored state of the hidden neurons  after the last call of eval
+	//!
+	//! This method is needed to compute derivatives of the neurons
+	//! \param  state last result of eval
+	//! \return Output value of the neurons.
+	typename HiddenNeuron::State const& hiddenState(State const& state)const{
+		//this hack uses knowledge of that the state of the linear model is the same as the state of the neuron
+		//it stores
+		return m_fullNetwork.hiddenState(state,0).toState<typename HiddenNeuron::State>();
+	}
+	
 	
 	/// \brief Returns the activation function of the hidden units.
 	HiddenNeuron const& hiddenActivationFunction()const{
-		return m_hiddenNeurons.neuron();
+		return m_encoder.activationFunction();
 	}
 	/// \brief Returns the activation function of the output units.
 	OutputNeuron const& outputActivationFunction()const{
-		return m_outputNeurons.neuron();
+		return m_decoder.activationFunction();
 	}
 	
 	/// \brief Returns the activation function of the hidden units.
 	HiddenNeuron& hiddenActivationFunction(){
-		return m_hiddenNeurons.neuron();
+		return m_encoder.activationFunction();
 	}
 	/// \brief Returns the activation function of the output units.
 	OutputNeuron& outputActivationFunction(){
-		return m_outputNeurons.neuron();
+		return m_decoder.activationFunction();
 	}
 	
 	boost::shared_ptr<State> createState()const{
@@ -160,11 +170,11 @@ public:
 	}
 	
 	Data<RealVector> encode(Data<RealVector> const& patterns)const{
-		return m_encoderNetwork(patterns);
+		return m_encoder(patterns);
 	}
 	
 	Data<RealVector> decode(Data<RealVector> const& patterns)const{
-		return m_decoderNetwork(patterns);
+		return m_decoder(patterns);
 	}
 	
 	template<class Label>
@@ -225,39 +235,26 @@ public:
 	){
 		m_encoder.setStructure(in,hidden, true);
 		m_decoder.setStructure(hidden,in, true);
-		m_hiddenNeurons.setStructure(hidden);
-		m_outputNeurons.setStructure(in);
 	}
 	
 	//! From ISerializable, reads a model from an archive
 	void read( InArchive & archive ){
 		archive >> m_encoder;
 		archive >> m_decoder;
-		archive >> m_hiddenNeurons;
-		archive >> m_outputNeurons;
 	}
 
 	//! From ISerializable, writes a model to an archive
 	void write( OutArchive & archive ) const{
 		archive << m_encoder;
 		archive << m_decoder;
-		archive << m_hiddenNeurons;
-		archive << m_outputNeurons;
 	}
 
 
 private:
-	LinearModel<> m_encoder;
-	LinearModel<> m_decoder;
+	LinearModel<RealVector, HiddenNeuron> m_encoder;
+	LinearModel<RealVector, OutputNeuron> m_decoder;
 
-	//!Type of hidden neuron. See Models/Neurons.h for a few choices
-	NeuronLayer<HiddenNeuron> m_hiddenNeurons;
-	//! Type of output neuron. See Models/Neurons.h for a few choices
-	NeuronLayer<OutputNeuron> m_outputNeurons;
-	
 	ConcatenatedModel<RealVector> m_fullNetwork;
-	ConcatenatedModel<RealVector> m_encoderNetwork;
-	ConcatenatedModel<RealVector> m_decoderNetwork;
 };
 
 

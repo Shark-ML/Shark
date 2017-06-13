@@ -6,7 +6,6 @@
 #include<shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> //loss for test performance
 
 //evaluating probabilities
-#include<shark/Models/Softmax.h> //transforms model output into probabilities  
 #include<shark/Models/ConcatenatedModel.h> //provides operator >> for concatenating models
 //###end<includes>
 
@@ -39,7 +38,7 @@ int main(){
 	//###begin<network_topology>
 	unsigned numInput=2;
 	unsigned numHidden=4;
-	unsigned numOutput=1;
+	unsigned numOutput=2;
 	FFNet<LogisticNeuron,LinearNeuron> network;
 	network.setStructure(numInput,numHidden,numOutput,FFNetStructures::Normal,true);
 	//###end<network_topology>
@@ -73,7 +72,7 @@ int main(){
 	
 	//###begin<probability>
 	cout<<"probabilities:"<<std::endl;
-	Softmax probabilty(1);
+	NeuronLayer<SoftmaxNeuron<>> probabilty(numOutput);
 	for(std::size_t i = 0; i != 4; ++i){
 		cout<< (network>>probabilty)(dataset.element(i).input)<<std::endl;
 	}

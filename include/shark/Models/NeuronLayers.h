@@ -42,12 +42,19 @@ namespace shark{
 ///it's derivative can be computed as
 ///\f[ f'(x)= 1-f(x)^2 \f]
 struct TanhNeuron{
-	template<class Input, class Output>
-	void function(Input const& input, Output& output)const{
-		noalias(output) = tanh(input);
+	typedef EmptyState State;
+	template<class Arg>
+	void evalInPlace(Arg& arg)const{
+		noalias(arg) = tanh(arg);
 	}
+	
+	template<class Arg>
+	void evalInPlace(Arg& arg, State&)const{
+		evalInPlace(arg);
+	}
+	
 	template<class Output, class Derivative>
-	void multiplyDerivative(Output const& output, Derivative& der)const{
+	void multiplyDerivative(Output const& output, Derivative& der, State const& )const{
 		noalias(der) *= typename Output::value_type(1) - sqr(output);
 	}
 };
@@ -59,12 +66,19 @@ struct TanhNeuron{
 ///it's derivative can be computed as
 ///\f[ f'(x)= f(x)(1-f(x)) \f]
 struct LogisticNeuron{
-	template<class Input, class Output>
-	void function(Input const& input, Output& output)const{
-		noalias(output) = sigmoid(input);
+	typedef EmptyState State;
+	template<class Arg>
+	void evalInPlace(Arg& arg)const{
+		noalias(arg) = sigmoid(arg);
 	}
+	
+	template<class Arg>
+	void evalInPlace(Arg& arg, State&)const{
+		evalInPlace(arg);
+	}
+
 	template<class Output, class Derivative>
-	void multiplyDerivative(Output const& output, Derivative& der)const{
+	void multiplyDerivative(Output const& output, Derivative& der, State const& state)const{
 		noalias(der) *= output * (typename Output::value_type(1) - output);
 	}
 };
@@ -76,36 +90,51 @@ struct LogisticNeuron{
 ///it's derivative can be computed as
 ///\f[ f'(x)= (1 - |f(x)|)^2 \f]
 struct FastSigmoidNeuron{
-	template<class Input, class Output>
-	void function(Input const& input, Output& output)const{
-		noalias(output)  = input/(typename Input::value_type(1)+abs(input));
+	typedef EmptyState State;
+	template<class Arg>
+	void evalInPlace(Arg& arg)const{
+		noalias(arg)  /= typename Arg::value_type(1)+abs(arg);
 	}
+	
+	template<class Arg>
+	void evalInPlace(Arg& arg, State&)const{
+		evalInPlace(arg);
+	}
+
 	template<class Output, class Derivative>
-	void multiplyDerivative(Output const& output, Derivative& der)const{
+	void multiplyDerivative(Output const& output, Derivative& der, State const& state)const{
 		noalias(der) *= sqr(typename Output::value_type(1) - abs(output));
 	}
 };
 
 ///\brief Linear activation Neuron. 
 struct LinearNeuron{
-	template<class Input, class Output>
-	void function(Input const& input, Output& output)const{
-		noalias(output) = input;
-	}
+	typedef EmptyState State;
+	template<class Arg>
+	void evalInPlace(Arg&)const{}
+	
+	template<class Arg>
+	void evalInPlace(Arg& arg, State const&)const{}
+	
 	template<class Output, class Derivative>
-	void multiplyDerivative(Output const& output, Derivative& der)const{
-		noalias(der) *= blas::repeat(typename Output::value_type(1), der.size1(), der.size2());
-	}
+	void multiplyDerivative(Output const& output, Derivative& der, State const& state)const{}
 };
 
 ///\brief Rectifier Neuron f(x) = max(0,x)
 struct RectifierNeuron{
-	template<class Input, class Output>
-	void function(Input const& input, Output& output)const{
-		noalias(output) = max(input,typename Input::value_type(0));
+	typedef EmptyState State;
+	template<class Arg>
+	void evalInPlace(Arg& arg)const{
+		noalias(arg) = max(arg,typename Arg::value_type(0));
 	}
+	
+	template<class Arg>
+	void evalInPlace(Arg& arg, State&)const{
+		evalInPlace(arg);
+	}
+	
 	template<class Output, class Derivative>
-	void multiplyDerivative(Output const& output, Derivative& der)const{
+	void multiplyDerivative(Output const& output, Derivative& der, State const& state)const{
 		//~ noalias(der) *= heaviside(output);
 		for(std::size_t i = 0; i != output.size1(); ++i){
 			for(std::size_t j = 0; j != output.size2(); ++j){
@@ -115,6 +144,72 @@ struct RectifierNeuron{
 	}
 };
 
+template<class VectorType = RealVector>
+struct NormalizerNeuron{
+	struct State: public shark::State{
+		VectorType norm;
+		
+		void resize(std::size_t patterns){
+			norm.resize(patterns);
+		}
+	};
+	
+	template<class Arg, class Device>
+	void evalInPlace(blas::vector_expression<Arg,Device>& arg)const{
+		noalias(arg) /= sum(arg);
+	}
+	
+	template<class Arg, class Device>
+	void evalInPlace(blas::matrix_expression<Arg,Device>& arg)const{
+		noalias(trans(arg)) /= blas::repeat(sum_columns(arg),arg().size2());
+	}
+	
+	template<class Arg, class Device>
+	void evalInPlace(blas::matrix_expression<Arg,Device>& arg, State& state)const{
+		state.norm.resize(arg().size1());
+		noalias(state.norm) = sum_columns(arg);
+		noalias(trans(arg)) /= blas::repeat(state.norm,arg().size2());
+	}
+	
+	template<class Output, class Derivative>
+	void multiplyDerivative(Output const& output, Derivative& der, State const& s)const{
+		for(std::size_t i = 0; i != output.size1(); ++i){
+			double constant=inner_prod(row(der,i),row(output,i));
+			noalias(row(der,i))= (row(der,i)-constant)/s.norm(i);
+		}
+	}
+};
+
+
+template<class VectorType = RealVector>
+struct SoftmaxNeuron{
+	typedef EmptyState State;
+	
+	template<class Arg, class Device>
+	void evalInPlace(blas::vector_expression<Arg,Device>& arg)const{
+		noalias(arg) = exp(arg);
+		noalias(arg) /= sum(arg);
+	}
+	
+	template<class Arg, class Device>
+	void evalInPlace(blas::matrix_expression<Arg,Device>& arg)const{
+		noalias(arg) = exp(arg);
+		noalias(trans(arg)) /= blas::repeat(sum_columns(arg),arg().size2());
+	}
+	
+	template<class Arg, class Device>
+	void evalInPlace(blas::matrix_expression<Arg,Device>& arg, State&)const{
+		evalInPlace(arg);
+	}
+	
+	template<class Output, class Derivative>
+	void multiplyDerivative(Output const& output, Derivative& der, State const& s)const{
+		for(size_t i = 0; i != output.size1(); ++i){
+			double mass=inner_prod(row(der,i),row(output,i));
+			noalias(row(der,i)) = (row(der,i) - mass) *row(output,i);
+		}
+	}
+};
 
 template <class NeuronType, class VectorType = RealVector>
 class NeuronLayer : public AbstractModel<VectorType, VectorType, VectorType>{
@@ -168,7 +263,7 @@ public:
 	}
 
 	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+		return boost::shared_ptr<State>(new typename NeuronType::State());
 	}
 
 	using base_type::eval;
@@ -176,17 +271,21 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
 		SIZE_CHECK(inputs.size2() == inputSize());
 		outputs.resize(inputs.size1(),inputs.size2());
-		m_neuron.function(inputs,outputs);
+		noalias(outputs) = inputs;
+		m_neuron.evalInPlace(outputs);
 	}
 
 	void eval(VectorType const& input, VectorType& output)const{
 		SIZE_CHECK(input.size() == inputSize());
 		output.resize(input.size());
-		m_neuron.function(input,output);
+		noalias(output) = input;
+		m_neuron.evalInPlace(output);
 	}
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(inputs.size2() == inputSize());
-		eval(inputs,outputs);
+		outputs.resize(inputs.size1(),inputs.size2());
+		noalias(outputs) = inputs;
+		m_neuron.evalInPlace(outputs, state.toState<typename NeuronType::State>());
 	}
 
 	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all inputs of the last computed batch
@@ -213,14 +312,14 @@ public:
 
 		derivative.resize(inputs.size1(),inputs.size2());
 		noalias(derivative) = coefficients;
-		m_neuron.multiplyDerivative(outputs, derivative);
+		m_neuron.multiplyDerivative(outputs, derivative, state.toState<typename NeuronType::State>());
 		
 	}
 
 	/// From ISerializable
-	void read(InArchive& archive){}
+	void read(InArchive& archive){ archive >> m_inputSize;}
 	/// From ISerializable
-	void write(OutArchive& archive) const{}
+	void write(OutArchive& archive) const{ archive << m_inputSize;}
 };
 
 

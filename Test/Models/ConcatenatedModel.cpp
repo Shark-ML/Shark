@@ -5,7 +5,7 @@
 
 #include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/LinearModel.h>
-#include <shark/Models/Softmax.h>
+#include <shark/Models/NeuronLayers.h>
 
 #include <sstream>
 
@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_SUITE (Models_ConcatenatedModel)
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 {
 	LinearModel<> net1;
-	Softmax net2(5);
+	NeuronLayer<SoftmaxNeuron<> > net2(5);
 	LinearModel<> net3;
 	net1.setStructure(3,5,1);
 	net3.setStructure(5,2,1);
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 {
 	LinearModel<> net1;
-	Softmax net2(5);
+	NeuronLayer<SoftmaxNeuron<> > net2(5);
 	LinearModel<> net3;
 	net1.setStructure(3,5,1);
 	net3.setStructure(5,2,1);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedInputDerivative )
 {
 	LinearModel<> net1;
-	Softmax net2(5);
+	NeuronLayer<SoftmaxNeuron<> > net2(5);
 	LinearModel<> net3;
 	net1.setStructure(3,5,1);
 	net3.setStructure(5,10,1);
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedInputDerivative )
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedDerivatives )
 {
 	LinearModel<> net1;
-	Softmax net2(5);
+	NeuronLayer<SoftmaxNeuron<> > net2(5);
 	LinearModel<> net3;
 	net1.setStructure(3,5,1);
 	net3.setStructure(5,10,1);
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedDerivatives )
 BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 {
 	LinearModel<> net1;
-	Softmax net2(5);
+	NeuronLayer<SoftmaxNeuron<> > net2(5);
 	LinearModel<> net3;
 	net1.setStructure(10,5,1);
 	net3.setStructure(5,10,1);
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 
 	//and create a new model from the serialization
 	LinearModel<> netTest1;
-	Softmax netTest2;
+	NeuronLayer<SoftmaxNeuron<> > netTest2;
 	LinearModel<> netTest3;
 	ConcatenatedModel<RealVector> modelDeserialized  = netTest1 >> netTest2 >> netTest3;
 	istringstream inputStream(outputStream.str());  

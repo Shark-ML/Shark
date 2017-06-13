@@ -145,6 +145,11 @@ public:
 		InternalState const& s = state.toState<InternalState>();
 		return s.intermediates[index];
 	}
+	
+	State const& hiddenState(State const& state, std::size_t index)const{
+		InternalState const& s = state.toState<InternalState>();
+		return *s.state[index];
+	}
 
 	using base_type::eval;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const {

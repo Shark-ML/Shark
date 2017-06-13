@@ -44,7 +44,8 @@ class TiedAutoencoder :public AbstractModel<RealVector,RealVector>
 {
 	struct InternalState: public State{
 		RealMatrix hiddenResponses;
-		RealMatrix outputResponses;
+		typename HiddenNeuron::State hiddenState;
+		typename OutputNeuron::State outputState;
 	};
 	
 
@@ -159,50 +160,46 @@ public:
 		return s.hiddenResponses;
 	}
 	
+	//! \brief Returns the stored state of the hidden neurons  after the last call of eval
+	//!
+	//! This method is needed to compute derivatives of the neurons
+	//! \param  state last result of eval
+	//! \return Output value of the neurons.
+	typename HiddenNeuron::State const& hiddenState(State const& state)const{
+		InternalState const& s = state.toState<InternalState>();
+		return s.hiddenState;
+	}
+	
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new InternalState());
 	}
-
-	void evalLayer(std::size_t layer,RealMatrix const& patterns, RealMatrix& outputs)const{
-		SIZE_CHECK(layer < 2);
-		std::size_t numPatterns = patterns.size1();
-		
-		if(layer == 0){//input->hidden
-			SIZE_CHECK(patterns.size2() == encoderMatrix().size2());
-			std::size_t numOutputs = encoderMatrix().size1();
-			outputs.resize(numPatterns,numOutputs);
-			noalias(outputs) = patterns % trans(encoderMatrix()) + repeat(hiddenBias(),numPatterns);
-			m_hiddenNeurons.function(outputs,outputs);
-		}
-		else{//hidden->output
-			SIZE_CHECK(patterns.size2() == decoderMatrix().size2());
-			std::size_t numOutputs = decoderMatrix().size1();
-			outputs.resize(numPatterns,numOutputs);
-			noalias(outputs) = patterns % trans(decoderMatrix()) + repeat(outputBias(),numPatterns);
-			m_outputNeurons.function(outputs,outputs);
-		}
-	}
 	
-	///\brief Returns the response of the i-th layer given the input of that layer.
-	///
-	/// this is usefull if only a portion of the network needs to be evaluated
-	/// be aware that this only works without shortcuts in the network
-	Data<RealVector> evalLayer(std::size_t layer, Data<RealVector> const& patterns)const{
-		SIZE_CHECK(layer < 2);
+	Data<RealVector> encode(Data<RealVector> const& patterns)const{
+		SHARK_RUNTIME_CHECK(dataDimension(patterns) == inputSize(), "data has not the right input dimensionality");
 		int batches = (int) patterns.numberOfBatches();
 		Data<RealVector> result(batches);
 		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
-			evalLayer(layer,patterns.batch(i),result.batch(i));
+			auto& inputs = patterns.batch(i);
+			auto& outputs = result.batch(i);
+			outputs.resize(inputs.size1(),numberOfHiddenNeurons());
+			noalias(outputs) = patterns % trans(encoderMatrix()) + repeat(hiddenBias(),inputs.size1());
+			m_hiddenNeurons.evalInPlace(outputs);
 		}
 		return result;
 	}
 	
-	Data<RealVector> encode(Data<RealVector> const& patterns)const{
-		return evalLayer(0,patterns);
-	}
-	
 	Data<RealVector> decode(Data<RealVector> const& patterns)const{
-		return evalLayer(1,patterns);
+		SHARK_RUNTIME_CHECK(dataDimension(patterns) == numberOfHiddenNeurons(), "data has not the right input dimensionality");
+		int batches = (int) patterns.numberOfBatches();
+		Data<RealVector> result(batches);
+		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
+			auto& inputs = patterns.batch(i);
+			auto& outputs = result.batch(i);
+			outputs.resize(inputs.size1(),outputSize());
+			noalias(outputs) = patterns % trans(decoderMatrix()) + repeat(outputBias(),inputs.size1());
+			m_outputNeurons.evalInPlace(outputs);
+		}
+		return result;
 	}
 	
 	template<class Label>
@@ -219,11 +216,18 @@ public:
 		return LabeledData<RealVector,Label>(decode(data.inputs()),data.labels());
 	}
 	
-	void eval(RealMatrix const& patterns,RealMatrix& output, State& state)const{
+	void eval(RealMatrix const& patterns,RealMatrix& outputs, State& state)const{
+		SIZE_CHECK(patterns.size2() == inputSize());
 		InternalState& s = state.toState<InternalState>();
-		evalLayer(0,patterns,s.hiddenResponses);//propagate input->hidden
-		evalLayer(1,s.hiddenResponses,s.outputResponses);//propagate hidden->output
-		output = s.outputResponses;
+			
+		std::size_t numPatterns = patterns.size1();
+		s.hiddenResponses.resize(numPatterns,numberOfHiddenNeurons());
+		noalias(s.hiddenResponses) = patterns % trans(encoderMatrix()) + repeat(hiddenBias(),numPatterns);
+		m_hiddenNeurons.evalInPlace(s.hiddenResponses, s.hiddenState);
+		
+		outputs.resize(numPatterns,outputSize());
+		noalias(outputs) = s.hiddenResponses % trans(decoderMatrix()) + repeat(outputBias(),numPatterns);
+		m_outputNeurons.evalInPlace(outputs,s.outputState);
 	}
 	using AbstractModel<RealVector,RealVector>::eval;
 
@@ -236,7 +240,7 @@ public:
 		
 		RealMatrix outputDelta;
 		RealMatrix hiddenDelta;
-		computeDelta(state, coefficients, outputDelta,hiddenDelta);
+		computeDelta(state, outputs, coefficients, outputDelta,hiddenDelta);
 		computeParameterDerivative(patterns,outputDelta,hiddenDelta,state,gradient);
 	}
 	
@@ -249,7 +253,7 @@ public:
 		
 		RealMatrix outputDelta;
 		RealMatrix hiddenDelta;
-		computeDelta(state,coefficients, outputDelta,hiddenDelta,inputDerivative);
+		computeDelta(state, outputs, coefficients, outputDelta,hiddenDelta,inputDerivative);
 	}
 	
 	virtual void weightedDerivatives(
@@ -265,7 +269,7 @@ public:
 
 		RealMatrix outputDelta;
 		RealMatrix hiddenDelta;
-		computeDelta(state, coefficients, outputDelta,hiddenDelta,inputDerivative);
+		computeDelta(state, outputs, coefficients, outputDelta,hiddenDelta,inputDerivative);
 		computeParameterDerivative(patterns, outputDelta,hiddenDelta,state,parameterDerivative);
 	}
 	
@@ -295,23 +299,23 @@ public:
 private:
 	
 	void computeDelta(
-		State const& state, RealMatrix const& coefficients, RealMatrix& outputDelta, RealMatrix& hiddenDelta
+		State const& state, RealMatrix const& outputs, RealMatrix const& coefficients, RealMatrix& outputDelta, RealMatrix& hiddenDelta
 	)const{
 		InternalState const& s = state.toState<InternalState>();
 		outputDelta.resize(coefficients.size1(), coefficients.size2());
 		noalias(outputDelta) = coefficients;
-		m_outputNeurons.multiplyDerivative(s.outputResponses,outputDelta);
+		m_outputNeurons.multiplyDerivative(outputs,outputDelta,s.outputState);
 		
 		hiddenDelta.resize(outputDelta.size1(),numberOfHiddenNeurons());
 		noalias(hiddenDelta) = outputDelta % decoderMatrix();
-		m_hiddenNeurons.multiplyDerivative(s.hiddenResponses,hiddenDelta);
+		m_hiddenNeurons.multiplyDerivative(s.hiddenResponses,hiddenDelta,s.hiddenState);
 		
 	}
 	
 	void computeDelta(
-		State const& state, RealMatrix const& coefficients, RealMatrix& outputDelta, RealMatrix& hiddenDelta, RealMatrix& inputDelta
+		State const& state, RealMatrix const& outputs, RealMatrix const& coefficients, RealMatrix& outputDelta, RealMatrix& hiddenDelta, RealMatrix& inputDelta
 	)const{
-		computeDelta(state, coefficients, outputDelta,hiddenDelta);
+		computeDelta(state, outputs, coefficients, outputDelta,hiddenDelta);
 		inputDelta.resize(outputDelta.size1(),inputSize());
 		noalias(inputDelta) = hiddenDelta % encoderMatrix();
 	}

@@ -162,7 +162,9 @@ public:
 			meanActivation += sum_rows(hiddenActivation);
 			// calculate gradient of the hidden neurons
 			RealMatrix hiddenDerivative(hiddenActivation.size1(), hiddenActivation.size2(),1.0);
-			mep_model->hiddenActivationFunction().multiplyDerivative(hiddenActivation, hiddenDerivative);
+			mep_model->hiddenActivationFunction().multiplyDerivative(
+				hiddenActivation, hiddenDerivative, mep_model->hiddenState(*state)
+			);
 			//update sum of derivatives
 			noalias(hiddenDerivativeSum) += sum_rows(hiddenDerivative);
 

@@ -11,9 +11,9 @@ using namespace shark;
 BOOST_AUTO_TEST_SUITE (Models_DropoutLayer)
 
 
-typedef boost::mpl::list<TanhNeuron,LinearNeuron, LogisticNeuron, FastSigmoidNeuron> neuron_types;
+typedef boost::mpl::list<TanhNeuron,LinearNeuron, LogisticNeuron, FastSigmoidNeuron, NormalizerNeuron<>, SoftmaxNeuron<> > neuron_types;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(DropoutLayer_Value, Neuron,neuron_types){
+BOOST_AUTO_TEST_CASE_TEMPLATE(NeuronLayer_Value, Neuron,neuron_types){
 	NeuronLayer<Neuron> layer(10);
 	RealMatrix inputs(100,10);
 	for(std::size_t i = 0; i != 100; ++i){
@@ -24,16 +24,20 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(DropoutLayer_Value, Neuron,neuron_types){
 	testBatchEval(layer,inputs);
 	
 }
-BOOST_AUTO_TEST_CASE_TEMPLATE(DropoutLayer_Derivative, Neuron,neuron_types) {
-	NeuronLayer<Neuron> layer(10);
-	RealMatrix inputs(100,10);
-	for(std::size_t i = 0; i != 100; ++i){
-		for(std::size_t j = 0; j != 10; ++j){
-			inputs(i,j) = random::uni(random::globalRng,2,3);
+BOOST_AUTO_TEST_CASE_TEMPLATE(NeuronLayer_Derivative, Neuron,neuron_types) {
+	NeuronLayer<Neuron> net(10);
+	RealVector coefficients(net.outputSize());
+	RealVector point(net.inputSize());
+	for(unsigned int test = 0; test != 1000; ++test){
+		for(size_t i = 0; i != net.outputSize();++i){
+			coefficients(i) = random::uni(random::globalRng,-5,5);
 		}
+		for(size_t i = 0; i != net.inputSize();++i){
+			point(i) = random::uni(random::globalRng,0.1,3);
+		}
+
+		testWeightedDerivative(net, point, coefficients, 1.e-5,1.e-5);
 	}
-	testWeightedInputDerivative(layer);
-	
 }
 
 BOOST_AUTO_TEST_SUITE_END()

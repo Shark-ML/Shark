@@ -33,15 +33,18 @@
 #define SHARK_MODELS_LINEARMODEL_H
 
 #include <shark/Models/AbstractModel.h>
+#include <shark/Models/NeuronLayers.h>
 namespace shark {
 
 
 ///
-/// \brief Linear Prediction
+/// \brief Linear Prediction with optional activation function
 ///
 /// \par
-/// A linear model makes predictions according to
-/// \f$ y = f(x) = A x + b \f$. There are two important special cases:
+/// This model computes the result of
+/// \f$ y = f(x) = g(A x + b) \f$, where g is an arbitrary activation function.
+/// By default g is the identity and the model is a simple linear model. 
+/// Otherwise, this is known as a generalized linear model. There are two important special cases:
 /// The output may be a single number, and the offset term b may be
 /// dropped.
 ///
@@ -49,7 +52,7 @@ namespace shark {
 /// the weight matrix and the ouputs are dense. There are some cases where this is not
 /// good behavior. Check for example Normalizer for a class which is designed for sparse
 /// inputs and outputs.
-template <class InputType = RealVector>
+template <class InputType = RealVector, class ActivationFunction = LinearNeuron>
 class LinearModel : public AbstractModel<
 	InputType,
 	blas::vector<typename InputType::value_type, typename InputType::device_type>,//type of output uses same device and precision as input
@@ -59,9 +62,10 @@ private:
 	typedef blas::vector<typename InputType::value_type, typename InputType::device_type> VectorType;
 	typedef blas::matrix<typename InputType::value_type, blas::row_major, typename InputType::device_type> MatrixType;
 	typedef AbstractModel<InputType,VectorType, VectorType> base_type;
-	typedef LinearModel<InputType> self_type;
+	typedef LinearModel<InputType, ActivationFunction> self_type;
 	MatrixType m_matrix;
 	VectorType m_offset;
+	ActivationFunction m_activation;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;//same as MatrixType
@@ -144,7 +148,7 @@ public:
 
 	/// overwrite structure and parameters
 	void setStructure(std::size_t inputs, std::size_t outputs = 1, bool offset = false){
-		LinearModel<InputType> model(inputs,outputs,offset);
+		LinearModel<InputType, ActivationFunction> model(inputs,outputs,offset);
 		swap(*this,model);
 	}
 
@@ -170,9 +174,19 @@ public:
 	VectorType& offset(){
 		return m_offset;
 	}
+	
+	/// \brief Returns the activation function.
+	ActivationFunction const& activationFunction()const{
+		return m_activation;
+	}
+	
+	/// \brief Returns the activation function.
+	ActivationFunction& activationFunction(){
+		return m_activation;
+	}
 
 	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+		return boost::shared_ptr<State>(new typename ActivationFunction::State());
 	}
 
 	using base_type::eval;
@@ -185,6 +199,7 @@ public:
 		if (hasOffset()){
 			noalias(outputs)+=repeat(m_offset,inputs.size1());
 		}
+		m_activation.evalInPlace(outputs);
 	}
 
 	void eval(InputType const& input, VectorType& output)const {
@@ -194,10 +209,17 @@ public:
 		if (hasOffset()) {
 			noalias(output) += m_offset;
 		}
+		m_activation.evalInPlace(output);
 	}
 	/// Evaluate the model: output = matrix * input + offset
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
-		eval(inputs,outputs);
+		outputs.resize(inputs.size1(),m_matrix.size1());
+		//we multiply with a set of row vectors from the left
+		noalias(outputs) = inputs % trans(m_matrix);
+		if (hasOffset()){
+			noalias(outputs)+=repeat(m_offset,inputs.size1());
+		}
+		m_activation.evalInPlace(outputs, state.toState<typename ActivationFunction::State>());
 	}
 
 	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch
@@ -218,11 +240,14 @@ public:
 		std::size_t matrixParams = numInputs*numOutputs;
 
 		auto weightGradient = blas::to_matrix(subrange(gradient,0,matrixParams), numOutputs,numInputs);
+		
+		BatchOutputType delta = coefficients;
+		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 		//sum_i coefficients(output,i)*pattern(i))
-		noalias(weightGradient) = trans(coefficients) % patterns;
+		noalias(weightGradient) = trans(delta) % patterns;
 
 		if (hasOffset()){
-			noalias(subrange(gradient, matrixParams, matrixParams + numOutputs)) = sum_rows(coefficients);
+			noalias(subrange(gradient, matrixParams, matrixParams + numOutputs)) = sum_rows(delta);
 		}
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
@@ -235,9 +260,49 @@ public:
 	)const{
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
-
+		
+		//compute chain rule
+		BatchOutputType delta = coefficients;
+		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
+		
 		derivative.resize(patterns.size1(),inputSize());
-		noalias(derivative) = MatrixType(coefficients % m_matrix);//TODO: bug in remora will lead to compile error if derivative is sparse
+		noalias(derivative) = MatrixType(delta % m_matrix);//TODO: bug in remora will lead to compile error if derivative is sparse
+	}
+	
+	void weightedDerivatives(
+		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
+		BatchOutputType const & coefficients,
+		State const& state,
+		RealVector& parameterDerivative,
+		BatchInputType& inputDerivative
+	)const{
+		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size1()==patterns.size1());
+
+		std::size_t numInputs = inputSize();
+		std::size_t numOutputs = outputSize();
+		
+		//compute chain rule
+		BatchOutputType delta = coefficients;
+		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
+		
+		//compute input derivative
+		inputDerivative.resize(patterns.size1(),numInputs);
+		noalias(inputDerivative) = MatrixType(delta % m_matrix);
+		
+		//compute parameter derivative
+		parameterDerivative.resize(numberOfParameters());
+		parameterDerivative.clear();
+		std::size_t matrixParams = numInputs*numOutputs;
+		auto weightGradient = blas::to_matrix(subrange(parameterDerivative,0,matrixParams), numOutputs,numInputs);
+		auto offsetGradient = subrange(parameterDerivative,matrixParams,parameterDerivative.size());
+		
+		//sum_i coefficients(output,i)*pattern(i))
+		noalias(weightGradient) = trans(delta) % patterns;
+		if (hasOffset()){
+			noalias(offsetGradient) = sum_rows(delta);
+		}
 	}
 
 	/// From ISerializable

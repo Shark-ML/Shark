@@ -84,6 +84,8 @@ class FFNet :public AbstractModel<RealVector,RealVector>
 		//!                  i < M\f$</li>
 		//! </ul>
 		RealMatrix responses;
+		std::vector<typename HiddenNeuron::State> hiddenStates;
+		typename OutputNeuron::State outputState;
 		
 		void resize(std::size_t neurons, std::size_t patterns){
 			responses.resize(neurons,patterns);
@@ -296,10 +298,10 @@ public:
 		}
 		// if this is the last layer, use output neuron response
 		if(layer < m_layerMatrix.size()-1) {
-			m_hiddenNeuron.function(outputs,outputs);
+			m_hiddenNeuron.evalInPlace(outputs);
 		}
 		else {
-			m_outputNeuron.function(outputs,outputs);
+			m_outputNeuron.evalInPlace(outputs);
 		}
 	}
 	
@@ -322,6 +324,7 @@ public:
 		//initialize the input layer using the patterns.
 		s.resize(numberOfNeurons(),numPatterns);
 		s.responses.clear();
+		s.hiddenStates.resize(m_layerMatrix.size()-1);
 		noalias(rows(s.responses,0,m_inputNeurons)) = trans(patterns);
 		std::size_t beginNeuron = m_inputNeurons;
 		
@@ -346,14 +349,14 @@ public:
 			SHARK_CRITICAL_REGION{//beware Dropout Neurons!
 				// if this is the last layer, use output neuron response instead
 				if(layer < m_layerMatrix.size()-1) {
-					m_hiddenNeuron.function(responses,responses);
+					m_hiddenNeuron.evalInPlace(responses, s.hiddenStates[layer]);
 				}
 				else {
 					//add shortcuts if necessary
 					if(m_inputOutputShortcut.size1() != 0){
 						noalias(responses) += prod(m_inputOutputShortcut,trans(patterns));
 					}
-					m_outputNeuron.function(responses,responses);
+					m_outputNeuron.evalInPlace(responses, s.outputState);
 				}
 			}
 			//go to the next layer
@@ -618,7 +621,7 @@ private:
 		//initialize output neurons using coefficients
 		auto outputDelta = rows(delta,delta.size1()-outputSize(),delta.size1());
 		auto outputResponse = rows(s.responses,delta.size1()-outputSize(),delta.size1());
-		m_outputNeuron.multiplyDerivative(outputResponse,outputDelta);
+		m_outputNeuron.multiplyDerivative(outputResponse,outputDelta,s.outputState);
 
 		//iterate backwards using the backprop matrix and propagate the errors to get the needed delta values
 		//we stop until we have filled all delta values. Thus we might not necessarily compute all layers.
@@ -639,7 +642,7 @@ private:
 
 			noalias(layerDelta) += prod(weights,layerDeltaInput);//add the values to the maybe non-empty delta part
 			if(layer != 0){
-				m_hiddenNeuron.multiplyDerivative(layerResponse,layerDelta);
+				m_hiddenNeuron.multiplyDerivative(layerResponse,layerDelta,s.hiddenStates[layer]);
 			}
 			//go a layer backwards
 			endNeuron=beginNeuron;
