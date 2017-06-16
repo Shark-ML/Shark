@@ -89,13 +89,6 @@ public:
 	std::string name() const
 	{ return "LinearModel"; }
 
-	///operator =
-	LinearModel& operator=(LinearModel const& model){
-		self_type tempModel(model);
-		swap(*this,tempModel);
-		return *this;
-	}
-
 	/// Construction from matrix (and vector)
 	LinearModel(MatrixType const& matrix, VectorType const& offset = VectorType())
 	:m_matrix(matrix),m_offset(offset){
@@ -137,7 +130,7 @@ public:
 	/// overwrite structure and parameters
 	void setStructure(std::size_t inputs, std::size_t outputs = 1, bool offset = false){
 		LinearModel<InputType, ActivationFunction> model(inputs,outputs,offset);
-		swap(*this,model);
+		*this = model;
 	}
 
 	/// overwrite structure and parameters
