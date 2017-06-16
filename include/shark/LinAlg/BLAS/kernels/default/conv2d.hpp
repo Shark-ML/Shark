@@ -76,35 +76,39 @@ void im2mat_pad(
 	std::size_t image_height,
 	std::size_t image_width,
 	std::size_t filter_height,
-	std::size_t filter_width
+	std::size_t filter_width,
+	std::size_t padding_height,
+	std::size_t padding_width
 ){
-	int i1_start = - (int) (filter_height-1)/2;
-	int i1_end = filter_height + i1_start;
-	int j1_start = - (int) (filter_width-1)/2;
-	int j1_end = filter_width + j1_start;
+	std::size_t image_start1 = padding_height/2;
+	std::size_t image_end1 =  image_height + image_start1;
+	std::size_t image_start2 = padding_width/2;
+	std::size_t image_end2 =  image_width + image_start2;
+	std::size_t output_width = image_width - filter_width + 1 + padding_width;
+	std::size_t output_height = image_height - filter_height + 1 + padding_height;
 	//the order of loops is chosen such, that only very little changes of rows are performed
 	for(std::size_t c = 0; c != num_channels; ++c){//iterate over the channels
-		for(int i = 0; i != (int)image_height; ++i){// iterate over row-positions in the image
-			for(int i1 =  i1_start; i1 != i1_end; ++i1){//iterate over the the rows of the current filter
-				if(i1+i < 0 || i1+i >= (int)image_height){//special case: we are on the border above or below
-					for(int j = 0; j != (int)image_width; ++j){//iterate over the column-position in the image, so pad with 0
-						std::size_t row_start = i * image_width +j;
-						std::size_t col_start = c * filter_width * filter_height + (i1-i1_start) * filter_width;
-						for(int j1 = 0; j1 != (int)filter_width; ++j1){
+		for(std::size_t i = 0; i != output_height; ++i){// iterate over row-positions in the output
+			for(std::size_t i1 =  0; i1 != filter_height; ++i1){//iterate over the the rows of the current filter
+				if(i1+i < image_start1 || i1+i >= image_end1){//special case: we are on the border above or below
+					for(std::size_t j = 0; j != output_width; ++j){//iterate over the column-position in the output
+						std::size_t row_start = i * output_width +j;
+						std::size_t col_start = c * filter_width * filter_height + i1 * filter_width;
+						for(std::size_t j1 = 0; j1 != filter_width; ++j1){
 							output()(row_start, col_start +j1) = 0;
 						}
 					}
 					continue;//no need to got on, we are done
 				}
-				for(int j = 0; j != (int)image_width; ++j){//iterate over the column-position in the image
-					std::size_t row_start = i * image_width +j;
-					std::size_t image_start = c * image_width * image_height + (i+i1) * image_width + j;
-					std::size_t col_start = c * filter_width * filter_height + (i1-i1_start) * filter_width;
-					for(int j1 = j1_start; j1 != j1_end; ++j1){
-						if(j+j1 < 0 || j+j1 >= (int)image_width)
-							output()(row_start, col_start +(j1-j1_start)) = 0;
+				for(std::size_t j = 0; j != output_width; ++j){//iterate over the column-position in the output
+					std::size_t row_start = i * output_width +j;
+					std::size_t image_start = c * image_width * image_height + (i+i1 - image_start1) * image_width + j-image_start2;
+					std::size_t col_start = c * filter_width * filter_height + i1 * filter_width;
+					for(std::size_t j1 = 0; j1 != filter_width; ++j1){
+						if(j+j1 < image_start2 || j+j1 >= image_end2)
+							output()(row_start, col_start + j1) = 0;
 						else
-							output()(row_start, col_start +(j1-j1_start)) = image()(image_start + j1);
+							output()(row_start, col_start + j1) = image()(image_start + j1);
 					}
 				}
 			}
@@ -124,15 +128,14 @@ void conv2d(
 	std::size_t image_width,
 	std::size_t filter_height,
 	std::size_t filter_width,
-	bool pad
+	std::size_t padding_height,
+	std::size_t padding_width
 ){
 	typedef typename std::common_type<
 		typename E1::value_type, typename E2::value_type, typename M::value_type
 	>::type value_type;
 	
-	std::size_t output_rows_per_filter = (image_height  - filter_height +1) * (image_width - filter_width +1);
-	if(pad) 
-		output_rows_per_filter = image_height * image_width;
+	std::size_t output_rows_per_filter = (image_height  - filter_height +1 + padding_height) * (image_width - filter_width +1 + padding_width);
 	
 	std::size_t filter_size = filter_width * filter_height * num_channels;
 	
@@ -148,10 +151,10 @@ void conv2d(
 	dense_matrix_adaptor<value_type, row_major, cpu_tag> filter_transformed(filter_storage, num_filters, filter_size);
 	dense_matrix_adaptor<value_type, row_major, cpu_tag> output_transformed(output(), num_filters, output_rows_per_filter);
 	//copy image to temporary storage
-	if(pad){
-		im2mat_pad(image,image_transformed, num_channels, image_height, image_width, filter_height, filter_width);
-	}else{
+	if(padding_height == 0 && padding_width == 0){
 		im2mat(image,image_transformed, num_channels, image_height, image_width, filter_height, filter_width);
+	}else{
+		im2mat_pad(image,image_transformed, num_channels, image_height, image_width, filter_height, filter_width, padding_height, padding_width);
 	}
 	//copy filters to temporary storage
 	for(std::size_t f = 0; f != num_filters; ++f){

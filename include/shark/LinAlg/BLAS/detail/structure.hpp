@@ -121,10 +121,12 @@ struct row_major:public linear_structure{
 	}
 
 	// Major and minor indices
-	static size_type index_M(size_type index1, size_type /* index2 */) {
+	template<class Index1, class Index2>
+	static Index1 index_M(Index1 const& index1, Index2 const& /* index2 */) {
 		return index1;
 	}
-	static size_type index_m(size_type /* index1 */, size_type index2) {
+	template<class Index1, class Index2>
+	static Index2 index_m(Index1 const& /*index1*/, Index2 const& index2 ) {
 		return index2;
 	}
 	
@@ -171,10 +173,12 @@ struct column_major:public linear_structure{
 	}
 
 	// Major and minor indices
-	static size_type index_M(size_type /* index1 */, size_type index2) {
+	template<class Index1, class Index2>
+	static Index2 index_M(Index1 const& /*index1*/, Index2 const& index2 ) {
 		return index2;
 	}
-	static size_type index_m(size_type index1, size_type /* index2 */) {
+	template<class Index1, class Index2>
+	static Index1 index_m(Index1 const& index1, Index2 const& /* index2 */) {
 		return index1;
 	}
 	

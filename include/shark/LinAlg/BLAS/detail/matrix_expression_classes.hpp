@@ -249,8 +249,8 @@ private:
 	functor_type m_functor;
 };
 
-template<class V>
-class vector_repeater:public matrix_expression<vector_repeater<V>, typename V::device_type > {
+template<class V, class Orientation=row_major>
+class vector_repeater:public matrix_expression<vector_repeater<V, Orientation>, typename V::device_type > {
 public:
 	typedef typename V::const_closure_type expression_closure_type;
 	typedef typename V::size_type size_type;
@@ -262,25 +262,29 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef row_major orientation;
+	typedef Orientation orientation;
 	typedef typename V::evaluation_category evaluation_category;
 	typedef typename V::device_type device_type;
 
 	// Construction and destruction
-	explicit vector_repeater (expression_closure_type const& e, size_type rows):
-	m_vector(e), m_rows(rows) {}
+	explicit vector_repeater (expression_closure_type const& e, size_type elements):
+	m_vector(e), m_elements(elements) {}
 
 	// Accessors
 	size_type size1() const {
-		return m_rows;
+		return orientation::index_M(m_elements,m_vector.size());
 	}
 	size_type size2() const {
-		return m_vector.size();
+		return orientation::index_m(m_elements,m_vector.size());
 	}
 
 	// Expression accessors
 	const expression_closure_type& expression() const {
 		return m_vector;
+	}
+	
+	std::size_t num_repetitions()const{
+		return m_elements;
 	}
 	
 	template<class MatX>
@@ -295,38 +299,56 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& /*i*/, IndexExpr2 const& j) const -> decltype(std::declval<V const&>()(j)){
-		return m_vector(j);
+	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(std::declval<V const&>()(Orientation::index_m(i,j))){
+		return m_vector(Orientation::index_m(i,j));
 	}
 	
 	typename device_traits<typename V::device_type>::queue_type& queue()const{
 		return m_vector.queue();
 	}
+private:
+	typedef typename V::const_iterator vector_iterator;
+	typedef typename device_traits<typename V::device_type>:: template constant_iterator<value_type>::type constant_iterator;
+	
+	vector_iterator begin(size_type i, row_major) const {
+		return m_vector.begin();
+	}
+	vector_iterator end(size_type i, row_major) const {
+		return m_vector.end();
+	}
+	constant_iterator begin(size_type i, column_major) const {
+		return const_column_iterator(m_vector(i),0);
+	}
+	constant_iterator end(size_type i, column_major) const {
+		return const_column_iterator(m_vector(i), m_elements);
+	}
+public:
 
 	// Iterator types
-	typedef typename V::const_iterator const_row_iterator;
+	typedef typename std::conditional<std::is_same<Orientation, row_major>::value, vector_iterator, constant_iterator>::type const_row_iterator;
 	typedef const_row_iterator row_iterator;
-	typedef typename device_traits<typename V::device_type>:: template constant_iterator<value_type>::type  const_column_iterator;
+	typedef typename std::conditional<std::is_same<Orientation, row_major>::value, constant_iterator, vector_iterator>::type const_column_iterator;
 	typedef const_column_iterator column_iterator;
 
 	// Element lookup
 	
 	const_row_iterator row_begin(size_type i) const {
 		REMORA_RANGE_CHECK( i < size1());
-		return m_vector.begin();
+		return begin(i,Orientation());
 	}
 	const_row_iterator row_end(size_type i) const {
 		REMORA_RANGE_CHECK( i < size1());
-		return m_vector.end();
+		return end(i,Orientation());
 	}
 	
 	const_column_iterator column_begin(size_type j) const {
 		REMORA_RANGE_CHECK( j < size2());
-		return const_column_iterator(m_vector(j),0);
+		return begin(j,typename Orientation::transposed_orientation());
+		
 	}
 	const_column_iterator column_end(size_type j) const {
 		REMORA_RANGE_CHECK( j < size2());
-		return const_column_iterator(m_vector(j),size1());
+		return end(j,typename Orientation::transposed_orientation());
 	}
 private:
 	
@@ -336,12 +358,12 @@ private:
 		vector_expression<VecV, device_type> const& v,
 		typename MatX::value_type alpha
 	)const{
-		vector_repeater<VecV> e(v(),m_rows);
+		vector_repeater<VecV, Orientation> e(v(),m_elements);
 		plus_assign(X,e,alpha);
 	}
 
 	expression_closure_type m_vector;
-	size_type m_rows;
+	size_type m_elements;
 };
 
 /// \brief A matrix with all values of type \c T equal to the same value

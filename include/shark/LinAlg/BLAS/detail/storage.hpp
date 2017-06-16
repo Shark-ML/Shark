@@ -44,9 +44,18 @@ struct unknown_storage{
 
 template<class T>
 struct dense_vector_storage{
+	typedef typename std::remove_const<T>::type value_type;
 	typedef dense_tag storage_tag;
 	T* values;
 	std::size_t stride;
+	
+	dense_vector_storage(){}
+	dense_vector_storage(T* values, std::size_t stride):values(values),stride(stride){}
+	dense_vector_storage(dense_vector_storage<value_type> const& storage):
+	values(storage.values), stride(storage.stride){}
+	dense_vector_storage(dense_vector_storage<value_type const> const& storage):
+	values(storage.values), stride(storage.stride){}
+	
 	
 	dense_vector_storage<T> sub_region(std::size_t offset){
 		return {values+offset*stride, stride};
@@ -55,18 +64,34 @@ struct dense_vector_storage{
 
 template<class T, class I>
 struct sparse_vector_storage{
+	typedef typename std::remove_const<T>::type value_type;
 	typedef sparse_tag storage_tag;
 	T* values;
 	I* indices;
 	std::size_t nnz;
+	
+	sparse_vector_storage(){}
+	sparse_vector_storage(T* values, I* indices, std::size_t nnz):values(values), indices(indices), nnz(nnz){}
+	sparse_vector_storage(sparse_vector_storage<value_type, I> const& storage):
+	values(storage.values), indices(storage.indices), nnz(storage.nnz){}
+	sparse_vector_storage(sparse_vector_storage<value_type const, I> const& storage):
+	values(storage.values), indices(storage.indices), nnz(storage.nnz){}
 };
 
 template<class T>
 struct dense_matrix_storage{
+	typedef typename std::remove_const<T>::type value_type;
 	typedef dense_tag storage_tag;
 	typedef dense_vector_storage<T> row_storage;
 	T* values;
 	std::size_t leading_dimension;
+	
+	dense_matrix_storage(){}
+	dense_matrix_storage(T* values, std::size_t leading_dimension):values(values),leading_dimension(leading_dimension){}
+	dense_matrix_storage(dense_matrix_storage<value_type> const& storage):
+	values(storage.values), leading_dimension(storage.leading_dimension){}
+	dense_matrix_storage(dense_matrix_storage<value_type const> const& storage):
+	values(storage.values), leading_dimension(storage.leading_dimension){}
 	
 	template<class Orientation>
 	dense_matrix_storage<T> sub_region(std::size_t offset1, std::size_t offset2, Orientation){

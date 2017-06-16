@@ -63,12 +63,10 @@ void conv2d(
 	std::size_t image_width,
 	std::size_t filter_height,
 	std::size_t filter_width,
-	bool padding
+	std::size_t padding_height = 0,
+	std::size_t padding_width = 0
 ){
-	std::size_t output_rows_per_filter = (image_height  - filter_height +1) * (image_width - filter_width +1);
-	if(padding){
-		 output_rows_per_filter = image_height * image_width;
-	}
+	std::size_t output_rows_per_filter = (image_height  - filter_height +1 + padding_height) * (image_width - filter_width +1 + padding_width);
 	std::size_t filter_size = filter_width * filter_height * num_channels;
 	
 	REMORA_SIZE_CHECK(output().size() == num_filters * output_rows_per_filter);
@@ -78,7 +76,7 @@ void conv2d(
 	bindings::conv2d(
 		image, filter, output, num_channels, num_filters,
 		image_height, image_width, filter_height, filter_width,
-		padding
+		padding_height, padding_width
 	);
 }
 
