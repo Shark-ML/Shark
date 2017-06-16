@@ -168,7 +168,7 @@ struct NormalizerNeuron{
 	void evalInPlace(blas::matrix_expression<Arg,Device>& arg, State& state)const{
 		state.norm.resize(arg().size1());
 		noalias(state.norm) = sum_columns(arg);
-		noalias(trans(arg)) /= blas::repeat(state.norm,arg().size2());
+		noalias(arg) /= trans(blas::repeat(state.norm,arg().size2()));
 	}
 	
 	template<class Output, class Derivative>
@@ -194,7 +194,7 @@ struct SoftmaxNeuron{
 	template<class Arg, class Device>
 	void evalInPlace(blas::matrix_expression<Arg,Device>& arg)const{
 		noalias(arg) = exp(arg);
-		noalias(trans(arg)) /= blas::repeat(sum_columns(arg),arg().size2());
+		noalias(arg) /= trans(blas::repeat(sum_columns(arg),arg().size2()));
 	}
 	
 	template<class Arg, class Device>

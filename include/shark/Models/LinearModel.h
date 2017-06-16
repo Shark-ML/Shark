@@ -84,22 +84,10 @@ public:
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
-	///copy constructor
-	LinearModel(LinearModel const& model)
-	:m_matrix(model.m_matrix),m_offset(model.m_offset){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearModel"; }
-
-	///swap
-	friend void swap(LinearModel& model1,LinearModel& model2){
-		swap(model1.m_matrix,model2.m_matrix);
-		swap(model1.m_offset,model2.m_offset);
-	}
 
 	///operator =
 	LinearModel& operator=(LinearModel const& model){
