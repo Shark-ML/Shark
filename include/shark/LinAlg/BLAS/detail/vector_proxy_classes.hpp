@@ -307,8 +307,8 @@ public:
 
 	typedef dense_vector_adaptor<T const> const_closure_type;
 	typedef dense_vector_adaptor closure_type;
-	typedef dense_vector_storage<T> storage_type;
-	typedef dense_vector_storage<value_type const> const_storage_type;
+	typedef dense_vector_storage<T, dense_tag> storage_type;
+	typedef dense_vector_storage<value_type const, dense_tag> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction

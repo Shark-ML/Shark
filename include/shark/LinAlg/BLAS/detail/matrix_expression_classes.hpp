@@ -251,6 +251,13 @@ private:
 
 template<class V, class Orientation=row_major>
 class vector_repeater:public matrix_expression<vector_repeater<V, Orientation>, typename V::device_type > {
+private:
+	template<class IndexExpr1, class IndexExpr2>
+	struct OperatorReturn{//workaround for gcc 4.6 which would not like the type below inside a function signature.
+		typedef decltype(std::declval<V const&>()(
+			Orientation::index_m(std::declval<IndexExpr1&>(),std::declval<IndexExpr2&>()))
+		) type;
+	};
 public:
 	typedef typename V::const_closure_type expression_closure_type;
 	typedef typename V::size_type size_type;
@@ -299,7 +306,7 @@ public:
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& i, IndexExpr2 const& j) const -> decltype(std::declval<V const&>()(Orientation::index_m(i,j))){
+	typename OperatorReturn<IndexExpr1, IndexExpr2>::type operator()(IndexExpr1 const& i, IndexExpr2 const& j) const{
 		return m_vector(Orientation::index_m(i,j));
 	}
 	
@@ -917,7 +924,7 @@ template<class M, class TriangularType>
 class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType>, typename M::device_type > {
 	typedef typename closure<M>::type matrix_closure_type;
 public:
-	static_assert(std::is_same<typename M::storage_type::storage_tag, dense_tag>::value, "Can only create triangular proxies of dense matrices");
+	static_assert(std::is_base_of<dense_tag, typename M::storage_type::storage_tag>::value, "Can only create triangular proxies of dense matrices");
 
 	typedef typename M::size_type size_type;
 	typedef typename M::value_type value_type;
@@ -926,8 +933,11 @@ public:
 	typedef dense_triangular_proxy<typename const_expression<M>::type,TriangularType> const_closure_type;
 	typedef dense_triangular_proxy<M,TriangularType> closure_type;
 
-	typedef dense_matrix_storage<value_type> storage_type;
-	typedef dense_matrix_storage<value_type const> const_storage_type;
+	//~ typedef typename M::storage_type storage_type;
+	//~ typedef typename M::const_storage_type const_storage_type;
+	typedef dense_matrix_storage<value_type, dense_tag> storage_type;
+	typedef dense_matrix_storage<value_type const, dense_tag> const_storage_type;
+
 	typedef elementwise<dense_tag> evaluation_category;
 	typedef triangular<typename M::orientation,TriangularType> orientation;
 

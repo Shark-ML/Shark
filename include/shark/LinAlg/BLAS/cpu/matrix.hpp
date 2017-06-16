@@ -61,8 +61,8 @@ public:
 
 	typedef matrix_reference<self_type const> const_closure_type;
 	typedef matrix_reference<self_type> closure_type;
-	typedef dense_matrix_storage<T> storage_type;
-	typedef dense_matrix_storage<T const> const_storage_type;
+	typedef dense_matrix_storage<T, continuous_dense_tag> storage_type;
+	typedef dense_matrix_storage<T const, continuous_dense_tag> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 	typedef L orientation;
 

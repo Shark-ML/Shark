@@ -71,8 +71,8 @@ public:
 
 	typedef vector_reference<vector const> const_closure_type;
 	typedef vector_reference<vector> closure_type;
-	typedef gpu::dense_vector_storage<T> storage_type;
-	typedef gpu::dense_vector_storage<T> const_storage_type;
+	typedef gpu::dense_vector_storage<T,continuous_dense_tag> storage_type;
+	typedef gpu::dense_vector_storage<T,continuous_dense_tag> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction

@@ -51,7 +51,7 @@ void trsm_impl(
 	
 	static_assert(std::is_same<typename MatA::value_type, typename MatB::value_type>::value, "[trsm] Arguments do not have same element type");
 	static_assert(std::is_same<typename MatA::evaluation_category::tag, dense_tag>::value, "[trsm] A is not dense");
-	static_assert(std::is_same<typename MatB::storage_type::storage_tag, dense_tag>::value, "[trsm] B does not have dense storage layout");
+	static_assert(std::is_base_of<dense_tag, typename MatB::storage_type::storage_tag>::value, "[trsm] B does not have dense storage layout");
 	
 	//pre-evaluate A into a temporary if necessary
 	auto const& Aeval = eval_expression(A);

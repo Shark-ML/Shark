@@ -39,32 +39,77 @@ namespace remora{
 	
 struct unknown_storage{
 	typedef unknown_tag storage_tag;
-	typedef unknown_storage row_storage;
+	template<class O>
+	struct row_storage{typedef unknown_storage type;};
+	
+	typedef unknown_storage diag_storage;
+	typedef unknown_storage sub_region_storage;
 };
 
-template<class T>
+template<class T, class Tag>
 struct dense_vector_storage{
-	typedef typename std::remove_const<T>::type value_type;
-	typedef dense_tag storage_tag;
+	typedef Tag storage_tag;
 	T* values;
 	std::size_t stride;
 	
 	dense_vector_storage(){}
 	dense_vector_storage(T* values, std::size_t stride):values(values),stride(stride){}
-	dense_vector_storage(dense_vector_storage<value_type> const& storage):
-	values(storage.values), stride(storage.stride){}
-	dense_vector_storage(dense_vector_storage<value_type const> const& storage):
-	values(storage.values), stride(storage.stride){}
+	template<class U, class Tag2>
+	dense_vector_storage(dense_vector_storage<U, Tag2> const& storage):
+	values(storage.values), stride(storage.stride){
+		static_assert(!(std::is_same<Tag,continuous_dense_tag>::value && std::is_same<Tag2,dense_tag>::value), "Trying to assign dense to continuous dense storage");
+	}
 	
 	
-	dense_vector_storage<T> sub_region(std::size_t offset){
+	dense_vector_storage<T,Tag> sub_region(std::size_t offset){
 		return {values+offset*stride, stride};
 	}
 };
 
+template<class T, class Tag>
+struct dense_matrix_storage{
+	typedef Tag storage_tag;
+	template<class O>
+	struct row_storage: public std::conditional<
+		std::is_same<O,row_major>::value,
+		dense_vector_storage<T, Tag>,
+		dense_vector_storage<T, dense_tag>
+	>{};
+	
+	typedef dense_vector_storage<T, dense_tag> diag_storage;
+	typedef dense_matrix_storage<T, dense_tag> sub_region_storage;
+	
+	T* values;
+	std::size_t leading_dimension;
+	
+	dense_matrix_storage(){}
+	dense_matrix_storage(T* values, std::size_t leading_dimension):values(values),leading_dimension(leading_dimension){}
+	template<class U, class Tag2>
+	dense_matrix_storage(dense_matrix_storage<U, Tag2> const& storage):
+	values(storage.values), leading_dimension(storage.leading_dimension){
+		static_assert(!(std::is_same<Tag,continuous_dense_tag>::value && std::is_same<Tag2,dense_tag>::value), "Trying to assign dense to continuous dense storage");
+	}
+	
+	template<class Orientation>
+	sub_region_storage sub_region(std::size_t offset1, std::size_t offset2, Orientation){
+		std::size_t offset_major = Orientation::index_M(offset1,offset2);
+		std::size_t offset_minor = Orientation::index_m(offset1,offset2);
+		return {values+offset_major*leading_dimension+offset_minor, leading_dimension};
+	}
+	
+	template<class Orientation>
+	typename row_storage<Orientation>::type row(std::size_t i, Orientation){
+		return {values + i * Orientation::index_M(leading_dimension,(std::size_t)1), Orientation::index_m(leading_dimension,(std::size_t)1)};
+	}
+	
+	diag_storage diag(){
+		return {values, leading_dimension+1};
+	}
+};
+
+
 template<class T, class I>
 struct sparse_vector_storage{
-	typedef typename std::remove_const<T>::type value_type;
 	typedef sparse_tag storage_tag;
 	T* values;
 	I* indices;
@@ -72,48 +117,17 @@ struct sparse_vector_storage{
 	
 	sparse_vector_storage(){}
 	sparse_vector_storage(T* values, I* indices, std::size_t nnz):values(values), indices(indices), nnz(nnz){}
-	sparse_vector_storage(sparse_vector_storage<value_type, I> const& storage):
+	template<class U>
+	sparse_vector_storage(sparse_vector_storage<U, I> const& storage):
 	values(storage.values), indices(storage.indices), nnz(storage.nnz){}
-	sparse_vector_storage(sparse_vector_storage<value_type const, I> const& storage):
-	values(storage.values), indices(storage.indices), nnz(storage.nnz){}
-};
-
-template<class T>
-struct dense_matrix_storage{
-	typedef typename std::remove_const<T>::type value_type;
-	typedef dense_tag storage_tag;
-	typedef dense_vector_storage<T> row_storage;
-	T* values;
-	std::size_t leading_dimension;
-	
-	dense_matrix_storage(){}
-	dense_matrix_storage(T* values, std::size_t leading_dimension):values(values),leading_dimension(leading_dimension){}
-	dense_matrix_storage(dense_matrix_storage<value_type> const& storage):
-	values(storage.values), leading_dimension(storage.leading_dimension){}
-	dense_matrix_storage(dense_matrix_storage<value_type const> const& storage):
-	values(storage.values), leading_dimension(storage.leading_dimension){}
-	
-	template<class Orientation>
-	dense_matrix_storage<T> sub_region(std::size_t offset1, std::size_t offset2, Orientation){
-		std::size_t offset_major = Orientation::index_M(offset1,offset2);
-		std::size_t offset_minor = Orientation::index_m(offset1,offset2);
-		return {values+offset_major*leading_dimension+offset_minor, leading_dimension};
-	}
-	
-	template<class Orientation>
-	row_storage row(std::size_t i, Orientation){
-		return {values + i * Orientation::index_M(leading_dimension,(std::size_t)1), Orientation::index_m(leading_dimension,(std::size_t)1)};
-	}
-	template<class Orientation>
-	row_storage diag(){
-		return {values, leading_dimension+1};
-	}
 };
 
 template<class T>
 struct packed_matrix_storage{
 	typedef packed_tag storage_tag;
-	typedef dense_vector_storage<T> row_storage;
+	template<class Orientation>
+	struct row_storage{ typedef packed_matrix_storage<T> type;};
+	typedef packed_matrix_storage<T> sub_region_storage;
 	T* values;
 	std::size_t nnz;
 };
@@ -121,15 +135,15 @@ struct packed_matrix_storage{
 template<class T, class I>
 struct sparse_matrix_storage{
 	typedef sparse_tag storage_tag;
-	typedef sparse_vector_storage<T,I> row_storage;
+	template<class O>
+	struct row_storage{ typedef sparse_vector_storage<T,I> type;};
+	typedef sparse_matrix_storage<T,I> sub_region_storage;
 	T* values;
 	I* indices;
 	I* outer_indices_begin;
 	I* outer_indices_end;
 	
-	template<class Orientation>
-	row_storage row(std::size_t i, Orientation){
-		static_assert(std::is_same<Orientation,row_major>::value, "sparse matrix has wrong orientation for row/column");
+	sparse_vector_storage<T,I> row(std::size_t i, row_major){
 		return {values + outer_indices_begin[i], indices + outer_indices_begin[i],outer_indices_end[i] - outer_indices_begin[i]};
 	}
 };

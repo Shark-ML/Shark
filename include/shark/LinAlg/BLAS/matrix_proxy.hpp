@@ -281,7 +281,7 @@ temporary_proxy<dense_matrix_adaptor<T> > adapt_matrix(T (&array)[M][N]){
 /// \brief Converts a dense vector to a matrix of a given size
 template <class V, class Tag>
 typename std::enable_if<
-	std::is_same<typename V::storage_type::storage_tag,dense_tag>::value,
+	std::is_same<typename V::storage_type::storage_tag,continuous_dense_tag>::value,
 	temporary_proxy< dense_matrix_adaptor<
 		typename std::remove_reference<typename V::reference>::type,row_major, Tag
 	> >
@@ -298,7 +298,7 @@ to_matrix(
 /// \brief Converts a dense vector to a matrix of a given size
 template <class V, class Tag>
 typename std::enable_if<
-	std::is_same<typename V::storage_type::storage_tag,dense_tag>::value,
+	std::is_same<typename V::storage_type::storage_tag,continuous_dense_tag>::value,
 	temporary_proxy< dense_matrix_adaptor<typename V::value_type const,row_major, Tag> >
 >::type 
 to_matrix(
