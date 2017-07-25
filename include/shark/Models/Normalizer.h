@@ -191,7 +191,7 @@ public:
 
 	/// \brief Evaluate the model: output = matrix * input + offset.
 	void eval(BatchInputType const& input, BatchOutputType& output) const{
-		SIZE_CHECK(input.size1() == m_A.size());
+		SIZE_CHECK(input.size2() == m_A.size());
 		output.resize(input.size1(), input.size2());
 		noalias(output) = input * repeat(m_A,input.size1());
 		if (hasOffset())
