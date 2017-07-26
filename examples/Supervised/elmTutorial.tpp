@@ -71,7 +71,7 @@ int main(){
 	// we create a two layer network and initialize it randomly. By keeping the random
 	// hidden weights and only learning the visible later, we will create the elm
 	//###begin<FFNetStructure>
-	FFNet<LogisticNeuron,LogisticNeuron> elmNetwork;
+	FFNet<LogisticNeuron,LinearNeuron> elmNetwork;
 	elmNetwork.setStructure(inputDim,hiddenNeurons,labelDimension(data));
 	initRandomNormal(elmNetwork,1);
 	//###end<FFNetStructure>
