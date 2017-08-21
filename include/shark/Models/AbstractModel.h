@@ -83,7 +83,11 @@ public:
 	typedef InputTypeT InputType;
 	/// \brief Defines the output type of the model.
 	typedef OutputTypeT OutputType;
+	/// \brief Defines the output type of the model compatible with standard functors
 	typedef OutputType result_type;
+
+	///\brief Defines the BaseType used by the model (this type). Useful for creating derived models
+	typedef AbstractModel<InputTypeT,OutputTypeT,ParameterType> ModelBaseType;
 
 	/// \brief defines the batch type of the input type.
 	///

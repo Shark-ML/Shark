@@ -53,131 +53,87 @@ namespace shark {
 /// which is why there is no sparse version of this model (as opposed to
 /// the more general linear model). Also, the addition of b is optional.
 ///
-template <class DataType = RealVector>
-class Normalizer : public AbstractModel<DataType, DataType>
+template <class VectorType = RealVector>
+class Normalizer : public AbstractModel<VectorType, VectorType>
 {
 public:
-	typedef AbstractModel<DataType, DataType> base_type;
-	typedef Normalizer<DataType> self_type;
+	typedef AbstractModel<VectorType, VectorType, VectorType> base_type;
+	typedef Normalizer<VectorType> self_type;
 
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 
-	/// Constructor of an invalid model; use setStructure later
-	Normalizer()
-	{ }
+	/// \brief Construction from dimension
+	Normalizer(std::size_t dimension = 0, bool hasOffset = false)
+	{ setStructure(dimension,hasOffset);}
 
-	/// copy constructor
-	Normalizer(const self_type& model)
-	: m_A(model.m_A)
-	, m_b(model.m_b)
-	, m_hasOffset(model.m_hasOffset)
-	{ }
-
-	/// Construction from dimension
-	Normalizer(std::size_t dimension, bool hasOffset = false)
-	: m_A(dimension, dimension)
-	, m_b(dimension)
-	, m_hasOffset(hasOffset)
-	{ }
-
-	/// Construction from matrix
-	Normalizer(RealVector diagonal)
-	: m_A(diagonal)
-	, m_hasOffset(false)
-	{ }
-
-	/// Construction from matrix and vector
-	Normalizer(RealVector diagonal, RealVector vector)
-	: m_A(diagonal)
-	, m_b(vector)
-	, m_hasOffset(true)
-	{ }
+	/// \brief Construction from matrix and and optional offset vector
+	Normalizer(VectorType const& diagonal, VectorType const& offset = VectorType())
+	{ setStructure(diagonal, offset);}
 
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "Normalizer"; }
 
-	/// assignment operator
-	const self_type operator = (const self_type& model){
-		m_A = model.m_A;
-		m_b = model.m_b;
-		m_hasOffset = model.m_hasOffset;
-	}
-
-	/// derivative storage object (empty for this model)
-	boost::shared_ptr<State> createState() const
-	{
+	/// \brief derivative storage object (empty for this model)
+	boost::shared_ptr<State> createState() const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
 	
-	/// check for the presence of an offset term
+	/// \brief check for the presence of an offset term
 	bool hasOffset() const{
-		return m_hasOffset;
+		return !m_b.empty();
 	}
-
-	/// return the diagonal of the matrix
-	RealVector const& diagonal() const{
-		return m_A;
-	}
-
-	/// return the offset vector
-	RealVector const& offset() const{
-		return m_b;
-	}
-
-	/// obtain the input dimension
+	
+	/// \brief obtain the input dimension
 	std::size_t inputSize() const{
 		return m_A.size();
 	}
 
-	/// obtain the output dimension
+	/// \brief obtain the output dimension
 	std::size_t outputSize() const{
 		return m_A.size();
 	}
 
-	/// obtain the parameter vector
-	RealVector parameterVector() const{
-		if (hasOffset())
-			return m_A | m_b;
-		else
-			return m_A;
+	/// \brief return the diagonal of the matrix
+	VectorType const& diagonal() const{
+		return m_A;
 	}
 
-	/// overwrite the parameter vector
-	void setParameterVector(RealVector const& newParameters){
+	/// \brief return the offset vector
+	VectorType const& offset() const{
+		return m_b;
+	}
+	
+	/// \brief obtain the parameter vector
+	VectorType parameterVector() const{
+		return m_A | m_b;
+	}
+
+	/// \brief overwrite the parameter vector
+	void setParameterVector(VectorType const& newParameters){
 		SIZE_CHECK(newParameters.size() == numberOfParameters());
 		std::size_t dim = m_A.size();
 		noalias(m_A) = subrange(newParameters,0,dim);
-		if (hasOffset()){
-			noalias(m_b) = subrange(newParameters,dim, 2*dim);
-		}
+		noalias(m_b) = subrange(newParameters, dim, newParameters.size());
 	}
 
-	/// return the number of parameter
+	/// \brief return the number of parameter
 	std::size_t numberOfParameters() const{
-		return (m_hasOffset) ? m_A.size() + m_b.size() : m_A.size();
+		return m_A.size() + m_b.size();
 	}
 
-	/// overwrite structure and parameters
-	void setStructure(RealVector const& diagonal){
-		m_A = diagonal;
-		m_hasOffset = false;
-	}
-
-	/// overwrite structure and parameters
-	void setStructure(std::size_t dimension, bool hasOffset = false){
-		m_A.resize(dimension);
-		m_hasOffset = hasOffset;
-		if (hasOffset) m_b.resize(dimension);
-	}
-
-	/// overwrite structure and parameters
-	void setStructure(RealVector const& diagonal, RealVector const& offset){
+	/// \brief overwrite structure and parameters
+	void setStructure(VectorType const& diagonal, VectorType const& offset = VectorType()){
 		m_A = diagonal;
 		m_b = offset;
-		m_hasOffset = true;
+	}
+
+	/// \brief overwrite structure and parameters
+	void setStructure(std::size_t dimension, bool hasOffset = false){
+		m_A.resize(dimension);
+		m_b.resize(hasOffset? dimension : 0);
 	}
 
 	using base_type::eval;
@@ -187,8 +143,7 @@ public:
 		SIZE_CHECK(input.size2() == m_A.size());
 		output.resize(input.size1(), input.size2());
 		noalias(output) = input * repeat(m_A,input.size1());
-		if (hasOffset())
-		{
+		if (hasOffset()){
 			noalias(output) += repeat(m_b,input.size1());
 		}
 	}
@@ -202,20 +157,17 @@ public:
 	void read(InArchive& archive){
 		archive & m_A;
 		archive & m_b;
-		archive & m_hasOffset;
 	}
 
 	/// from ISerializable
 	void write(OutArchive& archive) const{
 		archive & m_A;
 		archive & m_b;
-		archive & m_hasOffset;
 	}
 
 protected:
-	RealVector m_A;                ///< matrix A (see class documentation)
-	RealVector m_b;                        ///< vector b (see class documentation)
-	bool m_hasOffset;                      ///< if true: add offset therm b; if false: don't.
+	VectorType m_A;                ///< matrix A (see class documentation)
+	VectorType m_b;                        ///< vector b (see class documentation)
 };
 
 

@@ -6,7 +6,7 @@
  *
  *
  * \author      T. Glasmachers, O. Krause
- * \date        2010-2011
+ * \date        2010-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -74,7 +74,7 @@ public:
 	/// CDefault Constructor; use setStructure later
 	LinearModel(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		if(std::is_same<typename InputType::storage_type::storage_tag, blas::dense_tag>::value){
+		if(std::is_base_of<typename InputType::storage_type::storage_tag, blas::dense_tag>::value){
 			base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		}
 	}
@@ -237,7 +237,7 @@ public:
 		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		BatchInputType& derivative
+		MatrixType& derivative
 	)const{
 		SIZE_CHECK(coefficients.size2() == outputSize());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
@@ -247,7 +247,7 @@ public:
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 		
 		derivative.resize(patterns.size1(),inputSize());
-		noalias(derivative) = MatrixType(delta % m_matrix);//TODO: bug in remora will lead to compile error if derivative is sparse
+		noalias(derivative) = delta % m_matrix;
 	}
 	
 	void weightedDerivatives(
@@ -255,8 +255,8 @@ public:
 		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		RealVector& parameterDerivative,
-		BatchInputType& inputDerivative
+		ParameterVectorType& parameterDerivative,
+		MatrixType& inputDerivative
 	)const{
 		SIZE_CHECK(coefficients.size2()==outputSize());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
@@ -270,7 +270,7 @@ public:
 		
 		//compute input derivative
 		inputDerivative.resize(patterns.size1(),numInputs);
-		noalias(inputDerivative) = MatrixType(delta % m_matrix);
+		noalias(inputDerivative) = delta % m_matrix;
 		
 		//compute parameter derivative
 		parameterDerivative.resize(numberOfParameters());
