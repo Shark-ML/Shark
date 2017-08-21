@@ -87,7 +87,6 @@
 #include <shark/Rng/Binomial.h>
 #include <shark/Rng/Cauchy.h>
 #include <shark/Rng/DiffGeometric.h>
-#include <shark/Rng/Dirichlet.h>
 #include <shark/Rng/DiscreteUniform.h>
 #include <shark/Rng/Erlang.h>
 #include <shark/Rng/Gamma.h>
@@ -184,17 +183,6 @@ namespace shark {
 		static double gam(double k,double theta) {
 			Gamma< rng_type > gamma(globalRng,k,theta);
 			return cauchy();
-		}
-
-		//! creates a dirichlet distributed number
-		static std::vector<double> dir(size_t n,double alpha) {
-			Dirichlet< rng_type > dist(globalRng,n,alpha);
-			return dist();
-		}
-		//! creates a dirichlet distributed number
-		static std::vector<double> dir(const std::vector<double>& alphas) {
-			Dirichlet< this_type > dist(globalRng,alphas);
-			return dist();
 		}
 
 		//! Sets the seed for all random number generators to "s".

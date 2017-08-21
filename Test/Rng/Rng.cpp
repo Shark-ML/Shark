@@ -3,7 +3,6 @@
 #include <shark/Rng/Binomial.h>
 #include <shark/Rng/Cauchy.h>
 #include <shark/Rng/DiffGeometric.h>
-#include <shark/Rng/Dirichlet.h>
 #include <shark/Rng/DiscreteUniform.h>
 #include <shark/Rng/Erlang.h>
 #include <shark/Rng/Gamma.h>
@@ -57,7 +56,6 @@ BOOST_AUTO_TEST_CASE( Distribution_DefaultTemplateArgumentCheck ) {
 	shark::Binomial<> dist3( shark::Rng::globalRng );
 	shark::Cauchy<> dist4( shark::Rng::globalRng );
 	shark::DiffGeometric<> dist5( shark::Rng::globalRng );
-	shark::Dirichlet<> dist6( shark::Rng::globalRng );
 	shark::DiscreteUniform<> dist7( shark::Rng::globalRng );
 	shark::Erlang<> dist8( shark::Rng::globalRng );
 	shark::Gamma<> dist9( shark::Rng::globalRng );
