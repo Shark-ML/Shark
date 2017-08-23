@@ -319,19 +319,27 @@ private:
 // and all eigenvalues are >=0. If A has full rank, this reduces to
 // the cholesky factor where the pivoting leads to slightly smaller numerical errors
 // At a higher computational cost compared to the normal cholesky decomposition.
+// 
+// In many cases, the small eigenvalues tgend to be unstable, e.g. when A is estimated from
+// strongly correlated data. in this case,  it is wise to limit the conditioning of L, i.e. throw away \
+// eigenvalues which are more than c times smaller than the largest eigenvalue.
 template<class MatrixStorage>
 class symm_pos_semi_definite_solver:
 	public solver_expression<symm_pos_semi_definite_solver<MatrixStorage>, typename MatrixStorage::device_type>{
 public:
 	typedef typename MatrixStorage::device_type device_type;
 	template<class E>
-	symm_pos_semi_definite_solver(matrix_expression<E,device_type> const& e)
+	symm_pos_semi_definite_solver(matrix_expression<E,device_type> const& e, double max_conditioning = 0.0)
 	:m_factor(e), m_permutation(e().size1()){
 		m_rank = kernels::pstrf<lower>(m_factor,m_permutation);
 		if(m_rank == e().size1()) return; //full rank, so m_factor is lower triangular and we are done
+        if(max_conditioning > 0){
+            while(m_factor(0,0) > max_conditioning * m_factor(m_rank-1,m_rank -1))
+                --m_rank;
+        }
 		
 		auto L = columns(m_factor,0,m_rank);
-		m_cholesky.decompose(prod(trans(L),L));
+		m_cholesky.decompose(trans(L) % L);
 	}
 	
 	std::size_t rank()const{
@@ -368,10 +376,10 @@ public:
 			kernels::trsm<upper,left>(trans(m_factor),B);
 		}else{//matrix is missing rank
 			auto L = columns(m_factor,0,m_rank);
-			auto Z =  eval_block(prod(trans(L),B));
+			auto Z =  eval_block(trans(L) % B);
 			m_cholesky.solve(Z,left());	
 			m_cholesky.solve(Z,left());	
-			noalias(B) = prod(L,Z);
+			noalias(B) = L % Z;
 		}
 		swap_rows_inverted(m_permutation,B);
 	}
