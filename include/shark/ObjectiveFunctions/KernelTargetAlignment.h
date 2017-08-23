@@ -265,8 +265,25 @@ private:
 			m_columnMeanY.clear();
 		}
 	}
+	void computeBlockY(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix& blockY)const{
+		std::size_t blockSize1 = labelsi.size();
+		std::size_t blockSize2 = labelsj.size();
+		double dm1 = m_numberOfClasses-1.0;
+		for(std::size_t k = 0; k != blockSize1; ++k){
+			for(std::size_t l = 0; l != blockSize2; ++l){
+				if( labelsi(k) ==  labelsj(l))
+					blockY(k,l) = 1;
+				else
+					blockY(k,l) = -1.0/dm1;
+			}
+		}
+	}
 
-	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
+	void computeBlockY(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix& blockY)const{
+		noalias(blockY) = labelsi % trans(labelsj);
+	}
+    
+    /// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
 	double updateYK(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix const& block)const{
 		std::size_t blockSize1 = labelsi.size();
 		std::size_t blockSize2 = labelsj.size();
@@ -286,41 +303,9 @@ private:
 
 	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
 	double updateYK(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix const& block)const{
-		std::size_t blockSize1 = labelsi.size1();
-		std::size_t blockSize2 = labelsj.size1();
-		//todo optimize the i=j case
-		double result = 0;
-		for(std::size_t k = 0; k != blockSize1; ++k){
-			for(std::size_t l = 0; l != blockSize2; ++l){
-				double y_kl = inner_prod(row(labelsi,k),row(labelsj,l));
-				result += y_kl*block(k,l);
-			}
-		}
-		return result;
-	}
-
-	void computeBlockY(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix& blockY)const{
-		std::size_t blockSize1 = labelsi.size();
-		std::size_t blockSize2 = labelsj.size();
-		double dm1 = m_numberOfClasses-1.0;
-		for(std::size_t k = 0; k != blockSize1; ++k){
-			for(std::size_t l = 0; l != blockSize2; ++l){
-				if( labelsi(k) ==  labelsj(l))
-					blockY(k,l) = 1;
-				else
-					blockY(k,l) = -1.0/dm1;
-			}
-		}
-	}
-
-	void computeBlockY(RealMatrix const& labelsi,RealMatrix const& labelsj, RealMatrix& blockY)const{
-		std::size_t blockSize1 = labelsi.size1();
-		std::size_t blockSize2 = labelsj.size1();
-		for(std::size_t k = 0; k != blockSize1; ++k){
-			for(std::size_t l = 0; l != blockSize2; ++l){
-				blockY(k,l) = inner_prod(row(labelsi,k),row(labelsj,l));
-			}
-		}
+        RealMatrix Y(labelsi.size1(), labelsj.size1());
+        computeBlockY(labelsi,labelsj,Y);
+        return sum(Y * block);
 	}
 
 	/// Compute a sub-block of the matrix

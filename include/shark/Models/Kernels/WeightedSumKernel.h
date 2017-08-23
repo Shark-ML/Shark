@@ -90,7 +90,7 @@ public:
 
 		m_base.resize( base.size() );
 		m_numParameters = m_base.size()-1;
-
+		m_adaptWeights = true;
 		for (std::size_t i=0; i != m_base.size() ; i++) {
 			SHARK_ASSERT( base[i] != NULL );
 			m_base[i].kernel = base[i];
@@ -146,6 +146,10 @@ public:
 	double weight(std::size_t index){
 		RANGE_CHECK(index < m_base.size());
 		return m_base[index].weight;
+	}
+	
+	void setAdaptiveWeights(bool b){
+		m_adaptWeights = b;
 	}
 
 	/// return the parameter vector. The first N-1 entries are the (log-encoded) kernel
@@ -274,13 +278,13 @@ public:
 		//[Theoretically, we wouldn't need to store its result .]
 		//calculate the weighted sum over all results
 		double numeratorSum = sum(coefficients * s.result);
-		for (std::size_t i = 1; i != numKernels; i++) {
+		for (std::size_t i = 1; i != numKernels && m_adaptWeights; i++) {
 			//calculate the weighted sum over all results of this kernel
 			double summedK=sum(coefficients * s.kernelResults[i]);
 			gradient(i-1) = m_base[i].weight * (summedK * m_weightsum - numeratorSum) / sumSquared;
 		}
 
-		std::size_t gradPos = numKernels-1; //starting position of subkerel gradient
+		std::size_t gradPos = m_adaptWeights ? numKernels-1: 0; //starting position of subkerel gradient
 		RealVector kernelGrad;
 		for (std::size_t i=0; i != numKernels; i++) {
 			if (isAdaptive(i)){
@@ -340,7 +344,7 @@ protected:
 	};
 
 	void updateNumberOfParameters(){
-		m_numParameters = m_base.size()-1;
+		m_numParameters = m_adaptWeights? m_base.size()-1 : 0;
 		for (std::size_t i=0; i != m_base.size(); i++)
 			if (m_base[i].adaptive)
 				m_numParameters += m_base[i].kernel->numberOfParameters();
@@ -388,6 +392,7 @@ protected:
 	std::vector<tBase> m_base;                      ///< collection of m_base kernels
 	double m_weightsum;                             ///< sum of all weights
 	std::size_t m_numParameters;                   ///< total number of parameters
+	bool m_adaptWeights;                           ///< whether the weights should be adapted
 };
 
 typedef WeightedSumKernel<> DenseWeightedSumKernel;

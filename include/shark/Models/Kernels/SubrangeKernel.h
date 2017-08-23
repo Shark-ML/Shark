@@ -185,14 +185,13 @@ public:
 /// The result of the kernel evaluation is devided by the sum of the
 /// kernel weights, so that in total, this amounts to fixing the sum
 /// of the weights to one.
-template<class InputType>
+template<class InputType, class InnerKernel=WeightedSumKernel<InputType> >
 class SubrangeKernel
 : private detail::SubrangeKernelBase<InputType>//order is important!
-, public WeightedSumKernel<InputType>
+, public InnerKernel
 {
 private:
 	typedef detail::SubrangeKernelBase<InputType> base_type1;
-	typedef WeightedSumKernel<InputType> base_type2;
 public:
 
 	/// \brief From INameable: return the class name.
@@ -202,7 +201,7 @@ public:
 	template<class Kernels,class Ranges>
 	SubrangeKernel(Kernels const& kernels, Ranges const& ranges)
 	: base_type1(kernels,ranges)
-	, base_type2(base_type1::makeKernelVector()){}
+	, InnerKernel(base_type1::makeKernelVector()){}
 };
 
 typedef SubrangeKernel<RealVector> DenseSubrangeKernel;
