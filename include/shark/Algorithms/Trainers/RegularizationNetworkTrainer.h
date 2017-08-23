@@ -120,16 +120,15 @@ public:
 		
 		// Setup the kernel matrix
 		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), noiseVariance());
-        RealMatrix V = createBatch<RealVector>(dataset.labels().elements());
-        RealVector mean = sum_rows(V)/V.size1();
-        noalias(V) -= blas::repeat(mean,V.size1());
-		//try a cholesky solver instead
-        std::cout<<"c"<<std::endl;
-        //check whether lambda is large enough to make the eigenvalues numerically stable
-        if(noiseVariance()/max(diag(M)) < 1.e-5)
-            noalias(svm.alpha()) = inv(M,blas::symm_semi_pos_def()) % V;
-        else//we think now it is stable so we can use the fast pure cholesky decomposition
-            noalias(svm.alpha()) = inv(M,blas::symm_pos_def()) % V;
+		RealMatrix V = createBatch<RealVector>(dataset.labels().elements());
+		RealVector mean = sum_rows(V)/V.size1();
+		noalias(V) -= blas::repeat(mean,V.size1());
+
+		//check whether lambda is large enough to make the eigenvalues numerically stable
+		if(noiseVariance()/max(diag(M)) < 1.e-5)
+			noalias(svm.alpha()) = inv(M,blas::symm_semi_pos_def()) % V;
+		else//we think now it is stable so we can use the fast pure cholesky decomposition
+			noalias(svm.alpha()) = inv(M,blas::symm_pos_def()) % V;
 		noalias(svm.offset()) = mean;
 	}
 };
