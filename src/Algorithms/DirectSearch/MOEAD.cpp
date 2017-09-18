@@ -26,10 +26,9 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- #define SHARK_COMPILE_DLL
+#define SHARK_COMPILE_DLL
 #include <shark/Algorithms/DirectSearch/MOEAD.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 #include <shark/Algorithms/DirectSearch/Operators/Scalarizers/Tchebycheff.h>
 using namespace shark;
 
@@ -93,7 +92,8 @@ void MOEAD::doInit(
 	double const nm,
 	double const nc,
 	double const crossover_prob,
-	std::size_t const neighbourhoodSize
+	std::size_t const neighbourhoodSize,
+	std::vector<Lattice_ROI> const & weightVectorROIs
 ){
 	SIZE_CHECK(initialSearchPoints.size() > 0);
 
@@ -101,19 +101,30 @@ void MOEAD::doInit(
 	const std::size_t numOfObjectives = functionValues[0].size();
 	// Decomposition-related initialization
 	std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
-	m_weights = sampleLatticeUniformly(
-		*mpe_rng,
-		weightLattice(numOfObjectives, numLatticeTicks),
-		mu
-	);
+	if(weightVectorROIs.empty())
+	{
+		m_weights = sampleLatticeUniformly(*mpe_rng,
+		                                   weightLattice(numOfObjectives, 
+		                                                 numLatticeTicks),
+		                                   mu);
+	}
+	else
+	{
+		m_weights = roiAdjustedWeightVectors(numOfObjectives, 
+		                                     numLatticeTicks, 
+		                                     weightVectorROIs);
+	}
+
+	// m_weights.size1() will be equal to mu whenever no ROI points are given.
+	// If the user supplied regions of interest, the number of weights will be
+	// more than the supplied mu, and therefore the actual m_mu value that is
+	// used in the algorithm will be set based on the size of the wight matrix.
+	m_mu = m_weights.size1();
 	m_neighbourhoodSize = neighbourhoodSize;
 	m_neighbourhoods = computeClosestNeighbourIndicesOnLattice(
-		m_weights,neighbourhoodSize
+		m_weights, neighbourhoodSize
 	);
-
-	SIZE_CHECK(m_weights.size1() == mu);
-	SIZE_CHECK(m_neighbourhoods.size1() == mu);
-	m_mu = mu;
+	SIZE_CHECK(m_neighbourhoods.size1() == m_mu);
 	m_mutation.m_nm = nm;
 	m_crossover.m_nc = nc;
 	m_crossoverProbability = crossover_prob;
