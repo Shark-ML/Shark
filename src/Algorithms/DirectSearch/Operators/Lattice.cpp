@@ -107,7 +107,52 @@ RealMatrix weightLattice(std::size_t const n, std::size_t const sum)
 RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum){
 	RealMatrix m = weightLattice(n, sum);
 	for(std::size_t i = 0; i < m.size1(); ++i){
-		row(m, i) /= norm_2(row(m,i));
+		row(m, i) /= norm_2(row(m, i));
+	}
+	return m;
+}
+
+RealMatrix roiAdjustedUnitVectors(std::size_t const n,
+                                  std::size_t const sum, 
+                                  std::vector<Lattice_ROI> const & rois){
+	const RealMatrix uv = unitVectorsOnLattice(n, sum);
+	const std::size_t k = rois.size();
+	const std::size_t numAdjustedVectors = k * uv.size1();
+	RealMatrix adjusted(numAdjustedVectors, uv.size2());
+	std::size_t row_idx = 0;
+	for(auto & roi : rois)
+	{
+		double r;
+		RealVector v_c;
+		std::tie(r, v_c) = roi;
+		v_c /= norm_2(v_c);
+		for(std::size_t i = 0; i < uv.size1(); ++i)
+		{
+			/* 
+			   Equation (14) of "Evolutionary Many-objective Optimization of
+			   Hybrid Electric Vehicle Control: From General Optimization to
+			   Preference Articulation"
+			*/
+			row(adjusted, row_idx) = r * row(uv, i) + (1 - r) * v_c;
+			row(adjusted, row_idx) /= norm_2(row(adjusted, row_idx));
+			++row_idx;
+		}
+	}
+	return adjusted;
+}
+
+RealMatrix roiAdjustedWeightVectors(std::size_t const n,
+                                    std::size_t const sum,
+                                    std::vector<Lattice_ROI> const & rois){
+	RealMatrix m = roiAdjustedUnitVectors(n, sum, rois);
+	/* 
+	   Translate vectors from the unit sphere to the hyperplane.  Equation (13)
+	   of "Evolutionary Many-objective Optimization of Hybrid Electric Vehicle
+	   Control: From General Optimization to Preference Articulation"
+	*/
+	for(std::size_t i = 0; i < m.size1(); ++i)
+	{
+		row(m, i) /= norm_1(row(m, i));
 	}
 	return m;
 }

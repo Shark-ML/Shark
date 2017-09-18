@@ -75,7 +75,6 @@ bool isLatticeCorner(Iterator begin, Iterator end){
 	return nonzero == 1;
 }
 
-
 } // namespace detail
 
 
@@ -122,6 +121,17 @@ Matrix sampleLatticeUniformly(
 	}
 	return sampledMatrix;
 }
+
+// A region of interest is a vector and a radius.
+typedef std::pair<double, RealVector> Lattice_ROI;
+
+RealMatrix roiAdjustedUnitVectors(std::size_t const n, 
+                                  std::size_t const sum,
+                                  std::vector<Lattice_ROI> const & rois);
+
+RealMatrix roiAdjustedWeightVectors(std::size_t const n,
+                                    std::size_t const sum,
+                                    std::vector<Lattice_ROI> const & rois);
 
 ///\brief  Computes the number of Ticks for a grid of a certain size
 ///

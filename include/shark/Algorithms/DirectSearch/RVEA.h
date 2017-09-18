@@ -39,6 +39,7 @@
 #include <shark/Algorithms/DirectSearch/Operators/Selection/ReferenceVectorGuidedSelection.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
+#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 
 namespace shark {
 
@@ -200,7 +201,8 @@ protected:
 		double const crossover_prob,
 		double const alph,
 		double const fr,
-		std::size_t const max_iterations
+		std::size_t const max_iterations,
+		std::vector<Lattice_ROI> const & referenceVectorsROIs = {}
 	);
 
 	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;

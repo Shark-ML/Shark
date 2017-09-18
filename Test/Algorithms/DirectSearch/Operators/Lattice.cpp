@@ -12,7 +12,43 @@
 
 using namespace shark;
 
+namespace {
+double angleBetween(RealVector const & x, 
+                    RealVector const & y, 
+                    double const radius){
+	const double d = norm_2(x - y);
+	return acos(1 - std::pow(d, 2) / (2 * std::pow(radius, 2)));
+}
+}
+
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Lattice)
+
+BOOST_AUTO_TEST_CASE(roiAdjustedUnitVectors_correct){
+	const double radius = 0.2;
+	for(std::size_t n = 3; n < 6; ++n){
+		const RealVector v = RealVector(n, 1);
+		const RealVector normalized_v = v / norm_2(v);
+		const std::vector<Lattice_ROI> rois = {{radius, v}};
+		const std::size_t s = 40;
+		const RealMatrix refvecs = roiAdjustedUnitVectors(n, s, rois);
+		const RealMatrix nonRoi = unitVectorsOnLattice(n, s);
+		const double maxDist = angleBetween(normalized_v, row(refvecs, 0), 1);
+		for(std::size_t r = 0; r < refvecs.size1(); ++r){
+			// All vectors must be of length 1 since they are unit
+			// vectors...
+			const double l = norm_2(row(refvecs, r));
+			BOOST_CHECK_CLOSE(l, 1, 1e-11);
+			// All vectors must be inside the region specified by the region of
+			// interest.  The distance on a surface of the sphere is radius
+			// times angle between points.  The radius is one, so the distance
+			// is the angle.
+			const double dist = angleBetween(normalized_v,
+			                                 row(refvecs, r),
+			                                 1);
+			BOOST_CHECK_LE(dist, maxDist);
+		}
+	}
+}
 
 BOOST_AUTO_TEST_CASE(unitVectors_correct){
 	for(std::size_t n = 2; n < 6; ++n){

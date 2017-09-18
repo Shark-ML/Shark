@@ -32,7 +32,6 @@
 #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/DirectSearch/RVEA.h>
 #include <shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h>
-#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 #include <shark/Algorithms/DirectSearch/Operators/Selection/TournamentSelection.h>
 
 using namespace shark;
@@ -114,15 +113,26 @@ void RVEA::doInit(
 	double const crossover_prob,
 	double const alph,
 	double const fr,
-	std::size_t const max_iterations){
+	std::size_t const max_iterations,
+	std::vector<Lattice_ROI> const & referenceVectorROIs){
 
 	SIZE_CHECK(initialSearchPoints.size() > 0);
 
 	const std::size_t numOfObjectives = functionValues[0].size();
+	const std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, 
+	                                                     approx_mu);
 
+	if(referenceVectorROIs.empty())
+	{
+       // The default reference vectors are sampled on the unit sphere.
+		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
+	}
+	else
+	{
+		m_referenceVectors = roiAdjustedUnitVectors(numOfObjectives, ticks,
+		                                            referenceVectorROIs);
+	}
 	// Set the reference vectors
-	std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, approx_mu);
-	m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
 	m_adaptation.m_initVecs = m_referenceVectors;
 	m_referenceVectorMinAngles = RealVector(m_referenceVectors.size1());
 	m_adaptation.updateAngles(m_referenceVectors, m_referenceVectorMinAngles);
