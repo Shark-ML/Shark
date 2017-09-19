@@ -137,7 +137,7 @@ struct NSGA3Indicator {
 	void init(std::size_t numOfObjectives, 
 	          std::size_t mu, 
 	          random& rng, 
-	          std::vector<Preference> const & preferences = {}){
+	          std::vector<Preference> const & preferences = std::vector<Preference>()){
 		std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
 		RealMatrix refs;
 		if(preferences.empty())

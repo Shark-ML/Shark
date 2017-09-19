@@ -71,7 +71,7 @@ protected:
 		double nm,
 		double nc,
 		double crossover_prob,
-		std::vector<Preference> const & indicatorPreferences = {}
+		std::vector<Preference> const & indicatorPreferences = std::vector<Preference>()
 		){
 		// Do the regular initialization.
 		base::doInit(

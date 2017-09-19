@@ -202,7 +202,7 @@ protected:
 		double const alph,
 		double const fr,
 		std::size_t const max_iterations,
-		std::vector<Preference> const & referenceVectorsPreferences = {}
+		std::vector<Preference> const & referenceVectorsPreferences = std::vector<Preference>()
 	);
 
 	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;
