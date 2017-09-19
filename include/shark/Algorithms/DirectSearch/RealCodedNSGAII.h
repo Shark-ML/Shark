@@ -276,7 +276,7 @@ protected:
 	}
 
 	std::vector<IndividualType> m_parents; ///< Population of size \f$\mu + 1\f$.
-
+	random::rng_type* mpe_rng; 
 private:
 	std::size_t m_mu; ///< Size of parent generation
 
@@ -286,7 +286,6 @@ private:
 	PolynomialMutator m_mutation; ///< Mutation operator.
 
 	double m_crossoverProbability; ///< Crossover probability.
-	random::rng_type* mpe_rng; 
 };
 
 typedef IndicatorBasedRealCodedNSGAII< HypervolumeIndicator > RealCodedNSGAII;

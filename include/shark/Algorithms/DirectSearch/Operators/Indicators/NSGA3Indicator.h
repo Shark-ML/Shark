@@ -134,16 +134,30 @@ struct NSGA3Indicator {
 	}
 	
 	template<class random>
-	void init(std::size_t numOfObjectives, std::size_t mu, random& rng){
+	void init(std::size_t numOfObjectives, 
+	          std::size_t mu, 
+	          random& rng, 
+	          std::vector<Preference> const & preferences = {}){
 		std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
-		RealMatrix refs = sampleLatticeUniformly(
-			rng,
-			unitVectorsOnLattice(numOfObjectives, numLatticeTicks),
-			mu
-		);
-		m_Z.resize(mu);
-		for(std::size_t i = 0; i != mu; ++i){
-			m_Z[i] = row(refs,i);
+		RealMatrix refs;
+		if(preferences.empty())
+		{
+			refs = sampleLatticeUniformly(
+				rng,
+				unitVectorsOnLattice(numOfObjectives, numLatticeTicks),
+				mu);
+		}
+		else
+		{
+			refs = preferenceAdjustedUnitVectors(
+				numOfObjectives, numLatticeTicks, preferences);
+		}
+		// m_Z either has size mu or it, if preference points are given, its
+		// size equals the number of preference points times the number of
+		// points in the lattice structure.
+		m_Z.resize(refs.size1());
+		for(std::size_t i = 0; i < refs.size1(); ++i){
+			m_Z[i] = row(refs, i);
 		}
 	}
 private:
