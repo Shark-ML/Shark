@@ -93,7 +93,7 @@ void MOEAD::doInit(
 	double const nc,
 	double const crossover_prob,
 	std::size_t const neighbourhoodSize,
-	std::vector<Lattice_ROI> const & weightVectorROIs
+	std::vector<Preference> const & weightVectorPreferences
 ){
 	SIZE_CHECK(initialSearchPoints.size() > 0);
 
@@ -101,7 +101,7 @@ void MOEAD::doInit(
 	const std::size_t numOfObjectives = functionValues[0].size();
 	// Decomposition-related initialization
 	std::size_t numLatticeTicks = computeOptimalLatticeTicks(numOfObjectives, mu);
-	if(weightVectorROIs.empty())
+	if(weightVectorPreferences.empty())
 	{
 		m_weights = sampleLatticeUniformly(*mpe_rng,
 		                                   weightLattice(numOfObjectives, 
@@ -110,9 +110,9 @@ void MOEAD::doInit(
 	}
 	else
 	{
-		m_weights = roiAdjustedWeightVectors(numOfObjectives, 
-		                                     numLatticeTicks, 
-		                                     weightVectorROIs);
+		m_weights = preferenceAdjustedWeightVectors(numOfObjectives, 
+		                                            numLatticeTicks, 
+		                                            weightVectorPreferences);
 	}
 
 	// m_weights.size1() will be equal to mu whenever no ROI points are given.

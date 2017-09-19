@@ -114,7 +114,7 @@ void RVEA::doInit(
 	double const alph,
 	double const fr,
 	std::size_t const max_iterations,
-	std::vector<Lattice_ROI> const & referenceVectorROIs){
+	std::vector<Preference> const & referenceVectorPreferences){
 
 	SIZE_CHECK(initialSearchPoints.size() > 0);
 
@@ -122,15 +122,16 @@ void RVEA::doInit(
 	const std::size_t ticks = computeOptimalLatticeTicks(numOfObjectives, 
 	                                                     approx_mu);
 
-	if(referenceVectorROIs.empty())
+	if(referenceVectorPreferences.empty())
 	{
        // The default reference vectors are sampled on the unit sphere.
 		m_referenceVectors = unitVectorsOnLattice(numOfObjectives, ticks);
 	}
 	else
 	{
-		m_referenceVectors = roiAdjustedUnitVectors(numOfObjectives, ticks,
-		                                            referenceVectorROIs);
+		m_referenceVectors = preferenceAdjustedUnitVectors(
+			numOfObjectives, ticks,
+			referenceVectorPreferences);
 	}
 	// Set the reference vectors
 	m_adaptation.m_initVecs = m_referenceVectors;

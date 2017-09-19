@@ -112,19 +112,20 @@ RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum){
 	return m;
 }
 
-RealMatrix roiAdjustedUnitVectors(std::size_t const n,
-                                  std::size_t const sum, 
-                                  std::vector<Lattice_ROI> const & rois){
+RealMatrix preferenceAdjustedUnitVectors(
+	std::size_t const n,
+	std::size_t const sum, 
+	std::vector<Preference> const & preferences){
+
 	const RealMatrix uv = unitVectorsOnLattice(n, sum);
-	const std::size_t k = rois.size();
-	const std::size_t numAdjustedVectors = k * uv.size1();
+	const std::size_t numAdjustedVectors = preferences.size() * uv.size1();
 	RealMatrix adjusted(numAdjustedVectors, uv.size2());
 	std::size_t row_idx = 0;
-	for(auto & roi : rois)
+	for(auto & preference : preferences)
 	{
 		double r;
 		RealVector v_c;
-		std::tie(r, v_c) = roi;
+		std::tie(r, v_c) = preference;
 		v_c /= norm_2(v_c);
 		for(std::size_t i = 0; i < uv.size1(); ++i)
 		{
@@ -141,10 +142,12 @@ RealMatrix roiAdjustedUnitVectors(std::size_t const n,
 	return adjusted;
 }
 
-RealMatrix roiAdjustedWeightVectors(std::size_t const n,
-                                    std::size_t const sum,
-                                    std::vector<Lattice_ROI> const & rois){
-	RealMatrix m = roiAdjustedUnitVectors(n, sum, rois);
+RealMatrix preferenceAdjustedWeightVectors(
+	std::size_t const n,
+	std::size_t const sum,
+	std::vector<Preference> const & preferences){
+
+	RealMatrix m = preferenceAdjustedUnitVectors(n, sum, preferences);
 	/* 
 	   Translate vectors from the unit sphere to the hyperplane.  Equation (13)
 	   of "Evolutionary Many-objective Optimization of Hybrid Electric Vehicle

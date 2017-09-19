@@ -202,7 +202,7 @@ protected:
 		double const alph,
 		double const fr,
 		std::size_t const max_iterations,
-		std::vector<Lattice_ROI> const & referenceVectorsROIs = {}
+		std::vector<Preference> const & referenceVectorsPreferences = {}
 	);
 
 	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;

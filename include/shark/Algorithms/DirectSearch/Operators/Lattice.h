@@ -122,16 +122,32 @@ Matrix sampleLatticeUniformly(
 	return sampledMatrix;
 }
 
-// A region of interest is a vector and a radius.
-typedef std::pair<double, RealVector> Lattice_ROI;
+/// \brief A preferred region in a lattice-sampled unit sphere.
+///
+/// A preferred region is a pair with a radius and a vector.  The intersection
+/// of the vector and the unit sphere denotes the center of the preferred
+/// region, and the radius denotes the radius of a sphere constructed such that
+/// the center point (intersection of vector and unit sphere) is on its
+/// periphery.  Points are then sampled on this smaller sphere and projected up
+/// on the unit sphere, thus restricting the covered
+/// segment/area/volume/hypervolume of the unit sphere.  See Figure 1 in
+/// "Evolutionary Many-objective Optimization of Hybrid Electric Vehicle
+/// Control: From General Optimization to Preference Articulation"
+typedef std::pair<double, RealVector> Preference;
 
-RealMatrix roiAdjustedUnitVectors(std::size_t const n, 
-                                  std::size_t const sum,
-                                  std::vector<Lattice_ROI> const & rois);
+/// \brief Return a set of evenly spaced n-dimensional points on the unit sphere
+/// clustered around the specified preference points.
+RealMatrix preferenceAdjustedUnitVectors(
+	std::size_t const n, 
+	std::size_t const sum,
+	std::vector<Preference> const & preferences);
 
-RealMatrix roiAdjustedWeightVectors(std::size_t const n,
-                                    std::size_t const sum,
-                                    std::vector<Lattice_ROI> const & rois);
+/// \brief Return a set of of evenly spaced n-dimensional points on the "unit
+/// simplex" clustered around the specified preference points.
+RealMatrix preferenceAdjustedWeightVectors(
+	std::size_t const n,
+	std::size_t const sum,
+	std::vector<Preference> const & preferences);
 
 ///\brief  Computes the number of Ticks for a grid of a certain size
 ///

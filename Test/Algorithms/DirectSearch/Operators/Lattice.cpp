@@ -23,14 +23,14 @@ double angleBetween(RealVector const & x,
 
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Lattice)
 
-BOOST_AUTO_TEST_CASE(roiAdjustedUnitVectors_correct){
+BOOST_AUTO_TEST_CASE(preferenceAdjustedUnitVectors_correct){
 	const double radius = 0.2;
 	for(std::size_t n = 3; n < 6; ++n){
 		const RealVector v = RealVector(n, 1);
 		const RealVector normalized_v = v / norm_2(v);
-		const std::vector<Lattice_ROI> rois = {{radius, v}};
+		const std::vector<Preference> prefs = {{radius, v}};
 		const std::size_t s = 40;
-		const RealMatrix refvecs = roiAdjustedUnitVectors(n, s, rois);
+		const RealMatrix refvecs = preferenceAdjustedUnitVectors(n, s, prefs);
 		const RealMatrix nonRoi = unitVectorsOnLattice(n, s);
 		const double maxDist = angleBetween(normalized_v, row(refvecs, 0), 1);
 		for(std::size_t r = 0; r < refvecs.size1(); ++r){

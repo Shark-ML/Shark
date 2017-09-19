@@ -138,7 +138,7 @@ protected:
 		double const nc,
 		double const crossover_prob,
 		std::size_t const neighbourhoodSize,
-		std::vector<Lattice_ROI> const & weightVectorROIs = {}
+		std::vector<Preference> const & weightVectorPreferences = {}
 	);
 	// Make me an offspring...
 	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;
