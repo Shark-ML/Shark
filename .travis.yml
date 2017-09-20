@@ -30,25 +30,25 @@ addons:
 
 matrix:
   include:
-  #   - os: linux
-  #     env: 
-  #       - COMPILER=g++-6
-  #       - OMP_NUM_THREADS=2
+    - os: linux
+      env: 
+        - COMPILER=g++-6
+        - OMP_NUM_THREADS=2
 
-  #   - os: linux
-  #     env: 
-  #       - COMPILER=g++-4.8
-  #       - OMP_NUM_THREADS=2
+    - os: linux
+      env: 
+        - COMPILER=g++-4.8
+        - OMP_NUM_THREADS=2
 
     - os: linux
       env: 
         - COMPILER=g++-4.6
         - OMP_NUM_THREADS=2
 
-  #   - os: osx
-  #     env: 
-  #       - COMPILER=clang++
-  #       - OMP_NUM_THREADS=2
+    - os: osx
+      env: 
+        - COMPILER=clang++
+        - OMP_NUM_THREADS=2
 
 before_install:
   - if [ "$TRAVIS_OS_NAME" != "linux" ]; then brew update && brew unlink cmake && brew install cmake; brew link cmake; fi
