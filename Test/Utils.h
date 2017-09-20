@@ -33,6 +33,24 @@ boost::test_tools::predicate_result verifyVectors(
 	return res;
 }
 
+template <typename Matrix>
+void dumpMatrix(const Matrix & matrix, const std::string & filename)
+{
+	std::ofstream file(filename);
+	for(std::size_t i = 0; i < matrix.size1(); ++i)
+	{
+		for(std::size_t j = 0; j < matrix.size2(); ++j)
+		{
+			file << matrix(i, j);
+			if(j < matrix.size2() - 1)
+			{
+				file << ", ";
+			}
+		}
+		file << "\n";
+	}
+}
+
 }} // namespace shark { namespace test {
 
 #endif // SHARK_TEST_HELPERS_UTILS_H

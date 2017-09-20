@@ -7,6 +7,7 @@
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 #include <shark/Core/Random.h>
 #include <shark/LinAlg/Metrics.h>
+#include "../../../Utils.h"
 
 #include <iostream>
 
@@ -31,7 +32,6 @@ BOOST_AUTO_TEST_CASE(preferenceAdjustedUnitVectors_correct){
 		const std::vector<Preference> prefs = {{radius, v}};
 		const std::size_t s = 40;
 		const RealMatrix refvecs = preferenceAdjustedUnitVectors(n, s, prefs);
-		const RealMatrix nonRoi = unitVectorsOnLattice(n, s);
 		const double maxDist = angleBetween(normalized_v, row(refvecs, 0), 1);
 		for(std::size_t r = 0; r < refvecs.size1() - n; ++r){
 			// All vectors must be of length 1 since they are unit
@@ -53,6 +53,33 @@ BOOST_AUTO_TEST_CASE(preferenceAdjustedUnitVectors_correct){
 		{
 			BOOST_CHECK(detail::isLatticeCorner(row(refvecs, r).begin(), 
 			                                    row(refvecs, r).end()));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE(preferenceAdjustedWeightVectors_correct){
+	const double radius = 0.2;
+	for(std::size_t n = 3; n < 4; ++n){
+		const RealVector v = RealVector(n, 1);
+		const RealVector normalized_v = v / norm_1(v);
+		const std::vector<Preference> prefs = {{radius, v}};
+		const std::size_t s = 40;
+		const RealMatrix weightvecs = preferenceAdjustedWeightVectors(n, s, prefs);
+		const double maxDist = norm_2(normalized_v - row(weightvecs, 0));
+		for(std::size_t r = 0; r < weightvecs.size1() - n; ++r){
+			// All vectors must be inside the region specified by the region of
+			// interest.  The vectors are mapped back to the hyperplane from the
+			// unit sphere, so we just check that the euclidean distance to each
+			// point is no larger than the distance to the points farthest away.
+			const double dist = norm_2(normalized_v - row(weightvecs, r));
+			BOOST_CHECK_LE(dist, maxDist);
+		}
+		// The last n vectors must be the original endpoints, so the must be
+		// lattice corners.
+		for(std::size_t r = weightvecs.size1() - n; r < weightvecs.size1(); ++r)
+		{
+			BOOST_CHECK(detail::isLatticeCorner(row(weightvecs, r).begin(), 
+			                                    row(weightvecs, r).end()));
 		}
 	}
 }
