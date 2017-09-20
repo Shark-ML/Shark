@@ -54,6 +54,7 @@ before_install:
   - if [ "$TRAVIS_OS_NAME" != "linux" ]; then brew update && brew unlink cmake && brew install cmake; brew link cmake; fi
   
 before_script:  
+  - echo $COMPILER
   - export CXX=$COMPILER
   - mkdir build
   - cd build
