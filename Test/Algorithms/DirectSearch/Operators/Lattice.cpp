@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(preferenceAdjustedUnitVectors_correct){
 		const RealMatrix refvecs = preferenceAdjustedUnitVectors(n, s, prefs);
 		const RealMatrix nonRoi = unitVectorsOnLattice(n, s);
 		const double maxDist = angleBetween(normalized_v, row(refvecs, 0), 1);
-		for(std::size_t r = 0; r < refvecs.size1(); ++r){
+		for(std::size_t r = 0; r < refvecs.size1() - n; ++r){
 			// All vectors must be of length 1 since they are unit
 			// vectors...
 			const double l = norm_2(row(refvecs, r));
@@ -46,6 +46,13 @@ BOOST_AUTO_TEST_CASE(preferenceAdjustedUnitVectors_correct){
 			                                 row(refvecs, r),
 			                                 1);
 			BOOST_CHECK_LE(dist, maxDist);
+		}
+		// The last n vectors must be the original endpoints, so the must be
+		// lattice corners.
+		for(std::size_t r = refvecs.size1() - n; r < refvecs.size1(); ++r)
+		{
+			BOOST_CHECK(detail::isLatticeCorner(row(refvecs, r).begin(), 
+			                                    row(refvecs, r).end()));
 		}
 	}
 }

@@ -118,7 +118,9 @@ RealMatrix preferenceAdjustedUnitVectors(
 	std::vector<Preference> const & preferences){
 
 	const RealMatrix uv = unitVectorsOnLattice(n, sum);
-	const std::size_t numAdjustedVectors = preferences.size() * uv.size1();
+	// All vectors translated for every preference plus all the centers of the
+	// preferences plus the 'n' extreme endpoints (the corners):
+	const std::size_t numAdjustedVectors = preferences.size() * (1 + uv.size1()) + n;
 	RealMatrix adjusted(numAdjustedVectors, uv.size2());
 	std::size_t row_idx = 0;
 	for(auto & preference : preferences)
@@ -137,6 +139,18 @@ RealMatrix preferenceAdjustedUnitVectors(
 			row(adjusted, row_idx) = r * row(uv, i) + (1 - r) * v_c;
 			row(adjusted, row_idx) /= norm_2(row(adjusted, row_idx));
 			++row_idx;
+		}
+		// Put the center of the preference in the set of adjusted vectors too
+		row(adjusted, row_idx) = v_c;
+		++row_idx;
+	}
+	// Finally, we add the 'n' extreme end points of the original unit vectors
+	// -- the "corners".
+	for(std::size_t i = 0; i < n; ++i)
+	{
+		for(std::size_t j = 0; j < n; ++j)
+		{
+			adjusted(row_idx + i, j) = i == j ? 1 : 0;
 		}
 	}
 	return adjusted;
