@@ -29,7 +29,7 @@ addons:
       - libboost-thread1.55-dev
 
 matrix:
-  # include:
+  include:
   #   - os: linux
   #     env: 
   #       - COMPILER=g++-6
