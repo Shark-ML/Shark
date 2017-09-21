@@ -50,14 +50,43 @@ namespace shark {
 /// reference-point-based nondominated sorting approach, 
 /// part I: Solving problems with box constraints."
 /// IEEE Trans. Evolutionary Computation 18.4 (2014): 577-601.
-class RealCodedNSGAIII : public IndicatorBasedRealCodedNSGAII<NSGA3Indicator>{		
+class RealCodedNSGAIII : public IndicatorBasedRealCodedNSGAII<NSGA3Indicator>{
+	typedef IndicatorBasedRealCodedNSGAII<NSGA3Indicator> base;
 public:
 
 	/// \brief Default c'tor.
-	RealCodedNSGAIII(random::rng_type& rng = random::globalRng):IndicatorBasedRealCodedNSGAII<NSGA3Indicator>(rng){}
+	RealCodedNSGAIII(random::rng_type& rng = random::globalRng)
+		: base(rng){}
 
 	std::string name() const {
 		return "RealCodedNSGAIII";
+	}
+protected:
+	void doInit(
+		std::vector<SearchPointType> const& initialSearchPoints,
+		std::vector<ResultType> const& functionValues,
+		RealVector const& lowerBounds,
+		RealVector const& upperBounds,
+		std::size_t mu,
+		double nm,
+		double nc,
+		double crossover_prob,
+		std::vector<Preference> const & indicatorPreferences = std::vector<Preference>()
+		){
+		// Do the regular initialization.
+		base::doInit(
+			initialSearchPoints, 
+			functionValues,
+			lowerBounds,
+			upperBounds,
+			mu,
+			nm,
+			nc,
+			crossover_prob);
+		// Make sure that the indicator respects our preference points if they
+		// are set.
+		indicator().init(functionValues.front().size(), mu, *mpe_rng, 
+		                 indicatorPreferences);
 	}
 };
 

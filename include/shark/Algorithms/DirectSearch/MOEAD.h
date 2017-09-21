@@ -37,6 +37,7 @@
 #include <shark/Algorithms/DirectSearch/Individual.h>
 #include <shark/Algorithms/DirectSearch/Operators/Recombination/SimulatedBinaryCrossover.h>
 #include <shark/Algorithms/DirectSearch/Operators/Mutation/PolynomialMutation.h>
+#include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 
 namespace shark {
 
@@ -136,7 +137,8 @@ protected:
 		double const nm,
 		double const nc,
 		double const crossover_prob,
-		std::size_t const neighbourhoodSize
+		std::size_t const neighbourhoodSize,
+		std::vector<Preference> const & weightVectorPreferences = std::vector<Preference>()
 	);
 	// Make me an offspring...
 	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring() const;

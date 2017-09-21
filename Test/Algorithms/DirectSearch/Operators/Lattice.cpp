@@ -7,12 +7,82 @@
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 #include <shark/Core/Random.h>
 #include <shark/LinAlg/Metrics.h>
+#include "../../../Utils.h"
 
 #include <iostream>
 
 using namespace shark;
 
+namespace {
+double angleBetween(RealVector const & x, 
+                    RealVector const & y, 
+                    double const radius){
+	const double d = norm_2(x - y);
+	return acos(1 - std::pow(d, 2) / (2 * std::pow(radius, 2)));
+}
+}
+
 BOOST_AUTO_TEST_SUITE (Algorithms_DirectSearch_Operators_Lattice)
+
+BOOST_AUTO_TEST_CASE(preferenceAdjustedUnitVectors_correct){
+	const double radius = 0.2;
+	for(std::size_t n = 3; n < 6; ++n){
+		const RealVector v = RealVector(n, 1);
+		const RealVector normalized_v = v / norm_2(v);
+		const std::vector<Preference> prefs = {{radius, v}};
+		const std::size_t s = 40;
+		const RealMatrix refvecs = preferenceAdjustedUnitVectors(n, s, prefs);
+		const double maxDist = angleBetween(normalized_v, row(refvecs, 0), 1);
+		for(std::size_t r = 0; r < refvecs.size1() - n; ++r){
+			// All vectors must be of length 1 since they are unit
+			// vectors...
+			const double l = norm_2(row(refvecs, r));
+			BOOST_CHECK_CLOSE(l, 1, 1e-11);
+			// All vectors must be inside the region specified by the region of
+			// interest.  The distance on a surface of the sphere is radius
+			// times angle between points.  The radius is one, so the distance
+			// is the angle.
+			const double dist = angleBetween(normalized_v,
+			                                 row(refvecs, r),
+			                                 1);
+			BOOST_CHECK_LE(dist, maxDist);
+		}
+		// The last n vectors must be the original endpoints, so the must be
+		// lattice corners.
+		for(std::size_t r = refvecs.size1() - n; r < refvecs.size1(); ++r)
+		{
+			BOOST_CHECK(detail::isLatticeCorner(row(refvecs, r).begin(), 
+			                                    row(refvecs, r).end()));
+		}
+	}
+}
+
+BOOST_AUTO_TEST_CASE(preferenceAdjustedWeightVectors_correct){
+	const double radius = 0.2;
+	for(std::size_t n = 3; n < 4; ++n){
+		const RealVector v = RealVector(n, 1);
+		const RealVector normalized_v = v / norm_1(v);
+		const std::vector<Preference> prefs = {{radius, v}};
+		const std::size_t s = 40;
+		const RealMatrix weightvecs = preferenceAdjustedWeightVectors(n, s, prefs);
+		const double maxDist = norm_2(normalized_v - row(weightvecs, 0));
+		for(std::size_t r = 0; r < weightvecs.size1() - n; ++r){
+			// All vectors must be inside the region specified by the region of
+			// interest.  The vectors are mapped back to the hyperplane from the
+			// unit sphere, so we just check that the euclidean distance to each
+			// point is no larger than the distance to the points farthest away.
+			const double dist = norm_2(normalized_v - row(weightvecs, r));
+			BOOST_CHECK_LE(dist, maxDist);
+		}
+		// The last n vectors must be the original endpoints, so the must be
+		// lattice corners.
+		for(std::size_t r = weightvecs.size1() - n; r < weightvecs.size1(); ++r)
+		{
+			BOOST_CHECK(detail::isLatticeCorner(row(weightvecs, r).begin(), 
+			                                    row(weightvecs, r).end()));
+		}
+	}
+}
 
 BOOST_AUTO_TEST_CASE(unitVectors_correct){
 	for(std::size_t n = 2; n < 6; ++n){

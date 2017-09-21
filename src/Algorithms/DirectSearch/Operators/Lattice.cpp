@@ -107,7 +107,69 @@ RealMatrix weightLattice(std::size_t const n, std::size_t const sum)
 RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum){
 	RealMatrix m = weightLattice(n, sum);
 	for(std::size_t i = 0; i < m.size1(); ++i){
-		row(m, i) /= norm_2(row(m,i));
+		row(m, i) /= norm_2(row(m, i));
+	}
+	return m;
+}
+
+RealMatrix preferenceAdjustedUnitVectors(
+	std::size_t const n,
+	std::size_t const sum, 
+	std::vector<Preference> const & preferences){
+
+	const RealMatrix uv = unitVectorsOnLattice(n, sum);
+	// All vectors translated for every preference plus all the centers of the
+	// preferences plus the 'n' extreme endpoints (the corners):
+	const std::size_t numAdjustedVectors = preferences.size() * (1 + uv.size1()) + n;
+	RealMatrix adjusted(numAdjustedVectors, uv.size2());
+	std::size_t row_idx = 0;
+	for(auto & preference : preferences)
+	{
+		double r;
+		RealVector v_c;
+		std::tie(r, v_c) = preference;
+		v_c /= norm_2(v_c);
+		for(std::size_t i = 0; i < uv.size1(); ++i)
+		{
+			/* 
+			   Equation (14) of "Evolutionary Many-objective Optimization of
+			   Hybrid Electric Vehicle Control: From General Optimization to
+			   Preference Articulation"
+			*/
+			row(adjusted, row_idx) = r * row(uv, i) + (1 - r) * v_c;
+			row(adjusted, row_idx) /= norm_2(row(adjusted, row_idx));
+			++row_idx;
+		}
+		// Put the center of the preference in the set of adjusted vectors too
+		row(adjusted, row_idx) = v_c;
+		++row_idx;
+	}
+	// Finally, we add the 'n' extreme end points of the original unit vectors
+	// -- the "corners".
+	for(std::size_t i = 0; i < n; ++i)
+	{
+		for(std::size_t j = 0; j < n; ++j)
+		{
+			adjusted(row_idx + i, j) = i == j ? 1 : 0;
+		}
+	}
+	return adjusted;
+}
+
+RealMatrix preferenceAdjustedWeightVectors(
+	std::size_t const n,
+	std::size_t const sum,
+	std::vector<Preference> const & preferences){
+
+	RealMatrix m = preferenceAdjustedUnitVectors(n, sum, preferences);
+	/* 
+	   Translate vectors from the unit sphere to the hyperplane.  Equation (13)
+	   of "Evolutionary Many-objective Optimization of Hybrid Electric Vehicle
+	   Control: From General Optimization to Preference Articulation"
+	*/
+	for(std::size_t i = 0; i < m.size1(); ++i)
+	{
+		row(m, i) /= norm_1(row(m, i));
 	}
 	return m;
 }
