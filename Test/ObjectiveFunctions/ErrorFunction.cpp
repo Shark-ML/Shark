@@ -83,12 +83,12 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 	ErrorFunction mse(dataset, &model,&loss);
 
 	double error=mse.eval(parameters);
-	BOOST_CHECK_SMALL(error-40,1.e-15);
+	BOOST_CHECK_SMALL(error-20,1.e-15);
 
 	//calculate derivative - it should also be 40
 	ErrorFunction::FirstOrderDerivative derivative;
 	mse.evalDerivative(parameters,derivative);
-	BOOST_CHECK_SMALL(derivative(0)-40,1.e-15);
+	BOOST_CHECK_SMALL(derivative(0)-20,1.e-15);
 }
 
 //test whether we can get to the same result as linear regression
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		trainTarget[i] = noiseVal + testTarget[i];
 		optimalMSE+=norm_sqr(noiseVal);
 	}
-	optimalMSE/=trainExamples;
+	optimalMSE/=2*trainExamples;
 	
 	//create loss function and internal implementations to check everything is working
 	RegressionDataset trainset = createLabeledDataFromRange(input, trainTarget);

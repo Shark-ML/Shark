@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	optimizer.init(mse, point);
 	// train the cmac
 	double error = 0.0;
-	for (size_t iteration=0; iteration<501; ++iteration){
+	for (size_t iteration=0; iteration<701; ++iteration){
 		optimizer.step(mse);
 		if (iteration % 100 == 0){
 			error = optimizer.solution().value;
