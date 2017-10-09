@@ -11,11 +11,11 @@
  * \date        2016
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -39,7 +39,7 @@
 
 #include "../Base.h"
 #include "Json.h"
-#include <Shark/Core/Exception.h>
+#include <shark/Core/Exception.h>
 #include <boost/lexical_cast.hpp>
 #include <string>
 

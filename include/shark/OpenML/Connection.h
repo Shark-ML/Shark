@@ -16,11 +16,11 @@
  * \date        2016
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -42,7 +42,7 @@
 #define SHARK_OPENML_CONNECTION_H
 
 #include "Entity.h"
-#include "detail/Socket.h"
+#include "detail/SecureSocket.h"
 #include "detail/Json.h"
 #include "detail/HttpResponse.h"
 
@@ -143,7 +143,7 @@ private:
 	unsigned short m_port;             ///< remote port of this connection
 	std::string m_key;                 ///< API key of this connection (may be empty)
 	std::string m_prefix;              ///< URL prefix for the OpenML REST API
-	detail::Socket m_socket;           ///< underlying socket object
+	detail::SecureSocket m_socket;     ///< underlying socket object
 	std::string m_readbuffer;          ///< socket read buffer
 	std::mutex m_mutex;                ///< mutex for synchronization of REST API calls
 };

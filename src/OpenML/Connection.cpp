@@ -11,11 +11,11 @@
  * \date        2016
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -56,11 +56,11 @@ namespace openML {
 
 
 static const std::string OPENML_REST_API_HOST = "www.openml.org";
-static const unsigned short OPENML_REST_API_PORT = 80;
+static const unsigned short OPENML_REST_API_PORT = 443;
 static const std::string OPENML_REST_API_PREFIX = "/api_new/v1/json";
 
 static const std::string TEST_REST_API_HOST = "test.openml.org";
-static const unsigned short TEST_REST_API_PORT = 80;
+static const unsigned short TEST_REST_API_PORT = 443;
 static const std::string TEST_REST_API_PREFIX = "/api/v1/json";
 
 

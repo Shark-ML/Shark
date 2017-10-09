@@ -9,14 +9,14 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -131,7 +131,8 @@ Json::Json(std::istream& str)
 {
 	str.unsetf(std::ios::skipws);
 	std::istream_iterator<char> iter(str), end;
-	parseJson(iter, end, iter);
+	std::size_t position = 0;
+	parseJson(position, end, iter);
 }
 
 
@@ -345,7 +346,7 @@ void Json::outputJson(std::ostream& str, int depth) const
 	else throw std::runtime_error("json internal error");
 }
 
-bool Json::load(std::string filename)
+bool Json::load(std::string const& filename)
 {
 	std::ifstream ifs(filename.c_str());
 	if (! ifs.is_open()) return false;
@@ -360,7 +361,7 @@ bool Json::load(std::string filename)
 	}
 }
 
-bool Json::save(std::string filename) const
+bool Json::save(std::string const& filename) const
 {
 	std::ofstream ofs(filename.c_str());
 	if (! ofs.is_open()) return false;

@@ -12,6 +12,8 @@ cmake_minimum_required( VERSION 3.1 FATAL_ERROR)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 INCLUDE (CheckFunctionExists)
 
+# no idea why, but this is what I need for full C++11 support with clang
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wno-c++11-extensions")
 
 cmake_policy(SET CMP0003 NEW)
 if(POLICY CMP0042)
@@ -325,6 +327,24 @@ if( ENABLE_CBLAS )
 		endif()
 	endif()
 endif()
+
+#####################################################################
+#           openssl configuration
+#####################################################################
+# TODO: introduce a variable for OpenML support,
+#       openssl is only needed for OpenML.
+
+find_package(openssl REQUIRED)
+if(NOT OPENSSL_FOUND)
+	message(FATAL_ERROR "Please make sure that openssl is installed on your system")
+endif()
+
+include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR} )
+link_directories( ${OPENSSL_ROOT_DIR} )
+list(APPEND LINK_LIBRARIES ${OPENSSL_LIBRARIES})
+message( STATUS "Using openssl version " ${OPENSSL_VERSION} " from " ${OPENSSL_ROOT_DIR} )
+
+
 #####################################################################
 #                       Static Code Analysis
 #####################################################################

@@ -11,11 +11,11 @@
  * \date        2016
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -71,11 +71,11 @@ void CachedFile::download() const
 
 	std::string host;
 	std::string resource;
-	if (m_url.size() >= 7 && m_url.substr(0, 7) == "http://")
+	if (m_url.size() >= 8 && m_url.substr(0, 8) == "https://")
 	{
-		std::size_t slash = m_url.find('/', 7);
+		std::size_t slash = m_url.find('/', 8);
 		if (slash == std::string::npos) throw SHARKEXCEPTION("invalid URL for file download");
-		host = m_url.substr(7, slash - 7);
+		host = m_url.substr(8, slash - 8);
 		resource = m_url.substr(slash);
 	}
 	else

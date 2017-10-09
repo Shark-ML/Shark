@@ -11,11 +11,11 @@
  * \date        2016
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -483,7 +483,7 @@ public:
 	{ assertNumber(); return (int)(data().as<double>()); }
 	inline double asNumber() const
 	{ assertNumber(); return data().as<double>(); }
-	inline std::string asString() const
+	inline std::string const& asString() const
 	{ assertString(); return data().as<std::string>(); }
 
 	// elementary type read access
@@ -503,7 +503,7 @@ public:
 	{ if (isValid()) return asNumber(); else return defaultvalue; }
 	inline std::string operator () (const char* defaultvalue)
 	{ if (isValid()) return asString(); else return defaultvalue; }
-	inline std::string operator () (std::string defaultvalue)
+	inline std::string operator () (std::string const& defaultvalue)
 	{ if (isValid()) return asString(); else return defaultvalue; }
 
 	// container (array or object) size
@@ -517,17 +517,17 @@ public:
 	// object member test
 	inline bool has(const char* key) const
 	{ return has(std::string(key)); }
-	inline bool has(std::string key) const
+	inline bool has(std::string const& key) const
 	{ assertObject(); return (data().as<Object>().find(key) != object_end()); }
 
 	// container operator access
 	inline Json& operator [] (const char* key)
 	{ return operator [] (std::string(key)); }
-	inline Json& operator [] (std::string key)
+	inline Json& operator [] (std::string const& key)
 	{ assertObject(); return data().as<Object>()[key]; }
 	inline Json const& operator [] (const char* key) const
 	{ return operator [] (std::string(key)); }
-	inline Json const& operator [] (std::string key) const
+	inline Json const& operator [] (std::string const& key) const
 	{ assertObject(); if (! has(key)) return m_undefined; else return (const_cast<Object&>(data().as<Object>()))[key]; }
 	inline Json& operator [] (int index)
 	{ assertArray(index); return data().as<Array>()[index]; }
@@ -568,7 +568,7 @@ public:
 	{ return (isNumber() && asNumber() == other); }
 	inline bool operator == (const char* other) const
 	{ return (isString() && asString() == other); }
-	inline bool operator == (std::string other) const
+	inline bool operator == (std::string const& other) const
 	{ return (isString() && asString() == other); }
 	inline bool operator != (Json const& other) const
 	{ return ! (operator == (other)); }
@@ -578,7 +578,7 @@ public:
 	{ return ! (operator == (other)); }
 	inline bool operator != (const char* other) const
 	{ return ! (operator == (other)); }
-	inline bool operator != (std::string other) const
+	inline bool operator != (std::string const& other) const
 	{ return ! (operator == (other)); }
 
 	// value assignment and container preparation (write access)
@@ -587,68 +587,62 @@ public:
 	inline Json& operator = (double value)
 	{ m_ptr = std::make_shared<Data>(value); return *this; }
 	inline Json& operator = (const char* value)
-	{ std::string v = value; m_ptr = std::make_shared<Data>(v); return *this; }
+	{ m_ptr = std::make_shared<Data>(std::string(value)); return *this; }
 	inline Json& operator = (std::string const& value)
 	{ m_ptr = std::make_shared<Data>(value); return *this; }
 	inline Json& operator = (std::vector<bool> const& arr)
 	{
-		Array a(arr.size(), Json(false));
-		for (std::size_t i=0; i<arr.size(); i++) a[i] = Json(arr[i]);
-		m_ptr = std::make_shared<Data>(a);
+		m_ptr = std::make_shared<Data>(Array(arr.size(), Json(false)));
+		for (std::size_t i=0; i<arr.size(); i++) m_ptr->as<Array>()[i] = Json(arr[i]);
 		return *this;
 	}
 	inline Json& operator = (std::vector<double> const& arr)
 	{
-		Array a(arr.size(), Json(0.0));
-		for (std::size_t i=0; i<arr.size(); i++) a[i] = Json(arr[i]);
-		m_ptr = std::make_shared<Data>(a);
+		m_ptr = std::make_shared<Data>(Array(arr.size(), Json(0.0)));
+		for (std::size_t i=0; i<arr.size(); i++) m_ptr->as<Array>()[i] = Json(arr[i]);
 		return *this;
 	}
 	inline Json& operator = (std::vector<std::string> const& arr)
 	{
-		Array a(arr.size(), Json(std::string()));
-		for (std::size_t i=0; i<arr.size(); i++) a[i] = Json(arr[i]);
-		m_ptr = std::make_shared<Data>(a);
+		m_ptr = std::make_shared<Data>(Array(arr.size(), Json(std::string())));
+		for (std::size_t i=0; i<arr.size(); i++) m_ptr->as<Array>()[i] = Json(arr[i]);
 		return *this;
 	}
 	inline Json& operator = (std::map<std::string, bool> const& obj)
 	{
-		Object o;
+		m_ptr = std::make_shared<Data>(Object());
 		for (std::map<std::string, bool>::const_iterator it=obj.begin(); it != obj.end(); ++it)
 		{
-			o[it->first] = Json(it->second);
+			m_ptr->as<Object>()[it->first] = Json(it->second);
 		}
-		m_ptr = std::make_shared<Data>(o);
 		return *this;
 	}
 	inline Json& operator = (std::map<std::string, double> const& obj)
 	{
-		Object o;
+		m_ptr = std::make_shared<Data>(Object());
 		for (std::map<std::string, double>::const_iterator it=obj.begin(); it != obj.end(); ++it)
 		{
-			o[it->first] = Json(it->second);
+			m_ptr->as<Object>()[it->first] = Json(it->second);
 		}
-		m_ptr = std::make_shared<Data>(o);
 		return *this;
 	}
 	inline Json& operator = (std::map<std::string, std::string> const& obj)
 	{
-		Object o;
+		m_ptr = std::make_shared<Data>(Object());
 		for (std::map<std::string, std::string>::const_iterator it=obj.begin(); it != obj.end(); ++it)
 		{
-			o[it->first] = Json(it->second);
+			m_ptr->as<Object>()[it->first] = Json(it->second);
 		}
-		m_ptr = std::make_shared<Data>(o);
 		return *this;
 	}
 	inline Json& operator = (Json const& value)
 	{ m_ptr = value.m_ptr; return *this; }
 	inline Json& operator = (ConstructionTypename tn)
 	{
-		if (tn == null) { Null n; m_ptr = std::make_shared<Data>(n); }
-		else if (tn == object) { Object o; m_ptr = std::make_shared<Data>(o); }
-		else if (tn == array) { Array a; m_ptr = std::make_shared<Data>(a); }
-		else throw SHARKEXCEPTION("json internal error");
+		if (tn == null) m_ptr = std::make_shared<Data>(Null());
+		else if (tn == object) m_ptr = std::make_shared<Data>(Object());
+		else if (tn == array) m_ptr = std::make_shared<Data>(Array());
+		else throw std::runtime_error("json internal error");
 		return *this;
 	}
 	inline void push_back(Json const& value)
@@ -663,14 +657,14 @@ public:
 	{ assertArray(index); data().as<Array>().erase(array_begin() + index); }
 	template <class T> Json& operator << (T value)
 	{ push_back(value); return *this; }
-	inline void erase(std::string key)
+	inline void erase(std::string const& key)
 	{ assertObject(); data().as<Object>().erase(key); }
 
 	// deep copy
 	Json clone() const;
 
 	// string <-> object conversion
-	inline void parse(std::string s)
+	inline void parse(std::string const& s)
 	{ std::stringstream ss(s); ss >> *this; }
 	inline std::string stringify() const
 	{ std::stringstream ss; ss << *this; return ss.str(); }
@@ -678,24 +672,24 @@ public:
 	friend std::ostream& operator << (std::ostream& os, Json const& json);
 
 	// file I/O
-	bool load(std::string filename);
-	bool save(std::string filename) const;
+	bool load(std::string const& filename);
+	bool save(std::string const& filename) const;
 
 protected:
 	inline bool isValid() const
 	{ return (m_ptr->type() != type_undefined); }
 
-#define JSON_INTERNAL_FAIL { std::stringstream ss; ss << "json parse error at position " << std::distance(begin, iter) ; throw SHARKEXCEPTION(ss.str()); }
+#define JSON_INTERNAL_FAIL { std::stringstream ss; ss << "json parse error at position " << position ; throw std::runtime_error(ss.str()); }
 #define JSON_INTERNAL_PEEK(c) { if (iter == end) JSON_INTERNAL_FAIL; c = *iter; }
-#define JSON_INTERNAL_READ(c) { JSON_INTERNAL_PEEK(c); ++iter; }
+#define JSON_INTERNAL_READ(c) { JSON_INTERNAL_PEEK(c); ++iter; ++position; }
 #define JSON_INTERNAL_SKIP \
 	while (true) \
 	{ \
 		JSON_INTERNAL_PEEK(c); \
-		if (isspace(c)) ++iter; \
+		if (isspace(c)) { ++iter; ++position; } \
 		else if (c == '/') \
 		{ \
-			++iter; \
+			++iter; ++position; \
 			JSON_INTERNAL_READ(c); \
 			if (c == '/') \
 			{ \
@@ -709,7 +703,7 @@ protected:
 					if (c == '*') \
 					{ \
 						JSON_INTERNAL_PEEK(c); \
-						if (c == '/') { ++iter; break; } \
+						if (c == '/') { ++iter; ++position; break; } \
 					} \
 				} \
 			} \
@@ -718,7 +712,7 @@ protected:
 	}
 
 	template <class ITER>
-	static std::string parseString(ITER const& begin, ITER const& end, ITER& iter)
+	static std::string parseString(std::size_t& position, ITER const& end, ITER& iter)
 	{
 		char c;
 		std::string ret;
@@ -770,7 +764,7 @@ protected:
 	}
 
 	template <class ITER>
-	void parseJson(ITER begin, ITER end, ITER& iter)
+	void parseJson(std::size_t& position, ITER const& end, ITER& iter)
 	{
 		char c;
 		JSON_INTERNAL_SKIP
@@ -787,12 +781,12 @@ protected:
 					JSON_INTERNAL_SKIP
 					JSON_INTERNAL_READ(c)
 					if (c != '\"') JSON_INTERNAL_FAIL;
-					std::string key = parseString(begin, end, iter);
+					std::string key = parseString(position, end, iter);
 					JSON_INTERNAL_SKIP
 					JSON_INTERNAL_READ(c)
 					if (c != ':') JSON_INTERNAL_FAIL
 					Json sub;
-					sub.parseJson(begin, end, iter);
+					sub.parseJson(position, end, iter);
 					(*this)[key] = sub;
 					JSON_INTERNAL_SKIP
 					JSON_INTERNAL_READ(c)
@@ -812,7 +806,7 @@ protected:
 				do
 				{
 					Json sub;
-					sub.parseJson(begin, end, iter);
+					sub.parseJson(position, end, iter);
 					push_back(sub);
 					JSON_INTERNAL_SKIP
 					JSON_INTERNAL_READ(c)
@@ -823,7 +817,7 @@ protected:
 			else JSON_INTERNAL_READ(c);
 		}
 		else if (c == '\"')
-		{ (*this) = parseString(begin, end, iter); }
+		{ (*this) = parseString(position, end, iter); }
 		else if (c == 'n')
 		{
 			JSON_INTERNAL_READ(c); if (c != 'u') JSON_INTERNAL_FAIL;
@@ -924,7 +918,8 @@ inline std::istream& operator >> (std::istream& str, Json& json)
 {
 	str.unsetf(std::ios::skipws);
 	std::istream_iterator<char> iter(str), end;
-	json.parseJson(iter, end, iter);
+	std::size_t position = 0;
+	json.parseJson(position, end, iter);
 	return str;
 }
 

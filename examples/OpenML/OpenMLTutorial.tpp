@@ -9,11 +9,11 @@
  * \date        2016
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
 		params.push_back(openML::Hyperparameter("C", "regularization parameter, must be positive", "double"));
 		params.push_back(openML::Hyperparameter("gamma", "kernel bandwidth parameter, must be positive", "double"));
 		params.push_back(openML::Hyperparameter("bias", "presence or absence of the bias 'b' in the model", "bool"));
-		shared_ptr<openML::Flow> flow = openML::Flow::get(flowName, "one-versus-all C-SVM with Gaussian RBF kernel", params);
+		shared_ptr<openML::Flow> flow = openML::Flow::create(flowName, "one-versus-all C-SVM with Gaussian RBF kernel", params);
 		flow->print();
 //###end<flows>
 
