@@ -8,7 +8,7 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -56,7 +56,7 @@ Flow::Flow(std::string const& name, std::string const& description, std::vector<
 	std::string version = sharkVersion();
 
 	// check whether the flow already exists
-	SHARK_ASSERT(getFlow(name, version) == invalidID);
+	SHARK_ASSERT(findFlow(name, version) == invalidID);
 
 	// upload a new flow
 	std::string xml = "<oml:flow xmlns:oml=\"http://openml.org/openml\">"
@@ -88,22 +88,6 @@ Flow::Flow(std::string const& name, std::string const& description, std::vector<
 	// obtain the flow data back from the server
 	obtainFromServer();
 }
-
-////static
-//std::shared_ptr<Flow> Flow::getOrCreate(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
-//{
-//	IDType id = getFlow(name, sharkVersion());
-//	if (id == invalidID) return create(method, description, hyperparameters, properties);
-//	else return get(id);
-//}
-//
-////static
-//std::shared_ptr<Flow> Flow::getOrCreate(INameable const& method, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties)
-//{
-//	IDType id = getFlow(name, sharkVersion());
-//	if (id == invalidID) return create("shark." + method.name(), description, hyperparameters, properties);
-//	else return get(id);
-//}
 
 //static
 std::string Flow::sharkVersion()
@@ -181,7 +165,7 @@ void Flow::obtainFromServer()
 		}
 	}
 
-	// TODO: populate properties...!
+	// TODO: populate properties
 
 	if (desc.has("tag")) setTags(desc["tag"]);
 }

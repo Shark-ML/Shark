@@ -7,14 +7,14 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -73,8 +73,8 @@ SHARK_EXPORT_SYMBOL struct QueryEntry
 SHARK_EXPORT_SYMBOL typedef std::vector<QueryEntry> QueryResult; ///< \brief Collection of descriptions of entities of unspecified type.
 
 
-/// \brief Feature types known to OpenML (and ARFF).
-SHARK_EXPORT_SYMBOL enum FeatureType
+/// \brief Attribute types known to OpenML (and ARFF).
+SHARK_EXPORT_SYMBOL enum AttributeType
 {
 	BINARY = 0,
 	INTEGER = 1,
@@ -85,14 +85,14 @@ SHARK_EXPORT_SYMBOL enum FeatureType
 };
 
 
-/// \brief Names of feature types known to OpenML (and ARFF).
-static const char* featureTypeName[] = { "binary", "integer", "numeric", "nominal", "string", "date" };
+/// \brief Names of attribute types known to OpenML (and ARFF).
+static const char* attributeTypeName[] = { "binary", "integer", "numeric", "nominal", "string", "date" };
 
 
-/// \brief Meta data for an OpenML feature.
-SHARK_EXPORT_SYMBOL struct FeatureDescription
+/// \brief Meta data for an OpenML attribute.
+SHARK_EXPORT_SYMBOL struct AttributeDescription
 {
-	FeatureType type;
+	AttributeType type;
 	std::string name;
 	bool target;
 	bool ignore;
@@ -119,18 +119,6 @@ SHARK_EXPORT_SYMBOL struct Hyperparameter
 	std::string datatype;
 	std::string defaultValue;
 };
-
-
-/// \brief Enumeration of supported OpenML task types.
-SHARK_EXPORT_SYMBOL enum TaskType
-{
-	SupervisedClassification = 0,
-	SupervisedRegression = 1,
-};
-
-
-/// \brief Names of task types
-static const char* taskTypeName[] = { "supervised classification", "supervised regression" };
 
 
 };  // namespace openML

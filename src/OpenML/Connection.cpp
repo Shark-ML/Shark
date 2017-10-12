@@ -8,7 +8,7 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -57,7 +57,7 @@ namespace openML {
 
 static const std::string OPENML_REST_API_HOST = "www.openml.org";
 static const unsigned short OPENML_REST_API_PORT = 443;
-static const std::string OPENML_REST_API_PREFIX = "/api_new/v1/json";
+static const std::string OPENML_REST_API_PREFIX = "/api/v1/json";
 
 static const std::string TEST_REST_API_HOST = "test.openml.org";
 static const unsigned short TEST_REST_API_PORT = 443;
@@ -275,6 +275,48 @@ detail::HttpResponse Connection::postHTTP(std::string const& request, ParamType 
 	return response;
 };
 
+detail::HttpResponse Connection::deleteHTTP(std::string const& request, ParamType const& parameters)
+{
+	SYNCHRONIZE
+
+	detail::HttpResponse response;
+
+	if (! m_socket.connected()) m_socket.connect(m_host, m_port);
+	if (! m_socket.connected()) return response;
+
+	std::string url = m_prefix + request;
+	bool q = true;
+	if (! m_key.empty())
+	{
+		url += "?api_key=" + m_key;
+		q = false;
+	}
+	for (ParamType::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+	{
+		if (q) url += '?'; else url += '&';
+		url += detail::urlencode(it->first);
+		url += "=";
+		url += detail::urlencode(it->second);
+		q = false;
+	}
+
+	std::string msg = "DELETE " + url + " HTTP/1.1\r\n"
+			"host: " + m_host + "\r\n"
+			"\r\n";
+
+	if (! m_socket.writeAll(msg.c_str(), msg.size()))
+	{
+		m_socket.close();
+		return response;
+	}
+	if (! receiveResponse(response))
+	{
+		response.m_statusCode = 0;
+		response.m_returnPhrase = "";
+	}
+	return response;
+}
+
 detail::Json Connection::post(std::string const& request, ParamType const& parameters)
 {
 	detail::HttpResponse response = postHTTP(request, parameters);
@@ -293,6 +335,29 @@ detail::Json Connection::post(std::string const& request, ParamType const& param
 	else
 	{
 		// request successful, return JSON reply
+		detail::Json json;
+		json.parse(response.body());
+		return json;
+	}
+}
+
+detail::Json Connection::del(std::string const& request, ParamType const& parameters)
+{
+	detail::HttpResponse response = deleteHTTP(request, parameters);
+	if (response.statusCode() == 0)
+	{
+		// general communication or protocol violation error
+		throw SHARKEXCEPTION("OpenML DELETE request failed");
+	}
+	else if (response.statusCode() != 200 && response.statusCode() != 202 && response.statusCode() != 204)
+	{
+		// request failed, report error
+		std::string msg = "OpenML DELETE request failed; " + boost::lexical_cast<std::string>(response.statusCode()) + " " + response.returnPhrase();
+		throw SHARKEXCEPTION(msg);
+	}
+	else
+	{
+		// request successful
 		detail::Json json;
 		json.parse(response.body());
 		return json;
@@ -401,18 +466,33 @@ bool Connection::receiveResponse(detail::HttpResponse& response)
 	}
 
 	// decompress content if appropriate
-	auto it = response.m_header.find("content-encoding");
-	if (it != response.m_header.end())
 	{
-		if (it->second == "gzip")
+		auto it = response.m_header.find("content-encoding");
+		if (it != response.m_header.end())
 		{
-			try
+			if (it->second == "gzip")
 			{
-				response.m_body = detail::unzip(response.m_body);
+				try
+				{
+					response.m_body = detail::unzip(response.m_body);
+				}
+				catch (...)
+				{
+					return false;
+				}
 			}
-			catch (...)
+		}
+	}
+
+	// check whether "connection: close" is present
+	{
+		auto it = response.m_header.find("connection");
+		if (it != response.m_header.end())
+		{
+			if (it->second == "close")
 			{
-				return false;
+				m_readbuffer.clear();
+				m_socket.close();
 			}
 		}
 	}

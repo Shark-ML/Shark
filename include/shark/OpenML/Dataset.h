@@ -59,17 +59,17 @@ public:
 	//
 
 	/// \brief Add a tag to the entity.
-	void tag(std::string const& tagname);
+	void tag(std::string const& tagname) override;
 
 	/// \brief Remove a tag from the entity.
-	void untag(std::string const& tagname);
+	void untag(std::string const& tagname) override;
 
 	////////////////////////////////////////////////////////////
 	// printing
 	//
 
 	/// \brief Print a human readable summary of the entity.
-	void print(std::ostream& os = std::cout) const;
+	void print(std::ostream& os = std::cout) const override;
 
 	////////////////////////////////////////////////////////////
 	// property getters
@@ -95,22 +95,32 @@ public:
 	std::string const& visibility() const
 	{ return m_visibility; }
 
-	/// \brief Number of features of the data set as found in the ARFF data set file.
-	std::size_t numberOfFeatures() const
-	{ return m_feature.size(); }
+	/// \brief Number of attributes of the data set as found in the ARFF data set file.
+	std::size_t numberOfAttributes() const
+	{ return m_attribute.size(); }
 
-	/// \brief Obtain a feature description by index.
-	FeatureDescription const& feature(std::size_t index) const
-	{ return m_feature[index]; }
+	/// \brief Obtain a attribute description by index.
+	AttributeDescription const& attribute(std::size_t index) const
+	{ return m_attribute[index]; }
 
-	/// \brief Obtain the index of a feature by name.
-	std::size_t featureIndex(std::string const& name) const
+	/// \brief Obtain the index of an attribute by name.
+	std::size_t attributeIndex(std::string const& name) const
 	{
-		for (std::size_t i=0; i<m_feature.size(); i++)
+		for (std::size_t i=0; i<m_attribute.size(); i++)
 		{
-			if (m_feature[i].name == name) return i;
+			if (m_attribute[i].name == name) return i;
 		}
-		throw SHARKEXCEPTION("[featureIndex] feature " + name + " not found");
+		throw SHARKEXCEPTION("[attributeIndex] attribute " + name + " not found");
+	}
+
+	/// \brief Obtain the index of the default target attribute, or -1 if there is none
+	int defaultTargetAttribute() const
+	{
+		for (std::size_t i=0; i<m_attribute.size(); i++)
+		{
+			if (m_attribute[i].target) return i;
+		}
+		return -1;
 	}
 
 	/// \brief Obtain the underlying ARFF data set file
@@ -126,8 +136,8 @@ private:
 	std::string m_status;                 ///< data set status (e.g., active)
 	std::string m_visibility;             ///< data set visibility (e.g., public or private)
 
-	// features
-	std::vector<FeatureDescription> m_feature;   ///< feature meta data
+	// attributes
+	std::vector<AttributeDescription> m_attribute;   ///< attribute meta data
 
 	// external file
 	CachedFile m_file;                    ///< underlying ARFF data set file

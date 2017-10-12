@@ -64,13 +64,13 @@ public:
 	Run(std::shared_ptr<Task> task, std::shared_ptr<Flow> flow);
 
 	/// \brief Add a tag to the entity.
-	void tag(std::string const& tagname);
+	void tag(std::string const& tagname) override;
 
 	/// \brief Remove a tag from the entity.
-	void untag(std::string const& tagname);
+	void untag(std::string const& tagname) override;
 
 	/// \brief Print a human readable summary of the entity.
-	void print(std::ostream& os = std::cout) const;
+	void print(std::ostream& os = std::cout) const override;
 
 	/// \brief Obtain the underlying task.
 	std::shared_ptr<Task> task()

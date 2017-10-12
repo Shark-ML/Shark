@@ -44,25 +44,19 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 
-#include <sstream>
+#include <boost/lexical_cast.hpp>
+
 #include <thread>
 #include <chrono>
+#include <csignal>
 
 #ifdef _WIN32
 	#include <winsock2.h>
 	typedef int socklen_t;
 
-	#ifndef MSG_NOSIGNAL
-		#define MSG_NOSIGNAL 0
-	#endif
-
 	#pragma comment(lib, "ws2_32.lib")
 #else
-	#include <sys/socket.h>
 	#include <netinet/in.h>
-	#ifndef MSG_NOSIGNAL
-		#define MSG_NOSIGNAL SO_NOSIGPIPE
-	#endif
 #endif
 
 
@@ -84,11 +78,20 @@ struct SecureSocket::PIMPL
 	{
 		if (! initialized)
 		{
+			// ignore annoying pipe signal
+			struct sigaction sa;
+			sa.sa_handler = SIG_IGN;
+			sigemptyset(&sa.sa_mask);
+			sa.sa_flags = 0;
+			sigaction(SIGPIPE, &sa, 0);
+
+			// initialize and setup openssl
 			SSL_library_init();
 			OpenSSL_add_all_algorithms();
 			ERR_load_BIO_strings();
 			ERR_load_crypto_strings();
 			SSL_load_error_strings();
+
 			initialized = true;
 		}
 	}
@@ -108,10 +111,10 @@ struct SecureSocket::PIMPL
 	virtual bool hasData(unsigned int timeoutSeconds = 0, unsigned int timeoutUSeconds = 0) = 0;
 
 	virtual std::size_t read(char* buffer, std::size_t buffersize)
-	{ throw std::runtime_error("[network::SecureSocket::read] internal error"); }
+	{ throw SHARKEXCEPTION("[shark::openML::SecureSocket::read] internal error"); }
 
 	virtual std::size_t write(const char* buffer, std::size_t buffersize)
-	{ throw std::runtime_error("[network::SecureSocket::write] internal error"); }
+	{ throw SHARKEXCEPTION("[shark::openML::SecureSocket::write] internal error"); }
 
 	virtual bool writeAll(const char* buffer, std::size_t buffersize)
 	{
@@ -228,8 +231,8 @@ struct ClientEndpoint : public SecureSocket::PIMPL
 
 	void close() override
 	{
-		if (ctx) SSL_CTX_free(ctx);
 		if (web) BIO_free_all(web);
+		if (ctx) SSL_CTX_free(ctx);
 		ctx = nullptr;
 		web = nullptr;
 		ssl = nullptr;
@@ -250,7 +253,6 @@ struct ClientEndpoint : public SecureSocket::PIMPL
 		FD_SET(handle, &read_socks);
 
 		int count = select(handle + 1, &read_socks, nullptr, nullptr, &timeout);
-		// bool ret = (FD_ISSET(handle, &read_socks));
 		bool ret = (count == 1);
 
 		FD_ZERO(&read_socks);
@@ -268,6 +270,8 @@ struct ClientEndpoint : public SecureSocket::PIMPL
 		while (true)
 		{
 			int result = BIO_read(web, buffer, buffersize);
+			// for low-level debugging:
+			// if (result > 0) { printf("\n[read=%d]\n", result); for (int i=0; i<result; i++) printf("%c", buffer[i]); };
 			if (result > 0) return result;
 			if (! BIO_should_retry(web)) { close(); return 0; }
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -279,6 +283,8 @@ struct ClientEndpoint : public SecureSocket::PIMPL
 		while (true)
 		{
 			int result = BIO_write(web, buffer, buffersize);
+			// for low-level debugging:
+			// if (result > 0) { printf("\n[write=%d]\n", result); for (int i=0; i<result; i++) printf("%c", buffer[i]); };
 			if (result > 0) return result;
 			if (! BIO_should_retry(web)) { close(); return 0; }
 			std::this_thread::sleep_for(std::chrono::milliseconds(1));

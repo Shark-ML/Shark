@@ -120,6 +120,15 @@ inline std::string json2string(detail::Json const& json)
 	throw SHARKEXCEPTION("failed to convert json value to string: " + json.stringify());
 }
 
+template <typename KEY, typename VALUE>
+KEY const& inverseLookup(std::map<KEY, VALUE> const& dict, VALUE const& value, KEY const& notfound)
+{
+	for (auto const& p : dict)
+	{
+		if (p.second == value) return p.first;
+	}
+	return notfound;
+}
 
 };  // namespace detail
 };  // namespace openML

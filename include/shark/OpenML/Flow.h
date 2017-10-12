@@ -60,7 +60,10 @@ private:
 	Flow(IDType id);
 
 	/// \brief Construct a new OpenML flow.
-	Flow(std::string const& name, std::string const& description, std::vector<Hyperparameter> const& hyperparameters, std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
+	Flow(std::string const& name,
+			std::string const& description,
+			std::vector<Hyperparameter> const& hyperparameters,
+			std::map<std::string, std::string> const& properties = std::map<std::string, std::string>());
 
 public:
 	using PooledEntity<Flow>::get;
@@ -70,13 +73,13 @@ public:
 	static std::string sharkVersion();
 
 	/// \brief Add a tag to the entity.
-	void tag(std::string const& tagname);
+	void tag(std::string const& tagname) override;
 
 	/// \brief Remove a tag from the entity.
-	void untag(std::string const& tagname);
+	void untag(std::string const& tagname) override;
 
 	/// \brief Print a human readable summary of the entity.
-	void print(std::ostream& os = std::cout) const;
+	void print(std::ostream& os = std::cout) const override;
 
 	/// \brief Name of the flow (acts as a key in OpenML).
 	std::string const& name() const

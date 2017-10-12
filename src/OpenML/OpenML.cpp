@@ -8,7 +8,7 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -38,33 +38,16 @@
 #include <shark/OpenML/detail/Tools.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <string>
+#include <sstream>
+#include <istream>
+
 
 namespace shark {
 namespace openML {
 
 
 ////////////////////////////////////////////////////////////
-
-
-const std::vector<std::string> dataset_property_name {
-		"data_id",
-		"data_name",
-		"number_instances",
-		"number_features",
-		"number_classes",
-		"number_missing_values",
-	};
-
-const std::vector<std::string> run_property_name {
-		"task",
-		"setup",
-		"flow",
-		"uploader",
-		"run",
-		"tag",
-		"limit",
-		"offset"
-	};
 
 
 void fillTaggedValueArray(QueryEntry& entry, detail::Json json)
@@ -110,6 +93,186 @@ void fillProperties(QueryEntry& entry, detail::Json json)
 	}
 }
 
+
+////////////////////////////////////////////////////////////
+
+
+IDType createDataset(
+		std::string const& arff,
+		std::string const& name,
+		std::string const& description,
+		std::string const& target)
+{
+	// create the XML description
+	std::string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+	xml += "<oml:data_set_description xmlns:oml=\"http://openml.org/openml\">\n"
+			"<oml:name>" + detail::xmlencode(name) + "</oml:name>\n"
+			"<oml:description>" + detail::xmlencode(description) + "</oml:description>\n"
+			"<oml:format>arff</oml:format>\n";
+	if (! target.empty()) xml += "<oml:default_target_attribute>" + detail::xmlencode(target) + "</oml:default_target_attribute>\n";
+	xml += "</oml:data_set_description>\n";
+
+	// upload the data to the OpenML server
+	Connection::ParamType upload {
+				{"description|application/xml|description.xml", xml},
+				{"dataset|application/octet-stream|dataset.arff", arff}
+			};
+	openML::detail::Json result = connection.post("/data", upload);
+
+	// check the result
+	SHARK_ASSERT(result.isObject());
+	SHARK_ASSERT(result.has("upload_data_set"));
+	SHARK_ASSERT(result["upload_data_set"].isObject());
+	SHARK_ASSERT(result["upload_data_set"].has("id"));
+
+	// return the ID
+	return detail::json2number<IDType>(result["upload_data_set"]["id"]);
+}
+
+IDType createDataset(
+		PathType const& arffFile,
+		std::string const& name,
+		std::string const& description,
+		std::string const& target)
+{
+	// load the ARFF file
+	std::ifstream istr(arffFile.string());
+	std::stringstream arff;
+	arff << istr.rdbuf();
+
+	// call the in-memory version
+	return createDataset(arff.str(), name, description, target);
+}
+
+
+IDType createTask(
+		IDType type,
+		std::shared_ptr<Dataset> ds,
+		std::string const& target,
+		IDType estimationProcedure,
+		std::string const& evaluationMeasure)
+{
+	std::string t = target;
+	if (t.empty())
+	{
+		int index = ds->defaultTargetAttribute();
+		if (index < 0) throw SHARKEXCEPTION("[createTask] target attribute must be specified, since the data set does not define one");
+		t = ds->attribute(index).name;
+	}
+
+	// create the XML description
+	std::string xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
+	xml += "<oml:task_inputs xmlns:oml=\"http://openml.org/openml\">\n"
+			"<oml:task_type_id>" + boost::lexical_cast<std::string>(type) + "</oml:task_type_id>\n"
+			"<oml:input name=\"source_data\">" + boost::lexical_cast<std::string>(ds->id()) + "</oml:input>\n"
+			"<oml:input name=\"target_feature\">" + detail::xmlencode(t) + "</oml:input>\n"
+			"<oml:input name=\"estimation_procedure\">" + boost::lexical_cast<std::string>(estimationProcedure) + "</oml:input>\n";
+	if (! evaluationMeasure.empty()) xml += "<oml:input name=\"evaluation_measures\">" + detail::xmlencode(evaluationMeasure) + "</oml:input>\n";
+	xml += "</oml:task_inputs>\n";
+
+	// upload the data to the OpenML server
+	Connection::ParamType upload {
+				{"description|application/xml|description.xml", xml},
+			};
+	openML::detail::Json result = connection.post("/task", upload);
+
+	// check the result
+	SHARK_ASSERT(result.isObject());
+	SHARK_ASSERT(result.has("upload_task"));
+	SHARK_ASSERT(result["upload_task"].isObject());
+	SHARK_ASSERT(result["upload_task"].has("id"));
+
+	// return the ID
+	return detail::json2number<IDType>(result["upload_task"]["id"]);
+}
+
+IDType createSupervisedClassificationTask(
+		std::shared_ptr<Dataset> ds,
+		std::string const& target,
+		IDType estimationProcedure)
+{
+	IDType type = detail::inverseLookup(queryTaskTypes(), std::string("Supervised Classification"), invalidID);
+	if (type == invalidID) throw SHARKEXCEPTION("[createSupervisedClassificationTask] task type 'Supervised Classification' unknown to OpenML");
+	return createTask(type, ds, target, estimationProcedure);
+}
+
+IDType createSupervisedRegressionTask(
+		std::shared_ptr<Dataset> ds,
+		std::string const& target,
+		IDType estimationProcedure)
+{
+	IDType type = detail::inverseLookup(queryTaskTypes(), std::string("Supervised Regression"), invalidID);
+	if (type == invalidID) throw SHARKEXCEPTION("[createSupervisedRegressionTask] task type 'Supervised Regression' unknown to OpenML");
+	return createTask(type, ds, target, estimationProcedure);
+}
+
+
+////////////////////////////////////////////////////////////
+
+
+void deleteDataset(IDType id)
+{
+	detail::Json j = connection.del("/data/" + boost::lexical_cast<std::string>(id));
+
+	// check the return value
+	SHARK_ASSERT(j.isObject());
+	SHARK_ASSERT(j.has("data_delete"));
+	SHARK_ASSERT(j["data_delete"].has("id"));
+	SHARK_ASSERT(detail::json2number<IDType>(j["data_delete"]["id"]) == id);
+}
+
+void deleteDataset(std::shared_ptr<Dataset> dataset)
+{ deleteDataset(dataset->id()); }
+
+
+void deleteTask(IDType id)
+{
+	detail::Json j = connection.del("/task/" + boost::lexical_cast<std::string>(id));
+
+	// check the return value
+	SHARK_ASSERT(j.isObject());
+	SHARK_ASSERT(j.has("task_delete"));
+	SHARK_ASSERT(j["task_delete"].has("id"));
+	SHARK_ASSERT(detail::json2number<IDType>(j["task_delete"]["id"]) == id);
+}
+
+void deleteTask(std::shared_ptr<Task> task)
+{ deleteTask(task->id()); }
+
+
+void deleteFlow(IDType id)
+{
+	detail::Json j = connection.del("/flow/" + boost::lexical_cast<std::string>(id));
+
+	// check the return value
+	SHARK_ASSERT(j.isObject());
+	SHARK_ASSERT(j.has("flow_delete"));
+	SHARK_ASSERT(j["flow_delete"].has("id"));
+	SHARK_ASSERT(detail::json2number<IDType>(j["flow_delete"]["id"]) == id);
+}
+
+void deleteFlow(std::shared_ptr<Flow> flow)
+{ deleteFlow(flow->id()); }
+
+
+void deleteRun(IDType id)
+{
+	detail::Json j = connection.del("/run/" + boost::lexical_cast<std::string>(id));
+
+	// check the return value
+	SHARK_ASSERT(j.isObject());
+	SHARK_ASSERT(j.has("run_delete"));
+	SHARK_ASSERT(j["run_delete"].has("id"));
+	SHARK_ASSERT(detail::json2number<IDType>(j["run_delete"]["id"]) == id);
+}
+
+void deleteRun(Run const& run)
+{ deleteRun(run.id()); }
+
+
+////////////////////////////////////////////////////////////
+
+
 QueryResult getIDs(std::string const& query, std::string const& level1, std::string const& level2, std::string const& idname)
 {
 	detail::Json result = connection.get(query);
@@ -125,72 +288,22 @@ QueryResult getIDs(std::string const& query, std::string const& level1, std::str
 	return ret;
 }
 
-QueryResult allDatasets()
+QueryResult queryDatasets(std::string const& filters)
 {
-	return getIDs("/data/list", "data", "dataset", "did");
+	return getIDs("/data/list" + filters, "data", "dataset", "did");
 }
 
-QueryResult taggedDatasets(std::string const& tagname)
+QueryResult queryTasks(std::string const& filters)
 {
-	return getIDs("/data/list/tag/" + detail::urlencode(tagname), "data", "dataset", "did");
+	return getIDs("/task/list" + filters, "tasks", "task", "task_id");
 }
 
-QueryResult datasetsByProperties(std::map<DatasetProperty, std::string> const& properties)
+QueryResult queryFlows(std::string const& filters)
 {
-	throw std::runtime_error("[datasetsByProperties] not implemented yet");
+	return getIDs("/flow/list" + filters, "flows", "flow", "id");
 }
 
-QueryResult allTasks()
-{
-	return getIDs("/task/list", "tasks", "task", "task_id");
-}
-
-QueryResult supervisedClassificationTasks()
-{
-	return getIDs("/task/list/type/1", "tasks", "task", "task_id");
-}
-
-QueryResult supervisedRegressionTasks()
-{
-	return getIDs("/task/list/type/2", "tasks", "task", "task_id");
-}
-
-QueryResult taggedTasks(std::string const& tagname)
-{
-	return getIDs("/task/list/tag/" + detail::urlencode(tagname), "tasks", "task", "task_id");
-}
-
-QueryResult tasksByProperties(std::map<DatasetProperty, std::string> const& properties)
-{
-	throw std::runtime_error("[tasksByProperties] not implemented yet");
-}
-
-
-QueryResult allFlows()
-{
-	return getIDs("/flow/list", "flows", "flow", "id");
-}
-
-QueryResult taggedFlows(std::string const& tagname)
-{
-	return getIDs("/flow/list/tag/" + detail::urlencode(tagname), "flows", "flow", "id");
-}
-
-QueryResult myFlows()
-{
-	detail::Json result = connection.get("/flow/owned");
-	detail::Json ids = result["flow_owned"]["id"];
-	SHARK_ASSERT(ids.isArray());
-	QueryResult ret(ids.size());
-	for (std::size_t i=0; i<ids.size(); i++)
-	{
-		ret[i].id = detail::json2number<IDType>(ids[i]);
-		// TODO: fill in qualities and tags!
-	}
-	return ret;
-}
-
-IDType getFlow(std::string const& name, std::string const& version)
+IDType findFlow(std::string const& name, std::string const& version)
 {
 	std::string url = "/flow/exists/" + detail::urlencode(name) + "/" + detail::urlencode(version);
 	detail::Json result = connection.get(url);
@@ -199,129 +312,36 @@ IDType getFlow(std::string const& name, std::string const& version)
 	else return invalidID;
 }
 
-
-QueryResult taggedRuns(std::string const& tagname)
+QueryResult queryRuns(std::string const& filters)
 {
-	return getIDs("/run/list/tag/" + detail::urlencode(tagname), "runs", "run", "run_id");
+	return getIDs("/run/list" + filters, "runs", "run", "run_id");
 }
 
-QueryResult runsByTask(IDType taskID)
+std::map<IDType, std::string> queryTaskTypes()
 {
-	return getIDs("/run/list/task/" + boost::lexical_cast<std::string>(taskID), "runs", "run", "run_id");
-}
-
-QueryResult runsByTask(Task const& task)
-{
-	return getIDs("/run/list/task/" + boost::lexical_cast<std::string>(task.id()), "runs", "run", "run_id");
-}
-
-QueryResult runsByFlow(IDType flowID)
-{
-	return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flowID), "runs", "run", "run_id");
-}
-
-QueryResult runsByFlow(Flow const& flow)
-{
-	return getIDs("/run/list/flow/" + boost::lexical_cast<std::string>(flow.id()), "runs", "run", "run_id");
-}
-
-QueryResult runsByProperties(std::map<RunProperty, std::string> const& properties)
-{
-	throw std::runtime_error("[runsByProperties] not implemented yet");
-}
-
-
-struct Condition
-{
-	Condition(std::string const& name_, std::string const& op_, std::string const& value_)
-	: name(boost::trim_copy(name_))
-	, op(op_)
-	, value(boost::trim_copy(value_))
-	{ }
-
-	bool operator () (QueryEntry const& entry) const
+	detail::Json result = connection.get("/tasktype/list");
+	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	detail::Json objects = result["task_types"]["task_type"];
+	SHARK_ASSERT(objects.isArray());
+	std::map<IDType, std::string> ret;
+	for (std::size_t i=0; i<objects.size(); i++)
 	{
-		if (name == "tag" && op == "tag")
-		{
-			// check whether value is present as a tag
-			std::set<std::string>::const_iterator it = entry.tag.find(value);
-			return (it != entry.tag.end());
-		}
-		else
-		{
-			// check a condition on a property
-			std::map<std::string, std::string>::const_iterator it = entry.property.find(name);
-			if (it == entry.property.end()) return false;
-
-			try
-			{
-				// compare as numbers
-		 		double lhs = boost::lexical_cast<double>(value);
-		 		double rhs = boost::lexical_cast<double>(it->second);
-				if (op == "==") return (lhs == rhs);
-				if (op == "!=") return (lhs != rhs);
-				if (op == "<") return (lhs < rhs);
-				if (op == "<=") return (lhs <= rhs);
-				if (op == ">") return (lhs > rhs);
-				if (op == ">=") return (lhs >= rhs);
-				throw SHARKEXCEPTION("[filter] invalid operator");
-			}
-			catch (...)
-			{
-				// compare as strings
-				if (op == "==") return (value == it->second);
-				if (op == "!=") return (value != it->second);
-				throw SHARKEXCEPTION("[filter] invalid operator, non-numerical values cannot be ordered");
-			}
-		}
+		ret[detail::json2number<IDType>(objects[i]["id"])] = objects[i]["name"].asString();
 	}
+	return ret;
+}
 
-	std::string name;
-	std::string op;
-	std::string value;
-};
-
-SHARK_EXPORT_SYMBOL QueryResult filter(QueryResult const& list, std::string const& strCondition)
+std::map<IDType, std::string> queryEstimationProcedures()
 {
-	// parse condition string
-	std::vector<Condition> conditions;
-	std::size_t start = 0;
-	while (start >= strCondition.size())
+	detail::Json result = connection.get("/evaluationprocedure/list");
+	if (result.isNull() || result.isNumber()) throw SHARKEXCEPTION("OpenML request failed");
+	detail::Json objects = result["estimationprocedures"]["estimationprocedure"];
+	SHARK_ASSERT(objects.isArray());
+	std::map<IDType, std::string> ret;
+	for (std::size_t i=0; i<objects.size(); i++)
 	{
-		std::size_t semicolon = strCondition.find(';', start);
-		if (semicolon == std::string::npos) semicolon = strCondition.size();
-		if (conditions.size() >= start + 10 && strCondition.substr(start, 10) == "tagged as ")
-		{
-			conditions.push_back(Condition("tag", "tag", strCondition.substr(start + 10, semicolon - start - 10)));
-		}
-		else
-		{
-			std::size_t pos = strCondition.find_first_of("<=>!", start);
-			std::size_t end = pos + 1;
-			if (strCondition[end] == '=') end++;
-			std::string strOP = strCondition.substr(pos, end - pos);
-			if (strOP != "==" && strOP != "!=" && strOP != "<" && strOP != "<=" && strOP != ">" && strOP != ">=") throw SHARKEXCEPTION("[filter] invalid comparison operator: " + strOP);
-			conditions.push_back(Condition(strCondition.substr(start, pos - start), strOP, strCondition.substr(end, semicolon - end)));
-		}
-		start = semicolon + 1;
+		ret[(int)objects[i]["id"].asNumber()] = objects[i]["name"].asString();
 	}
-
-	// apply conditions to list
-	QueryResult ret;
-	for (std::size_t i=0; i<list.size(); i++)
-	{
-		bool add = true;
-		for (std::size_t j=0; j<conditions.size(); j++)
-		{
-			if (! conditions[j](list[i]))
-			{
-				add = false;
-				break;
-			}
-		}
-		if (add) ret.push_back(list[i]);
-	}
-
 	return ret;
 }
 

@@ -21,14 +21,14 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
- * \par Copyright 1995-2016 Shark Development Team
+ * \par Copyright 1995-2017 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
- * <http://image.diku.dk/shark/>
+ * <http://shark-ml.org/>
  * 
  * Shark is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published 
@@ -383,6 +383,8 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 				else
 				{
 					pos = arff::detail::parseToken(line, pos, s);
+					// convert to ASCII lower case (i.e., don't rely on the locale)
+					for (std::size_t i=0; i<s.size(); i++) if (s[i] >= 65 && s[i] <= 90) s[i] += 32;
 					if (s == "binary" || s == "numeric" || s == "integer" || s == "real")
 					{
 						attributeType.push_back(arff::detail::Numeric);
@@ -462,7 +464,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] invalid value in nominal field");
 						std::size_t value = it->second;
 						if (i == labelIndex) arff::detail::setLabel(label, value);
-						else input(attributeStart[i + value]) = 1.0;
+						else input(attributeStart[i] + value) = 1.0;
 					}
 				}
 				else if (attributeType[i] == arff::detail::Numeric)
@@ -521,7 +523,7 @@ SHARK_EXPORT_SYMBOL template<typename InputT, typename LabelT> void importARFF(
 						if (it == attributeNominalValue[i].end()) throw SHARKEXCEPTION("[importARFF] invalid value in nominal field");
 						std::size_t value = it->second;
 						if (i == labelIndex) arff::detail::setLabel(label, value);
-						else input(attributeStart[i + value]) = 1.0;
+						else input(attributeStart[i] + value) = 1.0;
 					}
 				}
 				else if (attributeType[i] == arff::detail::Numeric)

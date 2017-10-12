@@ -8,7 +8,7 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -56,16 +56,14 @@ Task::Task(IDType id, bool downloadSplits)
 	detail::Json desc = result["task"];
 	detail::Json input = desc["input"];
 	detail::Json output = desc["output"];
-	std::string s;
 
-	s = desc["task_type"].asString();
-	if (s == "Supervised Classification") m_tasktype = SupervisedClassification;
-	else if (s == "Supervised Regression") m_tasktype = SupervisedRegression;
-	else throw SHARKEXCEPTION("unsupported task type: " + s);
+	m_type = detail::inverseLookup(queryTaskTypes(), desc["task_type"].asString(), invalidID);
+
+	m_name = desc["task_name"].asString();
 
 	IDType datasetID = detail::json2number<IDType>(input[0]["data_set"]["data_set_id"]);
 	m_dataset = Dataset::get(datasetID);
-	m_targetFeature = input[0]["data_set"]["target_feature"].asString();
+	m_targetAttribute = input[0]["data_set"]["target_feature"].asString();
 
 	detail::Json ep = input[1]["estimation_procedure"];
 	m_file.setUrl(ep["data_splits_url"].asString());
@@ -83,25 +81,26 @@ Task::Task(IDType id, bool downloadSplits)
 
 	// expected output
 	m_outputFormat = output["predictions"]["format"].asString();
-	detail::Json features = output["predictions"]["feature"];
-	for (std::size_t i=0; i<features.size(); i++)
+	detail::Json attributes = output["predictions"]["feature"];
+	for (std::size_t i=0; i<attributes.size(); i++)
 	{
-		detail::Json feature = features[i];
-		FeatureDescription fd;
-		std::string type = feature["type"].asString();
+		detail::Json attribute = attributes[i];
+		AttributeDescription ad;
+		std::string type = attribute["type"].asString();
 		detail::ASCIItoLowerCase(type);
-		if (type == "binary") fd.type = BINARY;
-		else if (type == "integer") fd.type = INTEGER;
-		else if (type == "numeric") fd.type = NUMERIC;
-		else if (type == "nominal") fd.type = NOMINAL;
-		else if (type == "string") fd.type = STRING;
-		else if (type == "date") fd.type = DATE;
-		else throw SHARKEXCEPTION("unknown feature type in task definition");
-		fd.name = feature["name"].asString();
-		fd.target = false;
-		fd.ignore = false;
-		fd.rowIdentifier = false;
-		m_outputFeature.push_back(fd);
+		if (type == "binary") ad.type = BINARY;
+		else if (type == "integer") ad.type = INTEGER;
+		else if (type == "real") ad.type = NUMERIC;
+		else if (type == "numeric") ad.type = NUMERIC;
+		else if (type == "nominal") ad.type = NOMINAL;
+		else if (type == "string") ad.type = STRING;
+		else if (type == "date") ad.type = DATE;
+		else throw SHARKEXCEPTION("unknown attribute type in task definition");
+		ad.name = attribute["name"].asString();
+		ad.target = false;
+		ad.ignore = false;
+		ad.rowIdentifier = false;
+		m_outputAttribute.push_back(ad);
 	}
 
 	if (desc.has("tag")) setTags(desc["tag"]);
@@ -164,6 +163,14 @@ void Task::load() const
 	for (std::size_t i=0; i<ix.size(); i++) sp[rp[i]][ix[i]] = fd[i];
 }
 
+std::string Task::type() const
+{
+	auto dict = queryTaskTypes();
+	auto it = dict.find(m_type);
+	if (it == dict.end()) throw SHARKEXCEPTION("[Task::tasktype] invalid task type");
+	return it->second;
+}
+
 void Task::tag(std::string const& tagname)
 {
 	Connection::ParamType param;
@@ -186,9 +193,10 @@ void Task::print(std::ostream& os) const
 {
 	os << "Task:" << std::endl;
 	Entity::print(os);
-	os << " type: " << taskTypeName[m_tasktype] << std::endl;
+	os << " type: " << type() << std::endl;
+	os << " name: " << name() << std::endl;
 	os << " data set: " << m_dataset->name() << " [" << m_dataset->id() << "]" << std::endl;
-	os << " target feature: " << m_targetFeature << std::endl;
+	os << " target attribute: " << m_targetAttribute << std::endl;
 	os << " splits url: " << m_file.url() << std::endl;
 	os << " number of repetitions: " << m_repetitions << std::endl;
 	os << " number of folds: " << m_folds << std::endl;
@@ -198,10 +206,10 @@ void Task::print(std::ostream& os) const
 	if (m_file.downloaded()) os << "in cache at " << m_file.filename().string();
 	else os << "not in cache";
 	os << std::endl;
-	for (std::size_t i=0; i<m_outputFeature.size(); i++)
+	for (std::size_t i=0; i<m_outputAttribute.size(); i++)
 	{
-		FeatureDescription const& fd = m_outputFeature[i];
-		os << "  feature " << i << ": " << fd.name << " (" << featureTypeName[(unsigned int)fd.type] << ")";
+		AttributeDescription const& fd = m_outputAttribute[i];
+		os << "  attribute " << i << ": " << fd.name << " (" << attributeTypeName[(unsigned int)fd.type] << ")";
 		if (fd.target) os << " [target]";
 		if (fd.ignore) os << " [ignore]";
 		if (fd.rowIdentifier) os << " [row-identifier]";

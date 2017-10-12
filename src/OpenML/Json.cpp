@@ -229,7 +229,7 @@ bool Json::operator == (Json const& other) const
 		return true;
 	}
 	default:
-		throw std::runtime_error("json internal error");
+		throw SHARKEXCEPTION("json internal error");
 	}
 }
 
@@ -255,7 +255,7 @@ Json Json::clone() const
 		for (const_array_iterator it = array_begin(); it != array_end(); ++it) ret.push_back(it->clone());
 		return ret;
 	}
-	else throw std::runtime_error("json internal error");
+	else throw SHARKEXCEPTION("json internal error");
 }
 
 // static
@@ -343,7 +343,7 @@ void Json::outputJson(std::ostream& str, int depth) const
 		if (depth >= 0) str << "\n" << std::string(depth, INDENT_CHAR);
 		str << "]";
 	}
-	else throw std::runtime_error("json internal error");
+	else throw SHARKEXCEPTION("json internal error");
 }
 
 bool Json::load(std::string const& filename)

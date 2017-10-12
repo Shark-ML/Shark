@@ -71,7 +71,7 @@ Dataset::Dataset(IDType id, bool downloadData)
 		for (std::size_t i=0; i<features.size(); i++)
 		{
 			detail::Json feature = features[i];
-			FeatureDescription fd;
+			AttributeDescription fd;
 			std::string type = feature["data_type"].asString();
 			detail::ASCIItoLowerCase(type);
 			if (type == "binary") fd.type = BINARY;
@@ -80,12 +80,12 @@ Dataset::Dataset(IDType id, bool downloadData)
 			else if (type == "nominal") fd.type = NOMINAL;
 			else if (type == "string") fd.type = STRING;
 			else if (type == "date") fd.type = DATE;
-			else throw SHARKEXCEPTION("unknown feature type in dataset definition");
+			else throw SHARKEXCEPTION("unknown attribute type in dataset definition");
 			fd.name = feature["name"].asString();
 			fd.target = detail::json2bool(feature["is_target"]);
 			fd.ignore = detail::json2bool(feature["is_ignore"]);
 			fd.rowIdentifier = detail::json2bool(feature["is_row_identifier"]);
-			m_feature.push_back(fd);
+			m_attribute.push_back(fd);
 		}
 	}
 
@@ -125,14 +125,14 @@ void Dataset::print(std::ostream& os) const
 	if (m_file.downloaded()) os << "in cache at " << m_file.filename().string();
 	else os << "not in cache";
 	os << std::endl;
-	os << " " << m_feature.size() << " features:" << std::endl;
-	for (std::size_t i=0; i<m_feature.size(); i++)
+	os << " " << m_attribute.size() << " attributes:" << std::endl;
+	for (std::size_t i=0; i<m_attribute.size(); i++)
 	{
-		FeatureDescription const& fd = m_feature[i];
-		os << "  feature " << i << ": " << fd.name << " (" << featureTypeName[(unsigned int)fd.type] << ")";
-		if (fd.target) os << " [target]";
-		if (fd.ignore) os << " [ignore]";
-		if (fd.rowIdentifier) os << " [row-identifier]";
+		AttributeDescription const& ad = m_attribute[i];
+		os << "  attribute " << i << ": " << ad.name << " (" << attributeTypeName[(unsigned int)ad.type] << ")";
+		if (ad.target) os << " [target]";
+		if (ad.ignore) os << " [ignore]";
+		if (ad.rowIdentifier) os << " [row-identifier]";
 		os << std::endl;
 	}
 }

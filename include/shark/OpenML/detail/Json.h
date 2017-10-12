@@ -642,7 +642,7 @@ public:
 		if (tn == null) m_ptr = std::make_shared<Data>(Null());
 		else if (tn == object) m_ptr = std::make_shared<Data>(Object());
 		else if (tn == array) m_ptr = std::make_shared<Data>(Array());
-		else throw std::runtime_error("json internal error");
+		else throw SHARKEXCEPTION("json internal error");
 		return *this;
 	}
 	inline void push_back(Json const& value)
@@ -679,7 +679,7 @@ protected:
 	inline bool isValid() const
 	{ return (m_ptr->type() != type_undefined); }
 
-#define JSON_INTERNAL_FAIL { std::stringstream ss; ss << "json parse error at position " << position ; throw std::runtime_error(ss.str()); }
+#define JSON_INTERNAL_FAIL { std::stringstream ss; ss << "json parse error at position " << position ; throw SHARKEXCEPTION(ss.str()); }
 #define JSON_INTERNAL_PEEK(c) { if (iter == end) JSON_INTERNAL_FAIL; c = *iter; }
 #define JSON_INTERNAL_READ(c) { JSON_INTERNAL_PEEK(c); ++iter; ++position; }
 #define JSON_INTERNAL_SKIP \

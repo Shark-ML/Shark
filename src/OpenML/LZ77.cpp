@@ -152,7 +152,7 @@ pair<size_t, size_t> StreamDecoderRFC1951::decode(
 		size_t outputsize)
 {
 	// "functions"
-	#define error throw runtime_error("[decode] decompression failed")
+	#define error throw SHARKEXCEPTION("[decode] decompression failed")
 	#define available (8 * inputsize + m_numberOfBits)
 	#define bits(n) (m_bits & ((1 << n) - 1))
 	#define discard(n) \
@@ -517,7 +517,7 @@ pair<size_t, size_t> StreamDecoderRFC1950::decode(
 	#undef done
 	#undef error
 	#define done return make_pair(startInputsize - inputsize, startOutputsize - outputsize);
-	#define error throw runtime_error("[decode] decompression failed")
+	#define error throw SHARKEXCEPTION("[decode] decompression failed")
 
 	// perform atomic operations until we run out of buffer space
 	while (true)
@@ -592,7 +592,7 @@ pair<size_t, size_t> StreamDecoderRFC1952::decode(
 	#undef done
 	#undef error
 	#define done return make_pair(startInputsize - inputsize, startOutputsize - outputsize);
-	#define error throw runtime_error("[lz77::gzip] decompression failed")
+	#define error throw SHARKEXCEPTION("[lz77::gzip] decompression failed")
 
 	// perform atomic operations until we run out of buffer space
 	while (true)

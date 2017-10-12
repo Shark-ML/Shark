@@ -215,7 +215,7 @@ void Run::print(std::ostream& os) const
 {
 	os << "Run:" << std::endl;
 	Entity::print(os);
-	os << " task: " << taskTypeName[m_task->tasktype()] << " on " << m_task->dataset()->name() << " [" << m_task->id() << "]" << std::endl;
+	os << " task: " << m_task->type() << " on " << m_task->dataset()->name() << " [" << m_task->id() << "]" << std::endl;
 	os << " flow: " << m_flow->name() << " [" << m_flow->id() << "]" << std::endl;
 	for (std::size_t i=0; i<m_hyperparameterValue.size(); i++)
 	{
@@ -235,12 +235,12 @@ void Run::commit()
 	// https://github.com/openml/OpenML/issues/261
 	std::vector<std::string> nominalValue;
 	std::string labelType = "NUMERIC";
-	FeatureDescription const& fd = dataset->feature(dataset->featureIndex(m_task->targetFeature()));
+	AttributeDescription const& fd = dataset->attribute(dataset->attributeIndex(m_task->targetAttribute()));
 	if (fd.type == NOMINAL)
 	{
 		CachedFile const& f = dataset->datafile();
 		f.download();
-		nominalValue = importARFFnominalLabel(f.filename().string(), m_task->targetFeature());
+		nominalValue = importARFFnominalLabel(f.filename().string(), m_task->targetAttribute());
 		if (nominalValue.empty()) throw SHARKEXCEPTION("failed to determine nominal label values from ARFF data set file");
 		labelType = "{" + nominalValue[0];
 		for (std::size_t i=1; i<nominalValue.size(); i++) labelType += "," + nominalValue[i];

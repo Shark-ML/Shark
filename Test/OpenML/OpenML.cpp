@@ -6,127 +6,175 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cstdio>
+#include <thread>
+#include <chrono>
 
 using namespace shark;
 using namespace openML;
 
 
-static const std::string demo_api_key = "3e8001889d849f1dbdb109b3ac87c7eb";
+static const std::string demo_api_key = "0412af014f75cb8162542e34a0c86b2f";
 
 
-BOOST_AUTO_TEST_SUITE (OpenML_OpenML)
+BOOST_AUTO_TEST_SUITE(OpenML_OpenML)
 
-BOOST_AUTO_TEST_CASE(OpenML_Dataset)
+BOOST_AUTO_TEST_CASE(OpenML_Workflow)
 {
 	// prepare connection to the test server
-	connection.enableTestMode();
-	connection.setKey(demo_api_key);
+	openML::connection.enableTestMode();
+	openML::connection.setKey(demo_api_key);
 
-	// construct data set from ID
-	std::shared_ptr<Dataset> ds = Dataset::get(11);
-	BOOST_CHECK_EQUAL(ds->id(), 11);
+	// create a dummy data set
+	std::string arff = "% for unit testing only, please ignore\n"
+	                   "@relation unit-test-data\n"
+	                   "@attribute 'number' numeric\n"
+	                   "@attribute 'animal' {cat, dog, mouse, horse, donkey}\n"
+	                   "@attribute 'class' {good, bad}\n"
+	                   "@data\n"
+	                   "3.14, cat, good\n"
+	                   "42, cat, bad\n"
+	                   "-1.23456789, cat, good\n"
+	                   "1.123456789e50, cat, bad\n"
+	                   "3.14, dog, good\n"
+	                   "42, dog, bad\n"
+	                   "-1.23456789, dog, good\n"
+	                   "1.123456789e50, dog, bad\n"
+	                   "3.14, mouse, good\n"
+	                   "42, mouse, bad\n"
+	                   "-1.23456789, mouse, good\n"
+	                   "1.123456789e50, mouse, bad\n"
+	                   "3.14, horse, good\n"
+	                   "42, horse, bad\n"
+	                   "-1.23456789, horse, good\n"
+	                   "1.123456789e50, horse, bad\n"
+	                   "3.14, donkey, good\n"
+	                   "42, donkey, bad\n"
+	                   "-1.23456789, donkey, good\n"
+	                   "1.123456789e50, donkey, bad\n";
+	openML::IDType datasetID = openML::createDataset(
+	                   arff,
+	                   "unit-test-data",
+	                   "for unit testing only, please ignore",
+	                   "class");
+
+	std::cout << "data set ID: " << datasetID << std::endl;
+
+	// construct a data set object from the ID
+	std::cout << "please wait while OpenML processes the newly uploaded data set " << std::flush;
+	std::shared_ptr<openML::Dataset> ds;
+	for (int trials=0; trials<50; trials++)
+	{
+		try
+		{
+			ds = openML::Dataset::get(datasetID);
+			break;
+		}
+		catch (...)
+		{
+			// give the server some time to digest the upload
+			std::cout << "." << std::flush;
+			std::this_thread::sleep_for(std::chrono::seconds(3));
+		}
+	}
+	if (! ds)
+	{
+		std::cout << " giving up." << std::endl;
+		openML::deleteDataset(datasetID);
+		throw SHARKEXCEPTION("failed to load data set");
+	}
+	std::cout << " done." << std::endl;
+
+	ds->print();
+	BOOST_CHECK_EQUAL(ds->id(), datasetID);
 
 	// basic getters
-	BOOST_CHECK_EQUAL(ds->name(), "balance-scale");
-	BOOST_CHECK_EQUAL(ds->format(), "ARFF");
+	BOOST_CHECK_EQUAL(ds->name(), "unit-test-data");
+	BOOST_CHECK_EQUAL(ds->description(), "for unit testing only, please ignore");
+	BOOST_CHECK_EQUAL(ds->format(), "arff");
+	BOOST_CHECK_EQUAL(ds->visibility(), "public");
 
-	// feature getters
-	BOOST_CHECK_EQUAL(ds->numberOfFeatures(), 5);
-	BOOST_CHECK_EQUAL(ds->feature(0).type, NUMERIC);
-	BOOST_CHECK_EQUAL(ds->feature(0).name, "left-weight");
-	BOOST_CHECK_EQUAL(ds->feature(0).target, false);
-	BOOST_CHECK_EQUAL(ds->feature(0).ignore, false);
-	BOOST_CHECK_EQUAL(ds->feature(0).rowIdentifier, false);
-	BOOST_CHECK_EQUAL(ds->feature(4).type, NOMINAL);
-	BOOST_CHECK_EQUAL(ds->feature(4).name, "class");
-	BOOST_CHECK_EQUAL(ds->feature(4).target, true);
-	BOOST_CHECK_EQUAL(ds->feature(4).ignore, false);
-	BOOST_CHECK_EQUAL(ds->feature(4).rowIdentifier, false);
-	BOOST_CHECK_EQUAL(ds->featureIndex("class"), 4);
+	// attribute getters
+	BOOST_CHECK_EQUAL(ds->numberOfAttributes(), 3);
+	BOOST_CHECK_EQUAL(ds->attribute(0).type, NUMERIC);
+	BOOST_CHECK_EQUAL(ds->attribute(0).name, "number");
+	BOOST_CHECK_EQUAL(ds->attribute(0).target, false);
+	BOOST_CHECK_EQUAL(ds->attribute(0).ignore, false);
+	BOOST_CHECK_EQUAL(ds->attribute(0).rowIdentifier, false);
+	BOOST_CHECK_EQUAL(ds->attribute(1).type, NOMINAL);
+	BOOST_CHECK_EQUAL(ds->attribute(1).name, "animal");
+	BOOST_CHECK_EQUAL(ds->attribute(1).target, false);
+	BOOST_CHECK_EQUAL(ds->attribute(1).ignore, false);
+	BOOST_CHECK_EQUAL(ds->attribute(1).rowIdentifier, false);
+	BOOST_CHECK_EQUAL(ds->attribute(2).type, NOMINAL);
+	BOOST_CHECK_EQUAL(ds->attribute(2).name, "class");
+	BOOST_CHECK_EQUAL(ds->attribute(2).target, true);
+	BOOST_CHECK_EQUAL(ds->attribute(2).ignore, false);
+	BOOST_CHECK_EQUAL(ds->attribute(2).rowIdentifier, false);
+	BOOST_CHECK_EQUAL(ds->attributeIndex("number"), 0);
+	BOOST_CHECK_EQUAL(ds->attributeIndex("animal"), 1);
+	BOOST_CHECK_EQUAL(ds->attributeIndex("class"), 2);
 
 	// cached file
-	CachedFile const& f = ds->datafile();
-	BOOST_CHECK_EQUAL(f.filename(), CachedFile::cacheDirectory() / "dataset_11.arff");
-	f.download();
-	BOOST_CHECK(boost::filesystem::exists(f.filename()));
+	openML::CachedFile const& f1 = ds->datafile();
+	BOOST_CHECK_EQUAL(f1.filename(), CachedFile::cacheDirectory() / ("dataset_" + boost::lexical_cast<std::string>(datasetID) + ".arff"));
+	f1.download();
+	BOOST_CHECK(boost::filesystem::exists(f1.filename()));
 
 	// file content
 	ClassificationDataset data;
-	importARFF(f.filename().string(), "class", data);
-	BOOST_CHECK_EQUAL(data.numberOfElements(), 625);
-	BOOST_CHECK_EQUAL(inputDimension(data), 4);
-	BOOST_CHECK_EQUAL(numberOfClasses(data), 3);
+	importARFF(f1.filename().string(), "class", data);
+	BOOST_CHECK_EQUAL(data.numberOfElements(), 20);
+	BOOST_CHECK_EQUAL(inputDimension(data), 6);   // 1 + 5, the latter due to one-hot-encoding
+	BOOST_CHECK_EQUAL(numberOfClasses(data), 2);
 
-	// remove cached file
-	std::remove(f.filename().string().c_str());
-}
+	// tag the data set
+	ds->tag("shark-unit-test");
+	BOOST_CHECK(ds->tags().count("shark-unit-test") > 0);
 
-BOOST_AUTO_TEST_CASE(OpenML_Task)
-{
-	// prepare connection to the test server
-	connection.enableTestMode();
-	connection.setKey(demo_api_key);
+	// create a task for the data set
+	openML::IDType taskID = openML::createSupervisedClassificationTask(ds);
 
-	// construct task from ID
-	std::shared_ptr<Task> task = Task::get(11);
-	BOOST_CHECK_EQUAL(task->id(), 11);
-// TODO: obtain the properties of task 11 ON THE TEST SERVER
+	std::cout << "task ID: " << taskID << std::endl;
+
+	// construct a task object from the ID
+	std::this_thread::sleep_for(std::chrono::seconds(3));   // let the server breath...
+	std::shared_ptr<openML::Task> task = openML::Task::get(taskID);
+
+	task->print();
+	BOOST_CHECK_EQUAL(task->id(), taskID);
 
 	// basic getters
-	BOOST_CHECK_EQUAL(task->tasktype(), SupervisedClassification);
-	BOOST_CHECK_EQUAL(task->targetFeature(), "class");
+	BOOST_CHECK_EQUAL(task->dataset(), ds);
+	BOOST_CHECK_EQUAL(task->targetAttribute(), "class");
 	BOOST_CHECK_EQUAL(task->repetitions(), 1);
 	BOOST_CHECK_EQUAL(task->folds(), 10);
 
-	// access to data set
-	std::shared_ptr<const Dataset> ds = task->dataset();
-	BOOST_CHECK_EQUAL(ds->id(), 11);
-
-	// load data
-	ClassificationDataset data;
-	task->loadData(data);
-	BOOST_CHECK_EQUAL(data.numberOfElements(), 625);
-	BOOST_CHECK_EQUAL(inputDimension(data), 4);
-	BOOST_CHECK_EQUAL(numberOfClasses(data), 3);
-
-	// obtain folds
-	CVFolds<ClassificationDataset> folds = task->split(0, data);
-	BOOST_CHECK_EQUAL(folds.size(), 10);
-
-	// obtain "raw" split indices
-	std::vector<std::size_t> const& idx = task->splitIndices(0);
-	BOOST_CHECK_EQUAL(idx.size(), 625);
-
 	// cached file
-	CachedFile const& f = task->splitsfile();
-	BOOST_CHECK_EQUAL(f.filename(), CachedFile::cacheDirectory() / "task_11_splits.arff");
-	f.download();
-	BOOST_CHECK(boost::filesystem::exists(f.filename()));
+	openML::CachedFile const& f2 = task->splitsfile();
+	BOOST_CHECK_EQUAL(f2.filename(), CachedFile::cacheDirectory() / ("task_" + boost::lexical_cast<std::string>(taskID) + "_splits.arff"));
+	f2.download();
+	BOOST_CHECK(boost::filesystem::exists(f2.filename()));
 
-	// remove cached files
-	std::remove(f.filename().string().c_str());
-	std::remove(ds->datafile().filename().string().c_str());
-}
-
-BOOST_AUTO_TEST_CASE(OpenML_Flow)
-{
-	// prepare connection to the test server
-	connection.enableTestMode();
-	connection.setKey(demo_api_key);
+	// tag the task
+	task->tag("shark-unit-test");
+	BOOST_CHECK(task->tags().count("shark-unit-test") > 0);
 
 	// construct flow
-	std::vector<Hyperparameter> hyperparameters;
-	hyperparameters.push_back(Hyperparameter("a", "first dummy parameter", "numeric"));
-	hyperparameters.push_back(Hyperparameter("b", "second dummy parameter", "integer"));
-	IDType flowID = getFlow("Shark_unit_test_flow", Flow::sharkVersion());
-	std::shared_ptr<Flow> flow = (flowID == invalidID)
-			? Flow::create("Shark_unit_test_flow", "This flow is for unit testing only, please ignore.", hyperparameters)
-			: Flow::get(flowID);
+	IDType flowID = findFlow("shark-unit-test-flow");
+	if (flowID != invalidID) deleteFlow(flowID);
+	std::vector<Hyperparameter> hyperparameters {
+				Hyperparameter("a", "first dummy parameter", "numeric"),
+				Hyperparameter("b", "second dummy parameter", "integer"),
+			};
+	std::shared_ptr<Flow> flow = Flow::create("shark-unit-test-flow", "for unit testing only, please ignore", hyperparameters);
+	flowID = flow->id();
+
+	std::cout << "flow ID: " << flowID << std::endl;
 
 	// basic getters
-	BOOST_CHECK_EQUAL(flow->name(), "Shark_unit_test_flow");
+	BOOST_CHECK_EQUAL(flow->name(), "shark-unit-test-flow");
 	BOOST_CHECK_EQUAL(flow->version(), Flow::sharkVersion());
-	BOOST_CHECK_EQUAL(flow->description(), "This flow is for unit testing only, please ignore.");
+	BOOST_CHECK_EQUAL(flow->description(), "for unit testing only, please ignore");
 
 	// hyperparameters
 	BOOST_CHECK_EQUAL(flow->numberOfHyperparameters(), 2);
@@ -136,22 +184,12 @@ BOOST_AUTO_TEST_CASE(OpenML_Flow)
 	BOOST_CHECK_EQUAL(flow->hyperparameter(1).name, "b");
 	BOOST_CHECK_EQUAL(flow->hyperparameter(1).description, "second dummy parameter");
 	BOOST_CHECK_EQUAL(flow->hyperparameter(1).datatype, "integer");
+	BOOST_CHECK_EQUAL(flow->hyperparameterIndex("a"), 0);
 	BOOST_CHECK_EQUAL(flow->hyperparameterIndex("b"), 1);
-}
 
-BOOST_AUTO_TEST_CASE(OpenML_Run, * boost::unit_test::depends_on("OpenML_OpenML/OpenML_Task") * boost::unit_test::depends_on("OpenML_OpenML/OpenML_Flow"))
-{
-	// prepare connection to the test server
-	connection.enableTestMode();
-	connection.setKey(demo_api_key);
-
-	// construct task
-	std::shared_ptr<Task> task = Task::get(11);
-
-	// construct flow
-	IDType flowID = getFlow("Shark_unit_test_flow", Flow::sharkVersion());
-	BOOST_REQUIRE(flowID != invalidID);
-	std::shared_ptr<Flow> flow = Flow::get(flowID);
+	// tag the flow
+	flow->tag("shark-unit-test");
+	BOOST_CHECK(flow->tags().count("shark-unit-test") > 0);
 
 	// construct run from task and flow
 	Run run(task, flow);
@@ -162,12 +200,8 @@ BOOST_AUTO_TEST_CASE(OpenML_Run, * boost::unit_test::depends_on("OpenML_OpenML/O
 	run.setHyperparameterValue("b", 42);
 
 	// obtain data splits from the task
-	ClassificationDataset data;
-	task->loadData(data);
-	BOOST_CHECK_EQUAL(task->repetitions(), 1);
-	BOOST_CHECK_EQUAL(task->folds(), 10);
 	CVFolds<ClassificationDataset> folds = task->split(0, data);
-	BOOST_CHECK_EQUAL(folds.size(), 10);
+	BOOST_REQUIRE_EQUAL(folds.size(), 10);
 
 	// store test labels as predictions
 	// (in terms of machine learning this is cheating! but it is a useful unit test)
@@ -177,22 +211,27 @@ BOOST_AUTO_TEST_CASE(OpenML_Run, * boost::unit_test::depends_on("OpenML_OpenML/O
 		run.setPredictions(0, f, labels);
 	}
 
-	// store the "predictions" in OpenML
+	// store the "predictions" on the server
 	run.commit();
 
 	// check the run ID
 	IDType runID = run.id();
 	BOOST_CHECK(runID != invalidID);
 
+	// tag the run
+	run.tag("shark-unit-test");
+	BOOST_CHECK(run.tags().count("shark-unit-test") > 0);
+
 	// cached file
-	CachedFile const& f = run.predictionsfile();
-	BOOST_CHECK_EQUAL(f.filename(), CachedFile::cacheDirectory() / ("run_" + boost::lexical_cast<std::string>(runID) + ".arff"));
-	BOOST_CHECK(boost::filesystem::exists(f.filename()));
+	CachedFile const& f3 = run.predictionsfile();
+	BOOST_CHECK_EQUAL(f3.filename(), CachedFile::cacheDirectory() / ("run_" + boost::lexical_cast<std::string>(runID) + ".arff"));
+	BOOST_CHECK(boost::filesystem::exists(f3.filename()));
 
-	// remove cached file
-	std::remove(f.filename().string().c_str());
+	// remove the cached predictions file
+	std::remove(f3.filename().string().c_str());
+	BOOST_CHECK(! boost::filesystem::exists(f3.filename()));
 
-	// obtain the same run by ID from the server
+	// obtain the same run by it ID from the server
 	Run run2(runID);
 	BOOST_CHECK_EQUAL(run2.id(), runID);
 
@@ -228,14 +267,77 @@ BOOST_AUTO_TEST_CASE(OpenML_Run, * boost::unit_test::depends_on("OpenML_OpenML/O
 	}
 
 	// cached file
-	CachedFile const& f2 = run2.predictionsfile();
-	BOOST_CHECK_EQUAL(f2.filename(), CachedFile::cacheDirectory() / ("run_" + boost::lexical_cast<std::string>(runID) + ".arff"));
-	BOOST_CHECK(boost::filesystem::exists(f2.filename()));
+	CachedFile const& f4 = run2.predictionsfile();
+	BOOST_CHECK_EQUAL(f4.filename(), CachedFile::cacheDirectory() / ("run_" + boost::lexical_cast<std::string>(runID) + ".arff"));
+	BOOST_CHECK(boost::filesystem::exists(f4.filename()));
 
-	// remove cached files
+	// untag the run, here using a different object than for tagging
+	run2.untag("shark-unit-test");
+	BOOST_CHECK(run.tags().count("shark-unit-test") == 0);
+
+	// untag the flow
+	flow->untag("shark-unit-test");
+	BOOST_CHECK(flow->tags().count("shark-unit-test") == 0);
+
+	// untag the task
+	task->untag("shark-unit-test");
+	BOOST_CHECK(task->tags().count("shark-unit-test") == 0);
+
+	// untag the data set
+	ds->untag("shark-unit-test");
+	BOOST_CHECK(ds->tags().count("shark-unit-test") == 0);
+
+	// remove the run from the server
+	openML::deleteRun(run2);
+
+	// remove the flow from the server
+	openML::deleteFlow(flow);
+
+	// remove the task from the server
+	openML::deleteTask(task);
+
+	// remove the data set from the server
+	openML::deleteDataset(ds);
+
+	// remove the cached predictions file
+	std::remove(f4.filename().string().c_str());
+
+	// remove the cached splits file
 	std::remove(f2.filename().string().c_str());
-	std::remove(task->dataset()->datafile().filename().string().c_str());
-	std::remove(task->splitsfile().filename().string().c_str());
+
+	// remove the cached data set file
+	std::remove(f1.filename().string().c_str());
+}
+
+BOOST_AUTO_TEST_CASE(OpenML_Query)
+{
+	// prepare connection to the test server
+	openML::connection.enableTestMode();
+	openML::connection.setKey(demo_api_key);
+
+	// query data sets
+	{
+		openML::QueryResult q = openML::queryDatasets("/limit/10/offset/20");
+		BOOST_CHECK(q.size() == 10);
+	}
+
+	// query tasks
+	{
+		openML::QueryResult q = openML::queryTasks("/limit/10/offset/20");
+		BOOST_CHECK(q.size() == 10);
+	}
+
+	// query flows
+	{
+		openML::QueryResult q = openML::queryFlows("/limit/10/offset/20");
+		BOOST_CHECK(q.size() == 10);
+	}
+
+	// query runs
+	{
+		openML::QueryResult q = openML::queryRuns("/limit/10/offset/20");
+		BOOST_CHECK(q.size() == 10);
+	}
 }
 
 

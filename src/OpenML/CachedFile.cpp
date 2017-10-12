@@ -88,7 +88,7 @@ void CachedFile::download() const
 
 	Connection conn(host);
 	detail::HttpResponse response = conn.getHTTP(resource);
-	if (response.statusCode() != 200) throw SHARKEXCEPTION("file download failed");
+	if (response.statusCode() != 200) throw SHARKEXCEPTION("download of file '" + resource + "' failed");
 
 	std::ofstream os(m_filename.string());
 	os << response.body();

@@ -6,7 +6,7 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -35,6 +35,9 @@
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Algorithms/Trainers/McSvmOVATrainer.h>
 #include <iostream>
+#include <stdexcept>
+#include <chrono>
+#include <thread>
 
 using namespace shark;
 using namespace std;
@@ -61,12 +64,10 @@ int main(int argc, char** argv)
 //###end<key>
 
 //###begin<query>
-		// find a data set
-//		openML::QueryResult result = openML::supervisedClassificationTasks();
-//		result = openML::filter(result, "NumberOfInstances >= 100, NumberOfInstances <= 200, NumberOfFeatures <= 10, NumberOfMissingValues == 0");
-//		openML::IDType datasetID = result[0].id;
-//		// TODO: obtain supervised classification task from data set
-		openML::IDType taskID = 11;   // this should be the result of a query at some point in the future
+		// find a supervised classification task given a data set ID
+		openML::QueryResult tasks = openML::queryTasks("/data_id/61/type/1");
+		SHARK_ASSERT(! tasks.empty());
+		openML::IDType taskID = tasks[0].id;
 //###end<query>
 
 //###begin<task>
@@ -102,7 +103,10 @@ int main(int argc, char** argv)
 		params.push_back(openML::Hyperparameter("C", "regularization parameter, must be positive", "double"));
 		params.push_back(openML::Hyperparameter("gamma", "kernel bandwidth parameter, must be positive", "double"));
 		params.push_back(openML::Hyperparameter("bias", "presence or absence of the bias 'b' in the model", "bool"));
-		shared_ptr<openML::Flow> flow = openML::Flow::create(flowName, "one-versus-all C-SVM with Gaussian RBF kernel", params);
+		openML::IDType flowID = openML::findFlow(flowName);
+		shared_ptr<openML::Flow> flow = (flowID == openML::invalidID)
+		            ? openML::Flow::create(flowName, "one-versus-all C-SVM with Gaussian RBF kernel", params)
+		            : openML::Flow::get(flowID);
 		flow->print();
 //###end<flows>
 
@@ -150,6 +154,6 @@ int main(int argc, char** argv)
 	}
 	catch (std::exception const& ex)
 	{
-		cout << ex.what() << std::endl;
+		cout << "the following error occurred: " << ex.what() << std::endl;
 	}
 }

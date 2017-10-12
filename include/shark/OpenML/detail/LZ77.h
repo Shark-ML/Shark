@@ -38,11 +38,11 @@
 
 
 #include <shark/Core/DLLSupport.h>
+#include <shark/Core/Exception.h>
 
 #include <cstdint>
 #include <cstddef>
 #include <cassert>
-#include <stdexcept>
 #include <utility>
 #include <string>
 #include <vector>
@@ -237,7 +237,7 @@ ReturnType decodeRFC1951(ContainerType const& compressed)
 		pos += io.first;
 		ret.insert(ret.end(), buffer, buffer + io.second);
 	}
-	if (pos != compressed.size()) throw std::runtime_error("[decodeRFC1951] excess input bytes");
+	if (pos != compressed.size()) throw SHARKEXCEPTION("[decodeRFC1951] excess input bytes");
 	return ret;
 }
 
@@ -299,7 +299,7 @@ ReturnType decodeRFC1950(ContainerType const& compressed)
 		pos += io.first;
 		ret.insert(ret.end(), buffer, buffer + io.second);
 	}
-	if (pos != compressed.size()) throw std::runtime_error("[decodeRFC1950] excess input bytes");
+	if (pos != compressed.size()) throw SHARKEXCEPTION("[decodeRFC1950] excess input bytes");
 	return ret;
 }
 
@@ -375,7 +375,7 @@ ReturnType decodeRFC1952(ContainerType const& compressed)
 		pos += io.first;
 		ret.insert(ret.end(), buffer, buffer + io.second);
 	}
-	if (pos != compressed.size()) throw std::runtime_error("[decodeRFC1952] excess input bytes");
+	if (pos != compressed.size()) throw SHARKEXCEPTION("[decodeRFC1952] excess input bytes");
 	return ret;
 }
 
