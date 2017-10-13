@@ -7,13 +7,11 @@
 #         * doc/CMakeLists.txt
 #####################################################################
 project( shark )
-cmake_minimum_required( VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required( VERSION 3.6 FATAL_ERROR)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 INCLUDE (CheckFunctionExists)
 
-# no idea why, but this is what I need for full C++11 support with clang
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wno-c++11-extensions")
 
 cmake_policy(SET CMP0003 NEW)
 if(POLICY CMP0042)
@@ -58,7 +56,7 @@ option(BUILD_OFFICIAL_RELEASE "Is this an official Shark release." OFF )
 mark_as_advanced( BUILD_OFFICIAL_RELEASE )
 
 set(SHARK_VERSION_MAJOR 3)
-set(SHARK_VERSION_MINOR 0)
+set(SHARK_VERSION_MINOR 1)
 set(SHARK_VERSION_PATCH 0)
 set(SHARK_VERSION ${SHARK_VERSION_MAJOR}.${SHARK_VERSION_MINOR}.${SHARK_VERSION_PATCH})
 set(SHARK_SOVERSION 0)
@@ -329,20 +327,24 @@ if( ENABLE_CBLAS )
 endif()
 
 #####################################################################
+#           OpenML configuration
+#####################################################################
+option( ENABLE_OPENML "OpenML Support (requres openssl)" ON )
+
+#####################################################################
 #           openssl configuration
 #####################################################################
-# TODO: introduce a variable for OpenML support,
-#       openssl is only needed for OpenML.
+if( ENABLE_OPENML )
+	find_package(openssl REQUIRED)
+	if(NOT OPENSSL_FOUND)
+		message(FATAL_ERROR "Open-ssl was not found on your system (required for OpenML support)")
+	endif()
 
-find_package(openssl REQUIRED)
-if(NOT OPENSSL_FOUND)
-	message(FATAL_ERROR "Please make sure that openssl is installed on your system")
+	include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR} )
+	link_directories( ${OPENSSL_ROOT_DIR} )
+	list(APPEND LINK_LIBRARIES ${OPENSSL_LIBRARIES})
+	message( STATUS "Using openssl version " ${OPENSSL_VERSION} " from " ${OPENSSL_ROOT_DIR} )
 endif()
-
-include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR} )
-link_directories( ${OPENSSL_ROOT_DIR} )
-list(APPEND LINK_LIBRARIES ${OPENSSL_LIBRARIES})
-message( STATUS "Using openssl version " ${OPENSSL_VERSION} " from " ${OPENSSL_ROOT_DIR} )
 
 
 #####################################################################

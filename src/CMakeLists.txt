@@ -1,6 +1,22 @@
 # Glob the files
-file( GLOB_RECURSE SHARK_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
-file(GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/*.h ../include/*.hpp ../include/*.inl)
+file (GLOB_RECURSE SHARK_SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+file (GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/*.h ../include/*.hpp ../include/*.inl)
+
+# remove OpenML files if necessary
+if (NOT ${ENABLE_OPENML})
+	foreach (PATH ${SHARK_SRCS})
+		string (FIND ${PATH} "OpenML" RESULT)
+		if (NOT ${RESULT} EQUAL -1)
+			list (REMOVE_ITEM SHARK_SRCS ${PATH})
+		endif ()
+	endforeach(PATH)
+	foreach (PATH ${SHARK_HEADERS})
+		string (FIND ${PATH} "OpenML" RESULT)
+		if (NOT ${RESULT} EQUAL -1)
+			list (REMOVE_ITEM SHARK_HEADERS ${PATH})
+		endif ()
+	endforeach(PATH)
+endif()
 
 # Group the source for MSVC
 foreach(FILE ${SHARK_SRCS}) 

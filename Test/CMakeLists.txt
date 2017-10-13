@@ -209,7 +209,9 @@ shark_add_test( Data/SparseData.cpp Data_SparseData )
 shark_add_test( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
 # OpenML Tests
-shark_add_test( OpenML/OpenML.cpp OpenML_OpenML )
+if (ENABLE_OPENML)
+	shark_add_test( OpenML/OpenML.cpp OpenML_OpenML )
+endif()
 
 #Objective Functions
 shark_add_test( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )

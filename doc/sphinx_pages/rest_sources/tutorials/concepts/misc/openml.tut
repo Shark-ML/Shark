@@ -5,7 +5,8 @@ OpenML (open machine learning, http://www.openml.org) is a platform
 for sharing data, machine learning workflows, and results. It fosters
 collaborative problem solving, it makes research results more
 reproducible, and it can avoids duplicating efforts. Shark comes with
-built-in support for OpenML.
+built-in support for OpenML. OpenML support is optional, make sure to
+enable it in CMake if you want to use the platform.
 
 
 Introduction to OpenML
@@ -41,7 +42,7 @@ task. From these predictions OpenML computes a rich portfolio of
 evaluation metrics.
 
 For further information on OpenML we recommend the OpenML website
-http://www.openml.org/. Start by creating an account, and then export
+http://www.openml.org/. Start by creating an account, and then explore
 the platform.
 
 Each account is identified by a unique **API key**. The key can be
@@ -117,9 +118,9 @@ call the tag method on the object.
 
 ..sharkcode<OpenML/OpenMLTutorial.tpp,tagging>
 
-Recall that the tag is not added to the database since we are working
-with a read-only api key. Removing a tag is equally simple, using the
-`untag` function.
+Recall that the tag cannot be added to the database since we are working
+with a read-only api key, therefore the line is commented out.
+Removing a tag is equally simple, using the `untag` function.
 
 It is time to setup an actual machine learning experiment. We use a
 one-versus-all support vector machine for multi-class classification

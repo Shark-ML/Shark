@@ -22,6 +22,9 @@ add_custom_target(doc_creation)
 
 #find all .tut files
 file(GLOB_RECURSE TutFiles sphinx_pages *.tut)
+# at this point we could remove the openml tutorial in case the option
+# is disabled, however, this is pointless since it should still be found
+# in the docs
 foreach(tut ${TutFiles})
 	GET_FILENAME_COMPONENT(tutPath ${tut} PATH)
 	GET_FILENAME_COMPONENT(tutName ${tut} NAME_WE)
