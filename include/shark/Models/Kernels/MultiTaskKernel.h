@@ -77,8 +77,6 @@ struct MultiTaskSample : public ISerializable
 	std::size_t task;               ///< task index
 
 };
-}
-
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -87,9 +85,6 @@ struct MultiTaskSample : public ISerializable
         (shark::MultiTaskSample) (InputType),
         (InputType, input)(std::size_t, task)
     )
-
-
-namespace shark{
 
 
 template<class InputType>
