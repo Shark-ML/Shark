@@ -73,7 +73,7 @@ class RFTrainer;
 
 template<>
 class RFTrainer<unsigned int>
-: public AbstractWeightedTrainer<RFClassifier<unsigned int> >, public IParameterizable
+: public AbstractWeightedTrainer<RFClassifier<unsigned int> >, public IParameterizable<RealVector>
 {
 public:
 	/// Construct and compute feature importances when training or not
@@ -192,7 +192,7 @@ private:
 
 template<>
 class RFTrainer<RealVector>
-: public AbstractWeightedTrainer<RFClassifier<RealVector> >, public IParameterizable
+: public AbstractWeightedTrainer<RFClassifier<RealVector> >, public IParameterizable<RealVector>
 {
 public:
 	/// Construct and compute feature importances when training or not

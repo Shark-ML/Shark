@@ -199,8 +199,6 @@ private:
 	
 	template<class WeightVector>
 	RealVector updateWeights(WeightVector const& logWeights){
-		double const minExp = minExpInput<double>();
-		double const maxExp = maxExpInput<double>();
 		
 		//calculate the gradient update with respect of only the current batch
 		std::size_t size = batchSize(logWeights);
