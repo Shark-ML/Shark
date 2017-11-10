@@ -77,6 +77,7 @@ struct MultiTaskSample : public ISerializable
 	std::size_t task;               ///< task index
 
 };
+}
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
@@ -86,7 +87,7 @@ struct MultiTaskSample : public ISerializable
         (InputType, input)(std::size_t, task)
     )
 
-
+namespace shark {
 template<class InputType>
 struct Batch< MultiTaskSample<InputType> >{
 	SHARK_CREATE_BATCH_INTERFACE(
@@ -94,9 +95,10 @@ struct Batch< MultiTaskSample<InputType> >{
 		(InputType, input)(std::size_t, task)
 	)
 };
+}
 
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
+namespace shark {
 
 ///
 /// \brief Special "Gaussian-like" kernel function on tasks.
