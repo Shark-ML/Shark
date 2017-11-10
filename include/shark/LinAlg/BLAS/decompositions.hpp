@@ -321,7 +321,7 @@ private:
 // At a higher computational cost compared to the normal cholesky decomposition.
 // 
 // In many cases, the small eigenvalues tgend to be unstable, e.g. when A is estimated from
-// strongly correlated data. in this case,  it is wise to limit the conditioning of L, i.e. throw away \
+// strongly correlated data. in this case,  it is wise to limit the conditioning of L, i.e. throw away
 // eigenvalues which are more than c times smaller than the largest eigenvalue.
 template<class MatrixStorage>
 class symm_pos_semi_definite_solver:
