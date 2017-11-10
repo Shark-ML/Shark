@@ -207,6 +207,10 @@ protected:
 		}
 
 		m_cutDim = calculateCuttingDimension(points);
+		if (m_cutDim == m_size){
+			m_nodes = 1; 
+			return; 
+		}
 
 		// calculate the distance of the boundary for every point in the list
 		std::vector<double> distance(m_size);
@@ -272,6 +276,8 @@ protected:
 				cutDim = d;
 			}
 		}
+		if(extent == 0)
+			return m_size;
 		return cutDim;
 	}
 
