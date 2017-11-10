@@ -1,4 +1,4 @@
 algorithm	Shark	Scikit-Learn
-"SAG sparse"  	58.64	53.56
-"SAG dense"  	28.05	41.00
-"LBFGS dense"	22.54	35.16
+"SAG sparse"  	51.74	145.91
+"SAG dense"  	28.27	82.16
+"LBFGS dense"	11.84	94

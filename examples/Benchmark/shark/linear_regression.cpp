@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
 	double time_taken = time.stop();
 
 	SquaredLoss<> loss;
-	cout << "Residual sum of squares:" << loss(data.labels(),model(data.inputs()))<<std::endl;
+	cout << "Residual sum of squares:" << loss(data.labels(),model.getModel(0)(data.inputs()))<<std::endl;
 	cout << "Time:\n" << time_taken << endl;
 	cout << time_taken << endl;
 }

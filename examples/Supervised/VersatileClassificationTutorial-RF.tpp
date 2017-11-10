@@ -26,19 +26,19 @@ int main()
 //###end<skeleton>
 
 //###begin<RF>
-	RFClassifier model;
-	RFTrainer trainer;
+	RFClassifier<unsigned int> model;
+	RFTrainer<unsigned int> trainer;
 //###end<RF>
 
 //###begin<skeleton>
 	trainer.train(model, traindata);
 
 //###begin<real-prediction>
-	Data<RealVector> prediction = model(testdata.inputs());
+	auto prediction = model(testdata.inputs());
 //###end<real-prediction>
 
 //###begin<real-loss>
-	ZeroOneLoss<unsigned int, RealVector> loss;
+	ZeroOneLoss<unsigned int> loss;
 //###end<real-loss>
 	double error_rate = loss(testdata.labels(), prediction);
 

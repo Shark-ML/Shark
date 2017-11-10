@@ -83,6 +83,13 @@ struct SimpleBatch{
 		batch.resize(batchSize);
 	}
 	
+	//~ ///\brief Swaps the ith element in the first batch with the jth element in the second batch
+	//~ template<class T, class U>
+	//~ static void swap(T& batchi, U& batchj, std::size_t i, std::size_t j){
+		//~ using std::swap;
+		//~ swap(batchi[i],batchj[j]);
+	//~ }
+	
 	template<class T>
 	static std::size_t size(T const& batch){return batch.size();}
 	

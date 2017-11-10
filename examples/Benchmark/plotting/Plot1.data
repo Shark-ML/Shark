@@ -1,4 +1,4 @@
 Algorithm		Shark	Scikit-Learn
-"Random Forrest"	11.14	6.631
-"Linear Regression"	0.132	0.708
-"Ridge Regression"	0.132	1.852
+"Random Forest"		15.4	123
+"Linear Regression"	0.144	1.1
+"Ridge Regression"	0.116	1.58

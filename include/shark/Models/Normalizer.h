@@ -99,13 +99,6 @@ public:
 	std::string name() const
 	{ return "Normalizer"; }
 
-	/// swap
-	friend void swap(const Normalizer& model1, const Normalizer& model2){
-		std::swap(model1.m_A, model2.m_A);
-		std::swap(model1.m_b, model2.m_b);
-		std::swap(model1.m_hasOffset, model2.m_hasOffset);
-	}
-
 	/// assignment operator
 	const self_type operator = (const self_type& model){
 		m_A = model.m_A;

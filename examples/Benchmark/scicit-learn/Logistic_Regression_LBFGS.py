@@ -11,7 +11,7 @@ dataset_X = dataset_X.toarray()
 alpha = 1.0
 C=1/(dataset_X.shape[0]*alpha)
 
-model = linear_model.LogisticRegression(C=C, fit_intercept=True, multi_class='multinomial', solver='lbfgs', max_iter=200, n_jobs=-1)
+model = linear_model.LogisticRegression(C=C, fit_intercept=True, multi_class='multinomial', solver='lbfgs', max_iter=200, n_jobs=8)
 
 start = time.time()
 model.fit(dataset_X, dataset_Y)

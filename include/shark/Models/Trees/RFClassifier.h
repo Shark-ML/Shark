@@ -35,14 +35,15 @@
 #ifndef SHARK_MODELS_TREES_RFCLASSIFIER_H
 #define SHARK_MODELS_TREES_RFCLASSIFIER_H
 
-#include <shark/Models/Trees/CARTClassifier.h>
-#include <shark/Models/Trees/General.h>
+#include <shark/Models/Trees/CARTree.h>
 #include <shark/Models/MeanModel.h>
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>        
 #include <shark/Data/DataView.h>
 
 namespace shark {
 
-typedef CARTClassifier<RealVector>::TreeType TreeType;
+typedef CARTree<RealVector>::TreeType TreeType;
 typedef std::vector<TreeType> ForestInfo;
 
 ///
@@ -57,115 +58,145 @@ typedef std::vector<TreeType> ForestInfo;
 /// It is an ensemble learner that uses multiple decision trees built
 /// using the CART methodology.
 ///
-class RFClassifier : public MeanModel<CARTClassifier<RealVector> >
+template<class LabelType>
+class RFClassifier : public MeanModel<CARTree<LabelType> >
 {
 public:
-	typedef CARTClassifier<RealVector> SubmodelType;
-	RFClassifier() : m_OOBerror(0) {}
+	using MeanModel<CARTree<LabelType> >::numberOfModels;
+	using MeanModel<CARTree<LabelType> >::getModel;
+	typedef CARTree<LabelType> SubmodelType;
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
-
-	// compute the oob error for the forest
-	void computeOOBerror(
-			UIntMatrix const& oobClassTally,
-			DataView<ClassificationDataset const>& elements){
-		auto n_elements = elements.size();
-		m_OOBerror = detail::cart::sum<double>(n_elements, [&](size_t i){
-			auto y = elements[i].label;
-			auto z = arg_max(row(oobClassTally,i));
-			return static_cast<double>(y!=z);
-		})/n_elements;
-	}
-	void computeOOBerror(
-			RealMatrix const& oobTally,
-			DataView<RegressionDataset const>& elements){
-		auto n_elements = elements.size();
-		m_OOBerror = detail::cart::sum<double>(n_elements,[&](size_t i){
-			return distanceSqr(elements[i].label,row(oobTally,i));
-		})/n_elements;
-	}
-
-
-	// compute the feature importances for the forest
-	void computeFeatureImportances(){
-		m_featureImportances.resize(m_inputDimension);
-		std::size_t n_trees = numberOfModels();
-
-		for(std::size_t i=0;i!=m_inputDimension;++i){
-			m_featureImportances[i] = 0;
-			for(std::size_t j=0;j!=n_trees;++j){
-				m_featureImportances[i] += m_models[j].featureImportances()[i];
-			}
-			m_featureImportances[i] /= n_trees;
-		}
-	}
-
-	double const OOBerror() const {
+	
+	
+	/// \brief Returns the computed out-of-bag-error of the forest
+	double OOBerror() const {
 		return m_OOBerror;
 	}
 
-	// returns the feature importances
-	RealVector const& featureImportances() const {
+	/// \brief Returns the computed feature importances of the forest
+	RealVector const& featureImportances()const{
 		return m_featureImportances;
 	}
 
-	//Count how often attributes are used
+	/// \brief Counts how often attributes are used
 	UIntVector countAttributes() const {
-		std::size_t n = m_models.size();
+		std::size_t n = numberOfModels();
 		if(!n) return UIntVector();
-		UIntVector r = m_models[0].countAttributes();
+		UIntVector r = getModel(0).countAttributes();
 		for(std::size_t i=1; i< n; i++ ) {
-			noalias(r) += m_models[i].countAttributes();
+			noalias(r) += getModel(i).countAttributes();
 		}
 		return r;
 	}
 
-	/// Set the dimension of the labels
-	void setLabelDimension(std::size_t in){
-		m_labelDimension = in;
-	}
 
-	// Set the input dimension
-	void setInputDimension(std::size_t in){
-		m_inputDimension = in;
-	}
-
-	ForestInfo getForestInfo() const {
-		ForestInfo finfo(m_models.size());
-		for (std::size_t i=0; i<m_models.size(); ++i)
-			finfo[i]=m_models[i].getTree();
-		return finfo;
-	}
-
-	void setForestInfo(ForestInfo const& finfo, std::vector<double> const& weights = std::vector<double>()) {
-		std::size_t n_tree = finfo.size();
-		std::vector<double> we(weights);
-		m_models.resize(n_tree);
-		if (weights.empty()) // set default weights to 1
-			we.resize(n_tree, 1);
-		else 
-			SHARK_RUNTIME_CHECK(weights.size() == n_tree, "Weights must be the same number as trees");
-
-		for (std::size_t i=0; i<n_tree; ++i){
-			m_models[i]=SubmodelType{finfo[i]};
-			m_weight.push_back(we[i]);
-			m_weightSum+=we[i];
+	
+	
+	/// Compute oob error, given an oob dataset (Classification)
+	void computeOOBerror(std::vector<std::vector<std::size_t> > const& oobIndices, LabeledData<RealVector, LabelType> const& data){
+		UIntMatrix oobMatrix(oobIndices.size(), data.numberOfElements(),0);
+		for(std::size_t i = 0; i != oobMatrix.size1(); ++i){
+			for(auto index: oobIndices[i])
+				oobMatrix(i,index) = 1;
 		}
+		doComputeOOBerror(oobMatrix,data);
 	}
 
-protected:
-	// Dimension of label in the regression case, number of classes in the classification case.
-	std::size_t m_labelDimension;
+	/// Compute feature importances, given an oob dataset
+	///
+	/// For each tree, extracts the out-of-bag-samples indicated by oobIndices. The feature importance is defined
+	/// as the average change of loss (Squared loss or accuracy depending on label type) when the feature is permuted across the oob samples of a tree.
+	void computeFeatureImportances(std::vector<std::vector<std::size_t> > const& oobIndices, LabeledData<RealVector, LabelType> const& data, random::rng_type& rng){
+		std::size_t inputs = inputDimension(data);
+		m_featureImportances.resize(inputs);
+		DataView<LabeledData<RealVector, LabelType> const > view(data);
+		
+		for(std::size_t m = 0; m != numberOfModels();++m){
+			auto batch = subBatch(view, oobIndices[m]);
+			double errorBefore = loss(batch.label,getModel(m)(batch.input));
+			
+			for(std::size_t i=0; i!=inputs;++i) {
+				RealVector vOld= column(batch.input,i);
+				RealVector v = vOld;
+				std::shuffle(v.begin(), v.end(), rng);
+				noalias(column(batch.input,i)) = v;
+				double errorAfter = loss(batch.label,getModel(m)(batch.input));
+				noalias(column(batch.input,i)) = vOld;
+				m_featureImportances(i) += (errorAfter - errorBefore) / batch.size();
+			}
+		}
+		m_featureImportances /= numberOfModels();
+	}
 
-	// Input dimension
-	std::size_t m_inputDimension;
+private:
+	double loss(UIntVector const& labels, UIntVector const& predictions) const{
+		ZeroOneLoss<unsigned int> loss;
+		return loss.eval(labels,  predictions);
+	}
+	double loss(RealMatrix const& labels, RealMatrix const& predictions) const{
+		SquaredLoss<RealVector, RealVector> loss;
+		return loss.eval(labels,  predictions);
+	}
+	
+	//different versions for different labels
+	template<class Indices>
+	void doComputeOOBerror(
+		Indices const& oobPoints, LabeledData<RealVector, unsigned int> const& data
+	){
+		m_OOBerror = 0;
+		//aquire votes for every element
+		RealVector votes(numberOfClasses(data));
+		RealVector input(inputDimension(data));
+		std::size_t elem = 0;
+		for(auto&& point: data.elements()){
+			noalias(input) = point.input;
+			votes.clear();
+			for(std::size_t m = 0; m != numberOfModels();++m){
+				if(oobPoints(m,elem)){
+					auto const& model = getModel(m);
+					unsigned int label = model(input);
+					votes(label) += 1;
+				}
+			}
+			m_OOBerror += (arg_max(votes) != point.label);
+			++elem;
+		}
+		m_OOBerror /= data.numberOfElements();
+	}
+	
+	template<class Indices>
+	void doComputeOOBerror(
+		Indices const& oobPoints, LabeledData<RealVector, RealVector> const& data
+	){
+		m_OOBerror = 0;
+		//aquire votes for every element
+		RealVector mean(labelDimension(data));
+		RealVector input(inputDimension(data));
+		std::size_t elem = 0;
+		for(auto&& point: data.elements()){
+			noalias(input) = point.input;
+			mean.clear();
+			std::size_t oobModels = 0;
+			for(std::size_t m = 0; m != numberOfModels();++m){
+				if(oobPoints(m,elem)){
+					++oobModels;
+					auto const& model = getModel(m);
+					noalias(mean) += model(input);
+				}
+			}
+			mean /= oobModels;
+			m_OOBerror += 0.5 * norm_sqr(point.label - mean);
+			++elem;
+		}
+		m_OOBerror /= data.numberOfElements();
+	}
+	
 
-	// oob error for the forest
-	double m_OOBerror;
-
-	// feature importances for the forest
-	RealVector m_featureImportances;
+	
+	double m_OOBerror; ///< oob error for the forest
+	RealVector m_featureImportances; ///< feature importances for the forest
 
 };
 

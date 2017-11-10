@@ -184,7 +184,6 @@ shark_add_test( Models/Kernels/CSvmDerivative.cpp Models_CSvmDerivative )
 
 # Trees
 shark_add_test( Models/RFClassifier.cpp Models_RFClassifier )
-shark_add_test( Models/CARTClassifier.cpp Models_CARTClassifier )
 
 # Core tests
 #shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )

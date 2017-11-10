@@ -40,64 +40,31 @@
 
 #include <shark/Algorithms/Trainers/RFTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+#include <shark/Data/DataDistribution.h>
 
 using namespace shark;
 
 BOOST_AUTO_TEST_SUITE (Models_RFClassifier)
 
 BOOST_AUTO_TEST_CASE( RF_Classifier ) {
+	PamiToy generator(5,5,0,0.4);
+	auto train = generator.generateDataset(200);
+	auto test = generator.generateDataset(200);
+	RFTrainer<unsigned int> trainer(true,true);
+	RFClassifier<unsigned int> model;
+	trainer.train(model, train);
 
-	//Test data
-	std::vector<RealVector> input(10, RealVector(2));
-	input[0](0)=1;
-	input[0](1)=3;
-	input[1](0)=-1;
-	input[1](1)=3;
-	input[2](0)=1;
-	input[2](1)=0;
-	input[3](0)=-1;
-	input[3](1)=0;
-	input[4](0)=1;
-	input[4](1)=-3;
-	input[5](0)=-1;
-	input[5](1)=-3;
-	input[6](0)=-4;
-	input[6](1)=-3;
-	input[7](0)=-2;
-	input[7](1)=-1;
-	input[8](0)=-6;
-	input[8](1)=-8;
-	input[9](0)=-2;
-	input[9](1)=-2;
-
-	std::vector<unsigned int> target(10);
-	target[0]=0;
-	target[1]=0;
-	target[2]=1;
-	target[3]=1;
-	target[4]=2;
-	target[5]=2;
-	target[6]=3;
-	target[7]=3;
-	target[8]=4;
-	target[9]=4;
-
-	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
-
-	RFTrainer trainer;
-	RFClassifier model;
-
-	trainer.train(model, dataset);
-
-	Data<RealVector> prediction = model(dataset.inputs());
-
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	double error = loss.eval(dataset.labels(), prediction);
-
-	std::cout << model.countAttributes() << std::endl;
-
-	BOOST_CHECK(error == 0.0);
-
+	ZeroOneLoss<> loss;
+	double error_train = loss.eval(train.labels(), model(train.inputs()));
+	double error_test = loss.eval(test.labels(), model(test.inputs()));
+	
+	BOOST_REQUIRE_EQUAL(model.numberOfModels(), 100);
+	BOOST_REQUIRE_EQUAL(model.featureImportances().size(), 10);
+	BOOST_CHECK_SMALL(std::abs(error_test - model.OOBerror()), 0.02);
+	for(std::size_t i = 0; i != 5; ++i){
+		BOOST_CHECK(model.featureImportances()(i) > 0.01);
+		BOOST_CHECK(model.featureImportances()(i+5) < 0.01);
+	}
 }
 
 BOOST_AUTO_TEST_SUITE_END()

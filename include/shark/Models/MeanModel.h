@@ -36,14 +36,45 @@
 #define SHARK_MODELS_MEANMODEL_H
 
 namespace shark {
-///
+
 /// \brief Calculates the weighted mean of a set of models
-///
 template<class ModelType>
 class MeanModel : public AbstractModel<typename ModelType::InputType, typename ModelType::OutputType>
 {
 private:
 	typedef AbstractModel<typename ModelType::InputType, typename ModelType::OutputType> base_type;
+
+	template<class InputBatch>
+	void doEval(InputBatch const& patterns, RealMatrix& outputs)const{
+		m_models[0].eval(patterns,outputs);
+		outputs *=m_weight[0];
+		for(std::size_t i = 1; i != m_models.size(); i++) 
+			noalias(outputs) += m_weight[i] * m_models[i](patterns);
+		outputs /= m_weightSum;
+	}
+	template<class InputBatch>
+	void doEval(InputBatch const& patterns, blas::vector<unsigned int>& outputs)const{
+		//evaluate all models on the batch and obtain number of classes
+		std::vector<blas::vector<unsigned int> > responses(m_models.size());
+		unsigned int numClasses = 0;
+		for(std::size_t i = 0; i != m_models.size(); ++i){
+			m_models[i].eval(patterns, responses[i]);
+			numClasses = std::max(numClasses, max(responses[i]));
+		}
+		numClasses += 1;
+		//compute weighted class probabilities
+		RealMatrix classProbs(patterns.size1(), numClasses,0.0);
+		for(std::size_t i = 0; i != m_models.size(); ++i){
+			for(std::size_t p = 0; p != patterns.size1(); ++p){
+				classProbs(p,responses[i](p)) += m_weight[i];
+			}
+		}
+		
+		outputs.resize(patterns.size1());
+		for(std::size_t p = 0; p != patterns.size1(); ++p){
+			outputs(p) = arg_max(row(classProbs,p));
+		}
+	}
 public:
 	
 	/// Constructor
@@ -54,11 +85,7 @@ public:
 
 	using base_type::eval;
 	void eval(typename base_type::BatchInputType const& patterns, typename base_type::BatchOutputType& outputs)const{
-		m_models[0].eval(patterns,outputs);
-		outputs *=m_weight[0];
-		for(std::size_t i = 1; i != m_models.size(); i++) 
-			noalias(outputs) += m_weight[i] * m_models[i](patterns);
-		outputs /= m_weightSum;
+		doEval(patterns,outputs);
 	}
 	
 	void eval(typename base_type::BatchInputType const& patterns, typename base_type::BatchOutputType& outputs, State& state)const{
@@ -102,6 +129,10 @@ public:
 		m_models.push_back(model);
 		m_weight.push_back(weight);
 		m_weightSum+=weight;
+	}
+	
+	ModelType const& getModel(std::size_t index){
+		return m_models[index];
 	}
 
 	/// \brief Returns the weight of the i-th model

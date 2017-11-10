@@ -123,7 +123,6 @@ Neural networks and deep learning:
 
 Tree-based algorithms:
 
-* :doc:`algorithms/cart`
 * :doc:`algorithms/rf`
 
 Kernel methods -- support vector machine training and model selection:

@@ -70,15 +70,15 @@ int main() {
 
 	//Generate a random forest
 	//###begin<train>
-	RFTrainer trainer;
-	RFClassifier model;
+	RFTrainer<unsigned int> trainer;
+	RFClassifier<unsigned int> model;
 	trainer.train(model, data);
 	//###end<train>
 
 	// evaluate Random Forest classifier
 	//###begin<eval>
-	ZeroOneLoss<unsigned int, RealVector> loss;
-	Data<RealVector> prediction = model(data.inputs());
+	ZeroOneLoss<> loss;
+	auto prediction = model(data.inputs());
 	cout << "Random Forest on training set accuracy: " << 1. - loss.eval(data.labels(), prediction) << endl;
 
 	prediction = model(dataTest.inputs());

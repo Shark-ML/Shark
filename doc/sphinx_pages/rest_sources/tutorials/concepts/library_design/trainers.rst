@@ -120,8 +120,6 @@ List of some supervised trainers:
 ========================================  ========================================   ===================================================================
 Trainer                                     Model                                      Description
 ========================================  ========================================   ===================================================================
-:doxy:`CARTTrainer`                       :doxy:`CARTClassifier`                     Trains a CART (classification and regression) tree,
-                                                                                     see the :doc:`CART tutorial<../../algorithms/cart>` for details.
 :doxy:`FisherLDA`                         :doxy:`LinearModel`                        Performs Fisher Linear Discriminant.
 :doxy:`KernelMeanClassifier`              :doxy:`KernelExpansion`                    Computes the class means in the kernel induced feature
                                                                                      space and generates a classifier which assigns the points
@@ -132,7 +130,7 @@ Trainer                                     Model                               
                                                                                      model, error function and stopping criterion -- into a trainer.
 :doxy:`Perceptron`                        :doxy:`KernelExpansion`                    Kernelized perceptron -- tries to find a separating hyperplane of
                                                                                      the data in the feature space induced by the kernel.
-:doxy:`RFTrainer`                         :doxy:`RFClassifier`                       Implements a random forest of CART trees,
+:doxy:`RFTrainer`                         :doxy:`RFClassifier`                       Implements a random forest of decision trees,
                                                                                      see the :doc:`random forest tutorial<../../algorithms/rf>`.
 :doxy:`SigmoidFitRpropNLL`                :doxy:`SigmoidModel`                       Optimizes the parameters of a sigmoid to fit a validation
                                                                                      dataset via backpropagation on the negative log-likelihood.

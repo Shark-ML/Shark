@@ -230,8 +230,7 @@ Model                                    Description
                                          labels of the k nearest neighbors
 :doxy:`SoftNearestNeighborClassifier`    Nearest neighbor search for classification; returns the fraction
                                          of votes for a class instead of the majority vote
-:doxy:`CARTClassifier`                   Classification and regression tree
-:doxy:`RFClassifier`                     Random Forest based on a collection of CART classifiers
+:doxy:`RFClassifier`                     Random Forest based on a collection of decision trees
 =====================================    ========================================================================
 
 

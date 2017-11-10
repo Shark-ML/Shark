@@ -7,8 +7,8 @@ Background
 
 Random Forest is a decision tree algorithm for both classification and
 regression. It was first described by [Breiman2001]_. It is a recursive
-algorithm which partitions the training dataset by doing binary splits like CART.
-It builds an ensemble of classifiers, and uses randomization to reduce the variance
+algorithm which partitions the training dataset by doing binary splits based on the labels of the data.
+It builds an ensemble of models, and uses randomization to increase the variance
 between the trees of the ensemble. It performs remarkable well in practice, and 
 is widely used.
 
@@ -24,7 +24,7 @@ Sample classification problem: Protein fold prediction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let us consider the same bioinformatics problem as in the
-:doc:`nearestNeighbor`, :doc:`lda` and :doc:`cart` tutorial, namely the prediction of the
+:doc:`nearestNeighbor` and :doc:`lda` tutorial, namely the prediction of the
 secondary structure of proteins. The goal is to assign a protein to
 one out of 27 SCOP fold types [DingDubchak2001a]_.  We again consider
 the descriptions of amino-acid sequences provided by
@@ -56,7 +56,7 @@ simply computes the fraction of wrong predictions::
 ..sharkcode<Supervised/RFTutorial.tpp,eval>
 
 Of course, the accuracy is given by one minus the error.
-In this example, Random Forest outperforms LDA, KNN, and CART. 
+In this example, Random Forest outperforms LDA and KNN. 
 
 
 Parameters of the trainer

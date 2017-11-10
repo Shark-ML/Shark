@@ -17,17 +17,17 @@ int main(int argc, char **argv) {
 	
 	LabeledData<RealVector,unsigned int> mnist;
 	importSparseData(mnist, "mnist",0,8192);
-	{
-	Timer time;
-	KDTree<RealVector> kdtree(data.inputs());
-	TreeNearestNeighbors<RealVector,unsigned int> algorithmKD(data,&kdtree);
-	NearestNeighborClassifier<RealVector> model(&algorithmKD, 10);
-	ZeroOneLoss<> loss;
-	double error = loss(data.labels(),model(data.inputs()));
-	double time_taken = time.stop();
+	//~ {
+	//~ Timer time;
+	//~ KDTree<RealVector> kdtree(data.inputs());
+	//~ TreeNearestNeighbors<RealVector,unsigned int> algorithmKD(data,&kdtree);
+	//~ NearestNeighborClassifier<RealVector> model(&algorithmKD, 10);
+	//~ ZeroOneLoss<> loss;
+	//~ double error = loss(data.labels(),model(data.inputs()));
+	//~ double time_taken = time.stop();
 		
-	cout <<  "kdtree: "<< time_taken <<" "<< error<<std::endl;
-	}
+	//~ cout <<  "kdtree: "<< time_taken <<" "<< error<<std::endl;
+	//~ }
 	
 	{
 	Timer time;

@@ -300,7 +300,7 @@ private:
 		MultiNomialDistribution dist(probabilities);
 			
 		//variables used for the SAG loop
-		RealMatrix gradD(labelDim,ell,0); // gradients of regularized loss minimization with a linear model have the form sum_i D_i*x_i. We store the last acquired estimate
+		blas::matrix<double,blas::column_major> gradD(labelDim,ell,0); // gradients of regularized loss minimization with a linear model have the form sum_i D_i*x_i. We store the last acquired estimate
 		RealMatrix grad(labelDim,dim);// gradient of the weight matrix.
 		RealVector gradOffset(labelDim,0); //sum_i D_i, gradient estimate for the offset
 		RealVector pointNorms(ell); //norm of each point in the dataset
@@ -324,7 +324,7 @@ private:
 		{
 			// choose data point
 			std::size_t b = dist(rng);
-			auto point = data[b];
+			auto const& point = data[b];
 			
 			//just in time update of the previous steps for every nonzero element of point b
 			auto end = point.input.end();
@@ -342,7 +342,12 @@ private:
 			double currentValue = loss.evalDerivative(point.label, f_b, derivative);
 			
 			//update gradient (needs to be multiplied with kappa)
-			noalias(grad) += probabilities(b) * outer_prod(derivative-column(gradD,b), point.input);
+			//~ noalias(grad) += probabilities(b) * outer_prod(derivative-column(gradD,b), point.input); //todo: this is slow for some reason.
+			for(std::size_t l = 0; l != derivative.size(); ++l){
+				double val = probabilities(b) * (derivative(l) - gradD(l,b));
+				noalias(row(grad,l)) += val * point.input;
+			}
+			
 			if(m_offset) noalias(gradOffset) += probabilities(b) *(derivative-column(gradD,b));
 			noalias(column(gradD,b)) = derivative; //we got a new estimate for D of element b.
 			
