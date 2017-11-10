@@ -150,7 +150,7 @@ private:
 		RealVector votes(numberOfClasses(data));
 		RealVector input(inputDimension(data));
 		std::size_t elem = 0;
-		for(auto&& point: data.elements()){
+		for(auto const& point: data.elements()){
 			noalias(input) = point.input;
 			votes.clear();
 			for(std::size_t m = 0; m != numberOfModels();++m){
@@ -175,7 +175,7 @@ private:
 		RealVector mean(labelDimension(data));
 		RealVector input(inputDimension(data));
 		std::size_t elem = 0;
-		for(auto&& point: data.elements()){
+		for(auto const& point: data.elements()){
 			noalias(input) = point.input;
 			mean.clear();
 			std::size_t oobModels = 0;
