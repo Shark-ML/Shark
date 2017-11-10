@@ -207,7 +207,7 @@ protected:
 		}
 
 		m_cutDim = calculateCuttingDimension(points);
-		if (m_cutDim == m_size){
+		if (m_cutDim == (*begin)->size()){
 			m_nodes = 1; 
 			return; 
 		}
@@ -221,10 +221,6 @@ protected:
 
 		// split the list into sub-cells
 		iterator split = this->splitList(distance,points);
-		if (split == end){
-			m_nodes = 1;
-			return; 
-		}
 		std::size_t leftSize = split-begin;
 
 		// create sub-nodes
@@ -277,7 +273,7 @@ protected:
 			}
 		}
 		if(extent == 0)
-			return m_size;
+			return dim;
 		return cutDim;
 	}
 
