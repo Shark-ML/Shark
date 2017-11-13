@@ -58,6 +58,7 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	double error_train = loss.eval(train.labels(), model(train.inputs()));
 	double error_test = loss.eval(test.labels(), model(test.inputs()));
 	
+	BOOST_CHECK(error_train < 0.01);
 	BOOST_REQUIRE_EQUAL(model.numberOfModels(), 100);
 	BOOST_REQUIRE_EQUAL(model.featureImportances().size(), 10);
 	BOOST_CHECK_SMALL(std::abs(error_test - model.OOBerror()), 0.02);

@@ -36,7 +36,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_RFTRAINER_H
 #define SHARK_ALGORITHMS_TRAINERS_RFTRAINER_H
 
-#include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Models/Trees/RFClassifier.h>
 #include <shark/Algorithms/Trainers/Impl/CART.h>
 
@@ -74,7 +74,7 @@ class RFTrainer;
 
 template<>
 class RFTrainer<unsigned int>
-: public AbstractTrainer<RFClassifier<unsigned int> >, public IParameterizable
+: public AbstractWeightedTrainer<RFClassifier<unsigned int> >, public IParameterizable
 {
 public:
 	/// Construct and compute feature importances when training or not
@@ -119,7 +119,7 @@ public:
 	void epsilon(double distance) {m_epsilon = distance;}
 	
 	/// Return the parameter vector.
-	RealVector parameterVector() const{RealVector();}
+	RealVector parameterVector() const{return RealVector();}
 
 	/// Set the parameter vector.
 	void setParameterVector(RealVector const& newParameters){
@@ -128,7 +128,8 @@ public:
 	
 	
 	/// Train a random forest for classification.
-	void train(RFClassifier<LabelType>& model, LabeledData<RealVector,LabelType> const& dataset){
+	using AbstractWeightedTrainer<RFClassifier<unsigned int> >::train;
+	void train(RFClassifier<LabelType>& model, WeightedLabeledData<RealVector,LabelType> const& dataset){
 		model.clearModels();
 		
 		//setup treebuilder
@@ -143,6 +144,7 @@ public:
 		//copy data into single batch for easier lookup
 		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(dataset.inputs().elements().begin(),dataset.inputs().elements().end());
 		auto labels_train = createBatch<LabelType>(dataset.labels().elements().begin(),dataset.labels().elements().end());
+		auto weights_train = createBatch<double>(dataset.weights().elements().begin(),dataset.weights().elements().end());
 
 		//Setup seeds for the rng in the different threads
 		std::vector<unsigned int> seeds(m_numTrees);
@@ -157,7 +159,7 @@ public:
 			random::rng_type rng(seeds[t]);
 			
 			//Setup data for this tree
-			CART::Bootstrap<blas::matrix<double, blas::column_major>, UIntVector> bootstrap(rng, data_train,labels_train);
+			CART::Bootstrap<blas::matrix<double, blas::column_major>, UIntVector> bootstrap(rng, data_train,labels_train, weights_train);
 			auto const& tree = builder.buildTree(rng, bootstrap);
 			
 			SHARK_CRITICAL_REGION{
@@ -167,10 +169,10 @@ public:
 		}
 		
 		if(m_computeOOBerror)
-			model.computeOOBerror(complements, dataset);
+			model.computeOOBerror(complements, dataset.data());
 		
 		if(m_computeFeatureImportances)
-			model.computeFeatureImportances(complements,dataset, random::globalRng);
+			model.computeFeatureImportances(complements,dataset.data(), random::globalRng);
 	}
 	
 	
@@ -190,7 +192,7 @@ private:
 
 template<>
 class RFTrainer<RealVector>
-: public AbstractTrainer<RFClassifier<RealVector> >, public IParameterizable
+: public AbstractWeightedTrainer<RFClassifier<RealVector> >, public IParameterizable
 {
 public:
 	/// Construct and compute feature importances when training or not
@@ -235,7 +237,7 @@ public:
 	void epsilon(double distance) {m_epsilon = distance;}
 	
 	/// Return the parameter vector.
-	RealVector parameterVector() const{RealVector();}
+	RealVector parameterVector() const{ return RealVector();}
 
 	/// Set the parameter vector.
 	void setParameterVector(RealVector const& newParameters){
@@ -244,7 +246,7 @@ public:
 	
 	
 	/// Train a random forest for classification.
-	void train(RFClassifier<LabelType>& model, LabeledData<RealVector,LabelType> const& dataset){
+	void train(RFClassifier<LabelType>& model, WeightedLabeledData<RealVector,LabelType> const& dataset){
 		model.clearModels();
 		
 		//setup treebuilder
@@ -258,7 +260,8 @@ public:
 		//copy data into single batch for easier lookup
 		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(dataset.inputs().elements().begin(),dataset.inputs().elements().end());
 		auto labels_train = createBatch<LabelType>(dataset.labels().elements().begin(),dataset.labels().elements().end());
-
+		auto weights_train = createBatch<double>(dataset.weights().elements().begin(),dataset.weights().elements().end());
+		
 		//Setup seeds for the rng in the different threads
 		std::vector<unsigned int> seeds(m_numTrees);
 		for (auto& seed: seeds) {
@@ -272,7 +275,7 @@ public:
 			random::rng_type rng{seeds[t]};
 			
 			//Setup data for this tree
-			CART::Bootstrap<blas::matrix<double, blas::column_major>, RealMatrix> bootstrap(rng, data_train,labels_train);
+			CART::Bootstrap<blas::matrix<double, blas::column_major>, RealMatrix> bootstrap(rng, data_train,labels_train, weights_train);
 			auto const& tree = builder.buildTree(rng, bootstrap);
 			
 			SHARK_CRITICAL_REGION{
@@ -282,10 +285,10 @@ public:
 		}
 		
 		if(m_computeOOBerror)
-			model.computeOOBerror(complements,dataset);
+			model.computeOOBerror(complements,dataset.data());
 		
 		if(m_computeFeatureImportances)
-			model.computeFeatureImportances(complements,dataset, random::globalRng);
+			model.computeFeatureImportances(complements,dataset.data(), random::globalRng);
 	}
 	
 	

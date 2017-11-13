@@ -39,6 +39,7 @@
 #include <shark/Core/Random.h>
 #include <shark/Core/utility/KeyValuePair.h>
 #include <shark/LinAlg/Base.h>
+#include <shark/Statistics/Distributions/MultiNomialDistribution.h>
 
 namespace shark {namespace CART{
 	
@@ -52,12 +53,14 @@ struct Bootstrap{
 	std::vector<unsigned int> weights; /// number of times the ith point got picked.
 	
 	///\brief Creates a random bootstrap from the provided dataset.
-	Bootstrap(random::rng_type& rng, DataSet const& data, LabelSet const& labels):data(data){
+	Bootstrap(random::rng_type& rng, DataSet const& data, LabelSet const& labels, RealVector const& sample_weights):data(data){
 		// sample bootstrap indices (with replacement)
+		// we use the sample weights as sample probabilities (they are correctly normalized to 1)
+		MultiNomialDistribution dist(sample_weights);
 		unsigned int ell = data.size1();
 		std::vector<unsigned int> bootstrapIndices(ell,0);
 		for (unsigned int i = 0; i < ell; i++) {
-			bootstrapIndices[random::discrete(rng,0u,ell-1)] += 1;
+			bootstrapIndices[dist(rng)] += 1;
 		}
 		//compress bootstrap sample to actually sampled points
 		for (unsigned int i = 0; i < ell; i++) {
