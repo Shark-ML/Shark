@@ -27,7 +27,6 @@
 #ifndef SHARK_OBJECTIVEFUNCTIONS_IMPL_NOISYERRORFUNCTION_H
 #define SHARK_OBJECTIVEFUNCTIONS_IMPL_NOISYERRORFUNCTION_H
 
-#include <shark/Data/DataView.h>
 #include <shark/Core/Random.h>
 
 namespace shark{
@@ -35,14 +34,12 @@ namespace shark{
 namespace detail{
 /// \brief Implementation for the NoisyErrorFunction. It hides the Type of the OutputType.
 template<class InputType,class LabelType, class OutputType>
-class NoisyErrorFunctionWrapper : public NoisyErrorFunctionWrapperBase
+class NoisyErrorFunctionWrapper : public FunctionWrapperBase
 {
 private:
 	AbstractModel<InputType, OutputType>* mep_model;
 	AbstractLoss<LabelType,OutputType>* mep_loss;
-	DataView<LabeledData<InputType,LabelType> const> m_dataset;
-	std::size_t m_batchSize;
-	std::size_t m_dataSize;
+	LabeledData<InputType,LabelType> m_dataset;
 	typedef typename AbstractModel<InputType, OutputType>::BatchOutputType BatchOutputType;
 	typedef typename LabeledData<InputType,LabelType>::batch_type BatchDataType;
 
@@ -50,10 +47,8 @@ public:
 	NoisyErrorFunctionWrapper(
 		LabeledData<InputType,LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model,
-		AbstractLoss<LabelType,OutputType>* loss,
-		std::size_t batchSize=1
+		AbstractLoss<LabelType,OutputType>* loss
 	): mep_model(model), mep_loss(loss), m_dataset(dataset)
-	, m_batchSize(batchSize), m_dataSize(dataset.numberOfElements())
 	{
 		SHARK_ASSERT(model!=NULL);
 		SHARK_ASSERT(loss!=NULL);
@@ -71,8 +66,8 @@ public:
 		return new NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(*this);
 	}
 
-	void proposeStartingPoint( SearchPointType & startingPoint)const {
-		startingPoint=mep_model->parameterVector();
+	SearchPointType proposeStartingPoint()const{
+		return mep_model->parameterVector();
 	}
 	
 	std::size_t numberOfVariables()const{
@@ -80,39 +75,11 @@ public:
 	}
 
 	double eval(RealVector const& input)const {
-		if(m_batchSize > 0){
-			//prepare batch for the current iteration
-			std::vector<std::size_t> indices(m_batchSize);
-			std::generate(indices.begin(),indices.end(),[&](){return random::discrete(*mep_rng, std::size_t(0), m_dataSize -1);});
-			BatchDataType  batch = subBatch(m_dataset,indices);
-			
-			return evalForBatch(input,batch);
-		}else{
-			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.dataset().numberOfBatches()-1);
-			return evalForBatch(input,m_dataset.dataset().batch(batchIndex));
-		}
-	}
-
-	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative)const {
-		if(m_batchSize > 0){
-			//prepare batch for the current iteration
-			std::vector<std::size_t> indices(m_batchSize);
-			std::generate(indices.begin(),indices.end(),[&](){return random::discrete(*mep_rng, std::size_t(0), m_dataSize -1);});
-			BatchDataType  batch = subBatch(m_dataset,indices);
-			
-			return evalDerivativeForBatch(input, derivative, batch);
-		}else{
-			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.dataset().numberOfBatches()-1);
-			return evalDerivativeForBatch(input, derivative, m_dataset.dataset().batch(batchIndex));
-		}
-		
-		
-	}
-	
-private:
-	template<class Batch>
-	double evalForBatch(SearchPointType const& input, Batch const& batch)const {
 		mep_model->setParameterVector(input);
+		
+		std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+		auto const& batch = m_dataset.batch(batchIndex);
+		
 	
 		BatchOutputType predictions;
 		mep_model->eval(batch.input,predictions);
@@ -122,11 +89,14 @@ private:
 		error /= shark::batchSize(batch);
 		return error;
 	}
-	template<class Batch>
-	ResultType evalDerivativeForBatch( SearchPointType const& input, FirstOrderDerivative & derivative, Batch const& batch)const {
+
+	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative)const {
 		mep_model->setParameterVector(input);
-		boost::shared_ptr<State> state = mep_model->createState();
 		
+		std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+		auto const& batch = m_dataset.batch(batchIndex);
+		
+		boost::shared_ptr<State> state = mep_model->createState();
 		BatchOutputType predictions;
 		mep_model->eval(batch.input,predictions,*state);
 
@@ -141,43 +111,34 @@ private:
 		derivative /= shark::batchSize(batch);
 		return error;
 	}
-
 };
 }
-
-inline void swap(NoisyErrorFunction& op1, NoisyErrorFunction& op2){
-	using std::swap;
-	swap(op1.mp_wrapper,op2.mp_wrapper);
-	swap(op1.m_features,op2.m_features);
-}
-
 
 template<class InputType, class LabelType, class OutputType>
 NoisyErrorFunction::NoisyErrorFunction(
 	LabeledData<InputType,LabelType> const& dataset,
 	AbstractModel<InputType,OutputType>* model,
-	AbstractLoss<LabelType, OutputType>* loss,
-	std::size_t batchSize)
-:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(dataset,model,loss,batchSize))
+	AbstractLoss<LabelType, OutputType>* loss)
+:mp_wrapper(new detail::NoisyErrorFunctionWrapper<InputType,LabelType,OutputType>(dataset,model,loss))
 , m_regularizer(0), m_regularizationStrength(0){
-	this -> m_features = mp_wrapper -> features();
+	this->m_features = mp_wrapper->features();
 }
 
 inline NoisyErrorFunction::NoisyErrorFunction(NoisyErrorFunction const& op):
-	mp_wrapper(static_cast<detail::NoisyErrorFunctionWrapperBase*>(op.mp_wrapper->clone()))
+	mp_wrapper(op.mp_wrapper->clone())
 {
-	this -> m_features = mp_wrapper -> features();
+	this->m_features = mp_wrapper->features();
 }
 
 inline NoisyErrorFunction& NoisyErrorFunction::operator= (NoisyErrorFunction const& op){
-	NoisyErrorFunction copy(op);
-	swap(copy,*this);
+	mp_wrapper.reset(op.mp_wrapper->clone());
+	this->m_features = mp_wrapper->features();
 	return *this;
 }
 
 inline double NoisyErrorFunction::eval(RealVector const& input) const{
 	++m_evaluationCounter;
-	double value = mp_wrapper -> eval(input);
+	double value = mp_wrapper->eval(input);
 	if(m_regularizer)
 		value += m_regularizationStrength * m_regularizer->eval(input);
 	return value;
@@ -185,22 +146,13 @@ inline double NoisyErrorFunction::eval(RealVector const& input) const{
 
 inline NoisyErrorFunction::ResultType NoisyErrorFunction::evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative ) const{
 	++m_evaluationCounter;
-	double value = mp_wrapper -> evalDerivative(input,derivative);
+	double value = mp_wrapper->evalDerivative(input,derivative);
 	if(m_regularizer){
 		FirstOrderDerivative regularizerDerivative;
 		value += m_regularizationStrength * m_regularizer->evalDerivative(input,regularizerDerivative);
 		noalias(derivative) += m_regularizationStrength*regularizerDerivative;
 	}
 	return value;
-}
-
-
-inline void NoisyErrorFunction::setBatchSize(std::size_t batchSize){
-	mp_wrapper -> setBatchSize(batchSize);
-}
-
-inline std::size_t NoisyErrorFunction::batchSize() const{
-	return mp_wrapper -> batchSize();
 }
 
 }

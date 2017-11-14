@@ -42,21 +42,6 @@
 
 namespace shark{
 
-namespace detail{
-///\brief Baseclass for the Typewrapper of the Noisy Error Function.
-class NoisyErrorFunctionWrapperBase:public FunctionWrapperBase{
-protected:
-	std::size_t m_batchSize;
-public:
-	void setBatchSize(std::size_t batchSize){
-		m_batchSize = batchSize;
-	}
-	std::size_t batchSize() const{
-		return m_batchSize;
-	}
-};
-}
-
 ///\brief Error Function which only uses a random fraction of data.
 ///
 ///Conceptionally, this is the same as the normal ErrorFunction, with the only difference,
@@ -64,9 +49,8 @@ public:
 ///thus noise is introduced. This can be used to perform stochastic gradient
 ///descent or to introduce some noise to a problem.
 ///
-/// Setting the batch size to 0 is equivalent to performing minibatch learning
-/// where one random batch is picked from the dataset instead of sampling
-/// points from it
+/// Internally this is implemented by extracting a random batch from the dataset every time.
+/// Thus this error function uses the batch sizes used to split the dataset.
 class NoisyErrorFunction : public SingleObjectiveFunction
 {
 public:
@@ -74,8 +58,7 @@ public:
 	NoisyErrorFunction(
 		LabeledData<InputType,LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model,
-		AbstractLoss<LabelType,OutputType>* loss,
-		std::size_t batchSize=1
+		AbstractLoss<LabelType,OutputType>* loss
 	);
 	NoisyErrorFunction(NoisyErrorFunction const& op1);
 	NoisyErrorFunction& operator = (NoisyErrorFunction const& op1);
@@ -84,19 +67,16 @@ public:
 	std::string name() const
 	{ return "NoisyErrorFunction"; }
 
-	void setBatchSize(std::size_t batchSize);
-	std::size_t batchSize() const;
-
-	SearchPointType proposeStartingPoint() const{
-		return mp_wrapper -> proposeStartingPoint();
+	SearchPointType proposeStartingPoint()const{
+		return mp_wrapper->proposeStartingPoint();
 	}
 	std::size_t numberOfVariables()const{
-		return mp_wrapper -> numberOfVariables();
+		return mp_wrapper->numberOfVariables();
 	}
 	
 	void init(){
 		mp_wrapper->setRng(this->mep_rng);
-		mp_wrapper-> init();
+		mp_wrapper->init();
 	}
 	
 	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
@@ -106,10 +86,8 @@ public:
 
 	double eval(RealVector const& input)const;
 	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative )const;
-
-	friend void swap(NoisyErrorFunction& op1, NoisyErrorFunction& op2);
 private:
-	boost::scoped_ptr<detail::NoisyErrorFunctionWrapperBase> mp_wrapper;
+	boost::scoped_ptr<detail::FunctionWrapperBase> mp_wrapper;
 	
 	SingleObjectiveFunction* m_regularizer;
 	double m_regularizationStrength;

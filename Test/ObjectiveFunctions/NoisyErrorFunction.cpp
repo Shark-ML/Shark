@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 		output(0)=function.eval(input);
 		target.push_back(output);
 	}
-
-	RegressionDataset dataset = createLabeledDataFromRange(data,target);
+	// batchsize 1 corresponds to stochastic gradient descent
+	RegressionDataset dataset = createLabeledDataFromRange(data,target,1);
 
 	//startingPoint
 	RealVector point(3);
@@ -67,8 +67,9 @@ BOOST_AUTO_TEST_CASE( ML_NoisyErrorFunction )
 	SteepestDescent optimizer;
 	SquaredLoss<> loss;
 	LinearModel<> model(3);
-	// batchsize 1 corresponds to stochastic gradient descent
-	NoisyErrorFunction mse(dataset,&model,&loss,1);
+	
+	NoisyErrorFunction mse(dataset,&model,&loss);
+	mse.init();
 	optimizer.init(mse, point);
 	// train the cmac
 	double error = 0.0;
