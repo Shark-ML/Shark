@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE (Models_MeanModel)
 BOOST_AUTO_TEST_CASE( MeanModel_Test )
 {
 	MeanModel<LinearModel<> > model;
-	
+	model.setOutputSize(2);
 	RealMatrix weights(2,2,0.0);
 	RealVector bias(2,0.0);
 	
@@ -70,6 +70,7 @@ BOOST_AUTO_TEST_CASE( MeanModel_Serialize )
 {
 	//the target modelwork
 	MeanModel<LinearModel<> > model;
+	model.setOutputSize(2);
 	
 	RealMatrix weights(2,2,0.0);
 	RealVector bias(2,0.0);

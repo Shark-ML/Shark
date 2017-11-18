@@ -39,41 +39,29 @@ namespace shark {
 
 /// \brief Calculates the weighted mean of a set of models
 template<class ModelType>
-class MeanModel : public AbstractModel<typename ModelType::InputType, typename ModelType::OutputType>
+class MeanModel : public AbstractModel<typename ModelType::InputType, RealVector>
 {
 private:
-	typedef AbstractModel<typename ModelType::InputType, typename ModelType::OutputType> base_type;
-
+	typedef AbstractModel<typename ModelType::InputType, RealVector> base_type;
+	template<class T> struct tag{};
+	
 	template<class InputBatch>
-	void doEval(InputBatch const& patterns, RealMatrix& outputs)const{
-		m_models[0].eval(patterns,outputs);
-		outputs *=m_weight[0];
-		for(std::size_t i = 1; i != m_models.size(); i++) 
+	void doEval(InputBatch const& patterns, RealMatrix& outputs, tag<RealVector>)const{
+		for(std::size_t i = 0; i != m_models.size(); i++) 
 			noalias(outputs) += m_weight[i] * m_models[i](patterns);
 		outputs /= m_weightSum;
 	}
 	template<class InputBatch>
-	void doEval(InputBatch const& patterns, blas::vector<unsigned int>& outputs)const{
-		//evaluate all models on the batch and obtain number of classes
-		std::vector<blas::vector<unsigned int> > responses(m_models.size());
-		unsigned int numClasses = 0;
+	void doEval(InputBatch const& patterns, RealMatrix& outputs, tag<unsigned int>)const{
+		blas::vector<unsigned int> responses;
 		for(std::size_t i = 0; i != m_models.size(); ++i){
-			m_models[i].eval(patterns, responses[i]);
-			numClasses = std::max(numClasses, max(responses[i]));
-		}
-		numClasses += 1;
-		//compute weighted class probabilities
-		RealMatrix classProbs(patterns.size1(), numClasses,0.0);
-		for(std::size_t i = 0; i != m_models.size(); ++i){
+			m_models[i].eval(patterns, responses);
 			for(std::size_t p = 0; p != patterns.size1(); ++p){
-				classProbs(p,responses[i](p)) += m_weight[i];
+				SIZE_CHECK(responses(p) < m_outputDim);
+				outputs(p,responses(p)) += m_weight[i];
 			}
 		}
-		
-		outputs.resize(patterns.size1());
-		for(std::size_t p = 0; p != patterns.size1(); ++p){
-			outputs(p) = arg_max(row(classProbs,p));
-		}
+		outputs /= m_weightSum;
 	}
 public:
 	
@@ -85,11 +73,17 @@ public:
 
 	using base_type::eval;
 	void eval(typename base_type::BatchInputType const& patterns, typename base_type::BatchOutputType& outputs)const{
-		doEval(patterns,outputs);
+		outputs.resize(patterns.size1(), m_outputDim);
+		outputs.clear();
+		doEval(patterns,outputs, tag<typename ModelType::OutputType>());
 	}
 	
 	void eval(typename base_type::BatchInputType const& patterns, typename base_type::BatchOutputType& outputs, State& state)const{
 		eval(patterns,outputs);
+	}
+	
+	std::size_t outputSize() const{
+		return m_outputDim;
 	}
 
 
@@ -106,11 +100,13 @@ public:
 		archive >> m_models;
 		archive >> m_weight;
 		archive >> m_weightSum;
+		archive >> m_outputDim;
 	}
 	void write(OutArchive& archive)const{
 		archive << m_models;
 		archive << m_weight;
 		archive << m_weightSum;
+		archive << m_outputDim;
 	}
 
 	/// \brief Removes all models from the ensemble
@@ -131,7 +127,7 @@ public:
 		m_weightSum+=weight;
 	}
 	
-	ModelType const& getModel(std::size_t index){
+	ModelType const& getModel(std::size_t index)const{
 		return m_models[index];
 	}
 
@@ -142,8 +138,13 @@ public:
 	
 	/// \brief sets the weight of the i-th model
 	void setWeight(std::size_t i, double newWeight){
-		m_weightSum=newWeight - m_weight[i];
+		m_weightSum += newWeight - m_weight[i];
 		m_weight[i] = newWeight;
+	}
+	
+	///\brief sets the dimensionality of the output
+	void setOutputSize(std::size_t dim){
+		m_outputDim = dim;
 	}
 	
 	/// \brief Returns the number of models.
@@ -160,6 +161,9 @@ protected:
 
 	/// Total sum of weights.
 	double m_weightSum;
+
+	///\brief output dimensionality
+	std::size_t m_outputDim;
 };
 
 
