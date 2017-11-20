@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_SUITE (Models_LinearModel)
 BOOST_AUTO_TEST_CASE( Models_LinearModel )
 {
 	// 2 inputs, 2 outputs, no offset -> 4 parameters
-	LinearModel<> model(2, 2, false);
+	LinearModel<> model({2,1}, {1,2}, false);
 	BOOST_CHECK_EQUAL(model.numberOfParameters(), 4u);
 
 	// The matrix should have the form
@@ -119,11 +119,11 @@ BOOST_AUTO_TEST_CASE( LinearModel_SERIALIZE )
 	//so we generate some data first
 	std::vector<RealVector> data;
 	std::vector<RealVector> target;
-	RealVector input(model.inputSize());
-	RealVector output(model.outputSize());
+	RealVector input(model.inputShape().numElements());
+	RealVector output(model.outputShape().numElements());
 	for (size_t i=0; i<1000; i++)
 	{
-		for(size_t j=0;j!=model.inputSize();++j)
+		for(size_t j=0;j!=input.size();++j)
 		{
 			input(j)=random::uni(random::globalRng,-1,1);
 		}
@@ -147,8 +147,8 @@ BOOST_AUTO_TEST_CASE( LinearModel_SERIALIZE )
 	//first simple parameter and topology check
 	BOOST_REQUIRE_EQUAL(modelDeserialized.numberOfParameters(),model.numberOfParameters());
 	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
-	BOOST_REQUIRE_EQUAL(modelDeserialized.inputSize(),model.inputSize());
-	BOOST_REQUIRE_EQUAL(modelDeserialized.outputSize(),model.outputSize());
+	BOOST_REQUIRE_EQUAL(modelDeserialized.inputShape(),model.inputShape());
+	BOOST_REQUIRE_EQUAL(modelDeserialized.outputShape(),model.outputShape());
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = modelDeserialized(dataset.element(i).input);

@@ -2,13 +2,13 @@
 /*!
  * 
  *
- * \brief       unit test for kernel nearest neighbor classifier
+ * \brief       unit test for soft nearest neighbor classifier
  * 
  * 
  * 
  *
  * \author      T. Glasmachers
- * \date        2010-2011
+ * \date        2011
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -33,11 +33,11 @@
  */
 //===========================================================================
 
-#define BOOST_TEST_MODULE MODELS_KERNEL_NEAREST_NEIGHBOR_CLASSIFIER
+#define BOOST_TEST_MODULE MODELS_NEAREST_NEIGHBOR
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <shark/Models/NearestNeighborClassifier.h>
+#include <shark/Models/NearestNeighborModel.h>
 #include <shark/Algorithms/NearestNeighbors/TreeNearestNeighbors.h>
 #include <shark/Algorithms/NearestNeighbors/SimpleNearestNeighbors.h>
 
@@ -49,12 +49,86 @@
 
 #include <shark/Core/Random.h>
 #include <queue>
-
 using namespace shark;
 
-BOOST_AUTO_TEST_SUITE (Models_Kernels_KernelNearestNeighborClassifier)
+BOOST_AUTO_TEST_SUITE (Models_NearestNeighbor)
 
-BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_CLASSIFIER ) {
+BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Regression ) {
+
+	// simple data set with paired points
+	std::vector<RealVector> input(6, RealVector(2));
+	input[0](0)=1;
+	input[0](1)=3;
+	input[1](0)=-1;
+	input[1](1)=3;
+	input[2](0)=1;
+	input[2](1)=0;
+	input[3](0)=-1;
+	input[3](1)=0;
+	input[4](0)=1;
+	input[4](1)=-3;
+	input[5](0)=-1;
+	input[5](1)=-3;
+	std::vector<RealVector> target(6, RealVector(1));
+	target[0](0)=-5.0;
+	target[1](0)=-3.0;
+	target[2](0)=-1.0;
+	target[3](0)=+1.0;
+	target[4](0)=+3.0;
+	target[5](0)=+5.0;
+	RegressionDataset dataset = createLabeledDataFromRange(input, target);
+
+	// model
+	DenseLinearKernel kernel;
+	SimpleNearestNeighbors<RealVector,RealVector> algorithm(dataset, &kernel);
+	NearestNeighborModel<RealVector, RealVector> model(&algorithm, 2);
+
+	// predictions must be pair averages
+	Data<RealVector> prediction = model(dataset.inputs());
+	for (int i = 0; i<6; ++i)
+	{
+		BOOST_CHECK_SMALL(prediction.element(i)(0) - 4.0 * (i/2 - 1), 1e-14);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple ) {
+	std::vector<RealVector> input(6, RealVector(2));
+	input[0](0)=1;
+	input[0](1)=3;
+	input[1](0)=-1;
+	input[1](1)=3;
+	input[2](0)=1;
+	input[2](1)=0;
+	input[3](0)=-1;
+	input[3](1)=0;
+	input[4](0)=1;
+	input[4](1)=-3;
+	input[5](0)=-1;
+	input[5](1)=-3;
+	std::vector<unsigned int> target(6);
+	target[0]=0;
+	target[1]=0;
+	target[2]=1;
+	target[3]=1;
+	target[4]=2;
+	target[5]=2;
+
+	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
+
+	DenseRbfKernel kernel(0.5);
+	SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
+	NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
+
+	Data<unsigned int> prediction=model(dataset.inputs());
+	Data<RealVector> soft_prediction=model.decisionFunction()(dataset.inputs());
+	for (size_t i = 0; i<6; ++i)
+	{
+		BOOST_CHECK_EQUAL(prediction.element(i),target[i]);
+		BOOST_CHECK_CLOSE(soft_prediction.element(i)(target[i]), 2.0/3.0, 1e-12);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KHCTree ) {
 	std::vector<RealVector> input(6, RealVector(2));
 	input[0](0)=1;
 	input[0](1)=3;
@@ -82,7 +156,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_CLASSIFIER ) {
 
 	KHCTree<DataView<Data<RealVector> > > tree(view,&kernel);
 	TreeNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &tree);
-	NearestNeighborClassifier<RealVector> model(&algorithm, 3);
+	NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
 
 	for (size_t i = 0; i<6; ++i)
 	{
@@ -91,44 +165,8 @@ BOOST_AUTO_TEST_CASE( KERNEL_NEAREST_NEIGHBOR_CLASSIFIER ) {
 	}
 }
 
-BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER ) {
-	std::vector<RealVector> input(6, RealVector(2));
-	input[0](0)=1;
-	input[0](1)=3;
-	input[1](0)=-1;
-	input[1](1)=3;
-	input[2](0)=1;
-	input[2](1)=0;
-	input[3](0)=-1;
-	input[3](1)=0;
-	input[4](0)=1;
-	input[4](1)=-3;
-	input[5](0)=-1;
-	input[5](1)=-3;
-	std::vector<unsigned int> target(6);
-	target[0]=0;
-	target[1]=1;
-	target[2]=0;
-	target[3]=1;
-	target[4]=0;
-	target[5]=1;
 
-	ClassificationDataset dataset = createLabeledDataFromRange(input, target,2);
-
-	DenseRbfKernel kernel(0.5);
-	SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
-	NearestNeighborClassifier<RealVector> model(&algorithm, 3);
-
-	Data<unsigned int> labels = model(dataset.inputs());
-	for (size_t i = 0; i<6; ++i)
-	{
-		unsigned int label = model(input[i]);
-		BOOST_CHECK_EQUAL(target[i], label);
-		BOOST_CHECK_EQUAL(target[i], labels.element(i));
-	}
-}
-
-BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
+BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple_Brute_Force ) {
 	std::size_t Dimension = 5;
 	std::size_t Points = 100;
 	std::size_t TestPoints = 100;
@@ -157,7 +195,7 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
 	{
 		DenseRbfKernel kernel(0.5);
 		SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
-		NearestNeighborClassifier<RealVector> model(&algorithm, 1);
+		NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 1);
 
 		Data<unsigned int> labels = model(dataset.inputs());
 		for (size_t i = 0; i<Points; ++i)
@@ -191,7 +229,7 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
 	{
 		DenseRbfKernel kernel(0.5);
 		SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
-		NearestNeighborClassifier<RealVector> model(&algorithm, 3);
+		NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
 		
 		Data<unsigned int> testLabels = model(testDataset.inputs());
 		for (size_t i = 0; i<TestPoints; ++i)
@@ -210,14 +248,16 @@ BOOST_AUTO_TEST_CASE( SIMPLE_NEAREST_NEIGHBOR_CLASSIFIER_BRUTE_FORCE ) {
 			}
 			unsigned int bruteforceLabel = res > 1;
 			unsigned int label = model(testInput[i]);
+			RealVector prob = model.decisionFunction()(testInput[i]);
 			BOOST_CHECK_EQUAL(bruteforceLabel, label);
+			BOOST_CHECK_CLOSE(prob(bruteforceLabel), std::max(res/3.0, 1.0 - res/3.0), 1.e-10);
 			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.element(i));
 		}
 	
 	}
 }
 
-BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
+BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KDTree_Brute_Force) {
 	std::size_t Dimension = 5;
 	std::size_t Points = 100;
 	std::size_t TestPoints = 100;
@@ -244,7 +284,7 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 	{
 		KDTree<RealVector> tree(dataset.inputs());
 		TreeNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &tree);
-		NearestNeighborClassifier<RealVector> model(&algorithm, 1);
+		NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 1);
 
 		//test whether 1-NN classifies it's training set correctly.
 		Data<unsigned int> labels = model(dataset.inputs());
@@ -281,7 +321,7 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 	{
 		KDTree<RealVector> tree(dataset.inputs());
 		TreeNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &tree);
-		NearestNeighborClassifier<RealVector> model(&algorithm, 3);
+		NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
 		
 		Data<unsigned int> testLabels = model(testDataset.inputs());
 		for (size_t i = 0; i<TestPoints; ++i)
@@ -305,6 +345,5 @@ BOOST_AUTO_TEST_CASE( NEAREST_NEIGHBOR_CLASSIFIER_KDTREE_BRUTE_FORCE ) {
 		}
 	}
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

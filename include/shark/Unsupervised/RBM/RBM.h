@@ -207,6 +207,22 @@ public:
 		m_evalMean = evalMean;
 	}
 	
+	Shape outputShape() const{
+		if(m_forward){
+			return numberOfHN();
+		}else{
+			return numberOfVN();
+		}
+	}
+	
+	Shape inputShape() const{
+		if(m_forward){
+			return numberOfVN();
+		}else{
+			return numberOfHN();
+		}
+	}
+	
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}

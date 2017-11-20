@@ -29,12 +29,10 @@ public:
 		virtual void setParameterVector(RealVector const& newParameters){}
 		virtual size_t numberOfParameters()const{return 1;}
 
-		virtual size_t inputSize()const
-		{
+		Shape inputShape() const{
 			return m_dim;
 		}
-		virtual size_t outputSize()const
-		{
+		Shape outputShape() const{
 			return m_dim;
 		}
 		

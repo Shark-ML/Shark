@@ -167,7 +167,7 @@ private:
 		AbstractKernelFunction<RealVector> const& kernel = *mep_expansion->kernel();
 		RealMatrix const& alpha = mep_expansion->alpha();
 		std::size_t dim = dataDimension(expansionBasis);
-		std::size_t outputs = mep_expansion->outputSize();
+		std::size_t outputs = mep_expansion->outputShape().numElements();
 		auto basis = to_matrix(input, m_numApproximatingVectors,dim);
 
 		//set up system of equations and store the kernel states at the same time

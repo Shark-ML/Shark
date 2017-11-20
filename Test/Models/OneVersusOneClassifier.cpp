@@ -61,6 +61,9 @@ public:
 		p(0) = m_threshold;
 		return p;
 	}
+	
+	Shape inputShape() const{ return 1;}
+	Shape outputShape() const{ return Shape();}
 
 	void setParameterVector(RealVector const& newParameters)
 	{ m_threshold = newParameters(0); }

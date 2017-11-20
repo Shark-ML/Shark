@@ -79,7 +79,10 @@ public:
 	std::string name() const
 	{ return "HierarchicalClustering"; }
 
-
+	Shape inputShape() const{
+		return Shape();
+	}
+	
 	/// Return the number of clusters.
 	std::size_t numberOfClusters() const{
 		return (mep_tree->nodes() + 1) / 2;

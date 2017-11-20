@@ -102,8 +102,12 @@ public:
 	{ return "KernelExpansion"; }
 
 	/// dimensionality of the output RealVector
-	size_t outputSize() const{
+	Shape outputShape() const{
 		return m_alpha.size2();
+	}
+	
+	Shape inputShape() const{
+		return Shape();
 	}
 
 	// //////////////////////////////////////////////////////////
@@ -183,7 +187,7 @@ public:
 		m_basis = toDataset(subset(toView(m_basis),svIndices));
 		
 		//reduce alpha to it's support vector variables
-		RealMatrix a(svIndices.size(), outputSize());
+		RealMatrix a(svIndices.size(), m_alpha.size2());
 		for (std::size_t i=0; i!= svIndices.size(); ++i){
 			noalias(row(a,i)) = row(m_alpha,svIndices[i]); 
 		}
@@ -231,7 +235,7 @@ public:
 		std::size_t numPatterns = batchSize(patterns);
 		SHARK_ASSERT(mep_kernel != NULL);
 
-		output.resize(numPatterns,outputSize());
+		output.resize(numPatterns,m_alpha.size2());
 		if (hasOffset())
 			output = repeat(m_b,numPatterns);
 		else
@@ -247,7 +251,7 @@ public:
 			RealMatrix kernelEvaluations = (*mep_kernel)(m_basis.batch(i),patterns);
 			
 			//get the part of the alpha matrix which is suitable for this batch
-			auto batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,outputSize());
+			auto batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,m_alpha.size2());
 			noalias(output) += prod(trans(kernelEvaluations),batchAlpha);
 			batchStart = batchEnd;
 		}

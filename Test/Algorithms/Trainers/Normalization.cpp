@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 	LinearModel<> map;
 	normalizer.train(map, set);
 	Data<RealVector> transformedSet = map(set);
-	BOOST_REQUIRE_EQUAL(map.outputSize(),2);
+	BOOST_REQUIRE_EQUAL(map.outputShape(),2);
 	
 	RealMatrix covariance;
 	meanvar(transformedSet, mean, covariance);

@@ -71,28 +71,26 @@ public:
 	
 	///\brief Sets the structure by setting the dimensionalities of image and filters.
 	///
-	/// Easiest way to call this is Conv2D<...> model({imHeight,imWidth}, {fiHeight,fiWidth}, channels, filters);
+	/// \arg imageShape Shape of the image imHeight x imWidth x channel
+	/// \arg filterShape Shape of the filter matrix numFilters x fiHeight x fiWidth x channel
 	Conv2DModel(
-		std::pair<std::size_t, std::size_t> imageSize,
-		std::pair<std::size_t, std::size_t> filterSize,
-		std::size_t numChannels, std::size_t numFilters
+		Shape const& imageShape, Shape const& filterShape
 	){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		setStructure(imageSize, filterSize, numChannels, numFilters);
+		setStructure(imageShape, filterShape);
 	}
 
 	std::string name() const
 	{ return "Conv2DModel"; }
 	
-	/// \brief Obtain the input dimension.
-	std::size_t inputSize() const{
-		return m_numChannels * m_imageHeight * m_imageWidth;
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return {m_imageHeight, m_imageWidth, m_numChannels};
 	}
-
-	/// \brief Obtain the output dimension.
-	std::size_t outputSize() const{
-		return m_numFilters * (m_imageHeight - m_filterHeight + 1) * (m_imageWidth - m_filterWidth + 1);
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return {m_imageHeight - m_filterHeight + 1, m_imageWidth - m_filterWidth + 1, m_numFilters};
 	}
 	
 	/// \brief Returns the activation function.
@@ -123,20 +121,19 @@ public:
 		return m_filters.size() + m_offset.size();
 	}
 
-	///\brief Sets the structure by setting the dimensionalities of image and filters.
+	///\brief Sets the structure by setting the shape of image and filters.
 	///
-	/// Easiest way to call this is model.setStructure({imHeight,imWidth}, {fiHeight,fiWidth}, channels, filters);
+	/// \arg imageShape Shape of the image imHeight x imWidth x channel
+	/// \arg filterShape Shape of the filter matrix numFilters x fiHeight x fiWidth
 	void setStructure(
-		std::pair<std::size_t, std::size_t> imageSize,
-		std::pair<std::size_t, std::size_t> filterSize,
-		std::size_t numChannels, std::size_t numFilters
+		Shape const& imageShape, Shape const& filterShape
 	){
-		m_imageHeight = imageSize.first;
-		m_imageWidth = imageSize.second;
-		m_filterHeight = filterSize.first;
-		m_filterWidth = filterSize.second;
-		m_numChannels = numChannels;
-		m_numFilters = numFilters;
+		m_imageHeight = imageShape.dim(0);
+		m_imageWidth = imageShape.dim(1);
+		m_numChannels = imageShape.dim(2);
+		m_numFilters = filterShape.dim(0);
+		m_filterHeight = filterShape.dim(1);
+		m_filterWidth = filterShape.dim(2);
 		m_filters.resize(m_filterHeight * m_filterWidth * m_numFilters * m_numChannels);
 		m_offset.resize(m_numFilters);
 		updateBackpropFilters();
@@ -150,8 +147,8 @@ public:
 
 	/// Evaluate the model: output = matrix * input + offset
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
-		SIZE_CHECK(inputs.size2() == inputSize());
-		outputs.resize(inputs.size1(),outputSize());
+		SIZE_CHECK(inputs.size2() == inputShape().numElements());
+		outputs.resize(inputs.size1(),outputShape().numElements());
 		std::size_t outputsForFilter = (m_imageHeight - m_filterHeight + 1) * (m_imageWidth - m_filterWidth + 1);
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto output = row(outputs,i);
@@ -174,7 +171,7 @@ public:
 		State const& state,
 		ParameterVectorType& gradient
 	)const{
-		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size2()==outputShape().numElements());
 		SIZE_CHECK(coefficients.size1()==inputs.size1());
 		
 		BatchOutputType delta = coefficients;
@@ -185,7 +182,7 @@ public:
 		auto weightGradient = to_matrix(subrange(gradient,0,m_filters.size()), m_numFilters, m_filters.size()/m_numFilters);
 		auto offsetGradient = subrange(gradient, m_filters.size(),gradient.size());
 		
-		BatchInputType patches(outputSize()/m_numFilters, m_filters.size()/m_numFilters);
+		BatchInputType patches(outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			blas::bindings::im2mat(//todo must get public interface in remora
 				row(inputs,i),patches,
@@ -193,7 +190,7 @@ public:
 				m_imageHeight, m_imageWidth,
 				m_filterHeight, m_filterWidth
 			);
-			auto delta_mat = to_matrix(row(delta,i), m_numFilters, outputSize()/m_numFilters);
+			auto delta_mat = to_matrix(row(delta,i), m_numFilters, outputShape().numElements()/m_numFilters);
 			noalias(weightGradient) += delta_mat % patches;
 			noalias(offsetGradient) += sum_columns(delta_mat);
 		}
@@ -208,13 +205,13 @@ public:
 		State const& state,
 		BatchInputType& derivatives
 	)const{
-		SIZE_CHECK(coefficients.size2() == outputSize());
+		SIZE_CHECK(coefficients.size2() == outputShape().numElements());
 		SIZE_CHECK(coefficients.size1() == inputs.size1());
 		
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 
-		derivatives.resize(inputs.size1(),inputSize());
+		derivatives.resize(inputs.size1(),inputShape().numElements());
 		derivatives.clear();
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto derivative = row(derivatives,i);

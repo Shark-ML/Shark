@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		KernelExpansion<RealVector> clusteringModel = kMeans(dataset, numMeans, kernel);
 		//std::cout<<clusteringModel.alpha()<<std::endl;
 		// check result
-		BOOST_REQUIRE_EQUAL( clusteringModel.outputSize(), numMeans);
+		BOOST_REQUIRE_EQUAL( clusteringModel.outputShape().numElements(), numMeans);
 		
 		//check that every point is assigned to exactly one cluster
 		UIntVector numAssignments = sum_columns(clusteringModel.alpha() != 0.0);

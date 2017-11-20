@@ -26,13 +26,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(NeuronLayer_Value, Neuron,neuron_types){
 }
 BOOST_AUTO_TEST_CASE_TEMPLATE(NeuronLayer_Derivative, Neuron,neuron_types) {
 	NeuronLayer<Neuron> net(10);
-	RealVector coefficients(net.outputSize());
-	RealVector point(net.inputSize());
+	RealVector coefficients(10);
+	RealVector point(10);
 	for(unsigned int test = 0; test != 1000; ++test){
-		for(size_t i = 0; i != net.outputSize();++i){
+		for(size_t i = 0; i != 10;++i){
 			coefficients(i) = random::uni(random::globalRng,-5,5);
 		}
-		for(size_t i = 0; i != net.inputSize();++i){
+		for(size_t i = 0; i != 10;++i){
 			point(i) = random::uni(random::globalRng,0.1,3);
 		}
 

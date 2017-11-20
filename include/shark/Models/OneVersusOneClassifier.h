@@ -113,6 +113,13 @@ public:
 	/// return number of classes
 	unsigned int numberOfClasses() const
 	{ return m_classes; }
+	
+	Shape inputShape() const{
+		return Shape();
+	}
+	Shape outputShape() const{
+		return Shape();
+	}
 
 	/// \brief Obtain binary classifier.
 	///

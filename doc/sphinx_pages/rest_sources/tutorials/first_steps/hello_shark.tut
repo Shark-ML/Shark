@@ -81,16 +81,10 @@ Evaluation
 %%%%%%%%%%
 
 One way to evaluate our LDA-trained linear model is to count the number of
-correctly classified test samples. We simply use a for loop to iterate
-over all key-value pairs of the dataset::
+correctly classified test samples. Here, we use a loss function to evaluate the
+fration of incorrectly classified points::
 
 ..sharkcode<Supervised/quickstartTutorial.tpp,eval>
-
-Easier, faster, and more flexible ways to evaluate models are facilitated by Shark
-losses and error functions, which will be introduced in the next tutorials.
-In order to print the results (do not forget to include ``iostream``), issue::
-
-..sharkcode<Supervised/quickstartTutorial.tpp,outputs>
 
 The result should read:
 
@@ -100,7 +94,6 @@ The result should read:
     ========
 
     test data size: 200
-    correct classification: 155
     error rate: 0.225
 
 What you learned

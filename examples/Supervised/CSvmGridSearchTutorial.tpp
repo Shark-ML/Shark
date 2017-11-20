@@ -56,8 +56,10 @@ int main()
 	vector<double> min(2);
 	vector<double> max(2);
 	vector<size_t> sections(2);
-	min[0] = ljg-4.; max[0] = ljg+4; sections[0] = 9;  // kernel parameter gamma
-	min[1] = 0.0; max[1] = 10.0; sections[1] = 11;	   // regularization parameter C
+	// kernel parameter gamma
+	min[0] = ljg-4.; max[0] = ljg+4; sections[0] = 9;
+	// regularization parameter C
+	min[1] = 0.0; max[1] = 10.0; sections[1] = 11;
 	grid.configure(min, max, sections);
 	//###end<grid_configure>
 	//###begin<grid_train>

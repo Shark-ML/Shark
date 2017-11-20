@@ -52,23 +52,21 @@ class ConvexCombination : public AbstractModel<RealVector,RealVector>
 {
 private:
 	RealMatrix m_w; ///< the convex comination weights. it holds sum(row(w_i)) = 1
+	Shape m_inputShape;
+	Shape m_outputShape;
 public:
 
-	/// CDefault Constructor; use setStructure later
+	/// Default Constructor; use setStructure later
 	ConvexCombination(){
 		m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 		m_features |= HAS_FIRST_INPUT_DERIVATIVE;
 	}
 	
-	/// Constructor creating a model with given dimnsionalities and optional offset term.
-	ConvexCombination(std::size_t inputs, std::size_t outputs = 1)
-	: m_w(outputs,inputs,0.0){
-		m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
-		m_features |= HAS_FIRST_INPUT_DERIVATIVE;
-	}
-	
-	/// Construction from matrix
-	ConvexCombination(RealMatrix const& matrix):m_w(matrix){
+	/// Constructor creating a model with given dimensionalities
+	ConvexCombination(Shape const& inputs, Shape const& outputs)
+	: m_w(outputs.numElements(),inputs.numElements(),0.0)
+	, m_inputShape(inputs)
+	, m_outputShape(outputs){
 		m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
 		m_features |= HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -77,26 +75,13 @@ public:
 	std::string name() const
 	{ return "ConvexCombination"; }
 
-	///swap
-	friend void swap(ConvexCombination& model1,ConvexCombination& model2){
-		swap(model1.m_w,model2.m_w);
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_inputShape;
 	}
-
-	///operator =
-	ConvexCombination& operator=(ConvexCombination const& model){
-		ConvexCombination tempModel(model);
-		swap(*this,tempModel);
-		return *this;
-	}
-
-	/// obtain the input dimension
-	std::size_t inputSize() const{
-		return m_w.size2();
-	}
-
-	/// obtain the output dimension
-	std::size_t outputSize() const{
-		return m_w.size1();
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_outputShape;
 	}
 
 	/// obtain the parameter vector
@@ -108,7 +93,7 @@ public:
 	void setParameterVector(RealVector const& newParameters)
 	{
 		noalias(m_w) = exp(to_matrix(newParameters,m_w.size1(),m_w.size2()));
-		for(std::size_t i = 0; i != outputSize(); ++i){
+		for(std::size_t i = 0; i != m_w.size1(); ++i){
 			row(m_w,i) /= sum(row(m_w,i));
 		}
 	}
@@ -119,9 +104,9 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(std::size_t inputs, std::size_t outputs = 1){
+	void setStructure(Shape const& inputs, Shape const& outputs = 1){
 		ConvexCombination model(inputs,outputs);
-		swap(*this,model);
+		*this = model;
 	}
 	
 	RealMatrix const& weights() const{
@@ -151,11 +136,11 @@ public:
 		BatchInputType const& patterns, BatchOutputType const& outputs, 
 		RealMatrix const& coefficients, State const& state, RealVector& gradient
 	)const{
-		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size2()==m_w.size1());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
 		gradient.resize(numberOfParameters());
-		blas::dense_matrix_adaptor<double> weightGradient = blas::to_matrix(gradient,outputSize(),inputSize());
+		blas::dense_matrix_adaptor<double> weightGradient = blas::to_matrix(gradient,m_w.size1(),m_w.size2());
 
 		//derivative is
 		//sum_i sum_j c_ij sum_k x_ik grad_q w_jk= sum_k sum_j grad_q w_jk (sum_i c_ij x_ik)
@@ -163,7 +148,7 @@ public:
 		RealMatrix d = prod(trans(coefficients), patterns);
 		
 		//use the same drivative as in the softmax model
-		for(std::size_t i = 0; i != outputSize(); ++i){
+		for(std::size_t i = 0; i != m_w.size1(); ++i){
 			double mass=inner_prod(row(d,i),row(m_w,i));
 			noalias(row(weightGradient,i)) = element_prod(
 				row(d,i) - mass,
@@ -179,20 +164,24 @@ public:
 		State const& state,
 		BatchInputType& derivative
 	)const{
-		SIZE_CHECK(coefficients.size2() == outputSize());
+		SIZE_CHECK(coefficients.size2() == m_w.size1());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 
-		derivative.resize(patterns.size1(),inputSize());
+		derivative.resize(patterns.size1(),m_w.size2());
 		noalias(derivative) = prod(coefficients,m_w);
 	}
 
 	/// From ISerializable
 	void read(InArchive& archive){
 		archive >> m_w;
+		archive >> m_inputShape;
+		archive >> m_outputShape;
 	}
 	/// From ISerializable
 	void write(OutArchive& archive) const{
 		archive << m_w;
+		archive << m_inputShape;
+		archive << m_outputShape;
 	}
 };
 

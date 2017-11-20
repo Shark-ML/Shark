@@ -217,13 +217,13 @@ private:
 	typedef AbstractModel<VectorType,VectorType, VectorType> base_type;
 
 	NeuronType m_neuron;
-	std::size_t m_inputSize;
+	Shape m_shape;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
-	NeuronLayer(std::size_t inputSize = 0): m_inputSize(inputSize){
+	NeuronLayer(Shape const& shape = Shape()): m_shape(shape){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -235,16 +235,12 @@ public:
 	NeuronType const& neuron()const{ return m_neuron;}
 	NeuronType& neuron(){ return m_neuron;}
 	
-	std::size_t inputSize()const{
-		return m_inputSize;
+	Shape inputShape() const{
+		return m_shape;
 	}
 	
-	std::size_t outputSize()const{
-		return m_inputSize;
-	}
-	
-	void setStructure(std::size_t inputSize){
-		m_inputSize = inputSize;
+	Shape outputShape() const{
+		return m_shape;
 	}
 
 	/// obtain the parameter vector
@@ -269,20 +265,20 @@ public:
 	using base_type::eval;
 
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs)const{
-		SIZE_CHECK(inputs.size2() == inputSize());
+		SIZE_CHECK(inputs.size2() == m_shape.numElements());
 		outputs.resize(inputs.size1(),inputs.size2());
 		noalias(outputs) = inputs;
 		m_neuron.evalInPlace(outputs);
 	}
 
 	void eval(VectorType const& input, VectorType& output)const{
-		SIZE_CHECK(input.size() == inputSize());
+		SIZE_CHECK(input.size() == m_shape.numElements());
 		output.resize(input.size());
 		noalias(output) = input;
 		m_neuron.evalInPlace(output);
 	}
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
-		SIZE_CHECK(inputs.size2() == inputSize());
+		SIZE_CHECK(inputs.size2() == m_shape.numElements());
 		outputs.resize(inputs.size1(),inputs.size2());
 		noalias(outputs) = inputs;
 		m_neuron.evalInPlace(outputs, state.toState<typename NeuronType::State>());
@@ -317,9 +313,9 @@ public:
 	}
 
 	/// From ISerializable
-	void read(InArchive& archive){ archive >> m_inputSize;}
+	void read(InArchive& archive){ archive >> m_shape;}
 	/// From ISerializable
-	void write(OutArchive& archive) const{ archive << m_inputSize;}
+	void write(OutArchive& archive) const{ archive << m_shape;}
 };
 
 

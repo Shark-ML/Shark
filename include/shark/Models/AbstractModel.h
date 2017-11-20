@@ -39,6 +39,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/State.h>
+#include <shark/Core/Shape.h>
 #include <shark/Core/Random.h>
 #include<shark/Data/Dataset.h>
 
@@ -119,6 +120,11 @@ public:
 	bool isSequential()const{
 		return m_features & IS_SEQUENTIAL;
 	}
+	
+	///\brief Returns the expected shape of the input.
+	virtual Shape inputShape() const = 0;
+	///\brief Returns the shape of the output.
+	virtual Shape outputShape() const = 0;
 	
 	///\brief Creates an internal state of the model.
 	///

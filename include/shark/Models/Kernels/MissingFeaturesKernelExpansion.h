@@ -79,7 +79,7 @@ public:
 		//so i am using a DataView to have O(1) random access lookup. but this is not needed!
 		DataView<Data<InputType> const > indexedBasis(Base::m_basis);
 		
-		ensure_size(outputs,batchSize(patterns),Base::outputSize());
+		ensure_size(outputs,batchSize(patterns),Base::outputShape().numElements());
 		if (Base::hasOffset())
 				noalias(outputs) = repeat(Base::m_b,batchSize(patterns));
 			else

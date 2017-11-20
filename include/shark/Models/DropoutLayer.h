@@ -45,13 +45,14 @@ private:
 	};
 	random::rng_type* mep_rng;
 	double m_dropoutProbability;
+	Shape m_shape;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
-	DropoutLayer(double probability = 0.5, random::rng_type& rng = random::globalRng)
-	: mep_rng(&rng), m_dropoutProbability(probability){
+	DropoutLayer(Shape const& inputShape, double probability = 0.5, random::rng_type& rng = random::globalRng)
+	: m_shape(inputShape), mep_rng(&rng), m_dropoutProbability(probability){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -73,6 +74,15 @@ public:
 	/// return the number of parameter
 	size_t numberOfParameters() const{
 		return 0;
+	}
+	
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_shape;
+	}
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_shape;
 	}
 
 	boost::shared_ptr<State> createState()const{

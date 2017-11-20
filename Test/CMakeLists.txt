@@ -140,23 +140,17 @@ shark_add_test( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
 
 # Models
 shark_add_test( Models/ConcatenatedModel.cpp Models_ConcatenatedModel )
-shark_add_test( Models/FFNet.cpp Models_FFNet )
-shark_add_test( Models/Autoencoder.cpp Models_Autoencoder )
-shark_add_test( Models/TiedAutoencoder.cpp Models_TiedAutoencoder )
 shark_add_test( Models/LinearModel.cpp Models_LinearModel )
 shark_add_test( Models/ConvolutionalModel.cpp Models_ConvolutionalModel )
+shark_add_test( Models/NearestNeighborModel.cpp Models_NearestNeighborModel )
 shark_add_test( Models/ConvexCombination.cpp Models_ConvexCombination )
-shark_add_test( Models/OnlineRNNet.cpp Models_OnlineRNNet )
 shark_add_test( Models/RBFLayer.cpp Models_RBFLayer ) 
-shark_add_test( Models/RNNet.cpp Models_RNNet ) 
 shark_add_test( Models/CMAC.cpp Models_CMAC )
 shark_add_test( Models/MeanModel.cpp Models_MeanModel )
 shark_add_test( Models/DropoutLayer.cpp Models_DropoutLayer )
 shark_add_test( Models/NeuronLayer.cpp Models_NeuronLayer )
 
-shark_add_test( Models/SoftNearestNeighborClassifier.cpp Models_SoftNearestNeighborClassifier )
 shark_add_test( Models/Kernels/KernelExpansion.cpp Models_KernelExpansion )
-shark_add_test( Models/NearestNeighborRegression.cpp Models_NearestNeighborRegression )
 shark_add_test( Models/OneVersusOneClassifier.cpp Models_OneVersusOneClassifier )
 
 # Kernels
@@ -177,8 +171,6 @@ shark_add_test( Models/Kernels/ModelKernel.cpp Models_ModelKernel )
 
 # KernelMethods
 shark_add_test( Models/Kernels/KernelHelpers.cpp Models_KernelHelpers )
-shark_add_test( Models/Kernels/KernelNearestNeighborClassifier.cpp Models_KernelNearestNeighborClassifier )
-shark_add_test( Models/Kernels/KernelNearestNeighborRegression.cpp Models_KernelNearestNeighborRegression )
 shark_add_test( Models/Kernels/EvalSkipMissingFeaturesTests.cpp Models_EvalSkipMissingFeatures )
 shark_add_test( Models/Kernels/MissingFeaturesKernelExpansionTests.cpp Models_MissingFeaturesKernelExpansion )
 shark_add_test( Models/Kernels/CSvmDerivative.cpp Models_CSvmDerivative )
@@ -206,7 +198,6 @@ shark_add_test( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
 #Objective Functions
 shark_add_test( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
-shark_add_test( ObjectiveFunctions/SparseAutoencoderError.cpp ObjFunct_SparseAutoencoderError )
 shark_add_test( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFunction )
 shark_add_test( ObjectiveFunctions/VariationalAutoencoder.cpp ObjFunct_VariationalAutoencoder )
 shark_add_test( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )

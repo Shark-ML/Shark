@@ -98,9 +98,7 @@ Setting up the objective function
 
 In order to optimize the model defined above, we need to set up some criterion.
 For this, we choose the squared loss of the model when applied to the training
-data set. Note that the code below could with minor modifications also be used
-to circumvent the slightly longer manual for-loop we wrote in the previous
-tutorial to evaluate our function on the test set after training. ::
+data set::
 
 ..sharkcode<Supervised/regressionTutorial.tpp,error_function>
 

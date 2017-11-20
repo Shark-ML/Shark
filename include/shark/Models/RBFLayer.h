@@ -95,12 +95,12 @@ public:
 	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters()const;
 
 	///\brief Returns the number of input neurons.
-	std::size_t inputSize()const{
+	Shape inputShape()const{
 		return m_centers.size2();
 	}
 	
 	///\brief Returns the number of output neurons.
-	std::size_t outputSize()const{
+	Shape outputShape()const{
 		return m_centers.size1();
 	}
 	

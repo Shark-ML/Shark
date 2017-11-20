@@ -66,22 +66,23 @@ std::vector<std::size_t> CMACMap::getIndizes(blas::matrix_row< const RealMatrix>
 CMACMap::CMACMap():m_tilings(0) {
 	m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
 }
-void CMACMap::setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower, double upper,bool randomTiles){
-	RealMatrix bounds(inputs,2);
-	for (std::size_t dim=0; dim != inputs; ++dim) {
+void CMACMap::setStructure(Shape const& inputs, Shape const& outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower, double upper,bool randomTiles){
+	RealMatrix bounds(inputs.numElements(),2);
+	for (std::size_t dim=0; dim != bounds.size1(); ++dim) {
 		bounds(dim, 0) = lower;
 		bounds(dim, 1) = upper;
 	}
 	setStructure(inputs, outputs, numberOfTilings, numberOfTiles,bounds,randomTiles);
 }
-void CMACMap::setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds, bool randomTiles){
-	m_inputSize  = inputs;
-	m_outputSize = outputs;
+void CMACMap::setStructure(Shape const& inputs, Shape const& outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds, bool randomTiles){
+	m_inputSize  = inputs.numElements();
+	m_inputShape = inputs;
+	m_outputShape = outputs;
 	m_tilings    = numberOfTilings;
 	
-	m_offset.resize(numberOfTilings, inputs);
-	m_dimOffset.resize(inputs + 1);
-	m_tileBounds.resize(inputs, 2);
+	m_offset.resize(numberOfTilings, m_inputSize);
+	m_dimOffset.resize(m_inputSize + 1);
+	m_tileBounds.resize(m_inputSize, 2);
 	m_tilings = numberOfTilings;
 	
 	//initialize bounds
@@ -104,7 +105,7 @@ void CMACMap::setStructure(std::size_t inputs, std::size_t outputs, std::size_t 
 	numberOfParameters *= m_tilings;
 	m_parametersPerTiling=numberOfParameters;
 	//parameters total
-	numberOfParameters *= outputs;
+	numberOfParameters *= outputs.numElements();
 	m_parameters.resize(numberOfParameters);
 	
 	//create tilings
@@ -122,12 +123,12 @@ void CMACMap::setStructure(std::size_t inputs, std::size_t outputs, std::size_t 
 void CMACMap::eval(RealMatrix const& patterns,RealMatrix &output) const{
 	SIZE_CHECK(patterns.size2() == m_inputSize);
 	std::size_t numPatterns = patterns.size1();
-	output.resize(numPatterns,m_outputSize);
+	output.resize(numPatterns, m_outputShape.numElements());
 	output.clear();
 	
 	for(std::size_t i = 0; i != numPatterns; ++i){
 		std::vector<std::size_t> indizes = getIndizes(row(patterns,i));
-		for (std::size_t o=0; o!=m_outputSize; ++o) {
+		for (std::size_t o = 0; o != output.size2(); ++o) {
 			for (std::size_t j = 0; j != m_tilings; ++j) {
 				output(i,o) += m_parameters(indizes[j] + o*m_parametersPerTiling);
 			}
@@ -143,14 +144,14 @@ void CMACMap::weightedParameterDerivative(
 	RealVector &gradient
 ) const{
 	SIZE_CHECK(patterns.size2() == m_inputSize);
-	SIZE_CHECK(coefficients.size2() == m_outputSize);
+	SIZE_CHECK(coefficients.size2() == outputs.size2());
 	SIZE_CHECK(coefficients.size1() == patterns.size1());
 	std::size_t numPatterns = patterns.size1();
 	gradient.resize(m_parameters.size());
 	gradient.clear();
 	for(std::size_t i = 0; i != numPatterns; ++i){
 		std::vector<std::size_t> indizes = getIndizes(row(patterns,i));
-		for (std::size_t o=0; o!=m_outputSize; ++o) {
+		for (std::size_t o=0; o!= outputs.size2(); ++o) {
 			for (std::size_t j=0; j != m_tilings; ++j) {
 				gradient(indizes[j] + o*m_parametersPerTiling) += coefficients(i,o);
 			}
@@ -166,7 +167,8 @@ void CMACMap::read(InArchive &archive) {
 	archive >> m_tilings;
 	archive >> m_parametersPerTiling;
 	archive >> m_inputSize;
-	archive >> m_outputSize;
+	archive >> m_inputShape;
+	archive >> m_outputShape;
 	archive >> m_parameters;
 }
 
@@ -177,6 +179,7 @@ void CMACMap::write(OutArchive &archive) const {
 	archive << m_tilings;
 	archive << m_parametersPerTiling;
 	archive << m_inputSize;
-	archive << m_outputSize;
+	archive << m_inputShape;
+	archive << m_outputShape;
 	archive << m_parameters;
 }

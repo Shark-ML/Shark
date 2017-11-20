@@ -13,11 +13,14 @@ BOOST_AUTO_TEST_SUITE (Models_ConvolutionalModel)
 
 BOOST_AUTO_TEST_CASE( Models_Conv2D)
 {
-	std::size_t numParams = 6*5*3*4+6;
-	Conv2DModel<RealVector, FastSigmoidNeuron> model({10,9}, {3,4}, 5, 6);
+	std::size_t numParams = 7*5*3*4+7;
+	Shape imageShape = {10,9,5};
+	Shape filterShape = {7,3,4};
+	Shape outputShape = {8,6,7};
+	Conv2DModel<RealVector, FastSigmoidNeuron> model(imageShape, filterShape);
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), numParams);
-	BOOST_REQUIRE_EQUAL(model.inputSize(), 5*10*9);
-	BOOST_REQUIRE_EQUAL(model.outputSize(), 6*8*6);
+	BOOST_REQUIRE_EQUAL(model.inputShape(), imageShape);
+	BOOST_REQUIRE_EQUAL(model.outputShape(), outputShape);
 	
 	//check parameter vector
 	{

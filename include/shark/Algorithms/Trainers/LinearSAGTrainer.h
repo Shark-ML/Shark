@@ -210,8 +210,8 @@ private:
 		//get stats of the dataset
 		DataView<LabeledData<InputType, LabelType> const> data(dataset.data());
 		std::size_t ell = data.size();
-		std::size_t labelDim = model.outputSize();
-		std::size_t dim = model.inputSize();
+		std::size_t labelDim = model.outputShape().numElements();
+		std::size_t dim = model.inputShape().numElements();
 		
 		//set number of iterations
 		std::size_t iterations = m_maxEpochs * ell;

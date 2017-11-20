@@ -71,6 +71,15 @@ public:
 	
 	std::string name() const
 	{ return "MeanModel"; }
+	
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_models.front().inputShape();
+	}
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_models.front().outputShape();
+	}
 
 	using ModelBaseType::eval;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const{

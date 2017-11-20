@@ -66,6 +66,8 @@ private:
 	MatrixType m_matrix;
 	VectorType m_offset;
 	ActivationFunction m_activation;
+	Shape m_inputShape;
+	Shape m_outputShape;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;//same as MatrixType
@@ -73,16 +75,21 @@ public:
 
 	/// CDefault Constructor; use setStructure later
 	LinearModel(){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		if(std::is_base_of<typename InputType::storage_type::storage_tag, blas::dense_tag>::value){
-			base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		}
 	}
-	/// Constructor creating a model with given dimnsionalities and optional offset term.
-	LinearModel(std::size_t inputs, std::size_t outputs = 1, bool offset = false)
-	: m_matrix(outputs,inputs,0.0),m_offset(offset?outputs:0,0.0){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+	/// Constructor creating a model with given dimensionalities and optional offset term.
+	LinearModel(Shape const& inputs, Shape const& outputs = 1, bool offset = false)
+	: m_inputShape(inputs)
+	, m_outputShape(outputs)
+	, m_matrix(outputs.numElements(),inputs.numElements(),0.0)
+	, m_offset(offset?outputs.numElements():0,0.0){
+		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		}
 	}
 
 	/// \brief From INameable: return the class name.
@@ -91,9 +98,11 @@ public:
 
 	/// Construction from matrix (and vector)
 	LinearModel(MatrixType const& matrix, VectorType const& offset = VectorType())
-	:m_matrix(matrix),m_offset(offset){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+	:m_matrix(matrix),m_offset(offset), m_inputShape(matrix.size2()), m_outputShape(matrix.size1()){
+		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		}
 	}
 
 	/// check for the presence of an offset term
@@ -101,14 +110,13 @@ public:
 		return m_offset.size() != 0;
 	}
 
-	/// obtain the input dimension
-	size_t inputSize() const{
-		return m_matrix.size2();
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_inputShape;
 	}
-
-	/// obtain the output dimension
-	size_t outputSize() const{
-		return m_matrix.size1();
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_outputShape;
 	}
 
 	/// obtain the parameter vector
@@ -118,8 +126,10 @@ public:
 
 	/// overwrite the parameter vector
 	void setParameterVector(ParameterVectorType const& newParameters){
-		noalias(to_vector(m_matrix)) = subrange(newParameters,0,inputSize() * outputSize());
-		noalias(m_offset) = subrange(newParameters,inputSize() * outputSize(),newParameters.size());
+		std::size_t numInputs = inputShape().numElements();
+		std::size_t numOutputs = outputShape().numElements();
+		noalias(to_vector(m_matrix)) = subrange(newParameters, 0, numInputs * numOutputs);
+		noalias(m_offset) = subrange(newParameters, numInputs * numOutputs, newParameters.size());
 	}
 
 	/// return the number of parameter
@@ -128,15 +138,15 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(std::size_t inputs, std::size_t outputs = 1, bool offset = false){
+	void setStructure(Shape const& inputs, Shape const& outputs = {1}, bool offset = false){
 		LinearModel<InputType, ActivationFunction> model(inputs,outputs,offset);
 		*this = model;
 	}
 
 	/// overwrite structure and parameters
 	void setStructure(MatrixType const& matrix, VectorType const& offset = VectorType()){
-		m_matrix = matrix;
-		m_offset = offset;
+		LinearModel<InputType, ActivationFunction> model(matrix,offset);
+		*this = model;
 	}
 
 	/// return a copy of the matrix in dense format
@@ -211,12 +221,12 @@ public:
 		State const& state,
 		ParameterVectorType& gradient
 	)const{
-		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size2()==m_matrix.size1());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
 		gradient.resize(numberOfParameters());
-		std::size_t numInputs = inputSize();
-		std::size_t numOutputs = outputSize();
+		std::size_t numInputs = inputShape().numElements();
+		std::size_t numOutputs = outputShape().numElements();
 		gradient.clear();
 		std::size_t matrixParams = numInputs*numOutputs;
 
@@ -239,14 +249,14 @@ public:
 		State const& state,
 		MatrixType& derivative
 	)const{
-		SIZE_CHECK(coefficients.size2() == outputSize());
+		SIZE_CHECK(coefficients.size2() == m_matrix.size1());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
 		
 		//compute chain rule
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 		
-		derivative.resize(patterns.size1(),inputSize());
+		derivative.resize(patterns.size1(),patterns.size2());
 		noalias(derivative) = delta % m_matrix;
 	}
 	
@@ -258,11 +268,11 @@ public:
 		ParameterVectorType& parameterDerivative,
 		MatrixType& inputDerivative
 	)const{
-		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size2()==m_matrix.size1());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
-		std::size_t numInputs = inputSize();
-		std::size_t numOutputs = outputSize();
+		std::size_t numInputs = inputShape().numElements();
+		std::size_t numOutputs = outputShape().numElements();
 		
 		//compute chain rule
 		BatchOutputType delta = coefficients;
@@ -290,11 +300,15 @@ public:
 	void read(InArchive& archive){
 		archive >> m_matrix;
 		archive >> m_offset;
+		archive >> m_inputShape;
+		archive >> m_outputShape;
 	}
 	/// From ISerializable
 	void write(OutArchive& archive) const{
 		archive << m_matrix;
 		archive << m_offset;
+		archive << m_inputShape;
+		archive << m_outputShape;
 	}
 };
 

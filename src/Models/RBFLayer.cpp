@@ -65,7 +65,7 @@ void RBFLayer::setParameterVector(RealVector const& newParameters){
 	SIZE_CHECK(newParameters.size() == numberOfParameters());
 	std::size_t pos = 0;
 	if( m_trainCenters){
-		pos = inputSize() * outputSize();
+		pos = inputShape().numElements() * outputShape().numElements();
 		noalias(to_vector(m_centers)) = subrange(newParameters,0,pos);
 	}
 	if(m_trainWidth){
@@ -77,28 +77,28 @@ void RBFLayer::setParameterVector(RealVector const& newParameters){
 std::size_t RBFLayer::numberOfParameters()const{
 	std::size_t numParameters=0;
 	if(m_trainCenters)
-		numParameters += inputSize()*outputSize();
+		numParameters += inputShape().numElements() * outputShape().numElements();
 	if(m_trainWidth)
-		numParameters += outputSize();
+		numParameters += outputShape().numElements();
 	return numParameters;
 
 }
 
 void RBFLayer::setGamma(RealVector const& gamma){
-	SIZE_CHECK(gamma.size() == outputSize());
+	SIZE_CHECK(gamma.size() == outputShape().numElements());
 	m_gamma = gamma;
 		
 	double logPi = std::log(boost::math::constants::pi<double>());
-	m_logNormalization=  inputSize()*0.5*(logPi - log(gamma));
+	m_logNormalization=  inputShape().numElements()*0.5*(logPi - log(gamma));
 }
 
 void RBFLayer::eval(BatchInputType const& patterns, BatchOutputType& output, State& state)const{
-	SIZE_CHECK(patterns.size2() == inputSize());
+	SIZE_CHECK(patterns.size2() == inputShape().numElements());
 	std::size_t numPatterns = patterns.size1();
-	output.resize(numPatterns, outputSize());
+	output.resize(numPatterns, outputShape().numElements());
 	
 	InternalState& s = state.toState<InternalState>();
-	s.resize(numPatterns,outputSize());
+	s.resize(numPatterns,outputShape().numElements());
 
 	//we need to add separate gamma parameters for every evaluation
 	noalias(s.norm2) = distanceSqr(patterns,m_centers);
@@ -117,7 +117,7 @@ void RBFLayer::weightedParameterDerivative(
 	BatchOutputType const& coefficients, State const& state,  RealVector& gradient
 )const{
 	SIZE_CHECK(patterns.size1() == coefficients.size1());
-	SIZE_CHECK(coefficients.size2() == outputSize());
+	SIZE_CHECK(coefficients.size2() == outputShape().numElements());
 	gradient.resize(numberOfParameters());
 	InternalState const& s = state.toState<InternalState>();
 
@@ -136,20 +136,16 @@ void RBFLayer::weightedParameterDerivative(
 		//for all centers at the same time!
 		//the second part is than just a matrix-diagonal multiplication
 		
-		blas::dense_matrix_adaptor<double> centerDerivative = blas::adapt_matrix(outputSize(),inputSize(),&gradient(currentParameter));
+		blas::dense_matrix_adaptor<double> centerDerivative = blas::adapt_matrix(m_centers.size1(),m_centers.size2(),&gradient(currentParameter));
 		noalias(centerDerivative) = prod(trans(delta),patterns);
 		//compute second part
-		for(std::size_t i = 0; i != outputSize(); ++i){
+		for(std::size_t i = 0; i != m_centers.size1(); ++i){
 			noalias(row(centerDerivative,i)) -= deltaSum(i)*row(m_centers,i);
-		}
-		
-		//multiply with 2*gamma
-		for(std::size_t i = 0; i != outputSize(); ++i){
 			row(centerDerivative,i) *= 2*m_gamma(i);
 		}
 		
 		//move forward
-		currentParameter+=outputSize()*inputSize();
+		currentParameter += m_centers.size1() * m_centers.size2();
 	}
 	if(m_trainWidth){
 		//the derivative of gamma is computed as
@@ -161,7 +157,7 @@ void RBFLayer::weightedParameterDerivative(
 		auto gammaDerivative = subrange(gradient,currentParameter,gradient.size());
 		noalias(gammaDerivative) = sum_rows(-element_prod(delta,s.norm2));
 		noalias(gammaDerivative) = element_prod(gammaDerivative,m_gamma);
-		noalias(gammaDerivative) += 0.5*inputSize()*deltaSum;
+		noalias(gammaDerivative) += 0.5*m_centers.size2()*deltaSum;
 	}
 }
 
@@ -174,7 +170,7 @@ void RBFLayer::setTrainingParameters(bool centers, bool width){
 void RBFLayer::read( InArchive & archive ){
 	archive >> m_centers;
 	archive >> m_gamma;
-	archive >> m_logNormalization;;
+	archive >> m_logNormalization;
 	archive >> m_trainCenters;
 	archive >> m_trainWidth;
 }
@@ -184,7 +180,7 @@ void RBFLayer::read( InArchive & archive ){
 void RBFLayer::write( OutArchive & archive ) const{
 	archive << m_centers;
 	archive << m_gamma;
-	archive << m_logNormalization;;
+	archive << m_logNormalization;
 	archive << m_trainCenters;
 	archive << m_trainWidth;
 }

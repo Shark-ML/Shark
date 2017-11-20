@@ -34,7 +34,7 @@
 //===========================================================================
 
 #include <shark/Data/Csv.h>
-#include <shark/Models/NearestNeighborClassifier.h>
+#include <shark/Models/NearestNeighborModel.h>
 #include <shark/Algorithms/NearestNeighbors/SimpleNearestNeighbors.h>
 #include <shark/Models/Kernels/LinearKernel.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 		//calculate CV-error
 		for(std::size_t i = 0; i != NFolds; ++i){
 			SimpleNearestNeighbors<RealVector, unsigned int> algorithm(folds.training(i), &metric);
-			NearestNeighborClassifier<RealVector> KNN(&algorithm, k[p]);
+			NearestNeighborModel<RealVector, unsigned int> KNN(&algorithm, k[p]);
 			error += loss(folds.validation(i).labels(),KNN(folds.validation(i).inputs()));
 		}
 		error /=NFolds;
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 	}
 	//evaluate the best paramter found on test set using the full training set
 	SimpleNearestNeighbors<RealVector, unsigned int> algorithm(data, &metric);
-	NearestNeighborClassifier<RealVector> KNN(&algorithm, best_k);
+	NearestNeighborModel<RealVector, unsigned int> KNN(&algorithm, best_k);
 	std::cout<<"NearestNeighbors: " << loss(dataTest.labels(),KNN(dataTest.inputs()))<<'\n';
 	std::cout<<"K: "<<best_k<<std::endl; 
 }

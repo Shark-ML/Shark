@@ -61,6 +61,20 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ConcatenatedModel"; }
+	
+	
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_layers.front().model->inputShape();
+	}
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_layers.back().model->outputShape();
+	}
+
 
 	void add(AbstractModel<VectorType, VectorType>* layer, bool optimize){
 		m_layers.push_back({layer,optimize});
@@ -78,7 +92,8 @@ public:
 		this->m_features.reset();
 		bool inputDerivative = true;
 		bool parameterDerivative = true;
-		for(auto layer : m_layers){
+		for(std::size_t k = 0; k != m_layers.size(); ++k){
+			auto const& layer = m_layers[m_layers.size() - k -1];//we iterate backwards through the layers
 			if( layer.optimize && (!layer.model->hasFirstParameterDerivative() || !inputDerivative)){
 				parameterDerivative = false;
 			}
@@ -96,11 +111,6 @@ public:
 		}
 	
 	}
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "ConcatenatedModel"; }
-
 	ParameterVectorType parameterVector() const {
 		ParameterVectorType params(numberOfParameters());
 		std::size_t pos = 0;

@@ -324,9 +324,12 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	//test whether serialization works
 	//first simple parameter and topology check
 	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
-	BOOST_REQUIRE_EQUAL(net1.inputSize(),netTest1.inputSize());
-	BOOST_REQUIRE_EQUAL(net2.inputSize(),netTest2.inputSize());
-	BOOST_REQUIRE_EQUAL(net3.inputSize(),netTest3.inputSize());
+	BOOST_REQUIRE_EQUAL(net1.inputShape(),netTest1.inputShape());
+	BOOST_REQUIRE_EQUAL(net1.outputShape(),netTest1.outputShape());
+	BOOST_REQUIRE_EQUAL(net2.inputShape(),netTest2.inputShape());
+	BOOST_REQUIRE_EQUAL(net2.outputShape(),netTest2.outputShape());
+	BOOST_REQUIRE_EQUAL(net3.inputShape(),netTest3.inputShape());
+	BOOST_REQUIRE_EQUAL(net3.outputShape(),netTest3.outputShape());
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = modelDeserialized(dataset.element(i).input);

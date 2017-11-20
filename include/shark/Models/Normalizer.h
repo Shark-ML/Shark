@@ -87,12 +87,12 @@ public:
 	}
 	
 	/// \brief obtain the input dimension
-	std::size_t inputSize() const{
+	Shape inputShape() const{
 		return m_A.size();
 	}
 
 	/// \brief obtain the output dimension
-	std::size_t outputSize() const{
+	Shape outputShape() const{
 		return m_A.size();
 	}
 

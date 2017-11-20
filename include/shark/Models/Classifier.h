@@ -90,6 +90,17 @@ public:
 		return m_decisionFunction.numberOfParameters();
 	}
 	
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_decisionFunction.inputShape();
+	}
+	///\brief Returns the shape of the output
+	///
+	/// For the classifier, Shape is 0 as the output is a scalar
+	Shape outputShape() const{
+		return Shape();
+	}
+	
 	RealVector const& bias()const{
 		return m_bias;
 	}
@@ -108,7 +119,7 @@ public:
 	}
 	
 	void eval(BatchInputType const& input, BatchOutputType& output)const{
-		SIZE_CHECK(m_bias.empty() || m_decisionFunction.outputSize() == m_bias.size());
+		SIZE_CHECK(m_bias.empty() || m_decisionFunction.outputShape().numElements() == m_bias.size());
 		ModelBatchOutputType modelResult;
 		m_decisionFunction.eval(input,modelResult);
 		std::size_t batchSize = modelResult.size1();
@@ -133,7 +144,7 @@ public:
 	}
 	
 	void eval(InputType const & pattern, OutputType& output)const{
-		SIZE_CHECK(m_bias.empty() || m_decisionFunction.outputSize() == m_bias.size());
+		SIZE_CHECK(m_bias.empty() || m_decisionFunction.outputShape().numElements() == m_bias.size());
 		typename Model::OutputType modelResult;
 		m_decisionFunction.eval(pattern,modelResult);
 		if(m_bias.empty()){

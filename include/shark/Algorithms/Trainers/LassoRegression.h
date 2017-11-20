@@ -136,9 +136,7 @@ public:
 	}
 
 	/// \brief Train a linear model with LASSO regression.
-	void train(ModelType& model, DataType const& dataset)
-	{
-		SIZE_CHECK(model.outputSize() == 1);
+	void train(ModelType& model, DataType const& dataset){
 
 		// strategy constants
 		const double CHANGE_RATE = 0.2;

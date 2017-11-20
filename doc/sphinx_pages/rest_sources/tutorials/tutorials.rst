@@ -32,7 +32,6 @@ a simple regression task.
 * :doc:`first_steps/hello_shark`
 * :doc:`first_steps/general_optimization_tasks`
 * :doc:`first_steps/when_to_stop`
-* :doc:`concepts/misc/versatile_classification`
 
 
 
@@ -88,9 +87,8 @@ cover Shark's :doxy:`Data` class as well as common operations on them:
 
 
 
-Specific algorithms
-+++++++++++++++++++
-
+Specific Machine-Learning Algorithms
+++++++++++++++++++++++++++++++++++++
 
 Here come tutorials for some selected algorithms implemented in Shark.
 It must be said that this is only the tip of the iceberg, *many* more
@@ -108,16 +106,9 @@ Let's start with some classical methods:
 Neural networks and deep learning:
 
 * :doc:`algorithms/ffnet`
+* :doc:`algorithms/autoencoders`
 * :doc:`algorithms/rbm_module`
 * :doc:`algorithms/binary_rbm`
-* :doc:`algorithms/extreme_learning_machine`
-* Training of autoencoders
-
-  - :doc:`algorithms/autoencoders`
-  - :doc:`algorithms/denoising_autoencoders`
-  - :doc:`algorithms/sparse_ae`
-
-* :doc:`algorithms/deep_denoising_autoencoder_network`
 
 
 
@@ -179,7 +170,6 @@ Note that Shark follows a
 If you contribute to Shark, you might also find these documents helpful:
 
 * :doc:`for_developers/the_build_system`
-* :doc:`for_developers/effective_ublas`
 * :doc:`for_developers/writing_tutorials`
 * :doc:`for_developers/managing_the_documentation`
 

@@ -78,8 +78,8 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_Value)
 	for(std::size_t t = 0; t != numTrials; ++t){
 		ConvexCombination model(inputDim,outputDim);
 		BOOST_REQUIRE_EQUAL(model.numberOfParameters(),inputDim * outputDim);
-		BOOST_REQUIRE_EQUAL(model.inputSize(),inputDim);
-		BOOST_REQUIRE_EQUAL(model.outputSize(),outputDim);
+		BOOST_REQUIRE_EQUAL(model.inputShape().numElements(),inputDim);
+		BOOST_REQUIRE_EQUAL(model.outputShape().numElements(),outputDim);
 		RealVector params(inputDim * outputDim);
 		for(std::size_t i = 0; i != params.size(); ++i){
 			params(i) = random::gauss(random::globalRng,0,1);
@@ -131,11 +131,11 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_SERIALIZE )
 	//so we generate some data first
 	std::vector<RealVector> data;
 	std::vector<RealVector> target;
-	RealVector input(model.inputSize());
-	RealVector output(model.outputSize());
+	RealVector input(2);
+	RealVector output(3);
 	for (size_t i=0; i<1000; i++)
 	{
-		for(size_t j=0;j!=model.inputSize();++j)
+		for(size_t j=0; j!=2;++j)
 		{
 			input(j)=random::uni(random::globalRng,-1,1);
 		}
@@ -159,8 +159,8 @@ BOOST_AUTO_TEST_CASE( Models_ConvexCombination_SERIALIZE )
 	//first simple parameter and topology check
 	BOOST_REQUIRE_EQUAL(modelDeserialized.numberOfParameters(),model.numberOfParameters());
 	BOOST_CHECK_SMALL(norm_2(modelDeserialized.parameterVector() - testParameters),1.e-50);
-	BOOST_REQUIRE_EQUAL(modelDeserialized.inputSize(),model.inputSize());
-	BOOST_REQUIRE_EQUAL(modelDeserialized.outputSize(),model.outputSize());
+	BOOST_REQUIRE_EQUAL(modelDeserialized.inputShape(),model.inputShape());
+	BOOST_REQUIRE_EQUAL(modelDeserialized.outputShape(),model.outputShape());
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = modelDeserialized(dataset.element(i).input);

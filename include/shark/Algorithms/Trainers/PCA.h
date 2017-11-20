@@ -112,7 +112,7 @@ public:
 	/// econder() function (i.e., mapping from the original input
 	/// space to the PCA coordinate system).
 	void train(LinearModel<>& model, UnlabeledData<RealVector> const& inputs) {
-		std::size_t m = model.outputSize(); ///< reduced dimensionality
+		std::size_t m = model.outputShape().numElements(); ///< reduced dimensionality
 		setData(inputs);   // compute PCs
 		encoder(model, m); // define the model 
 	}

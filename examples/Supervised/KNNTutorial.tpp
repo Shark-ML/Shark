@@ -37,7 +37,7 @@
 #include <shark/Data/Csv.h>
 //###end<dataheader>
 //###begin<nnheader>
-#include <shark/Models/NearestNeighborClassifier.h>
+#include <shark/Models/NearestNeighborModel.h>
 #include <shark/Algorithms/NearestNeighbors/TreeNearestNeighbors.h>
 #include <shark/Models/Trees/KDTree.h>
 //###end<nnheader>
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
 	//instantiate the classifier
 //###begin<NNC>
 	const unsigned int K = 1; // number of neighbors for kNN
-	NearestNeighborClassifier<RealVector> KNN(&algorithm,K);
+	NearestNeighborModel<RealVector, unsigned int> KNN(&algorithm,K);
 //###end<NNC>
 
 	// evaluate classifier
