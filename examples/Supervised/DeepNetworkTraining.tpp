@@ -3,7 +3,7 @@
 #include <shark/Models/LinearModel.h>//single dense layer
 #include <shark/Models/ConcatenatedModel.h>//for stacking layers
 //training the  model
-#include <shark/ObjectiveFunctions/NoisyErrorFunction.h>//the error function performing the regularisation of the hidden neurons
+#include <shark/ObjectiveFunctions/ErrorFunction.h>//error function, allows for minibatch training
 #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h> // loss used for supervised training
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h> // loss used for evaluation of performance
 #include <shark/Algorithms/GradientDescent/Adam.h> //optimizer: simple gradient descent.
@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 //###begin<supervised_training>	
 	//create the supervised problem. 
 	CrossEntropy loss;
-	NoisyErrorFunction error(data, &network, &loss);
+	ErrorFunction error(data, &network, &loss, true);//enable minibatch training
 	
 	//optimize the model
 	std::cout<<"training network"<<std::endl;

@@ -53,6 +53,12 @@ namespace shark{
 /// of minimization of a cost function. The value of the
 /// objective function is the cost of the model predictions
 /// on the training data, given the targets.
+/// \par
+/// It supports mini-batch learning using an optional fourth argument to
+/// The constructor. With mini-batch learning enabled, each iteration a random
+/// batch is taken from the dataset. Thus the size of the minibatch is the size of the batches in
+/// the datasets. Normalization ensures that batches of different sizes have approximately the same
+/// magnitude of error and derivative.
 ///
 ///\par
 /// It automatically infers the input und label type from the given dataset and the output type
@@ -65,7 +71,8 @@ public:
 	ErrorFunction(
 		LabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model, 
-		AbstractLoss<LabelType, OutputType>* loss
+		AbstractLoss<LabelType, OutputType>* loss,
+		bool useMiniBatches = false
 	);
 	template<class InputType, class LabelType, class OutputType>
 	ErrorFunction(

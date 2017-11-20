@@ -53,8 +53,9 @@ previous layers (in this case just a 1-d shape with the number of neurons) to
 specify the shape of the input of the next layer.
 
 Next, we set up the objective function. This should by now be looking
-quite familiar.  We set up an :doxy:`NoisyErrorFunction` with the model and
-the squared loss. This enables minibatch training. 
+quite familiar.  We set up an :doxy:`ErrorFunction` with the model and
+the squared loss. Here we enable minibatch training to speed up 
+the training progress.
 We create the :doxy:`LabeledData` object from the
 input data by setting the labels to be the same as the inputs. Finally
 we add  two-norm regularisation by creating an instance of the

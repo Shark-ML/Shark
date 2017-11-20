@@ -198,7 +198,6 @@ shark_add_test( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
 #Objective Functions
 shark_add_test( ObjectiveFunctions/ErrorFunction.cpp ObjFunct_ErrorFunction )
-shark_add_test( ObjectiveFunctions/NoisyErrorFunction.cpp ObjFunct_NoisyErrorFunction )
 shark_add_test( ObjectiveFunctions/VariationalAutoencoder.cpp ObjFunct_VariationalAutoencoder )
 shark_add_test( ObjectiveFunctions/CrossValidation.cpp ObjFunct_CrossValidation )
 shark_add_test( ObjectiveFunctions/Benchmarks.cpp ObjFunct_Benchmarks )

@@ -3,7 +3,7 @@
 #include <shark/Data/SparseData.h>//for reading in the images as sparseData/Libsvm format
 #include <shark/Models/LinearModel.h>//single dense layer
 #include <shark/Models/ConcatenatedModel.h>//for stacking layers
-#include <shark/ObjectiveFunctions/NoisyErrorFunction.h> //the error function for minibatch training
+#include <shark/ObjectiveFunctions/ErrorFunction.h> //the error function for minibatch training
 #include <shark/Algorithms/GradientDescent/Adam.h>// The Adam optimization algorithm
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h> // squared loss used for regression
 #include <shark/ObjectiveFunctions/Regularizer.h> //L2 regulariziation
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
 	//create the objective function as a regression problem
 	LabeledData<RealVector,RealVector> trainSet(data.inputs(),data.inputs());//labels identical to inputs
 	SquaredLoss<RealVector> loss;
-	NoisyErrorFunction error(trainSet, &autoencoder, &loss);
+	ErrorFunction error(trainSet, &autoencoder, &loss, true);//we enable minibatch learning
 	TwoNormRegularizer regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 	initRandomNormal(autoencoder,0.01);
