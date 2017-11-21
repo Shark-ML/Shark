@@ -67,7 +67,7 @@ namespace shark{
 class Shape{
 public:
 	Shape(): m_numElements(1){}
-	Shape(std::size_t size): m_numElements(size), m_dims(1,size){}
+	Shape(std::size_t size): m_dims(1,size), m_numElements(size){}
 	Shape(std::initializer_list<std::size_t> dims): m_dims(dims){
 		m_numElements = 1;
 		for(auto dim: m_dims){
@@ -119,6 +119,7 @@ std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os, Shape const
 			os<<", ";
 	}
 	os<<')';
+	return os;
 }
 
 }
