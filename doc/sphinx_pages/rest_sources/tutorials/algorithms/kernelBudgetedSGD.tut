@@ -12,7 +12,7 @@ time grows quadratically in the number of support vector-- but the
 latter have been shown to grow linearly in the dataset size.
 Therefore the whole training process becomes quadratically,
 and impractical for even remotely large datasets.
-This problem was called the curse of kernelization in [WangCrammerVucetic2012].
+This problem was called the curse of kernelization in [WangCrammerVucetic2012]_.
 
 There are different ways to solve this problem.
 One intuitive method was presented in 

@@ -56,10 +56,6 @@
 
    rest_sources/tutorials/algorithms/ffnet
    rest_sources/tutorials/algorithms/autoencoders
-   rest_sources/tutorials/algorithms/denoising_autoencoders
-   rest_sources/tutorials/algorithms/sparse_ae
-   rest_sources/tutorials/algorithms/extreme_learning_machine
-   rest_sources/tutorials/algorithms/deep_denoising_autoencoder_network
 
    rest_sources/tutorials/algorithms/rf
 
@@ -80,14 +76,9 @@
 
    rest_sources/tutorials/algorithms/quadratic_programs
 
-
-   rest_sources/tutorials/concepts/misc/versatile_classification
-
-
    rest_sources/tutorials/for_developers/codingconvention
    rest_sources/tutorials/for_developers/the_build_system
    rest_sources/tutorials/for_developers/development_environment
-   rest_sources/tutorials/for_developers/effective_ublas
    rest_sources/tutorials/for_developers/writing_tutorials
    rest_sources/tutorials/for_developers/managing_the_documentation
    rest_sources/tutorials/for_developers/issuing_a_release

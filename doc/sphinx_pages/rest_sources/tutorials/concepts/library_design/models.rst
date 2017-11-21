@@ -190,7 +190,7 @@ Model                        Description
 ==========================   ==================================================================================
 :doxy:`LinearModel`          A simple linear model mapping an n-dimensional input to an m-dimensional output
 			     It offers the possibility to add an activation function
-:doxy:`ConvolutionalModel`   A simple linear model mapping an n-dimensional input to an m-dimensional output
+:doxy:`Conv2DModel`          A simple linear model mapping an n-dimensional input to an m-dimensional output
 			     It offers the possibility to add an activation function
 :doxy:`ConcatenatedModel`    Chains two models together by using the output of one model as the
                              input to the second.

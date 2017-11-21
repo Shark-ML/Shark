@@ -62,11 +62,6 @@ needed to use the normalization followed by the trained model::
   YourModel model;
   ConcatenatedModel<RealVector,RealVector> completeModel = normalizer >> model;
 
-For a more complex example of how normalization can be used, see the
-tutorial about training the :doc:`../../algorithms/extreme_learning_machine`
-with the complete example source :doxy:`elmTutorial.cpp`.
-
-
 Whitening
 ---------
 

@@ -205,8 +205,6 @@ Model                                         Description
 :doxy:`SvmLogisticInterpretation`             Model selection for SVMs using a maximum-likelihood criterion
 :doxy:`RadiusMarginQuotient`                  Model selection for SVMs by optimizing the radius-margin quotient.
 :doxy:`NegativeGaussianProcessEvidence`       Model selection for a regularization network/Gaussian process.
-:doxy:`KernelBasisDistance`                   Measures the distance between two points in a kernel space to
-					      approximate one point with a much smaller basis.
 :doxy:`KernelTargetAlignment`                 Model selection algorithm which measures for a given kernel,
 					      how similar points of the same class are and how dissimilar points of
 					      different classes.

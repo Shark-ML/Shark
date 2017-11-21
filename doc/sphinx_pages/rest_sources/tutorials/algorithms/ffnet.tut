@@ -1,94 +1,48 @@
 Training Feed-Forward Networks
 =================================
-This tutorial serves as a primer for using the Shark implementation of feed-forward
-multi-layer perceptron neural networks [Bishop1995]_. The whole functionality can be discovered
-in the documentation pages of the :doxy:`FFNet` class. It is recommended to read the
+This tutorial will show you how to construct a feed-forward
+multi-layer neural network and how to train it efficiently using minibatch training
+and the Adam Optimization algorithm. It is recommended to read the
 getting started section, especially the introduction about :doc:`../first_steps/general_optimization_tasks`.
 
 For this tutorial the following includes are needed::
 
 ..sharkcode<Supervised/FFNNBasicTutorial.tpp,includes>
 
-Defining the Learning Problem
+Loading the Data
 ------------------------------
-In this tutorial, we want to solve the infamous xor problem using a feed-forward network.
-First, we define the problem by generating the training data. We consider two binary inputs
-that are to be mapped to one if they have the same value and to zero otherwise.
-Input patterns and corresponding target patterns are stored in a container for labeled data
-after generation.
+In this tutorial, we want to learn to recognize handwriten digits from the mnist dataset
+using a feed-forward network. This is done similar to the previous tutorials
+by loading a dataset and splitting it into training and test part::
 
-For this part, we need to include the Dataset and define the problem in a function, which
-we will use shortly::
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,data>
 
-..sharkcode<Supervised/FFNNBasicTutorial.tpp,problem>
+Note that we define the batchsize of the dataset during loading of the dataset. This
+will create the apropriately sized batches which we will later use for minibatch training.
 
 Defining the Network topology
 ------------------------------
 
-After we have defined our Problem, we can define our feed forward
-network. For this, we have to decide on the network topology. We have
-to choose activation functions, how many hidden layers and
-neurons we want, and how the layers are connected. This is quite a lot
-of stuff, but Shark makes this task straight-forward.
+Next, we define our feed forward network. 
+For this, we stack several layers on top of each other. For simplicity
+we will use only :doxy:`LinearModel` with nonlinear activation functions.
+For this tutorial we decide that the two hidden layers should use
+Rectified-Linear Units (ReLu). For classification tasks, output neurons should be
+linear. The Layers are then chained together using `operator>>`::
 
-The easiest part are the neurons. Shark offers several different types
-of neurons named after their activation function  [ReedMarks1998]_:
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,model_creation>
 
-* :doxy:`LogisticNeuron`: is a sigmoid (S-shaped)
-  function with outputs in the range [0,1] and the following definition
-
-.. math::
-  f(x) = \frac 1 {1+e^{-x}}.
-
-* :doxy:`TanhNeuron`: the hyperbolic tangens, can be viewed as a rescaled
-  version of the Logistic function with outputs ranging from [-1,1]. It
-  has the formula
-
-.. math::
-  f(x) = \tanh(x) = \frac 2 {1+e^{-2x}}-1.
-
-* :doxy:`FastSigmoidNeuron`: a sigmoidal function which is faster to
-  evaluate than the previous two activation functions. It has also "bigger
-  tails" (i.e., the gradient does not vanish as quickly). This
-  activation function is highly recommended and defined in Shark as
-
-.. math::
-  f(x) = \frac x {1+|x|}.
-  
-* :doxy:`RectifierNeuron`: an activation function that has become
-  popular more recently [KrizhevskyEtAl2012]_. The neuron's activation
-  is kept at 0 for negative activation levels and is linear for all
-  positive values.  A network with these neurons is effectively a
-  piecewise linear function.
-
-.. math::
-  f(x) = \max(0,x).
-
-* :doxy:`LinearNeuron`: not a good choice for hidden neurons, but
-  for output neurons when the output is not bounded. This activation
-  function :math:`f(x)=x` is the typical choice for regression tasks.
-
-For our example, we will use logistic hidden neurons and a linear output neuron.
-We choose the neuron types using two template parameters, one
-for the hidden neurons, one for the visible. For the topology, we will
-choose a network with 2 hidden neurons without direct connections between input and output neuron(s). 
-We also want a bias neuron (i.e., bias or offset parameters).
-All this can be achieved with :doxy:`FFNet::setStructure`::
-
-..sharkcode<Supervised/FFNNBasicTutorial.tpp,network_topology>
-
-The last two parameters are optional and here they are set to their default values and could have been omitted. 
-
+As you can see, we define the number of inputs and outputs for each layer during construction.
+Note that instead of memorising the number inputs and outputs, we can instead use the `inputShape()`
+and `outputShape()` functions.
 
 Training the Network
 ----------------------
 
-After we have defined problem and topology, we can now finally train
-the network. The most frequently used error function for training
-neural networks is arguably the :doxy:`SquaredLoss`, but Shark offers
-alternatives. Since the xor Problem is a classification task, we can
-use the :doxy:`CrossEntropy` error to maximize the class probability
-[Bishop1995]_. The cross entropy assumes the inputs to be the log of
+After we loaded the dataset and defined the topology of the network,
+we can train it. Since we use a classification task, we can
+use the :doxy:`CrossEntropy` error to maximize the class probability.
+The cross entropy assumes the inputs to be the log of
 the unnormalized probability :math:`p(y=c|x)`, i.e. the probability of
 the input to belong to class :math:`c`. The cross entropy uses an
 exponential normalisation to transform the inputs into proper
@@ -105,54 +59,22 @@ of the neuron with highest activation value.  In the case of only one
 output neuron, the sign decides: negative activation is class 0,
 positive is class 1.
 
-For optimizing this function the improved resilient backpropagation
-algorithm ([IgelHüsken2003]_, a faster, more robust variant of the
-seminal Rprop algorithm [Riedmiller1994]_) is used: ::
+We will setup our error function to use minibatch training. Every time
+the error function is evaluated, a random batch in the dataset is evaluated.
+Thus the batch size defined earlier is an important parameter and a trade-off betwen evaluation
+speed and noise of the evaluation::
 
-..sharkcode<Supervised/FFNNBasicTutorial.tpp,train>
-
-If you don't know how to use and evaluate the trained model you will find the information in the getting started section.
-
-
-Calculate the probabilities
------------------------------------------
-
-As outlined earlier, the network does not return the actual probabilities after training However, sometimes we are
-interested int he probabilities in which case we need to convert the network output. For this purpose, we can use the
-:doxy:`Softmax` model. It takes the input and applies just the right transformation for the probabilities. Additionally,
-it handles the case of only a single output just as well as if we had trained the model with two output neurons.
-What we need to do is concatenate our ffnet with it and print out the probabilities::
-
-..sharkcode<Supervised/FFNNBasicTutorial.tpp, probability>
+..sharkcode<Supervised/FFNNBasicTutorial.tpp,training>
 
 
 Other network types
 ---------------------
 
 Shark offers many different types of neural other neural networks,
-including radial basis function networks using :doxy:`RBFLayer`
-as well as support vector and regularization networks.
+including radial basis function networks using :doxy:`RBFLayer` and
+Convolutional Neural Networks using :doxy:`Conv2DModel`
 
 Full example program
 ----------------------
 
 The full example program is  :doxy:`FFNNBasicTutorial.cpp`.
-Multi class classification with cross entropy is shown in :doxy:`FFNNMultiClassCrossEntropy.cpp`.
-
-References
-^^^^^^^^^^
-
-.. [Bishop1995] C.M. Bishop. Neural networks for pattern recognition. Oxford University Press, 1995.
-
-.. [IgelHüsken2003] C. Igel and M. Hüsken.
-   Empirical Evaluation of the Improved Rprop Learning Algorithm. Neurocomputing 50(C), pp. 105-123, 2003
-
-.. [KrizhevskyEtAl2012] A. Krizhevsky, I. Sutskever,
-   G. E. Hinton. ImageNet Classification with Deep Convolutional
-   Neural Networks. In: NIPS 2012, pp. 1097-1105, 2012
-
-.. [ReedMarks1998] R.D. Redd and R.J. Marks. Neural smithing:
-   supervised learning in feedforward artificial neural networks. MIT  Press, 1998
-
-.. [Riedmiller1994] M. Riedmiller.
-   Advanced supervised learning in multilayer perceptrons-from backpropagation to adaptive learning techniques. International Journal of Computer Standards and Interfaces 16(3), pp. 265-278, 1994.

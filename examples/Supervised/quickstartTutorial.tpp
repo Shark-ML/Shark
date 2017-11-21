@@ -12,12 +12,11 @@ using namespace std;
 
 int main(int argc, char **argv){
 	//create a Dataset from the file "quickstartData"
-	//###begin<load_data>
 	if(argc < 2) {
 		cerr << "usage: " << argv[0] << " (filename)" << endl;
 		exit(EXIT_FAILURE);
 	}
-
+	//###begin<load_data>
 	ClassificationDataset data;
 	try {
 		importCSV(data, argv[1], LAST_COLUMN, ' ');

@@ -3,7 +3,7 @@ Covariance Matrix Adaptation Evolution Strategy
 
 The covariance matrix adaptation evolution strategy (CMA-ES) is one of
 the most powerful evolutionary algorithms for single-objective
-real-valued optimization. The algorithm relies on normally distributed
+real-valued optimization [Hansen2004]_. The algorithm relies on normally distributed
 mutative steps to explore the search space while adjusting its
 mutation distribution to make successful steps from the recent past
 more likely in the future. In addition, a separate step-size is

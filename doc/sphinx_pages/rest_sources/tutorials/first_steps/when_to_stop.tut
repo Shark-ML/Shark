@@ -167,13 +167,20 @@ In summary, this code uses the progress on a validation set to decide when to st
 Printing the results
 ++++++++++++++++++++
 
-Printing all variables of type ``double`` defined in the snippets above, we get
+Printing all variables of type ``double`` defined in the snippets above, we get:
 
-..sharkcode<Supervised/StoppingCriteria.tpp,output>
+.. code-block:: none
 
+	RESULTS: 
+	======== 
 
+	10 iterations   : 0.375
+	100 iterations : 0.348958
+	500 iterations : 0.302083
+	training Error : 0.333333
+	generalization Quotient : 0.375
 
-So stopping after around 100 iterations yielded the lowest error on the test
+So stopping after around 500 iterations yielded the lowest error on the test
 set. The TrainingError criterion will, as predicted, wait a lot longer. The
 GeneralizationQuotient does in fact stop too early in this case, which is very
 likely due to the small size of the data set used in the example code.
