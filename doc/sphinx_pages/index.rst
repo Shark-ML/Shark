@@ -55,6 +55,7 @@
    rest_sources/tutorials/algorithms/Benchmark
 
    rest_sources/tutorials/algorithms/ffnet
+   rest_sources/tutorials/algorithms/activations
    rest_sources/tutorials/algorithms/autoencoders
 
    rest_sources/tutorials/algorithms/rf

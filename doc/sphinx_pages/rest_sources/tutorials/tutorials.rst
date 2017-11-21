@@ -34,6 +34,14 @@ a simple regression task.
 * :doc:`first_steps/when_to_stop`
 
 
+Neural Networks
+++++++++++++++++++++++
+A very important class of machine-learning models are Neural Networks. This section
+discusses the creation and training of multi-layer neural networks
+
+* :doc:`algorithms/ffnet`
+* :doc:`algorithms/activations`
+* :doc:`algorithms/autoencoders`
 
 Overarching concepts
 ++++++++++++++++++++
@@ -105,8 +113,6 @@ Let's start with some classical methods:
 
 Neural networks and deep learning:
 
-* :doc:`algorithms/ffnet`
-* :doc:`algorithms/autoencoders`
 * :doc:`algorithms/rbm_module`
 * :doc:`algorithms/binary_rbm`
 
