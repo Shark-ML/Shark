@@ -38,7 +38,7 @@
 namespace shark {
 /// \brief Calculates the weighted mean of a set of models
 template<class ModelType>
-class MeanModel : public ModelType::ModelBaseType
+class MeanModel : public AbstractModel<typename ModelType::InputType, RealVector, typename ModelType::ParameterVectorType>
 {
 private:
 	template<class T> struct tag{};
@@ -61,8 +61,10 @@ private:
 		}
 		outputs /= m_weightSum;
 	}
+	typedef AbstractModel<typename ModelType::InputType, RealVector, typename ModelType::ParameterVectorType> ModelBaseType;
 public:
-	typedef typename ModelType::ModelBaseType ModelBaseType;
+	
+
 	typedef typename ModelBaseType::BatchInputType BatchInputType;
 	typedef typename ModelBaseType::BatchOutputType BatchOutputType;
 	typedef typename ModelBaseType::ParameterVectorType ParameterVectorType;

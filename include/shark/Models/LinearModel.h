@@ -141,7 +141,7 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(Shape const& inputs, Shape const& outputs = {1}, bool offset = false){
+	void setStructure(Shape const& inputs, Shape const& outputs = 1, bool offset = false){
 		LinearModel<InputType, ActivationFunction> model(inputs,outputs,offset);
 		*this = model;
 	}
