@@ -90,7 +90,7 @@ public:
 	}
 	///\brief Returns the shape of the output
 	Shape outputShape() const{
-		return {m_imageHeight - m_filterHeight + 1, m_imageWidth - m_filterWidth + 1, m_numFilters};
+		return {m_imageHeight, m_imageWidth, m_numFilters};
 	}
 	
 	/// \brief Returns the activation function.
@@ -149,13 +149,14 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(inputs.size2() == inputShape().numElements());
 		outputs.resize(inputs.size1(),outputShape().numElements());
-		std::size_t outputsForFilter = (m_imageHeight - m_filterHeight + 1) * (m_imageWidth - m_filterWidth + 1);
+		std::size_t outputsForFilter = m_imageHeight * m_imageWidth;
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto output = row(outputs,i);
 			blas::kernels::conv2d(row(inputs,i), m_filters, output,
 				m_numChannels, m_numFilters, 
 				m_imageHeight, m_imageWidth,
-				m_filterHeight, m_filterWidth
+				m_filterHeight, m_filterWidth,
+				m_filterHeight - 1, m_filterWidth - 1
 			);
 			//apply offset
 			noalias(to_matrix(output, m_numFilters, outputsForFilter) ) += trans(blas::repeat(m_offset,outputsForFilter));
@@ -184,11 +185,12 @@ public:
 		
 		BatchInputType patches(outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
-			blas::bindings::im2mat(//todo must get public interface in remora
+			blas::bindings::im2mat_pad(//todo must get public interface in remora
 				row(inputs,i),patches,
 				m_numChannels, 
 				m_imageHeight, m_imageWidth,
-				m_filterHeight, m_filterWidth
+				m_filterHeight, m_filterWidth,
+				m_filterHeight - 1, m_filterWidth - 1
 			);
 			auto delta_mat = to_matrix(row(delta,i), m_numFilters, outputShape().numElements()/m_numFilters);
 			noalias(weightGradient) += delta_mat % patches;
@@ -215,11 +217,11 @@ public:
 		derivatives.clear();
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto derivative = row(derivatives,i);
-			blas::kernels::conv2d(row(delta,i), m_filters, derivative,
+			blas::kernels::conv2d(row(delta,i), m_backpropFilters, derivative,
 				m_numFilters, m_numChannels, 
-				m_imageHeight - m_filterHeight +1, m_imageWidth - m_filterWidth +1,
+				m_imageHeight, m_imageWidth,
 				m_filterHeight, m_filterWidth,
-				2*(m_filterHeight - 1), 2*(m_filterWidth - 1)
+				m_filterHeight - 1, m_filterWidth - 1
 			);
 		}
 	}

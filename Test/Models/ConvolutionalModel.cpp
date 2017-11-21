@@ -13,10 +13,10 @@ BOOST_AUTO_TEST_SUITE (Models_ConvolutionalModel)
 
 BOOST_AUTO_TEST_CASE( Models_Conv2D)
 {
-	std::size_t numParams = 7*5*3*4+7;
-	Shape imageShape = {10,9,5};
-	Shape filterShape = {7,3,4};
-	Shape outputShape = {8,6,7};
+	std::size_t numParams = 2*5*3*6+2;
+	Shape imageShape = {11,9,6};
+	Shape filterShape = {2,3,5};
+	Shape outputShape = {11,9,2};
 	Conv2DModel<RealVector, FastSigmoidNeuron> model(imageShape, filterShape);
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), numParams);
 	BOOST_REQUIRE_EQUAL(model.inputShape(), imageShape);
@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE( Models_Conv2D)
 		}
 	}
 	
-	testWeightedDerivative(model,10);
-	testWeightedInputDerivative(model,10,1.e-5, 1.e-7);
+	testWeightedDerivative(model,10,1.e-5,1.e-4);
+	testWeightedInputDerivative(model,10,1.e-5, 1.e-5);
 	testWeightedDerivativesSame(model,10);
 }
 
