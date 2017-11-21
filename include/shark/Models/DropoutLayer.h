@@ -43,9 +43,10 @@ private:
 	struct InternalState: public State{
 		MatrixType mask;
 	};
+	Shape m_shape;
 	random::rng_type* mep_rng;
 	double m_dropoutProbability;
-	Shape m_shape;
+	
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;

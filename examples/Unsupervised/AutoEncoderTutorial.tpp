@@ -22,7 +22,6 @@ int main(int argc, char **argv)
 	std::size_t hidden2 = 100;
 	std::size_t iterations = 10000;
 	double regularisation = 0.01;
-	double noiseStrength = 0.5;
 	
 	LabeledData<RealVector,unsigned int> data;
 	importSparseData( data, argv[1] );

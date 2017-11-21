@@ -63,11 +63,11 @@ private:
 	typedef blas::matrix<typename InputType::value_type, blas::row_major, typename InputType::device_type> MatrixType;
 	typedef AbstractModel<InputType,VectorType, VectorType> base_type;
 	typedef LinearModel<InputType, ActivationFunction> self_type;
+	Shape m_inputShape;
+	Shape m_outputShape;
 	MatrixType m_matrix;
 	VectorType m_offset;
 	ActivationFunction m_activation;
-	Shape m_inputShape;
-	Shape m_outputShape;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;//same as MatrixType
@@ -98,7 +98,10 @@ public:
 
 	/// Construction from matrix (and vector)
 	LinearModel(MatrixType const& matrix, VectorType const& offset = VectorType())
-	:m_matrix(matrix),m_offset(offset), m_inputShape(matrix.size2()), m_outputShape(matrix.size1()){
+	: m_inputShape(matrix.size2())
+	, m_outputShape(matrix.size1())
+	, m_matrix(matrix)
+	, m_offset(offset){
 		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
 			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
