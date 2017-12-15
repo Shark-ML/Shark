@@ -42,6 +42,9 @@
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Data/DataDistribution.h>
 
+#include <sstream>
+
+
 using namespace shark;
 
 BOOST_AUTO_TEST_SUITE (Models_RFClassifier)
@@ -69,6 +72,25 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 		BOOST_CHECK(model.featureImportances()(i) > 0.01);
 		BOOST_CHECK(model.featureImportances()(i+5) < 0.01);
 	}
+	
+	
+	//serialisation test
+	std::ostringstream outputStream;
+	{
+		TextOutArchive oa(outputStream);  
+		oa << model;
+	}
+	//and create a new model from the serialization
+	RFClassifier<unsigned int> modelDeserialized;
+	std::istringstream inputStream(outputStream.str());  
+	TextInArchive ia(inputStream);
+	ia >> modelDeserialized;
+	double error_train_serialized = loss.eval(train.labels(), modelDeserialized(train.inputs()));
+	double error_train2_serialized = loss2.eval(train.labels(), modelDeserialized.decisionFunction()(train.inputs()));
+	double error_test_serialized = loss.eval(test.labels(), modelDeserialized(test.inputs()));
+	BOOST_REQUIRE_CLOSE(error_train_serialized, error_train, 1.e-13);
+	BOOST_REQUIRE_CLOSE(error_train2_serialized, error_train2, 1.e-13);
+	BOOST_REQUIRE_CLOSE(error_test_serialized, error_test, 1.e-13);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

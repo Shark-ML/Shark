@@ -124,11 +124,15 @@ public:
 	/// from ISerializable, reads a model from an archive
 	void read(InArchive& archive){
 		archive >> m_tree;
+		archive >> m_labels;
+		archive >> m_inputDimension;
 	}
 
 	/// from ISerializable, writes a model to an archive
 	void write(OutArchive& archive) const {
 		archive << m_tree;
+		archive << m_labels;
+		archive << m_inputDimension;
 	}
 
 	//Count how often attributes are used
