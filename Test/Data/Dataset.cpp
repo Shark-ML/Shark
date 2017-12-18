@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	// 1.1 test element access and thus createDataFromRange
 	UnlabeledData<int> set = createDataFromRange(inputs,5);//20 batches
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(), 100u);
+	BOOST_CHECK_EQUAL(set.shape(), Shape({}));
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(), 20u);
 	for (size_t i=0; i!=100; ++i) {
 		BOOST_CHECK_EQUAL(inputs[i], set.element(i));
@@ -76,12 +77,10 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	// 2. create indexed partitions
 	{
 		UnlabeledData<int> subset = set.indexedSubset(indizes[0]);
-		UnlabeledData<int> subsetMethod;
-		set.indexedSubset(indizes[0],subsetMethod);
 		BOOST_REQUIRE_EQUAL(subset.numberOfBatches(), indizes[0].size());
 
 		for (size_t i=0; i!=subset.numberOfBatches(); ++i) {
-			IntVector batch=subsetMethod.batch(i);
+			IntVector batch=subset.batch(i);
 			BOOST_REQUIRE_EQUAL(batch.size(),5);
 			BOOST_CHECK_EQUAL_COLLECTIONS(
 				batch.begin(),batch.end(),
@@ -89,7 +88,6 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 				inputs.begin()+(indizes[0][i]+1)*5
 			);
 		}
-		testSetEquality(subset,subsetMethod);
 	}
 
 	// 2.1 now with complement

@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE (Set_SparseData)
 	importSparseData(test_ds_smc, sssmc);       // sparse multi-class classification
 	importSparseData(test_ds_reg, ssreg);       // dense regression
 	importSparseData(test_ds_sreg, sssreg);     // sparse regression
-
+	
 	// check that we got the proper number of lines
 	BOOST_REQUIRE_EQUAL(test_ds_bc.numberOfElements(), NumLines);
 	BOOST_REQUIRE_EQUAL(test_ds_sbc.numberOfElements(), NumLines);
@@ -142,6 +142,16 @@ BOOST_AUTO_TEST_CASE (Set_SparseData)
 	BOOST_REQUIRE_EQUAL(test_ds_smc.numberOfElements(), NumLines);
 	BOOST_REQUIRE_EQUAL(test_ds_reg.numberOfElements(), NumLines);
 	BOOST_REQUIRE_EQUAL(test_ds_sreg.numberOfElements(), NumLines);
+	
+	//chekc that we got the correct shape
+	BOOST_CHECK_EQUAL(test_ds_bc.inputShape(), Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_sbc.inputShape(), Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_mc.inputShape(), Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_smc.inputShape(), Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_reg.inputShape(), Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_reg.labelShape(), Shape({1}));
+	BOOST_CHECK_EQUAL(test_ds_sreg.inputShape(), Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_sreg.labelShape(), Shape({1}));
 
 	// check labels of read-in
 	BOOST_CHECK_EQUAL(0u, test_ds_bc.element(0).label);

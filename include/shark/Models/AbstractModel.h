@@ -300,6 +300,15 @@ void initRandomUniform(AbstractModel<InputType, OutputType>& model, double lower
 
 /** @}*/
 
+namespace detail{
+//Required for correct shape infering of transform
+template<class I, class O, class V>
+struct InferShape<AbstractModel<I,O,V> >{
+	static Shape infer(AbstractModel<I,O,V> const& f){return f.outputShape();}
+};
+
+}
+
 }
 
 

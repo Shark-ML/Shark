@@ -179,6 +179,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 			++i;
 		}
 	}
+	data.inputs().shape() = {maxIndex};
 	return data;
 }
 
@@ -226,6 +227,8 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 			++i;
 		}
 	}
+	data.inputs().shape() = {maxIndex};
+	data.labels().shape() = {1};
 	return data;
 }
 

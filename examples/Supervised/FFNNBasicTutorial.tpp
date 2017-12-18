@@ -27,7 +27,6 @@ int main(int argc, char **argv)
 	importSparseData( data, argv[1], 0, batchSize );
 	data.shuffle(); //shuffle data randomly
 	auto test = splitAtElement(data, 70 * data.numberOfElements() / 100);//split a test set
-	std::size_t inputs = inputDimension(data);
 	std::size_t numClasses = numberOfClasses(data);
 //###end<data>	
 //###begin<model_creation>
@@ -35,7 +34,7 @@ int main(int argc, char **argv)
 	typedef LinearModel<RealVector, RectifierNeuron> DenseLayer;
 	
 	//build the network
-	DenseLayer layer1(inputs,hidden1);
+	DenseLayer layer1(data.inputShape(),hidden1);
 	DenseLayer layer2(layer1.outputShape(),hidden2);
 	LinearModel<RealVector> output(layer2.outputShape(),numClasses);
 	auto network = layer1 >> layer2 >> output;

@@ -52,6 +52,7 @@
 #include <shark/Core/utility/functional.h>
 #include <boost/iterator/transform_iterator.hpp>
 #include <shark/Core/Random.h>
+#include <shark/Core/Shape.h>
 #include "Impl/Dataset.inl"
 
 namespace shark {
@@ -129,7 +130,8 @@ class Data : public ISerializable
 protected:
 	typedef detail::SharedContainer<Type> Container;
 
-	Container m_data;		///< data
+	Container m_data;///< data
+	Shape m_shape;///< shape of a datapoint
 public:
 	/// \brief Defines the default batch size of the Container.
 	///
@@ -209,6 +211,17 @@ public:
 	std::size_t numberOfElements() const{
 		return m_data.numberOfElements();
 	}
+	
+	
+	///\brief Returns the shape of the elements in the dataset.
+	Shape const& shape() const{
+		return m_shape;
+	}
+	
+	///\brief Returns the shape of the elements in the dataset.
+	Shape& shape(){
+		return m_shape;
+	}
 
 	///\brief Check whether the set is empty.
 	bool empty() const{
@@ -255,10 +268,12 @@ public:
 
 	void read(InArchive& archive){
 		archive >> m_data;
+		archive >> m_shape;
 	}
 
 	void write(OutArchive& archive) const{
 		archive << m_data;
+		archive << m_shape;
 	}
 	///\brief This method makes the vector independent of all siblings and parents.
 	virtual void makeIndependent(){
@@ -278,7 +293,8 @@ public:
 	///this to work.
 	Data splice(std::size_t batch){
 		Data right;
-		right.m_data=m_data.splice(m_data.begin()+batch);
+		right.m_data = m_data.splice(m_data.begin()+batch);
+		right.m_shape = m_shape;
 		return right;
 	}
 
@@ -312,10 +328,6 @@ public:
 	}
 
 	// SUBSETS
-	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, Data& subset) const{
-		subset.m_data=Container(m_data,indices);
-	}
 
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
 	void indexedSubset(IndexSet const& indices, Data& subset, Data& complement) const{
@@ -327,12 +339,14 @@ public:
 	
 	Data indexedSubset(IndexSet const& indices) const{
 		Data subset;
-		subset.m_data=Container(m_data,indices);
+		subset.m_data = Container(m_data,indices);
+		subset.m_shape = m_shape;
 		return subset;
 	}
 
 	friend void swap(Data& a, Data& b){
 		swap(a.m_data,b.m_data);
+		std::swap(a.m_shape,b.m_shape);
 	}
 };
 
@@ -425,7 +439,8 @@ public:
 	///this to work.
 	UnlabeledData splice(std::size_t batch){
 		UnlabeledData right;
-		right.m_data=m_data.splice(m_data.begin()+batch);
+		right.m_data = m_data.splice(m_data.begin()+batch);
+		right.m_shape = this->m_shape;
 		return right;
 	}
 
@@ -608,6 +623,26 @@ public:
 	const_batch_reference batch(std::size_t i) const{
 		return const_batch_reference(m_data.batch(i),m_label.batch(i));
 	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape const& inputShape() const{
+		return m_data.shape();
+	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape& inputShape(){
+		return m_data.shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape const& labelShape() const{
+		return m_label.shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape& labelShape(){
+		return m_label.shape();
+	}
 
 	// MISC
 
@@ -720,6 +755,27 @@ struct TransformedData{
 	typedef Data<typename detail::TransformedDataElement<Functor,T>::type > type;
 };
 
+namespace detail{
+template<class T>
+struct InferShape{
+	static Shape infer(T const&){return {};}
+};
+
+template<class T>
+struct InferShape<Data<blas::vector<T> > >{
+	static Shape infer(Data<blas::vector<T> > const& f){
+		return {f.element(0).size()};
+	}
+};
+
+template<class T>
+struct InferShape<Data<blas::compressed_vector<T> > >{
+	static Shape infer(Data<blas::compressed_vector<T> > const& f){
+		return {f.element(0).size()};
+	}
+};
+
+}
 
 /**
  * \addtogroup shark_globals
@@ -754,7 +810,7 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 		);
 		start = end;
 	}
-
+	data.shape() = detail::InferShape<Data<Input> >::infer(data);
 	return data;
 }
 
@@ -863,6 +919,7 @@ transform(Data<T> const& data, Functor f){
 			boost::make_transform_iterator(batchBegin(data.batch(i)), f),
 			boost::make_transform_iterator(batchEnd(data.batch(i)), f)
 		);
+	result.shape() = detail::InferShape<Data<ResultType> >::infer(result);
 	return result;
 }
 
@@ -880,6 +937,11 @@ transform(Data<T> const& data, Functor const& f){
 	Data<ResultType> result(batches);
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
 		result.batch(i)= f(data.batch(i));
+	Shape shape = detail::InferShape<Functor>::infer(f);
+	if(shape == Shape()){
+		shape = detail::InferShape<Data<ResultType> >::infer(result);
+	}
+	result.shape() = shape;
 	return result;
 }
 
@@ -899,14 +961,23 @@ transformLabels(LabeledData<I,L> const& data, Functor const& f){
 }
 
 ///\brief Creates a copy of a dataset selecting only a certain set of features.
-template<class FeatureSet>
-Data<RealVector> selectFeatures(Data<RealVector> const& data,FeatureSet const& features){
-	return transform(data,detail::SelectFeatures<FeatureSet>(features));
+template<class T, class FeatureSet>
+Data<blas::vector<T> > selectFeatures(Data<blas::vector<T> > const& data,FeatureSet const& features){
+	auto select = [&](blas::matrix<T> const& input){
+		blas::matrix<T> output(input.size1(),features.size());
+		for(std::size_t i = 0; i != input.size1(); ++i){
+			for(std::size_t j = 0; j != features.size(); ++j){
+				output(i,j) = input(i,features[j]);
+			}
+		}
+		return output;
+	};
+	return transform(data,select);
 }
 
 template<class T, class FeatureSet>
 LabeledData<RealVector,T> selectInputFeatures(LabeledData<RealVector,T> const& data,FeatureSet const& features){
-	return transformInputs(data, detail::SelectFeatures<FeatureSet>(features));
+	return LabeledData<RealVector,T>(selectFeatures(data.inputs(),features), data.labels());
 }
 
 
@@ -1030,8 +1101,8 @@ LabeledData<I,unsigned int> binarySubProblem(
 template<class I>
 LabeledData<I,unsigned int> oneVersusRestProblem(
 	LabeledData<I,unsigned int>const& data,
-	unsigned int oneClass)
-{
+	unsigned int oneClass
+){
 	return transformLabels(data, [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
 

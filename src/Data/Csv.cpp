@@ -242,6 +242,7 @@ void shark::csvStringToData(
 			}
 		}
 	}
+	data.shape() = {dimensions};
 	SIZE_CHECK(currentRow == rows.size());
 }
 
@@ -275,6 +276,7 @@ void shark::csvStringToData(
 			}
 		}
 	}
+	data.shape() = {dimensions};
 	SIZE_CHECK(currentRow == rows.size());
 }
 
@@ -375,6 +377,7 @@ void shark::csvStringToData(
 			labels[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel -minPositiveLabel;
 		}
 	}
+	dataset.inputs().shape() = {dimensions};
 	SIZE_CHECK(currentRow == rows.size());
 }
 
@@ -435,6 +438,7 @@ void shark::csvStringToData(
 			labels[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel -minPositiveLabel;
 		}
 	}
+	dataset.inputs().shape() = {dimensions};
 	SIZE_CHECK(currentRow == rows.size());
 }
 
@@ -479,6 +483,8 @@ void shark::csvStringToData(
 			}
 		}
 	}
+	dataset.inputs().shape() = {numberOfInputs};
+	dataset.labels().shape() = {numberOfOutputs};
 	SIZE_CHECK(currentRow == rows.size());
 }
 
@@ -523,6 +529,8 @@ void shark::csvStringToData(
 			}
 		}
 	}
+	dataset.inputs().shape() = {numberOfInputs};
+	dataset.labels().shape() = {numberOfOutputs};
 	SIZE_CHECK(currentRow == rows.size());
 }
 

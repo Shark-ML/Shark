@@ -639,30 +639,6 @@ private:
 	}
 };
 
-///\brief Selects a subset of features from a given Matrix
-///
-///TODO: this should be a local class in selectFeatures. However, C++03 does not allow
-///such a class to be a template argument. C++11 does.
-template<class FeatureSet>
-class SelectFeatures{
-public:
-	SelectFeatures(FeatureSet const& f):features(f){}
-		
-	typedef RealMatrix result_type;
-	
-	RealMatrix operator()(RealMatrix const& input)const{
-		RealMatrix output(input.size1(),features.size());
-		for(std::size_t i = 0; i != input.size1(); ++i){
-			for(std::size_t j = 0; j != features.size(); ++j){
-				output(i,j) = input(i,features[j]);
-			}
-		}
-		return output;
-	}
-private:
-	FeatureSet const& features;
-};
-
 /// \brief For Data<T> and functor F calculates the result of the resulting elements F(T).
 template<class Functor, class T>
 struct TransformedDataElement{
@@ -683,9 +659,6 @@ public:
 	>::type type;
 };
 /** @*/
-
-
-
 }
 
 
@@ -829,6 +802,7 @@ struct BatchTraits<InputLabelBatch<InputBatchType, LabelBatchType> >{
 	typedef typename detail::batch_to_element<LabelBatchType>::type LabelElem;
 	typedef Batch<InputLabelPair<InputElem,LabelElem> > type;
 };
+
 
 }
 

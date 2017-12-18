@@ -503,7 +503,16 @@ public:
 	UnlabeledData<DataT>& inputs(){
 		return data();
 	}
-
+	
+	///\brief Returns the Shape of the data.
+	Shape const& shape() const{
+		return data().shape();
+	}
+	
+	///\brief Returns the Shape of the data.
+	Shape& shape(){
+		return data().shape();
+	}
 	///\brief Splits the container into two independent parts. The left part remains in the container, the right is stored as return type
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
@@ -634,6 +643,26 @@ public:
 	///\brief Access to the labels as a separate container.
 	Data<LabelType>& labels(){
 		return data().labels();
+	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape const& inputShape() const{
+		return inputs().shape();
+	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape& inputShape(){
+		return inputs().shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape const& labelShape() const{
+		return labels().shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape& labelShape(){
+		return labels().shape();
 	}
 	
 	/// \brief Constructs an WeightedUnlabeledData object for the inputs.
@@ -782,6 +811,8 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
 		bootstrapSet.element(index).weight += 1.0;
 	}
+	bootstrapSet.inputShape() = dataset.inputShape();
+	bootstrapSet.labelShape() = dataset.labelShape();
 	return bootstrapSet;
 }
 
@@ -808,6 +839,7 @@ WeightedUnlabeledData<InputType> bootstrap(
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
 		bootstrapSet.element(index).weight += 1.0;
 	}
+	bootstrapSet.shape() = dataset.shape();
 	return bootstrapSet;
 }
 
