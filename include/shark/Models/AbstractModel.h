@@ -105,7 +105,6 @@ public:
 	enum Feature {
 		HAS_FIRST_PARAMETER_DERIVATIVE  = 1,
 		HAS_FIRST_INPUT_DERIVATIVE      = 4,
-		IS_SEQUENTIAL = 16
 	};
 	SHARK_FEATURE_INTERFACE;
 
@@ -116,9 +115,6 @@ public:
 	/// \brief Returns true when the first input derivative is implemented.
 	bool hasFirstInputDerivative()const{
 		return m_features & HAS_FIRST_INPUT_DERIVATIVE;
-	}
-	bool isSequential()const{
-		return m_features & IS_SEQUENTIAL;
 	}
 	
 	///\brief Returns the expected shape of the input.

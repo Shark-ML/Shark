@@ -33,13 +33,13 @@
 namespace shark{
 namespace detail{
 
-
-///\brief Implementation of the ErrorFunction using AbstractLoss.
+///\brief Implementation of the ErrorFunction using AbstractLoss for parallelizable computations
 template<class InputType, class LabelType,class OutputType>
 class ErrorFunctionImpl:public FunctionWrapperBase{
 public:
+
 	ErrorFunctionImpl(
-		LabeledData<InputType, LabelType> const& dataset,
+		LabeledData<InputType,LabelType> const& dataset,
 		AbstractModel<InputType,OutputType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss,
 		bool useMiniBatches
@@ -50,8 +50,6 @@ public:
 		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
 			m_features|=HAS_FIRST_DERIVATIVE;
 		m_features|=CAN_PROPOSE_STARTING_POINT;
-		if(useMiniBatches)
-			m_features |= IS_NOISY;
 	}
 
 	std::string name() const
@@ -69,161 +67,54 @@ public:
 		return new ErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
 	}
 
-	double eval(RealVector const& input) const {
-		mep_model->setParameterVector(input);
-		if(!m_useMiniBatches)
-			return evalPointSet();
-		else{
-			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
-			auto const& batch = m_dataset.batch(batchIndex);
-			
-		
-			typename Batch<OutputType>::type predictions;
-			mep_model->eval(batch.input,predictions);
-
-			//calculate error derivative of the loss function
-			double error= mep_loss->eval(batch.label, predictions);
-			error /= shark::batchSize(batch);
-			return error;
-		}
-	}
-	
-	double evalPointSet() const {
-		std::size_t dataSize = m_dataset.numberOfElements();
-		typename Batch<OutputType>::type prediction;
-		double error = 0.0;
-		for(auto const& batch: m_dataset.batches()){
-			mep_model->eval(batch.input, prediction);
-			error += mep_loss->eval(batch.label, prediction);
-		}
-		return error/dataSize;
-	}
-
-	ResultType evalDerivative( SearchPointType const& point, FirstOrderDerivative& derivative ) const {
+	double eval(RealVector const& point) const {
 		mep_model->setParameterVector(point);
-		if(!m_useMiniBatches)
-			return evalDerivativePointSet(derivative);
-		else{
+		//minibatch case
+		if(m_useMiniBatches){
 			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
-			auto const& batch = m_dataset.batch(batchIndex);
-			
-			boost::shared_ptr<State> state = mep_model->createState();
-			typename Batch<OutputType>::type predictions;
-			mep_model->eval(batch.input,predictions,*state);
-
-			//calculate error derivative of the loss function
-			typename Batch<OutputType>::type errorDerivative;
-			double error= mep_loss->evalDerivative(batch.label, predictions,errorDerivative);
-
-			//chain rule
-			mep_model->weightedParameterDerivative(batch.input,predictions, errorDerivative,*state,derivative);
+			double error = eval(batchIndex,batchIndex+1);
+			return error / shark::batchSize(m_dataset.batch(batchIndex));
+		}
 		
-			error /= shark::batchSize(batch);
+		//full batch case
+		std::size_t numBatches = m_dataset.numberOfBatches();
+		std::size_t numThreads = std::min(SHARK_NUM_THREADS,numBatches);
+		//calculate optimal partitioning
+		std::size_t batchesPerThread = numBatches/numThreads;
+		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
+		double error = 0;
+		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in parallel loops
+			//get start and end index of batch-range
+			std::size_t t = ti;
+			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
+			std::size_t end = (t+1)*batchesPerThread+std::min(t+1,leftOver);
+			
+			//compute derivative of the range
+			double threadError = eval(start, end);
+			
+			SHARK_CRITICAL_REGION{
+				error +=  threadError;
+			}
+		}
+		return error /  m_dataset.numberOfElements();
+	}
+
+	ResultType evalDerivative(SearchPointType const& point, FirstOrderDerivative & derivative ) const {
+		mep_model->setParameterVector(point);
+		derivative.resize(mep_model->numberOfParameters());
+		derivative.clear();
+		
+		//minibatch case
+		if(m_useMiniBatches){
+			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			double error = evalDerivative(batchIndex,batchIndex+1, derivative);
+			
+			auto const& batch = m_dataset.batch(batchIndex);
 			derivative /= shark::batchSize(batch);
-			return error;
+			return error / shark::batchSize(batch);
 		}
-	}
-	
-	ResultType evalDerivativePointSet( FirstOrderDerivative & derivative ) const {
-		std::size_t dataSize = m_dataset.numberOfElements();
-		derivative.resize(mep_model->numberOfParameters());
-		derivative.clear();
-
-		typename Batch<OutputType>::type prediction;
-		RealVector dataGradient(mep_model->numberOfParameters());
-		typename Batch<OutputType>::type errorDerivative;
-
-		double error=0.0;
-		boost::shared_ptr<State> state = mep_model->createState();
-		for(auto const& batch: m_dataset.batches()){
-			// calculate model output for the batch as well as the derivative
-			mep_model->eval(batch.input, prediction,*state);
-
-			// calculate error derivative of the loss function
-			error += mep_loss->evalDerivative(batch.label, prediction,errorDerivative);
-
-			//calculate the gradient using the chain rule
-			mep_model->weightedParameterDerivative(batch.input,prediction, errorDerivative,*state,dataGradient);
-			derivative+=dataGradient;
-		}
-		error /= dataSize;
-		derivative /= double(dataSize);
-		return error;
-	}
-
-private:
-	AbstractModel<InputType, OutputType>* mep_model;
-	AbstractLoss<LabelType, OutputType>* mep_loss;
-	LabeledData<InputType, LabelType> m_dataset;
-	bool m_useMiniBatches;
-};
-
-
-///\brief Implementation of the ErrorFunction using AbstractLoss for parallelizable computations
-template<class InputType, class LabelType,class OutputType>
-class ParallelErrorFunctionImpl:public FunctionWrapperBase{
-public:
-
-	ParallelErrorFunctionImpl(
-		LabeledData<InputType,LabelType> const& dataset,
-		AbstractModel<InputType,OutputType>* model, 
-		AbstractLoss<LabelType, OutputType>* loss
-	):mep_model(model),mep_loss(loss),m_dataset(dataset){
-		SHARK_ASSERT(model!=NULL);
-		SHARK_ASSERT(loss!=NULL);
-
-		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
-			m_features|=HAS_FIRST_DERIVATIVE;
-		m_features|=CAN_PROPOSE_STARTING_POINT;
-	}
-
-	std::string name() const
-	{ return ""; }
-
-	SearchPointType proposeStartingPoint() const{
-		return mep_model->parameterVector();
-	}
-	
-	std::size_t numberOfVariables() const{
-		return mep_model->numberOfParameters();
-	}
-
-	FunctionWrapperBase* clone()const{
-		return new ParallelErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
-	}
-
-	double eval(RealVector const& input) const {
-		mep_model->setParameterVector(input);
-
-		std::size_t numBatches = m_dataset.numberOfBatches();
-		std::size_t numElements = m_dataset.numberOfElements();
-		std::size_t numThreads = std::min(SHARK_NUM_THREADS,numBatches);
-		//calculate optimal partitioning
-		std::size_t batchesPerThread = numBatches/numThreads;
-		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
-		double error = 0;
-		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in paralll loops
-			std::size_t t = ti;
-			//get start and end index of batch-range
-			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
-			std::size_t end = (t+1)*batchesPerThread+std::min(t+1,leftOver);
-			LabeledData<InputType, LabelType> threadData = rangeSubset(m_dataset,start,end);//threadsafe!
-			ErrorFunctionImpl<InputType,LabelType,OutputType> errorFunc(threadData,mep_model,mep_loss, false);
-			double threadError = errorFunc.evalPointSet();//threadsafe!
-			//we need to weight the error and derivativs with the number of samples in the split.
-			double weightFactor = double(threadData.numberOfElements())/numElements;
-			SHARK_CRITICAL_REGION{
-				error += weightFactor * threadError;
-			}
-		}
-		return error;
-	}
-
-	ResultType evalDerivative( const SearchPointType & point, FirstOrderDerivative & derivative ) const {
-		mep_model->setParameterVector(point);
-		derivative.resize(mep_model->numberOfParameters());
-		derivative.clear();
 		
+		//full batch case
 		std::size_t numBatches = m_dataset.numberOfBatches();
 		std::size_t numElements = m_dataset.numberOfElements();
 		std::size_t numThreads = std::min(SHARK_NUM_THREADS,numBatches);
@@ -231,29 +122,63 @@ public:
 		std::size_t batchesPerThread = numBatches/numThreads;
 		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
 		double error = 0;
-		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in paralll loops
-			std::size_t t = ti;
-			FirstOrderDerivative threadDerivative;
+		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in parallel loops
 			//get start and end index of batch-range
+			std::size_t t = ti;
 			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
 			std::size_t end = (t+1)*batchesPerThread+std::min(t+1,leftOver);
-			LabeledData<InputType, LabelType> threadData = rangeSubset(m_dataset,start,end);//threadsafe!
-			ErrorFunctionImpl<InputType,LabelType,OutputType> errorFunc(threadData,mep_model,mep_loss, false);
-			double threadError = errorFunc.evalDerivativePointSet(threadDerivative);//threadsafe!
-			//we need to weight the error and derivativs with the number of samples in the split.
-			double weightFactor = double(threadData.numberOfElements())/numElements;
+			
+			//compute derivative of the range
+			FirstOrderDerivative threadDerivative(mep_model->numberOfParameters(),0.0);
+			double threadError = evalDerivative(start, end, threadDerivative);
+			
 			SHARK_CRITICAL_REGION{
-				error += weightFactor*threadError;
-				noalias(derivative) += weightFactor*threadDerivative;
+				error +=  threadError;
+				noalias(derivative) += threadDerivative;
 			}
 		}
-		return error;
+		derivative /= numElements;
+		return error / numElements;
 	}
 
 protected:
 	AbstractModel<InputType, OutputType>* mep_model;
 	AbstractLoss<LabelType, OutputType>* mep_loss;
 	LabeledData<InputType, LabelType> m_dataset;
+	bool m_useMiniBatches;
+
+	ResultType evalDerivative( std::size_t start, std::size_t end,FirstOrderDerivative& derivative) const {
+		boost::shared_ptr<State> state = mep_model->createState();
+		typename Batch<OutputType>::type predictions;
+		typename Batch<OutputType>::type errorDerivative;
+		RealVector parameterDerivative;
+		double errorSum = 0;
+		for(std::size_t i = start; i != end; ++i){
+			auto const& batch = m_dataset.batch(i);
+			mep_model->eval(batch.input,predictions,*state);
+
+			//calculate error derivative of the loss function
+			errorSum += mep_loss->evalDerivative(batch.label, predictions,errorDerivative);
+
+			//chain rule
+			mep_model->weightedParameterDerivative(batch.input,predictions, errorDerivative,*state,parameterDerivative);
+			noalias(derivative) += parameterDerivative;
+		}
+		return errorSum;
+	}
+	
+	ResultType eval( std::size_t start, std::size_t end) const {
+		typename Batch<OutputType>::type predictions;
+		double errorSum = 0;
+		for(std::size_t i = start; i != end; ++i){
+			auto const& batch = m_dataset.batch(i);
+			mep_model->eval(batch.input,predictions);
+
+			//calculate error derivative of the loss function
+			errorSum += mep_loss->eval(batch.label, predictions);
+		}
+		return errorSum;
+	}
 };
 
 
@@ -375,11 +300,7 @@ inline ErrorFunction::ErrorFunction(
 	bool useMiniBatches
 ){
 	m_regularizer = 0;
-	//non sequential models can be parallelized. also mini batch training doe snot need threads
-	if(model->isSequential() || SHARK_NUM_THREADS == 1 || useMiniBatches)
-		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss,useMiniBatches));
-	else
-		mp_wrapper.reset(new detail::ParallelErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss));
+	mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss, useMiniBatches));
 
 	this -> m_features = mp_wrapper -> features();
 }
@@ -391,7 +312,6 @@ inline ErrorFunction::ErrorFunction(
 	AbstractLoss<LabelType, OutputType>* loss
 ){
 	m_regularizer = 0;
-	SHARK_RUNTIME_CHECK(!model->isSequential(),"ErrorFunction not implemented for weighted sequential models");
 	mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss));
 	this -> m_features = mp_wrapper -> features();
 }

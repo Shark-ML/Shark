@@ -208,31 +208,6 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		
 		BOOST_CHECK_SMALL(diff, 1.e-3);
 	}
-	
-	{
-		detail::ParallelErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss);
-		double val = mse.eval(optimum);
-		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
-		
-		ErrorFunction::FirstOrderDerivative d;
-		double valGrad = mse.evalDerivative(optimum,d);
-		double gradNorm = norm_2(d);
-		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
-		BOOST_CHECK_SMALL(gradNorm,1.e-1);
-		
-		//let the model forget by reinitializing with random values
-		initRandomNormal(model,2);
-		//optimize with rprop
-		IRpropPlus rprop;
-		rprop.init(mse);
-		for(std::size_t i = 0; i != 100; ++i){ 
-			rprop.step(mse);
-		}
-		double diff = norm_sqr(rprop.solution().point-optimum);
-		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
-		
-		BOOST_CHECK_SMALL(diff, 1.e-3);
-	}	
 }
 
 BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )

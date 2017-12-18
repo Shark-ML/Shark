@@ -418,19 +418,11 @@ public:
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, BaseWeightedDataset& subset) const{
-		m_data.indexedSubset(indices,subset.m_data);
-		m_weights.indexedSubset(indices,subset.m_weights);
-	}
-
-	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, BaseWeightedDataset& subset, BaseWeightedDataset& complement)const{
-		IndexSet comp;
-		detail::complement(indices,m_data.numberOfBatches(),comp);
-		m_data.indexedSubset(indices,subset.m_data);
-		m_weights.indexedSubset(indices,subset.m_weights);
-		m_data.indexedSubset(comp,complement.m_data);
-		m_weights.indexedSubset(comp,complement.m_weights);
+	BaseWeightedDataset indexedSubset(IndexSet const& indices) const{
+		BaseWeightedDataset subset;
+		subset.m_data = m_data.indexedSubset(indices);
+		subset.m_weights = m_weights.indexedSubset(indices);
+		return subset;
 	}
 private:
 	DataContainer m_data;               /// point data

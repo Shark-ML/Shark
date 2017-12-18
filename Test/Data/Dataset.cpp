@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	
 	// 2. create indexed partitions
 	{
-		UnlabeledData<int> subset = indexedSubset(set,indizes[0]);
+		UnlabeledData<int> subset = set.indexedSubset(indizes[0]);
 		UnlabeledData<int> subsetMethod;
 		set.indexedSubset(indizes[0],subsetMethod);
 		BOOST_REQUIRE_EQUAL(subset.numberOfBatches(), indizes[0].size());
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 
 	// 2.1 now with complement
 	{
-		UnlabeledData<int> subset = indexedSubset(set,indizes[0]);
+		UnlabeledData<int> subset = set.indexedSubset(indizes[0]);
 		UnlabeledData<int> subset2;
 		UnlabeledData<int> complement;
 		set.indexedSubset(indizes[0], subset2, complement);

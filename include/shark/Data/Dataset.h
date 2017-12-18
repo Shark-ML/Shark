@@ -324,6 +324,12 @@ public:
 		subset.m_data=Container(m_data,indices);
 		complement.m_data=Container(m_data,comp);
 	}
+	
+	Data indexedSubset(IndexSet const& indices) const{
+		Data subset;
+		subset.m_data=Container(m_data,indices);
+		return subset;
+	}
 
 	friend void swap(Data& a, Data& b){
 		swap(a.m_data,b.m_data);
@@ -692,19 +698,8 @@ public:
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, LabeledData& subset) const{
-		m_data.indexedSubset(indices,subset.m_data);
-		m_label.indexedSubset(indices,subset.m_label);
-	}
-
-	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, LabeledData& subset, LabeledData& complement)const{
-		IndexSet comp;
-		detail::complement(indices,m_data.numberOfBatches(),comp);
-		m_data.indexedSubset(indices,subset.m_data);
-		m_label.indexedSubset(indices,subset.m_label);
-		m_data.indexedSubset(comp,complement.m_data);
-		m_label.indexedSubset(comp,complement.m_label);
+	LabeledData indexedSubset(IndexSet const& indices) const{
+		return LabeledData(m_data.indexedSubset(indices),m_label.indexedSubset(indices));
 	}
 protected:
 	InputContainer m_data;               /// point data
@@ -850,30 +845,6 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 	return classSizes(dataset.labels());
 }
 
-
-//subsetting
-template<class DatasetT>
-DatasetT indexedSubset(
-	DatasetT const& dataset,
-	typename DatasetT::IndexSet const& indices
-){
-	DatasetT subset;
-	dataset.indexedSubset(indices,subset);
-	return subset;
-}
-///\brief  Fill in the subset of batches [start,...,size+start[.
-template<class DatasetT>
-DatasetT rangeSubset(DatasetT const& dataset, std::size_t start, std::size_t end){
-	typename DatasetT::IndexSet indices;
-	detail::range(end-start, start, indices);
-	return indexedSubset(dataset,indices);
-}
-///\brief  Fill in the subset of batches [0,...,size[.
-template<class DatasetT>
-DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
-	return rangeSubset(dataset,size,0);
-}
-
 // TRANSFORMATION
 ///\brief Transforms a dataset using a Functor f and returns the transformed result.
 ///
@@ -927,7 +898,7 @@ transformLabels(LabeledData<I,L> const& data, Functor const& f){
 	return DatasetType(data.inputs(),transform(data.labels(),f));
 }
 
-///\brief Creates a copy o a dataset selecting only a certain set of features.
+///\brief Creates a copy of a dataset selecting only a certain set of features.
 template<class FeatureSet>
 Data<RealVector> selectFeatures(Data<RealVector> const& data,FeatureSet const& features){
 	return transform(data,detail::SelectFeatures<FeatureSet>(features));
@@ -1045,7 +1016,7 @@ LabeledData<I,unsigned int> binarySubProblem(
 	for(;start != numBatches && getBatchElement(data.batch(start),0).label == bigger; ++start)
 		indexSet.push_back(start);
 
-	return transformLabels(indexedSubset(data,indexSet), [=](unsigned int label){return (unsigned int)(label == oneClass);});
+	return transformLabels(data.indexedSubset(indexSet), [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
 
 /// \brief Construct a binary (two-class) one-versus-rest problem from a multi-class problem.

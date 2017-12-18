@@ -76,14 +76,7 @@ Flag and accessor function name                                           Descri
 =======================================================================   ========================================================
 ``HAS_FIRST_PARAMETER_DERIVATIVE``, ``hasFirstParameterDerivative()``     First derivative w.r.t. the parameters is available
 ``HAS_FIRST_INPUT_DERIVATIVE``, ``hasFirstInputDerivative()``             First derivative w.r.t. the inputs is available
-``IS_SEQUENTIAL``, ``isSequential()``                                     Model is sequential (see below)
 =======================================================================   ========================================================
-
-
-
-A sequential model can only process a single input at a time and will throw an
-exception if multiple inputs are fed in. For these models, the next output depends
-on the sequence of previous inputs and thus a batch computation does not make sense.
 
 To evaluate a model, there exist several variants of ``eval`` and
 ``operator()``. The most notable exception is the stateful valuated version of ``eval``. 
