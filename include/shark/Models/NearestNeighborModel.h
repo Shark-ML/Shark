@@ -68,7 +68,7 @@ public:
 	{ return "Internal"; }
 	
 	Shape inputShape() const{
-		return Shape();//todo!
+		return m_algorithm->inputShape();
 	}
 	Shape outputShape() const{
 		return Shape(m_outputDimensions);

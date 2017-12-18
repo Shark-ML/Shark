@@ -77,11 +77,13 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Regression ) {
 	target[4](0)=+3.0;
 	target[5](0)=+5.0;
 	RegressionDataset dataset = createLabeledDataFromRange(input, target);
-
+	dataset.inputShape()={1,2};
 	// model
 	DenseLinearKernel kernel;
 	SimpleNearestNeighbors<RealVector,RealVector> algorithm(dataset, &kernel);
 	NearestNeighborModel<RealVector, RealVector> model(&algorithm, 2);
+	BOOST_CHECK_EQUAL(dataset.inputShape(),model.inputShape());
+	BOOST_CHECK_EQUAL(dataset.labelShape(),model.outputShape());
 
 	// predictions must be pair averages
 	Data<RealVector> prediction = model(dataset.inputs());
@@ -114,10 +116,13 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple ) {
 	target[5]=2;
 
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
-
+	dataset.inputShape()={1,2};
+	
 	DenseRbfKernel kernel(0.5);
 	SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
 	NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
+	BOOST_CHECK_EQUAL(dataset.inputShape(),model.inputShape());
+	BOOST_CHECK_EQUAL(dataset.labelShape(),model.outputShape());
 
 	Data<unsigned int> prediction=model(dataset.inputs());
 	Data<RealVector> soft_prediction=model.decisionFunction()(dataset.inputs());
@@ -151,12 +156,16 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KHCTree ) {
 	target[5]=1;
 
 	ClassificationDataset dataset = createLabeledDataFromRange(input, target);
+	dataset.inputShape()={1,2};
+	
 	DataView<Data<RealVector> > view(dataset.inputs());
 	DenseRbfKernel kernel(0.5);
 
 	KHCTree<DataView<Data<RealVector> > > tree(view,&kernel);
 	TreeNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &tree);
 	NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
+	BOOST_CHECK_EQUAL(dataset.inputShape(),model.inputShape());
+	BOOST_CHECK_EQUAL(dataset.labelShape(),model.outputShape());
 
 	for (size_t i = 0; i<6; ++i)
 	{

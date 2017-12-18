@@ -55,11 +55,18 @@ public:
 	///Given a batch of size n, a array with nxk values is returned where each entry is a key-value pair of distance and label.
 	///the first k entries are the neighbors of point 1, the next k of point 2 and so on.
 	virtual std::vector<DistancePair> getNeighbors(BatchInputType const& batch, std::size_t k) const = 0;
+
+	/// \brief Returns the expected shape of the inputs
+	Shape const& inputShape() const{
+		return m_inputShape;
+	}
 	
 	///\brief returns a const reference to the dataset used by the algorithm
 	virtual LabeledData<InputType,LabelType>const& dataset()const = 0;
 
 	virtual ~AbstractNearestNeighbors() {}
+protected:
+	Shape m_inputShape;
 };
 
 	
