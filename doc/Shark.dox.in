@@ -705,7 +705,7 @@ EXCLUDE_PATTERNS       =  */.svn/* */Test/* *boost* */Impl/* */detail/*
 # wildcard * is used, a substring. Examples: ANamespace, AClass,
 # AClass::ANamespace, ANamespace::*Test
 
-EXCLUDE_SYMBOLS        = boost::noncopyable *type* shark::detail shark::blas::detail shark::blas::bindings shark::tag
+EXCLUDE_SYMBOLS        = boost::noncopyable *type* shark::detail shark::blas::detail shark::blas::bindings shark::tag remora
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or
 # directories that contain example code fragments that are included (see
