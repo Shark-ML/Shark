@@ -50,7 +50,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 
@@ -183,7 +183,7 @@ template <
 	class Trainer= AbstractTrainer< Model,LabelType>
 >
 class AbstractSvmTrainer
-: public Trainer,public QpConfig, public IParameterizable
+: public Trainer,public QpConfig, public IParameterizable<>
 {
 public:
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -320,7 +320,7 @@ template <class InputType>
 class AbstractLinearSvmTrainer
 : public AbstractTrainer<LinearClassifier<InputType>, unsigned int>
 , public QpConfig
-, public IParameterizable
+, public IParameterizable<>
 {
 public:
 	typedef AbstractTrainer<LinearClassifier<InputType>, unsigned int> base_type;

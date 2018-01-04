@@ -80,6 +80,8 @@ Flag, accessor function                                          If set to true 
                                                                  point given an infeasible one.
 ``IS_THREAD_SAFE``, ``isThreadSafe``                             This flag indicates that eval and evalDerivative can be
                                                                  called in parallel by the optimizer for different points.
+``IS_NOISY``, ``isNoisy``                                        This flag indicates that the function is noisy and several
+								 calls to eval or evalDerivative will lead to different results
 ===============================================================  ==========================================================
 
 
@@ -193,21 +195,16 @@ Model                                         Description
 ============================================  ===================================================================================
 :doxy:`CombinedObjectiveFunction`             Weighted sum of several other objective functions.
 :doxy:`ErrorFunction`                         Uses a Model, some data and one of the :doc:`losses` to define a supervised problem.
-:doxy:`NoisyErrorFunction`                    Same as ErrorFunction, but it only uses a subset of the data at every call.
-                                              Thus the return value for a given point is noisy
+					      The class also allows for minibatch training
 :doxy:`CrossValidationError`                  *k*-fold cross validation. The mean error over all *k* validation sets
                                               is returned. Training time is proportional to the number of partitions.
 :doxy:`LooError`                              Leave-one-out error, the most extreme form of cross validation in which all but one 
                                               point are part of the training sets.
 :doxy:`LooErrorCSvm`                          Special case of the ``LooError`` for SVMs using the structure of the SVM solution
                                               to speed-up evaluation.
-:doxy:`SparseAutoencoderError`                Same as ``ErrorFunction``, but imposes a sparseness constraint on the activation of the
-                                              hidden neurons of a neural network using the Kullback-Leibler divergence.
 :doxy:`SvmLogisticInterpretation`             Model selection for SVMs using a maximum-likelihood criterion
 :doxy:`RadiusMarginQuotient`                  Model selection for SVMs by optimizing the radius-margin quotient.
 :doxy:`NegativeGaussianProcessEvidence`       Model selection for a regularization network/Gaussian process.
-:doxy:`KernelBasisDistance`                   Measures the distance between two points in a kernel space to
-					      approximate one point with a much smaller basis.
 :doxy:`KernelTargetAlignment`                 Model selection algorithm which measures for a given kernel,
 					      how similar points of the same class are and how dissimilar points of
 					      different classes.

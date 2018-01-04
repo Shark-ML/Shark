@@ -2,6 +2,7 @@
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/Algorithms/Trainers/LinearRegression.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
+#include <shark/Algorithms/GradientDescent/SteepestDescent.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Data/DataDistribution.h>
 
@@ -29,12 +30,10 @@ public:
 		virtual void setParameterVector(RealVector const& newParameters){}
 		virtual size_t numberOfParameters()const{return 1;}
 
-		virtual size_t inputSize()const
-		{
+		Shape inputShape() const{
 			return m_dim;
 		}
-		virtual size_t outputSize()const
-		{
+		Shape outputShape() const{
 			return m_dim;
 		}
 		
@@ -53,7 +52,7 @@ public:
 		}
 		using AbstractModel<RealVector,RealVector>::eval;
 
-		virtual void weightedParameterDerivative( RealMatrix const& input, RealMatrix const& coefficients, State const& state, RealVector& derivative)const
+		virtual void weightedParameterDerivative( RealMatrix const& input, RealMatrix const&, RealMatrix const& coefficients, State const& state, RealVector& derivative)const
 		{
 			derivative.resize(1);
 			derivative(0)=0;
@@ -62,6 +61,29 @@ public:
 				derivative(0) +=sum(row(coefficients,p));
 			}
 		}
+};
+
+struct TestFunction : public SingleObjectiveFunction
+{
+	typedef SingleObjectiveFunction Base;
+
+	std::string name() const
+	{ return "TestFunction"; }
+
+	RealVector weights;
+	TestFunction():weights(3){
+		weights(0)=1;
+		weights(1)=2;
+		weights(2)=-1;
+	}
+	std::size_t numberOfVariables()const{
+		return 3;
+	}
+
+	virtual double eval(RealVector const& pattern)const
+	{
+		return inner_prod(weights,pattern);
+	}
 };
 
 
@@ -83,12 +105,12 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 	ErrorFunction mse(dataset, &model,&loss);
 
 	double error=mse.eval(parameters);
-	BOOST_CHECK_SMALL(error-40,1.e-15);
+	BOOST_CHECK_SMALL(error-20,1.e-15);
 
 	//calculate derivative - it should also be 40
 	ErrorFunction::FirstOrderDerivative derivative;
 	mse.evalDerivative(parameters,derivative);
-	BOOST_CHECK_SMALL(derivative(0)-40,1.e-15);
+	BOOST_CHECK_SMALL(derivative(0)-20,1.e-15);
 }
 
 //test whether we can get to the same result as linear regression
@@ -131,7 +153,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		trainTarget[i] = noiseVal + testTarget[i];
 		optimalMSE+=norm_sqr(noiseVal);
 	}
-	optimalMSE/=trainExamples;
+	optimalMSE/=2*trainExamples;
 	
 	//create loss function and internal implementations to check everything is working
 	RegressionDataset trainset = createLabeledDataFromRange(input, trainTarget);
@@ -163,7 +185,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	}
 	
 	{
-		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss);
+		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss,false);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
@@ -186,31 +208,6 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		
 		BOOST_CHECK_SMALL(diff, 1.e-3);
 	}
-	
-	{
-		detail::ParallelErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss);
-		double val = mse.eval(optimum);
-		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
-		
-		ErrorFunction::FirstOrderDerivative d;
-		double valGrad = mse.evalDerivative(optimum,d);
-		double gradNorm = norm_2(d);
-		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
-		BOOST_CHECK_SMALL(gradNorm,1.e-1);
-		
-		//let the model forget by reinitializing with random values
-		initRandomNormal(model,2);
-		//optimize with rprop
-		IRpropPlus rprop;
-		rprop.init(mse);
-		for(std::size_t i = 0; i != 100; ++i){ 
-			rprop.step(mse);
-		}
-		double diff = norm_sqr(rprop.solution().point-optimum);
-		std::cout<<diff<<rprop.solution().point<<" "<<optimum<<std::endl;
-		
-		BOOST_CHECK_SMALL(diff, 1.e-3);
-	}	
 }
 
 BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
@@ -255,6 +252,54 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 	BOOST_CHECK_CLOSE(WError1, unWError1,1.e-11);
 	
 	BOOST_CHECK_SMALL(norm_sqr(unWDerivative - WDerivative),1.e-8);
+}
+
+BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_Noisy )
+{
+	//create regression data from the testfunction
+	TestFunction function;
+	std::vector<RealVector> data;
+	std::vector<RealVector> target;
+	RealVector input(3);
+	RealVector output(1);
+
+	for (size_t i=0; i<1000; i++)
+	{
+		for(size_t j=0;j!=3;++j)
+		{
+			input(j)=random::uni(random::globalRng, -1,1);
+		}
+		data.push_back(input);
+		output(0)=function.eval(input);
+		target.push_back(output);
+	}
+	// batchsize 1 corresponds to stochastic gradient descent
+	RegressionDataset dataset = createLabeledDataFromRange(data,target,1);
+
+	//startingPoint
+	RealVector point(3);
+	point(0) = 0;
+	point(1) = 0;
+	point(2) = 0;
+	SteepestDescent optimizer;
+	SquaredLoss<> loss;
+	LinearModel<> model(3);
+	
+	ErrorFunction mse(dataset,&model,&loss, true);
+	mse.init();
+	optimizer.init(mse, point);
+	// train the cmac
+	double error = 0.0;
+	for (size_t iteration=0; iteration<701; ++iteration){
+		optimizer.step(mse);
+		if (iteration % 100 == 0){
+			error = optimizer.solution().value;
+			RealVector best = optimizer.solution().point;
+			std::cout << iteration << " error:" << error << " parameter:" << best << std::endl;
+		}
+	}
+	std::cout << "Optimization done. Error:" << error << std::endl;
+	BOOST_CHECK_SMALL(error, 1.e-15);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

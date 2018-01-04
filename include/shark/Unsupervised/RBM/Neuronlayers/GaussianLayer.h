@@ -45,7 +45,7 @@ namespace shark{
 /// For a Gaussian neuron/variable the conditional probability distribution of the
 /// state of the variable given the state of the other layer is given by a Gaussian
 /// distribution with the input of the neuron as mean and unit variance.
-class GaussianLayer : public ISerializable, public IParameterizable{
+class GaussianLayer : public ISerializable, public IParameterizable<>{
 private:
 	RealVector m_bias; ///the bias terms associated with the neurons 
 public:

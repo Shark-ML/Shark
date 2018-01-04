@@ -49,38 +49,66 @@ namespace remora{namespace gpu{
 template<class Device>
 struct device_traits;
 	
-template<class T>
+template<class T, class Tag>
 struct dense_vector_storage{
-	typedef dense_tag storage_tag;
+	typedef Tag storage_tag;
+	
 	boost::compute::buffer buffer;
 	std::size_t offset;
 	std::size_t stride;
 	
-	dense_vector_storage<T> sub_region(std::size_t offset){
-		return {buffer, this->offset+offset, stride};
+	dense_vector_storage(){}
+	dense_vector_storage(boost::compute::buffer const& buffer, std::size_t offset, std::size_t stride)
+	:buffer(buffer), offset(offset), stride(stride){}
+	template<class U, class Tag2>
+	dense_vector_storage(dense_vector_storage<U, Tag2> const& storage):
+	buffer(storage.buffer), offset(storage.offset), stride(storage.stride){
+		static_assert(!(std::is_same<Tag,continuous_dense_tag>::value && std::is_same<Tag2,dense_tag>::value), "Trying to assign dense to continuous dense storage");
+	}
+	
+	dense_vector_storage<T,Tag> sub_region(std::size_t offset){
+		return {buffer, this->offset+offset * stride, stride};
 	}
 };
 
-template<class T>
+template<class T, class Tag>
 struct dense_matrix_storage{
-	typedef dense_tag storage_tag;
-	typedef dense_vector_storage<T> row_storage;
+	typedef Tag storage_tag;
+	template<class O>
+	struct row_storage: public std::conditional<
+		std::is_same<O,row_major>::value,
+		dense_vector_storage<T, Tag>,
+		dense_vector_storage<T, dense_tag>
+	>{};
+	
+	typedef dense_vector_storage<T,Tag> diag_storage;
+	typedef dense_matrix_storage<T,dense_tag> sub_region_storage;
+	
 	boost::compute::buffer buffer;
 	std::size_t offset;
 	std::size_t leading_dimension;
 	
+	dense_matrix_storage(){}
+	dense_matrix_storage(boost::compute::buffer const& buffer, std::size_t offset, std::size_t leading_dimension)
+	:buffer(buffer), offset(offset), leading_dimension(leading_dimension){}
+	template<class U, class Tag2>
+	dense_matrix_storage(dense_matrix_storage<U, Tag2> const& storage):
+	buffer(storage.buffer), offset(storage.offset), leading_dimension(storage.leading_dimension){
+		static_assert(!(std::is_same<Tag,continuous_dense_tag>::value && std::is_same<Tag2,dense_tag>::value), "Trying to assign dense to continuous dense storage");
+	}
+	
 	template<class Orientation>
-	dense_matrix_storage<T> sub_region(std::size_t offset1, std::size_t offset2, Orientation){
+	sub_region_storage sub_region(std::size_t offset1, std::size_t offset2, Orientation){
 		std::size_t offset_major = Orientation::index_M(offset1,offset2);
 		std::size_t offset_minor = Orientation::index_m(offset1,offset2);
 		return {buffer, offset + offset_major*leading_dimension+offset_minor, leading_dimension};
 	}
 	
 	template<class Orientation>
-	row_storage row(std::size_t i, Orientation){
-		return {buffer, offset + i * Orientation::index_M(leading_dimension,1), Orientation::index_m(leading_dimension,1)};
+	typename row_storage<Orientation>::type row(std::size_t i, Orientation){
+		return {buffer, offset + i * Orientation::index_M(leading_dimension,std::size_t(1)), Orientation::index_m(leading_dimension,std::size_t(1))};
 	}
-	row_storage diag(){
+	diag_storage diag(){
 		return {buffer, offset, leading_dimension+1};
 	}
 };
@@ -567,6 +595,20 @@ struct device_traits<gpu_tag>{
 	using min = boost::compute::fmin<T>;
 	template<class T>
 	using max = boost::compute::fmax<T>;
+	
+	//comparison
+	template<class T>
+	using less = boost::compute::less<T>;
+	template<class T>
+	using less_equal  = boost::compute::less_equal<T>;
+	template<class T>
+	using greater = boost::compute::greater<T>;
+	template<class T>
+	using greater_equal  = boost::compute::greater_equal<T>;
+	template<class T>
+	using equal = boost::compute::equal_to<T>;
+	template<class T>
+	using not_equal  = boost::compute::not_equal_to<T>;
 	
 };
 

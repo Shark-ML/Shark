@@ -128,49 +128,14 @@ void gemv(
 	);
 }
 
-template<class Storage1, class Storage2, class Storage3, class T1, class T2, class T3>
-struct optimized_gemv_detail{
-	typedef std::false_type type;
-};
-template<>
-struct optimized_gemv_detail<
-	dense_tag, dense_tag, dense_tag, 
-	double, double, double
->{
-	typedef std::true_type type;
-};
-template<>
-struct optimized_gemv_detail<
-	dense_tag, dense_tag, dense_tag, 
-	float, float, float
->{
-	typedef std::true_type type;
-};
-
-template<>
-struct optimized_gemv_detail<
-	dense_tag, dense_tag, dense_tag,
-	std::complex<double>, std::complex<double>, std::complex<double>
->{
-	typedef std::true_type type;
-};
-template<>
-struct optimized_gemv_detail<
-	dense_tag, dense_tag, dense_tag,
-	std::complex<float>, std::complex<float>, std::complex<float>
->{
-	typedef std::true_type type;
-};
-
-template<class M1, class M2, class M3>
-struct  has_optimized_gemv
-: public optimized_gemv_detail<
-	typename M1::storage_type::storage_tag,
-	typename M2::storage_type::storage_tag,
-	typename M3::storage_type::storage_tag,
-	typename M1::value_type,
-	typename M2::value_type,
-	typename M3::value_type
+template<class M, class V1, class V2>
+struct has_optimized_gemv: std::integral_constant<bool,
+	allowed_cblas_type<typename M::value_type>::type::value
+	&& std::is_same<typename M::value_type, typename V1::value_type>::value
+	&& std::is_same<typename V1::value_type, typename V2::value_type>::value
+	&& std::is_base_of<dense_tag, typename M::storage_type::storage_tag>::value
+	&& std::is_base_of<dense_tag, typename V1::storage_type::storage_tag>::value 
+	&& std::is_base_of<dense_tag, typename V2::storage_type::storage_tag>::value 
 >{};
 
 }}

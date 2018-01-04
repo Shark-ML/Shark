@@ -39,6 +39,7 @@
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/INameable.h>
 #include <shark/Core/State.h>
+#include <shark/Core/Shape.h>
 #include <shark/Core/Random.h>
 #include<shark/Data/Dataset.h>
 
@@ -73,16 +74,21 @@ namespace shark {
 /// This is no restriction, since typical error measures need the mapping itself and not only the derivative.
 ///
 /// \par
-/// Models have names and can be serialised
-template<class InputTypeT, class OutputTypeT>
-class AbstractModel : public IParameterizable, public INameable, public ISerializable
+/// Models have names and can be serialised and have parameters. The type of the parameter vector
+/// can be set as third argument. By default, this is RealVector.
+template<class InputTypeT, class OutputTypeT, class ParameterType=RealVector>
+class AbstractModel : public IParameterizable<ParameterType>, public INameable, public ISerializable
 {
 public:
 	/// \brief Defines the input type of the model.
 	typedef InputTypeT InputType;
 	/// \brief Defines the output type of the model.
 	typedef OutputTypeT OutputType;
+	/// \brief Defines the output type of the model compatible with standard functors
 	typedef OutputType result_type;
+
+	///\brief Defines the BaseType used by the model (this type). Useful for creating derived models
+	typedef AbstractModel<InputTypeT,OutputTypeT,ParameterType> ModelBaseType;
 
 	/// \brief defines the batch type of the input type.
 	///
@@ -98,10 +104,7 @@ public:
 
 	enum Feature {
 		HAS_FIRST_PARAMETER_DERIVATIVE  = 1,
-		HAS_SECOND_PARAMETER_DERIVATIVE = 2,
 		HAS_FIRST_INPUT_DERIVATIVE      = 4,
-		HAS_SECOND_INPUT_DERIVATIVE     = 8,
-		IS_SEQUENTIAL = 16
 	};
 	SHARK_FEATURE_INTERFACE;
 
@@ -109,21 +112,15 @@ public:
 	bool hasFirstParameterDerivative()const{
 		return m_features & HAS_FIRST_PARAMETER_DERIVATIVE;
 	}
-	/// \brief Returns true when the second parameter derivative is implemented.
-	bool hasSecondParameterDerivative()const{
-		return m_features & HAS_SECOND_PARAMETER_DERIVATIVE;
-	}
 	/// \brief Returns true when the first input derivative is implemented.
 	bool hasFirstInputDerivative()const{
 		return m_features & HAS_FIRST_INPUT_DERIVATIVE;
 	}
-	/// \brief Returns true when the second parameter derivative is implemented.
-	bool hasSecondInputDerivative()const{
-		return m_features & HAS_SECOND_INPUT_DERIVATIVE;
-	}
-	bool isSequential()const{
-		return m_features & IS_SEQUENTIAL;
-	}
+	
+	///\brief Returns the expected shape of the input.
+	virtual Shape inputShape() const = 0;
+	///\brief Returns the shape of the output.
+	virtual Shape outputShape() const = 0;
 	
 	///\brief Creates an internal state of the model.
 	///
@@ -134,9 +131,7 @@ public:
 	virtual boost::shared_ptr<State> createState() const
 	{
 		if (hasFirstParameterDerivative()
-		|| hasFirstInputDerivative()
-		|| hasSecondParameterDerivative()
-		|| hasSecondInputDerivative())
+		|| hasFirstInputDerivative())
 		{
 			throw SHARKEXCEPTION("[AbstractModel::createState] createState must be overridden by models with derivatives");
 		}
@@ -148,7 +143,7 @@ public:
 		m_features.read(archive);
 		RealVector p;
 		archive & p;
-		setParameterVector(p);
+		this->setParameterVector(p);
 	}
 
 	/// \brief writes a model to an archive
@@ -156,7 +151,7 @@ public:
 	/// the default implementation just saves the parameters, not the structure!
 	virtual void write( OutArchive & archive ) const{
 		m_features.write(archive);
-		RealVector p = parameterVector();
+		RealVector p = this->parameterVector();
 		archive & p;
 	}
 
@@ -193,12 +188,7 @@ public:
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
 	Data<OutputType> operator()(Data<InputType> const& patterns)const{
-		int batches = (int) patterns.numberOfBatches();
-		Data<OutputType> result(batches);
-		SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
-			result.batch(i)= (*this)(patterns.batch(i));
-		return result;
-		//return transform(patterns,*this);//todo this leads to compiler errors.
+		return transform(patterns,*this);
 	}
 
 	/// \brief Model evaluation as an operator for a single pattern. This is a convenience function
@@ -229,30 +219,12 @@ public:
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
 	virtual void weightedParameterDerivative(
 		BatchInputType const & pattern,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& derivative
 	)const{
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_PARAMETER_DERIVATIVE);
-	}
-
-	/// \brief calculates the weighted sum of derivatives w.r.t the parameters
-	///
-	/// \param  pattern       the patterns to evaluate
-	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
-	/// \param  errorHessian  the second derivative of the error function for every pattern
-	/// \param  state intermediate results stored by eval to speed up calculations of the derivatives
-	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
-	/// \param  hessian       the calculated hessian as sum over all derivates of all patterns
-	virtual void weightedParameterDerivative(
-		BatchInputType const & pattern,
-		BatchOutputType const & coefficients,
-		Batch<RealMatrix>::type const & errorHessian,//maybe a batch of matrices is bad?,
-		State const& state,
-		RealVector& derivative,
-		RealMatrix& hessian
-	)const{
-		SHARK_FEATURE_EXCEPTION(HAS_SECOND_PARAMETER_DERIVATIVE);
 	}
 
 	///\brief calculates the weighted sum of derivatives w.r.t the inputs
@@ -263,6 +235,7 @@ public:
 	/// \param  derivative    the calculated derivative for every pattern
 	virtual void weightedInputDerivative(
 		BatchInputType const & pattern,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		BatchInputType& derivative
@@ -270,24 +243,6 @@ public:
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_INPUT_DERIVATIVE);
 	}
 
-	///\brief calculates the weighted sum of derivatives w.r.t the inputs
-	///
-	/// \param pattern       the pattern to evaluate
-	/// \param coefficients  the coefficients which are used to calculate the weighted sum
-	/// \param  errorHessian  the second derivative of the error function for every pattern
-	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
-	/// \param derivative      the calculated derivative for every pattern
-	/// \param hessian       the calculated hessian for every pattern
-	virtual void weightedInputDerivative(
-		BatchInputType const & pattern,
-		BatchOutputType const & coefficients,
-		typename Batch<RealMatrix>::type const & errorHessian,
-		State const& state,
-		RealMatrix& derivative,
-		Batch<RealMatrix>::type& hessian
-	)const{
-		SHARK_FEATURE_EXCEPTION(HAS_SECOND_INPUT_DERIVATIVE);
-	}
 	///\brief calculates weighted input and parameter derivative at the same time
 	///
 	/// Sometimes, both derivatives are needed at the same time. But sometimes, when calculating the
@@ -301,13 +256,14 @@ public:
 	/// \param inputDerivative    the calculated derivative for every pattern
 	virtual void weightedDerivatives(
 		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
 		RealVector& parameterDerivative,
 		BatchInputType& inputDerivative
 	)const{
-		weightedParameterDerivative(patterns,coefficients,state,parameterDerivative);
-		weightedInputDerivative(patterns,coefficients,state,inputDerivative);
+		weightedParameterDerivative(patterns, outputs, coefficients,state,parameterDerivative);
+		weightedInputDerivative(patterns, outputs, coefficients,state,inputDerivative);
 	}
 };
 
@@ -343,6 +299,15 @@ void initRandomUniform(AbstractModel<InputType, OutputType>& model, double lower
 }
 
 /** @}*/
+
+namespace detail{
+//Required for correct shape infering of transform
+template<class I, class O, class V>
+struct InferShape<AbstractModel<I,O,V> >{
+	static Shape infer(AbstractModel<I,O,V> const& f){return f.outputShape();}
+};
+
+}
 
 }
 

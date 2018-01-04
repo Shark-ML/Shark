@@ -36,7 +36,7 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Core/IParameterizable.h>
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 
 namespace shark {
@@ -55,7 +55,7 @@ namespace shark {
 //! \f$ m_c\f$ are the means of class c, \f$ C \f$ is the covariance matrix formed by all data points.
 //! The regularization paramter \f$ \alpha \f$ is by default 0. The trainer is implemented such, that
 //! it still works when C is singular, in this case the singular directions are ignored. 	
-class LDA : public AbstractWeightedTrainer<LinearClassifier<>, unsigned int>, public IParameterizable
+class LDA : public AbstractWeightedTrainer<LinearClassifier<>, unsigned int>, public IParameterizable<>
 {
 public:
 	/// constructor

@@ -32,231 +32,143 @@
 #define REMORA_KERNELS_DEFAULT_Conv2D_HPP
 
 #include "simd.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
+#include "../gemm.hpp"
 #include <type_traits> //for std::common_type and aligned storage
 namespace remora{namespace bindings {
+	
 
-template <typename T>
-struct conv2d_block_size {
-	typedef detail::block<T> block;
-	static const unsigned col_block_size = 3; //number of neighbouring columbs to be computed in a mini block
-	static const unsigned num_filter_outputs = 2 * block::max_vector_elements; //number of filters to be computed in a block. must be multiple of vector_length
-	static const unsigned output_block_size = (200/col_block_size) * col_block_size; // maximum size of the tile of an output. Bigger is not always better.
-};
-
-
-// convolution micro kernel
-// computes the convolution of single channel image with a set of filters
-// the following is assumed:
-// image is an image with a single channel of size image_size1 * image_size2 stored in row-major format
-// filter is an image of size filter_size1x filter_size2 where every pixel consists of block_size::num_filter_outputs
-// values standing for the outputs of the filter. those valeus are stored interleaved.
-// output has enough size to store the result of the convolution in the same interleaved format as the
-// the filter
-// note that it must hold (image_size2 - filter_size2 +1)/ block_size::col_block_size == 0
-// and all arrays must be aligned to block_size::align boundary.
-//
-// see conv2d_block_size for the tuning parameters.
-template<class T, class block_size>
-void uConv2d(T const* image, T const* filter, T* output,
-	std::size_t image_size1, std::size_t image_size2,
-	std::size_t filter_size1, std::size_t filter_size2,
-	block_size
+/// \brief Transforms the given image into a row-major format for convolution 
+///
+/// The resulting matrix has one row for each output of the convolution.
+/// each row contains the patch used for computing the result.	
+template<class E1, class E2>
+void im2mat(
+	vector_expression<E1, cpu_tag> const& image,
+	matrix_expression<E2, cpu_tag>& output,
+	std::size_t num_channels,
+	std::size_t image_height,
+	std::size_t image_width,
+	std::size_t filter_height,
+	std::size_t filter_width
 ){
-	BOOST_ALIGN_ASSUME_ALIGNED(image, block_size::block::align);
-	BOOST_ALIGN_ASSUME_ALIGNED(filter, block_size::block::align);
-	BOOST_ALIGN_ASSUME_ALIGNED(output, block_size::block::align);
-	static std::size_t const col_block_size = block_size::col_block_size;
-	static std::size_t const num_filter_outputs = block_size::num_filter_outputs;
-	typedef typename block_size::block::type vx;
-	static const std::size_t vector_length = block_size::block::vector_elements;
-	static const std::size_t num_filter_vec = num_filter_outputs/vector_length;
+	//the order of loops is chosen such, that only very little changes of rows are performed
+	for(std::size_t c = 0; c != num_channels; ++c){//iterate over the channels
+		for(std::size_t i = 0; i != image_height - filter_height +1; ++i){// iterate over row-positions in the image
+			for(std::size_t i1 = 0; i1 != filter_height; ++i1){//iterate over the the rows of the current filter
+				for(std::size_t j = 0; j != image_width - filter_width +1; ++j){//iterate over the column-position in the image
+					std::size_t row_start = i * (image_width - filter_width +1) +j;
+					std::size_t image_start = c * image_width * image_height + (i+i1) * image_width + j;
+					std::size_t col_start = c * filter_width * filter_height + i1 * filter_width;
+					for(std::size_t j1 = 0; j1 != filter_width; ++j1){
+						output()(row_start, col_start +j1) = image()(image_start + j1);
+					}
+				}
+			}
+		}
+	}
+}
 
-	vx* output_packed = (vx*) output;
-	std::size_t output_size1 = image_size1 - filter_size1 + 1;
-	std::size_t output_size2 = image_size2 - filter_size2 + 1;
-
-	for(std::size_t i = 0; i != output_size1; ++i){
-		for(std::size_t j = 0; j != output_size2; j += col_block_size){//we hand unroll this loop, thus output_size2 must be divisable by col_block_size
-			//create local accumulator register
-#ifdef REMORA_USE_SIMD
-			vx acc[num_filter_vec * col_block_size] = {};
-#else
-			typename std::aligned_storage<sizeof(vx[num_filter_outputs * col_block_size]),block_size::block::align>::type Pa;
-			T* acc = reinterpret_cast<T*>(&Pa);
-			for (std::size_t l = 0; l < num_filter_vec * col_block_size; l++)
-				acc[l] = 0;
-#endif
-			//perform the convolution with result (i,j)
-			vx const* filter_packed = (vx const*) filter;
-			for(std::size_t i0 = 0; i0 != filter_size1; ++i0){
-				T const* imageP = image + (i+i0) * image_size2 + j;
-				for(std::size_t j0 = 0; j0 != filter_size2; ++j0){
-					for(std::size_t j1 = 0; j1 != col_block_size; ++j1){
-						T val = imageP[j0+j1];
-						for(std::size_t k0 = 0; k0 < num_filter_vec; ++k0){
-							acc[ j1 * num_filter_vec + k0] += val * filter_packed[k0];
+template<class E1, class E2>
+void im2mat_pad(
+	vector_expression<E1, cpu_tag> const& image,
+	matrix_expression<E2, cpu_tag>& output,
+	std::size_t num_channels,
+	std::size_t image_height,
+	std::size_t image_width,
+	std::size_t filter_height,
+	std::size_t filter_width,
+	std::size_t padding_height,
+	std::size_t padding_width
+){
+	std::size_t image_start1 = padding_height/2;
+	std::size_t image_end1 =  image_height + image_start1;
+	std::size_t image_start2 = padding_width/2;
+	std::size_t image_end2 =  image_width + image_start2;
+	std::size_t output_width = image_width - filter_width + 1 + padding_width;
+	std::size_t output_height = image_height - filter_height + 1 + padding_height;
+	//the order of loops is chosen such, that only very little changes of rows are performed
+	for(std::size_t c = 0; c != num_channels; ++c){//iterate over the channels
+		for(std::size_t i = 0; i != output_height; ++i){// iterate over row-positions in the output
+			for(std::size_t i1 =  0; i1 != filter_height; ++i1){//iterate over the the rows of the current filter
+				if(i1+i < image_start1 || i1+i >= image_end1){//special case: we are on the border above or below
+					for(std::size_t j = 0; j != output_width; ++j){//iterate over the column-position in the output
+						std::size_t row_start = i * output_width +j;
+						std::size_t col_start = c * filter_width * filter_height + i1 * filter_width;
+						for(std::size_t j1 = 0; j1 != filter_width; ++j1){
+							output()(row_start, col_start +j1) = 0;
 						}
 					}
-					filter_packed += num_filter_vec;
+					continue;//no need to got on, we are done
 				}
-			}
-			//add result to packed storage
-			for(std::size_t j1 = 0; j1 != col_block_size; ++j1){
-				for (std::size_t k0 = 0; k0 < num_filter_vec; ++k0){
-					*output_packed += acc[ j1 * num_filter_vec + k0];
-					++output_packed;
-
+				for(std::size_t j = 0; j != output_width; ++j){//iterate over the column-position in the output
+					std::size_t row_start = i * output_width +j;
+					std::size_t image_start = c * image_width * image_height + (i+i1 - image_start1) * image_width + j-image_start2;
+					std::size_t col_start = c * filter_width * filter_height + i1 * filter_width;
+					for(std::size_t j1 = 0; j1 != filter_width; ++j1){
+						if(j+j1 < image_start2 || j+j1 >= image_end2)
+							output()(row_start, col_start + j1) = 0;
+						else
+							output()(row_start, col_start + j1) = image()(image_start + j1);
+					}
 				}
 			}
 		}
 	}
 }
 
-//takes a filter and transforms it into block-interleaved format as described above
-template<class T, class E, class block_size>
-void pack_filter(
-	T* p, matrix_expression<E, cpu_tag> const& filter_im, std::size_t num_channels, std::size_t num_filters,
-	block_size
-){
-	static std::size_t const num_filter_outputs = block_size::num_filter_outputs;
-	std::size_t size1 = filter_im().size1()/num_channels/num_filters;
-	std::size_t size2 = filter_im().size2();
-
-	std::size_t filter_blocks = (num_filters + num_filter_outputs - 1)/num_filter_outputs;
-	std::size_t filter_packed_stride2 = num_filter_outputs;
-	std::size_t filter_packed_stride1 = size2 * filter_packed_stride2;
-
-	for( std::size_t filter_block = 0; filter_block != filter_blocks; ++filter_block){
-		for(std::size_t channel = 0; channel != num_channels; ++channel){
-			for(std::size_t f = 0; f != num_filter_outputs; ++f){
-				std::size_t filter = filter_block * num_filter_outputs + f;
-				//obtain proxy to the target memory which is used to store this channel
-				dense_matrix_adaptor<T> filter_packed_channel(p + f,size1,size2, filter_packed_stride1, filter_packed_stride2);
-				if(filter >= num_filters){//check if the filter is padding and pad with 0
-					filter_packed_channel.clear();
-				}else{
-					//obtain proxy to current image channel and assign it(handles case of E being column major)
-					std::size_t filter_channel_start = (filter * num_channels + channel) * size1;
-					matrix_range<typename const_expression<E>::type > filter_channel(filter_im(),filter_channel_start,filter_channel_start+size1, 0,size2);
-					noalias(filter_packed_channel) = filter_channel;
-				}
-			}
-			p += num_filter_outputs * size1 * size2;//move memory to next channel block
-		}
-	}
-}
-
-//takes a tile of the image and copies it into a temporary array. if the tile exceeds the image boundaries, those values are undefined.
-template<class T, class E, class block_size>
-void pack_image(
-	T* p, matrix_expression<E, cpu_tag> const& image, std::size_t num_channels,
-	std::size_t start1, std::size_t start2,
-	std::size_t size1, std::size_t size2,
-	block_size
-){
-	//the padded region does not matter as pixels affected by it are thrown away
-	std::size_t unpadded_size2 = std::min(size2, image().size2() - start2);
-
-	for(std::size_t channel = 0; channel != num_channels; ++channel){
-		std::size_t image_channel_start1 = channel * image().size1()/num_channels +start1;
-
-		//obtain proxy to the unpadded target memory which is used to store this channel
-		dense_matrix_adaptor<T> image_packed_channel(p, size1, unpadded_size2, size2, 1);
-
-		//obtain proxy to current image channel and assign it(handles case of E being column major)
-		matrix_range<typename const_expression<E>::type > image_channel(image(),image_channel_start1,image_channel_start1 + size1, start2, start2 + unpadded_size2);
-		noalias(image_packed_channel) = image_channel;
-
-		//move pointer to next channel
-		p += size1 * size2;
-	}
-}
 
 template<class E1, class E2, class M>
 void conv2d(
-	matrix_expression<E1, cpu_tag> const& image,
-	matrix_expression<E2, cpu_tag> const& filter,
-	matrix_expression<M, cpu_tag>& output,
+	vector_expression<E1, cpu_tag> const& image,
+	vector_expression<E2, cpu_tag> const& filter,
+	vector_expression<M, cpu_tag>& output,
 	std::size_t num_channels,
-	std::size_t num_filters
+	std::size_t num_filters,
+	std::size_t image_height,
+	std::size_t image_width,
+	std::size_t filter_height,
+	std::size_t filter_width,
+	std::size_t padding_height,
+	std::size_t padding_width
 ){
-	typedef typename std::common_type<typename E1::value_type, typename E2::value_type>::type value_type;
-	typedef conv2d_block_size<value_type> block_size;
-
-	static std::size_t const col_block_size = block_size::col_block_size;
-	static std::size_t const num_filter_outputs = block_size::num_filter_outputs;
-	static std::size_t const output_block_size = block_size::output_block_size;
-
-	std::size_t filter_blocks = (num_filters + num_filter_outputs-1)/num_filter_outputs;
-	std::size_t filter_size1 = filter().size1()/(num_channels * num_filters);
-	std::size_t filter_size2 = filter().size2();
-	std::size_t image_size1 = image().size1()/num_channels;
-	std::size_t image_size2 = image().size2();
-	std::size_t output_size1 = image_size1 +1 - filter_size1;
-	std::size_t output_size2 = image_size2 +1 - filter_size2;
-	std::size_t image_block_size = output_block_size + std::max(filter_size1,filter_size2) - 1;
-	std::size_t size_filter_block = num_filter_outputs * filter_size1 * filter_size2;
-	std::size_t output_blocks1 = (output_size1+output_block_size - 1)/output_block_size;
-	std::size_t output_blocks2 = (output_size2+output_block_size - 1)/output_block_size;
-
-	boost::alignment::aligned_allocator<value_type,block_size::block::align> allocator;
-	value_type* filter_temporary = allocator.allocate(filter_blocks * num_channels * size_filter_block);
-	value_type* image_temporary = allocator.allocate(num_channels * image_block_size * image_block_size);
-	value_type* output_temporary = allocator.allocate(num_filter_outputs * output_block_size * output_block_size);
-
-	//pack filter into temporary memory
-	pack_filter(filter_temporary,filter,num_channels, num_filters, block_size());
-
-	for(std::size_t i = 0; i != output_blocks1; ++i){
-		std::size_t cur_out_size1 = std::min(output_block_size, output_size1 - i * output_block_size);
-		std::size_t cur_image_size1 = cur_out_size1 + filter_size1 -1;//extend image area to fit the patch
-		std::size_t block_start1 = i * output_block_size;
-		for(std::size_t j = 0; j != output_blocks2; ++j){
-			std::size_t cur_out_size2 = std::min(output_block_size,output_size2 - j * output_block_size);
-			cur_out_size2 = (cur_out_size2 +col_block_size -1)/col_block_size * col_block_size;//take padding into account
-			std::size_t cur_image_size2 = cur_out_size2 + filter_size2 -1;//extend image area to fit the patch
-			std::size_t block_start2 = j * output_block_size;
-
-			pack_image(
-				image_temporary, image, num_channels,
-				block_start1,block_start2,
-				cur_image_size1, cur_image_size2,
-				block_size()
-			);
-
-			for( std::size_t block = 0; block != filter_blocks; ++block){
-				//clear temporary output memory
-				for(std::size_t l = 0; l != num_filter_outputs * cur_out_size1 * cur_out_size2; ++l){
-					output_temporary[l] = value_type();
-				}
-				for(std::size_t channel = 0; channel != num_channels; ++channel){
-					value_type const* image_block = image_temporary + channel * cur_image_size1 * cur_image_size2;
-					value_type const* filter_block = filter_temporary + (block * num_channels + channel) * size_filter_block;
-					uConv2d(image_block, filter_block, output_temporary,
-						cur_image_size1, cur_image_size2, filter_size1, filter_size2, block_size()
-					);
-				}
-
-				//copy result to output
-				std::size_t unpadded_size2 = std::min(cur_out_size2,output_size2 - block_start2);
-				for(std::size_t f = 0; f != num_filter_outputs; ++f){
-					std::size_t filter_index = block * num_filter_outputs + f;
-					if(filter_index >= num_filters) break; // do not copy padding
-					std::size_t output_start1 = filter_index * output_size1 + block_start1;
-					//obtain proxy to the unpadded target memory which is used to store this channel
-					dense_matrix_adaptor<value_type const> output_packed_channel(output_temporary + f, cur_out_size1, unpadded_size2, cur_out_size2 * num_filter_outputs, num_filter_outputs);
-
-					//obtain proxy to current image channel and assign it(handles case of E being column major)
-					matrix_range<M> output_channel(output(),output_start1,output_start1 + cur_out_size1, block_start2, block_start2 + unpadded_size2);
-					noalias(output_channel) = output_packed_channel;
-				}
-			}
+	typedef typename std::common_type<
+		typename E1::value_type, typename E2::value_type, typename M::value_type
+	>::type value_type;
+	
+	std::size_t output_rows_per_filter = (image_height  - filter_height +1 + padding_height) * (image_width - filter_width +1 + padding_width);
+	
+	std::size_t filter_size = filter_width * filter_height * num_channels;
+	
+	REMORA_SIZE_CHECK(output().size() == num_filters * output_rows_per_filter);
+	REMORA_SIZE_CHECK(image().size() == num_channels * image_width * image_height);
+	REMORA_SIZE_CHECK(filter().size() == num_filters * filter_size);
+	
+	//allocate storage and create temporary matrices
+	boost::alignment::aligned_allocator<value_type,64> allocator;
+	value_type* image_storage = allocator.allocate( output_rows_per_filter * filter_size);
+	value_type* filter_storage = allocator.allocate(num_filters * filter_size);
+	dense_matrix_adaptor<value_type, row_major, cpu_tag> image_transformed(image_storage,output_rows_per_filter, filter_size);
+	dense_matrix_adaptor<value_type, row_major, cpu_tag> filter_transformed(filter_storage, num_filters, filter_size);
+	dense_matrix_adaptor<value_type, row_major, cpu_tag> output_transformed(output(), num_filters, output_rows_per_filter);
+	//copy image to temporary storage
+	if(padding_height == 0 && padding_width == 0){
+		im2mat(image,image_transformed, num_channels, image_height, image_width, filter_height, filter_width);
+	}else{
+		im2mat_pad(image,image_transformed, num_channels, image_height, image_width, filter_height, filter_width, padding_height, padding_width);
+	}
+	//copy filters to temporary storage
+	for(std::size_t f = 0; f != num_filters; ++f){
+		for(std::size_t i = 0; i != filter_size; ++i){
+			filter_transformed(f,i) = filter()(f * filter_size + i);
 		}
 	}
-	allocator.deallocate(filter_temporary, filter_blocks * num_channels * size_filter_block);
-	allocator.deallocate(image_temporary, num_channels * image_block_size * image_block_size);
-	allocator.deallocate(output_temporary, num_filter_outputs * output_size1 * output_size2);
+	
+	//do the computation
+	kernels::gemm(filter_transformed, trans(image_transformed), output_transformed, value_type(1.0));
+	
+	//deallocate storage
+	allocator.deallocate(image_storage,output_rows_per_filter * filter_size);
+	allocator.deallocate(filter_storage, num_filters * filter_size);
 }
 
 }}

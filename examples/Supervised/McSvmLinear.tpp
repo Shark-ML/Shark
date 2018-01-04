@@ -1,6 +1,5 @@
 
 #include <shark/Data/Dataset.h>
-#include <shark/Models/LinearClassifier.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Data/DataDistribution.h>

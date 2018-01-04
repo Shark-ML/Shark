@@ -84,7 +84,7 @@ public:
 		ModelType* model,
 		TrainerType* trainer,
 		LossType* loss,
-		IParameterizable* meta = NULL)
+		IParameterizable<>* meta = NULL)
 	: m_dataset(dataset)
 	, mep_meta(meta)
 	, mep_model(model)
@@ -142,7 +142,7 @@ public:
 	}
 protected:
 	DataView<DatasetType const> m_dataset;
-	IParameterizable* mep_meta;
+	IParameterizable<>* mep_meta;
 	ModelType* mep_model;
 	TrainerType* mep_trainer;
 	LossType* mep_loss;

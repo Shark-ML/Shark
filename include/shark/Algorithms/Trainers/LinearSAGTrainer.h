@@ -41,7 +41,6 @@
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Models/LinearModel.h>
-#include <shark/Models/LinearClassifier.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/Statistics/Distributions/MultiNomialDistribution.h>
 #include <shark/Data/DataView.h>
@@ -88,7 +87,7 @@ namespace detail{
 /// "Minimizing finite sums with the stochastic average gradient."
 /// arXiv preprint arXiv:1309.2388 (2013).
 template <class InputType, class LabelType>
-class LinearSAGTrainer : public detail::LinearSAGTrainerBase<InputType,LabelType>::type, public IParameterizable
+class LinearSAGTrainer : public detail::LinearSAGTrainerBase<InputType,LabelType>::type, public IParameterizable<>
 {
 private:
 	typedef typename detail::LinearSAGTrainerBase<InputType,LabelType>::type Base;
@@ -210,8 +209,8 @@ private:
 		//get stats of the dataset
 		DataView<LabeledData<InputType, LabelType> const> data(dataset.data());
 		std::size_t ell = data.size();
-		std::size_t labelDim = model.outputSize();
-		std::size_t dim = model.inputSize();
+		std::size_t labelDim = model.outputShape().numElements();
+		std::size_t dim = model.inputShape().numElements();
 		
 		//set number of iterations
 		std::size_t iterations = m_maxEpochs * ell;

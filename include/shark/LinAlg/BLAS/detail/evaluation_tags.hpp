@@ -37,12 +37,14 @@ namespace remora{
 	
 // Evaluation type tags:
 // dense_tag -> dense storage scheme an dense interface supported
+// continuous_dense_tag -> dense storage scheme where stride between all elements is 1
 // sparse_tag -> sparse storage scheme and supports sparse interface.
 // packed_tag ->BLAS packed format and supports packed interface
 // unknown_tag -> no known storage scheme, only supports basic interface(probably blockwise evaluation)
 struct unknown_tag{};
 struct sparse_tag:public unknown_tag{};
 struct dense_tag: public unknown_tag{};
+struct continuous_dense_tag: public dense_tag{};
 struct packed_tag: public unknown_tag{};
 	
 struct elementwise_tag{};

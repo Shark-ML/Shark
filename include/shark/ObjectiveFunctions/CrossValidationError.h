@@ -85,7 +85,7 @@ private:
 
 
 	FoldsType m_folds;
-	IParameterizable* mep_meta;
+	IParameterizable<>* mep_meta;
 	ModelType* mep_model;
 	TrainerType* mep_trainer;
 	CostType* mep_cost;
@@ -94,7 +94,7 @@ public:
 
 	CrossValidationError(
 		FoldsType const& dataFolds,
-		IParameterizable* meta,
+		IParameterizable<>* meta,
 		ModelType* model,
 		TrainerType* trainer,
 		CostType* cost)

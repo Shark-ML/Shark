@@ -418,19 +418,11 @@ public:
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, BaseWeightedDataset& subset) const{
-		m_data.indexedSubset(indices,subset.m_data);
-		m_weights.indexedSubset(indices,subset.m_weights);
-	}
-
-	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, BaseWeightedDataset& subset, BaseWeightedDataset& complement)const{
-		IndexSet comp;
-		detail::complement(indices,m_data.numberOfBatches(),comp);
-		m_data.indexedSubset(indices,subset.m_data);
-		m_weights.indexedSubset(indices,subset.m_weights);
-		m_data.indexedSubset(comp,complement.m_data);
-		m_weights.indexedSubset(comp,complement.m_weights);
+	BaseWeightedDataset indexedSubset(IndexSet const& indices) const{
+		BaseWeightedDataset subset;
+		subset.m_data = m_data.indexedSubset(indices);
+		subset.m_weights = m_weights.indexedSubset(indices);
+		return subset;
 	}
 private:
 	DataContainer m_data;               /// point data
@@ -511,7 +503,16 @@ public:
 	UnlabeledData<DataT>& inputs(){
 		return data();
 	}
-
+	
+	///\brief Returns the Shape of the data.
+	Shape const& shape() const{
+		return data().shape();
+	}
+	
+	///\brief Returns the Shape of the data.
+	Shape& shape(){
+		return data().shape();
+	}
 	///\brief Splits the container into two independent parts. The left part remains in the container, the right is stored as return type
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
@@ -642,6 +643,26 @@ public:
 	///\brief Access to the labels as a separate container.
 	Data<LabelType>& labels(){
 		return data().labels();
+	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape const& inputShape() const{
+		return inputs().shape();
+	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape& inputShape(){
+		return inputs().shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape const& labelShape() const{
+		return labels().shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape& labelShape(){
+		return labels().shape();
 	}
 	
 	/// \brief Constructs an WeightedUnlabeledData object for the inputs.
@@ -790,6 +811,8 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
 		bootstrapSet.element(index).weight += 1.0;
 	}
+	bootstrapSet.inputShape() = dataset.inputShape();
+	bootstrapSet.labelShape() = dataset.labelShape();
 	return bootstrapSet;
 }
 
@@ -816,6 +839,7 @@ WeightedUnlabeledData<InputType> bootstrap(
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
 		bootstrapSet.element(index).weight += 1.0;
 	}
+	bootstrapSet.shape() = dataset.shape();
 	return bootstrapSet;
 }
 

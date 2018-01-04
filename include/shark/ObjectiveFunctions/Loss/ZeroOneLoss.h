@@ -91,7 +91,7 @@ public:
 
 	/// constructor
 	///
-    /// \param threshold: in the case dim(predictions) == 1, predictions strictly larger than this parameter are regarded as belonging to the positive class
+	/// \param threshold: in the case dim(predictions) == 1, predictions strictly larger than this parameter are regarded as belonging to the positive class
 	ZeroOneLoss(double threshold = 0.0)
 	{
 		m_threshold = threshold;

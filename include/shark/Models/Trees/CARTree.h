@@ -148,8 +148,11 @@ public:
 	}
 
 	///Return input dimension
-	std::size_t inputSize() const {
+	Shape inputShape() const {
 		return m_inputDimension;
+	}
+	Shape outputShape() const{
+		return Shape();
 	}
 	
 	////////////////////////////////

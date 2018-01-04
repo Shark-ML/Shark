@@ -31,29 +31,6 @@ std::vector<RealVector> estimateDerivative(Model& net,const Point& point,double 
 	}
 	return gradients;
 }
-template<class Model,class Point>
-std::vector<RealMatrix> estimateSecondDerivative(Model& net,const Point& point,double epsilon=1.e-10){
-	std::size_t outputSize = net(point).size();
-
-	RealVector parameters=net.parameterVector();
-	std::vector<RealMatrix> hessians(parameters.size(),RealMatrix(parameters.size(),outputSize));
-	for(size_t parameter=0;parameter!=parameters.size();++parameter){
-		RealVector testPoint1=parameters;
-		testPoint1(parameter)+=epsilon;
-		net.setParameterVector(testPoint1);
-		std::vector<RealVector> grad1 = estimateDerivative(net,point);
-
-		RealVector testPoint2=parameters;
-		testPoint2(parameter)-=epsilon;
-		net.setParameterVector(testPoint2);
-		std::vector<RealVector> grad2 = estimateDerivative(net,point);
-
-		for(size_t param = 0; param != parameters.size(); ++param){
-			row(hessians[parameter],param)=(grad1[param]-grad2[param])/(2*epsilon);
-		}
-	}
-	return hessians;
-}
 //input Derivative for Models
 template<class Model,class Point>
 std::vector<RealVector> estimateInputDerivative(Model& net,const Point& point,double epsilon=1.e-10){
@@ -97,7 +74,7 @@ void testWeightedDerivative(Model& net,const Point& point,const RealVector& coef
 		coeffBatch(0,coeff)=coefficients(coeff);
 
 		RealVector testGradient;
-		net.weightedParameterDerivative(pointBatch,coeffBatch,*state,testGradient);
+		net.weightedParameterDerivative(pointBatch, output, coeffBatch,*state,testGradient);
 		//this makes the result again independent of the coefficient
 		//provided that the computation is correct
 		testGradient/=coefficients(coeff);
@@ -109,53 +86,8 @@ void testWeightedDerivative(Model& net,const Point& point,const RealVector& coef
 			BOOST_CHECK_SMALL(error,epsilon);
 		}
 	}
-//	double error=norm_2(testGradient-resultGradient);
-//	BOOST_CHECK_SMALL(error,epsilon);
 }
 
-template<class Model,class Point>
-void testWeightedSecondDerivative(Model& net,const Point& point,const RealVector& coefficients, const RealMatrix& coeffHessian, double epsilon=1.e-5,double estimationEpsilon = 1.e-10){
-	boost::shared_ptr<State> state = net.createState();
-	typename Model::BatchOutputType output; 
-	net.eval(point,output,*state);
-	//now calculate the nets weighted gradient
-	RealVector testGradient;
-	RealMatrix testHessian;
-	net.weightedParameterDerivative(point,coefficients,coeffHessian,*state,testGradient,testHessian);
-
-	//estimate hessians and derivatives for every output
-	std::vector<RealMatrix> hessians = estimateSecondDerivative(net,point);
-	std::vector<RealVector> derivative = estimateDerivative(net,point, estimationEpsilon);
-
-	//calculate testresult
-	RealMatrix resultHessian(derivative.size(),derivative.size());
-	RealVector resultGradient(derivative.size());
-	//this is the weighted gradient calculated the naiive way
-	for(size_t i=0;i!=derivative.size();++i)
-		resultGradient(i)=inner_prod(derivative[i],coefficients);
-
-	//this is the weighted hessian calculated the naiive way
-	for(size_t wi=0;wi!=derivative.size();++wi){
-		for(size_t wj=0;wj!=derivative.size();++wj){
-			resultHessian(wi,wj) = inner_prod(row(hessians[wi],wj),coefficients);
-			for(size_t output=0;output!=coefficients.size();++output){
-				for(size_t output2=0;output2!=coefficients.size();++output2){
-					resultHessian(wi,wj) += coeffHessian(output,output2)*derivative[wi](output)*derivative[wj](output2);
-				}
-			}
-		}
-	}
-	//test the gradient
-	double error=norm_2(testGradient-resultGradient);
-	BOOST_REQUIRE_SMALL(error,epsilon);
-
-	//test hessian
-	for(size_t wi=0;wi!=derivative.size();++wi){
-		for(size_t wj=0;wj!=derivative.size();++wj){
-			BOOST_CHECK_SMALL(resultHessian(wi,wj)-testHessian(wi,wj),epsilon);
-		}
-	}
-}
 template<class Model,class Point>
 void testWeightedInputDerivative(Model& net,const Point& point,const RealVector& coefficients,double epsilon=1.e-5, double estimationEpsilon=1.e-5){
 	//now calculate the nets weighted gradient
@@ -169,7 +101,7 @@ void testWeightedInputDerivative(Model& net,const Point& point,const RealVector&
 	net.eval(pointBatch,output,*state);
 	
 	RealMatrix testGradient;
-	net.weightedInputDerivative(pointBatch,coeffBatch,*state,testGradient);
+	net.weightedInputDerivative(pointBatch, output, coeffBatch,*state,testGradient);
 
 	//calculate testresult
 	//this is the weighted gradient calculated the naive way
@@ -177,9 +109,9 @@ void testWeightedInputDerivative(Model& net,const Point& point,const RealVector&
 	RealVector resultGradient(derivative.size());
 	for(size_t i=0;i!=derivative.size();++i)
 		resultGradient(i)=inner_prod(derivative[i],coefficients);
-
+	
 	//calculate error between both
-	double error=norm_2(row(testGradient,0)-resultGradient);
+	double error=norm_inf(row(testGradient,0)-resultGradient);
 	BOOST_CHECK_SMALL(error,epsilon);
 }
 
@@ -191,17 +123,17 @@ template<class Model>
 void testWeightedDerivative(Model& net,unsigned int numberOfTests = 1000, double epsilon=1.e-5,double estimationEpsilon = 1.e-5) {
 	BOOST_CHECK_EQUAL(net.hasFirstParameterDerivative(),true);
 	RealVector parameters(net.numberOfParameters());
-	RealVector coefficients(net.outputSize());
-	RealVector point(net.inputSize());
+	RealVector coefficients(net.outputShape().numElements());
+	RealVector point(net.inputShape().numElements());
 	for(unsigned int test = 0; test != numberOfTests; ++test){
 		for(size_t i = 0; i != net.numberOfParameters();++i){
-			parameters(i) = random::uni(random::globalRng,-5,5);
+			parameters(i) = random::uni(random::globalRng,-1.0,1.0);
 		}
-		for(size_t i = 0; i != net.outputSize();++i){
-			coefficients(i) = random::uni(random::globalRng,-5,5);
+		for(size_t i = 0; i != coefficients.size();++i){
+			coefficients(i) = random::uni(random::globalRng,-1.0,1.0);
 		}
-		for(size_t i = 0; i != net.inputSize();++i){
-			point(i) = random::uni(random::globalRng,-5,5);
+		for(size_t i = 0; i != point.size();++i){
+			point(i) = random::uni(random::globalRng,-1.0,1.0);
 		}
 
 		net.setParameterVector(parameters);
@@ -216,17 +148,17 @@ template<class Model>
 void testWeightedInputDerivative(Model& net,unsigned int numberOfTests = 1000, double epsilon=1.e-5,double estimationEpsilon = 1.e-5) {
 	BOOST_CHECK_EQUAL(net.hasFirstInputDerivative(),true);
 	RealVector parameters(net.numberOfParameters());
-	RealVector coefficients(net.outputSize());
-	RealVector point(net.inputSize());
+	RealVector coefficients(net.outputShape().numElements());
+	RealVector point(net.inputShape().numElements());
 	for(unsigned int test = 0; test != numberOfTests; ++test){
 		for(size_t i = 0; i != net.numberOfParameters();++i){
-			parameters(i) = random::uni(random::globalRng,-10,10);
+			parameters(i) = 1.0/net.numberOfParameters();//random::uni(random::globalRng,-1.0/net.numberOfParameters(),1.0/net.numberOfParameters());
 		}
-		for(size_t i = 0; i != net.outputSize();++i){
-			coefficients(i) = random::uni(random::globalRng,-10,10);
+		for(size_t i = 0; i != coefficients.size();++i){
+			coefficients(i) = random::uni(random::globalRng,-1.0,1.0);
 		}
-		for(size_t i = 0; i != net.inputSize();++i){
-			point(i) = random::uni(random::globalRng,-10,10);
+		for(size_t i = 0; i != point.size();++i){
+			point(i) = random::uni(random::globalRng,-1.0,1.0);
 		}
 
 		net.setParameterVector(parameters);
@@ -240,18 +172,18 @@ template<class Model>
 void testWeightedDerivativesSame(Model& net,unsigned int numberOfTests = 100, double epsilon = 1.e-10){
 	BOOST_CHECK_EQUAL(net.hasFirstInputDerivative(),true);
 	RealVector parameters(net.numberOfParameters());
-	RealMatrix coeffBatch(10,net.outputSize());
-	RealMatrix pointBatch(10,net.inputSize());
+	RealMatrix coeffBatch(10,net.outputShape().numElements());
+	RealMatrix pointBatch(10,net.inputShape().numElements());
 	for(unsigned int test = 0; test != numberOfTests; ++test){
 		for(size_t i = 0; i != net.numberOfParameters();++i){
-			parameters(i) = random::uni(random::globalRng,-10,10);
+			parameters(i) = random::uni(random::globalRng,-1.0/net.numberOfParameters(),1.0/net.numberOfParameters());
 		}
 		for(std::size_t j = 0; j != 10; ++j){
-			for(size_t i = 0; i != net.outputSize();++i){
-				coeffBatch(j,i) = random::uni(random::globalRng,-10,10);
+			for(size_t i = 0; i != coeffBatch.size2();++i){
+				coeffBatch(j,i) = random::uni(random::globalRng,-1.0/coeffBatch.size2(),1.0/coeffBatch.size2());
 			}
-			for(size_t i = 0; i != net.inputSize();++i){
-				pointBatch(j,i) = random::uni(random::globalRng,-10,10);
+			for(size_t i = 0; i != pointBatch.size2();++i){
+				pointBatch(j,i) = random::uni(random::globalRng,-1.0/pointBatch.size2(),1.0/pointBatch.size2());
 			}
 		}
 		net.setParameterVector(parameters);
@@ -262,11 +194,11 @@ void testWeightedDerivativesSame(Model& net,unsigned int numberOfTests = 100, do
 		
 		RealMatrix inputDerivative;
 		RealVector parameterDerivative;
-		net.weightedInputDerivative(pointBatch,coeffBatch,*state,inputDerivative);
-		net.weightedParameterDerivative(pointBatch,coeffBatch,*state, parameterDerivative);
+		net.weightedInputDerivative(pointBatch, output, coeffBatch,*state,inputDerivative);
+		net.weightedParameterDerivative(pointBatch, output, coeffBatch,*state, parameterDerivative);
 		RealMatrix testInputDerivative;
 		RealVector testParameterDerivative;
-		net.weightedDerivatives(pointBatch,coeffBatch,*state, testParameterDerivative, testInputDerivative);
+		net.weightedDerivatives(pointBatch, output, coeffBatch,*state, testParameterDerivative, testInputDerivative);
 		double errorInput = max(inputDerivative-testInputDerivative); 
 		double errorParameter = max(parameterDerivative-testParameterDerivative); 
 		

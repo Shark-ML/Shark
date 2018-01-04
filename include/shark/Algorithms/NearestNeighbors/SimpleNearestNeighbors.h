@@ -64,7 +64,9 @@ public:
 	/// The "default" Euclidean metric is realized by providing a pointer to
 	/// an object of type LinearKernel<InputType>.
 	SimpleNearestNeighbors(Dataset const& dataset, Metric const* metric)
-	:m_dataset(dataset), mep_metric(metric){}
+	:m_dataset(dataset), mep_metric(metric){
+		this->m_inputShape=dataset.inputShape();
+	}
 
 	///\brief Return the k nearest neighbors of the query point.
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{

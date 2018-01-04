@@ -80,13 +80,11 @@ public:
 
 	DatasetType training(std::size_t i) const {
 		SIZE_CHECK(i < size());
-
-		return indexedSubset(m_dataset, trainingFoldIndices(i));
+		return m_dataset.indexedSubset(trainingFoldIndices(i));
 	}
 	DatasetType validation(std::size_t i) const {
 		SIZE_CHECK(i < size());
-
-		return indexedSubset(m_dataset,validationFoldIndices(i));
+		return m_dataset.indexedSubset(validationFoldIndices(i));
 	}
 
 	///\brief returns the indices that make up the i-th validation fold
@@ -106,21 +104,6 @@ public:
 	std::size_t size()const {
 		return m_validationFolds.size();
 	}
-
-	//~ /// \brief Returns the overall number of elements in the partitioned dataset
-	//~ std::size_t numberOfElements() const {
-		//~ return m_foldElementStart[size()];
-	//~ }
-	//~ /// \brief Returns the overall number of elements in the i-th training fold
-	//~ std::size_t numberOfTrainingElements(std::size_t i) const {
-		//~ SIZE_CHECK(i < size());
-		//~ return m_datasetSize-m_validationFoldSizes[i];
-	//~ }
-	//~ /// \brief Returns the overall number of elements in the i-th valdiation fold
-	//~ std::size_t numberOfValidationElements(std::size_t i) const {
-		//~ SIZE_CHECK(i < size());
-		//~ return m_validationFoldSizes[i];
-	//~ }
 
 	/// \brief Returns the dataset underying the folds
 	DatasetType const& dataset()const{

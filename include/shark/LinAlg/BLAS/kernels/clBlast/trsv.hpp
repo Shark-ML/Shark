@@ -48,7 +48,7 @@ void trsv(
 	
 	static_assert(std::is_same<typename MatA::value_type, typename VecB::value_type>::value, "[trsv] Arguments do not have same element type");
 	static_assert(std::is_same<typename MatA::evaluation_category::tag, dense_tag>::value, "[trsv] A is not dense");
-	static_assert(std::is_same<typename VecB::storage_type::storage_tag, dense_tag>::value, "[trsv] b does not have dense storage layout");
+	static_assert(std::is_base_of<dense_tag, typename VecB::storage_type::storage_tag>::value, "[trsv] b does not have dense storage layout");
 	
 	//pre-evaluate A into a temporary if necessary
 	auto const& Aeval = eval_expression(A);

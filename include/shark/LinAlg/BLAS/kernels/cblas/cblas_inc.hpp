@@ -89,6 +89,28 @@ template<> struct storage_order<column_major> {
 	enum ename { value = CblasColMajor };
 };
 
+template<class T>
+struct allowed_cblas_type{
+	typedef std::false_type type;
+};
+
+template<>
+struct allowed_cblas_type<float>{
+	typedef std::true_type type;
+};
+template<>
+struct allowed_cblas_type<double>{
+	typedef std::true_type type;
+};
+template<>
+struct allowed_cblas_type<std::complex<float> >{
+	typedef std::true_type type;
+};
+template<>
+struct allowed_cblas_type<std::complex<double> >{
+	typedef std::true_type type;
+};
+
 }}
 
 #ifndef OPENBLAS_CONST

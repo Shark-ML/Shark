@@ -6,7 +6,7 @@
  *
  *
  * \author      T. Glasmachers, O. Krause
- * \date        2010-2011
+ * \date        2010-2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -33,15 +33,19 @@
 #define SHARK_MODELS_LINEARMODEL_H
 
 #include <shark/Models/AbstractModel.h>
+#include <shark/Models/NeuronLayers.h>
+#include <shark/Models/Classifier.h>
 namespace shark {
 
 
 ///
-/// \brief Linear Prediction
+/// \brief Linear Prediction with optional activation function
 ///
 /// \par
-/// A linear model makes predictions according to
-/// \f$ y = f(x) = A x + b \f$. There are two important special cases:
+/// This model computes the result of
+/// \f$ y = f(x) = g(A x + b) \f$, where g is an arbitrary activation function.
+/// By default g is the identity and the model is a simple linear model. 
+/// Otherwise, this is known as a generalized linear model. There are two important special cases:
 /// The output may be a single number, and the offset term b may be
 /// dropped.
 ///
@@ -49,61 +53,60 @@ namespace shark {
 /// the weight matrix and the ouputs are dense. There are some cases where this is not
 /// good behavior. Check for example Normalizer for a class which is designed for sparse
 /// inputs and outputs.
-template <class InputType = RealVector>
-class LinearModel : public AbstractModel<InputType,RealVector>
-{
+template <class InputType = RealVector, class ActivationFunction = LinearNeuron>
+class LinearModel : public AbstractModel<
+	InputType,
+	blas::vector<typename InputType::value_type, typename InputType::device_type>,//type of output uses same device and precision as input
+	blas::vector<typename InputType::value_type, typename InputType::device_type>//type of parameters uses same device and precision as input
+>{
 private:
-	typedef AbstractModel<InputType,RealVector> base_type;
-	typedef LinearModel<InputType> self_type;
-	/// Wrapper for the type erasure
-	RealMatrix m_matrix;
-	RealVector m_offset;
+	typedef blas::vector<typename InputType::value_type, typename InputType::device_type> VectorType;
+	typedef blas::matrix<typename InputType::value_type, blas::row_major, typename InputType::device_type> MatrixType;
+	typedef AbstractModel<InputType,VectorType, VectorType> base_type;
+	typedef LinearModel<InputType, ActivationFunction> self_type;
+	Shape m_inputShape;
+	Shape m_outputShape;
+	MatrixType m_matrix;
+	VectorType m_offset;
+	ActivationFunction m_activation;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
-	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::BatchOutputType BatchOutputType;//same as MatrixType
+	typedef typename base_type::ParameterVectorType ParameterVectorType;//same as VectorType
 
 	/// CDefault Constructor; use setStructure later
 	LinearModel(){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		if(std::is_same<typename InputType::storage_type::storage_tag, blas::dense_tag>::value){
-			base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		}
 	}
-	/// Constructor creating a model with given dimnsionalities and optional offset term.
-	LinearModel(std::size_t inputs, std::size_t outputs = 1, bool offset = false)
-	: m_matrix(outputs,inputs,0.0),m_offset(offset?outputs:0,0.0){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-	}
-	///copy constructor
-	LinearModel(LinearModel const& model)
-	:m_matrix(model.m_matrix),m_offset(model.m_offset){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+	/// Constructor creating a model with given dimensionalities and optional offset term.
+	LinearModel(Shape const& inputs, Shape const& outputs = 1, bool offset = false)
+	: m_inputShape(inputs)
+	, m_outputShape(outputs)
+	, m_matrix(outputs.numElements(),inputs.numElements(),0.0)
+	, m_offset(offset?outputs.numElements():0,0.0){
+		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		}
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "LinearModel"; }
 
-	///swap
-	friend void swap(LinearModel& model1,LinearModel& model2){
-		swap(model1.m_matrix,model2.m_matrix);
-		swap(model1.m_offset,model2.m_offset);
-	}
-
-	///operator =
-	LinearModel& operator=(LinearModel const& model){
-		self_type tempModel(model);
-		swap(*this,tempModel);
-		return *this;
-	}
-
 	/// Construction from matrix (and vector)
-	LinearModel(RealMatrix const& matrix, RealVector const& offset = RealVector())
-	:m_matrix(matrix),m_offset(offset){
-		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+	LinearModel(MatrixType const& matrix, VectorType const& offset = VectorType())
+	: m_inputShape(matrix.size2())
+	, m_outputShape(matrix.size1())
+	, m_matrix(matrix)
+	, m_offset(offset){
+		this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		if(std::is_base_of<blas::dense_tag, typename InputType::storage_type::storage_tag>::value){
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		}
 	}
 
 	/// check for the presence of an offset term
@@ -111,25 +114,26 @@ public:
 		return m_offset.size() != 0;
 	}
 
-	/// obtain the input dimension
-	size_t inputSize() const{
-		return m_matrix.size2();
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_inputShape;
 	}
-
-	/// obtain the output dimension
-	size_t outputSize() const{
-		return m_matrix.size1();
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_outputShape;
 	}
 
 	/// obtain the parameter vector
-	RealVector parameterVector() const{
+	ParameterVectorType parameterVector() const{
 		return to_vector(m_matrix) | m_offset;
 	}
 
 	/// overwrite the parameter vector
-	void setParameterVector(RealVector const& newParameters){
-		noalias(to_vector(m_matrix)) = subrange(newParameters,0,inputSize() * outputSize());
-		noalias(m_offset) = subrange(newParameters,inputSize() * outputSize(),newParameters.size());
+	void setParameterVector(ParameterVectorType const& newParameters){
+		std::size_t numInputs = inputShape().numElements();
+		std::size_t numOutputs = outputShape().numElements();
+		noalias(to_vector(m_matrix)) = subrange(newParameters, 0, numInputs * numOutputs);
+		noalias(m_offset) = subrange(newParameters, numInputs * numOutputs, newParameters.size());
 	}
 
 	/// return the number of parameter
@@ -138,36 +142,46 @@ public:
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(std::size_t inputs, std::size_t outputs = 1, bool offset = false){
-		LinearModel<InputType> model(inputs,outputs,offset);
-		swap(*this,model);
+	void setStructure(Shape const& inputs, Shape const& outputs = 1, bool offset = false){
+		LinearModel<InputType, ActivationFunction> model(inputs,outputs,offset);
+		*this = model;
 	}
 
 	/// overwrite structure and parameters
-	void setStructure(RealMatrix const& matrix, RealVector const& offset = RealVector()){
-		m_matrix = matrix;
-		m_offset = offset;
+	void setStructure(MatrixType const& matrix, VectorType const& offset = VectorType()){
+		LinearModel<InputType, ActivationFunction> model(matrix,offset);
+		*this = model;
 	}
 
 	/// return a copy of the matrix in dense format
-	RealMatrix const& matrix() const{
+	MatrixType const& matrix() const{
 		return m_matrix;
 	}
 
-	RealMatrix& matrix(){
+	MatrixType& matrix(){
 		return m_matrix;
 	}
 
 	/// return the offset
-	RealVector const& offset() const{
+	VectorType const& offset() const{
 		return m_offset;
 	}
-	RealVector& offset(){
+	VectorType& offset(){
 		return m_offset;
+	}
+	
+	/// \brief Returns the activation function.
+	ActivationFunction const& activationFunction()const{
+		return m_activation;
+	}
+	
+	/// \brief Returns the activation function.
+	ActivationFunction& activationFunction(){
+		return m_activation;
 	}
 
 	boost::shared_ptr<State> createState()const{
-		return boost::shared_ptr<State>(new EmptyState());
+		return boost::shared_ptr<State>(new typename ActivationFunction::State());
 	}
 
 	using base_type::eval;
@@ -180,68 +194,148 @@ public:
 		if (hasOffset()){
 			noalias(outputs)+=repeat(m_offset,inputs.size1());
 		}
+		m_activation.evalInPlace(outputs);
 	}
 
-	void eval(InputType const& input, RealVector& output)const {
+	void eval(InputType const& input, VectorType& output)const {
 		output.resize(m_matrix.size1());
 		//we multiply with a set of row vectors from the left
 		noalias(output) = m_matrix % input;
 		if (hasOffset()) {
 			noalias(output) += m_offset;
 		}
+		m_activation.evalInPlace(output);
 	}
 	/// Evaluate the model: output = matrix * input + offset
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
-		eval(inputs,outputs);
+		outputs.resize(inputs.size1(),m_matrix.size1());
+		//we multiply with a set of row vectors from the left
+		noalias(outputs) = inputs % trans(m_matrix);
+		if (hasOffset()){
+			noalias(outputs)+=repeat(m_offset,inputs.size1());
+		}
+		m_activation.evalInPlace(outputs, state.toState<typename ActivationFunction::State>());
 	}
 
 	///\brief Calculates the first derivative w.r.t the parameters and summing them up over all patterns of the last computed batch
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, RealMatrix const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns,
+		BatchOutputType const& outputs,
+		BatchOutputType const& coefficients,
+		State const& state,
+		ParameterVectorType& gradient
 	)const{
-		SIZE_CHECK(coefficients.size2()==outputSize());
+		SIZE_CHECK(coefficients.size2()==m_matrix.size1());
 		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
 		gradient.resize(numberOfParameters());
-		std::size_t inputs = inputSize();
-		std::size_t outputs = outputSize();
+		std::size_t numInputs = inputShape().numElements();
+		std::size_t numOutputs = outputShape().numElements();
 		gradient.clear();
+		std::size_t matrixParams = numInputs*numOutputs;
 
-		auto weightGradient = blas::to_matrix(gradient, outputs,inputs);
+		auto weightGradient = blas::to_matrix(subrange(gradient,0,matrixParams), numOutputs,numInputs);
+		
+		BatchOutputType delta = coefficients;
+		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 		//sum_i coefficients(output,i)*pattern(i))
-		noalias(weightGradient) = trans(coefficients) % patterns;
+		noalias(weightGradient) = trans(delta) % patterns;
 
 		if (hasOffset()){
-			std::size_t start = inputs*outputs;
-			noalias(subrange(gradient, start, start + outputs)) = sum_rows(coefficients);
+			noalias(subrange(gradient, matrixParams, matrixParams + numOutputs)) = sum_rows(delta);
 		}
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
 	void weightedInputDerivative(
-		RealMatrix const & patterns,
+		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		BatchInputType& derivative
+		MatrixType& derivative
 	)const{
-		SIZE_CHECK(coefficients.size2() == outputSize());
+		SIZE_CHECK(coefficients.size2() == m_matrix.size1());
 		SIZE_CHECK(coefficients.size1() == patterns.size1());
+		
+		//compute chain rule
+		BatchOutputType delta = coefficients;
+		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
+		
+		derivative.resize(patterns.size1(),patterns.size2());
+		noalias(derivative) = delta % m_matrix;
+	}
+	
+	void weightedDerivatives(
+		BatchInputType const & patterns,
+		BatchOutputType const& outputs,
+		BatchOutputType const & coefficients,
+		State const& state,
+		ParameterVectorType& parameterDerivative,
+		MatrixType& inputDerivative
+	)const{
+		SIZE_CHECK(coefficients.size2()==m_matrix.size1());
+		SIZE_CHECK(coefficients.size1()==patterns.size1());
 
-		derivative.resize(patterns.size1(),inputSize());
-		noalias(derivative) = coefficients % m_matrix;
+		std::size_t numInputs = inputShape().numElements();
+		std::size_t numOutputs = outputShape().numElements();
+		
+		//compute chain rule
+		BatchOutputType delta = coefficients;
+		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
+		
+		//compute input derivative
+		inputDerivative.resize(patterns.size1(),numInputs);
+		noalias(inputDerivative) = delta % m_matrix;
+		
+		//compute parameter derivative
+		parameterDerivative.resize(numberOfParameters());
+		parameterDerivative.clear();
+		std::size_t matrixParams = numInputs*numOutputs;
+		auto weightGradient = blas::to_matrix(subrange(parameterDerivative,0,matrixParams), numOutputs,numInputs);
+		auto offsetGradient = subrange(parameterDerivative,matrixParams,parameterDerivative.size());
+		
+		//sum_i coefficients(output,i)*pattern(i))
+		noalias(weightGradient) = trans(delta) % patterns;
+		if (hasOffset()){
+			noalias(offsetGradient) = sum_rows(delta);
+		}
 	}
 
 	/// From ISerializable
 	void read(InArchive& archive){
 		archive >> m_matrix;
 		archive >> m_offset;
+		archive >> m_inputShape;
+		archive >> m_outputShape;
 	}
 	/// From ISerializable
 	void write(OutArchive& archive) const{
 		archive << m_matrix;
 		archive << m_offset;
+		archive << m_inputShape;
+		archive << m_outputShape;
 	}
 };
 
+/*! \brief Basic linear classifier.
+ *
+ *  The LinearClassifier class is a multi class classifier model
+ *  suited for linear discriminant analysis. For c classes
+ *  \f$ 0, \dots, c-1 \f$  the model computes
+ *   
+ *  \f$ \arg \max_i w_i^T x + b_i \f$
+ *  
+ *  Thus is it a linear model with arg max computation.
+ *  The internal linear model can be queried using decisionFunction().
+ */ 
+template<class VectorType = RealVector>
+class LinearClassifier : public Classifier<LinearModel<VectorType> >
+{
+public:
+	LinearClassifier(){}
+
+	std::string name() const
+	{ return "LinearClassifier"; }
+};
 
 }
 #endif

@@ -54,20 +54,29 @@ namespace remora{namespace kernels{
 /// The caller must ensure that enough memory is stored.	
 template<class E1, class E2, class M>
 void conv2d(
-	matrix_expression<E1, cpu_tag> const& image,
-	matrix_expression<E2, cpu_tag> const& filter,
-	matrix_expression<M, cpu_tag>& output,
+	vector_expression<E1, cpu_tag> const& image,
+	vector_expression<E2, cpu_tag> const& filter,
+	vector_expression<M, cpu_tag>& output,
 	std::size_t num_channels,
-	std::size_t num_filters
+	std::size_t num_filters,
+	std::size_t image_height,
+	std::size_t image_width,
+	std::size_t filter_height,
+	std::size_t filter_width,
+	std::size_t padding_height = 0,
+	std::size_t padding_width = 0
 ){
-	REMORA_SIZE_CHECK(filter().size1() % (num_filters * num_channels)  == 0);
-	REMORA_SIZE_CHECK(image().size1() % num_channels  == 0);
-	REMORA_SIZE_CHECK(output().size1() % num_filters  == 0);
-	REMORA_SIZE_CHECK(output().size1()/num_filters + filter().size1()/(num_filters * num_channels) -1 == image().size1() / num_channels);
-	REMORA_SIZE_CHECK(output().size2() + filter().size2() -1 == image().size2());
+	std::size_t output_rows_per_filter = (image_height  - filter_height +1 + padding_height) * (image_width - filter_width +1 + padding_width);
+	std::size_t filter_size = filter_width * filter_height * num_channels;
+	
+	REMORA_SIZE_CHECK(output().size() == num_filters * output_rows_per_filter);
+	REMORA_SIZE_CHECK(image().size() == num_channels * image_width * image_height);
+	REMORA_SIZE_CHECK(filter().size() == num_filters * filter_size);
 	
 	bindings::conv2d(
-		image, filter, output, num_channels, num_filters
+		image, filter, output, num_channels, num_filters,
+		image_height, image_width, filter_height, filter_width,
+		padding_height, padding_width
 	);
 }
 

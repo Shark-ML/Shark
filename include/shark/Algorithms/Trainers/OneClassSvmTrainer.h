@@ -81,7 +81,7 @@ namespace shark {
 /// <p>Estimating the support of a high-dimensional distribution. B. Sch&ouml;lkopf, J. C. Platt, J. Shawe-Taylor, A. Smola, and R. C. Williamson, 1999.</p>
 ///
 template <class InputType, class CacheType = float>
-class OneClassSvmTrainer : public AbstractUnsupervisedTrainer<KernelExpansion<InputType> >, public QpConfig, public IParameterizable
+class OneClassSvmTrainer : public AbstractUnsupervisedTrainer<KernelExpansion<InputType> >, public QpConfig, public IParameterizable<>
 {
 public:
 

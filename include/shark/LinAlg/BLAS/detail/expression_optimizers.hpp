@@ -207,6 +207,16 @@ struct matrix_transpose_optimizer<outer_product<V1,V2> >{
 	}
 };
 
+//vector repeater behaves as outer product to: (v 1^T)^T = (1 v^T)
+template<class V, class Orientation>
+struct matrix_transpose_optimizer<vector_repeater<V,Orientation> >{
+	typedef vector_repeater<V,typename Orientation::transposed_orientation> type;
+	
+	static type create(vector_repeater<V,Orientation> const& m){
+		return type(m.expression(),m.num_repetitions());
+	}
+};
+
 //(M1 M2)^T = M2^T M1^T
 template<class M1, class M2>
 struct matrix_transpose_optimizer<matrix_matrix_prod<M1,M2> >{
@@ -308,6 +318,36 @@ struct matrix_row_optimizer<matrix_matrix_prod<M1,M2> >{
 	}
 };
 
+//row(v1 v2^T,i)^T = v(i) v2 
+template<class V1, class V2>
+struct matrix_row_optimizer<outer_product<V1,V2> >{
+	typedef vector_scalar_multiply<V2> type;
+	
+	static type create(outer_product<V1,V2> const& m, std::size_t i){
+		return type(m.rhs(),m.lhs()(i));
+	}
+};
+
+
+//row(repeat(v),i) = v if repeat is row_major
+template<class V>
+struct matrix_row_optimizer<vector_repeater<V, row_major> >{
+	typedef typename V::const_closure_type type;
+	
+	static type create(vector_repeater<V, row_major> const& m, std::size_t){
+		return m.expression();
+	}
+};
+//row(repeat(v),i) = v(i) 1^T if repeat is column_major
+template<class V>
+struct matrix_row_optimizer<vector_repeater<V, column_major> >{
+	typedef scalar_vector<typename V::value_type, typename V::device_type> type;
+	
+	static type create(vector_repeater<V, column_major> const& m, std::size_t i){
+		return type(m.num_repetitions(), m.expression()(i));
+	}
+};
+
 
 ////////////////////////////////////
 //// Matrix Range
@@ -394,6 +434,23 @@ struct matrix_range_optimizer<outer_product<V1,V2> >{
 		std::size_t start1, std::size_t end1, std::size_t start2, std::size_t end2
 	){
 		return type( left_opt::create(m.lhs(),start1,end1), right_opt::create(m.rhs(),start2,end2));
+	}
+};
+
+//repeater behaves like outer_product
+template<class V, class Orientation>
+struct matrix_range_optimizer<vector_repeater<V, Orientation> >{
+	typedef vector_range_optimizer<typename const_expression<V>::type > vector_opt;
+	typedef vector_repeater<typename vector_opt::type, Orientation> type;
+	
+	static type create(
+		vector_repeater<V, Orientation> const& m,
+		std::size_t start1, std::size_t end1, std::size_t start2, std::size_t end2
+	){
+		return type( 
+			vector_opt::create(m.expression(),Orientation::index_m(start1,start2),Orientation::index_m(end1,end2)), 
+			Orientation::index_M(end1,end2) - Orientation::index_M(start1,start2)
+		);
 	}
 };
 
@@ -503,6 +560,28 @@ struct matrix_vector_prod_optimizer<outer_product<V1,V2>,V3>{
 		return type(m.lhs(),alpha);
 	}
 };
+
+template<class V1, class V2>
+struct matrix_vector_prod_optimizer<vector_repeater<V1, row_major>, V2 >{
+	typedef scalar_vector<typename common_value_type<V1,V2>::type, typename V1::device_type> type;
+	
+	static type create(vector_repeater<V1, row_major> const& m, typename V2::const_closure_type const& v){
+		auto alpha = inner_prod(m.expression(),v);
+		return type(alpha,m.num_repetitions());
+	}
+};
+
+template<class V1, class V2>
+struct matrix_vector_prod_optimizer<vector_repeater<V1, column_major>, V2 >{
+	typedef vector_scalar_multiply<V1> type;
+	
+	static type create(vector_repeater<V1, row_major> const& m, typename V2::const_closure_type const& v){
+		auto alpha = sum(m.expression(),v);
+		return type(m.expression(),alpha);
+	}
+};
+
+
 
 //(diag(v1) * v2) = v1 .* v2
 template<class V1,class V2>

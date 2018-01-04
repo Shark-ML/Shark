@@ -87,11 +87,11 @@ BOOST_AUTO_TEST_CASE( CMAC_COPY )
 	//create dataset for training
 	std::vector<RealVector> data;
 	std::vector<RealVector> target;
-	RealVector input(cmac.inputSize());
+	RealVector input(cmac.inputShape().numElements());
 
 	for (size_t i=0; i<1000; i++)
 	{
-		for(size_t j=0;j!=cmac.inputSize();++j)
+		for(size_t j=0;j!=input.size();++j)
 		{
 			input(j)=random::uni(random::globalRng,-1,1);
 		}
@@ -155,11 +155,11 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 
 	std::vector<RealVector> data;
 	std::vector<RealVector> target;
-	RealVector input(cmac.inputSize());
+	RealVector input(cmac.inputShape().numElements());
 
 	for (size_t i=0; i<1000; i++)
 	{
-		for(size_t j=0;j!=cmac.inputSize();++j)
+		for(size_t j=0;j!= input.size();++j)
 		{
 			input(j)=random::uni(random::globalRng,-1,1);
 		}
@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 	//test whether serialization works
 	//first simple parameter and topology check
 	BOOST_CHECK_SMALL(norm_2(cmacDeserialized.parameterVector() - testParameters),1.e-50);
-	BOOST_REQUIRE_EQUAL(cmacDeserialized.inputSize(),cmac.inputSize());
-	BOOST_REQUIRE_EQUAL(cmacDeserialized.outputSize(),cmac.outputSize());
+	BOOST_REQUIRE_EQUAL(cmacDeserialized.inputShape(),cmac.inputShape());
+	BOOST_REQUIRE_EQUAL(cmacDeserialized.outputShape(),cmac.outputShape());
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = cmacDeserialized(dataset.element(i).input);

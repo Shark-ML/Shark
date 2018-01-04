@@ -212,42 +212,24 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 		true);
 }
 
-
-/// \brief Stores name and size of image externally
-///
-struct ImageInformation {
-	std::size_t x;
-	std::size_t y;
-	std::string name;
-
-	template<typename Archive>
-	void serialize(Archive & ar, const unsigned int) {
-		ar & x;
-		ar & y;
-		ar & name;
-	}
-};
-
 /// \brief Import PGM images scanning a directory recursively
 ///
-/// \param  p          Directory
-/// \param  container  Container storing images
-/// \param  info       Vector storing image informations
+/// All images are required to have the same size. the shape of the images is stored in set.shape()
+///
+/// \param  p       Directory
+/// \param  set     Set storing images
 template<class T>
-void importPGMDir(const std::string &p, T &container, std::vector<ImageInformation> &info)
-{
-	typedef typename T::value_type InputType;
-
-
+void importPGMSet(std::string const&p, Data<T> &set){
+	std::vector<T> container;
+	std::vector<std::pair<std::size_t,std::size_t> > info;
 	if (boost::filesystem::is_directory(p)) {
 		for (boost::filesystem::recursive_directory_iterator itr(p); itr!=boost::filesystem::recursive_directory_iterator(); ++itr) {
 			if (boost::filesystem::is_regular(itr->status())) {
 				if ((boost::filesystem::extension(itr->path()) == ".PGM") ||
 				    (boost::filesystem::extension(itr->path()) == ".pgm")) {
-					InputType img;
-					ImageInformation imgInfo;
-					importPGM(itr->path().string().c_str(), img, imgInfo.x, imgInfo.y);
-					imgInfo.name = itr->path().filename().string().c_str();
+					T img;
+					std::pair<std::size_t,std::size_t> imgInfo;
+					importPGM(itr->path().string().c_str(), img, imgInfo.first, imgInfo.second);
 					container.push_back(img);
 					info.push_back(imgInfo);
 				}
@@ -256,21 +238,15 @@ void importPGMDir(const std::string &p, T &container, std::vector<ImageInformati
 	} else {
 		throw( std::invalid_argument( "[importPGMDir] cannot open file" ) );
 	}
-}
-
-/// \brief Import PGM images scanning a directory recursively
-///
-/// \param  p       Directory
-/// \param  set     Set storing images
-/// \param  setInfo Vector storing image informations
-template<class T>
-void importPGMSet(const std::string &p, Data<T> &set, Data<ImageInformation> &setInfo)
-{
-	std::vector<T> tmp;
-	std::vector<ImageInformation> tmpInfo;
-	importPGMDir(p, tmp, tmpInfo);
-	set = createDataFromRange(tmp);
-	setInfo = createDataFromRange(tmpInfo);
+	
+	//check all images have same size
+	for(auto const& i: info){
+		if(i.first != info.front().first || i.second != info.front().second){
+			throw SHARKEXCEPTION("[importPGMSet] all images are required to have the same size");
+		}
+	}
+	set = createDataFromRange(container);
+	set.shape() = {info.front().second,info.front().first};
 }
 
 /** @}*/

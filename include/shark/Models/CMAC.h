@@ -63,8 +63,9 @@ protected:
 	std::size_t m_tilings;
 	std::size_t m_parametersPerTiling;
 
+	Shape m_inputShape;
 	std::size_t m_inputSize;
-	std::size_t m_outputSize;
+	Shape m_outputShape;
 
 	///The parameters of the model
 	RealVector m_parameters;
@@ -83,14 +84,14 @@ public:
 
 	///\brief initializes the structure of the cmac. it uses the same lower and upper bound for every input dimension. default is [0,1]
 	///
-	///\param inputs number of input dimensions
-	///\param outputs number of output dimensions
+	///\param inputs Shape of the input dimensions
+	///\param outputs Shape of the input dimensions
 	///\param numberOfTilings number of Tilings to be created
 	///\param numberOfTiles amount of tiles per dimension
 	///\param lower lower bound of input values
 	///\param upper upper bound of input values
 	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
-	SHARK_EXPORT_SYMBOL void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
+	SHARK_EXPORT_SYMBOL void setStructure(Shape const& inputs, Shape const& outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, double lower = 0., double upper = 1.,bool randomTiles = false);
 
 	///\brief initializes the structure of the cmac
 	///
@@ -100,28 +101,25 @@ public:
 	///\param numberOfTiles amount of tiles per dimension
 	///\param bounds lower and upper bounts for every input dimension. every row consists of (lower,upper)
 	///\param randomTiles flag specifying whether distance between tiles is regular or randomized
-	SHARK_EXPORT_SYMBOL void setStructure(std::size_t inputs, std::size_t outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
+	SHARK_EXPORT_SYMBOL void setStructure(Shape const& inputs, Shape const& outputs, std::size_t numberOfTilings, std::size_t numberOfTiles, RealMatrix const& bounds,bool randomTiles = false);
 
-	virtual std::size_t inputSize()const
-	{
-		return m_inputSize;
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_inputShape;
 	}
-	virtual std::size_t outputSize()const
-	{
-		return m_outputSize;
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_outputShape;
 	}
-
-	virtual RealVector parameterVector()const
-	{
+	
+	virtual RealVector parameterVector()const{
 		return m_parameters;
 	}
-	virtual void setParameterVector(RealVector const& newParameters)
-	{
+	virtual void setParameterVector(RealVector const& newParameters){
 		SIZE_CHECK(numberOfParameters() == newParameters.size());
 		m_parameters=newParameters;
 	}
-	virtual std::size_t numberOfParameters()const
-	{
+	virtual std::size_t numberOfParameters()const{
 		return m_parameters.size();
 	}
 
@@ -136,6 +134,7 @@ public:
 	}
 	SHARK_EXPORT_SYMBOL void weightedParameterDerivative(
 		RealMatrix const& pattern, 
+		BatchOutputType const& outputs,
 		RealMatrix const& coefficients,  
 		State const& state,
 		RealVector& gradient)const;

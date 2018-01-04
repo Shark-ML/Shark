@@ -70,7 +70,7 @@ struct Batch< detail::TruncatedExponentialSufficientStatistics<VectorType> >{
 /// Truncated exponential distributions arise, when the state space of the binary neurons is extended to the
 /// real numbers in [0,1]. The conditional distribution of the state of this neurons given the states of the
 /// connecred layer is an exponential distribution restricted to [0,1]. 
-class TruncatedExponentialLayer : public ISerializable, public IParameterizable{
+class TruncatedExponentialLayer : public ISerializable, public IParameterizable<>{
 private:
 	RealVector m_bias;
 public:

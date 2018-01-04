@@ -74,6 +74,13 @@ public:
 	
 	using ClusteringModel<InputT, unsigned int>::eval;
 	
+	Shape inputShape()const{
+		return this->mep_clustering->inputShape();
+	}
+	Shape outputShape()const{
+		return this->mep_clustering->numberOfClusters();
+	}
+	
 	/// \brief Compute best matching cluster.
 	///
 	/// \par

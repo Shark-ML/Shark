@@ -5,11 +5,11 @@
 
 //headers needed for our test problem
 #include <shark/Data/DataDistribution.h>
-#include <shark/Models/FFNet.h>
+#include <shark/Models/LinearModel.h>
+#include <shark/Models/ConcatenatedModel.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <shark/ObjectiveFunctions/Regularizer.h>
-#include <shark/ObjectiveFunctions/CombinedObjectiveFunction.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 
 //we use an artifical learning problem
@@ -28,36 +28,26 @@ using namespace std;
 ///in the problem itself. But here you can also see how to create
 ///regularized error functions. so maybe it's still worth taking a look ;)
 double trainProblem(const RegressionDataset& training, RegressionDataset const& validation, double regularization){
-	//we create a feed forward network with 20 hidden neurons.
-	//this should create a lot of overfitting when not regularized
-	FFNet<LogisticNeuron,LogisticNeuron> network;
-	network.setStructure(1,20,1);
-
-	//initialize with random weights between -5 and 5
-	//todo: find better initialization for cv-error...
-	RealVector startingPoint(network.numberOfParameters());
-	std::generate(startingPoint.begin(),startingPoint.end(),[&](){return random::uni(random::globalRng, -5,5);});
+	LinearModel<RealVector,LogisticNeuron> layer1(1,20);
+	LinearModel<RealVector> layer2(20,1);
+	ConcatenatedModel<RealVector> network = layer1 >> layer2;
+	initRandomUniform(network,-1,1);
 
 	//the error function is a combination of MSE and 2-norm error
 	SquaredLoss<> loss;
 	ErrorFunction error(training,&network,&loss);
 	TwoNormRegularizer regularizer;
-
-	//combine both functions
-	CombinedObjectiveFunction<RealVector, double> regularizedError;
-	regularizedError.add(error);
-	regularizedError.add(regularization,regularizer);
-
+	error.setRegularizer(regularization, &regularizer);
 
 	//now train for a number of iterations using Rprop
 	IRpropPlus optimizer;
-	regularizedError.init();
+	error.init();
 	//initialize with our predefined point, since
 	//the combined function can't propose one.
-	optimizer.init(regularizedError,startingPoint);
+	optimizer.init(error);
 	for(unsigned iter = 0; iter != 5000; ++iter)
 	{
-		optimizer.step(regularizedError);
+		optimizer.step(error);
 	}
 
 	//validate and return the error without regularization
@@ -93,9 +83,9 @@ int main(){
 	//now we want to use the folds to find the best regularization
 	//parameter for our problem. we use a grid search to accomplish this
 //###begin<cvselection>
-	double bestValidationError = 1e5;
+	double bestValidationError = 1e4;
 	double bestRegularization = 0;
-	for (double regularization = 0; regularization < 1.e-4; regularization +=1.e-5) {
+	for (double regularization = 1.e-5; regularization < 1.e-3; regularization *= 2) {
 		double result = 0;
 		for (std::size_t fold = 0; fold != folds.size(); ++fold){ //CV
 			// access the fold

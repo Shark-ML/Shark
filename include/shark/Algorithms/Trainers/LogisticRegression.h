@@ -36,7 +36,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_LOGISTICREGRESSION_H
 #define SHARK_ALGORITHMS_TRAINERS_LOGISTICREGRESSION_H
 
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Algorithms/GradientDescent/LBFGS.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
@@ -61,7 +61,7 @@ namespace shark {
 /// is used. This is one of the most efficient solvers for logistic regression as long as the
 /// number of data points is not too large.
 template <class InputVectorType = RealVector>
-class LogisticRegression : public AbstractWeightedTrainer<LinearClassifier<InputVectorType> >, public IParameterizable
+class LogisticRegression : public AbstractWeightedTrainer<LinearClassifier<InputVectorType> >, public IParameterizable<>
 {
 private:
 	typedef AbstractWeightedTrainer<LinearClassifier<InputVectorType> > base_type;

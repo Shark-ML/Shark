@@ -74,14 +74,14 @@ public:
 		for(std::size_t i = 0; i != labels.size1(); ++i){
 			error+=distanceSqr(row(predictions,i),row(labels,i));
 		}
-		return error;
+		return 0.5 * error;
 	}
 
 	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$
 	/// and its deriative \f$ \frac{\partial}{\partial prediction} 1/2 (label - prediction)^2 = prediction - label \f$.
 	double evalDerivative(BatchLabelType const& label, BatchOutputType const& prediction, BatchOutputType& gradient) const {
 		gradient.resize(prediction.size1(),prediction.size2());
-		noalias(gradient) = 2.0*(prediction - label);
+		noalias(gradient) = (prediction - label);
 		return SquaredLoss::eval(label,prediction);
 	}
 };
@@ -118,18 +118,18 @@ public:
 			SIZE_CHECK(c < predictions.size2());
 			error+=norm_sqr(row(predictions,i))+1.0-2.0*predictions(i,c);
 		}
-		return error;
+		return 0.5 * error;
 	}
 
 	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$
 	/// and its deriative \f$ \frac{\partial}{\partial prediction} 1/2 (label - prediction)^2 = prediction - label \f$.
 	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient) const {
 		gradient.resize(predictions.size1(),predictions.size2());
-		noalias(gradient) = 2.0*predictions;
+		noalias(gradient) = predictions;
 		for(std::size_t i = 0; i != labels.size(); ++i){
 			unsigned int c = labels(i);
 			SIZE_CHECK(c < predictions.size2());
-			gradient(i,c)-=2.0;
+			gradient(i,c)-=1.0;
 		}
 		return SquaredLoss::eval(labels,predictions);
 	}
@@ -173,7 +173,7 @@ public:
 				error += distanceSqr(predictions[i][j],labels[i][j]);
 			}
 		}
-		return error;
+		return 0.5 * error;
 	}
 
 	/// Evaluate the squared loss \f$ (label - prediction)^2 \f$
@@ -190,8 +190,8 @@ public:
 				gradient[i].push_back(RealVector(predictions[i][j].size(),0.0));
 			}
 			for(std::size_t j = m_ignore; j != labels[i].size(); ++j){
-				error += distanceSqr(predictions[i][j],labels[i][j]);
-				gradient[i].push_back(2.0*(predictions[i][j] - labels[i][j]));
+				error += 0.5 * distanceSqr(predictions[i][j],labels[i][j]);
+				gradient[i].push_back(predictions[i][j] - labels[i][j]);
 				
 			}
 		}

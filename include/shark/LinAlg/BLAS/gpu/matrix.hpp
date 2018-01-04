@@ -92,8 +92,8 @@ public:
 
 	typedef matrix_reference<matrix const> const_closure_type;
 	typedef matrix_reference<matrix> closure_type;
-	typedef gpu::dense_matrix_storage<T> storage_type;
-	typedef gpu::dense_matrix_storage<T const> const_storage_type;
+	typedef gpu::dense_matrix_storage<T, continuous_dense_tag> storage_type;
+	typedef gpu::dense_matrix_storage<T const, continuous_dense_tag> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 	typedef L orientation;
 

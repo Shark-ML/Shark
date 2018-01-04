@@ -41,7 +41,7 @@
 #include <shark/Core/INameable.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/ISerializable.h>
-
+#include <shark/Core/Shape.h>
 
 namespace shark {
 
@@ -89,7 +89,7 @@ namespace shark {
 /// SoftClusteringModel.
 ///
 template <class InputT>
-class AbstractClustering : public INameable, public IParameterizable, public ISerializable
+class AbstractClustering : public INameable, public IParameterizable<>, public ISerializable
 {
 public:
 	typedef InputT InputType;
@@ -111,6 +111,8 @@ public:
 
 	/// return the number of clusters
 	virtual std::size_t numberOfClusters() const = 0;
+	
+	virtual Shape inputShape() const = 0;
 
 	/// \brief Compute best matching cluster.
 	///

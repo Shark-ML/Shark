@@ -88,8 +88,7 @@ public:
 	SHARK_EXPORT_SYMBOL std::size_t numberOfParameters() const;
 
 	/// return the dimension of the inputs
-	std::size_t dimension() const
-	{
+	Shape inputShape() const{
 		return dataDimension(m_centroids);
 	}
 

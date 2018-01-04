@@ -131,20 +131,17 @@ public:
 				mep_model->eval(m_data.batch(i),predictions,*state);
 				SIZE_CHECK(predictions.size2() == 1);
 				threadError += sum(log(max(predictions,minProb)));
-				//noalias(predictions) = elem_inv(predictions)
+				RealMatrix coeffs(predictions.size1(),predictions.size2(),0.0);
 				//the below handls numeric instabilities...
 				for(std::size_t j = 0; j != predictions.size1(); ++j){
 					for(std::size_t k = 0; k != predictions.size2(); ++k){
-						if(predictions(j,k) < minProb){
-							predictions(j,k) = 0;
-						}
-						else{
-							predictions(j,k) = 1.0/predictions(j,k);
+						if(predictions(j,k) >= minProb){
+							coeffs(j,k) = 1.0/predictions(j,k);
 						}
 					}
 				}
 				mep_model->weightedParameterDerivative(
-					m_data.batch(i),predictions,*state,batchDerivative
+					m_data.batch(i),predictions, coeffs,*state,batchDerivative
 				);
 				threadDerivative += batchDerivative;
 			}

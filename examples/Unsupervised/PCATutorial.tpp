@@ -58,12 +58,11 @@ int main(){
 	//###begin<import>
 	const char *facedirectory = "Cambridge_FaceDB"; //< set this to the directory containing the face database
 	UnlabeledData<RealVector> images;
-	Data<ImageInformation> imagesInfo;
 	//###end<import>
 	cout << "Read images ... " << flush;
 	try {
 	//###begin<import>
-		importPGMSet(facedirectory, images, imagesInfo);
+		importPGMSet(facedirectory, images);
 	//###end<import>
 	} catch(...) {
 		cerr << "[PCATutorial] could not open face database directory\n\nThis file is part of the \"Principal Component Analysis\" tutorial.\nThe tutorial requires that you download the Cambridge Face Database\nfrom http://www.cl.cam.ac.uk/research/dtg/attarchive/facedatabase.html\nand adjust the facedirectory path in the source code to the directory\ncontaining the faces in PGM format." << endl;
@@ -73,8 +72,8 @@ int main(){
 	
 	//###begin<import>
 	unsigned l = images.numberOfElements();   // number of samples
-	unsigned x = imagesInfo.element(0).x; // width of images
-	unsigned y = imagesInfo.element(0).y; // height of images
+	unsigned x = images.shape()[1]; // width of images
+	unsigned y = images.shape()[0]; // height of images
 	//###end<import>
 	
 	cout << "Eigenvalue decomposition ... " << flush;

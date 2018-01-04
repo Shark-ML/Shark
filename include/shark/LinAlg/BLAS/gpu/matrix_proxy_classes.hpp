@@ -41,7 +41,7 @@ struct induced_matrix_adaptor_element{
 	typedef T result_type;
 	Arg1 arg1;
 	Arg2 arg2;
-	gpu::dense_matrix_storage<T> storage;
+	gpu::dense_matrix_storage<T, dense_tag> storage;
 };
 
 template<class Arg1, class Arg2,class T>
@@ -79,8 +79,8 @@ public:
 
 	typedef matrix_reference<dense_matrix_adaptor> closure_type;
 	typedef matrix_reference<dense_matrix_adaptor const> const_closure_type;
-	typedef gpu::dense_matrix_storage<T> storage_type;
-	typedef gpu::dense_matrix_storage<value_type const> const_storage_type;
+	typedef gpu::dense_matrix_storage<T, dense_tag> storage_type;
+	typedef gpu::dense_matrix_storage<value_type const, dense_tag> const_storage_type;
         typedef Orientation orientation;
 	typedef elementwise<dense_tag> evaluation_category;
 

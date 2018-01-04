@@ -64,7 +64,7 @@ for classification.
 
 
 Conversions of class labels
------------
+---------------------------
 
 Often Models in Shark do not produce the correct output format for
 classification. For example, a neural network for a ``d``-class

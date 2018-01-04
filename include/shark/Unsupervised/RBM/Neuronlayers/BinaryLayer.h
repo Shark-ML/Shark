@@ -44,7 +44,7 @@ namespace shark{
 ///A neuron in a Binary Layer takes values in {0,1} and the conditional probability to be 1 
 ///given the states of the neurons in the connected layer is determined by the sigmoid function
 ///and the input it gets from the connected layer.   
-class BinaryLayer : public ISerializable, public IParameterizable{
+class BinaryLayer : public ISerializable, public IParameterizable<>{
 private:
 	///\brief The bias terms associated with the neurons.
 	RealVector m_bias;

@@ -58,12 +58,12 @@ namespace shark {
 /// the fly, without a need for re-training the existing
 /// binary models.
 ///
-template <class InputType>
-class OneVersusOneClassifier : public AbstractModel<InputType, unsigned int>
+template <class InputType, class VectorType = RealVector>
+class OneVersusOneClassifier : public AbstractModel<InputType, unsigned int, VectorType>
 {
 public:
-	typedef AbstractModel<InputType, unsigned int> base_type;
-	typedef AbstractModel<InputType, unsigned int> binary_classifier_type;
+	typedef AbstractModel<InputType, unsigned int, VectorType> base_type;
+	typedef AbstractModel<InputType, unsigned int, VectorType> binary_classifier_type;
 	typedef LabeledData<InputType, unsigned int> dataset_type;
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
@@ -79,9 +79,9 @@ public:
 
 
 	/// get internal parameters of the model
-	virtual RealVector parameterVector() const{
+	virtual VectorType parameterVector() const{
 		std::size_t total = numberOfParameters();
-		RealVector ret(total);
+		VectorType ret(total);
 		std::size_t used = 0;
 		for (std::size_t i=0; i<m_binary.size(); i++){
 			std::size_t n = m_binary[i]->numberOfParameters();
@@ -92,7 +92,7 @@ public:
 	}
 
 	/// set internal parameters of the model
-	virtual void setParameterVector(RealVector const& newParameters) {
+	virtual void setParameterVector(VectorType const& newParameters) {
 		SHARK_RUNTIME_CHECK(numberOfParameters() == newParameters.size(),"Invalid number of parameters");
 		std::size_t used = 0;
 		for (std::size_t i=0; i<m_binary.size(); i++){
@@ -113,6 +113,13 @@ public:
 	/// return number of classes
 	unsigned int numberOfClasses() const
 	{ return m_classes; }
+	
+	Shape inputShape() const{
+		return m_binary.empty()? Shape() : m_binary[0]->inputShape();
+	}
+	Shape outputShape() const{
+		return Shape();
+	}
 
 	/// \brief Obtain binary classifier.
 	///
@@ -200,7 +207,7 @@ public:
 	void write(OutArchive& archive) const
 	{
 		archive & m_classes;
-		//TODO: O.K. mit be leaking memory!!!
+		//TODO: O.K. might be leaking memory!!!
 		archive & m_binary;
 	}
 

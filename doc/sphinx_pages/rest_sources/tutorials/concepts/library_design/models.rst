@@ -75,28 +75,11 @@ convenience functions summarized in the table below:
 Flag and accessor function name                                           Description
 =======================================================================   ========================================================
 ``HAS_FIRST_PARAMETER_DERIVATIVE``, ``hasFirstParameterDerivative()``     First derivative w.r.t. the parameters is available
-``HAS_SECOND_PARAMETER_DERIVATIVE``, ``hasSecondParameterDerivative()``   Second derivative w.r.t. the parameters is available
 ``HAS_FIRST_INPUT_DERIVATIVE``, ``hasFirstInputDerivative()``             First derivative w.r.t. the inputs is available
-``HAS_SECOND_INPUT_DERIVATIVE``, ``hasSecondInputDerivative()``           Second derivative w.r.t. the inputs is available
-``IS_SEQUENTIAL``, ``isSequential()``                                     Model is sequential (see below)
 =======================================================================   ========================================================
 
-
-
-A sequential model can only process a single input at a time and will throw an
-exception if multiple inputs are fed in. For these models, the next output depends
-on the sequence of previous inputs and thus a batch computation does not make sense.
-
-
-.. caution::
-
-  Support for the second derivatives is purely experimental and not well
-  supported throughout Shark. Changes of the interface are likely.
-
-
-
 To evaluate a model, there exist several variants of ``eval`` and
-``operator()``. The most notable exception is the statefull valuated version of ``eval``. 
+``operator()``. The most notable exception is the stateful valuated version of ``eval``. 
 The state allows the model to store computation results during ``eval`` which then can be reused
 in the computation of the derivative to save computation time. 
 In general, if the state is not required, it is a matter of taste which functions
@@ -129,9 +112,8 @@ batch variant. However, the single-input variant will usually not be
 called when performance is important, so not implementing it should
 not have critical drawbacks from the point of view of the standard
 Shark code base. If a model indicates by its flags that it offers
-first or second derivatives, then the following methods also need to
-be implemented (which are overloaded once for the first derivative,
-and once for the first and second derivatives at the same time):
+first derivatives, then the following methods also need to
+be implemented:
 
 
 
@@ -143,7 +125,7 @@ Method                           Description
 ``weightedInputDerivative``      Computes first or second drivative w.r.t the inputs for every output value
                                  and input and weights these results together
 ``weightedDerivatives``          Computes first input and parameter derivative at the same time, making it
-                                 possible to share calculations of both derivatives
+                                 possible to share calculations of both derivatives. Can be omitted.
 ===============================  ==============================================================================
 
 The parameter list of these methods is somewhat lengthy, and thus we
@@ -163,7 +145,7 @@ respect to its parameters thus looks like this::
   // somehow compute some weights and calculate the parameter derivative
   RealMatrix weights = someFunction(inputs,outputs);
   RealVector derivative;
-  modl.weightedParameterDerivative(inputs,weights,*state,derivative);
+  modl.weightedParameterDerivative(inputs, outputs, weights,*state,derivative);
 
 
 There are a few more methods which result from the fact that AbstractModel
@@ -196,49 +178,46 @@ together with a brief description.
 
 We start with general purpose models:
 
-
-========================   ==================================================================================
-Model                      Description
-========================   ==================================================================================
-:doxy:`LinearModel`        A simple linear model mapping an n-dimensional input to an m-dimensional output
-:doxy:`FFNet`              The well-known feed-forward multilayer perceptron
-                           It allows the usage of different types of neurons in the hidden and output layers
-:doxy:`RBFLayer`           Implements a layer of a radial basis function network using gaussian distributions
-:doxy:`CMACMap`            Discretizes the space using several randomized tile maps and calculates a
-                           weighted sum of the discretized activation
-:doxy:`RNNet`              Recurrent neural network for sequences
-:doxy:`OnlineRNNet`        Recurrent neural network for online learning
-:doxy:`KernelExpansion`    linear combination of outputs of :doxy:`AbstractKernelFunction`, given
-                           points of a dataset and the point to be evaluated (input point)
-========================   ==================================================================================
+==========================   ==================================================================================
+Model                        Description
+==========================   ==================================================================================
+:doxy:`LinearModel`          A simple linear model mapping an n-dimensional input to an m-dimensional output
+			     It offers the possibility to add an activation function
+:doxy:`Conv2DModel`          A simple linear model mapping an n-dimensional input to an m-dimensional output
+			     It offers the possibility to add an activation function
+:doxy:`ConcatenatedModel`    Chains two models together by using the output of one model as the
+                             input to the second.
+:doxy:`NeuronLayer`	     Implements a nonlinear activation function.
+:doxy:`RBFLayer`             Implements a layer of a radial basis function network using gaussian distributions
+:doxy:`CMACMap`              Discretizes the space using several randomized tile maps and calculates a
+                             weighted sum of the discretized activation
+:doxy:`KernelExpansion`      linear combination of outputs of :doxy:`AbstractKernelFunction`, given
+                             points of a dataset and the point to be evaluated (input point)
+==========================   ==================================================================================
 
 
 
 Some models for Classification or Regression:
 
-
-
 =====================================    ========================================================================
 Model                                    Description
 =====================================    ========================================================================
-:doxy:`LinearClassifier`                 Given a metric represented by a scatter matrix and the class means,
-                                         assigns a new point to the class with the nearest mean
+:doxy:`Classifier`	                 Wraps another model with 1(for binary) or n (for multi-class) output.
+					 Returns the index of the class with largest value for the given point.
+:doxy:`LinearClassifier`                 Classifier based on the prediction of a :doxy:`LinearModel`
+:doxy:`KernelClassifier`                 Classifier based on the prediction of a :doxy:`KernelExpansion`
 :doxy:`OneVersusOneClassifier`           Multi-class classifier which does majority voting using binary
                                          classifiers for every class combination
-:doxy:`NearestNeighborClassifier`        Nearest neighbor search for classification using a majority vote system.
-:doxy:`NearestNeighborRegression`        Nearest neighbor search for regression; the result is the mean of the
-                                         labels of the k nearest neighbors
-:doxy:`SoftNearestNeighborClassifier`    Nearest neighbor search for classification; returns the fraction
-                                         of votes for a class instead of the majority vote
-:doxy:`RFClassifier`                     Random Forest based on a collection of decision trees
+:doxy:`NearestNeighborModel`             Nearest neighbor search for classification and regression
+					 using a (weighted) majority vote system.
+:doxy:`RFClassifier`         		 Random Forest based on a collection of decision trees. Can be used for
+					 classification and regression
 =====================================    ========================================================================
 
 
 
 
 Models for Clustering:
-
-
 
 ========================================== =====================================================================================
 Model                                      Description
@@ -254,27 +233,14 @@ Model                                      Description
 
 Special purpose models:
 
-
-
 ======================================  ======================================================================
 Model                                   Description
 ======================================  ======================================================================
 :doxy:`MissingFeaturesKernelExpansion`  KernelExpansion with support for missing input values.
-:doxy:`ConcatenatedModel`               Chains two models together by using the output of one model as the
-                                        input to the second. It is even possible to calculate the derivative
-                                        of such a combination if all models implement it.
-:doxy:`LinearNorm`                      For positive inputs, normalize them to unit L_1-norm
-:doxy:`Softmax`                         Standard softmax activation/weighting function.
-:doxy:`Classifier`	                Assigns the index (e.g., a class label) of the largest component in
-                                        the input vector.
-:doxy:`Autoencoder`			Special case of the FFNet with a single hidden layer with special 
-					functionality that is guided  towards unsupervised pre-training
-:doxy:`TiedAutoencoder`			Special Autoencoder where the weights of the output layer are 
-					constrained to be the transpose of the input. Has the same interface
-					as the Autoencoder for easy replacement.
 :doxy:`MeanModel`			Computes the mean output of a set of models.
 :doxy:`Normalizer`			Special case of the :doxy:`LinearModel` which only has a diagonal
 					matrix and an optional offset. Used for normalisation
+:doxy:`DropoutLayer`			Implements dropout of inputs
 ======================================  ======================================================================
 
 

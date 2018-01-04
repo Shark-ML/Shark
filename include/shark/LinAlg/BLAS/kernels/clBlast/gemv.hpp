@@ -52,7 +52,7 @@ void gemv(
 	static_assert(std::is_same<typename MatA::value_type, typename VecV::value_type>::value, "[gemv] Arguments do not have same element type");	
 	static_assert(std::is_same<typename MatA::evaluation_category::tag, dense_tag>::value, "[gemv] A is not dense");
 	static_assert(std::is_same<typename VecX::evaluation_category::tag, dense_tag>::value, "[gemv] x is not dense");
-	static_assert(std::is_same<typename VecV::storage_type::storage_tag, dense_tag>::value, "[gemv] v does not have dense storage layout");
+	static_assert(std::is_base_of<dense_tag, typename VecV::storage_type::storage_tag>::value, "[gemv] v does not have dense storage layout");
 	
 	//pre-evaluate A and x into a temporary if necessary
 	auto const& Aeval = eval_expression(A);

@@ -41,317 +41,6 @@
 
 namespace shark {
 
-namespace detail{
-
-
-///\brief Baseclass for the wrapper which is used to hide the matrix type. 
-///
-///Additional to the requirement of a Model, a clone() method must be implemented which is used to
-///copy a wrapper
-template<class InputType, class OutputType>
-class ConcatenatedModelWrapperBase:public AbstractModel<InputType,OutputType>{
-public:
-	virtual ConcatenatedModelWrapperBase<InputType,OutputType>* clone() const = 0;
-
-	virtual void enableModelOptimization(std::size_t index, bool opt)=0;
-	virtual std::size_t numModels()=0;
-};
-
-///\brief Internal Wrappertype to connect the output of the first model with the input of the second model.
-///
-///This model is also created when concatenating two models with operator>> (firstModel>>secondModel)
-template<class InputType, class IntermediateType, class OutputType>
-class ConcatenatedModelWrapper : public ConcatenatedModelWrapperBase<InputType, OutputType> {
-protected:
-	typedef typename AbstractModel<InputType,IntermediateType>::BatchOutputType BatchIntermediateType;
-	AbstractModel<InputType,IntermediateType>* m_firstModel;
-	AbstractModel<IntermediateType,OutputType>* m_secondModel;
-
-	typedef ConcatenatedModelWrapperBase<InputType, OutputType> base_type;
-	bool m_optimizeFirst;
-	bool m_optimizeSecond;
-
-	struct InternalState: public State{
-		BatchIntermediateType intermediateResult;
-		boost::shared_ptr<State> firstModelState;
-		boost::shared_ptr<State> secondModelState;
-	};
-	
-	void enableModelOptimization(std::size_t index, bool opt){
-		SHARK_RUNTIME_CHECK(index < 2, "index supplied that is larger than the number of concatenated models");
-		if(index == 1) m_optimizeSecond = opt;
-		else m_optimizeFirst = opt;
-		this->m_features.reset();
-		bool secondDiff=false;
-		if (!m_optimizeSecond || m_secondModel->hasFirstParameterDerivative()){
-			secondDiff=true;
-		}
-		
-		bool firstDiff=false;
-		if(
-			!m_optimizeFirst 
-			||(m_firstModel->hasFirstParameterDerivative()
-			&& m_secondModel ->hasFirstInputDerivative())
-		){
-			firstDiff = true;
-		}
-
-		if (firstDiff && secondDiff){ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		}
-		
-		if (m_firstModel ->hasFirstInputDerivative() && m_secondModel ->hasFirstInputDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		}
-	}
-public:
-	typedef typename base_type::BatchInputType BatchInputType;
-	
-	typedef typename base_type::BatchOutputType BatchOutputType;
-	ConcatenatedModelWrapper(
-		AbstractModel<InputType, IntermediateType>* firstModel,
-		AbstractModel<IntermediateType, OutputType>* secondModel)
-	: m_firstModel(firstModel), m_secondModel(secondModel)
-	{
-		
-		enableModelOptimization(0,true);
-		enableModelOptimization(1,true);
-	}
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "Concatenation<" + m_firstModel->name() + "," + m_secondModel->name() + ">"; }
-
-	ConcatenatedModelWrapperBase<InputType, OutputType>* clone()const{
-		return new ConcatenatedModelWrapper<InputType, IntermediateType, OutputType>(*this);
-	}
-	
-	std::size_t numModels(){return 2;}
-
-	RealVector parameterVector() const {
-		if(m_optimizeFirst && m_optimizeSecond)
-			return m_firstModel->parameterVector() | m_secondModel->parameterVector();
-		else if (m_optimizeFirst)
-			return m_firstModel->parameterVector();
-		else if (m_optimizeSecond)
-			return m_secondModel->parameterVector();
-		return RealVector();
-	}
-
-	void setParameterVector(RealVector const& newParameters){
-		if(m_optimizeFirst && m_optimizeSecond){
-			std::size_t numFirst = m_firstModel->numberOfParameters();
-			m_firstModel->setParameterVector(subrange(newParameters,0,numFirst));
-			m_secondModel->setParameterVector(subrange(newParameters,numFirst,newParameters.size()));
-		}else if (m_optimizeFirst)
-			m_firstModel->setParameterVector(newParameters);
-		else if (m_optimizeSecond)
-			m_secondModel->setParameterVector(newParameters);
-		
-	}
-	
-	boost::shared_ptr<State> createState()const{
-		InternalState* state = new InternalState();
-		boost::shared_ptr<State> ptrState(state);
-		state->firstModelState = m_firstModel->createState();
-		state->secondModelState = m_secondModel->createState();
-		return ptrState;
-	}
-
-	std::size_t numberOfParameters() const {
-		std::size_t numParams = 0;
-		if(m_optimizeFirst)
-			numParams += m_firstModel->numberOfParameters();
-		if (m_optimizeSecond)
-			numParams += m_secondModel->numberOfParameters();
-		return numParams;
-			
-	}
-
-	void eval( BatchInputType const& patterns, BatchOutputType& outputs)const{
-		m_secondModel->eval(
-			(*m_firstModel)(patterns), 
-			outputs
-		);
-	}
-
-	void eval( BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
-		InternalState& s = state.toState<InternalState>();
-		m_firstModel->eval(patterns, s.intermediateResult,*s.firstModelState);
-		m_secondModel->eval(s.intermediateResult, outputs,*s.secondModelState);
-	}
-
-	void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
-	)const{
-		InternalState const& s = state.toState<InternalState>();
-
-		//don't compute the derivative of the first model if it does not have parameters.
-		std::size_t numParamsFirst = m_firstModel->numberOfParameters();
-		if(m_optimizeFirst && m_optimizeSecond && numParamsFirst != 0){
-			RealVector firstParameterDerivative;
-			BatchIntermediateType secondInputDerivative;
-			RealVector secondParameterDerivative;
-			
-			m_secondModel->weightedDerivatives(
-				s.intermediateResult,coefficients,*s.secondModelState,
-				secondParameterDerivative,secondInputDerivative
-			);
-			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,firstParameterDerivative);
-			
-			gradient.resize(numberOfParameters());
-			noalias(gradient) = firstParameterDerivative | secondParameterDerivative;
-		}else if(m_optimizeFirst && numParamsFirst != 0){
-			RealVector firstParameterDerivative;
-			BatchIntermediateType secondInputDerivative;
-			
-			m_secondModel->weightedInputDerivative(
-				s.intermediateResult,coefficients,*s.secondModelState,secondInputDerivative
-			);
-			m_firstModel->weightedParameterDerivative(patterns,secondInputDerivative,*s.firstModelState,gradient);
-		}else if(m_optimizeSecond){
-			m_secondModel->weightedParameterDerivative(
-				s.intermediateResult,coefficients,*s.secondModelState,
-				gradient
-			);
-		}else {
-			gradient.resize(0);
-		}
-	}
-
-	void weightedInputDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, BatchOutputType& gradient
-	)const{
-		InternalState const& s = state.toState<InternalState>();
-		BatchIntermediateType secondInputDerivative;
-		m_secondModel->weightedInputDerivative(s.intermediateResult, coefficients, *s.secondModelState, secondInputDerivative);
-		m_firstModel->weightedInputDerivative(patterns, secondInputDerivative, *s.firstModelState, gradient);
-	}
-	
-	//special implementation, because we can reuse the input derivative of the second model for the calculation of both derivatives of the first
-	virtual void weightedDerivatives(
-		BatchInputType const & patterns, 
-		BatchOutputType const & coefficients, 
-		State const& state,
-		RealVector& parameterDerivative,
-		BatchInputType& inputDerivative
-	)const{
-		InternalState const& s = state.toState<InternalState>();
-		std::size_t firstParam=m_firstModel->numberOfParameters();
-		std::size_t secondParam=m_secondModel->numberOfParameters();
-		parameterDerivative.resize(firstParam+secondParam);
-
-		RealVector firstParameterDerivative;
-		BatchIntermediateType secondInputDerivative;
-		RealVector secondParameterDerivative;
-		if(m_optimizeSecond){
-			m_secondModel->weightedDerivatives(
-				s.intermediateResult, coefficients, *s.firstModelState, secondParameterDerivative, secondInputDerivative
-			);
-		}else{
-			m_secondModel->weightedInputDerivative(
-				s.intermediateResult, coefficients, *s.firstModelState, secondInputDerivative
-			);
-		}
-		if(m_optimizeFirst){
-			m_firstModel->weightedDerivatives(
-				patterns, secondInputDerivative, *s.secondModelState, parameterDerivative, inputDerivative
-			);
-		}else{
-			m_firstModel->weightedInputDerivative(
-				patterns, secondInputDerivative, *s.secondModelState, inputDerivative
-			);
-		}
-
-		parameterDerivative.resize(firstParam+secondParam);
-		noalias(parameterDerivative) = firstParameterDerivative | secondParameterDerivative;
-	}
-	/// From ISerializable
-	void read( InArchive & archive ){
-		m_firstModel->read(archive);
-		m_secondModel->read(archive);
-		archive >> m_optimizeFirst;
-		archive >> m_optimizeSecond;
-	}
-
-	/// From ISerializable
-	void write( OutArchive & archive ) const{
-		m_firstModel->write(archive);
-		m_secondModel->write(archive);
-		archive << m_optimizeFirst;
-		archive << m_optimizeSecond;
-	}
-};
-
-///\brief When using operator>> to connect more than two models, this type is created.
-///
-///When concatenating two models, the ConcatenatedModelWrapper is created. But it is only a temporary object. 
-///Thus when concatenating it with another model, it must be made persistent. We do that by simply calling clone() and saving the now
-///persistens pointer. Note, that the right-hand-side is not allowed to be a ConcatenatedModelWrapperBase. This is not checked.
-template<class InputType, class IntermediateType, class OutputType>
-class ConcatenatedModelList:public ConcatenatedModelWrapper<InputType,IntermediateType,OutputType>{
-private:
-	typedef ConcatenatedModelWrapper<InputType,IntermediateType,OutputType> base_type;
-	typedef ConcatenatedModelWrapperBase<InputType,IntermediateType> FirstModelType;
-public:	
-
-	ConcatenatedModelList(
-		const FirstModelType& firstModel,
-		AbstractModel<IntermediateType, OutputType>* secondModel
-	):base_type(firstModel.clone(),secondModel){}
-
-	~ConcatenatedModelList(){
-		delete base_type::m_firstModel;
-	}
-	
-	std::size_t numModels(){return static_cast<FirstModelType*>(base_type::m_firstModel)->numModels() +1;}
-	
-	void enableModelOptimization(std::size_t index, bool opt){
-		std::size_t models = numModels();
-		SHARK_RUNTIME_CHECK(index < models, "index supplied that is larger than the number of concatenated models");
-		if(index + 1 == models){
-			base_type::enableModelOptimization(1,opt);
-		}else{
-			static_cast<FirstModelType*>(base_type::m_firstModel)->enableModelOptimization(index,opt);
-			base_type::enableModelOptimization(0,true);//update own flags
-		}
-	}
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "Concatenation<" + base_type::m_firstModel->name() + "," + base_type::m_secondModel->name() + ">"; }
-
-	ConcatenatedModelWrapperBase<InputType, OutputType>* clone()const{
-		return new ConcatenatedModelList<InputType, IntermediateType, OutputType>(
-			*static_cast<FirstModelType*>(base_type::m_firstModel),//get the type information back
-			base_type::m_secondModel
-		);
-	}
-};
-
-}
-
-///\brief Connects two AbstractModels so that the output of the first model is the input of the second.
-///
-///The type of the output of the first model must match the type of the input of the second model exactly.
-template<class InputT,class IntermediateT,class OutputT>
-detail::ConcatenatedModelWrapper<InputT,IntermediateT,OutputT> 
-operator>>(AbstractModel<InputT,IntermediateT>& firstModel,AbstractModel<IntermediateT,OutputT>& secondModel){
-	return detail::ConcatenatedModelWrapper<InputT,IntermediateT,OutputT> (&firstModel,&secondModel);
-}
-
-///\brief Connects another AbstractModel two a previously created connection of models
-template<class InputT,class IntermediateT,class OutputT>
-detail::ConcatenatedModelList<InputT,IntermediateT,OutputT> 
-operator>>(
-	const detail::ConcatenatedModelWrapperBase<InputT,IntermediateT>& firstModel,
-	AbstractModel<IntermediateT,OutputT>& secondModel
-){
-	return detail::ConcatenatedModelList<InputT,IntermediateT,OutputT> (firstModel,&secondModel);
-}
-
-
-
 ///\brief ConcatenatedModel concatenates two models such that the output of the first model is input to the second.
 ///
 ///Sometimes a series of models is needed to generate the desired output. For example when input data needs to be 
@@ -363,57 +52,34 @@ operator>>(
 ///of model2 must match. Another way of construction is calling the constructor of ConcatenatedModel using the constructor:
 /// ConcatenatedModel<InputType,OutputType> model (&modell,&model2);
 ///warning: model1 and model2 must outlive model. When they are destroyed first, behavior is undefined.
-template<class InputType, class OutputType>
-class ConcatenatedModel: public AbstractModel<InputType,OutputType> {
+template<class VectorType>
+class ConcatenatedModel: public AbstractModel<VectorType, VectorType, VectorType> {
 private:
-	boost::scoped_ptr<detail::ConcatenatedModelWrapperBase<InputType, OutputType> > m_wrapper;
-	typedef AbstractModel<InputType, OutputType> base_type;
-
+	typedef AbstractModel<VectorType, VectorType, VectorType> base_type;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
-
-	///creates a concatenated model using two base model. this is equivalent to concModel = *firstModel >> *secondModel;
-	template<class T>
-	ConcatenatedModel(AbstractModel<InputType, T>* firstModel, AbstractModel<T, OutputType>* secondModel) {
-		m_wrapper.reset(new detail::ConcatenatedModelWrapper<InputType, T, OutputType>(firstModel, secondModel));
-		if (m_wrapper->hasFirstParameterDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE; 
-		}
-
-		if (m_wrapper->hasFirstInputDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
-		}
-	}
-	///copy constructor to allow ConcatenatedModel concModel = model1 >> model2 >> model3;
-	ConcatenatedModel(const detail::ConcatenatedModelWrapperBase<InputType,OutputType>& wrapper) {
-		m_wrapper.reset(wrapper.clone());
-		if (m_wrapper->hasFirstParameterDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE; 
-		}
-
-		if (m_wrapper->hasFirstInputDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
-		}
-	}
-	///operator =  to allow concModel = model1 >> model2 >> model3; for a previously declared concatenadel model
-	ConcatenatedModel<InputType,OutputType>& operator = ( detail::ConcatenatedModelWrapperBase<InputType,OutputType>& wrapper ){
-		m_wrapper.reset(wrapper.clone());
-		this->m_features.reset();
-		if (m_wrapper->hasFirstParameterDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE; 
-		}
-
-		if (m_wrapper->hasFirstInputDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
-		}
-
-		return *this;
-	}
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "ConcatenatedModel"; }
 	
-	///\brief Returns the number of concatenated models
-	std::size_t numModels(){return m_wrapper->numModels();}
+	
+	///\brief Returns the expected shape of the input
+	Shape inputShape() const{
+		return m_layers.front().model->inputShape();
+	}
+	///\brief Returns the shape of the output
+	Shape outputShape() const{
+		return m_layers.back().model->outputShape();
+	}
+
+
+	void add(AbstractModel<VectorType, VectorType>* layer, bool optimize){
+		m_layers.push_back({layer,optimize});
+		enableModelOptimization(m_layers.size()-1, optimize);//recompute capabilities
+	}
 	
 	///\brief sets whether the parameters of the index-th model should be optimized
 	///
@@ -421,90 +87,243 @@ public:
 	/// the whole model differentiable.
 	/// Note that the models are ordered as model0 >> model1>> model2>>...
 	void enableModelOptimization(std::size_t index, bool opt){
+		SIZE_CHECK(index < m_layers.size());
+		m_layers[index].optimize = opt;
 		this->m_features.reset();
-		m_wrapper->enableModelOptimization(index,opt);
-		if (m_wrapper->hasFirstParameterDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE; 
+		bool inputDerivative = true;
+		bool parameterDerivative = true;
+		for(std::size_t k = 0; k != m_layers.size(); ++k){
+			auto const& layer = m_layers[m_layers.size() - k -1];//we iterate backwards through the layers
+			if( layer.optimize && (!layer.model->hasFirstParameterDerivative() || !inputDerivative)){
+				parameterDerivative = false;
+			}
+			if( !layer.model->hasFirstInputDerivative()){
+				inputDerivative = false;
+			}
 		}
 
-		if (m_wrapper->hasFirstInputDerivative()){ 
-			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE; 
+		if (parameterDerivative){ 
+			this->m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		}
+		
+		if (inputDerivative){ 
+			this->m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 		}
 	
 	}
-
-	ConcatenatedModel(const ConcatenatedModel<InputType, OutputType>& src)
-	:m_wrapper(src.m_wrapper->clone()) {
-		this->m_features = src.m_features;
+	ParameterVectorType parameterVector() const {
+		ParameterVectorType params(numberOfParameters());
+		std::size_t pos = 0;
+		for(auto layer: m_layers){
+			if(!layer.optimize) continue;
+			ParameterVectorType layerParams = layer.model->parameterVector();
+			noalias(subrange(params,pos,pos+layerParams.size())) = layerParams;
+			pos += layerParams.size();
+		}
+		return params;
 	}
 
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return m_wrapper->name(); }
-
-	const ConcatenatedModel<InputType,OutputType>& operator = (const ConcatenatedModel<InputType, OutputType>& src) {
-		ConcatenatedModel<InputType,OutputType> copy(src);
-		swap(m_wrapper,copy.m_wrapper);
-		std::swap(base_type::m_features,copy.m_features);
-		return *this;
+	void setParameterVector(ParameterVectorType const& newParameters) {
+		std::size_t pos = 0;
+		for(auto layer: m_layers){
+			if(!layer.optimize) continue;
+			ParameterVectorType layerParams = subrange(newParameters,pos,pos+layer.model->numberOfParameters());
+			layer.model->setParameterVector(layerParams);
+			pos += layerParams.size();
+		}
 	}
 
-	RealVector parameterVector() const {
-		return m_wrapper->parameterVector();
-	}
-
-	void setParameterVector(RealVector const& newParameters) {
-		m_wrapper->setParameterVector(newParameters);
-	}
-
-	size_t numberOfParameters() const {
-		return m_wrapper->numberOfParameters();
+	std::size_t numberOfParameters() const{
+		std::size_t numParams = 0;
+		for(auto layer: m_layers){
+			if(!layer.optimize) continue;
+			numParams += layer.model->numberOfParameters();
+		}
+		return numParams;
 	}
 	
 	boost::shared_ptr<State> createState()const{
-		return m_wrapper->createState();
+		InternalState* state = new InternalState;
+		for(std::size_t i = 0; i != m_layers.size(); ++i){
+			state->state.push_back(m_layers[i].model->createState());
+			state->intermediates.push_back(BatchOutputType());
+		}
+		return boost::shared_ptr<State>(state);
+	}
+	
+	BatchOutputType const& hiddenResponses(State const& state, std::size_t index)const{
+		InternalState const& s = state.toState<InternalState>();
+		return s.intermediates[index];
+	}
+	
+	State const& hiddenState(State const& state, std::size_t index)const{
+		InternalState const& s = state.toState<InternalState>();
+		return *s.state[index];
 	}
 
 	using base_type::eval;
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const {
-		m_wrapper->eval(patterns, outputs);
+		BatchOutputType intermediates;
+		outputs = patterns;
+		for(auto layer: m_layers){
+			swap(intermediates,outputs);
+			layer.model->eval(intermediates,outputs);
+		}
 	}
-	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const {
-		m_wrapper->eval(patterns, outputs, state);
+	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State& state)const{
+		InternalState& s = state.toState<InternalState>();
+		outputs = patterns;
+		for(std::size_t i = 0; i != m_layers.size(); ++i){
+			if(i == 0)
+				m_layers[i].model->eval(patterns,s.intermediates[i], *s.state[i]);
+			else
+				m_layers[i].model->eval(s.intermediates[i-1],s.intermediates[i], *s.state[i]);
+		}
+		outputs = s.intermediates.back();
 	}
 	
 	void weightedParameterDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, RealVector& gradient
+		BatchInputType const& patterns,
+		BatchOutputType const & outputs,
+		BatchOutputType const& coefficients,
+		State const& state,
+		RealVector& gradient
 	)const{
-		m_wrapper->weightedParameterDerivative(patterns, coefficients, state, gradient);
+		InternalState const& s = state.toState<InternalState>();
+		BatchOutputType inputDerivativeLast;
+		BatchOutputType inputDerivative = coefficients;
+		gradient.resize(numberOfParameters());
+		std::size_t paramEnd = gradient.size();
+		for(std::size_t k = 0; k != m_layers.size(); ++k){
+			std::size_t i = m_layers.size() - k -1;//we iterate backwards through the layers
+			BatchInputType const* pInput = &patterns;
+			if(i != 0)
+				pInput = &s.intermediates[i-1];
+			
+			swap(inputDerivativeLast,inputDerivative);
+			//if the current layer does not need to be optimized, we just check whether we have to compute the chain rule
+			if(!m_layers[i].optimize || m_layers[i].model->numberOfParameters() == 0){
+				if(i != 0) //check, if we are done, the input layer does not need to compute anything
+					m_layers[i].model->weightedInputDerivative(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], inputDerivative);
+			}else{
+				RealVector paramDerivative;
+				if(i != 0){//if we are in an intermediates layer, compute chain rule
+					m_layers[i].model->weightedDerivatives(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], paramDerivative,inputDerivative);					
+				}
+				else{//lowest layer only needs to compute parameter derivative
+					m_layers[i].model->weightedParameterDerivative(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], paramDerivative);
+				}
+				noalias(subrange(gradient,paramEnd - paramDerivative.size(),paramEnd)) = paramDerivative;
+				paramEnd -= paramDerivative.size();
+			}
+		}
 	}
 
 	void weightedInputDerivative(
-		BatchInputType const& patterns, BatchOutputType const& coefficients, State const& state, BatchOutputType& derivatives
+		BatchInputType const& patterns,
+		BatchOutputType const & outputs,
+		BatchOutputType const& coefficients,
+		State const& state, 
+		BatchOutputType& derivatives
 	)const{
-		m_wrapper->weightedInputDerivative(patterns, coefficients, state, derivatives);
+		InternalState const& s = state.toState<InternalState>();
+		BatchOutputType derivativeLast;
+		derivatives = coefficients;
+		for(std::size_t k = 0; k != m_layers.size(); ++k){
+			std::size_t i = m_layers.size() - k -1;//we iterate backwards through the layers
+			
+			BatchInputType const* pInput = &patterns;
+			if(i != 0)
+				pInput = &s.intermediates[i-1];
+			
+			swap(derivativeLast,derivatives);
+			m_layers[i].model->weightedInputDerivative(*pInput,s.intermediates[i], derivativeLast, *s.state[i], derivatives);
+		}
 	}
 
 	virtual void weightedDerivatives(
 		BatchInputType const & patterns,
+		BatchOutputType const & outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		RealVector& parameterDerivative,
+		RealVector& gradient,
 		BatchInputType& inputDerivative
 	)const{
-		m_wrapper->weightedDerivatives(patterns, coefficients, state, parameterDerivative,inputDerivative);
+		InternalState const& s = state.toState<InternalState>();
+		BatchOutputType inputDerivativeLast;
+		inputDerivative = coefficients;
+		gradient.resize(numberOfParameters());
+		std::size_t paramEnd = gradient.size();
+		for(std::size_t k = 0; k != m_layers.size(); ++k){
+			std::size_t i = m_layers.size() - k -1;//we iterate backwards through the layers
+			BatchInputType const* pInput = &patterns;
+			if(i != 0)
+				pInput = &s.intermediates[i-1];
+			
+			swap(inputDerivativeLast,inputDerivative);
+			//if the current layer does not need to be optimized, we just check whether we have to compute the chain rule
+			if(!m_layers[i].optimize || m_layers[i].model->numberOfParameters() == 0){
+				m_layers[i].model->weightedInputDerivative(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], inputDerivative);
+			}else{
+				RealVector paramDerivative;
+				m_layers[i].model->weightedDerivatives(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], paramDerivative,inputDerivative);
+				noalias(subrange(gradient,paramEnd - paramDerivative.size(),paramEnd)) = paramDerivative;
+				paramEnd -= paramDerivative.size();
+			}
+		}
 	}
 
 	/// From ISerializable
 	void read( InArchive & archive ){
-		m_wrapper->read(archive);
+		for(auto layer: m_layers){
+			archive >> *layer.model;
+			archive >> layer.optimize;
+		}
 	}
 
 	/// From ISerializable
 	void write( OutArchive & archive ) const{
-		m_wrapper->write(archive);
+		for(auto layer: m_layers){
+			archive << *layer.model;
+			archive << layer.optimize;
+		}
 	}
+private:
+	struct Layer{
+		AbstractModel<VectorType, VectorType>* model;
+		bool optimize;
+	};
+	std::vector<Layer> m_layers;
+	
+	struct InternalState: State{
+		std::vector<boost::shared_ptr<State> > state;
+		std::vector<BatchOutputType> intermediates;
+	};
 };
+
+
+
+///\brief Connects two AbstractModels so that the output of the first model is the input of the second.
+template<class VectorType>
+ConcatenatedModel<VectorType>  operator>>(
+	AbstractModel<VectorType,VectorType, VectorType>& firstModel,
+	AbstractModel<VectorType,VectorType, VectorType>& secondModel
+){
+	ConcatenatedModel<VectorType> sequence;
+	sequence.add(&firstModel, true);
+	sequence.add(&secondModel, true);
+	return sequence;
+}
+
+template<class VectorType>
+ConcatenatedModel<VectorType>  operator>>(
+	ConcatenatedModel<VectorType> const& firstModel,
+	AbstractModel<VectorType,VectorType, VectorType>& secondModel
+){
+	ConcatenatedModel<VectorType> sequence = firstModel;
+	sequence.add(&secondModel, true);
+	return sequence;
+}
 
 
 }

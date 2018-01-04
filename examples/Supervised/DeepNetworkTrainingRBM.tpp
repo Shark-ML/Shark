@@ -1,6 +1,7 @@
 //###begin<includes>
 //noisy AutoencoderModel model and deep network
-#include <shark/Models/FFNet.h>// neural network for supervised training
+#include <shark/Models/LinearModel.h>//single dense layer
+#include <shark/Models/ConcatenatedModel.h>//for stacking layers and concatenating noise model
 #include <shark/Unsupervised/RBM/BinaryRBM.h> // model for unsupervised pre-training
 
 //training the  model
@@ -46,7 +47,6 @@ LabeledData<RealVector,unsigned int> createProblem(){
 }
 
 //training of an RBM
-//###begin<function>
 BinaryRBM trainRBM(
 	UnlabeledData<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
@@ -84,50 +84,9 @@ BinaryRBM trainRBM(
 	return rbm;
 }
 
-//###begin<network_types>
-typedef FFNet<LogisticNeuron,LinearNeuron> Network;//final supervised trained structure
-//###end<network_types>
-
-//unsupervised pre training of a network with two hidden layers
-//###begin<pretraining_autoencoder>
-Network unsupervisedPreTraining(
-	UnlabeledData<RealVector> const& data,
-	std::size_t numHidden1,std::size_t numHidden2, std::size_t numOutputs,
-	double regularisation, std::size_t iterations, double learningRate
-){
-	//train the first hidden layer
-	std::cout<<"training first layer"<<std::endl;
-	BinaryRBM layer =  trainRBM(
-		data,numHidden1,
-		regularisation,iterations, learningRate
-	);
-	
-	//compute the mapping onto features of the first hidden layer
-	layer.evaluationType(true,true);//we compute the direction visible->hidden and want the features and no samples
-	UnlabeledData<RealVector> intermediateData=layer(data);
-	
-	//train the next layer
-	std::cout<<"training second layer"<<std::endl;
-	BinaryRBM layer2 =  trainRBM(
-		intermediateData,numHidden2,
-		regularisation,iterations, learningRate
-	);
-//###end<pretraining_autoencoder>
-//###begin<pretraining_creation>
-	//create the final network
-	Network network;
-	network.setStructure(dataDimension(data),numHidden1,numHidden2, numOutputs);
-	initRandomNormal(network,0.1);
-	network.setLayer(0,layer.weightMatrix(),layer.hiddenNeurons().bias());
-	network.setLayer(1,layer2.weightMatrix(),layer2.hiddenNeurons().bias());
-	
-	return network;
-//###end<pretraining_creation>
-}
 
 int main()
 {
-//###begin<supervised_training>
 	//model parameters
 	std::size_t numHidden1 = 8;
 	std::size_t numHidden2 = 8;
@@ -144,12 +103,37 @@ int main()
 	data.shuffle();
 	LabeledData<RealVector,unsigned int> test = splitAtElement(data,static_cast<std::size_t>(0.5*data.numberOfElements()));
 	
-	//unsupervised pre training
-	Network network = unsupervisedPreTraining(
-		data.inputs(),numHidden1, numHidden2,numberOfClasses(data),
-		unsupRegularisation, unsupIterations, unsupLearningRate
+//###begin<pretraining_rbm>
+	//train the first hidden layer
+	std::cout<<"pre-training first layer"<<std::endl;
+	BinaryRBM rbm1 =  trainRBM(
+		data.inputs(),numHidden1,
+		unsupRegularisation,unsupIterations, unsupLearningRate
 	);
 	
+	//compute the mapping onto features of the first hidden layer
+	rbm1.evaluationType(true,true);//we compute the direction visible->hidden and want the features and no samples
+	UnlabeledData<RealVector> intermediateData=rbm1(data.inputs());
+	
+	//train the next layer
+	std::cout<<"pre-training second layer"<<std::endl;
+	BinaryRBM rbm2 =  trainRBM(
+		intermediateData,numHidden2,
+		unsupRegularisation,unsupIterations, unsupLearningRate
+	);
+	
+//###end<pretraining_rbm>
+
+//###begin<pretraining_creation>
+	//build three layer neural network from the re-trained RBMs
+	LinearModel<RealVector, LogisticNeuron> layer1(rbm1.weightMatrix(),rbm1.hiddenNeurons().bias());
+	LinearModel<RealVector, LogisticNeuron> layer2(rbm2.weightMatrix(),rbm2.hiddenNeurons().bias());
+	LinearModel<RealVector> output(layer2.outputShape(),numberOfClasses(data));
+	initRandomNormal(output,0.01);
+	auto network = layer1 >> layer2 >> output;
+//###end<pretraining_creation>
+	
+//###begin<supervised_training>
 	//create the supervised problem. Cross Entropy loss with one norm regularisation
 	CrossEntropy loss;
 	ErrorFunction error(data, &network, &loss);

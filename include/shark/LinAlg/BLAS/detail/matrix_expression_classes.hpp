@@ -249,8 +249,15 @@ private:
 	functor_type m_functor;
 };
 
-template<class V>
-class vector_repeater:public matrix_expression<vector_repeater<V>, typename V::device_type > {
+template<class V, class Orientation=row_major>
+class vector_repeater:public matrix_expression<vector_repeater<V, Orientation>, typename V::device_type > {
+private:
+	template<class IndexExpr1, class IndexExpr2>
+	struct OperatorReturn{//workaround for gcc 4.6 which would not like the type below inside a function signature.
+		typedef decltype(std::declval<V const&>()(
+			Orientation::index_m(std::declval<IndexExpr1&>(),std::declval<IndexExpr2&>()))
+		) type;
+	};
 public:
 	typedef typename V::const_closure_type expression_closure_type;
 	typedef typename V::size_type size_type;
@@ -262,64 +269,108 @@ public:
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
-	typedef row_major orientation;
+	typedef Orientation orientation;
 	typedef typename V::evaluation_category evaluation_category;
+	typedef typename V::device_type device_type;
 
 	// Construction and destruction
-	explicit vector_repeater (expression_closure_type const& e, size_type rows):
-	m_vector(e), m_rows(rows) {}
+	explicit vector_repeater (expression_closure_type const& e, size_type elements):
+	m_vector(e), m_elements(elements) {}
 
 	// Accessors
 	size_type size1() const {
-		return m_rows;
+		return orientation::index_M(m_elements,m_vector.size());
 	}
 	size_type size2() const {
-		return m_vector.size();
+		return orientation::index_m(m_elements,m_vector.size());
 	}
 
 	// Expression accessors
 	const expression_closure_type& expression() const {
 		return m_vector;
 	}
+	
+	std::size_t num_repetitions()const{
+		return m_elements;
+	}
+	
+	template<class MatX>
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha) const {
+		X().clear();
+		plus_assign_to(X,eval_block(m_vector), alpha);
+	}
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha) const {
+		plus_assign_to(X,eval_block(m_vector), alpha);
+	}
 
 	// Element access
 	template <class IndexExpr1, class IndexExpr2>
-	auto operator()(IndexExpr1 const& /*i*/, IndexExpr2 const& j) const -> decltype(std::declval<V const&>()(j)){
-		return m_vector(j);
+	typename OperatorReturn<IndexExpr1, IndexExpr2>::type operator()(IndexExpr1 const& i, IndexExpr2 const& j) const{
+		return m_vector(Orientation::index_m(i,j));
 	}
 	
 	typename device_traits<typename V::device_type>::queue_type& queue()const{
 		return m_vector.queue();
 	}
+private:
+	typedef typename V::const_iterator vector_iterator;
+	typedef typename device_traits<typename V::device_type>:: template constant_iterator<value_type>::type constant_iterator;
+	
+	vector_iterator begin(size_type i, row_major) const {
+		return m_vector.begin();
+	}
+	vector_iterator end(size_type i, row_major) const {
+		return m_vector.end();
+	}
+	constant_iterator begin(size_type i, column_major) const {
+		return const_column_iterator(m_vector(i),0);
+	}
+	constant_iterator end(size_type i, column_major) const {
+		return const_column_iterator(m_vector(i), m_elements);
+	}
+public:
 
 	// Iterator types
-	typedef typename V::const_iterator const_row_iterator;
+	typedef typename std::conditional<std::is_same<Orientation, row_major>::value, vector_iterator, constant_iterator>::type const_row_iterator;
 	typedef const_row_iterator row_iterator;
-	typedef typename device_traits<typename V::device_type>:: template constant_iterator<value_type>::type  const_column_iterator;
+	typedef typename std::conditional<std::is_same<Orientation, row_major>::value, constant_iterator, vector_iterator>::type const_column_iterator;
 	typedef const_column_iterator column_iterator;
 
 	// Element lookup
 	
 	const_row_iterator row_begin(size_type i) const {
 		REMORA_RANGE_CHECK( i < size1());
-		return m_vector.begin();
+		return begin(i,Orientation());
 	}
 	const_row_iterator row_end(size_type i) const {
 		REMORA_RANGE_CHECK( i < size1());
-		return m_vector.end();
+		return end(i,Orientation());
 	}
 	
 	const_column_iterator column_begin(size_type j) const {
 		REMORA_RANGE_CHECK( j < size2());
-		return const_column_iterator(m_vector(j),0);
+		return begin(j,typename Orientation::transposed_orientation());
+		
 	}
 	const_column_iterator column_end(size_type j) const {
 		REMORA_RANGE_CHECK( j < size2());
-		return const_column_iterator(m_vector(j),size1());
+		return end(j,typename Orientation::transposed_orientation());
 	}
 private:
+	
+	template<class MatX, class VecV>
+	void plus_assign_to(
+		matrix_expression<MatX, device_type>& X,
+		vector_expression<VecV, device_type> const& v,
+		typename MatX::value_type alpha
+	)const{
+		vector_repeater<VecV, Orientation> e(v(),m_elements);
+		plus_assign(X,e,alpha);
+	}
+
 	expression_closure_type m_vector;
-	size_type m_rows;
+	size_type m_elements;
 };
 
 /// \brief A matrix with all values of type \c T equal to the same value
@@ -873,7 +924,7 @@ template<class M, class TriangularType>
 class dense_triangular_proxy: public matrix_expression<dense_triangular_proxy<M, TriangularType>, typename M::device_type > {
 	typedef typename closure<M>::type matrix_closure_type;
 public:
-	static_assert(std::is_same<typename M::storage_type::storage_tag, dense_tag>::value, "Can only create triangular proxies of dense matrices");
+	static_assert(std::is_base_of<dense_tag, typename M::storage_type::storage_tag>::value, "Can only create triangular proxies of dense matrices");
 
 	typedef typename M::size_type size_type;
 	typedef typename M::value_type value_type;
@@ -882,8 +933,11 @@ public:
 	typedef dense_triangular_proxy<typename const_expression<M>::type,TriangularType> const_closure_type;
 	typedef dense_triangular_proxy<M,TriangularType> closure_type;
 
-	typedef dense_matrix_storage<value_type> storage_type;
-	typedef dense_matrix_storage<value_type const> const_storage_type;
+	//~ typedef typename M::storage_type storage_type;
+	//~ typedef typename M::const_storage_type const_storage_type;
+	typedef dense_matrix_storage<value_type, dense_tag> storage_type;
+	typedef dense_matrix_storage<value_type const, dense_tag> const_storage_type;
+
 	typedef elementwise<dense_tag> evaluation_category;
 	typedef triangular<typename M::orientation,TriangularType> orientation;
 

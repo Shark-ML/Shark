@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_LooError )
 
 	// check the value of the objective function
 	double value = loo.eval();
-	double should = 5.0 / 9.0;                  // manually computed reference value
+	double should = 5.0 / 18.0;                  // manually computed reference value
 	BOOST_CHECK_SMALL(value - should, 1e-10);
 }
 

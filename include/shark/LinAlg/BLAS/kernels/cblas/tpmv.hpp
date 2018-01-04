@@ -122,47 +122,12 @@ void tpmv(
 	);
 }
 
-template<class Storage1, class Storage2, class T1, class T2>
-struct optimized_tpmv_detail{
-	typedef std::false_type type;
-};
-template<>
-struct optimized_tpmv_detail<
-	packed_tag, dense_tag,
-	double, double
->{
-	typedef std::true_type type;
-};
-template<>
-struct optimized_tpmv_detail<
-	packed_tag, dense_tag,
-	float, float
->{
-	typedef std::true_type type;
-};
-
-template<>
-struct optimized_tpmv_detail<
-	packed_tag, dense_tag,
-	std::complex<double>, std::complex<double>
->{
-	typedef std::true_type type;
-};
-template<>
-struct optimized_tpmv_detail<
-	packed_tag, dense_tag,
-	std::complex<float>, std::complex<float>
->{
-	typedef std::true_type type;
-};
-
 template<class M, class V>
-struct  has_optimized_tpmv
-: public optimized_tpmv_detail<
-	typename M::storage_type::storage_tag,
-	typename V::storage_type::storage_tag,
-	typename M::value_type,
-	typename V::value_type
+struct has_optimized_tpmv: std::integral_constant<bool,
+	allowed_cblas_type<typename M::value_type>::type::value
+	&& std::is_same<typename M::value_type, typename V::value_type>::value
+	&& std::is_base_of<packed_tag, typename M::storage_type::storage_tag>::value
+	&& std::is_base_of<dense_tag, typename V::storage_type::storage_tag>::value 
 >{};
 
 }}

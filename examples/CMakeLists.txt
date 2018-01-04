@@ -59,8 +59,7 @@ shark_add_example( EA/SOO/AckleyES AckleyES "EA/SOO" )
 shark_add_example( EA/SOO/Archive Archive "EA/SOO" )
 
 shark_add_example( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
-shark_add_example( Supervised/DeepNetworkTraining DeepNetworkTraining "Supervised" )
-shark_add_example( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
+
 
 shark_add_example( Supervised/CVFolds CVFolds "Supervised" )
 shark_add_example( Supervised/CSvmLinear CSvmLinear "Supervised" )
@@ -80,19 +79,13 @@ shark_add_example( Supervised/SubrangeKernelTutorial SubrangeKernelTutorial "Sup
 
 shark_add_example( Supervised/KNNTutorial KNNTutorial "Supervised" )
 shark_add_example( Supervised/LDATutorial LDATutorial "Supervised" )
-shark_add_example( Supervised/elmTutorial elmTutorial "Supervised" )
 shark_add_example( Supervised/KNNCrossValidationTutorial KNNCrossValidationTutorial "Supervised" )
 shark_add_example( Supervised/linearRegressionTutorial linearRegressionTutorial "Supervised" )
 shark_add_example( Supervised/LassoRegression LassoRegression "Supervised" )
 shark_add_example( Supervised/FFNNBasicTutorial FFNNBasicTutorial "Supervised" )
-shark_add_example( Supervised/FFNNMultiClassCrossEntropy FFNNMultiClassCrossEntropy "Supervised" )
+shark_add_example( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
 shark_add_example( Supervised/RFTutorial RFTutorial "Supervised" )
 shark_add_example( Supervised/KTA-tutorial KTA-tutorial "Supervised" )
-shark_add_example( Supervised/VersatileClassificationTutorial-LDA VersatileClassificationTutorial-LDA "Supervised" )
-shark_add_example( Supervised/VersatileClassificationTutorial-NN VersatileClassificationTutorial-NN "Supervised" )
-shark_add_example( Supervised/VersatileClassificationTutorial-SVM VersatileClassificationTutorial-SVM "Supervised" )
-shark_add_example( Supervised/VersatileClassificationTutorial-RF VersatileClassificationTutorial-RF "Supervised" )
-shark_add_example( Supervised/VersatileClassificationTutorial-Network VersatileClassificationTutorial-Network "Supervised" )
 shark_add_example( Supervised/KernelBudgetedSGDTutorial KernelBudgetedSGDTutorial "Supervised" )
 
 #basic tutorials
@@ -113,11 +106,8 @@ shark_add_example( Data/Import Import "Data" )
 shark_add_example( Unsupervised/PCA PCA "Unsupervised" )
 shark_add_example( Unsupervised/PCATutorial PCATutorial "Unsupervised" )
 shark_add_example( Unsupervised/KMeansTutorial KMeansTutorial "Unsupervised" )
-shark_add_example( Unsupervised/MaxLogLikelihood MaxLogLikelihoodTutorial "Unsupervised" )
 shark_add_example( Unsupervised/BinaryRBM BinaryRBM "Unsupervised" )
-shark_add_example( Unsupervised/SparseAETutorial SparseAETutorial "Unsupervised" )
 shark_add_example( Unsupervised/AutoEncoderTutorial AutoencoderTutorial "Unsupervised" )
-shark_add_example( Unsupervised/DenoisingAutoencoderTutorial DenoisingAutoencoderTutorial "Unsupervised" )
 shark_add_example( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised" )
 shark_add_example( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
 

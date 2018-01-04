@@ -417,8 +417,13 @@ public:
 	typedef typename Batch<InputType>::type BatchInputType;
 
 	TreeNearestNeighbors(Dataset const& dataset, Tree const* tree)
-	: m_dataset(dataset), m_inputs(dataset.inputs()), m_labels(dataset.labels()),mep_tree(tree)
-	{ }
+	: m_dataset(dataset)
+	, m_inputs(dataset.inputs())
+	, m_labels(dataset.labels())
+	, mep_tree(tree)
+	{
+		this->m_inputShape = dataset.inputShape();
+	}
 
 	///\brief returns the k nearest neighbors of the point
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{

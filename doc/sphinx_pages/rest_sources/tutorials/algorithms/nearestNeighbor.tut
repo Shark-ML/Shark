@@ -15,7 +15,9 @@ Assume that we are given a data set
 and that we want to predict the label *y* of an unseen data point *x*.
 The idea of *K* nearest neighbor classification is to look in *S* for
 those *K* patterns that are most similar to *x* and to choose *y*
-based on their labels.
+based on their labels. The NearestNeighborModel implemented in Shark
+supports classification as well as regression. In this tutorial we give an classification
+example
 
 For details see [DMLNb]_.
 
@@ -123,7 +125,7 @@ Now defining and training a *K* nearest neighbor classifier with the algorithm i
 
 ..sharkcode<Supervised/KNNTutorial.tpp, NNC>
 
-instantiating a  :doxy:`NearestNeighborClassifier` object.
+instantiating a  :doxy:`NearestNeighborModel` object.
 
 Evaluating the model
 ^^^^^^^^^^^^^^^^^^^^
@@ -153,34 +155,19 @@ Advanced topics
 
 Not only the Euclidean metric is supported, but also kernel-based
 nearest neighbor classification is provided. In this case the
-kernel-induced metric is applied. The following lines should give the
-same results as the example above, because the :doxy:`LinearKernel`
-induces the Euclidean metric::
-
-    LinearKernel<RealVector> kernel;
-    KHCTree<RealVector> tree(data.inputs(), &kernel);
-    TreeNearestNeighbors<RealVector, unsigned int> algorithm(data, &tree);
-    NearestNeighborClassifier<RealVector> KNN(&algorithm, K);
+kernel-induced metric is applied. This can be done by replacing
+the :doxy:`KDTree` by an :doxy:`KHCTree` and using an appropriate kernel.
 
 For high dimensional data, as said before, a tree lookup may not be that efficient. In this case,
 we can just use the simple brute force algorithm instead, which is
-implemented by :doxy:`SimpleNearestNeighbors`. We need to define the
-metric to to measure the distance. This was previously handled
-implicitly  by the tree, now we specify a kernel function that induces
-the metric. A  comparable setup to the example above is::
-
-    LinearKernel<> kernel;
-    SimpleNearestNeighbors<RealVector, unsigned int> algorithm(data, &kernel);
-    NearestNeighborClassifier<RealVector> KNN(&algorithm, K);
-
-Changing the kernel will lead to the same results as
-changing it in the KHC Tree.
+implemented by :doxy:`SimpleNearestNeighbors`. It requires specifying a kernel object.
+Choosing a :doxy:`LinearKernel` will give the same results as the example above.
 
 Often you do not only want the nearest neighbor algorithm to predict
 the most promising class label for given input pattern *x*, but an
-estimate of the probability that *x* belongs to a certain class.
-This is provided by the :doxy:`SoftNearestNeighborClassifier` object.
-Nearest neighbor regression is implemented as well.
+estimate of the probability that *x* belongs to a certain class. This
+can be done by using the decisionFunction() method provided by
+the NearestNeighborModel in the classification case.
 
 References
 ----------

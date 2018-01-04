@@ -52,8 +52,8 @@ public:
 
 	typedef vector_reference<self_type const> const_closure_type;
 	typedef vector_reference<self_type> closure_type;
-	typedef dense_vector_storage<value_type> storage_type;
-	typedef dense_vector_storage<value_type const> const_storage_type;
+	typedef dense_vector_storage<value_type, continuous_dense_tag> storage_type;
+	typedef dense_vector_storage<value_type const, continuous_dense_tag> const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 
 	// Construction and destruction

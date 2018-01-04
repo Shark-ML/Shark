@@ -108,7 +108,7 @@ Trainer                                     Model                     Descriptio
                                                                     data has unit variance in its induced feature space. Note
                                                                     how this trainer operates on a kernel rather than a (linear)
                                                                     model.
-:doxy:`OneClassSvmTrainer`                :doxy:`KernelExpansion`   Trains a one-class SVM.
+:doxy:`OneClassSvmTrainer`                :doxy:`KernelExpansion`   Trains a one-class SVM which can be used for outlier detection
 ========================================  ========================  ============================================================
 
 
@@ -132,24 +132,11 @@ Trainer                                     Model                               
                                                                                      the data in the feature space induced by the kernel.
 :doxy:`RFTrainer`                         :doxy:`RFClassifier`                       Implements a random forest of decision trees,
                                                                                      see the :doc:`random forest tutorial<../../algorithms/rf>`.
-:doxy:`SigmoidFitRpropNLL`                :doxy:`SigmoidModel`                       Optimizes the parameters of a sigmoid to fit a validation
-                                                                                     dataset via backpropagation on the negative log-likelihood.
-:doxy:`SigmoidFitPlatt`                   :doxy:`SigmoidModel`                       Optimizes the parameters of a sigmoid to fit a validation
-                                                                                     dataset with Platt's method.
 :doxy:`AbstractSvmTrainer`                :doxy:`KernelExpansion`                    Base class for all support vector machine trainers.
 :doxy:`MissingFeatureSvmTrainer`          :doxy:`MissingFeaturesKernelExpansion`     Trainer for binary SVMs supporting missing features.
-:doxy:`CSvmTrainer`                       :doxy:`KernelExpansion`                    Trainer for binary SVMs, with one-norm regularization,
+:doxy:`CSvmTrainer`                       :doxy:`KernelExpansion`                    Trainer for binary and multiclass SVMs, with one-norm regularization,
                                                                                      see the :doc:`SVM introduction<../../algorithms/svm>`.
 :doxy:`EpsilonSvmTrainer`                 :doxy:`KernelExpansion`                    Trains an epsilon-SVM for regression.
 :doxy:`RegularizationNetworkTrainer`      :doxy:`KernelExpansion`                    Trains a Gaussian Process model / regularization network.
-:doxy:`McSvmOVATrainer`                   :doxy:`KernelExpansion`                    Trains a one-vs-all multiclass SVM.
-:doxy:`McSvmCSTrainer`                    :doxy:`KernelExpansion`                    Multiclass SVM as defined by Cramer & Singer.
-:doxy:`McSvmWWTrainer`                    :doxy:`KernelExpansion`                    Multiclass SVM as defined by Weston & Watkins.
-:doxy:`McSvmLLWTrainer`                   :doxy:`KernelExpansion`                    Multiclass SVM as defined by Lee, Lin, and Wahba.
-:doxy:`McSvmMMRTrainer`                   :doxy:`KernelExpansion`                    Multiclass SVM using maximum margin regression.
 :doxy:`AbstractLinearSvmTrainer`          :doxy:`LinearModel`                        Base class for all linear-SVM trainers
-:doxy:`LinearMcSvmOVATrainer`             :doxy:`LinearModel`                        Trainer for a  one-vs-all multiclass SVM with linear kernel.
-:doxy:`LinearMcSvmCSTrainer`              :doxy:`LinearModel`                        Trainer for multiclass SVM defined by Cramer & Singer having linear kernel.
-:doxy:`LinearMcSvmWWTrainer`              :doxy:`LinearModel`                        Trainer for multiclass SVM defined by  Weston & Watkins having linear kernel.
-:doxy:`LinearMcSvmLLWTrainer`             :doxy:`LinearModel`                        Trainer for multiclass SVM defined by Lee, Lin, and Wahba having linear kernel.
 ========================================  ========================================   ===================================================================

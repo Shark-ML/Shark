@@ -52,6 +52,7 @@
 #include <shark/Core/utility/functional.h>
 #include <boost/iterator/transform_iterator.hpp>
 #include <shark/Core/Random.h>
+#include <shark/Core/Shape.h>
 #include "Impl/Dataset.inl"
 
 namespace shark {
@@ -129,7 +130,8 @@ class Data : public ISerializable
 protected:
 	typedef detail::SharedContainer<Type> Container;
 
-	Container m_data;		///< data
+	Container m_data;///< data
+	Shape m_shape;///< shape of a datapoint
 public:
 	/// \brief Defines the default batch size of the Container.
 	///
@@ -209,6 +211,17 @@ public:
 	std::size_t numberOfElements() const{
 		return m_data.numberOfElements();
 	}
+	
+	
+	///\brief Returns the shape of the elements in the dataset.
+	Shape const& shape() const{
+		return m_shape;
+	}
+	
+	///\brief Returns the shape of the elements in the dataset.
+	Shape& shape(){
+		return m_shape;
+	}
 
 	///\brief Check whether the set is empty.
 	bool empty() const{
@@ -255,10 +268,12 @@ public:
 
 	void read(InArchive& archive){
 		archive >> m_data;
+		archive >> m_shape;
 	}
 
 	void write(OutArchive& archive) const{
 		archive << m_data;
+		archive << m_shape;
 	}
 	///\brief This method makes the vector independent of all siblings and parents.
 	virtual void makeIndependent(){
@@ -278,7 +293,8 @@ public:
 	///this to work.
 	Data splice(std::size_t batch){
 		Data right;
-		right.m_data=m_data.splice(m_data.begin()+batch);
+		right.m_data = m_data.splice(m_data.begin()+batch);
+		right.m_shape = m_shape;
 		return right;
 	}
 
@@ -312,10 +328,6 @@ public:
 	}
 
 	// SUBSETS
-	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, Data& subset) const{
-		subset.m_data=Container(m_data,indices);
-	}
 
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
 	void indexedSubset(IndexSet const& indices, Data& subset, Data& complement) const{
@@ -324,9 +336,17 @@ public:
 		subset.m_data=Container(m_data,indices);
 		complement.m_data=Container(m_data,comp);
 	}
+	
+	Data indexedSubset(IndexSet const& indices) const{
+		Data subset;
+		subset.m_data = Container(m_data,indices);
+		subset.m_shape = m_shape;
+		return subset;
+	}
 
 	friend void swap(Data& a, Data& b){
 		swap(a.m_data,b.m_data);
+		std::swap(a.m_shape,b.m_shape);
 	}
 };
 
@@ -419,7 +439,8 @@ public:
 	///this to work.
 	UnlabeledData splice(std::size_t batch){
 		UnlabeledData right;
-		right.m_data=m_data.splice(m_data.begin()+batch);
+		right.m_data = m_data.splice(m_data.begin()+batch);
+		right.m_shape = this->m_shape;
 		return right;
 	}
 
@@ -602,6 +623,26 @@ public:
 	const_batch_reference batch(std::size_t i) const{
 		return const_batch_reference(m_data.batch(i),m_label.batch(i));
 	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape const& inputShape() const{
+		return m_data.shape();
+	}
+	
+	///\brief Returns the Shape of the inputs.
+	Shape& inputShape(){
+		return m_data.shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape const& labelShape() const{
+		return m_label.shape();
+	}
+	
+	///\brief Returns the Shape of the labels.
+	Shape& labelShape(){
+		return m_label.shape();
+	}
 
 	// MISC
 
@@ -692,19 +733,8 @@ public:
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices.
-	void indexedSubset(IndexSet const& indices, LabeledData& subset) const{
-		m_data.indexedSubset(indices,subset.m_data);
-		m_label.indexedSubset(indices,subset.m_label);
-	}
-
-	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, LabeledData& subset, LabeledData& complement)const{
-		IndexSet comp;
-		detail::complement(indices,m_data.numberOfBatches(),comp);
-		m_data.indexedSubset(indices,subset.m_data);
-		m_label.indexedSubset(indices,subset.m_label);
-		m_data.indexedSubset(comp,complement.m_data);
-		m_label.indexedSubset(comp,complement.m_label);
+	LabeledData indexedSubset(IndexSet const& indices) const{
+		return LabeledData(m_data.indexedSubset(indices),m_label.indexedSubset(indices));
 	}
 protected:
 	InputContainer m_data;               /// point data
@@ -725,6 +755,27 @@ struct TransformedData{
 	typedef Data<typename detail::TransformedDataElement<Functor,T>::type > type;
 };
 
+namespace detail{
+template<class T>
+struct InferShape{
+	static Shape infer(T const&){return {};}
+};
+
+template<class T>
+struct InferShape<Data<blas::vector<T> > >{
+	static Shape infer(Data<blas::vector<T> > const& f){
+		return {f.element(0).size()};
+	}
+};
+
+template<class T>
+struct InferShape<Data<blas::compressed_vector<T> > >{
+	static Shape infer(Data<blas::compressed_vector<T> > const& f){
+		return {f.element(0).size()};
+	}
+};
+
+}
 
 /**
  * \addtogroup shark_globals
@@ -759,7 +810,7 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 		);
 		start = end;
 	}
-
+	data.shape() = detail::InferShape<Data<Input> >::infer(data);
 	return data;
 }
 
@@ -850,30 +901,6 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 	return classSizes(dataset.labels());
 }
 
-
-//subsetting
-template<class DatasetT>
-DatasetT indexedSubset(
-	DatasetT const& dataset,
-	typename DatasetT::IndexSet const& indices
-){
-	DatasetT subset;
-	dataset.indexedSubset(indices,subset);
-	return subset;
-}
-///\brief  Fill in the subset of batches [start,...,size+start[.
-template<class DatasetT>
-DatasetT rangeSubset(DatasetT const& dataset, std::size_t start, std::size_t end){
-	typename DatasetT::IndexSet indices;
-	detail::range(end-start, start, indices);
-	return indexedSubset(dataset,indices);
-}
-///\brief  Fill in the subset of batches [0,...,size[.
-template<class DatasetT>
-DatasetT rangeSubset(DatasetT const& dataset, std::size_t size){
-	return rangeSubset(dataset,size,0);
-}
-
 // TRANSFORMATION
 ///\brief Transforms a dataset using a Functor f and returns the transformed result.
 ///
@@ -892,6 +919,7 @@ transform(Data<T> const& data, Functor f){
 			boost::make_transform_iterator(batchBegin(data.batch(i)), f),
 			boost::make_transform_iterator(batchEnd(data.batch(i)), f)
 		);
+	result.shape() = detail::InferShape<Data<ResultType> >::infer(result);
 	return result;
 }
 
@@ -909,6 +937,11 @@ transform(Data<T> const& data, Functor const& f){
 	Data<ResultType> result(batches);
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
 		result.batch(i)= f(data.batch(i));
+	Shape shape = detail::InferShape<Functor>::infer(f);
+	if(shape == Shape()){
+		shape = detail::InferShape<Data<ResultType> >::infer(result);
+	}
+	result.shape() = shape;
 	return result;
 }
 
@@ -927,15 +960,24 @@ transformLabels(LabeledData<I,L> const& data, Functor const& f){
 	return DatasetType(data.inputs(),transform(data.labels(),f));
 }
 
-///\brief Creates a copy o a dataset selecting only a certain set of features.
-template<class FeatureSet>
-Data<RealVector> selectFeatures(Data<RealVector> const& data,FeatureSet const& features){
-	return transform(data,detail::SelectFeatures<FeatureSet>(features));
+///\brief Creates a copy of a dataset selecting only a certain set of features.
+template<class T, class FeatureSet>
+Data<blas::vector<T> > selectFeatures(Data<blas::vector<T> > const& data,FeatureSet const& features){
+	auto select = [&](blas::matrix<T> const& input){
+		blas::matrix<T> output(input.size1(),features.size());
+		for(std::size_t i = 0; i != input.size1(); ++i){
+			for(std::size_t j = 0; j != features.size(); ++j){
+				output(i,j) = input(i,features[j]);
+			}
+		}
+		return output;
+	};
+	return transform(data,select);
 }
 
 template<class T, class FeatureSet>
 LabeledData<RealVector,T> selectInputFeatures(LabeledData<RealVector,T> const& data,FeatureSet const& features){
-	return transformInputs(data, detail::SelectFeatures<FeatureSet>(features));
+	return LabeledData<RealVector,T>(selectFeatures(data.inputs(),features), data.labels());
 }
 
 
@@ -1045,7 +1087,7 @@ LabeledData<I,unsigned int> binarySubProblem(
 	for(;start != numBatches && getBatchElement(data.batch(start),0).label == bigger; ++start)
 		indexSet.push_back(start);
 
-	return transformLabels(indexedSubset(data,indexSet), [=](unsigned int label){return (unsigned int)(label == oneClass);});
+	return transformLabels(data.indexedSubset(indexSet), [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
 
 /// \brief Construct a binary (two-class) one-versus-rest problem from a multi-class problem.
@@ -1059,173 +1101,10 @@ LabeledData<I,unsigned int> binarySubProblem(
 template<class I>
 LabeledData<I,unsigned int> oneVersusRestProblem(
 	LabeledData<I,unsigned int>const& data,
-	unsigned int oneClass)
-{
+	unsigned int oneClass
+){
 	return transformLabels(data, [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
-
-///
-///\brief Transformation function multiplying the elements in a dataset by a scalar or component-wise by values stores in a vector
-///
-class Multiply {
-public:
-	///@param factor All components of all vectors in the dataset are multiplied by this number
-	Multiply(double factor) : m_factor(factor), m_scalar(true) {}
-	///@param factor For all elements in the dataset, the i-th component is multiplied with the i-th component of this vector
-	Multiply(const RealVector factor) : m_factor(0), m_factorv(factor), m_scalar(false) {}
-
-	typedef RealVector result_type;
-
-	RealVector operator()(RealVector input) const {
-		if(m_scalar) {
-			for(std::size_t i = 0; i != input.size(); ++i) input(i) *= m_factor;
-			return input;
-		} else {
-			SIZE_CHECK(m_factorv.size() == input.size());
-			for(std::size_t i = 0; i != input.size(); ++i) input(i) *= m_factorv(i);
-			return input;
-		}
-	}
-private:
-	double m_factor;
-	RealVector m_factorv;
-	bool m_scalar;
-};
-
-///
-///\brief Transformation function dividing the elements in a dataset by a scalar or component-wise by values stores in a vector
-///
-class Divide {
-public:
-	///@param factor All components of all vectors in the dataset are divided by this number
-	Divide(double factor) : m_factor(factor), m_scalar(true) {}
-	///@param factor For all elements in the dataset, the i-th component is divided by the i-th component of this vector
-	Divide(const RealVector factor) : m_factor(0), m_factorv(factor), m_scalar(false) {}
-
-	typedef RealVector result_type;
-
-	RealVector operator()(RealVector input) const {
-		if(m_scalar) {
-			for(std::size_t i = 0; i != input.size(); ++i) input(i) /= m_factor;
-			return input;
-		} else {
-			SIZE_CHECK(m_factorv.size() == input.size());
-			for(std::size_t i = 0; i != input.size(); ++i) input(i) /= m_factorv(i);
-			return input;
-		}
-	}
-private:
-	double m_factor;
-	RealVector m_factorv;
-	bool m_scalar;
-};
-
-
-///
-///\brief Transformation function adding a vector or a scalar to the elements in a dataset
-///
-class Shift {
-public:
-	///@param offset Scalar added to all components of all vectors in the dataset
-	Shift(double offset) : m_offset(offset), m_scalar(true) {}
-	///@param offset Vector added to vectors in the dataset
-	Shift(const RealVector offset) : m_offsetv(offset), m_scalar(false) {}
-
-	typedef RealVector result_type;
-
-	RealVector operator()(RealVector input) const {
-		if(m_scalar) {
-			for(std::size_t i = 0; i != input.size(); ++i)
-				input(i) += m_offset;
-		} else {
-			SIZE_CHECK(m_offsetv.size() == input.size());
-			for(std::size_t i = 0; i != input.size(); ++i)
-				input(i) += m_offsetv(i);
-		}
-		return input;
-
-	}
-private:
-	double m_offset;
-	RealVector m_offsetv;
-	bool m_scalar;
-};
-
-///
-///\brief Transformation function truncating elements in a dataset
-///
-class Truncate {
-public:
-	///@param minValue All elements below this value are cut to the minimum value
-	///@param maxValue All elements above this value are cut to the maximum value
-	Truncate(double minValue,double maxValue) : m_min(minValue), m_max(maxValue){}
-	///@param minv Lower bound for element-wise truncation
-	///@param maxv Upper bound for element-wise truncation
-	Truncate(const RealVector minv, const RealVector maxv) : m_min(1), m_max(-1), m_minv(minv), m_maxv(maxv) { SIZE_CHECK(m_minv.size() == m_maxv.size()); }
-
-	typedef RealVector result_type;
-
-	RealVector operator()(RealVector input) const {
-		if(m_min < m_max) {
-			for(std::size_t i = 0; i != input.size(); ++i){
-				input(i) = std::max(m_min, std::min(m_max, input(i)));
-			}
-		} else {
-			SIZE_CHECK(m_minv.size() == input.size());
-			for(std::size_t i = 0; i != input.size(); ++i){
-				input(i) = std::max(m_minv(i), std::min(m_maxv(i), input(i)));
-			}
-		}
-		return input;
-	}
-private:
-	double m_min;
-	double m_max;
-	RealVector m_minv;
-	RealVector m_maxv;
-};
-
-///
-///\brief Transformation function first truncating and then rescaling elements in a dataset
-///
-class TruncateAndRescale {
-public:
-	///@param minCutValue All elements below this value are cut to the minimum value
-	///@param maxCutValue All elements above this value are cut to the maximum value
-	///@param minValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
-	///@param maxValue The imterval [minCutValue, maxCutValue] is mapped to [minValue, maxValue]
-	TruncateAndRescale(double minCutValue, double maxCutValue, double minValue = 0., double maxValue = 1.) : m_minCut(minCutValue), m_maxCut(maxCutValue), m_range(maxValue - minValue), m_min(minValue), m_scalar(true) {}
-	///@param minv Lower bound for element-wise truncation
-	///@param maxv Upper bound for element-wise truncation
-	///@param minValue The imterval [minv, maxv is mapped to [minValue, maxValue]
-	///@param maxValue The imterval [minv, maxv] is mapped to [minValue, maxValue]
-	TruncateAndRescale(const RealVector minv, const RealVector maxv, double minValue = 0., double maxValue = 1.) : m_minCutv(minv), m_maxCutv(maxv), m_range(maxValue - minValue), m_min(minValue), m_scalar(false) { SIZE_CHECK(m_minCutv.size() == m_maxCutv.size()); }
-
-	typedef RealVector result_type;
-
-	RealVector operator()(RealVector input) const {
-		if(m_scalar) {
-			for(std::size_t i = 0; i != input.size(); ++i){
-				input(i) = (std::max(m_minCut, std::min(m_maxCut, input(i))) - m_minCut)  / (m_maxCut - m_minCut) * m_range + m_min;
-			}
-		} else {
-			SIZE_CHECK(m_minCutv.size() == input.size());
-			for(std::size_t i = 0; i != input.size(); ++i){
-				input(i) = (std::max(m_minCutv(i), std::min(m_maxCutv(i), input(i))) - m_minCutv(i))  / (m_maxCutv(i) - m_minCutv(i)) * m_range + m_min;
-			}
-		}
-		return input;
-	}
-private:
-	double m_minCut;
-	double m_maxCut;
-	RealVector m_minCutv;
-	RealVector m_maxCutv;
-	double m_range; // maximum - minimum
-	double m_min;
-	bool m_scalar;
-};
-
 
 template <typename RowType>
 RowType getColumn(Data<RowType> const& data, std::size_t columnID) {

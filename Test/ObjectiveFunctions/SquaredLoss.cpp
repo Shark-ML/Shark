@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL ) {
 
 
 		//the test results
-		double valueResult = sqr(testPoint(0,0)-testLabel(0,0))+sqr(testPoint(0,1)-testLabel(0,1));
+		double valueResult = 0.5 * sqr(testPoint(0,0)-testLabel(0,0))+0.5*sqr(testPoint(0,1)-testLabel(0,1));
 		RealVector estimatedDerivative = estimateDerivative(loss, testPoint, testLabel);
 
 		//test eval

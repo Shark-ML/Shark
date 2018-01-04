@@ -58,15 +58,7 @@ int main()
 
 	// create an indexed subset of batches
 	std::vector<std::size_t> indices;     // indices of the batches to be contained in the subset
-	LabeledData<I,L> subset = indexedSubset(dataset, indices);
-
-	// if also the complement of the set is needed, the call is:
-	LabeledData<I,L> complement;
-	dataset.indexedSubset(indices, subset, complement);
-
-	// create subsets from ranges of batches
-	LabeledData<I,L> range1 = rangeSubset(dataset, start, end);   // contains batches start,...,end-1
-	LabeledData<I,L> range2 = rangeSubset(dataset, end);          // contains batches 0,...,end-1
+	LabeledData<I,L> subset = dataset.indexedSubset(indices);
 //###end<subsets>
 
 	unsigned int k = 7;
