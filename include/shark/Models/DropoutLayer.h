@@ -153,7 +153,7 @@ public:
 	}
 
 	/// From ISerializable
-	void read(InArchive& archive){ archive >> m_dropoutProbability;}
+	void read(InArchive& archive){archive >> m_dropoutProbability;}
 	/// From ISerializable
 	void write(OutArchive& archive) const{ archive << m_dropoutProbability;}
 };

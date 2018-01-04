@@ -38,6 +38,11 @@
 namespace shark {
 
 
+	
+enum class Convolution{
+	Valid,
+	ZeroPad
+};
 ///
 /// \brief Convolutional Model for 2D image data.
 ///
@@ -49,13 +54,22 @@ namespace shark {
 /// The image is allowed to have several channels andare linearized to a single vector of size width * height * numChannels.
 /// the linearization is performed as linearizing each channel as if it were a row-major matrix and then concatenating the different channels.
 ///
+/// For handling edge condition, the Conv2D model handles two different convolution modes:
+///
+/// Convolution::Valid:
 /// The output is only computed on patches which are fully inside the unpadded image as a linearized vector in the same format
-/// of size (width - filter_width+1) * (height - filter_height+1) * numFilters. Here each filter response as treated as one channel.
+/// of size (width - filter_width+1) * (height - filter_height+1) * numFilters.
+///
+/// Convolution::ZeroPad
+/// The output input is padded with zeros and the output has the same size as the input
+/// of size width * height * numFilters.
 template <class VectorType = RealVector, class ActivationFunction = LinearNeuron>
 class Conv2DModel : public AbstractModel<VectorType,VectorType,VectorType>{
 private:
 	typedef AbstractModel<VectorType,VectorType, VectorType> base_type;
 	typedef Conv2DModel<VectorType, ActivationFunction> self_type;
+
+	static_assert(!std::is_same<typename VectorType::storage_type::storage_tag, blas::dense_tag>::value, "Conv2D not implemented for sparse inputs");
 public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::BatchInputType BatchInputType;
@@ -64,21 +78,20 @@ public:
 	/// Default Constructor; use setStructure later.
 	Conv2DModel(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
-		if(std::is_same<typename VectorType::storage_type::storage_tag, blas::dense_tag>::value){
-			base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		}
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
 	
 	///\brief Sets the structure by setting the dimensionalities of image and filters.
 	///
 	/// \arg imageShape Shape of the image imHeight x imWidth x channel
 	/// \arg filterShape Shape of the filter matrix numFilters x fiHeight x fiWidth x channel
+	/// \arg type Type of convolution padding to perform
 	Conv2DModel(
-		Shape const& imageShape, Shape const& filterShape
+		Shape const& imageShape, Shape const& filterShape, Convolution type = Convolution::ZeroPad
 	){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		setStructure(imageShape, filterShape);
+		setStructure(imageShape, filterShape, type);
 	}
 
 	std::string name() const
@@ -90,7 +103,11 @@ public:
 	}
 	///\brief Returns the shape of the output
 	Shape outputShape() const{
-		return {m_imageHeight, m_imageWidth, m_numFilters};
+		if(m_type != Convolution::Valid){
+			return {m_imageHeight, m_imageWidth, m_numFilters};
+		}else{
+			return {m_imageHeight - m_filterHeight + 1, m_imageWidth - m_filterWidth + 1, m_numFilters};
+		}
 	}
 	
 	/// \brief Returns the activation function.
@@ -125,15 +142,17 @@ public:
 	///
 	/// \arg imageShape Shape of the image imHeight x imWidth x channel
 	/// \arg filterShape Shape of the filter matrix numFilters x fiHeight x fiWidth
+	/// \arg type Type of convolution padding to perform
 	void setStructure(
-		Shape const& imageShape, Shape const& filterShape
+		Shape const& imageShape, Shape const& filterShape, Convolution type = Convolution::ZeroPad
 	){
-		m_imageHeight = imageShape.dim(0);
-		m_imageWidth = imageShape.dim(1);
-		m_numChannels = imageShape.dim(2);
-		m_numFilters = filterShape.dim(0);
-		m_filterHeight = filterShape.dim(1);
-		m_filterWidth = filterShape.dim(2);
+		m_type = type;
+		m_imageHeight = imageShape[0];
+		m_imageWidth = imageShape[1];
+		m_numChannels = imageShape[2];
+		m_numFilters = filterShape[0];
+		m_filterHeight = filterShape[1];
+		m_filterWidth = filterShape[2];
 		m_filters.resize(m_filterHeight * m_filterWidth * m_numFilters * m_numChannels);
 		m_offset.resize(m_numFilters);
 		updateBackpropFilters();
@@ -145,18 +164,21 @@ public:
 
 	using base_type::eval;
 
-	/// Evaluate the model: output = matrix * input + offset
+	/// Evaluate the model
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(inputs.size2() == inputShape().numElements());
 		outputs.resize(inputs.size1(),outputShape().numElements());
-		std::size_t outputsForFilter = m_imageHeight * m_imageWidth;
+		//geometry for "zero pad"
+		std::size_t outputsForFilter = outputShape().numElements()/m_numFilters;
+		std::size_t paddingHeight = (m_type != Convolution::Valid) ? m_filterHeight - 1: 0;
+		std::size_t paddingWidth = (m_type != Convolution::Valid) ? m_filterWidth - 1: 0;
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto output = row(outputs,i);
 			blas::kernels::conv2d(row(inputs,i), m_filters, output,
 				m_numChannels, m_numFilters, 
 				m_imageHeight, m_imageWidth,
 				m_filterHeight, m_filterWidth,
-				m_filterHeight - 1, m_filterWidth - 1
+				paddingHeight, paddingWidth
 			);
 			//apply offset
 			noalias(to_matrix(output, m_numFilters, outputsForFilter) ) += trans(blas::repeat(m_offset,outputsForFilter));
@@ -185,14 +207,23 @@ public:
 		
 		BatchInputType patches(outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
-			blas::bindings::im2mat_pad(//todo must get public interface in remora
-				row(inputs,i),patches,
-				m_numChannels, 
-				m_imageHeight, m_imageWidth,
-				m_filterHeight, m_filterWidth,
-				m_filterHeight - 1, m_filterWidth - 1
-			);
-			auto delta_mat = to_matrix(row(delta,i), m_numFilters, outputShape().numElements()/m_numFilters);
+			if(m_type == Convolution::Valid){
+				blas::bindings::im2mat(//todo must get public interface in remora
+					row(inputs,i),patches,
+					m_numChannels, 
+					m_imageHeight, m_imageWidth,
+					m_filterHeight, m_filterWidth
+				);
+			}else{
+				blas::bindings::im2mat_pad(//todo must get public interface in remora
+					row(inputs,i),patches,
+					m_numChannels, 
+					m_imageHeight, m_imageWidth,
+					m_filterHeight, m_filterWidth,
+					m_filterHeight - 1, m_filterWidth - 1
+				);
+			}
+			auto delta_mat = to_matrix(row(delta,i), m_numFilters, patches.size1());
 			noalias(weightGradient) += delta_mat % patches;
 			noalias(offsetGradient) += sum_columns(delta_mat);
 		}
@@ -212,16 +243,22 @@ public:
 		
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
-
+		Shape shape = outputShape();
+		std::size_t paddingHeight = m_filterHeight - 1;
+		std::size_t paddingWidth = m_filterWidth - 1;
+		if(m_type == Convolution::Valid){
+			paddingHeight *=2;
+			paddingWidth *=2;
+		}
 		derivatives.resize(inputs.size1(),inputShape().numElements());
 		derivatives.clear();
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto derivative = row(derivatives,i);
 			blas::kernels::conv2d(row(delta,i), m_backpropFilters, derivative,
 				m_numFilters, m_numChannels, 
-				m_imageHeight, m_imageWidth,
+				shape[0], shape[1],
 				m_filterHeight, m_filterWidth,
-				m_filterHeight - 1, m_filterWidth - 1
+				paddingHeight, paddingWidth
 			);
 		}
 	}
@@ -236,6 +273,7 @@ public:
 		archive >> m_filterWidth;
 		archive >> m_numChannels;
 		archive >> m_numFilters;
+		archive >> m_type;
 		updateBackpropFilters();
 	}
 	/// From ISerializable
@@ -248,6 +286,7 @@ public:
 		archive << m_filterWidth;
 		archive << m_numChannels;
 		archive << m_numFilters;
+		archive << m_type;
 	}
 	
 private:
@@ -295,6 +334,8 @@ private:
 	std::size_t m_filterWidth;
 	std::size_t m_numChannels;
 	std::size_t m_numFilters;
+	
+	Convolution m_type;
 };
 
 

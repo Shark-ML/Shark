@@ -1,12 +1,12 @@
 /*!
  * 
  *
- * \brief       Negative Log Likelihood error function
+ * \brief       Variational-autoencoder error function
  * 
  * 
  *
  * \author      O.Krause
- * \date        2014
+ * \date        2017
  *
  *
  * \par Copyright 1995-2017 Shark Development Team

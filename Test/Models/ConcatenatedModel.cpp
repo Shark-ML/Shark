@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 
 	//test1: all activated
 	{
-		//parameters
+		//parameters(net2 doe snot have parameters)
 		size_t modelParameters = net1.numberOfParameters()+net3.numberOfParameters();
 		BOOST_REQUIRE_EQUAL(model.numberOfParameters(), modelParameters);
 		RealVector parameters(modelParameters);
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	for (size_t i=0; i<1000; i++)
 	{
 		RealVector output = modelDeserialized(dataset.element(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
+		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-8);
 	}
 }
 

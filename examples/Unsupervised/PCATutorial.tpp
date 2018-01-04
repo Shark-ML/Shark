@@ -72,8 +72,8 @@ int main(){
 	
 	//###begin<import>
 	unsigned l = images.numberOfElements();   // number of samples
-	unsigned x = images.shape().dim(1); // width of images
-	unsigned y = images.shape().dim(0); // height of images
+	unsigned x = images.shape()[1]; // width of images
+	unsigned y = images.shape()[0]; // height of images
 	//###end<import>
 	
 	cout << "Eigenvalue decomposition ... " << flush;

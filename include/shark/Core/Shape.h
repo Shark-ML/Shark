@@ -74,10 +74,10 @@ public:
 			m_numElements *= dim;
 		}
 	}
-	std::size_t numDims()const{
+	std::size_t size()const{
 		return m_dims.size();
 	}
-	std::size_t dim(std::size_t i) const{
+	std::size_t operator[](std::size_t i) const{
 		return m_dims[i];
 	}
 	std::size_t numElements()const{
@@ -100,22 +100,26 @@ private:
 };
 
 inline bool operator == (Shape const& shape1, Shape const& shape2){
-	if(shape1.numDims() != shape2.numDims())
+	if(shape1.size() != shape2.size())
 		return false;
-	for(std::size_t i = 0; i != shape1.numDims(); ++i){
-		if(shape1.dim(i) != shape2.dim(i)){
+	for(std::size_t i = 0; i != shape1.size(); ++i){
+		if(shape1[i] != shape2[i]){
 			return false;
 		}
 	}
 	return true;
 }
 
+inline bool operator != (Shape const& shape1, Shape const& shape2){
+	return ! (shape1 == shape2);
+}
+
 template<class E, class T>
 std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os, Shape const& shape) {
 	os<<'(';
-	for(std::size_t i = 0; i != shape.numDims(); ++i){
-		os<<shape.dim(i);
-		if(i != shape.numDims() -1)
+	for(std::size_t i = 0; i != shape.size(); ++i){
+		os<<shape[i];
+		if(i != shape.size() -1)
 			os<<", ";
 	}
 	os<<')';
