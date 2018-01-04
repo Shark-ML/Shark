@@ -36,7 +36,7 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Core/IParameterizable.h>
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 
 namespace shark {

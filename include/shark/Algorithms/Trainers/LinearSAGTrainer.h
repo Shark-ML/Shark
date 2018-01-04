@@ -41,7 +41,6 @@
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Models/LinearModel.h>
-#include <shark/Models/LinearClassifier.h>
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/Statistics/Distributions/MultiNomialDistribution.h>
 #include <shark/Data/DataView.h>

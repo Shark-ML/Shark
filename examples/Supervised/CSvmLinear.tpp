@@ -1,7 +1,6 @@
 
 //###begin<includes>
 #include <shark/Data/Dataset.h>
-#include <shark/Models/LinearClassifier.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 //###end<includes>

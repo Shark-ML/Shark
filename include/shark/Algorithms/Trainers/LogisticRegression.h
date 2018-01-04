@@ -36,7 +36,7 @@
 #ifndef SHARK_ALGORITHMS_TRAINERS_LOGISTICREGRESSION_H
 #define SHARK_ALGORITHMS_TRAINERS_LOGISTICREGRESSION_H
 
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
 #include <shark/Algorithms/GradientDescent/LBFGS.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>

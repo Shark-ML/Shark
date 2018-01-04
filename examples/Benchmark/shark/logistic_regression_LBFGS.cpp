@@ -4,7 +4,7 @@
 
 #include <shark/Algorithms/GradientDescent/LBFGS.h>
 #include <shark/ObjectiveFunctions/ErrorFunction.h>
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 
 #include <shark/Core/Timer.h>
 #include <iostream>

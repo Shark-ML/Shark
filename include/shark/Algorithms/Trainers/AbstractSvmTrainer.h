@@ -50,7 +50,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
-#include <shark/Models/LinearClassifier.h>
+#include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 
