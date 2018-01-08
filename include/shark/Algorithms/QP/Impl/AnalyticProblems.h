@@ -32,6 +32,8 @@
 #ifndef SHARK_ALGORITHMS_QP_IMPL_ANALYTICPROBLEMS_H
 #define SHARK_ALGORITHMS_QP_IMPL_ANALYTICPROBLEMS_H
 
+#include <algorithm> //for std::min, std::max
+
 namespace shark{ namespace detail{
 //! Exact solver for the one-dimensional sub-problem<br>
 //! maximize \f$ g \alpha - Q/2 \alpha^2 \f$<br>
