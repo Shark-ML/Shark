@@ -91,6 +91,13 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	BOOST_REQUIRE_CLOSE(error_train_serialized, error_train, 1.e-13);
 	BOOST_REQUIRE_CLOSE(error_train2_serialized, error_train2, 1.e-13);
 	BOOST_REQUIRE_CLOSE(error_test_serialized, error_test, 1.e-13);
+
+        // Find the leaf for a sample
+        auto aTree = model.getModel(0);
+        auto result = aTree.findLeaf(test.inputs().element(0));
+        BOOST_CHECK(result < aTree.numberOfNodes());
+        std::cout << "Result : " << result << " < " << aTree.numberOfNodes() << '\n';
+        
 }
 
 BOOST_AUTO_TEST_SUITE_END()
