@@ -118,8 +118,6 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	for(auto i=0; i<nodeIds.size(); ++i){
 	BOOST_REQUIRE_EQUAL(nodeIds[i], nodeLabels[i]);	
 	}
-
-	
         
 }
 

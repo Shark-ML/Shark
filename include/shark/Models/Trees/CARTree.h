@@ -303,7 +303,7 @@ private:
 		return m_labels[m_tree[nodeId].rightIdOrIndex];
 	}
 
-	///Number of attributes (set by trainer)
+  ///Number of attributes (set by trainer)
 	std::size_t m_inputDimension;
 };
 
