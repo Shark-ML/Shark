@@ -280,17 +280,6 @@ public:
 		return nodeId;
 	}
 
-	/// Replace the label of each leaf by its nodeId
-	void relabelTreeWithNodeIds()
-	{
-		for(auto i=0; i<m_tree.size(); ++i){
-			auto node = m_tree[i];
-			if(node.leftId==0) {
-			m_labels[node.rightIdOrIndex] = i;
-			}
-		}
-      	}
-
 private:
 	/// tree of the model
 	TreeType m_tree;
@@ -303,7 +292,7 @@ private:
 		return m_labels[m_tree[nodeId].rightIdOrIndex];
 	}
 
-  ///Number of attributes (set by trainer)
+	///Number of attributes (set by trainer)
 	std::size_t m_inputDimension;
 };
 

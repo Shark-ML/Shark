@@ -100,25 +100,6 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	nodeIds.push_back(result);
 	BOOST_CHECK(result < aTree.numberOfNodes());
 	}
-	//Relabel the trees with nodeId instead of the labels
-	RFClassifier<unsigned int> relabeledRF;
-	relabeledRF.clearModels();
-	for(auto m=0; m<model.numberOfModels(); ++m){
-	auto aTree = model.getModel(m);
-	aTree.relabelTreeWithNodeIds();
-	relabeledRF.addModel(aTree);
-	}
-	std::vector<unsigned int> nodeLabels;
-	for(auto m=0; m<model.numberOfModels(); ++m){
-	auto aTree = relabeledRF.getModel(m);
-	unsigned int result{1000};
-	aTree.eval(test.inputs().element(0), result);
-	nodeLabels.push_back(result);
-	}
-	for(auto i=0; i<nodeIds.size(); ++i){
-	BOOST_REQUIRE_EQUAL(nodeIds[i], nodeLabels[i]);	
-	}
-        
 }
 
 BOOST_AUTO_TEST_SUITE_END()
