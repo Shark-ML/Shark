@@ -270,8 +270,8 @@ public:
 		std::size_t nodeId = 0;
 		while(m_tree[nodeId].leftId != 0){
 			if(pattern[m_tree[nodeId].attributeIndex] <= m_tree[nodeId].attributeValue){
-			//Branch on left node
-			nodeId = m_tree[nodeId].leftId;
+				//Branch on left node
+				nodeId = m_tree[nodeId].leftId;
 			}else{
 				//Branch on right node
 				nodeId = m_tree[nodeId].rightIdOrIndex;
