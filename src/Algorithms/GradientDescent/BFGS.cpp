@@ -1,9 +1,9 @@
 /*!
  * 
  *
- * \brief       BFGS
+ * \brief       BFGS<SearchPointType>
  * 
- * The Broyden, Fletcher, Goldfarb, Shannon (BFGS) algorithm is a
+ * The Broyden, Fletcher, Goldfarb, Shannon (BFGS<SearchPointType>) algorithm is a
  * quasi-Newton method for unconstrained real-valued optimization.
  * 
  * 
@@ -33,28 +33,28 @@
  *
  */
  #define SHARK_COMPILE_DLL
+ #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/BFGS.h>
 
 using namespace shark;
 
-void BFGS::initModel(){
-	m_hessian.resize(m_dimension, m_dimension);
-	noalias(m_hessian) = blas::identity_matrix<double>(m_dimension);
+template<class SearchPointType>
+void BFGS<SearchPointType>::initModel(){
+	m_hessian.resize(this->m_dimension, this->m_dimension);
+	noalias(m_hessian) = blas::identity_matrix<double>(this->m_dimension);
 }
-void BFGS::computeSearchDirection(ObjectiveFunctionType const&){
-	RealVector gamma = m_derivative - m_lastDerivative;
-	RealVector delta = m_best.point - m_lastPoint;
+template<class SearchPointType>
+void BFGS<SearchPointType>::computeSearchDirection(ObjectiveFunctionType const&){
+	SearchPointType gamma = this->m_derivative - this->m_lastDerivative;
+	SearchPointType delta = this->m_best.point - this->m_lastPoint;
 	double d = inner_prod(gamma,delta);
 	
-	RealVector Hg = prod(m_hessian,gamma);
+	SearchPointType Hg = prod(m_hessian,gamma);
 	
 	//update hessian
-	if (d < 1e-20)
-	{
-		noalias(m_hessian) = blas::identity_matrix<double>(m_dimension);
-	}
-	else
-	{
+	if (d < 1e-20){
+		noalias(m_hessian) = blas::identity_matrix<double>(this->m_dimension);
+	}else{
 		double scale=inner_prod(gamma,Hg);
 		scale = (scale / d + 1) / d;
 		
@@ -64,18 +64,21 @@ void BFGS::computeSearchDirection(ObjectiveFunctionType const&){
 	}
 	
 	//compute search direction
-	noalias(m_searchDirection) = -prod(m_hessian,m_derivative);
+	noalias(this->m_searchDirection) = -m_hessian % this->m_derivative;
 }
 
 //from ISerializable
-void BFGS::read( InArchive & archive )
-{
-	AbstractLineSearchOptimizer::read(archive);
+template<class SearchPointType>
+void BFGS<SearchPointType>::read( InArchive & archive ){
+	AbstractLineSearchOptimizer<SearchPointType>::read(archive);
 	archive>>m_hessian;
 }
 
-void BFGS::write( OutArchive & archive ) const
-{
-	AbstractLineSearchOptimizer::write(archive);
+template<class SearchPointType>
+void BFGS<SearchPointType>::write( OutArchive & archive ) const{
+	AbstractLineSearchOptimizer<SearchPointType>::write(archive);
 	archive<<m_hessian;
 }
+
+template class SHARK_EXPORT_SYMBOL BFGS<RealVector>;
+template class SHARK_EXPORT_SYMBOL BFGS<FloatVector>;

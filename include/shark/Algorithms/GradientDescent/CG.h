@@ -37,7 +37,6 @@
 #ifndef SHARK_ML_OPTIMIZER_CG_H
 #define SHARK_ML_OPTIMIZER_CG_H
 
-#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
 namespace shark {
@@ -55,20 +54,28 @@ namespace shark {
 /// while ensuring a descent direction.
 /// 
 /// We implement restarting to ensure quadratic convergence near the optimum as well as numerical stability
-class CG : public AbstractLineSearchOptimizer<RealVector>{
+template<class SearchPointType = RealVector>
+class CG : public AbstractLineSearchOptimizer<SearchPointType>
+{
+public:
+	typedef typename AbstractLineSearchOptimizer<SearchPointType>::ObjectiveFunctionType ObjectiveFunctionType;
 protected:
-	SHARK_EXPORT_SYMBOL void initModel();
-	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const& objectiveFunction);
+	void initModel();
+	void computeSearchDirection(ObjectiveFunctionType const& objectiveFunction);
 public:
 	std::string name() const
 	{ return "CG"; }
 
 	//from ISerializable
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
+	void read( InArchive & archive );
+	void write( OutArchive & archive ) const;
 protected:
 	unsigned m_count;
 };
+
+//implementation is included in the library
+extern template class CG<RealVector>;
+extern template class CG<FloatVector>;
 
 }
 

@@ -241,7 +241,7 @@ private:
 		logistic_model.setStructure(1,1, true);//1 input, 1 output, bias = 2 parameters
 		CrossEntropy<RealVector> logistic_loss;
 		ErrorFunction<> error(data, &logistic_model, & logistic_loss);
-		BFGS optimizer;
+		BFGS<> optimizer;
 		optimizer.init(error);
 		//this converges after very few iterations (typically 20 function evaluations)
 		while(norm_2(optimizer.derivative())> 1.e-8){

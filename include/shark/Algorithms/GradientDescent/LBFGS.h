@@ -142,6 +142,7 @@ private:
 	std::deque<SearchPointType> m_gradientDifferences;	
 };
 
+//implementation is included in the library
 extern template class LBFGS<RealVector>;
 extern template class LBFGS<FloatVector>;
 
