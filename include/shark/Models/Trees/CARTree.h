@@ -263,6 +263,23 @@ public:
 		//overwrite old tree with pruned tree
 		m_tree = std::move(reordered_tree);
 	}
+
+	/// Find the leaf of the tree for a sample
+	template<class Vector>
+	std::size_t findLeaf(Vector const& pattern) const{
+		std::size_t nodeId = 0;
+		while(m_tree[nodeId].leftId != 0){
+			if(pattern[m_tree[nodeId].attributeIndex] <= m_tree[nodeId].attributeValue){
+			//Branch on left node
+			nodeId = m_tree[nodeId].leftId;
+			}else{
+				//Branch on right node
+				nodeId = m_tree[nodeId].rightIdOrIndex;
+			}
+		}
+		return nodeId;
+	}
+
 private:
 	/// tree of the model
 	TreeType m_tree;
@@ -271,16 +288,7 @@ private:
 	/// Evaluate the CART tree on a single sample
 	template<class Vector>
 	LabelType const& evalPattern(Vector const& pattern) const{
-		std::size_t nodeId = 0;
-		while(m_tree[nodeId].leftId != 0){
-			if(pattern[m_tree[nodeId].attributeIndex] <= m_tree[nodeId].attributeValue){
-				//Branch on left node
-				nodeId = m_tree[nodeId].leftId;
-			}else{
-				//Branch on right node
-				nodeId = m_tree[nodeId].rightIdOrIndex;
-			}
-		}
+		auto nodeId = findLeaf(pattern);
 		return m_labels[m_tree[nodeId].rightIdOrIndex];
 	}
 
