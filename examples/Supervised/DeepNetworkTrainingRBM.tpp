@@ -63,7 +63,7 @@ BinaryRBM trainRBM(
 	//create derivative to optimize the rbm
 	//we want a simple vanilla CD-1.
 	BinaryCD estimator(&rbm);
-	TwoNormRegularizer regularizer;
+	TwoNormRegularizer<> regularizer;
 	//0.0 is the regularization strength. 0.0 means no regularization. choose as >= 0.0
 	estimator.setRegularizer(regularisation,&regularizer);
 	estimator.setK(1);//number of sampling steps
@@ -134,10 +134,10 @@ int main()
 //###end<pretraining_creation>
 	
 //###begin<supervised_training>
-	//create the supervised problem. Cross Entropy loss with one norm regularisation
-	CrossEntropy loss;
-	ErrorFunction error(data, &network, &loss);
-	OneNormRegularizer regularizer(error.numberOfVariables());
+	//create the supervised problem. Cross Entropy loss with two norm regularisation
+	CrossEntropy<RealVector> loss;
+	ErrorFunction<> error(data, &network, &loss);
+	TwoNormRegularizer<> regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 	
 	//optimize the model

@@ -38,7 +38,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/WeightedDataset.h>
-#include "Impl/FunctionWrapperBase.h"
+#include "Impl/ErrorFunction.inl"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -64,29 +64,52 @@ namespace shark{
 /// It automatically infers the input und label type from the given dataset and the output type
 /// of the model in the constructor and ensures that Model and loss match. Thus the user does
 /// not need to provide the types as template parameters. 
-class ErrorFunction : public SingleObjectiveFunction
+template<class SearchPointType = RealVector>
+class ErrorFunction : public AbstractObjectiveFunction<SearchPointType, double>
 {
+private:
+	typedef AbstractObjectiveFunction<SearchPointType, double> FunctionType;
 public:
+	typedef typename FunctionType::ResultType ResultType;
+	typedef typename FunctionType::FirstOrderDerivative FirstOrderDerivative;
+
 	template<class InputType, class LabelType, class OutputType>
 	ErrorFunction(
 		LabeledData<InputType, LabelType> const& dataset,
-		AbstractModel<InputType,OutputType>* model, 
+		AbstractModel<InputType,OutputType, SearchPointType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss,
 		bool useMiniBatches = false
-	);
+	){
+		m_regularizer = nullptr;
+		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss, useMiniBatches));
+
+		this -> m_features = mp_wrapper -> features();
+	}
 	template<class InputType, class LabelType, class OutputType>
 	ErrorFunction(
 		WeightedLabeledData<InputType, LabelType> const& dataset,
-		AbstractModel<InputType,OutputType>* model, 
+		AbstractModel<InputType,OutputType, SearchPointType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss
-	);
-	ErrorFunction(const ErrorFunction& op);
-	ErrorFunction& operator=(const ErrorFunction& op);
+	){
+		m_regularizer = nullptr;
+		mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss));
+		this -> m_features = mp_wrapper -> features();
+	}
+	ErrorFunction(ErrorFunction const& op)
+	:mp_wrapper(op.mp_wrapper->clone()){
+		this -> m_features = mp_wrapper -> features();
+	}
+	ErrorFunction& operator=(ErrorFunction const& op){
+		ErrorFunction copy(op);
+		swap(copy.mp_wrapper,mp_wrapper);
+		swap(copy.m_features, this->m_features);
+		return *this;
+	}
 
 	std::string name() const
 	{ return "ErrorFunction"; }
 	
-	void setRegularizer(double factor, SingleObjectiveFunction* regularizer){
+	void setRegularizer(double factor, FunctionType* regularizer){
 		m_regularizer = regularizer;
 		m_regularizationStrength = factor;
 	}
@@ -103,17 +126,29 @@ public:
 		mp_wrapper-> init();
 	}
 
-	double eval(RealVector const& input) const;
-	ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const;
-	
-	friend void swap(ErrorFunction& op1, ErrorFunction& op2);
-
+	double eval(SearchPointType const& input) const{
+		++this->m_evaluationCounter;
+		double value = mp_wrapper -> eval(input);
+		if(m_regularizer)
+			value += m_regularizationStrength * m_regularizer->eval(input);
+		return value;
+	}
+	ResultType evalDerivative( SearchPointType const& input, FirstOrderDerivative & derivative ) const{
+		++this->m_evaluationCounter;
+		double value = mp_wrapper -> evalDerivative(input,derivative);
+		if(m_regularizer){
+			FirstOrderDerivative regularizerDerivative;
+			value += m_regularizationStrength * m_regularizer->evalDerivative(input,regularizerDerivative);
+			noalias(derivative) += m_regularizationStrength*regularizerDerivative;
+		}
+		return value;
+	}
 private:
-	boost::scoped_ptr<detail::FunctionWrapperBase > mp_wrapper;
-	SingleObjectiveFunction* m_regularizer;
+	boost::scoped_ptr<detail::FunctionWrapperBase<SearchPointType> > mp_wrapper;
+	FunctionType* m_regularizer;
 	double m_regularizationStrength;
 };
 
 }
-#include "Impl/ErrorFunction.inl"
+
 #endif

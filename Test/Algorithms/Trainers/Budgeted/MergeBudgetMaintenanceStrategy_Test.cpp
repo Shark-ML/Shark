@@ -68,8 +68,8 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     {
         MergeBudgetMaintenanceStrategy<RealVector>::MergingProblemFunction mergingProblemFunction(a, b, k);
 	fret = mergingProblemFunction.evalDerivative(h,d);
-        LineSearch lineSearch;
-	lineSearch.lineSearchType() = LineSearch::Dlinmin;
+        LineSearch<RealVector> lineSearch;
+	lineSearch.lineSearchType() = LineSearchType::Dlinmin;
 	lineSearch.init(mergingProblemFunction);
 	lineSearch(h,fret,xi,d,1.0);
         BOOST_CHECK_EQUAL(h(0), 0);
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     xi(0) = 0.00001;
     {
         MergeBudgetMaintenanceStrategy<RealVector>::MergingProblemFunction mergingProblemFunction(a, b, k);
-	LineSearch lineSearch;
-	lineSearch.lineSearchType() = LineSearch::Dlinmin;
+	LineSearch<RealVector> lineSearch;
+	lineSearch.lineSearchType() = LineSearchType::Dlinmin;
 	lineSearch.init(mergingProblemFunction);
 	lineSearch(h,fret,xi,d,1.0);
         BOOST_CHECK_SMALL(h(0), 0.000001);
@@ -100,8 +100,8 @@ BOOST_AUTO_TEST_CASE( MergeBudgetMaintenanceStrategy_MergingProblemFunction)
     xi(0) = 0.00001;
     {
         MergeBudgetMaintenanceStrategy<RealVector>::MergingProblemFunction mergingProblemFunction(a, b, k);
-       LineSearch lineSearch;
-	lineSearch.lineSearchType() = LineSearch::Dlinmin;
+	LineSearch<RealVector> lineSearch;
+	lineSearch.lineSearchType() = LineSearchType::Dlinmin;
 	lineSearch.init(mergingProblemFunction);
 	lineSearch(h,fret,xi,d,1.0);
         BOOST_CHECK_SMALL(h(0) -0.133040685 , 0.000001);

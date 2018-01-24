@@ -35,8 +35,8 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 
 	//the error function is a combination of MSE and 2-norm error
 	SquaredLoss<> loss;
-	ErrorFunction error(training,&network,&loss);
-	TwoNormRegularizer regularizer;
+	ErrorFunction<> error(training,&network,&loss);
+	TwoNormRegularizer<> regularizer;
 	error.setRegularizer(regularization, &regularizer);
 
 	//now train for a number of iterations using Rprop

@@ -38,7 +38,8 @@ namespace shark{
 
 namespace detail{
 ///\brief Base class for implementations of the Error Function.
-class FunctionWrapperBase: public SingleObjectiveFunction{
+template<class SearchPointType>
+class FunctionWrapperBase: public AbstractObjectiveFunction<SearchPointType, double>{
 public:
 	virtual FunctionWrapperBase* clone()const = 0;
 };

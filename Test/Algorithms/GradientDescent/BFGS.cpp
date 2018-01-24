@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE( BFGS_dlinmin )
 {
 	Ellipsoid function(5);
 	BFGS optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::Dlinmin;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,100);
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( BFGS_WolfeCubic )
 {
 	Ellipsoid function(5);
 	BFGS optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
 	testFunction(optimizer,function,100,100);
@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( BFGS_Dlinmin_Rosenbrock )
 {
 	Rosenbrock function(3);
 	BFGS optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::Dlinmin;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,2000);
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( BFGS_WolfeCubic_Rosenbrock )
 {
 	Rosenbrock function(3);
 	BFGS optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
 	testFunction(optimizer,function,100,2000);

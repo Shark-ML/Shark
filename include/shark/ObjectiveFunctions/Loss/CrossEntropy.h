@@ -63,10 +63,15 @@ namespace shark{
  * The class labels must be integers starting from 0. Also for theoretical reasons, the output neurons of a neural
  *  Network must be linear.
  */
-class CrossEntropy : public AbstractLoss<unsigned int,RealVector>
+template<class OutputType>
+class CrossEntropy : public AbstractLoss<unsigned int,OutputType>
 {
 private:
-	typedef AbstractLoss<unsigned int,RealVector> base_type;
+	typedef AbstractLoss<unsigned int,OutputType> base_type;
+	typedef typename base_type::ConstLabelReference ConstLabelReference;
+	typedef typename base_type::ConstOutputReference ConstOutputReference;
+	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::MatrixType MatrixType;
 
 	//uses different formula to compute the binary case for 1 output.
 	//should be numerically more stable
@@ -82,10 +87,7 @@ private:
 	}
 public:
 	CrossEntropy()
-	{
-		m_features |= HAS_FIRST_DERIVATIVE;
-		//~ m_features |= HAS_SECOND_DERIVATIVE;
-	}
+	{ this->m_features |= base_type::HAS_FIRST_DERIVATIVE;}
 
 
 	/// \brief From INameable: return the class name.
@@ -95,7 +97,7 @@ public:
 	// annoyingness of C++ templates
 	using base_type::eval;
 
-	double eval(UIntVector const& target, RealMatrix const& prediction) const {
+	double eval(UIntVector const& target, BatchOutputType const& prediction) const {
 		double error = 0;
 		for(std::size_t i = 0; i != prediction.size1(); ++i){
 			error += eval(target(i), row(prediction,i));
@@ -123,7 +125,7 @@ public:
 		}
 	}
 
-	double evalDerivative(UIntVector const& target, RealMatrix const& prediction, RealMatrix& gradient) const {
+	double evalDerivative(UIntVector const& target, BatchOutputType const& prediction, BatchOutputType& gradient) const {
 		gradient.resize(prediction.size1(),prediction.size2());
 		if ( prediction.size2() == 1 )
 		{
@@ -160,8 +162,7 @@ public:
 	}
 	double evalDerivative(ConstLabelReference target, ConstOutputReference prediction, OutputType& gradient) const {
 		gradient.resize(prediction.size());
-		if ( prediction.size() == 1 )
-		{
+		if ( prediction.size() == 1 ){
 			RANGE_CHECK ( target < 2 );
 			double label = 2.0 * target - 1;   //converts labels from 0/1 to -1/1
 			double exponential =  std::exp ( - label * prediction(0));
@@ -187,7 +188,7 @@ public:
 
 	double evalDerivative(
 		ConstLabelReference target, ConstOutputReference prediction,
-		OutputType& gradient,MatrixType & hessian
+		BatchOutputType& gradient,MatrixType & hessian
 	) const {
 		gradient.resize(prediction.size());
 		hessian.resize(prediction.size(),prediction.size());

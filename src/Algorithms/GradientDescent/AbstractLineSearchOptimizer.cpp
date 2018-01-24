@@ -26,22 +26,25 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- #define SHARK_COMPILE_DLL
+#define SHARK_COMPILE_DLL
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
 using namespace shark;
 
-AbstractLineSearchOptimizer::AbstractLineSearchOptimizer() {
-	m_features |= REQUIRES_VALUE;
-	m_features |= REQUIRES_FIRST_DERIVATIVE;
-	m_linesearch.lineSearchType() = LineSearch::WolfeCubic;
+template<class SearchPointType>
+AbstractLineSearchOptimizer<SearchPointType>::AbstractLineSearchOptimizer() {
+	this->m_features |= this->REQUIRES_VALUE;
+	this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
+	m_linesearch.lineSearchType() = LineSearchType::WolfeCubic;
 }
 
-void AbstractLineSearchOptimizer::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
-	checkFeatures(objectiveFunction);
+template<class SearchPointType>
+void AbstractLineSearchOptimizer<SearchPointType>::init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
+	this->checkFeatures(objectiveFunction);
 	if(objectiveFunction.isConstrained()){
 		//backtracking is the only alorithm that can handle constraints (e.g. initial bracketing phases are going to be nasty)
-		m_linesearch.lineSearchType() = LineSearch::Backtracking;
+		m_linesearch.lineSearchType() = LineSearchType::Backtracking;
 		SHARK_RUNTIME_CHECK(objectiveFunction.isFeasible(startingPoint), "Initial point is not feasible");
 	}
 
@@ -67,7 +70,8 @@ void AbstractLineSearchOptimizer::init(ObjectiveFunctionType const& objectiveFun
 	initModel();
 }
 
-void AbstractLineSearchOptimizer::step(ObjectiveFunctionType const& objectiveFunction) {
+template<class SearchPointType>
+void AbstractLineSearchOptimizer<SearchPointType>::step(ObjectiveFunctionType const& objectiveFunction) {
 	// Perform line search
 	m_lastDerivative = m_derivative;
 	m_lastPoint = m_best.point;
@@ -78,7 +82,8 @@ void AbstractLineSearchOptimizer::step(ObjectiveFunctionType const& objectiveFun
 }
 
 //from ISerializable
-void AbstractLineSearchOptimizer::read(InArchive &archive) {
+template<class SearchPointType>
+void AbstractLineSearchOptimizer<SearchPointType>::read(InArchive &archive) {
 	archive>>m_linesearch;
 	archive>>m_initialStepLength;
 	archive>>m_dimension;
@@ -90,7 +95,8 @@ void AbstractLineSearchOptimizer::read(InArchive &archive) {
 	archive>>m_lastValue;
 }
 
-void AbstractLineSearchOptimizer::write(OutArchive &archive) const {
+template<class SearchPointType>
+void AbstractLineSearchOptimizer<SearchPointType>::write(OutArchive &archive) const {
 	archive<<m_linesearch;
 	archive<<m_initialStepLength;
 	archive<<m_dimension;
@@ -101,3 +107,6 @@ void AbstractLineSearchOptimizer::write(OutArchive &archive) const {
 	archive<<m_lastPoint;
 	archive<<m_lastValue;
 }
+
+template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<RealVector>;
+template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<FloatVector>;

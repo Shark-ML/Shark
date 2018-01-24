@@ -35,7 +35,8 @@ BOOST_AUTO_TEST_CASE( LineSearch_DLinmin )
 	xi(0) = 3.;
 	RealVector d = {-6};
 	Testfunction function;
-	LineSearch search;
+	LineSearch<RealVector> search;
+	search.lineSearchType() = LineSearchType::Dlinmin;
 	search.init(function);
 	// Minimize function:
 	search(p,fret, xi,d);

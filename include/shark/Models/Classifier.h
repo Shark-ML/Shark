@@ -61,15 +61,20 @@ namespace shark {
 /// more likely to be predicted. In the binary case with a single output, a positive weight
 /// makes class one more likely and a negative weight class 0.
 template<class Model>
-class Classifier : public AbstractModel<typename Model::InputType, unsigned int>
-{
+class Classifier : public AbstractModel<
+	typename Model::InputType,
+	unsigned int,
+	typename Model::ParameterVectorType
+>{
 private:
 	typedef typename Model::BatchOutputType ModelBatchOutputType;
 public:
+	typedef Model DecisionFunctionType;
 	typedef typename Model::InputType InputType;
 	typedef unsigned int OutputType;
 	typedef typename Batch<InputType>::type BatchInputType;
 	typedef Batch<unsigned int>::type BatchOutputType;
+	typedef typename Model::ParameterVectorType ParameterVectorType;
 
 	Classifier(){}
 	Classifier(Model const& decisionFunction)
@@ -78,11 +83,11 @@ public:
 	std::string name() const
 	{ return "Classifier<"+m_decisionFunction.name()+">"; }
 	
-	RealVector parameterVector() const{
+	ParameterVectorType parameterVector() const{
 		return m_decisionFunction.parameterVector();
 	}
 
-	void setParameterVector(RealVector const& newParameters){
+	void setParameterVector(ParameterVectorType const& newParameters){
 		m_decisionFunction.setParameterVector(newParameters);
 	}
 

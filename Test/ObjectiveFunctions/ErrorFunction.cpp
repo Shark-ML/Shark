@@ -18,49 +18,49 @@ private:
 	double m_c;
 	size_t m_dim;
 public:
-		TestModel(int dim,double c):m_c(c),m_dim(dim){
-			m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
-		}
+	TestModel(int dim,double c):m_c(c),m_dim(dim){
+		m_features|=HAS_FIRST_PARAMETER_DERIVATIVE;
+	}
 
-		std::string name() const
-		{ return "TestModel"; }
+	std::string name() const
+	{ return "TestModel"; }
 
-		//this model doesn't use any parameters...it just pretends!
-		virtual RealVector parameterVector()const{return RealVector(10);}
-		virtual void setParameterVector(RealVector const& newParameters){}
-		virtual size_t numberOfParameters()const{return 1;}
+	//this model doesn't use any parameters...it just pretends!
+	virtual RealVector parameterVector()const{return RealVector(10);}
+	virtual void setParameterVector(RealVector const& newParameters){}
+	virtual size_t numberOfParameters()const{return 1;}
 
-		Shape inputShape() const{
-			return m_dim;
+	Shape inputShape() const{
+		return m_dim;
+	}
+	Shape outputShape() const{
+		return m_dim;
+	}
+	
+	boost::shared_ptr<State> createState()const{
+		return boost::shared_ptr<State>(new EmptyState());
+	}
+	
+	// adds just a value c on the input
+	void eval(RealMatrix const& patterns, RealMatrix& output, State& state)const
+	{
+		output.resize(patterns.size1(),m_dim);
+		for(std::size_t  p = 0; p != patterns.size1();++p){
+			for (size_t i=0;i!=m_dim;++i)
+				output(p,i)=patterns(p,i)+m_c;
 		}
-		Shape outputShape() const{
-			return m_dim;
-		}
-		
-		boost::shared_ptr<State> createState()const{
-			return boost::shared_ptr<State>(new EmptyState());
-		}
-		
-		// adds just a value c on the input
-		void eval(RealMatrix const& patterns, RealMatrix& output, State& state)const
+	}
+	using AbstractModel<RealVector,RealVector>::eval;
+
+	virtual void weightedParameterDerivative( RealMatrix const& input, RealMatrix const&, RealMatrix const& coefficients, State const& state, RealVector& derivative)const
+	{
+		derivative.resize(1);
+		derivative(0)=0;
+		for (size_t p = 0; p < coefficients.size1(); p++)
 		{
-			output.resize(patterns.size1(),m_dim);
-			for(std::size_t  p = 0; p != patterns.size1();++p){
-				for (size_t i=0;i!=m_dim;++i)
-					output(p,i)=patterns(p,i)+m_c;
-			}
+			derivative(0) +=sum(row(coefficients,p));
 		}
-		using AbstractModel<RealVector,RealVector>::eval;
-
-		virtual void weightedParameterDerivative( RealMatrix const& input, RealMatrix const&, RealMatrix const& coefficients, State const& state, RealVector& derivative)const
-		{
-			derivative.resize(1);
-			derivative(0)=0;
-			for (size_t p = 0; p < coefficients.size1(); p++)
-			{
-				derivative(0) +=sum(row(coefficients,p));
-			}
-		}
+	}
 };
 
 struct TestFunction : public SingleObjectiveFunction
@@ -102,13 +102,13 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_BASE )
 	//every value of input gets 2 added. so the square error of each example is 10*4=40
 	TestModel model(10,2);
 	SquaredLoss<> loss;
-	ErrorFunction mse(dataset, &model,&loss);
+	ErrorFunction<> mse(dataset, &model,&loss);
 
 	double error=mse.eval(parameters);
 	BOOST_CHECK_SMALL(error-20,1.e-15);
 
 	//calculate derivative - it should also be 40
-	ErrorFunction::FirstOrderDerivative derivative;
+	ErrorFunction<>::FirstOrderDerivative derivative;
 	mse.evalDerivative(parameters,derivative);
 	BOOST_CHECK_SMALL(derivative(0)-20,1.e-15);
 }
@@ -160,11 +160,11 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	SquaredLoss<> loss;
 	
 	{
-		ErrorFunction mse(trainset, &model,&loss);
+		ErrorFunction<> mse(trainset, &model,&loss);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
-		ErrorFunction::FirstOrderDerivative d;
+		ErrorFunction<>::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
@@ -185,11 +185,11 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	}
 	
 	{
-		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector> mse(trainset,&model,&loss,false);
+		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector,RealVector> mse(trainset,&model,&loss,false);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		
-		ErrorFunction::FirstOrderDerivative d;
+		ErrorFunction<>::FirstOrderDerivative d;
 		double valGrad = mse.evalDerivative(optimum,d);
 		double gradNorm = norm_2(d);
 		BOOST_CHECK_CLOSE(optimalMSE,valGrad,1.e-10);
@@ -235,15 +235,15 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 	LinearModel<> model;
 	model.setStructure(1,1,true);
 	SquaredLoss<> loss;
-	ErrorFunction unweightedError(unweightedData, &model,&loss);
-	ErrorFunction weightedError(weightedData, &model,&loss);
+	ErrorFunction<> unweightedError(unweightedData, &model,&loss);
+	ErrorFunction<> weightedError(weightedData, &model,&loss);
 	RealVector point(2,0.0);
 
-	ErrorFunction::FirstOrderDerivative unWDerivative;
+	ErrorFunction<>::FirstOrderDerivative unWDerivative;
 	double unWError1 = unweightedError.eval(point);
 	double unWError2 = unweightedError.evalDerivative(point,unWDerivative);
 	
-	ErrorFunction::FirstOrderDerivative WDerivative;
+	ErrorFunction<>::FirstOrderDerivative WDerivative;
 	double WError1 = weightedError.eval(point);
 	double WError2 = weightedError.evalDerivative(point,WDerivative);
 	
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_Noisy )
 	SquaredLoss<> loss;
 	LinearModel<> model(3);
 	
-	ErrorFunction mse(dataset,&model,&loss, true);
+	ErrorFunction<> mse(dataset,&model,&loss, true);
 	mse.init();
 	optimizer.init(mse, point);
 	// train the cmac

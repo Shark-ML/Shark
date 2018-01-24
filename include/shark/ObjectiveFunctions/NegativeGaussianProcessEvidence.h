@@ -63,7 +63,7 @@ namespace shark {
 /// The exponential encoding is the proper choice for unconstraint optimization.
 /// Be careful not to mix up different encodings between trainer and evidence.
 template<class InputType = RealVector, class OutputType = RealVector, class LabelType = RealVector>
-class NegativeGaussianProcessEvidence : public SingleObjectiveFunction
+class NegativeGaussianProcessEvidence : public AbstractObjectiveFunction< RealVector, double >
 {
 public:
 	typedef LabeledData<InputType,LabelType> DatasetType;

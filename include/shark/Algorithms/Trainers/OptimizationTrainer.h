@@ -61,12 +61,14 @@ class OptimizationTrainer : public AbstractTrainer<Model,LabelTypeT>
 
 public:
 	typedef typename base_type::InputType InputType;
+	typedef typename Model::OutputType OutputType;
 	typedef typename base_type::LabelType LabelType;
-	typedef typename base_type::ModelType ModelType;
+	typedef Model ModelType;
+	typedef typename ModelType::ParameterVectorType ParameterVectorType;
 
-	typedef AbstractSingleObjectiveOptimizer< RealVector > OptimizerType;
-	typedef AbstractLoss< LabelType, InputType > LossType;
-	typedef AbstractStoppingCriterion<SingleObjectiveResultSet<OptimizerType::SearchPointType> > StoppingCriterionType;
+	typedef AbstractSingleObjectiveOptimizer< ParameterVectorType > OptimizerType;
+	typedef AbstractLoss< LabelType, OutputType > LossType;
+	typedef AbstractStoppingCriterion<SingleObjectiveResultSet<ParameterVectorType> > StoppingCriterionType;
 
 	OptimizationTrainer(
 			LossType* loss,
@@ -88,7 +90,7 @@ public:
 	}
 
 	void train(ModelType& model, LabeledData<InputType, LabelType> const& dataset) {
-		ErrorFunction error(dataset, &model, mep_loss);
+		ErrorFunction<ParameterVectorType> error(dataset, &model, mep_loss);
 		error.init();
 		mep_optimizer->init(error);
 		mep_stoppingCriterion->reset();

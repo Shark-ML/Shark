@@ -55,7 +55,7 @@ namespace shark {
 /// while ensuring a descent direction.
 /// 
 /// We implement restarting to ensure quadratic convergence near the optimum as well as numerical stability
-class CG : public AbstractLineSearchOptimizer{
+class CG : public AbstractLineSearchOptimizer<RealVector>{
 protected:
 	SHARK_EXPORT_SYMBOL void initModel();
 	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const& objectiveFunction);

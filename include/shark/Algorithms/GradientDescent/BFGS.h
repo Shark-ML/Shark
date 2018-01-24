@@ -45,7 +45,7 @@
 namespace shark {
 
 //! \brief Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization
-class BFGS : public AbstractLineSearchOptimizer
+class BFGS : public AbstractLineSearchOptimizer<RealVector>
 {
 protected:
 	SHARK_EXPORT_SYMBOL void initModel();

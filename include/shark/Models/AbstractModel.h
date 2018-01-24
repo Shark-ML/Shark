@@ -76,8 +76,8 @@ namespace shark {
 /// \par
 /// Models have names and can be serialised and have parameters. The type of the parameter vector
 /// can be set as third argument. By default, this is RealVector.
-template<class InputTypeT, class OutputTypeT, class ParameterType=RealVector>
-class AbstractModel : public IParameterizable<ParameterType>, public INameable, public ISerializable
+template<class InputTypeT, class OutputTypeT, class ParameterVectorType=RealVector>
+class AbstractModel : public IParameterizable<ParameterVectorType>, public INameable, public ISerializable
 {
 public:
 	/// \brief Defines the input type of the model.
@@ -88,7 +88,7 @@ public:
 	typedef OutputType result_type;
 
 	///\brief Defines the BaseType used by the model (this type). Useful for creating derived models
-	typedef AbstractModel<InputTypeT,OutputTypeT,ParameterType> ModelBaseType;
+	typedef AbstractModel<InputTypeT,OutputTypeT,ParameterVectorType> ModelBaseType;
 
 	/// \brief defines the batch type of the input type.
 	///
@@ -222,7 +222,7 @@ public:
 		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		RealVector& derivative
+		ParameterVectorType& derivative
 	)const{
 		SHARK_FEATURE_EXCEPTION(HAS_FIRST_PARAMETER_DERIVATIVE);
 	}
@@ -259,7 +259,7 @@ public:
 		BatchOutputType const& outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		RealVector& parameterDerivative,
+		ParameterVectorType& parameterDerivative,
 		BatchInputType& inputDerivative
 	)const{
 		weightedParameterDerivative(patterns, outputs, coefficients,state,parameterDerivative);

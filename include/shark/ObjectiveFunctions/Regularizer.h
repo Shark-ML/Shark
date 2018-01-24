@@ -48,15 +48,14 @@ namespace shark {
 /// objective functions within a CombinedObjectiveFunction, in order to
 /// obtain a more smooth and more sparse solution.
 ///
-class OneNormRegularizer : public SingleObjectiveFunction
+template<class SearchPointType = RealVector>
+class OneNormRegularizer : public AbstractObjectiveFunction< SearchPointType, double >
 {
 public:
 
 	/// Constructor
-	OneNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
-	{
-		m_features|=HAS_FIRST_DERIVATIVE;
-		m_features|=HAS_SECOND_DERIVATIVE;
+	OneNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables){
+		this->m_features |= this->HAS_FIRST_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -75,63 +74,38 @@ public:
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	void setMask(const RealVector& mask){
+	void setMask(SearchPointType const& mask){
 		m_mask = mask;
 	}
-	const RealVector& mask()const{
+	SearchPointType const& mask() const{
 		return m_mask;
 	}
 	/// Evaluates the objective function.
-	double eval( RealVector const& input ) const{
+	double eval( SearchPointType const& input ) const{
 		if(m_mask.empty()){
 			return norm_1(input);
-		}
-		else
-		{
+		}else{
 			return norm_1(input * m_mask);
 		}
 	}
 
 	/// Evaluates the objective function
 	/// and calculates its gradient.
-	double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
+	double evalDerivative( SearchPointType const& input, SearchPointType& derivative ) const {
+		SIZE_CHECK(m_mask.empty() || m_mask.size() == input.size());
 		std::size_t ic = input.size();
 		derivative.resize(ic);
-		if(m_mask.empty()){
-			for (std::size_t i = 0; i != ic; i++){
-				derivative(i) = boost::math::sign(input(i));
-			}
+		
+		for (std::size_t i = 0; i != ic; i++){
+			derivative(i) = boost::math::sign(input(i));
 		}
-		else
-		{
-			SIZE_CHECK(m_mask.size() == input.size());
-			for (std::size_t i=0; i != ic; i++){
-				derivative(i) = m_mask(i)*boost::math::sign(input(i));
-			}
-		}
-		return eval(input);
-	}
-	double evalDerivative( RealVector const& input, SecondOrderDerivative & derivative ) const {
-		std::size_t ic = input.size();
-		derivative.gradient.resize(ic);
-		derivative.hessian.resize(ic,ic);
-		derivative.hessian.clear();
-		if(m_mask.empty()){
-			for (std::size_t i=0; i != ic; i++){
-				derivative.gradient(i) = boost::math::sign(input(i));
-			}
-		}
-		else
-		{
-			SIZE_CHECK(m_mask.size() == input.size());
-			for (std::size_t i=0; i != ic; i++){
-				derivative.gradient(i) = m_mask(i)*boost::math::sign(input(i));
-			}
+		if(!m_mask.empty()){
+			derivative *= m_mask;
 		}
 		return eval(input);
 	}
 private:
-	RealVector m_mask;
+	SearchPointType m_mask;
 	std::size_t m_numberOfVariables;
 };
 
@@ -144,19 +118,15 @@ private:
 /// objective functions within a CombinedObjectiveFunction, in order to
 /// obtain a more smooth solution.
 ///
-class TwoNormRegularizer : public AbstractObjectiveFunction<RealVector, double>
+template<class SearchPointType = RealVector>
+class TwoNormRegularizer : public AbstractObjectiveFunction< SearchPointType, double >
 {
 public:
-	typedef RealVector SearchPointType;
- 	typedef double ResultType;
-
-	typedef AbstractObjectiveFunction<RealVector, double> super;
+	typedef AbstractObjectiveFunction< SearchPointType, double > base_type;
 
 	/// Constructor
-	TwoNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables)
-	{
-		m_features|=HAS_FIRST_DERIVATIVE;
-		m_features|=HAS_SECOND_DERIVATIVE;
+	TwoNormRegularizer(std::size_t numVariables = 0):m_numberOfVariables(numVariables){
+		this->m_features |=  base_type::HAS_FIRST_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -175,47 +145,36 @@ public:
 		m_numberOfVariables = numberOfVariables;
 	}
 	
-	void setMask(const RealVector& mask){
+	void setMask(SearchPointType const& mask){
 		m_mask = mask;
 	}
-	const RealVector& mask()const{
+	SearchPointType const& mask()const{
 		return m_mask;
 	}
 
 	/// Evaluates the objective function.
-	virtual double eval( RealVector const& input ) const
+	double eval( SearchPointType const& input ) const
 	{ 
 		if(m_mask.empty()){
 			return 0.5*norm_sqr(input);
-		}
-		else{
+		}else{
 			return 0.5 * sum(m_mask*sqr(input));
 		}
 	}
 
 	/// Evaluates the objective function
 	/// and calculates its gradient.
-	virtual double evalDerivative( RealVector const& input, FirstOrderDerivative & derivative ) const {
+	double evalDerivative( SearchPointType const& input, SearchPointType & derivative ) const {
 		if(m_mask.empty()){
 			derivative = input;
-		}
-		else{
-			derivative = m_mask*input;
+		}else{
+			derivative = m_mask * input;
 		}
 		return eval(input);
 	}
-
-	/// Evaluates the objective function
-	/// and calculates its gradient and
-	/// its Hessian.
-	virtual ResultType evalDerivative( const SearchPointType & input, SecondOrderDerivative & derivative )const {
-		derivative.gradient = input;
-		derivative.hessian = blas::identity_matrix<double>(input.size());
-		return 0.5 * norm_sqr(input);
-	}
 private:
 	std::size_t m_numberOfVariables;
-	RealVector m_mask;
+	SearchPointType m_mask;
 };
 
 

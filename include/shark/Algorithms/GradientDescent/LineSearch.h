@@ -37,30 +37,33 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/ISerializable.h>
-#include <shark/Core/DLLSupport.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 
 namespace shark {
+	
+enum class LineSearchType {
+	Dlinmin,
+	WolfeCubic,
+	Backtracking
+};
+	
 ///\brief Wrapper for the linesearch class of functions in the linear algebra library.
 ///
 ///This class is a wrapper for the linesearch class of functions of the linear algebra library.
 ///The class is used for example in CG or BFGS for their internal linesearch learning steps.
 ///It is NOT an Optimizer on its own, since it needs the Newton direction to be specified.
+template<class SearchPointType>
 class LineSearch:public ISerializable {
 public:
-	enum LineSearchType {
-		Dlinmin,
-		WolfeCubic,
-		Backtracking,
-	};
-	typedef AbstractObjectiveFunction<RealVector,double> ObjectiveFunction;
+	
+	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunction;
 
 	///Initializes the internal variables of the class to useful default values.
 	///Dlinmin is used as default
 	LineSearch() {
 		m_minInterval=0;
 		m_maxInterval=1;
-		m_lineSearchType=Dlinmin;
+		m_lineSearchType= LineSearchType::WolfeCubic;
 	}
 
 	LineSearchType lineSearchType()const {
@@ -97,7 +100,7 @@ public:
 	///@param newtonDirection the search direction of the line search
 	///@param derivative the derivative of the function at searchPoint
 	///@param stepLength initial step length guess for guiding the line search
-	SHARK_EXPORT_SYMBOL void operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength = 1.0)const;
+	void operator()(SearchPointType &searchPoint,double &pointValue,SearchPointType const& newtonDirection, SearchPointType &derivative, double stepLength = 1.0)const;
 
 	//ISerializable
 	virtual void read(InArchive &archive) {
@@ -124,6 +127,9 @@ protected:
 	///function to optimize
 	ObjectiveFunction const* m_function;
 };
+
+extern template class LineSearch<RealVector>;
+extern template class LineSearch<FloatVector>;
 }
 
 #endif

@@ -57,7 +57,8 @@ namespace shark{
 /// the second half of outputs is interpreted as the log of the variance. So if z should be a 100 dimensional variable, q must have 200
 /// outputs. The outputs and loss function used for the encoder p is arbitrary, but a SquaredLoss will work well, however also other losses 
 /// like pixel probabilities can be used.
-class VariationalAutoencoderError : public SingleObjectiveFunction
+
+class VariationalAutoencoderError : public AbstractObjectiveFunction<RealVector, double>
 {
 public:
 	typedef UnlabeledData<RealVector> DatasetType;
@@ -86,7 +87,7 @@ public:
 		return mep_decoder->numberOfParameters() + mep_encoder->numberOfParameters();
 	}
 
-	ResultType eval(RealVector const& parameters) const{
+	ResultType eval(SearchPointType const& parameters) const{
 		SIZE_CHECK(parameters.size() == numberOfVariables());
 		m_evaluationCounter++;
 		mep_decoder->setParameterVector(subrange(parameters,0,mep_decoder->numberOfParameters()));

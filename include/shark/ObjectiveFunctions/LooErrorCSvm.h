@@ -47,7 +47,7 @@ namespace shark {
 /// \brief Leave-one-out error, specifically optimized for C-SVMs.
 ///
 template<class InputType, class CacheType = float>
-class LooErrorCSvm : public SingleObjectiveFunction
+class LooErrorCSvm : public AbstractObjectiveFunction< RealVector, double >
 {
 public:
 	typedef CacheType QpFloatType;

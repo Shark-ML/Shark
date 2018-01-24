@@ -29,18 +29,22 @@
 #define SHARK_OBJECTIVEFUNCTIONS_IMPL_ERRORFUNCTION_INL
 
 #include <shark/Core/OpenMP.h>
+#include "FunctionWrapperBase.h"
 
 namespace shark{
 namespace detail{
 
 ///\brief Implementation of the ErrorFunction using AbstractLoss for parallelizable computations
-template<class InputType, class LabelType,class OutputType>
-class ErrorFunctionImpl:public FunctionWrapperBase{
+template<class InputType, class LabelType,class OutputType, class SearchPointType>
+class ErrorFunctionImpl:public FunctionWrapperBase<SearchPointType>{
+private:
+	typedef FunctionWrapperBase<SearchPointType> base_type;
 public:
-
+	typedef typename base_type::ResultType ResultType;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
 	ErrorFunctionImpl(
 		LabeledData<InputType,LabelType> const& dataset,
-		AbstractModel<InputType,OutputType>* model, 
+		AbstractModel<InputType,OutputType, SearchPointType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss,
 		bool useMiniBatches
 	):mep_model(model),mep_loss(loss),m_dataset(dataset), m_useMiniBatches(useMiniBatches){
@@ -48,8 +52,8 @@ public:
 		SHARK_ASSERT(loss!=NULL);
 
 		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
-			m_features|=HAS_FIRST_DERIVATIVE;
-		m_features|=CAN_PROPOSE_STARTING_POINT;
+			this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
+		this->m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
 	}
 
 	std::string name() const
@@ -63,15 +67,15 @@ public:
 		return mep_model->numberOfParameters();
 	}
 
-	FunctionWrapperBase* clone()const{
-		return new ErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
+	ErrorFunctionImpl* clone()const{
+		return new ErrorFunctionImpl(*this);
 	}
 
-	double eval(RealVector const& point) const {
+	double eval(SearchPointType const& point) const {
 		mep_model->setParameterVector(point);
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(*this->mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
 			double error = eval(batchIndex,batchIndex+1);
 			return error / shark::batchSize(m_dataset.batch(batchIndex));
 		}
@@ -106,7 +110,7 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(*mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(*this->mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
 			double error = evalDerivative(batchIndex,batchIndex+1, derivative);
 			
 			auto const& batch = m_dataset.batch(batchIndex);
@@ -142,7 +146,7 @@ public:
 	}
 
 protected:
-	AbstractModel<InputType, OutputType>* mep_model;
+	AbstractModel<InputType, OutputType, SearchPointType>* mep_model;
 	AbstractLoss<LabelType, OutputType>* mep_loss;
 	LabeledData<InputType, LabelType> m_dataset;
 	bool m_useMiniBatches;
@@ -151,7 +155,7 @@ protected:
 		boost::shared_ptr<State> state = mep_model->createState();
 		typename Batch<OutputType>::type predictions;
 		typename Batch<OutputType>::type errorDerivative;
-		RealVector parameterDerivative;
+		SearchPointType parameterDerivative;
 		double errorSum = 0;
 		for(std::size_t i = start; i != end; ++i){
 			auto const& batch = m_dataset.batch(i);
@@ -183,20 +187,25 @@ protected:
 
 
 ///\brief Implementation of the ErrorFunction using AbstractLoss.
-template<class InputType, class LabelType,class OutputType>
-class WeightedErrorFunctionImpl:public FunctionWrapperBase{
+template<class InputType, class LabelType,class OutputType, class SearchPointType>
+class WeightedErrorFunctionImpl:public FunctionWrapperBase<SearchPointType>{
+private:
+	typedef FunctionWrapperBase<SearchPointType> base_type;
 public:
+	typedef typename base_type::ResultType ResultType;
+	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
+
 	WeightedErrorFunctionImpl(
 		WeightedLabeledData<InputType, LabelType> const& dataset,
-		AbstractModel<InputType,OutputType>* model, 
+		AbstractModel<InputType,OutputType, SearchPointType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss
 	):mep_model(model),mep_loss(loss),m_dataset(dataset){
 		SHARK_ASSERT(model!=NULL);
 		SHARK_ASSERT(loss!=NULL);
 
 		if(mep_model->hasFirstParameterDerivative() && mep_loss->hasFirstDerivative())
-			m_features|=HAS_FIRST_DERIVATIVE;
-		m_features|=CAN_PROPOSE_STARTING_POINT;
+			this->m_features |= base_type::HAS_FIRST_DERIVATIVE;
+		this-> m_features |= base_type::CAN_PROPOSE_STARTING_POINT;
 	}
 
 	std::string name() const
@@ -210,11 +219,11 @@ public:
 		return mep_model->numberOfParameters();
 	}
 
-	FunctionWrapperBase* clone()const{
-		return new WeightedErrorFunctionImpl<InputType,LabelType,OutputType>(*this);
+	WeightedErrorFunctionImpl* clone()const{
+		return new WeightedErrorFunctionImpl(*this);
 	}
 
-	double eval(RealVector const& input) const {
+	double eval(SearchPointType const& input) const {
 		mep_model->setParameterVector(input);
 
 		double sumWeights = sumOfWeights(m_dataset);
@@ -265,7 +274,7 @@ public:
 			}
 			
 			//calculate the gradient using the chain rule
-			RealVector dataGradient(mep_model->numberOfParameters());
+			SearchPointType dataGradient(mep_model->numberOfParameters());
 			mep_model->weightedParameterDerivative(data.input, prediction, errorDerivative,*state,dataGradient);
 			SHARK_CRITICAL_REGION{
 				derivative += dataGradient;
@@ -278,72 +287,11 @@ public:
 	}
 
 private:
-	AbstractModel<InputType, OutputType>* mep_model;
+	AbstractModel<InputType, OutputType, SearchPointType>* mep_model;
 	AbstractLoss<LabelType, OutputType>* mep_loss;
 	WeightedLabeledData<InputType, LabelType> m_dataset;
 };
 
 } // namespace detail
-
-
-inline void swap(ErrorFunction& op1, ErrorFunction& op2){
-	using std::swap;
-	swap(op1.mp_wrapper,op2.mp_wrapper);
-	swap(op1.m_features,op2.m_features);
-}
-
-template<class InputType,class LabelType, class OutputType>
-inline ErrorFunction::ErrorFunction(
-	LabeledData<InputType, LabelType> const& dataset,
-	AbstractModel<InputType,OutputType>* model, 
-	AbstractLoss<LabelType, OutputType>* loss,
-	bool useMiniBatches
-){
-	m_regularizer = 0;
-	mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss, useMiniBatches));
-
-	this -> m_features = mp_wrapper -> features();
-}
-
-template<class InputType,class LabelType, class OutputType>
-inline ErrorFunction::ErrorFunction(
-	WeightedLabeledData<InputType, LabelType> const& dataset,
-	AbstractModel<InputType,OutputType>* model, 
-	AbstractLoss<LabelType, OutputType>* loss
-){
-	m_regularizer = 0;
-	mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType>(dataset,model,loss));
-	this -> m_features = mp_wrapper -> features();
-}
-
-inline ErrorFunction::ErrorFunction(const ErrorFunction& op)
-:mp_wrapper(op.mp_wrapper->clone()){
-	this -> m_features = mp_wrapper -> features();
-}
-
-inline ErrorFunction& ErrorFunction::operator = (const ErrorFunction& op){
-	ErrorFunction copy(op);
-	swap(copy.mp_wrapper,mp_wrapper);
-	return *this;
-}
-
-inline double ErrorFunction::eval(RealVector const& input) const{
-	++m_evaluationCounter;
-	double value = mp_wrapper -> eval(input);
-	if(m_regularizer)
-		value += m_regularizationStrength * m_regularizer->eval(input);
-	return value;
-}
-
-inline ErrorFunction::ResultType ErrorFunction::evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
-	++m_evaluationCounter;
-	double value = mp_wrapper -> evalDerivative(input,derivative);
-	if(m_regularizer){
-		FirstOrderDerivative regularizerDerivative;
-		value += m_regularizationStrength * m_regularizer->evalDerivative(input,regularizerDerivative);
-		noalias(derivative) += m_regularizationStrength*regularizerDerivative;
-	}
-	return value;
-}
 }
 #endif
