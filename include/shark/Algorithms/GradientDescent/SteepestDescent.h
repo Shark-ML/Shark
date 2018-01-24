@@ -43,7 +43,7 @@ template<class SearchPointType = RealVector>
 class SteepestDescent : public AbstractSingleObjectiveOptimizer<SearchPointType>
 {
 public:
-	typedef typename AbstractSingleObjectiveOptimizer<SearchPointType>::ObjectiveFunctionType ObjectiveFunctionType;
+	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunctionType;
 	SteepestDescent() {
 		this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
 

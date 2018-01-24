@@ -42,11 +42,13 @@ namespace shark{
 ///
 /// Performs SGD by using a long term average of the gradient as well as its second moment to adapt
 /// a step size for each coordinate.
-class Adam : public AbstractSingleObjectiveOptimizer<RealVector >
+template<class SearchPointType = RealVector>
+class Adam : public AbstractSingleObjectiveOptimizer<SearchPointType >
 {
 public:
+	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunctionType;
 	Adam() {
-		m_features |= REQUIRES_FIRST_DERIVATIVE;
+		this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
 
 		m_beta1 = 0.9;
 		m_beta2 = 0.999;
@@ -59,7 +61,7 @@ public:
 	{ return "Adam"; }
 
 	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
-		checkFeatures(objectiveFunction);
+		this-> checkFeatures(objectiveFunction);
 		SHARK_RUNTIME_CHECK(startingPoint.size() == objectiveFunction.numberOfVariables(), "Initial starting point and dimensionality of function do not agree");
 		
 		//initialize long term averages
@@ -68,10 +70,10 @@ public:
 		m_counter = 0;
 		
 		//set point to the current starting point
-		m_best.point = startingPoint;
-		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
+		this->m_best.point = startingPoint;
+		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
 	}
-	using AbstractSingleObjectiveOptimizer<RealVector >::init;
+	using AbstractSingleObjectiveOptimizer<SearchPointType >::init;
 
 	/// \brief get learning rate eta
 	double eta() const {
@@ -133,19 +135,16 @@ public:
 		++m_counter;
 		double bias1 = 1-std::pow(m_beta1,m_counter);
 		double bias2 = 1-std::pow(m_beta2,m_counter);
-		//~ std::cout<<"m "<<m_avgGrad<<std::endl;
-		//~ std::cout<<"v "<<m_secondMoment<<std::endl;
 		
-		noalias(m_best.point) -= (m_eta/bias1) * m_avgGrad/(m_epsilon + sqrt(m_secondMoment/bias2));
-		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
+		noalias(this->m_best.point) -= (m_eta/bias1) * m_avgGrad/(m_epsilon + sqrt(m_secondMoment/bias2));
+		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
 	}
-	virtual void read( InArchive & archive )
-	{
+	virtual void read( InArchive & archive ){
 		archive>>m_avgGrad;
 		archive>>m_secondMoment;
 		archive>>m_counter;
 		archive>>m_derivative;
-		archive>>m_best;
+		archive>>this->m_best;
 		
 		archive>>m_beta1;
 		archive>>m_beta2;
@@ -159,7 +158,7 @@ public:
 		archive<<m_secondMoment;
 		archive<<m_counter;
 		archive<<m_derivative;
-		archive<<m_best;
+		archive<<this->m_best;
 		
 		archive<<m_beta1;
 		archive<<m_beta2;
@@ -168,10 +167,10 @@ public:
 	}
 
 private:
-	RealVector m_avgGrad;
-	RealVector m_secondMoment;
+	SearchPointType m_avgGrad;
+	SearchPointType m_secondMoment;
 	unsigned int m_counter;
-	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
+	SearchPointType m_derivative;
 	
 	double m_beta1;
 	double m_beta2;

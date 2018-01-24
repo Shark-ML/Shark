@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 //###end<objective>	
 	//set up optimizer
 //###begin<optimizer>
-	Adam optimizer;
+	Adam<> optimizer;
 	error.init();
 	optimizer.init(error);
 	std::cout<<"Optimizing model "<<std::endl;

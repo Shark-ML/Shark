@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	//optimize the model
 	std::cout<<"training network"<<std::endl;
 	initRandomNormal(network,0.001);
-	Adam optimizer;
+	Adam<> optimizer;
 	error.init();
 	optimizer.init(error);
 	for(std::size_t i = 0; i != iterations; ++i){

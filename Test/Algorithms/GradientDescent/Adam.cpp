@@ -7,11 +7,12 @@
 
 using namespace shark;
 
-struct NoisyEllipsoid : public SingleObjectiveFunction {
+template<class VectorType>
+struct NoisyEllipsoid : public AbstractObjectiveFunction<VectorType,double> {
 	NoisyEllipsoid(size_t numberOfVariables, double alpha, double noise) : m_alpha(alpha) {
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= HAS_FIRST_DERIVATIVE;
-		m_features |= IS_NOISY;
+		this-> m_features |= this-> CAN_PROPOSE_STARTING_POINT;
+		this-> m_features |= this-> HAS_FIRST_DERIVATIVE;
+		this-> m_features |= this-> IS_NOISY;
 		m_numberOfVariables = numberOfVariables;
 		m_epsilon = noise;
 	}
@@ -32,17 +33,17 @@ struct NoisyEllipsoid : public SingleObjectiveFunction {
 		m_numberOfVariables = numberOfVariables;
 	}
 
-	SearchPointType proposeStartingPoint() const {
-		RealVector x(numberOfVariables());
+	VectorType proposeStartingPoint() const {
+		VectorType x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(*mep_rng, 0,1);
+			x(i) = random::uni(*this->mep_rng, 0,1);
 		}
 		return x;
 	}
 
-	double eval( const SearchPointType & p ) const {
-		m_evaluationCounter++;
+	double eval( VectorType const& p ) const {
+		this->m_evaluationCounter++;
 		double sum = 0;
 		double sizeMinusOne = p.size() - 1.;
 		for( std::size_t i = 0; i < p.size(); i++ ){
@@ -52,7 +53,8 @@ struct NoisyEllipsoid : public SingleObjectiveFunction {
 		return sum;
 	}
 
-	double evalDerivative( const SearchPointType & p, FirstOrderDerivative & derivative ) const {
+	double evalDerivative( VectorType const& p, VectorType & derivative ) const {
+		this->m_evaluationCounter++;
 		double sizeMinusOne=p.size() - 1.;
 		derivative.resize(p.size());
 		double sum = 0.0;
@@ -73,10 +75,11 @@ private:
 
 BOOST_AUTO_TEST_SUITE (GradDesc_Adam)
 
-BOOST_AUTO_TEST_CASE( Basic_Test )
-{
-	NoisyEllipsoid function(10,1.e-3,1.e-3);
-	shark::Adam optimizer;
+typedef boost::mpl::list<RealVector, FloatVector > VectorTypes;
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(Basic_Test, VectorType,VectorTypes){
+	NoisyEllipsoid<VectorType> function(10,1.e-3,1.e-3);
+	shark::Adam<VectorType> optimizer;
 	function.init();
 	optimizer.init(function);
 
