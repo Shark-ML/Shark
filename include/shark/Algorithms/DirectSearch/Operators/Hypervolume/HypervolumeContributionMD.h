@@ -99,15 +99,16 @@ struct HypervolumeContributionMD {
 		return result;
 	}
 	
-	/// \brief Returns the index of the points with smallest contribution.
+	/// \brief Returns the index of the k points with smallest contribution.
 	///
-	/// As no reference point is given, the extremum points can not be computed and are never selected.
+	/// As no reference point is given, the contribution of the extremum points can not be computed, thus they are never selected. 
+	/// This also entails that k + dim(point) points are required in the set.
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k)const{
-		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
+		SHARK_RUNTIME_CHECK(points.size() >= k+points[0].size(), "There must be at least k + dim(point) points in the set");
 		//find reference point as well as points with lowest function value
 		std::vector<std::size_t> minIndex(points[0].size(),0);
 		RealVector minVal = points[0];
@@ -146,15 +147,16 @@ struct HypervolumeContributionMD {
 		return result;
 	}
 	
-	/// \brief Returns the index of the points with largest contribution.
+	/// \brief Returns the index of the k points with largest contribution.
 	///
-	/// As no reference point is given, the extremum points can not be computed and are never selected.
+	/// As no reference point is given, the contribution of the extremum points can not be computed, thus they are never selected. 
+	/// This also entails that k + dim(point) points are required in the set.
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
 	/// \param [in] k The number of points to select.
 	template<class Set>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k)const{
-		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
+		SHARK_RUNTIME_CHECK(points.size() >= k+points[0].size(), "There must be at least k + dim(point) points in the set");
 		//find reference point as well as points with lowest function value
 		std::vector<std::size_t> minIndex(points[0].size(),0);
 		RealVector minVal = points[0];
