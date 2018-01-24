@@ -42,45 +42,26 @@
 
 namespace shark {
 
-///  \brief Selects the least contributing points based on hypervolume contribution.
+///  \brief Calculates the hypervolume covered by a front of non-dominated points.
 ///
-/// For problems with many objectives, an approximative algorithm for estimating the contribution can be used.
-///
-/// The hypervolume indicator requires a reference point describing the worst possible function value, which can be set via setReference. 
-/// In many cases, this point is hard to define as error functions are often unbounded.
-/// In this case, the reference point can be estimated from the data (as a lower bound of the true reference point).
-/// There are two ways this is done depending on whether an archive of points is supplied or not.
-/// 1. The supplied archive is empty. In this case, the reference point is estimated purely from the supplied set as the maximum in each objective.
-/// As this usually gives 0 contribution to the extremum points (i.e. the ones with best function value), those
+/// If given, the Indicator uses a provided reference value that can be set via setReference. 
+/// Otherwise, it is computed from the data by using the maximum value in the set. As this usually
+/// gives 0 contribution to the extremum points (i.e. the ones with best function value), those
 /// points are skipped when computing the contribution (i.e. extremum points are never selected).
-/// Note, that for boundary points that are not extrema, this does not hold and they can still be selected
-/// Warning: this entails that the set must have at least numObjectives+K points!
+/// Note, that for boundary points that are not extrema, this does not hold and they are selected.
 ///
-/// 2. An archive is provided with additional points. In this case we assume the supplied front is either
-/// dominated or extremum points are explicitely handled. Thus the reference point is computed as the maximum of
-/// the union of the points in set and archive and all points can be selected.
+/// for problems with many objectives, an approximative algorithm can be used.
 struct HypervolumeIndicator {
 	/// \brief Determines the point contributing the least hypervolume to the overall front of points.
 	///
 	/// \param [in] front pareto front of points
-	/// \param [in] archive Optional archive of external points used for estimate the reference point if the reference point is not set
 	template<typename ParetoFrontType, typename ParetoArchive>
-	std::size_t leastContributor( ParetoFrontType const& front, ParetoArchive const& archive)const{
+	std::size_t leastContributor( ParetoFrontType const& front, ParetoArchive const& /*archive*/)const{
 		HypervolumeContribution algorithm;
 		if(m_reference.size() != 0)
 			return m_algorithm.smallest(front,1,m_reference)[0].value;
-		else if(archive.empty())//no reference point, case 1
+		else	
 			return m_algorithm.smallest(front,1)[0].value;
-		else{//no reference point, case 2
-			auto ref = front[0];                        
-			for(auto const& p: front){
-				noalias(ref) = max(ref,p);
-			}
-			for(auto const& p: archive){
-				noalias(ref) = max(ref,p);
-			}
-			return m_algorithm.smallest(front,1, ref)[0].value;
-		}
 	}
 	
 	template<typename ParetoFrontType, typename ParetoArchive>
