@@ -39,11 +39,13 @@
 namespace shark{
 
 ///@brief Standard steepest descent.
-class SteepestDescent : public AbstractSingleObjectiveOptimizer<RealVector >
+template<class SearchPointType = RealVector>
+class SteepestDescent : public AbstractSingleObjectiveOptimizer<SearchPointType>
 {
 public:
+	typedef typename AbstractSingleObjectiveOptimizer<SearchPointType>::ObjectiveFunctionType ObjectiveFunctionType;
 	SteepestDescent() {
-		m_features |= REQUIRES_FIRST_DERIVATIVE;
+		this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
 
 		m_learningRate = 0.1;
 		m_momentum = 0.0;
@@ -54,15 +56,15 @@ public:
 	{ return "SteepestDescent"; }
 
 	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
-		checkFeatures(objectiveFunction);
+		this->checkFeatures(objectiveFunction);
 		SHARK_RUNTIME_CHECK(startingPoint.size() == objectiveFunction.numberOfVariables(), "Initial starting point and dimensionality of function do not agree");
 		
 		m_path.resize(startingPoint.size());
 		m_path.clear();
-		m_best.point = startingPoint;
-		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
+		this->m_best.point = startingPoint;
+		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
 	}
-	using AbstractSingleObjectiveOptimizer<RealVector >::init;
+	using AbstractSingleObjectiveOptimizer<SearchPointType >::init;
 
 	/*!
 	 *  \brief get learning rate
@@ -96,8 +98,8 @@ public:
 	 */
 	void step(ObjectiveFunctionType const& objectiveFunction) {
 		m_path = -m_learningRate * m_derivative + m_momentum * m_path;
-		m_best.point+=m_path;
-		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivative);
+		this->m_best.point+=m_path;
+		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
 	}
 	virtual void read( InArchive & archive )
 	{
@@ -114,8 +116,8 @@ public:
 	}
 
 private:
-	RealVector m_path;
-	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
+	SearchPointType m_path;
+	SearchPointType m_derivative;
 	double m_learningRate;
 	double m_momentum;
 };

@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_Noisy )
 	point(0) = 0;
 	point(1) = 0;
 	point(2) = 0;
-	SteepestDescent optimizer;
+	SteepestDescent<> optimizer;
 	SquaredLoss<> loss;
 	LinearModel<> model(3);
 	

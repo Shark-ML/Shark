@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergenceTraining_Bars ){
 		initRandomUniform(rbm,-0.1,0.1);
 		BinaryCD cd(&rbm);
 		cd.setData(data);
-		SteepestDescent optimizer;
+		SteepestDescent<> optimizer;
 		optimizer.setLearningRate(0.05);
 		optimizer.setMomentum(0);
 		optimizer.init(cd);

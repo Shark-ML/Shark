@@ -70,7 +70,7 @@ BinaryRBM trainRBM(
 	estimator.setData(data);//the data used for optimization
 
 	//create and configure optimizer
-	SteepestDescent optimizer;
+	SteepestDescent<> optimizer;
 	optimizer.setLearningRate(learningRate);//learning rate of the algorithm
 	
 	//now we train the rbm and evaluate the mean negative log-likelihood at the end
