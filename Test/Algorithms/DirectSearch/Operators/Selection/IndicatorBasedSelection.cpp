@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( IndicatorBasedSelection_Test ) {
 			}
 		}
 		
-		std::size_t mu = random::discrete(random::globalRng,std::size_t(1),numPoints-2);
+		std::size_t mu = random::discrete(random::globalRng,std::size_t(numDims),numPoints-2);
 		
 		//store copy and compute ranks
 		std::vector<Individual<RealVector,RealVector> > popCopy = population;
