@@ -142,7 +142,7 @@ int main()
 	
 	//optimize the model
 	std::cout<<"training supervised model"<<std::endl;
-	IRpropPlusFull optimizer;
+	Rprop<> optimizer;
 	error.init();
 	optimizer.init(error);
 	for(std::size_t i = 0; i != iterations; ++i){

@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	SvmLogisticInterpretation<> mlms_score( cv_folds, &kernel, false, &stop );
 
 	// optimize NCLL using rprop
-	IRpropPlus rprop;
+	Rprop<> rprop;
 	RealVector start(2);
 	start(0) = 1.0; start(1) = 0.5;
 	rprop.init( mlms_score, start );
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Small_Chessbo
 	SvmLogisticInterpretation<> mlms_score( cv_folds, &kernel, false, &stop );
 
 	// optimize NCLL using rprop
-	IRpropPlus rprop;
+	Rprop<> rprop;
 	RealVector start(2);
 	start(0) = 1.0; start(1) = 0.5;
 	rprop.init( mlms_score, start );
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_SvmLogisticInterpretation_Pami_Toy )
 	testDerivative(mlms, start, 1.e-6,1.e-10,0.01);
 
 	// optimize NCLL using rprop
-	IRpropPlus rprop;
+	Rprop<> rprop;
 	rprop.init( mlms, start );
 	unsigned int its = 30;
 	for (unsigned int i=0; i<its; i++) {

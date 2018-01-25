@@ -33,7 +33,7 @@ double experiment(
 	CrossEntropy<RealVector> loss;
 
 	//we use IRpropPlus for network optimization
-	IRpropPlus optimizer;
+	Rprop<> optimizer;
 	
 	//create an optimization trainer and train the model
 	OptimizationTrainer<AbstractModel<RealVector, RealVector>,unsigned int > trainer(&loss, &optimizer, &stoppingCriterion);

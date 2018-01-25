@@ -91,7 +91,7 @@ RealVector run_one_trial( bool verbose) {
 
     //###begin<setup_optimizer>
     // set up the optimizer
-    IRpropPlus rprop;
+    Rprop<> rprop;
     double stepsize = 0.1;
     double stop_delta = 1e-3;
     mlms.init();

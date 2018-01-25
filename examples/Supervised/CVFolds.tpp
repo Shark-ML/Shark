@@ -40,7 +40,7 @@ double trainProblem(const RegressionDataset& training, RegressionDataset const& 
 	error.setRegularizer(regularization, &regularizer);
 
 	//now train for a number of iterations using Rprop
-	IRpropPlus optimizer;
+	Rprop<> optimizer;
 	error.init();
 	//initialize with our predefined point, since
 	//the combined function can't propose one.

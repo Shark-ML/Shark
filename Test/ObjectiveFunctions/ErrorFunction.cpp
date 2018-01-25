@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		//let the model forget by reinitializing with random values
 		initRandomNormal(model,2);
 		//optimize with rprop
-		IRpropPlus rprop;
+		Rprop<> rprop;
 		rprop.init(mse);
 		for(std::size_t i = 0; i != 100; ++i){
 			rprop.step(mse);
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 		//let the model forget by reinitializing with random values
 		initRandomNormal(model,2);
 		//optimize with rprop
-		IRpropPlus rprop;
+		Rprop<> rprop;
 		rprop.init(mse);
 		for(std::size_t i = 0; i != 100; ++i){
 			rprop.step(mse);

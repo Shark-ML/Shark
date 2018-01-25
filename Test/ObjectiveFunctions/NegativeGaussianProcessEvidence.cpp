@@ -106,10 +106,8 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 		testDerivative(evidence,parameters,1.e-8);
 	}
 
-	/*
-	 * Check whether optimization works.
-         */
-	IRpropPlus rprop;
+	// Check whether optimization works.
+	Rprop<> rprop;
 	rprop.init(evidence, params);
 
 	trainer.setParameterVector(rprop.solution().point);
