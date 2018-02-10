@@ -408,6 +408,12 @@ if( MSVC )
 	add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 	add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 	add_definitions(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
+
+	# Allow multi core compile on Visual Studio
+	set(MULTICORE_COMPILE OFF CACHE BOOL "Compile with all available cores")
+	if (${MULTICORE_COMPILE})
+		add_definitions(${CMAKE_CXX_FLAGS} "/MP")
+	endif(${MULTICORE_COMPILE})
 endif()
 
 #####################################################################
