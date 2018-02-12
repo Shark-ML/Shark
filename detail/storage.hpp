@@ -182,10 +182,11 @@ struct sparse_matrix_storage{
 	, capacity(storage.capacity){}
 	
 	sparse_vector_storage<T,I> row(std::size_t i, row_major)const{
+		I start = major_indices_begin[i];
 		return {
-			values, indices, major_indices_begin + i,
-			major_indices_end + i,
-			major_indices_begin + (i+1)
+			values + start, indices + start,
+			major_indices_end[i] - start,
+			major_indices_begin[i + 1] - start
 		};
 	}
 };

@@ -359,8 +359,7 @@ public:
 		REMORA_RANGE_CHECK(index == pos.index());
 		*pos = value;
 		//return the iterator to the next element
-		++pos;
-		return pos;
+		return pos + 1;
 	}
 	
 		
@@ -632,8 +631,7 @@ public:
 		REMORA_RANGE_CHECK(index == pos.index());
 		*pos = value;
 		//return the iterator to the next element
-		++pos;
-		return pos;
+		return pos + 1;
 	}
 
 	// Serialization

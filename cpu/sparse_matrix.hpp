@@ -36,13 +36,11 @@ struct MatrixStorage{
 	typedef I size_type;
 	typedef T value_type;
 	
-	MatrixStorage(size_type major_size, size_type minor_size, size_type non_zeros = 0)
+	MatrixStorage(size_type major_size, size_type minor_size)
 	: m_major_indices_begin(major_size + 1,0)
 	, m_major_indices_end(major_size,0)
 	, m_minor_size(minor_size)
-	{
-		reserve(non_zeros);
-	}
+	{}
 	
 	storage_type reserve(size_type non_zeros){
 		if(non_zeros > m_indices.size()){
@@ -50,6 +48,12 @@ struct MatrixStorage{
 			m_values.resize(non_zeros);
 		}
 		return {m_values.data(), m_indices.data(), m_major_indices_begin.data(), m_major_indices_end.data(), m_indices.size()};
+	}
+	
+	storage_type resize(size_type major_size){
+		m_major_indices_begin.resize(major_size + 1);
+		m_major_indices_end.resize(major_size);
+		return reserve(m_indices.size());
 	}
 	
 	size_type major_size()const{
@@ -89,6 +93,21 @@ public:
 	compressed_matrix_impl(compressed_matrix_impl const& impl)
 	: m_manager(impl.m_manager)
 	, m_storage(m_manager.reserve(impl.nnz_reserved())){};
+	
+	compressed_matrix_impl(compressed_matrix_impl&& impl)
+	: m_manager(std::move(impl.m_manager))
+	, m_storage(m_manager.reserve(impl.nnz_reserved())){};
+	
+	compressed_matrix_impl& operator=(compressed_matrix_impl const& impl){
+		m_manager = impl.m_manager;
+		m_storage = m_manager.reserve(impl.nnz_reserved());
+	}
+	
+	compressed_matrix_impl& operator=(compressed_matrix_impl&& impl){
+		m_manager = std::move(impl.m_manager);
+		m_storage = m_manager.reserve(impl.nnz_reserved());
+		return *this;
+	}
 
 	// Accessors
 	size_type major_size() const {
@@ -111,16 +130,23 @@ public:
 		return m_storage.major_indices_begin[major_size()];
 	}
 	/// \brief Number of nonzeros the major index (a major or column depending on orientation) can maximally store before a resize
+	///
+	///  It holds major_nnz <= major_capacity. Capacity can be increased via major_reserve. It is also increased automatically
+	/// when a new element is inserted and no more storage is available.
 	size_type major_capacity(size_type i)const{
 		REMORA_RANGE_CHECK(i < major_size());
 		return m_storage.major_indices_begin[i+1] - m_storage.major_indices_begin[i];
 	}
 	/// \brief Number of nonzeros the major index (a major or column depending on orientation) currently stores
+	///
+	/// This is <= major_capacity.
 	size_type major_nnz(size_type i) const {
 		return m_storage.major_indices_end[i] - m_storage.major_indices_begin[i];
 	}
 
 	/// \brief Set the number of nonzeros stored in the major index (a major or column depending on orientation)
+	///
+	/// This is a semi-internal function and can be used after a change to the underlying storage occured.
 	void set_major_nnz(size_type i,size_type non_zeros) {
 		REMORA_SIZE_CHECK(i < major_size());
 		REMORA_SIZE_CHECK(non_zeros <= major_capacity(i));
@@ -132,6 +158,12 @@ public:
 		m_storage = m_manager.reserve(non_zeros);
 	}
 
+	/// \brief Reserves space for a given row or column.
+	///
+	/// Note that all rows are stored in the same array, expanding the storage of a row
+	/// leads to a reordering of the whole matrix and all iterators are invaldiated.
+	/// To make frequent reservation unlikely, the optional third argument will add more
+	/// space additionally. e.g. capacity is at least increased by a factor of 2.
 	void major_reserve(size_type i, size_type non_zeros, bool exact_size = false) {
 		REMORA_RANGE_CHECK(i < major_size());
 		non_zeros = std::min(minor_size(),non_zeros);
@@ -148,7 +180,7 @@ public:
 		//move the elements of the next majors to make room for the reserved space
 		for (size_type k = major_size()-1; k != i; --k) {
 			value_type* values = m_storage.values + m_storage.major_indices_begin[k];
-			value_type* values_end =m_storage.values + m_storage.major_indices_end[k];
+			value_type* values_end = m_storage.values + m_storage.major_indices_end[k];
 			size_type* indices = m_storage.indices + m_storage.major_indices_begin[k];
 			size_type* indices_end = m_storage.indices + m_storage.major_indices_end[k];
 			std::copy_backward(values, values_end, values_end + space_difference);
@@ -255,6 +287,14 @@ public:
 		REMORA_RANGE_CHECK(elem != major_end());
 		return clear_range(elem,elem + 1);
 	}
+	
+	template<class Archive>
+	void serialize(Archive& ar, const unsigned int){
+		ar & m_manager;
+		ar & m_minor_size;
+		if(Archive::is_loading::value)
+			m_storage = m_manager.reserve(0);
+	}
 
 private:
 	StorageManager m_manager;
@@ -333,7 +373,7 @@ public:
 		return m_matrix->major_nnz(m_major_start + i);
 	}
 	
-	const_storage_type raw_storage()const{
+	storage_type raw_storage()const{
 		return m_matrix->raw_storage();
 	}
 	
@@ -398,7 +438,9 @@ public:
 	// Construction
 	compressed_matrix_row(matrix_type const& m, size_type i):m_matrix(m), m_row(i){}
 	//copy or conversion ctor non-const ->const proxy
-	compressed_matrix_row(compressed_matrix_row<typename std::remove_const<M>::type > const& ref):m_matrix(ref.m_matrix){}
+	template<class M2>
+	compressed_matrix_row(compressed_matrix_row<M2 > const& ref)
+	:m_matrix(ref.m_matrix), m_row(ref.m_row){}
 	
 	//assignment from different expression
 	template<class E>
@@ -411,12 +453,7 @@ public:
 	}
 	
 	///\brief Returns the underlying storage structure for low level access
-	storage_type raw_storage(){
-		return m_matrix.raw_storage().row(m_row, row_major());
-	}
-	
-	///\brief Returns the underlying storage structure for low level access
-	const_storage_type raw_storage() const{
+	storage_type raw_storage() const{
 		return m_matrix.raw_storage().row(m_row, row_major());
 	}
 	

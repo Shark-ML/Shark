@@ -186,7 +186,8 @@ template<class VecX, class VecV, class Device>
 VecX& multiply_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	auto&& veval = eval_block(v);
-	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<VecX,VecV>::type>> (x, veval);
+	typedef typename device_traits<Device>:: template multiply<typename common_value_type<VecX,VecV>::type> F;
+	kernels::assign(x, veval, F());
 	return x();
 }
 
@@ -198,7 +199,8 @@ template<class VecX, class VecV, class Device>
 VecX& divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	auto&& veval = eval_block(v);
-	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<VecX,VecV>::type>> (x, veval);
+	typedef typename device_traits<Device>:: template divide<typename common_value_type<VecX,VecV>::type> F;
+	kernels::assign(x, veval, F());
 	return x();
 }
 	
@@ -277,7 +279,8 @@ MatA& multiply_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	auto&& Beval = eval_block(B);
-	kernels::assign<typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> > (A, Beval);
+	typedef typename device_traits<Device>:: template multiply<typename common_value_type<MatA,MatB>::type> F;
+	kernels::assign(A, Beval, F());
 	return A();
 }
 
@@ -290,7 +293,8 @@ MatA& divide_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, 
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	auto&& Beval = eval_block(B);
-	kernels::assign<typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> > (A, Beval);
+	typedef typename device_traits<Device>:: template divide<typename common_value_type<MatA,MatB>::type> F;
+	kernels::assign(A, Beval, F());
 	return A();
 }
 
@@ -315,7 +319,7 @@ template<class VecX, class VecV, class Device>
 typename VecX::closure_type operator+=(vector_expression<VecX, Device>&& x, vector_expression<VecV, Device> const& v){
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
-	plus_assign(x,temporary);
+	return plus_assign(x,temporary);
 }
 
 /// \brief  Subtract-Assigns two vector expressions
@@ -335,7 +339,7 @@ template<class VecX, class VecV, class Device>
 typename VecX::closure_type operator-=(vector_expression<VecX, Device>&& x, vector_expression<VecV, Device> const& v){
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
-	minus_assign(x,temporary);
+	return plus_assign(x,temporary, typename VecX::value_type(-1.0));
 }
 
 /// \brief  Multiply-Assigns two vector expressions
@@ -493,7 +497,7 @@ typename MatA::closure_type operator-=(matrix_expression<MatA, Device>&& A, matr
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
-	return minus_assign(A,temporary);
+	return plus_assign(A,temporary, typename MatA::value_type(-1.0));
 }
 
 /// \brief  Multiply-Assigns two matrix expressions

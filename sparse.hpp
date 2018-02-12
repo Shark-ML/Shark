@@ -92,7 +92,7 @@ public:
 		assign(*this,e);
 	}
 	
-	void resize(size_type size, bool keep){
+	void resize(size_type size, bool keep = false){
 		this->do_resize(size, keep);
 	}
 	
@@ -135,11 +135,7 @@ public:
 	// Serialization
 	template<class Archive>
 	void serialize(Archive& ar, const unsigned int /* file_version */) {
-		ar & this->m_impl;
-		ar & boost::serialization::make_nvp("size", this->m_size());
-		if (Archive::is_loading::value) {
-			this->m_storage = this->m_impl.reserve(this->nnz());
-		}
+		ar & static_cast< detail::BaseSparseVector<detail::VectorStorage<T,I > >& >(*this);
 	}
 };
 
@@ -161,8 +157,8 @@ class compressed_vector_adaptor
 : public vector_expression<compressed_vector_adaptor<T, I>, cpu_tag>
 ,public detail::BaseSparseVector<detail::VectorStorageReference<T,I > >{
 public:
-	typedef T value_type;
-	typedef I size_type;
+	typedef typename std::remove_const<T>::type value_type;
+	typedef typename std::remove_const<I>::type size_type;
 	typedef T const& const_reference;
 	typedef T& reference;
 	
@@ -228,16 +224,16 @@ public:
 	typedef elementwise<sparse_tag> evaluation_category;
 	typedef Orientation orientation;
 
-	compressed_matrix():m_impl(detail::MatrixStorage<T,I>(0,0,0)){}
+	compressed_matrix():m_impl(detail::MatrixStorage<T,I>(0,0)){}
 	
 	compressed_matrix(size_type rows, size_type cols, size_type non_zeros = 0)
 	:m_impl(detail::MatrixStorage<T,I>(orientation::index_M(rows,cols),orientation::index_m(rows,cols)),non_zeros){}
 	
 	template<class E>
 	compressed_matrix(matrix_expression<E, cpu_tag> const& m, size_type non_zeros = 0)
-	:m_impl(detail::MatrixStorage<T,I>(
-		orientation::index_M(m().size1(),m().size2()),
-		orientation::index_m(m().size1(),m().size2()),non_zeros)
+	:m_impl(
+		detail::MatrixStorage<T,I>(orientation::index_M(m().size1(),m().size2()),orientation::index_m(m().size1(),m().size2())),
+		non_zeros
 	){
 		assign(*this,m);
 	}
@@ -250,7 +246,7 @@ public:
 	template<class E>
 	compressed_matrix& operator=(matrix_expression<E, cpu_tag> const& m){
 		compressed_matrix temporary(m);
-		swap(*this,temporary);
+		m_impl = std::move(temporary.m_impl);
 		return *this;
 	}
 	
