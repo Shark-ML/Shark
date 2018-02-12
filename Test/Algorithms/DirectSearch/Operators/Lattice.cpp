@@ -150,13 +150,13 @@ BOOST_AUTO_TEST_CASE(sampleUniformly_correct){
 			std::size_t num_corners_orig = 0;
 			std::size_t num_corners_sampled = 0;
 			for(std::size_t r = 0; r < sampled.size1(); ++r){
-				if(detail::isLatticeCorner(sampled.row_begin(r), sampled.row_end(r))){
+				if(detail::isLatticeCorner(sampled.major_begin(r), sampled.major_end(r))){
 					++num_corners_sampled;
 				}
 			}
 			for(std::size_t r = 0; r < m.size1(); ++r)
 			{
-				if(detail::isLatticeCorner(m.row_begin(r), m.row_end(r)))
+				if(detail::isLatticeCorner(m.major_begin(r), m.major_end(r)))
 				{
 					++num_corners_orig;
 				}
@@ -194,16 +194,16 @@ BOOST_AUTO_TEST_CASE(vector_sorting_correct)
 			for(std::size_t row = 0; row < dists.size1(); ++row)
 			{
 				std::list<std::vector<double>> my_nearest_points;
-				std::for_each(dists.row_begin(row), dists.row_end(row),
+				std::for_each(dists.major_begin(row), dists.major_end(row),
 							  [&](std::size_t idx)
 							  {
 								  my_nearest_points.push_back(
-									  std::vector<double>(weights.row_begin(idx),
-														  weights.row_end(idx)));
+									  std::vector<double>(weights.major_begin(idx),
+														  weights.major_end(idx)));
 							  });
 				BOOST_CHECK_EQUAL(my_nearest_points.size(), T);
-				const std::vector<double> this_point(weights.row_begin(row),
-													 weights.row_end(row));
+				const std::vector<double> this_point(weights.major_begin(row),
+													 weights.major_end(row));
 				std::list<double> my_dists;
 				for(std::vector<double> const & point : my_nearest_points)
 				{

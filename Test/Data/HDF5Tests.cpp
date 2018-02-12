@@ -89,13 +89,14 @@ boost::test_tools::predicate_result HDF5Fixture::verify(
 		}
 
 		for (size_t j = 0; j < actual.element(i).size(); ++j) {
-			if (actual.element(i)(j) != expected[i][j]) { // floating point comparison here should also work in our case
+			auto elem = *(actual.element(i).begin()+j)
+			if (elem != expected[i][j]) { // floating point comparison here should also work in our case
 				res = false;
 				res.message() <<
 					boost::format("\nElements not equal: actual[%1%][%2%]=%3%, expected[%1%][%2%]=%4%")
 						% i
 						% j
-						% actual.element(i)(j)
+						% elem
 						% expected[i][j];
 			}
 		}
@@ -124,26 +125,6 @@ BOOST_AUTO_TEST_CASE(BasicTests)
 	{
 		LabeledData<RealVector, boost::int32_t> data;
 		importHDF5<RealVector, boost::int32_t>(data, m_exampleFileName, m_datasetNameData1, m_labelNameLabel1);
-		BOOST_CHECK(verify(data.inputs(), m_expectedFromData1));
-		BOOST_CHECK_EQUAL_COLLECTIONS(
-			data.labels().elements().begin(), 
-			data.labels().elements().end(), 
-			m_expectedFromLabel1.begin(), 
-			m_expectedFromLabel1.end()
-		);
-	}
-
-	// Test same thing for compressed vector
-
-	{
-		Data<CompressedRealVector> data;
-		importHDF5<CompressedRealVector>(data, m_exampleFileName, m_datasetNameData1);
-		BOOST_CHECK(verify(data, m_expectedFromData1));
-	}
-
-	{
-		LabeledData<CompressedRealVector, boost::int32_t> data;
-		importHDF5<CompressedRealVector, boost::int32_t>(data, m_exampleFileName, m_datasetNameData1, m_labelNameLabel1);
 		BOOST_CHECK(verify(data.inputs(), m_expectedFromData1));
 		BOOST_CHECK_EQUAL_COLLECTIONS(
 			data.labels().elements().begin(), 

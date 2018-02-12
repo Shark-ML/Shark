@@ -120,25 +120,31 @@ struct SimpleBatch{
 };
 
 
-
 ///\brief Wrapper for a matrix row, which offers a conversion operator to
 /// to the Vector Type.
 template<class Matrix>
-class MatrixRowReference: public blas::temporary_proxy<blas::matrix_row<Matrix> >{
+class MatrixRowReference: public blas::detail::matrix_row_optimizer<
+	typename blas::closure<Matrix>::type
+>::type{
 private:
-	typedef blas::temporary_proxy<blas::matrix_row<Matrix> > base_type;
+	typedef typename blas::detail::matrix_row_optimizer<
+		typename blas::closure<Matrix>::type
+	>::type row_type;
 public:
 	typedef typename blas::vector_temporary<Matrix>::type Vector;
 
 	MatrixRowReference( Matrix& matrix, std::size_t i)
-	:base_type(blas::matrix_row<Matrix>(matrix,i)){}
-	template<class T>//special version allows for const-conversion
-	MatrixRowReference(T const& matrixrow)
-	:base_type(blas::matrix_row<Matrix>(matrixrow.expression(),matrixrow.index())){}
+	:row_type(row(matrix,i)){}
+	MatrixRowReference(row_type const& matrixrow)
+	:row_type(matrixrow){}
+	
+	template<class M2>
+	MatrixRowReference(MatrixRowReference<M2> const& matrixrow)
+	:row_type(matrixrow){}
 	
 	template<class T> 
 	const MatrixRowReference& operator=(const T& argument){
-		static_cast<base_type&>(*this)=argument;
+		static_cast<row_type&>(*this)=argument;
 		return *this;
 	}
 	
@@ -147,15 +153,15 @@ public:
 	}
 };
 
-template<class M>
-void swap(MatrixRowReference<M> ref1, MatrixRowReference<M> ref2){
-	swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
-}
+//~ template<class M>
+//~ void swap(MatrixRowReference<M> ref1, MatrixRowReference<M> ref2){
+	//~ swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
+//~ }
 
-template<class M1, class M2>
-void swap(MatrixRowReference<M1> ref1, MatrixRowReference<M2> ref2){
-	swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
-}
+//~ template<class M1, class M2>
+//~ void swap(MatrixRowReference<M1> ref1, MatrixRowReference<M2> ref2){
+	//~ swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
+//~ }
 
 template<class Matrix>
 struct VectorBatch{
@@ -276,8 +282,17 @@ struct Batch<shark::blas::compressed_vector<T> >{
 			nonzeros += pos->nnz();
 		}
 		
-		type batch(end - start,start->size(),nonzeros);
-		std::copy(start,end,begin(batch));
+		std::size_t size = end - start;
+		type batch(size,start->size(),nonzeros);
+		
+		Iterator pos = start;
+		for(std::size_t i = 0; i != size; ++i, ++pos){
+			auto row_start = batch.major_end(i);
+			for(auto elem_pos = pos->begin(); elem_pos != pos->end(); ++elem_pos){
+				row_start = batch.set_element(row_start, elem_pos.index(), *elem_pos);
+			}
+		}
+		//~ std::copy(start,end,begin(batch));
 		return batch;
 	}
 	

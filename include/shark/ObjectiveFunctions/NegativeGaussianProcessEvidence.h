@@ -112,7 +112,7 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		RealVector t = column(createBatch<RealVector>(m_dataset.labels().elements()),0);
+		RealMatrix t = createBatch<RealVector>(m_dataset.labels().elements());
 
 		blas::cholesky_decomposition<RealMatrix> cholesky(M);
 		
@@ -124,11 +124,11 @@ public:
 		//= t^T (AA^T)^-1 t= t^T (A^-T A^-1)=||A^-1 t||^2
 		//so we will first solve the triangular System Az=t
 		//and then compute ||z||^2
-		RealVector z = solve(cholesky.lower_factor(),t,blas::lower(), blas::left());
+		RealMatrix z = solve(cholesky.lower_factor(),t,blas::lower(), blas::left());
 
 		// equation (6.69) on page 311 in the book C.M. Bishop, Pattern Recognition and Machine Learning, Springer, 2006
 		// e = 1/2 \cdot [ -log(det(M)) - t^T M^{-1} t - N log(2 \pi) ]
-		double e = 0.5 * (-logDet - norm_sqr(z) - N * std::log(2.0 * M_PI));
+		double e = 0.5 * (-logDet - norm_sqr(to_vector(z)) - N * std::log(2.0 * M_PI));
 
 		// return the *negative* evidence
 		return -e;
@@ -159,7 +159,7 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		RealVector t = column(createBatch<RealVector>(m_dataset.labels().elements()),0);
+		RealMatrix t = createBatch<RealVector>(m_dataset.labels().elements());
 
 		//compute cholesky decomposition of M
 		blas::cholesky_decomposition<RealMatrix> cholesky(M);
@@ -182,12 +182,12 @@ public:
 		cholesky.solve(W,blas::left());
 
 		//calculate z = Wt=M^-1 t
-		RealVector z = prod(W,t);
+		RealMatrix z = prod(W,t);
 		
 		// W is already initialized as the inverse of M, so we only need 
 		// to change the sign and add z. to calculate W fully
 		W*=-1;
-		noalias(W) += outer_prod(z,z);
+		noalias(W) += prod(z,trans(z));
 		
 		
 		//now calculate the derivative
@@ -210,7 +210,7 @@ public:
 		// compute the evidence
 		//compute determinant of M (see eval for why this works)
 		double logDetM = 2* trace(log(cholesky.lower_factor()));
-		double e = 0.5 * (-logDetM - inner_prod(t, z) - N * std::log(2.0 * M_PI));
+		double e = 0.5 * (-logDetM - inner_prod(to_vector(t), to_vector(z)) - N * std::log(2.0 * M_PI));
 		return -e;
 	}
 	

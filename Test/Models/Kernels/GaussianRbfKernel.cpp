@@ -123,11 +123,11 @@ BOOST_AUTO_TEST_CASE( CompressedRbfKernel_Test )
 
 	//testpoints
 	CompressedRealVector x1(17000);
-	x1(3745)=1;
-	x1(14885)=0;
+	x1.set_element(x1.end(),3745,1);
+
 	CompressedRealVector x2(17000);
-	x2(3745)=1;
-	x2(14885)=-1;
+	x2.set_element(x2.end(),3745,1);
+	x2.set_element(x2.end(),14885,-1);
 
 	double result=std::exp(-gamma);
 	//evaluate point
@@ -160,11 +160,11 @@ BOOST_AUTO_TEST_CASE( CompressedRbfKernelUnconstrained_Test )
 
 	//testpoints
 	CompressedRealVector x1(17000);
-	x1(3745)=1;
-	x1(14885)=0;
+	x1.set_element(x1.end(),3745,1);
+
 	CompressedRealVector x2(17000);
-	x2(3745)=1;
-	x2(14885)=-1;
+	x2.set_element(x2.end(),3745,1);
+	x2.set_element(x2.end(),14885,-1);
 
 	double result=std::exp(-gamma);
 	//evaluate point

@@ -81,7 +81,9 @@ BOOST_AUTO_TEST_CASE( ModelKernel_Eval_EvalDerivative )
 	x2(1)=0.0;
 	//evaluate single point
 	double test = modelKernel(x1,x2);
-	double result = kernel(model(x1),model(x2));
+	auto mx1 = model(x1);
+	auto mx2 = model(x2);
+	double result = kernel(mx1,mx2);
 	BOOST_CHECK_SMALL(result-test,1.e-15);
 	
 	//evaluate a batch of points

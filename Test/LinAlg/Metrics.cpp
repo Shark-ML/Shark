@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Vector){
 		vec1(2) = 6;
 		
 		CompressedIntVector vec2(3);
-		vec2(1) = 7;
+		vec2.set_element(vec2.end(),1,7);
 		
 		int result1 = distanceSqr(vec2,vec1);
 		int result2 = distanceSqr(vec1,vec2);
@@ -51,14 +51,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Vector){
 	//compressed- compressed
 	{
 		CompressedIntVector vec1(100);
-		vec1(0) = 2;
-		vec1(10) = 4;
-		vec1(20) = 6;
+		vec1.set_element(vec1.end(),0,2);
+		vec1.set_element(vec1.end(),10,4);
+		vec1.set_element(vec1.end(),20,6);
 		
 		CompressedIntVector vec2(100);
-		vec2(0) = 3;
-		vec2(8) = 7;
-		vec2(20) = 11;
+		vec2.set_element(vec2.end(),0,3);
+		vec2.set_element(vec2.end(),8,7);
+		vec2.set_element(vec2.end(),20,11);
 		
 		int result1 = distanceSqr(vec2,vec1);
 		int result2 = distanceSqr(vec1,vec2);
@@ -101,10 +101,10 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Vector){
 	//dense - compressed
 	{
 		CompressedIntMatrix vec1(3,3);
-		vec1(0,2) = 6;
-		vec1(2,0) = 4;
-		vec1(2,1) = 6;
-		vec1(2,2) = 8;
+		vec1.set_element(vec1.major_end(0),2,6);
+		vec1.set_element(vec1.major_end(2),0,4);
+		vec1.set_element(vec1.major_end(2),1,6);
+		vec1.set_element(vec1.major_end(2),2,8);
 		
 		IntMatrix vec3(3,3,0);
 		vec3(0,2) = 6;
@@ -118,9 +118,9 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Vector){
 		vec2(2) = 11;
 		
 		CompressedIntVector vec4(3);
-		vec4(0) = 3;
-		vec4(1) = 7;
-		vec4(2) = 11;
+		vec4.set_element(vec4.end(),0,3);
+		vec4.set_element(vec4.end(),1,7);
+		vec4.set_element(vec4.end(),2,11);
 		
 		IntVector result1 = distanceSqr(vec2,vec1);
 		IntVector result2 = distanceSqr(vec1,vec2);
@@ -144,17 +144,17 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Vector){
 	//compressed- compressed
 	{
 		CompressedIntMatrix vec1(3,100);
-		vec1(0,0) = 2;
-		vec1(0,10) = 4;
-		vec1(0,20) = 6;
-		vec1(2,1) = 1;
-		vec1(2,2) = 6;
-		vec1(2,3) = 2;
+		vec1.set_element(vec1.major_end(0),0,2);
+		vec1.set_element(vec1.major_end(0),10,4);
+		vec1.set_element(vec1.major_end(0),20,6);
+		vec1.set_element(vec1.major_end(2),1,1);
+		vec1.set_element(vec1.major_end(2),2,6);
+		vec1.set_element(vec1.major_end(2),3,2);
 		
 		CompressedIntVector vec2(100);
-		vec2(0) = 3;
-		vec2(8) = 7;
-		vec2(20) = 11;
+		vec2.set_element(vec2.end(),0,3);
+		vec2.set_element(vec2.end(),8,7);
+		vec2.set_element(vec2.end(),20,11);
 		
 		IntVector result1 = distanceSqr(vec2,vec1);
 		IntVector result2 = distanceSqr(vec1,vec2);
@@ -212,23 +212,23 @@ BOOST_AUTO_TEST_CASE( LinAlg_Norm_distanceSqr_Matrix_Matrix){
 	//small compressed block 
 	{
 		CompressedIntMatrix mat1(2,3);
-		mat1(0,0) = 2;
-		mat1(0,1) = 4;
-		mat1(0,2) = 6;
-		mat1(1,0) = 3;
-		mat1(1,1) = 5;
-		mat1(1,2) = 7;
-		
+		mat1.set_element(mat1.major_end(0),0,2);
+		mat1.set_element(mat1.major_end(0),1,4);
+		mat1.set_element(mat1.major_end(0),2,6);
+		mat1.set_element(mat1.major_end(1),0,3);
+		mat1.set_element(mat1.major_end(1),1,5);
+		mat1.set_element(mat1.major_end(1),2,7);
+
 		CompressedIntMatrix mat2(3,3);
-		mat2(0,0) = 3;
-		mat2(0,1) = 5;
-		mat2(0,2) = 7;
-		mat2(1,0) = 4;
-		mat2(1,1) = 6;
-		mat2(1,2) = 8;
-		mat2(2,0) = 2;
-		mat2(2,1) = 1;
-		mat2(2,2) = 0;
+		mat2.set_element(mat2.major_end(0),0,3);
+		mat2.set_element(mat2.major_end(0),1,5);
+		mat2.set_element(mat2.major_end(0),2,7);
+		mat2.set_element(mat2.major_end(1),0,4);
+		mat2.set_element(mat2.major_end(1),1,6);
+		mat2.set_element(mat2.major_end(1),2,8);
+		mat2.set_element(mat2.major_end(2),0,2);
+		mat2.set_element(mat2.major_end(2),1,1);
+		mat2.set_element(mat2.major_end(2),2,0);
 		
 		IntMatrix result1 = distanceSqr(mat1,mat2);
 		IntMatrix result2 = distanceSqr(mat2,mat1);

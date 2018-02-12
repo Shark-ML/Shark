@@ -72,10 +72,10 @@ BOOST_AUTO_TEST_CASE( SparsePolynomialKernel_Test ){
 
 	// test points
 	CompressedRealVector x1(200);
-	x1(30) = 1.5;
+	x1.set_element(x1.end(),30,1.5);
 	CompressedRealVector x2(200);
-	x2(30) = 2.0;
-	x2(51) = 1.0;
+	x2.set_element(x2.end(),30,2.0);
+	x2.set_element(x2.end(),51,1.0);
 	//evaluate single point
 	double test = kernel(x1,x2);
 	BOOST_CHECK_SMALL(result3-test,1.e-15);
@@ -94,11 +94,11 @@ BOOST_AUTO_TEST_CASE( SparsePolynomialKernel_Test ){
 	CompressedRealMatrix batch2(20,200);
 	for(std::size_t i = 0; i != 10;++i){
 		for(std::size_t j = 0; j != 2; ++j)
-			batch1(i,j*100)=random::uni(random::globalRng,-1,1);
+			batch1.set_element(batch1.major_end(i), j * 100, random::uni(random::globalRng,-1,1));
 	}
 	for(std::size_t i = 0; i != 20;++i){
 		for(std::size_t j = 0; j != 4; ++j)
-			batch2(i,j*50)=random::uni(random::globalRng,-1,1);
+			batch2.set_element(batch2.major_end(i), j * 100, random::uni(random::globalRng,-1,1));
 	}
 	kernel.setDegree(3);
 	testEval(kernel,batch1,batch2);

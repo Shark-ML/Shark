@@ -135,11 +135,11 @@ void applyHouseholderOnTheLeft(
 /// calculates (1-beta*xx^T)*A
 template<class Mat, class R, class T, class Device>
 void applyHouseholderOnTheLeft(
-	temporary_proxy<Mat> matrix,
+	matrix_expression<Mat, Device>&& matrix,
 	vector_expression<R, Device> const& reflection, 
 	T const& beta
 ){
-	applyHouseholderOnTheLeft(static_cast<Mat&>(matrix),reflection,beta);
+	applyHouseholderOnTheLeft(matrix(),reflection,beta);
 }
 
 /// \brief Initializes a matrix such that it forms a random rotation matrix.

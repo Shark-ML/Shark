@@ -25,8 +25,8 @@ public:
 	{
 		label = random::discrete(random::globalRng, 0, 4);
 		input.resize(1000002);
-		input(1000000) = noise * random::gauss(random::globalRng) + 3.0 * std::cos((double)label);
-		input(1000001) = noise * random::gauss(random::globalRng) + 3.0 * std::sin((double)label);
+		input.set_element(input.end(), 1000000,  noise * random::gauss(random::globalRng) + 3.0 * std::cos((double)label));
+		input.set_element(input.end(), 1000001,  noise * random::gauss(random::globalRng) + 3.0 * std::sin((double)label));
 	}
 };
 /// @endcond

@@ -70,8 +70,8 @@ struct TwoStateSpace{
 	///
 	/// @param vec the vector the i-th state vector is stored in
 	/// @param stateNumber the number of the state   
-	template<class Matrix>
-	static void state(blas::matrix_row<Matrix> vec,std::size_t stateNumber){
+	template<class V>
+	static void state(V&& vec,std::size_t stateNumber){
 		for (std::size_t i = 0; i != vec.size(); i++) {
 			bool secondState = stateNumber & (std::size_t(1)<<i);
 			vec(i) = secondState? State2 : State1;

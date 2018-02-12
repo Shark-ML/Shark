@@ -55,7 +55,6 @@ macro(SHARK_ADD_TEST SRC NAME)
 endmacro()
 
 # LinAlg Tests
-shark_add_test( LinAlg/Proxy.cpp LinAlg_Proxy )
 shark_add_test( LinAlg/rotations.cpp LinAlg_rotations )
 shark_add_test( LinAlg/permute.cpp LinAlg_Permutations )
 shark_add_test( LinAlg/KernelMatrix.cpp LinAlg_KernelMatrix )
@@ -189,9 +188,9 @@ shark_add_test( Data/Dataset.cpp Data_Dataset )
 shark_add_test( Data/DataView.cpp Data_DataView )
 shark_add_test( Data/LabelOrder_Test.cpp Data_LabelOrder )
 shark_add_test( Data/Statistics.cpp Data_Statistics )
-if(HDF5_FOUND)
-  shark_add_test( Data/HDF5Tests.cpp Data_HDF5 )
-endif()
+#~ if(HDF5_FOUND)
+  #~ shark_add_test( Data/HDF5Tests.cpp Data_HDF5 )
+#~ endif()
 shark_add_test( Data/SparseData.cpp Data_SparseData )
 shark_add_test( Data/ExportKernelMatrix.cpp Data_ExportKernelMatrix )
 
@@ -257,14 +256,14 @@ set_tests_properties( Trainers_LinearSvmTrainer PROPERTIES LABELS "slow" )
 
 
 # Copy test file
-if(HDF5_FOUND)
-    add_custom_command(
-        TARGET Data_HDF5
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test_data
-            ${CMAKE_CURRENT_BINARY_DIR}/test_data
-    )
-endif()
+#~ if(HDF5_FOUND)
+    #~ add_custom_command(
+        #~ TARGET Data_HDF5
+        #~ POST_BUILD
+        #~ COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/test_data
+            #~ ${CMAKE_CURRENT_BINARY_DIR}/test_data
+    #~ )
+#~ endif()
 
 # Create output dir
 add_custom_command(
