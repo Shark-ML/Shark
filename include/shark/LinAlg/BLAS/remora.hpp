@@ -38,8 +38,7 @@
 #include "solve.hpp"
 //containers
 #include "dense.hpp"
-//~ #include "vector_sparse.hpp"
-//~ #include "matrix_sparse.hpp"
+#include "sparse.hpp"
 
 //misc
 #include "permutation.hpp"
