@@ -28,23 +28,17 @@
 #ifndef REMORA_KERNELS_DEFAULT_MATRIX_FOLD_HPP
 #define REMORA_KERNELS_DEFAULT_MATRIX_FOLD_HPP
 
-#include "../../detail/traits.hpp" //orientations, major_begin/end
+#include "../../detail/traits.hpp" //orientations
 #include "../../expression_types.hpp"
 #include <type_traits>
 namespace remora{namespace bindings{
 	
 template<class F, class M, class Orientation, class Tag>
 void matrix_fold(matrix_expression<M, cpu_tag> const& m, typename F::result_type& value, Orientation, Tag) {
-	typedef typename std::conditional<
-		std::is_same<Orientation,unknown_orientation>::value,
-		row_major,
-		Orientation
-	>::type chosen_orientation;
 	F f;
-	std::size_t size = chosen_orientation::index_M(m().size1(),m().size2());
-	for(std::size_t i = 0; i != size; ++i){
-		auto end = major_end(m,i);
-		for(auto pos = major_begin(m,i);pos != end; ++pos){
+	for(std::size_t i = 0; i != major_size(m); ++i){
+		auto end = m().major_end(i);
+		for(auto pos = m().major_begin(i);pos != end; ++pos){
 			value = f(value,*pos);
 		}
 	}

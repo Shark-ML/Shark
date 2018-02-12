@@ -33,7 +33,7 @@
 
 #include "../gemv.hpp"//for dispatching to gemv
 #include "../../assignment.hpp"//plus_assign
-#include "../../detail/matrix_proxy_classes.hpp"//matrix row,column,transpose,range
+#include "../../proxy_expressions.hpp"//matrix row,column,transpose,range
 #include "mgemm.hpp" //block macro kernel for dense gemm
 #include <type_traits> //std::common_type
 
@@ -120,12 +120,12 @@ void dense_gemm(
 
 		for (std::size_t l=0; l<kb; ++l) {
 			std::size_t kc = std::min(KC, K - l*KC);
-			matrix_range<typename const_expression<E2>::type> Bs(e2(), l*KC, l*KC+kc, j*NC, j*NC+nc);
+			auto Bs = subrange(e2, l*KC, l*KC+kc, j*NC, j*NC+nc);
 			pack_B_dense(Bs, B, block_size());
 
 			for (std::size_t i=0; i<mb; ++i) {
 				std::size_t mc = std::min(MC, M - i*MC);
-				matrix_range<typename const_expression<E1>::type> As(e1(), i*MC, i*MC+mc, l*KC, l*KC+kc);
+				auto As = subrange(e1, i*MC, i*MC+mc, l*KC, l*KC+kc);
 				pack_A_dense(As, A, block_size());
 
 				mgemm(

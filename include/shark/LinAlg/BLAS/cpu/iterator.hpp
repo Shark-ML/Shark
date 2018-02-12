@@ -38,51 +38,10 @@
 
 namespace remora{ namespace iterators{
 
-//pure block expressions do not have an iterator but the interface still requires one.
-// this is our cheap way out.
-struct no_iterator{};
-
 // Iterator tags -- hierarchical definition of storage characteristics
-struct sparse_bidirectional_iterator_tag: public std::bidirectional_iterator_tag{};
+struct sparse_random_access_iterator_tag: public std::random_access_iterator_tag{};
 struct packed_random_access_iterator_tag: public std::random_access_iterator_tag{};
 struct dense_random_access_iterator_tag: public packed_random_access_iterator_tag{};
-
-/** \brief Base class of all bidirectional iterators.
- *
- * \param I the derived iterator type
- * \param T the value type
- *
- * The bidirectional iterator can proceed in both directions
- * via the post increment and post decrement operator.
- */
-template<class I, class T>
-struct bidirectional_iterator_base:
-	public std::iterator<sparse_bidirectional_iterator_tag, T> {
-	typedef I derived_iterator_type;
-	typedef T derived_value_type;
-
-	// Arithmetic
-	derived_iterator_type operator ++ (int) {
-		derived_iterator_type &d(*static_cast<const derived_iterator_type *>(this));
-		derived_iterator_type tmp(d);
-		++ d;
-		return tmp;
-	}
-
-	derived_iterator_type operator -- (int) {
-		derived_iterator_type &d(*static_cast<const derived_iterator_type *>(this));
-		derived_iterator_type tmp(d);
-		-- d;
-		return tmp;
-	}
-
-	// Comparison
-
-	bool operator != (const derived_iterator_type &it) const {
-		const derived_iterator_type *d = static_cast<const derived_iterator_type *>(this);
-		return !(*d == it);
-	}
-};
 
 /** \brief Base class of all random access iterators.
  *
@@ -102,14 +61,6 @@ struct random_access_iterator_base
 	typedef T derived_value_type;
 	typedef std::ptrdiff_t difference_type;
 
-	//~ I operator + (difference_type n) const {
-		//~ I tmp(*static_cast<const I *>(this));
-		//~ return tmp += n;
-	//~ }
-	//~ I operator - (difference_type n) const {
-		//~ I tmp(*static_cast<const I *>(this));
-		//~ return tmp -= n;
-	//~ }
 	friend I operator + (random_access_iterator_base const& it, difference_type n) {
 		I tmp(static_cast<const I&>(it));
 		return tmp += n;
@@ -188,32 +139,6 @@ bool operator > (
 	return d2 < d1;
 }
 //traits lass for choosing the right base for wrapping iterators
-
-template<class IC>
-struct iterator_base_traits {};
-
-template<>
-struct iterator_base_traits<sparse_bidirectional_iterator_tag> {
-	template<class I, class T>
-	struct iterator_base {
-		typedef bidirectional_iterator_base<I, T> type;
-	};
-};
-template<>
-struct iterator_base_traits<dense_random_access_iterator_tag> {
-	template<class I, class T>
-	struct iterator_base {
-		typedef random_access_iterator_base<I, T, dense_random_access_iterator_tag> type;
-	};
-};
-
-template<>
-struct iterator_base_traits<packed_random_access_iterator_tag> {
-	template<class I, class T>
-	struct iterator_base {
-		typedef random_access_iterator_base<I, T, packed_random_access_iterator_tag> type;
-	};
-};
 
 template<class Closure>
 class indexed_iterator:
@@ -394,9 +319,11 @@ private:
 };
 template<class T, class I>
 class compressed_storage_iterator:
-	public bidirectional_iterator_base<
-		compressed_storage_iterator<T,I>,typename std::remove_const<T>::type
-	>{
+public random_access_iterator_base<
+	compressed_storage_iterator<T,I>,
+	typename std::remove_const<T>::type, 
+	sparse_random_access_iterator_tag
+>{
 public:
 	typedef typename std::remove_const<T>::type value_type;
 	typedef typename std::remove_const<I>::type size_type;
@@ -408,15 +335,15 @@ public:
 	compressed_storage_iterator() {}
 	compressed_storage_iterator(
 		T* value_array, I* index_array, 
-		size_type position, size_type row = 0
+		size_type position, size_type major_pos = 0
 	)
 	: m_values(value_array),m_indices(index_array)
-	, m_position(position), m_row(row){}
+	, m_position(position), m_major_pos(major_pos){}
 		
 	template<class U,class V>
 	compressed_storage_iterator(compressed_storage_iterator<U,V> const& it) {
 		m_position = it.m_position;
-		m_row = it.m_row;
+		m_major_pos = it.m_major_pos;
 		m_values = it.m_values;
 		m_indices = it.m_indices;
 	}
@@ -424,7 +351,7 @@ public:
 	template<class U,class V>
 	compressed_storage_iterator &operator = (compressed_storage_iterator<U,V> const& it) {
 		m_position = it.m_position;
-		m_row = it.m_row;
+		m_major_pos = it.m_major_pos;
 		m_values = it.m_values;
 		m_indices = it.m_indices;
 		return *this;
@@ -440,10 +367,22 @@ public:
 		--m_position;
 		return *this;
 	}
+	
+	compressed_storage_iterator &operator += (difference_type n) {
+		m_position += n;
+		return *this;
+	}
+	compressed_storage_iterator &operator -= (difference_type n) {
+		m_position -= n;
+		return *this;
+	}
 
 	// Dereference
 	reference operator* () const {
 		return m_values[m_position];
+	}
+	reference operator [](difference_type n) const {
+		return m_values[m_position+n];
 	}
 	size_type index() const {
 		return m_indices[m_position];
@@ -456,8 +395,8 @@ public:
 		return difference_type(m_position) - difference_type(it.m_position);
 	}
 	
-	size_type row()const{
-		return m_row;
+	size_type major_index()const{
+		return m_major_pos;
 	}
 
 	template<class U,class V>
@@ -471,130 +410,10 @@ private:
 	T* m_values;
 	I* m_indices;
 	std::size_t m_position;
-	std::size_t m_row;
+	std::size_t m_major_pos;
 	template<class,class> friend class compressed_storage_iterator;
 };
 
-template<class BaseIterator>
-class subrange_iterator:
-	public iterator_base_traits<typename BaseIterator::iterator_category>::template
-		iterator_base<subrange_iterator<BaseIterator>, typename BaseIterator::value_type>::type {
-private:
-	template<class Iterator>
-	Iterator incrementToIndex(
-		Iterator iter, Iterator end, std::size_t index, dense_random_access_iterator_tag
-	) {
-		REMORA_SIZE_CHECK(iter.index()<= index);
-		return iter+(index-iter.index());
-	}
-	template<class Iterator>
-	Iterator incrementToIndex(
-		Iterator iter, Iterator end, std::size_t index, packed_random_access_iterator_tag
-	) {
-		if(iter < end ){
-			REMORA_RANGE_CHECK(iter.index() < index);
-			return iter+std::min<std::ptrdiff_t>(std::ptrdiff_t(index-iter.index()),end-iter);
-		}
-		return end;
-	}
-	
-	template<class Iterator>
-	Iterator incrementToIndex(
-	    Iterator iter, Iterator end, std::size_t index,sparse_bidirectional_iterator_tag
-	) {
-		while (iter != end && iter.index() < index)++iter;
-		return iter;
-	}
-	template<class Iterator>
-	Iterator incrementToIndex(
-	    Iterator iter, Iterator end, std::size_t index
-	) {
-		return incrementToIndex(iter,end,index,typename Iterator::iterator_category());
-	}
-public:
-	typedef typename BaseIterator::value_type value_type;
-	typedef typename BaseIterator::difference_type difference_type;
-	typedef typename BaseIterator::reference reference;
-	typedef typename BaseIterator::pointer pointer;
-
-	// Construction and destruction
-	subrange_iterator() {}
-
-	subrange_iterator(BaseIterator const &it, BaseIterator const &end, std::size_t startIterIndex,std::size_t startIndex)
-		: m_iterator(incrementToIndex(it,end,startIterIndex)),m_start(startIndex) {}
-
-	subrange_iterator(BaseIterator const &it, std::size_t startIndex)
-		: m_iterator(it),m_start(startIndex) {}
-
-	template<class Iterator>
-	subrange_iterator(subrange_iterator<Iterator> const &it)
-		:m_iterator(it.m_iterator), m_start(it.m_start) {}
-
-	// Arithmetic
-	subrange_iterator &operator ++ () {
-		++ m_iterator;
-		return *this;
-	}
-
-	subrange_iterator &operator -- () {
-		-- m_iterator;
-		return *this;
-	}
-
-	subrange_iterator &operator += (difference_type n) {
-		m_iterator += n;
-		return *this;
-	}
-
-	subrange_iterator &operator -= (difference_type n) {
-		m_iterator -= n;
-		return *this;
-	}
-
-	difference_type operator - (subrange_iterator const &it) const {
-		return m_iterator - it.m_iterator;
-	}
-
-	// Dereference
-	reference operator * () const {
-		return *m_iterator;
-	}
-	reference operator [](difference_type n) const {
-		return *(*this + n);
-	}
-
-	// Indices
-	std::size_t index() const {
-		return m_iterator.index() - m_start;
-	}
-
-	// Assignment
-	template<class Iterator>
-	subrange_iterator &operator = (subrange_iterator<Iterator> const &it) {
-		m_iterator = it.m_iterator;
-		m_start = it.m_start;
-		return *this;
-	}
-
-	// Comparison
-	template<class Iterator>
-	bool operator == (subrange_iterator<Iterator> const &it) const {
-		return m_iterator == it.m_iterator;
-	}
-	template<class Iterator>
-	bool operator < (subrange_iterator<Iterator> const &it) const {
-		return m_iterator < it.m_iterator;
-	}
-
-	BaseIterator inner()const {
-		return m_iterator;
-	}
-
-private:
-	BaseIterator m_iterator;
-	std::size_t m_start;
-	template<class> friend class subrange_iterator;
-};
 
 
 template<class T>
@@ -672,8 +491,11 @@ private:
 
 template<class BaseIterator, class F>
 class transform_iterator:
-	public iterator_base_traits<typename BaseIterator::iterator_category>::template
-		iterator_base<transform_iterator<BaseIterator,F>, typename BaseIterator::value_type>::type {
+public random_access_iterator_base<
+	transform_iterator<BaseIterator,F>, 
+	typename BaseIterator::value_type,
+	typename BaseIterator::iterator_category
+>{
 public:
 	typedef typename BaseIterator::iterator_category iterator_category;
 	typedef std::size_t size_type;
@@ -743,7 +565,9 @@ private:
 };
 
 template<class T>
-class one_hot_iterator:public bidirectional_iterator_base<one_hot_iterator<T>, T> {
+class one_hot_iterator:public random_access_iterator_base<
+	one_hot_iterator<T>, T, sparse_random_access_iterator_tag
+> {
 public:
 	typedef T value_type;
 	typedef std::ptrdiff_t difference_type;
@@ -766,6 +590,15 @@ public:
 		m_isEnd = false;
 		return *this;
 	}
+	one_hot_iterator &operator += (difference_type n) {
+		m_isEnd += n;
+		return *this;
+	}
+	one_hot_iterator &operator -= (difference_type n) {
+		m_isEnd -= n;
+		return *this;
+	}
+	
 
 	// Dereference
 	reference operator*() const {
@@ -775,6 +608,9 @@ public:
 	// Indices
 	size_type index() const{
 		return m_index;
+	}
+	difference_type operator - (one_hot_iterator const &it) const {
+		return m_isEnd - it.m_isEnd;
 	}
 
 	// Assignment
@@ -788,6 +624,9 @@ public:
 	bool operator == (one_hot_iterator const& it) const {
 		REMORA_RANGE_CHECK(m_index == it.m_index);
 		return m_isEnd == it.m_isEnd;
+	}
+	bool operator < (one_hot_iterator const &it) const {
+		return m_isEnd < it.m_isEnd;
 	}
 
 private:
@@ -803,8 +642,8 @@ struct iterator_restrict_traits {
 };
 
 template<>
-struct iterator_restrict_traits<dense_random_access_iterator_tag, sparse_bidirectional_iterator_tag> {
-	typedef sparse_bidirectional_iterator_tag iterator_category;
+struct iterator_restrict_traits<dense_random_access_iterator_tag, sparse_random_access_iterator_tag> {
+	typedef sparse_random_access_iterator_tag iterator_category;
 };
 
 template<>
@@ -813,21 +652,20 @@ struct iterator_restrict_traits<packed_random_access_iterator_tag,dense_random_a
 };
 
 template<>
-struct iterator_restrict_traits<packed_random_access_iterator_tag,sparse_bidirectional_iterator_tag> {
-	typedef sparse_bidirectional_iterator_tag iterator_category;
+struct iterator_restrict_traits<packed_random_access_iterator_tag,sparse_random_access_iterator_tag> {
+	typedef sparse_random_access_iterator_tag iterator_category;
 };
 
 template<class Iterator1, class Iterator2, class F>
 class binary_transform_iterator:
-public iterator_base_traits<
+public random_access_iterator_base<
+	binary_transform_iterator<Iterator1,Iterator2,F>,
+	typename std::result_of<F(typename Iterator1::value_type, typename Iterator2::value_type)>::type,
 	typename iterator_restrict_traits<
 		typename Iterator1::iterator_category,
 		typename Iterator2::iterator_category
 	>::iterator_category
->::template iterator_base<
-	binary_transform_iterator<Iterator1,Iterator2,F>,
-	typename std::result_of<F(typename Iterator1::value_type, typename Iterator2::value_type)>::type
->::type{
+>{
 private:
 	typedef typename Iterator1::iterator_category category1;
 	typedef typename Iterator2::iterator_category category2;
@@ -905,8 +743,8 @@ private:
 
 	// Sparse specializations
 	void ensureValidPosition(
-		sparse_bidirectional_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag,
+		sparse_random_access_iterator_tag
 	){
 		//ensure that both iterators point to the same index
 		if(F::left_zero_remains || F::right_zero_remains){
@@ -926,8 +764,8 @@ private:
 		}
 	}
 	void increment(
-		sparse_bidirectional_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag,
+		sparse_random_access_iterator_tag
 	) {
 		if(F::left_zero_remains || F::right_zero_remains){
 			++ m_iterator1;
@@ -959,8 +797,8 @@ private:
 		m_index = std::min(index1, index2);
 	}
 	void decrement(
-		sparse_bidirectional_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag,
+		sparse_random_access_iterator_tag
 	) {
 		if (m_index <= m_iterator1.index())
 			-- m_iterator1;
@@ -969,8 +807,8 @@ private:
 		m_index = std::max(m_iterator1.index(), m_iterator2.index());
 	}
 	void increment(
-		sparse_bidirectional_iterator_tag, 
-		sparse_bidirectional_iterator_tag, 
+		sparse_random_access_iterator_tag, 
+		sparse_random_access_iterator_tag, 
 		difference_type n
 	) {
 		while (n > 0) {
@@ -983,8 +821,8 @@ private:
 		}
 	}
 	value_type dereference(
-		sparse_bidirectional_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag,
+		sparse_random_access_iterator_tag
 	) const {
 		value_type t1 = value_type/*zero*/();
 		if (m_iterator1 != m_end1 && m_iterator1.index() == m_index)
@@ -999,7 +837,7 @@ private:
 	// Sparse specializations
 	void ensureValidPosition(
 		dense_random_access_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag
 	){
 		if(F::right_zero_remains){
 			m_iterator1 += m_iterator2.index()-m_iterator1.index();
@@ -1008,7 +846,7 @@ private:
 	
 	void increment(
 		dense_random_access_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag
 	) {
 		if(F::right_zero_remains){
 			++ m_iterator2;
@@ -1034,7 +872,7 @@ private:
 	}
 	void decrement(
 		dense_random_access_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag
 	) {
 		if(F::right_zero_remains){
 			-- m_iterator2;
@@ -1049,7 +887,7 @@ private:
 	}
 	void increment(
 		dense_random_access_iterator_tag, 
-		sparse_bidirectional_iterator_tag, 
+		sparse_random_access_iterator_tag, 
 		difference_type n
 	) {
 		while (n > 0) {
@@ -1063,7 +901,7 @@ private:
 	}
 	value_type dereference(
 		dense_random_access_iterator_tag,
-		sparse_bidirectional_iterator_tag
+		sparse_random_access_iterator_tag
 	) const {
 		typedef typename Iterator2::value_type value_type2;
 		value_type t2 = value_type2/*zero*/();
@@ -1074,7 +912,7 @@ private:
 	
 	//sparse-dense
 	void ensureValidPosition(
-		sparse_bidirectional_iterator_tag,
+		sparse_random_access_iterator_tag,
 		dense_random_access_iterator_tag
 	){
 		if(F::left_zero_remains){
@@ -1082,7 +920,7 @@ private:
 		}
 	}
 	void increment(
-		sparse_bidirectional_iterator_tag,
+		sparse_random_access_iterator_tag,
 		dense_random_access_iterator_tag
 	) {
 		if(F::left_zero_remains){
@@ -1108,7 +946,7 @@ private:
 		m_index = std::min(index1, index2);
 	}
 	void decrement(
-		sparse_bidirectional_iterator_tag,
+		sparse_random_access_iterator_tag,
 		dense_random_access_iterator_tag
 	) {
 		if(F::left_zero_remains){
@@ -1123,7 +961,7 @@ private:
 		}
 	}
 	void increment(
-		sparse_bidirectional_iterator_tag,
+		sparse_random_access_iterator_tag,
 		dense_random_access_iterator_tag,
 		difference_type n
 	) {
@@ -1137,7 +975,7 @@ private:
 		}
 	}
 	value_type dereference(
-		sparse_bidirectional_iterator_tag,
+		sparse_random_access_iterator_tag,
 		dense_random_access_iterator_tag
 	) const {
 		typedef typename Iterator1::value_type value_type1;

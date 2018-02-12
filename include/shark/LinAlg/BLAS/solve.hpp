@@ -82,18 +82,18 @@ public:
 		return m_system_type;
 	}
 	
-	typedef typename MatA::const_row_iterator iterator;
+	typedef no_iterator iterator;
 	typedef iterator const_iterator;
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		assign(x,m_rhs,alpha);
 		solver<MatA,SystemType> alg(m_matrix, m_system_type);
 		alg.solve(x,Side());
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
 		typename vector_temporary<VecX>::type temp(m_rhs);
 		solver<MatA,SystemType> alg(m_matrix, m_system_type);
 		alg.solve(temp,Side());
@@ -156,20 +156,18 @@ public:
 			return m_system_type;
 	}
 	
-	typedef typename MatA::const_row_iterator row_iterator;
-	typedef row_iterator const_row_iterator;
-	typedef typename MatA::const_column_iterator column_iterator;
-	typedef column_iterator const_column_iterator;
+	typedef no_iterator major_iterator;
+	typedef major_iterator const_major_iterator;
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		assign(X,m_rhs,alpha);
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(X,Side());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		typename matrix_temporary<MatX>::type temp(m_rhs);
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(temp,Side());
@@ -223,21 +221,19 @@ public:
 			return m_system_type;
 	}
 	
-	typedef typename MatA::const_row_iterator row_iterator;
-	typedef row_iterator const_row_iterator;
-	typedef typename MatA::const_column_iterator column_iterator;
-	typedef column_iterator const_column_iterator;
+	typedef no_iterator major_iterator;
+	typedef major_iterator const_major_iterator;
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		typedef scalar_vector<value_type, device_type> diag_vec;
 		assign(X,diagonal_matrix<diag_vec>(diag_vec(size1(),value_type(1))),alpha);
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(X,left());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		typedef scalar_vector<value_type, device_type> diag_vec;
 		typename matrix_temporary<MatX>::type temp = diagonal_matrix<diag_vec>(diag_vec(size1(),value_type(1)),alpha);
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
@@ -317,8 +313,8 @@ struct solve_tag_transpose_helper<triangular_tag<Upper,Unit> >{
 //trans(solve(A,B,right)) = solve(trans(A),trans(B),left)
 template<class M1, class M2, bool Left, class Tag>
 struct matrix_transpose_optimizer<matrix_matrix_solve<M1,M2, Tag, system_tag<Left> > >{
-	typedef matrix_transpose_optimizer<typename const_expression<M2>::type> lhs_opt;
-	typedef matrix_transpose_optimizer<typename const_expression<M1>::type> rhs_opt;
+	typedef matrix_transpose_optimizer<typename M2::const_closure_type> lhs_opt;
+	typedef matrix_transpose_optimizer<typename M2::const_closure_type> rhs_opt;
 	typedef matrix_matrix_solve_optimizer<
 		typename lhs_opt::type,typename rhs_opt::type,
 		typename Tag::transposed_tag, system_tag<!Left>
@@ -336,7 +332,7 @@ struct matrix_transpose_optimizer<matrix_matrix_solve<M1,M2, Tag, system_tag<Lef
 
 template<class M, class Tag>
 struct matrix_transpose_optimizer<matrix_inverse<M, Tag> >{
-	typedef matrix_transpose_optimizer<typename const_expression<M>::type> mat_opt;
+	typedef matrix_transpose_optimizer<typename M::const_closure_type> mat_opt;
 	typedef matrix_inverse_optimizer<
 		typename mat_opt::type, typename Tag::transposed_orientation
 	> opt;
@@ -393,7 +389,7 @@ struct matrix_vector_prod_optimizer<matrix_matrix_solve<M1,M2, Tag, right >, V >
 //row(solve(A,B,left),i) = prod(solve(A,e_i,right),B) = prod(trans(B),solve(A,e_i,right)) 
 template<class M1, class M2,class Tag>
 struct matrix_row_optimizer<matrix_matrix_solve<M1,M2, Tag, left > >{
-	typedef matrix_transpose_optimizer<typename const_expression<M2>::type> rhs_opt;
+	typedef matrix_transpose_optimizer<typename M2::const_closure_type> rhs_opt;
 	typedef unit_vector<typename M1::value_type, typename M1::device_type> unit;
 	typedef matrix_vector_solve_optimizer<M1, unit, Tag, right> solve_opt;
 	typedef matrix_vector_prod_optimizer<typename rhs_opt::type,typename solve_opt::type> opt;
@@ -410,7 +406,7 @@ struct matrix_row_optimizer<matrix_matrix_solve<M1,M2, Tag, left > >{
 //row(solve(A,B,right),i) = solve(A,row(B,i),right) 
 template<class M1, class M2, class Tag>
 struct matrix_row_optimizer<matrix_matrix_solve<M1,M2, Tag, right > >{
-	typedef matrix_row_optimizer<typename const_expression<M2>::type> rhs_opt;
+	typedef matrix_row_optimizer<typename M2::const_closure_type> rhs_opt;
 	typedef matrix_vector_solve_optimizer<M1, typename rhs_opt::type, Tag, right> opt;
 	typedef typename opt::type type;
 	

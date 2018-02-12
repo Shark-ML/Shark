@@ -109,8 +109,7 @@ void trsv_impl(
 	vector_expression<V, cpu_tag> &b,
 	std::true_type, right
 ){
-	matrix_transpose<typename const_expression<MatA>::type> transA(A());
-	trsv_impl<typename Triangular::transposed_orientation>(transA, b, std::true_type(),  left());
+	trsv_impl<typename Triangular::transposed_orientation>(trans(A), b, std::true_type(),  left());
 }
 
 //dispatcher

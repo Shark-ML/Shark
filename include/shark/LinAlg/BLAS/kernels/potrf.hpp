@@ -60,4 +60,8 @@ std::size_t potrf(
 }
 
 }}
+
+#ifdef REMORA_USE_GPU
+#include "gpu/potrf.hpp"
+#endif
 #endif

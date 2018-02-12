@@ -34,8 +34,6 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/functional/operator.hpp> //for multiplies
 
 namespace remora{ namespace kernels{
@@ -43,21 +41,24 @@ namespace remora{ namespace kernels{
 // v <- v + alpha * A * x
 template <typename MatA, typename VecX, typename VecV>
 void gemv(
-	matrix_expression<MatA, gpu_tag> const& A,
-	vector_expression<VecX, gpu_tag> const& x,
-	vector_expression<VecV, gpu_tag>& v, 
+	matrix_expression<MatA, gpu_tag> const& A_unreg,
+	vector_expression<VecX, gpu_tag> const& x_unreg,
+	vector_expression<VecV, gpu_tag>& v_unreg, 
 	typename VecV::value_type const& alpha
 ) {
-	REMORA_SIZE_CHECK(A().size1() == v().size());
-	REMORA_SIZE_CHECK(A().size2() == x().size());
+	REMORA_SIZE_CHECK(A_unreg().size1() == v_unreg().size());
+	REMORA_SIZE_CHECK(A_unreg().size2() == x_unreg().size());
 	
 	
 	typedef typename VecV::value_type value_type;
 	boost::compute::multiplies<value_type> prod;
-	boost::compute::detail::meta_kernel k("blas_gemv");
+	gpu::detail::meta_kernel k("blas_gemv");
 	std::size_t alpha_index = k.add_arg<value_type>("alpha");
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
 	std::size_t size2_index = k.add_arg<std::size_t>("size2");
+	auto A = k.register_args(to_functor(A_unreg));
+	auto x = k.register_args(to_functor(x_unreg));
+	auto v = k.register_args(to_functor(v_unreg));
 	//read all tiles in the assigned rows and compute the inner product
 	k << "__local " <<k.decl<value_type>("results")<< "[TILE_DIM][TILE_DIM+2];";
 	k << "uint rowid = get_global_id(0);";
@@ -65,7 +66,7 @@ void gemv(
 	k << "for(uint i = get_local_id(1) ; i < size2 && rowid < size1; i += TILE_DIM){";
 	auto exprRow = k.expr<cl_uint>("rowid");
 	auto exprCol = k.expr<cl_uint>("i");
-	k<< "    results[get_local_id(0)][get_local_id(1)] += "<< prod(A()(exprRow,exprCol),x()(exprCol))<<";";
+	k<< "    results[get_local_id(0)][get_local_id(1)] += "<< prod(A(exprRow,exprCol),x(exprCol))<<";";
 	k<<'}';
 	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with computing
 	//sum up the rows
@@ -73,24 +74,24 @@ void gemv(
 	k << "    for(uint i = 1 ; i < TILE_DIM; ++i){";
 	k << "        results[get_local_id(0)][0] +=results[get_local_id(0)][i];";
 	k << "    }";
-	k << v()(exprRow) << "+= alpha * results[get_local_id(0)][0];";
+	k << v(exprRow) << "+= alpha * results[get_local_id(0)][0];";
 	k<< "}";
 	//create source
 
 	std::size_t TILE_DIM = 16;
 	char const* options ="-DTILE_DIM=16";
-	boost::compute::kernel kernel = k.compile(v().queue().get_context(), options);
+	boost::compute::kernel kernel = k.compile(v_unreg().queue().get_context(), options);
 	//enqueue kernel
 	kernel.set_arg(alpha_index, alpha);
-	kernel.set_arg(size1_index, A().size1());
-	kernel.set_arg(size2_index, A().size2());
+	kernel.set_arg(size1_index, A_unreg().size1());
+	kernel.set_arg(size2_index, A_unreg().size2());
 	
 	std::size_t global_work_size[2] = {
-		((A().size1()+TILE_DIM-1)/TILE_DIM) * TILE_DIM,
+		((A_unreg().size1()+TILE_DIM-1)/TILE_DIM) * TILE_DIM,
 		TILE_DIM
 	};
 	std::size_t local_work_size[2] = {TILE_DIM,TILE_DIM};
-	v().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
+	v_unreg().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }
 
 }}

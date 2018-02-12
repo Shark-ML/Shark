@@ -35,6 +35,17 @@
 #include <type_traits>
 
 namespace remora {namespace kernels{
+	
+template<class F, class M, class Device>
+void apply(
+	matrix_expression<M, Device>& m, 
+	F const&f
+){
+	if(m().size1() == 0|| m().size2() == 0) return;
+	typedef typename M::orientation orientation;
+	bindings::matrix_apply(m, f, orientation());
+}	
+
 //////////////////////////////////////////////////////
 ////Scalar Assignment to Matrix
 /////////////////////////////////////////////////////
@@ -42,7 +53,7 @@ namespace remora {namespace kernels{
 // Dispatcher
 template<class F, class M, class Device>
 void assign(
-	matrix_expression<M, Device> &m, 
+	matrix_expression<M, Device>& m, 
 	typename M::value_type t
 ){
 	if(m().size1() == 0|| m().size2() == 0) return;
@@ -60,23 +71,23 @@ namespace detail{
 // it is chosen the same as the first one
 template<class M, class E, class EOrientation, class TagE, class TagM, class Device>
 void matrix_assign(
-	matrix_expression<M, Device> &m, 
+	matrix_expression<M, Device>& m, 
 	matrix_expression<E, Device> const& e,
 	row_major, EOrientation ,TagE tagE, TagM tagM
 ) {
 	typedef typename std::conditional<
 		std::is_same<EOrientation, unknown_orientation>::value,
-		typename M::orientation,//always row_major
+		row_major,
 		typename E::orientation
 	>::type Orientation;
-	bindings::matrix_assign(m,e,typename M::orientation(),Orientation(),tagE,tagM);
+	bindings::matrix_assign(m, e, typename M::orientation(), Orientation(), tagE, tagM);
 }
 
 //general dispatcher: if the first argument is column major, we transpose the whole expression
 //so that it  is row-major, this saves us to implment everything twice.
 template<class M, class E,class EOrientation, class TagE, class TagM, class Device>
 void matrix_assign(
-	matrix_expression<M, Device> &m, 
+	matrix_expression<M, Device>& m, 
 	matrix_expression<E, Device> const& e,
 	column_major, EOrientation,TagE tagE, TagM tagM
 ) {
@@ -85,13 +96,16 @@ void matrix_assign(
 	auto transM = trans(m);
 	auto transE = trans(e);
 	//dispatch to first version
-	matrix_assign(transM,transE,TMOrientation(),TEOrientation(),tagE,tagM);
+	matrix_assign(transM, transE, TMOrientation(), TEOrientation(), tagE, tagM);
 }
 }
 
 // Dispatcher
 template<class M, class E, class Device>
-void assign(matrix_expression<M, Device>& m, matrix_expression<E, Device> const& e) {
+void assign(
+	matrix_expression<M, Device>& m,
+	matrix_expression<E, Device> const& e
+){
 	REMORA_SIZE_CHECK(m().size1() == e().size1());
 	REMORA_SIZE_CHECK(m().size2() == e().size2());
 	if(m().size1() == 0|| m().size2() == 0) return;
@@ -99,7 +113,7 @@ void assign(matrix_expression<M, Device>& m, matrix_expression<E, Device> const&
 	typedef typename E::orientation::orientation EOrientation;
 	typedef typename M::evaluation_category::tag MCategory;
 	typedef typename E::evaluation_category::tag ECategory;
-	detail::matrix_assign(m, e, MOrientation(),EOrientation(),MCategory(), ECategory());
+	detail::matrix_assign(m, e, MOrientation(), EOrientation(), MCategory(), ECategory());
 }
 
 
@@ -108,28 +122,28 @@ void assign(matrix_expression<M, Device>& m, matrix_expression<E, Device> const&
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 namespace detail{
-//general dispatcher: if the second argument has an unknown orientation
+// general dispatcher: if the second argument has an unknown orientation
 // it is chosen the same as the first one
 template<class F, class M, class E, class EOrientation, class TagE, class TagM, class Device>
 void matrix_assign_functor(
-	matrix_expression<M, Device> &m, 
+	matrix_expression<M, Device>& m, 
 	matrix_expression<E, Device> const& e,
 	F f,
 	row_major, EOrientation ,TagE tagE, TagM tagM
 ) {
 	typedef typename std::conditional<
 		std::is_same<EOrientation, unknown_orientation>::value,
-		typename M::orientation,//always row_major
+		row_major,
 		typename E::orientation
 	>::type Orientation;
-	bindings::matrix_assign_functor(m,e,f,typename M::orientation(),Orientation(),tagE,tagM);
+	bindings::matrix_assign_functor(m, e, f, typename M::orientation(), Orientation(), tagE, tagM);
 }
 
 //general dispatcher: if the first argument is column major, we transpose the whole expression
 //so that it  is row-major, this saves us to implment everything twice.
 template<class F, class M, class E,class EOrientation, class TagE, class TagM, class Device>
 void matrix_assign_functor(
-	matrix_expression<M, Device> &m, 
+	matrix_expression<M, Device>& m, 
 	matrix_expression<E, Device> const& e,
 	F f,
 	column_major, EOrientation,TagE tagE, TagM tagM
@@ -139,7 +153,7 @@ void matrix_assign_functor(
 	
 	auto transM = trans(m);
 	auto transE = trans(e);
-	matrix_assign_functor(transM,transE,f,TMOrientation(),TEOrientation(),tagE,tagM);
+	matrix_assign_functor(transM, transE, f, TMOrientation(), TEOrientation(), tagE, tagM);
 }
 
 }
@@ -147,7 +161,11 @@ void matrix_assign_functor(
 
 //First Level Dispatcher, dispatches by orientation
 template<class F, class M, class E, class Device>
-void assign(matrix_expression<M, Device> &m, const matrix_expression<E, Device> &e, F f = F()) {
+void assign(
+	matrix_expression<M, Device>& m, 
+	matrix_expression<E, Device> const&e,
+	F const& f
+){
 	REMORA_SIZE_CHECK(m().size1()  == e().size1());
 	REMORA_SIZE_CHECK(m().size2()  == e().size2());
 	if(m().size1() == 0|| m().size2() == 0) return;
@@ -155,7 +173,7 @@ void assign(matrix_expression<M, Device> &m, const matrix_expression<E, Device> 
 	typedef typename E::orientation::orientation EOrientation;
 	typedef typename M::evaluation_category::tag MCategory;
 	typedef typename E::evaluation_category::tag ECategory;
-	detail::matrix_assign_functor(m, e, f, MOrientation(),EOrientation(), MCategory(), ECategory());
+	detail::matrix_assign_functor(m, e, f, MOrientation(), EOrientation(), MCategory(), ECategory());
 }
 
 }}

@@ -121,63 +121,47 @@ eval_expression(matrix_expression<E, Device> const& e){
 	
 namespace detail{
 	template<class VecX, class VecV, class Device>
-	void assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign(x,v);
-	}
-	template<class VecX, class VecV, class Device>
 	void assign(
 		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
 		elementwise_tag, typename VecX::value_type alpha
 	){
-		typename device_traits<Device>:: template multiply_assign<typename common_value_type<VecX,VecV>::type> f(alpha);
-		kernels::assign(x, v,f);
+		typedef typename VecX::value_type  value_type;
+		if(alpha == value_type(1)){
+			kernels::assign(x, v);
+		}else{
+			typename device_traits<Device>:: template multiply_assign<value_type> f(alpha);
+			kernels::assign(x, v, f);
+		}
 	}
 	template<class VecX, class VecV, class Device>
 	void assign(
 		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
-		blockwise_tag, typename VecX::value_type alpha = 1
+		blockwise_tag, typename VecX::value_type alpha
 	){
 		v().assign_to(x,alpha);
 	}
 	template<class VecX, class VecV, class Device>
-	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template add<typename common_value_type<VecX,VecV>::type> > (x, v);
-	}
-	template<class VecX, class VecV, class Device>
-	void plus_assign(
-		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
+	void plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
 		elementwise_tag, typename  VecX::value_type alpha
 	){
 		typename device_traits<Device>:: template multiply_and_add<typename common_value_type<VecX,VecV>::type> f(alpha);
-		kernels::assign(x, v,f);
+		kernels::assign(x, v, f);
 	}
 	template<class VecX, class VecV, class Device>
 	void plus_assign(
 		vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v,
-		blockwise_tag,typename VecX::value_type alpha = 1
+		blockwise_tag,typename VecX::value_type alpha
 	){
 		v().plus_assign_to(x,alpha);
 	}
 }
-	
 
 /// \brief Dispatches vector assignment on an expression level
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
-VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	REMORA_SIZE_CHECK(x().size() == v().size());
-	detail::assign(x,v,typename VecV::evaluation_category());
-	return x();
-}
-
-/// \brief Dispatches vector assignment on an expression level
-///
-/// This dispatcher takes care for whether the blockwise evaluation
-/// or the elementwise evaluation is called
-template<class VecX, class VecV, class Device>
-VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha){
+VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha = 1){
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	detail::assign(x,v,typename VecV::evaluation_category(),alpha);
 	return x();
@@ -188,18 +172,7 @@ VecX& assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device>
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
 template<class VecX, class VecV, class Device>
-VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v){
-	REMORA_SIZE_CHECK(x().size() == v().size());
-	detail::plus_assign(x,v,typename VecV::evaluation_category());
-	return x();
-}
-
-/// \brief Dispatches vector plus-assignment on an expression level
-///
-/// This dispatcher takes care for whether the blockwise evaluation
-/// or the elementwise evaluation is called
-template<class VecX, class VecV, class Device>
-VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha){
+VecX& plus_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, Device> const& v, typename VecX::value_type alpha = 1){
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	detail::plus_assign(x,v,typename VecV::evaluation_category(),alpha);
 	return x();
@@ -235,27 +208,24 @@ VecX& divide_assign(vector_expression<VecX, Device>& x, vector_expression<VecV, 
 	
 namespace detail{
 	template<class MatA, class MatB, class Device>
-	void assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign(A,B);
-	}
-	template<class MatA, class MatB, class Device>
 	void assign(
 		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
 		elementwise_tag,typename MatA::value_type alpha
 	){
-		typename device_traits<Device>:: template multiply_assign<typename common_value_type<MatA,MatB>::type> f(alpha);
-		kernels::assign(A,B,f);
+		typedef typename MatA::value_type  value_type;
+		if(alpha == value_type(1)){
+			kernels::assign(A, B);
+		}else{
+			typename device_traits<Device>:: template multiply_assign<value_type> f(alpha);
+			kernels::assign(A, B, f);
+		}
 	}
 	template<class MatA, class MatB, class Device>
 	void assign(
 		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
-		blockwise_tag, typename MatA::value_type alpha = 1
+		blockwise_tag, typename MatA::value_type alpha
 	){
 		B().assign_to(A,alpha);
-	}
-	template<class MatA, class MatB, class Device>
-	void plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,elementwise_tag){
-		kernels::assign<typename device_traits<Device>:: template add<typename common_value_type<MatA,MatB>::type> > (A, B);
 	}
 	template<class MatA, class MatB, class Device>
 	void plus_assign(
@@ -268,31 +238,18 @@ namespace detail{
 	template<class MatA, class MatB, class Device>
 	void plus_assign(
 		matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B,
-		blockwise_tag, typename MatA::value_type alpha = 1
+		blockwise_tag, typename MatA::value_type alpha
 	){
 		B().plus_assign_to(A,alpha);
 	}
 }
-	
 
 /// \brief Dispatches matrix assignment on an expression level
 ///
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
-MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	REMORA_SIZE_CHECK(A().size1() == B().size1());
-	REMORA_SIZE_CHECK(A().size2() == B().size2());
-	detail::assign(A,B, typename MatB::evaluation_category());
-	return A();
-}
-
-/// \brief Dispatches matrix assignment on an expression level
-///
-/// This dispatcher takes care for whether the blockwise evaluation
-/// or the elementwise evaluation is called
-template<class MatA, class MatB, class Device>
-MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha){
+MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha = 1){
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	detail::assign(A,B, typename MatB::evaluation_category(),alpha);
@@ -304,19 +261,7 @@ MatA& assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device>
 /// This dispatcher takes care for whether the blockwise evaluation
 /// or the elementwise evaluation is called
 template<class MatA, class MatB, class Device>
-MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
-	REMORA_SIZE_CHECK(A().size1() == B().size1());
-	REMORA_SIZE_CHECK(A().size2() == B().size2());
-	detail::plus_assign(A,B, typename MatB::evaluation_category());
-	return A();
-}
-
-/// \brief Dispatches matrix plus-assignment on an expression level
-///
-/// This dispatcher takes care for whether the blockwise evaluation
-/// or the elementwise evaluation is called
-template<class MatA, class MatB, class Device>
-MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha){
+MatA& plus_assign(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B, typename MatA::value_type alpha = 1){
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	detail::plus_assign(A,B, typename MatB::evaluation_category(),alpha);
@@ -366,6 +311,13 @@ VecX& operator+=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 	return plus_assign(x,temporary);
 }
 
+template<class VecX, class VecV, class Device>
+typename VecX::closure_type operator+=(vector_expression<VecX, Device>&& x, vector_expression<VecV, Device> const& v){
+	REMORA_SIZE_CHECK(x().size() == v().size());
+	typename vector_temporary<VecX>::type temporary(v);
+	plus_assign(x,temporary);
+}
+
 /// \brief  Subtract-Assigns two vector expressions
 ///
 /// Performs the operation x_i-=v_i for all elements.
@@ -377,6 +329,13 @@ VecX& operator-=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 	REMORA_SIZE_CHECK(x().size() == v().size());
 	typename vector_temporary<VecX>::type temporary(v);
 	return plus_assign(x,temporary, typename VecX::value_type(-1.0));
+}
+
+template<class VecX, class VecV, class Device>
+typename VecX::closure_type operator-=(vector_expression<VecX, Device>&& x, vector_expression<VecV, Device> const& v){
+	REMORA_SIZE_CHECK(x().size() == v().size());
+	typename vector_temporary<VecX>::type temporary(v);
+	minus_assign(x,temporary);
 }
 
 /// \brief  Multiply-Assigns two vector expressions
@@ -392,6 +351,13 @@ VecX& operator*=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 	return multiply_assign(x,temporary);
 }
 
+template<class VecX, class VecV, class Device>
+typename VecX::closure_type operator*=(vector_expression<VecX, Device>&& x, vector_expression<VecV, Device> const& v){
+	REMORA_SIZE_CHECK(x().size() == v().size());
+	typename vector_temporary<VecX>::type temporary(v);
+	multiply_assign(x,temporary);
+}
+
 /// \brief  Divide-Assigns two vector expressions
 ///
 /// Performs the operation x_i/=v_i for all elements.
@@ -405,12 +371,26 @@ VecX& operator/=(vector_expression<VecX, Device>& x, vector_expression<VecV, Dev
 	return divide_assign(x,temporary);
 }
 
+template<class VecX, class VecV, class Device>
+typename VecX::closure_type operator/=(vector_expression<VecX, Device>&& x, vector_expression<VecV, Device> const& v){
+	REMORA_SIZE_CHECK(x().size() == v().size());
+	typename vector_temporary<VecX>::type temporary(v);
+	divide_assign(x,temporary);
+}
+
 /// \brief  Adds a scalar to all elements of the vector
 ///
 /// Performs the operation x_i += t for all elements.
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,VecX&>::type
 operator+=(vector_expression<VecX, Device>& x, T t){
+	kernels::assign<typename device_traits<Device>:: template add<typename VecX::value_type> > (x, t);
+	return x();
+}
+
+template<class VecX, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
+operator+=(vector_expression<VecX, Device>&& x, T t){
 	kernels::assign<typename device_traits<Device>:: template add<typename VecX::value_type> > (x, t);
 	return x();
 }
@@ -425,6 +405,13 @@ operator-=(vector_expression<VecX, Device>& x, T t){
 	return x();
 }
 
+template<class VecX, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
+operator-=(vector_expression<VecX, Device>&& x, T t){
+	kernels::assign<typename device_traits<Device>:: template subtract<typename VecX::value_type> > (x, t);
+	return x();
+}
+
 /// \brief  Multiplies a scalar with all elements of the vector
 ///
 /// Performs the operation x_i *= t for all elements.
@@ -435,12 +422,26 @@ operator*=(vector_expression<VecX, Device>& x, T t){
 	return x();
 }
 
+template<class VecX, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
+operator*=(vector_expression<VecX, Device>&& x, T t){
+	kernels::assign<typename device_traits<Device>:: template multiply<typename VecX::value_type> > (x, t);
+	return x();
+}
+
 /// \brief  Divides all elements of the vector by a scalar
 ///
 /// Performs the operation x_i /= t for all elements.
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,VecX&>::type
 operator/=(vector_expression<VecX, Device>& x, T t){
+	kernels::assign<typename device_traits<Device>:: template divide<typename VecX::value_type> > (x, t);
+	return x();
+}
+
+template<class VecX, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
+operator/=(vector_expression<VecX, Device>&& x, T t){
 	kernels::assign<typename device_traits<Device>:: template divide<typename VecX::value_type> > (x, t);
 	return x();
 }
@@ -465,6 +466,14 @@ MatA& operator+=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 	return plus_assign(A,temporary);
 }
 
+template<class MatA, class MatB, class Device>
+typename MatA::closure_type operator+=(matrix_expression<MatA, Device>&& A, matrix_expression<MatB, Device> const& B){
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
+	typename matrix_temporary<MatA>::type temporary(B);
+	return plus_assign(A,temporary);
+}
+
 /// \brief  Subtract-Assigns two matrix expressions
 ///
 /// Performs the operation A_ij-=B_ij for all elements.
@@ -479,6 +488,14 @@ MatA& operator-=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 	return plus_assign(A,temporary, typename MatA::value_type(-1.0));
 }
 
+template<class MatA, class MatB, class Device>
+typename MatA::closure_type operator-=(matrix_expression<MatA, Device>&& A, matrix_expression<MatB, Device> const& B){
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
+	typename matrix_temporary<MatA>::type temporary(B);
+	return minus_assign(A,temporary);
+}
+
 /// \brief  Multiply-Assigns two matrix expressions
 ///
 /// Performs the operation A_ij*=B_ij for all elements.
@@ -487,6 +504,14 @@ MatA& operator-=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 /// use noalias as in noalias(A)*=B to avoid this if A and B do not alias
 template<class MatA, class MatB, class Device>
 MatA& operator*=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Device> const& B){
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
+	typename matrix_temporary<MatA>::type temporary(B);
+	return multiply_assign(A,temporary);
+}
+
+template<class MatA, class MatB, class Device>
+typename MatA::closure_type operator*=(matrix_expression<MatA, Device>&& A, matrix_expression<MatB, Device> const& B){
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	typename matrix_temporary<MatA>::type temporary(B);
@@ -507,12 +532,27 @@ MatA& operator/=(matrix_expression<MatA, Device>& A, matrix_expression<MatB, Dev
 	return divide_assign(A,temporary);
 }
 
+template<class MatA, class MatB, class Device>
+typename MatA::closure_type operator/=(matrix_expression<MatA, Device>&& A, matrix_expression<MatB, Device> const& B){
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
+	typename matrix_temporary<MatA>::type temporary(B);
+	return divide_assign(A,temporary);
+}
+
 /// \brief  Adds a scalar to all elements of the matrix
 ///
 /// Performs the operation A_ij += t for all elements.
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,MatA&>::type
 operator+=(matrix_expression<MatA, Device>& A, T t){
+	kernels::assign<typename device_traits<Device>:: template add<typename MatA::value_type> > (A, t);
+	return A();
+}
+
+template<class MatA, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
+operator+=(matrix_expression<MatA, Device>&& A, T t){
 	kernels::assign<typename device_traits<Device>:: template add<typename MatA::value_type> > (A, t);
 	return A();
 }
@@ -527,12 +567,26 @@ operator-=(matrix_expression<MatA, Device>& A, T t){
 	return A();
 }
 
+template<class MatA, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
+operator-=(matrix_expression<MatA, Device>&& A, T t){
+	kernels::assign<typename device_traits<Device>:: template subtract<typename MatA::value_type> > (A, t);
+	return A();
+}
+
 /// \brief  Multiplies a scalar to all elements of the matrix
 ///
 /// Performs the operation A_ij *= t for all elements.
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,MatA&>::type
 operator*=(matrix_expression<MatA, Device>& A, T t){
+	kernels::assign<typename device_traits<Device>:: template multiply<typename MatA::value_type> > (A, t);
+	return A();
+}
+
+template<class MatA, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
+operator*=(matrix_expression<MatA, Device>&& A, T t){
 	kernels::assign<typename device_traits<Device>:: template multiply<typename MatA::value_type> > (A, t);
 	return A();
 }
@@ -547,35 +601,12 @@ operator/=(matrix_expression<MatA, Device>& A, T t){
 	return A();
 }
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-///// Temporary Proxy Operators
-/////////////////////////////////////////////////////////////////////////////////////
-
-template<class T, class U>
-temporary_proxy<T> operator+=(temporary_proxy<T> x, U const& arg){
-	static_cast<T&>(x) += arg;
-	return x;
+template<class MatA, class T, class Device>
+typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
+operator/=(matrix_expression<MatA, Device>&& A, T t){
+	kernels::assign<typename device_traits<Device>:: template divide<typename MatA::value_type> > (A, t);
+	return A();
 }
-template<class T, class U>
-temporary_proxy<T> operator-=(temporary_proxy<T> x, U const& arg){
-	static_cast<T&>(x) -= arg;
-	return x;
-}
-template<class T, class U>
-temporary_proxy<T> operator*=(temporary_proxy<T> x, U const& arg){
-	static_cast<T&>(x) *= arg;
-	return x;
-}
-template<class T, class U>
-temporary_proxy<T> operator/=(temporary_proxy<T> x, U const& arg){
-	static_cast<T&>(x) /= arg;
-	return x;
-}
-
-
-
 
 // Assignment proxy.
 // Provides temporary free assigment when LHS has no alias on RHS
@@ -648,15 +679,20 @@ template <class C, class Device>
 noalias_proxy<C> noalias(vector_expression<C, Device>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
+template <class C, class Device>
+noalias_proxy<C> noalias(vector_expression<C, Device>&& rvalue) {
+	return noalias_proxy<C>(rvalue());
+}
+template <class C, class Device>
+noalias_proxy<C> noalias(matrix_expression<C, Device>&& lvalue) {
+	return noalias_proxy<C> (lvalue());
+}
 
 template <class C, class Device>
 noalias_proxy<C> noalias(vector_set_expression<C>& lvalue) {
 	return noalias_proxy<C> (lvalue());
 }
-template <class C>
-noalias_proxy<C> noalias(temporary_proxy<C> lvalue) {
-	return noalias_proxy<C> (static_cast<C&>(lvalue));
-}
+
 
 }
 #endif

@@ -32,10 +32,11 @@
 #define REMORA_KERNELS_DEFAULT_TRSM_HPP
 
 #include "../../expression_types.hpp" //matrix_expression
+#include "../../proxy_expressions.hpp" //matrix proxies for blocking
 #include "../../detail/structure.hpp" //structure tags
-#include <stdexcept> //exception when matrix is singular
 #include "../gemm.hpp" //gemm kernel
-#include "simple_proxies.hpp"
+
+#include <stdexcept> //exception when matrix is singular
 #include <type_traits> //std::false_type marker for unoptimized
 
 namespace remora{namespace bindings {
@@ -45,7 +46,7 @@ template<std::size_t maxBlockSize1,std::size_t maxBlockSize2, bool Unit, class M
 void trsm_block(
 	matrix_expression<MatA, cpu_tag> const& A,
 	matrix_expression<MatB, cpu_tag> &B,
-    lower,
+	lower,
 	row_major // B is row-major
 ){
 	REMORA_SIZE_CHECK(A().size1() <= maxBlockSize1);
@@ -232,8 +233,8 @@ void trsm_recursive(
 ){
 	static std::size_t const Block_Size =  32;
 	std::size_t num_rhs = Bfull().size2();
-	auto A = simple_subrange(Afull,start,end,start,end);
-	auto B = simple_subrange(Bfull,start,end,0,num_rhs);
+	auto A = subrange(Afull,start,end,start,end);
+	auto B = subrange(Bfull,start,end,0,num_rhs);
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(A.size1() <= Block_Size){
 		trsm_block<Block_Size,16,Triangular::is_unit>(A,B,triangular_tag<Triangular::is_upper,false>(), typename MatB::orientation());
@@ -242,17 +243,17 @@ void trsm_recursive(
 	std::size_t size = A.size1();
 	std::size_t numBlocks =(A.size1()+Block_Size-1)/Block_Size;
 	std::size_t split = numBlocks/2*Block_Size;
-	auto Bfront = simple_subrange(B,0,split,0,num_rhs);
-	auto Bback = simple_subrange(B,split,size,0,num_rhs);
+	auto Bfront = subrange(B,0,split,0,num_rhs);
+	auto Bback = subrange(B,split,size,0,num_rhs);
 
 	//otherwise run the kernel recursively
 	if(Triangular::is_upper){ //Upper triangular case
 		trsm_recursive(Afull, Bfull,start+split,end, t, l);
-		kernels::gemm(simple_subrange(A,0,split,split,size), Bback, Bfront, -1.0);
+		kernels::gemm(subrange(A,0,split,split,size), Bback, Bfront, -1.0);
 		trsm_recursive(Afull, Bfull,start,start+split, t, l);
 	}else{// Lower triangular caste
 		trsm_recursive(Afull, Bfull,start,start+split, t, l);
-		kernels::gemm(simple_subrange(A,split,size,0,split), Bfront, Bback, -1.0);
+		kernels::gemm(subrange(A,split,size,0,split), Bfront, Bback, -1.0);
 		trsm_recursive(Afull, Bfull,start+split,end, t, l);
 	}
 }
@@ -266,8 +267,8 @@ void trsm_recursive(
 	Triangular,
 	right
 ){
-	auto transA = simple_trans(Afull);
-	auto transB = simple_trans(Bfull);
+	auto transA = trans(Afull);
+	auto transB = trans(Bfull);
 	trsm_recursive(transA,transB,start,end,typename Triangular::transposed_orientation(),left());
 }
 

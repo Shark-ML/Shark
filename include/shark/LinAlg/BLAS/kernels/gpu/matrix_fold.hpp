@@ -30,23 +30,22 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/container/array.hpp>
 #include <boost/compute/algorithm/copy_n.hpp>
 namespace remora{namespace bindings{
 
 template<class F, class MatA, class Orientation>
-void matrix_fold(matrix_expression<MatA, gpu_tag> const& A, typename F::result_type& value, Orientation, dense_tag) {
-	auto& queue = A().queue();
+void matrix_fold(matrix_expression<MatA, gpu_tag> const& A_unreg, typename F::result_type& value, Orientation, dense_tag) {
+	auto& queue = A_unreg().queue();
 	typedef typename F::result_type value_type;
-	boost::compute::detail::meta_kernel k("blas_matrix_fold");
+	gpu::detail::meta_kernel k("blas_matrix_fold");
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
 	std::size_t size2_index = k.add_arg<std::size_t>("size2");
+	auto A = k.register_args(to_functor(A_unreg));
+	auto f = k.register_args(F());
 	boost::compute::array<value_type,1> device_result;
 	boost::compute::copy_n(&value, 1, device_result.begin(), queue);
 	device_result.front() = value;
-	F f;
 	
 	//read all tiles in the assigned rows and apply f
 	k << "__local " <<k.decl<value_type>("subfold")<< "[TILE_DIM][TILE_DIM+1];";
@@ -54,7 +53,7 @@ void matrix_fold(matrix_expression<MatA, gpu_tag> const& A, typename F::result_t
 	k << "for(uint i = get_local_id(0) ; i < size1; i += TILE_DIM){";
 	k << "    for(uint j = get_local_id(1) ; j < size2; j += TILE_DIM){";
 	auto exprSubFold = k.expr<value_type>("subfold[get_local_id(0)][get_local_id(1)]");
-	k<< exprSubFold << '=' << f(exprSubFold,A()(k.expr<cl_uint>("i"),k.expr<cl_uint>("j")))<<";";
+	k<< exprSubFold << '=' << f(exprSubFold,A(k.expr<cl_uint>("i"),k.expr<cl_uint>("j")))<<";";
 	k<<"}}";
 	k << "barrier(CLK_LOCAL_MEM_FENCE);";//wait until all threads are done with copying
 	//sum up the rows
@@ -78,8 +77,8 @@ void matrix_fold(matrix_expression<MatA, gpu_tag> const& A, typename F::result_t
 	char const* options ="-DTILE_DIM=1";
 	boost::compute::kernel kernel = k.compile(queue.get_context(), options);
 	//enqueue kernel
-	kernel.set_arg(size1_index, A().size1());
-	kernel.set_arg(size2_index, A().size2());
+	kernel.set_arg(size1_index, A_unreg().size1());
+	kernel.set_arg(size2_index, A_unreg().size2());
 	
 	std::size_t global_work_size[2] = {TILE_DIM,TILE_DIM};
 	std::size_t local_work_size[2] = {TILE_DIM, TILE_DIM};

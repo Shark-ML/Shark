@@ -1,11 +1,8 @@
 /*!
+ * \brief       expression templates for copying from cpu to device and back
  * 
- *
- * \brief       includes all uBLAS files needed by Shark linear Algebra
- * 
- *
  * \author      O. Krause
- * \date        2012
+ * \date        2013
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -28,21 +25,28 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#ifndef REMORA_DEVICE_COPY_HPP
+#define REMORA_DEVICE_COPY_HPP
 
-#ifndef SHARK_LINALG_BLAS_REMORA_HPP
-#define SHARK_LINALG_BLAS_REMORA_HPP
+#include "expression_types.hpp"
 
-//expressions
-#include "vector_expression.hpp"
-#include "matrix_expression.hpp"
-#include "solve.hpp"
-//containers
-#include "dense.hpp"
-//~ #include "vector_sparse.hpp"
-//~ #include "matrix_sparse.hpp"
+namespace remora{
 
-//misc
-#include "permutation.hpp"
-#include "io.hpp"
+template<class E>
+E const& copy_to_cpu(vector_expression<E, cpu_tag> const& e){
+	return e();
+}
+
+
+template<class E>
+E const&  copy_to_cpu(matrix_expression<E, cpu_tag> const& e){
+	return e();
+}
+
+}
+
+#ifdef REMORA_USE_GPU
+#include "gpu/copy.hpp"
+#endif
 
 #endif

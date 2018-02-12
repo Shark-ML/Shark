@@ -32,7 +32,7 @@
 #define REMORA_KERNELS_CBLAS_TRSM_HPP
 
 #include "cblas_inc.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
+#include "../../proxy_expressions.hpp"
 #include <type_traits>
 ///solves systems of triangular matrices
 
@@ -118,9 +118,8 @@ void trsm_impl(
 	matrix_expression<MatB, cpu_tag> &B,
 	std::true_type, right
 ){
-	matrix_transpose<typename const_expression<MatA>::type> transA(A());
-	matrix_transpose<MatB> transB(B());
-	trsm_impl<typename Triangular::transposed_orientation>(transA, transB, std::true_type(),  left());
+	auto transB = trans(B);
+	trsm_impl<typename Triangular::transposed_orientation>(trans(A), transB, std::true_type(),  left());
 }
 
 template <class Triangular, class Side, typename MatA, typename MatB>

@@ -33,11 +33,8 @@
 
 
 #include "../../detail/traits.hpp"
-#include "../../expression_types.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
+#include "../../proxy_expressions.hpp"
 #include "../gemv.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/functional/operator.hpp> //for multiplies
 
 ///solves systems of triangular matrices with one left hand side
@@ -53,19 +50,21 @@ struct trsv_kernel{
 //Lower triangular - matrix(row-major)
 template<class MatA, class VecB>
 trsv_kernel createTRSVDiagBlockKernel(
-	matrix_expression<MatA, gpu_tag> const& A,
-	vector_expression<VecB, gpu_tag> &b,
+	matrix_expression<MatA, gpu_tag> const& A_unreg,
+	vector_expression<VecB, gpu_tag> &b_unreg,
 	char const* options
 ){
 	typedef typename MatA::value_type value_typeA;
 	typedef typename VecB::value_type value_typeB;
 	boost::compute::multiplies<value_typeB> prod;
 	
-	boost::compute::detail::meta_kernel k("blas_trsv");
+	gpu::detail::meta_kernel k("blas_trsv");
 	std::size_t start_index = k.add_arg<std::size_t>("start");//start of block of A
 	std::size_t end_index = k.add_arg<std::size_t>("end");//end of Block of A
 	std::size_t unit_index = k.add_arg<std::size_t>("unit");//whether A is unit triangular
 	std::size_t upper_index = k.add_arg<std::size_t>("upper");//whether A is upper triangular
+	auto A = k.register_args(to_functor(A_unreg));
+	auto b = k.register_args(to_functor(b_unreg));
 	// Local memory to fit a tile of A and the vector B
 	k << "__local " <<k.decl<value_typeA>("Asub")<< "[TILE_SIZE][TILE_SIZE+2];\n";//+2 to avoid bank conflicts
 	k << "__local " <<k.decl<value_typeB>("Bsub")<< "[TILE_SIZE];\n";
@@ -76,14 +75,14 @@ trsv_kernel createTRSVDiagBlockKernel(
 	// Load tile of A into local memory
 	k << "for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
 	k << "	for(ulong j = 0; j < TILE_SIZE; j++){\n";
-	k << "		Asub[i][j] ="<< A()(k.expr<cl_ulong>("min(end-1, start + i)"),k.expr<cl_ulong>("min(end-1, start + j)"))<<";\n";
+	k << "		Asub[i][j] ="<< A(k.expr<cl_ulong>("min(end-1, start + i)"),k.expr<cl_ulong>("min(end-1, start + j)"))<<";\n";
 	k << "	}\n";
 	k << "}\n";
 	
 	
 	// Load Tile of B into local memory, store columns of B as rows
 	k << "for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
-	k << "	Bsub[i] ="<< b()(k.expr<cl_ulong>("min(end-1,start + i)"))<<";\n";
+	k << "	Bsub[i] ="<< b(k.expr<cl_ulong>("min(end-1,start + i)"))<<";\n";
 	k << "}\n";
 	// Synchronise to make sure everything is loaded
 	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";
@@ -111,10 +110,10 @@ trsv_kernel createTRSVDiagBlockKernel(
 	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";
 	// Store the final results back in B
 	k << "for(ulong i = get_local_id(0); i < curTileA; i += numWorkers){\n";
-	k << b()(k.expr<cl_ulong>("(start+i)"))<<" =  Bsub[i];\n";
+	k << b(k.expr<cl_ulong>("(start+i)"))<<" =  Bsub[i];\n";
 	k << "}\n";
 	
-	boost::compute::kernel kernel = k.compile(b().queue().get_context(), options);
+	boost::compute::kernel kernel = k.compile(b_unreg().queue().get_context(), options);
 	return {kernel,start_index,end_index,unit_index,upper_index};
 }
 
@@ -146,17 +145,17 @@ void trsv_recursive(
 	}
 	std::size_t numBlocks = (size+tileSize-1)/tileSize;
 	std::size_t split = numBlocks/2 * tileSize;
-	vector_range<VecB> bfront(bfull(),start,start+split);
-	vector_range<VecB> bback(bfull(),start+split,end);
+	auto bfront = subrange(bfull,start,start+split);
+	auto bback = subrange(bfull,start+split,end);
 	
 	//otherwise run the kernel recursively
 	if(Triangular::is_upper){ //Upper triangular case
-		matrix_range<typename const_expression<MatA>::type > Aur(Afull(),start,start+split,start+split,end);
+		auto Aur = subrange(Afull,start,start+split,start+split,end);
 		trsv_recursive(Afull, bfull, kernel, start+split,end, tileSize, numWorkers, t);
 		kernels::gemv(Aur, bback, bfront, -1.0);
 		trsv_recursive(Afull, bfull, kernel, start,start+split, tileSize, numWorkers, t);
 	}else{// Lower triangular caste
-		matrix_range<typename const_expression<MatA>::type> All(Afull(),start+split,end,start,start+split);
+		auto All = subrange(Afull,start+split,end,start,start+split);
 		trsv_recursive(Afull, bfull, kernel, start,start+split, tileSize, numWorkers, t);
 		kernels::gemv(All, bfront, bback, -1.0);
 		trsv_recursive(Afull, bfull, kernel, start+split,end, tileSize, numWorkers, t);
@@ -184,8 +183,7 @@ void trsv_call(
 	Triangular,
 	right
 ){
-	matrix_transpose<typename const_expression<MatA>::type> transA(A());
-	trsv_call(transA,b,typename Triangular::transposed_orientation(),left());
+	trsv_call(trans(A),b,typename Triangular::transposed_orientation(),left());
 }
 }
 namespace kernels{

@@ -38,7 +38,7 @@
 #include "default/dense_gemm.hpp"
 #endif
 
-#include "../detail/matrix_proxy_classes.hpp"
+#include "../proxy_expressions.hpp"
 
 namespace remora{
 
@@ -65,12 +65,10 @@ namespace bindings{
 		column_major, Orientation1, Orientation2,
 		Tag1, Tag2
 	){
-		matrix_transpose<M> transposedM(m());
+		auto transposedM = trans(m);
 		typedef typename Orientation1::transposed_orientation transpO1;
 		typedef typename Orientation2::transposed_orientation transpO2;
-		matrix_transpose<E1 const> e1trans(e1());
-		matrix_transpose<E2 const> e2trans(e2());
-		gemm(e2trans,e1trans,transposedM,alpha,row_major(),transpO2(),transpO1(), Tag2(),Tag1());
+		gemm(trans(e2),trans(e1),transposedM,alpha,row_major(),transpO2(),transpO1(), Tag2(),Tag1());
 	}
 }
 

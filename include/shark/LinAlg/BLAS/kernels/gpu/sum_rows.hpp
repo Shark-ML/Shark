@@ -33,24 +33,24 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/functional/operator.hpp> //for multiplies
 
 namespace remora{namespace bindings{
 
 template<class M,class V, class Orientation>
 void sum_rows(
-	matrix_expression<M, gpu_tag> const& A, 
-	vector_expression<V, gpu_tag>& v,
+	matrix_expression<M, gpu_tag> const& A_unreg, 
+	vector_expression<V, gpu_tag>& v_unreg,
 	typename V::value_type alpha,
 	Orientation, dense_tag, dense_tag
 ){
 	typedef typename V::value_type value_type;
-	boost::compute::detail::meta_kernel k("blas_sum_rows_row");
+	gpu::detail::meta_kernel k("blas_sum_rows_row");
 	std::size_t alpha_index = k.add_arg<value_type>("alpha");
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
 	std::size_t size2_index = k.add_arg<std::size_t>("size2");
+	auto A = k.register_args(to_functor(A_unreg));
+	auto v = k.register_args(to_functor(v_unreg));
 	//read all tiles in the assigned rows and sum them up
 	k << "__local " <<k.decl<value_type>("sums")<< "[TILE_DIM][TILE_DIM+1];\n";
 	k << "uint colid = get_global_id(1);\n";
@@ -58,7 +58,7 @@ void sum_rows(
 	k << "for(uint i = get_local_id(0) ; i < size1 && colid < size2; i += TILE_DIM){\n";
 	auto exprRow = k.expr<cl_uint>("i");
 	auto exprCol = k.expr<cl_uint>("colid");
-	k<< "    sums[get_local_id(0)][get_local_id(1)] +=" << A()(exprRow,exprCol)<<";\n";
+	k<< "    sums[get_local_id(0)][get_local_id(1)] +=" << A(exprRow,exprCol)<<";\n";
 	k<<'}';
 	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";//wait until all threads are done with copying
 	//sum up the rows
@@ -66,24 +66,24 @@ void sum_rows(
 	k << "    for(uint i = 1 ; i < TILE_DIM; ++i){\n";
 	k << "        sums[0][get_local_id(1)] +=sums[i][get_local_id(1)];\n";
 	k << "    }\n";
-	k << v()(exprCol) << "+= alpha * sums[0][get_local_id(1)];\n";
+	k << v(exprCol) << "+= alpha * sums[0][get_local_id(1)];\n";
 	k<< "}\n";
 	//create source
 
 	std::size_t TILE_DIM = 8;
 	char const* options ="-DTILE_DIM=8";
-	boost::compute::kernel kernel = k.compile(v().queue().get_context(), options);
+	boost::compute::kernel kernel = k.compile(v_unreg().queue().get_context(), options);
 	//enqueue kernel
 	kernel.set_arg(alpha_index, alpha);
-	kernel.set_arg(size1_index, A().size1());
-	kernel.set_arg(size2_index, A().size2());
+	kernel.set_arg(size1_index, A_unreg().size1());
+	kernel.set_arg(size2_index, A_unreg().size2());
 	
 	std::size_t global_work_size[2] = {
 		TILE_DIM,
-		((A().size2()+TILE_DIM-1)/TILE_DIM) * TILE_DIM
+		((A_unreg().size2()+TILE_DIM-1)/TILE_DIM) * TILE_DIM
 	};
 	std::size_t local_work_size[2] = {TILE_DIM, TILE_DIM};
-	v().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
+	v_unreg().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }
 
 

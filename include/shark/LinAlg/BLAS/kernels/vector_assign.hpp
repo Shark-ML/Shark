@@ -36,6 +36,11 @@
 
 namespace remora{namespace kernels {
 
+	
+template<class V, class F, class Device>
+void apply(vector_expression<V, Device>& v,F const& f) {
+	bindings::apply(v,f);
+}
 template<class F, class V, class Device>
 void assign(vector_expression<V, Device>& v, typename V::value_type t) {
 	bindings::assign<F>(v,t);
@@ -47,11 +52,11 @@ void assign(vector_expression<V, Device>& v, typename V::value_type t) {
 
 //dispatcher
 template< class V, class E, class Device>
-void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> &e) {
+void assign(vector_expression<V, Device>& v, vector_expression<E, Device> const& e) {
 	REMORA_SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;
-	bindings::vector_assign(v, e, TagV(),TagE());
+	bindings::vector_assign(v, e,TagV(),TagE());
 }
 
 ////////////////////////////////////////////
@@ -61,7 +66,7 @@ void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> 
 
 // Dispatcher
 template<class F, class V, class E, class Device>
-void assign(vector_expression<V, Device>& v, const vector_expression<E, Device> &e, F f=F()) {
+void assign(vector_expression<V, Device>& v, vector_expression<E, Device> const& e, F f) {
 	REMORA_SIZE_CHECK(v().size() == e().size());
 	typedef typename V::evaluation_category::tag TagV;
 	typedef typename E::evaluation_category::tag TagE;

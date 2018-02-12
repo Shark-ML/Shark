@@ -83,7 +83,8 @@ void gemm(
 		storageB.buffer.get(), storageB.offset, storageB.leading_dimension,
                 typename MatC::value_type(1),
 		storageC.buffer.get(), storageC.offset, storageC.leading_dimension,
-                &C().queue().get(), event);
+                &C().queue().get(), event
+	);
 		
 	assert(code == StatusCode::kSuccess);
 }

@@ -29,10 +29,46 @@
 #define REMORA_KERNELS_DEFAULT_MATRIX_ASSIGN_HPP
 
 #include "../vector_assign.hpp"
+#include "../../proxy_expressions.hpp"
 #include "../../detail/traits.hpp"
 #include <algorithm>
 #include <vector>
+#include <iostream>
 namespace remora{namespace bindings{
+
+// Explicitly iterating row major
+template<class F, class M>
+void matrix_apply(
+	matrix_expression<M, cpu_tag>& m,
+	F const& f,
+	row_major
+){
+	for(std::size_t i = 0; i != m().size1(); ++i){
+		auto rowM = row(m,i);
+		kernels::apply(rowM,f);
+	}
+}
+// Explicitly iterating column major
+template<class F, class M>
+void matrix_apply(
+	matrix_expression<M, cpu_tag>& m,
+	F const& f,
+	column_major
+){
+	for(std::size_t j = 0; j != m().size2(); ++j){
+		auto columnM = column(m,j);
+		kernels::apply(columnM,f);
+	}
+}
+// Spcial case triangular packed - just calls the first two implementations.
+template<class F, class M, class Orientation, class Triangular>
+void matrix_apply(
+	matrix_expression<M, cpu_tag>& m,
+	F const& f,
+	triangular<Orientation,Triangular>
+){
+	matrix_apply(m,f,Orientation());
+}
 
 //////////////////////////////////////////////////////
 ////Scalar Assignment to Matrix
@@ -40,51 +76,31 @@ namespace remora{namespace bindings{
 
 
 // Explicitly iterating row major
-template<class F, class M>
+template<class F, class M, class Orientation>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	typename M::value_type t,
-	row_major
+	Orientation
 ){
-	for(std::size_t i = 0; i != m().size1(); ++i){
-		auto rowM = row(m,i);
-		kernels::assign<F>(rowM,t);
-	}
+	F f;
+	matrix_apply(m, [=](typename M::value_type x){return f(x,t);},Orientation());
+
 }
-// Explicitly iterating column major
-template<class F, class M>
-void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
-	typename M::value_type t,
-	column_major
-){
-	for(std::size_t j = 0; j != m().size2(); ++j){
-		auto columnM = column(m,j);
-		kernels::assign<F>(columnM,t);
-	}
-}
-// Spcial case triangular packed - just calls the first two implementations.
-template<class F, class M, class Orientation, class Triangular>
-void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
-	typename M::value_type t,
-	triangular<Orientation,Triangular>
-){
-	matrix_assign<F>(m,t,Orientation());
-}
+
 
 
 /////////////////////////////////////////////////////////////////
 //////Matrix Assignment implementing op=
 ////////////////////////////////////////////////////////////////
 
-//direct assignment without functor
-//the cases were both arguments have the same orientation can be implemented using assign.
-template<class M, class E,class TagE, class TagM>
+// direct assignment without functor
+// the cases were both arguments have the same orientation and the left hand side
+// is dense can be implemented using assign.
+template<class M, class E,class TagE>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
-	row_major, row_major,TagE, TagM
+	row_major, row_major,dense_tag, TagE
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
@@ -92,12 +108,29 @@ void matrix_assign(
 	}
 }
 
-//remain the versions where both argumnts to not have the same orientation
+// direct assignment for sparse matrices with the same orientation
+template<class M, class E>
+void matrix_assign(
+	matrix_expression<M, cpu_tag>& m,
+	matrix_expression<E, cpu_tag> const& e,
+	row_major, row_major,sparse_tag, sparse_tag
+) {
+	m().clear();
+	for(std::size_t i = 0; i != m().size1(); ++i){
+		auto m_pos = m().major_begin(i);
+		auto end = e().major_end(i);
+		for(auto it = e().major_begin(i); it != end; ++it){
+			m_pos = m().set_element(m_pos,it.index(),*it);
+		}
+	}
+}
+
+//remain the versions where both arguments do not have the same orientation
 
 //dense-dense case
 template<class M, class E>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, dense_tag
 ) {
@@ -133,7 +166,7 @@ void matrix_assign(
 // dense-sparse
 template<class M, class E>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,dense_tag, sparse_tag
 ) {
@@ -143,24 +176,10 @@ void matrix_assign(
 	}
 }
 
-
-//sparse-dense
-template<class M, class E>
-void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
-	matrix_expression<E, cpu_tag> const& e,
-	row_major, column_major, sparse_tag, dense_tag
-) {
-	for(std::size_t i = 0; i != m().size1(); ++i){
-		auto rowM = row(m,i);
-		kernels::assign(rowM,row(e,i));
-	}
-}
-
 //sparse-sparse
 template<class M, class E>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	row_major, column_major,sparse_tag,sparse_tag
 ) {
@@ -174,10 +193,9 @@ void matrix_assign(
 	std::vector<Element> elements;
 
 	size_type size2 = m().size2();
-	size_type size1 = m().size1();
 	for(size_type j = 0; j != size2; ++j){
-		typename E::const_column_iterator pos_e = e().column_begin(j);
-		typename E::const_column_iterator end_e = e().column_end(j);
+		auto pos_e = e().major_begin(j);
+		auto end_e = e().major_end(j);
 		for(; pos_e != end_e; ++pos_e){
 			Element element;
 			element.i = pos_e.index();
@@ -189,60 +207,61 @@ void matrix_assign(
 	std::sort(elements.begin(),elements.end());
 	//fill m with the contents
 	m().clear();
-	m().reserve(elements.size());//reserve a bit of space
-	for(size_type current = 0; current != elements.size();){
+	size_type num_elems = size_type(elements.size());
+	for(size_type current = 0; current != num_elems;){
 		//count elements in row and reserve enough space for it
 		size_type row = elements[current].i;
 		size_type row_end = current;
-		while(row_end != elements.size() && elements[row_end].i == row)
+		while(row_end != num_elems && elements[row_end].i == row)
 			++ row_end;
-		m().reserve_row(row,row_end - current);
+		m().major_reserve(row,row_end - current);
 
 		//copy elements
-		typename M::row_iterator row_pos = m().row_begin(row);
+		auto row_pos = m().major_begin(row);
 		for(; current != row_end; ++current){
 			row_pos = m().set_element(row_pos,elements[current].j,elements[current].value);
-			++row_pos;
 		}
 	}
 }
 
-//packed row_major,row_major
-template<class M, class E,class Triangular>
+//triangular row_major,row_major
+template<class M, class E, bool Upper, bool Unit>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
-	triangular<row_major,Triangular>, triangular<row_major,Triangular>,
+	triangular<row_major,triangular_tag<Upper, false> >, triangular<row_major,triangular_tag<Upper, Unit> >,
 	packed_tag, packed_tag
 ) {
-	typedef typename M::row_iterator MIter;
-	typedef typename E::const_row_iterator EIter;
-
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		MIter mpos = m().row_begin(i);
-		EIter epos = e().row_begin(i);
-		MIter mend = m().row_end(i);
+		auto mpos = m().major_begin(i);
+		auto epos = e().major_begin(i);
+		auto eend = e().major_end(i);
+		if(Unit && Upper){
+			*mpos = 1;
+			++mpos;
+		}
 		REMORA_SIZE_CHECK(mpos.index() == epos.index());
-		for(; mpos!=mend; ++mpos,++epos){
+		for(; epos != eend; ++epos,++mpos){
 			*mpos = *epos;
+		}
+		if(Unit && Upper){
+			*mpos = 1;
 		}
 	}
 }
 
-////packed row_major,column_major
+////triangular row_major,column_major
 //todo: this is suboptimal as we do strided access!!!!
 template<class M, class E,class Triangular>
 void matrix_assign(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>,
 	packed_tag, packed_tag
 ) {
-	typedef typename M::row_iterator MIter;
-
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		MIter mpos = m().row_begin(i);
-		MIter mend = m().row_end(i);
+		auto mpos = m().major_begin(i);
+		auto mend = m().major_end(i);
 		for(; mpos!=mend; ++mpos){
 			*mpos = e()(i,mpos.index());
 		}
@@ -253,27 +272,78 @@ void matrix_assign(
 //////Matrix Assignment With Functor implementing +=,-=...
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-//when both are row-major we can map to vector case
-//this is not necessarily efficient if m is sparse.
-template<class F, class M, class E, class TagE, class TagM>
+//when both are row-major and target is dense we can map to vector case
+template<class F, class M, class E, class TagE>
 void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	F f,
-	row_major, row_major,TagM, TagE
+	row_major, row_major, dense_tag, TagE
 ) {
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto rowM = row(m,i);
 		kernels::assign(rowM,row(e,i),f);
 	}
 }
+template<class F, class M, class E>
+void matrix_assign_functor(
+	matrix_expression<M, cpu_tag>& m,
+	matrix_expression<E, cpu_tag> const& e,
+	F f,
+	row_major, row_major, sparse_tag, sparse_tag
+) {
+	typedef typename M::value_type value_type;
+	value_type zero = value_type();
+	typedef row_major::sparse_element<value_type> Element;
+	std::vector<Element> elements;
+	
+	for(std::size_t i = 0; i != major_size(m); ++i){
+		//first merge the two rows in elements using the functor
+		
+		elements.clear();
+		auto m_pos = m().major_begin(i);
+		auto m_end = m().major_end(i);
+		auto e_pos = e().major_begin(i);
+		auto e_end = e().major_end(i);
+		
+		while(m_pos != m_end && e_pos != e_end){
+			if(m_pos.index() < e_pos.index()){
+				elements.push_back({i,m_pos.index(), f(*m_pos, zero)});
+				++m_pos;
+			}else if( m_pos.index() == e_pos.index()){
+				elements.push_back({i,m_pos.index(), f(*m_pos ,*e_pos)});
+				++m_pos;
+				++e_pos;
+			}
+			else{ //m_pos.index() > e_pos.index()
+				elements.push_back({i,e_pos.index(), f(zero,*e_pos)});
+				++e_pos;
+			}
+		}
+		for(;m_pos != m_end;++m_pos){
+			elements.push_back({i,m_pos.index(), f(*m_pos, zero)});
+		}
+		for(;e_pos != e_end; ++e_pos){
+			elements.push_back({i,e_pos.index(), f(zero, *e_pos)});
+		}
+		
+		//clear contents of m and fill with elements
+		m().clear_range(m().major_begin(i),m().major_end(i));
+		m().major_reserve(i,elements.size());
+		m_pos = m().major_begin(i);
+		for(auto elem: elements){
+			m_pos = m().set_element(m_pos, elem.j, elem.value);
+		}
+	}
+}
+	
 
 //we only need to implement the remaining versions for column major second argument
 
 //dense-dense case
 template<class F,class M, class E>
 void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	F f,
 	row_major, column_major,dense_tag, dense_tag
@@ -310,7 +380,7 @@ void matrix_assign_functor(
 //dense-sparse case
 template<class F,class M, class E>
 void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	F f,
 	row_major, column_major,dense_tag, sparse_tag
@@ -321,112 +391,35 @@ void matrix_assign_functor(
 	}
 }
 
-//sparse-dense case
-template<class F,class M, class E>
-void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
-	matrix_expression<E, cpu_tag> const& e,
-	F f,
-	row_major, column_major, sparse_tag, dense_tag
-) {
-	for(std::size_t i = 0; i != m().size1(); ++i){
-		auto rowM = row(m,i);
-		kernels::assign(rowM,row(e,i),f);
-	}
-}
-
 //sparse-sparse
 template<class F,class M, class E>
 void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	F f,
 	row_major, column_major,sparse_tag t,sparse_tag
 ) {
 	typename matrix_temporary<M>::type eTrans = e;//explicit calculation of the transpose for now
 	matrix_assign_functor(m,eTrans,f,row_major(),row_major(),t,t);
-	//~ F<typename M::iterator::reference, typename E::value_type> f;
-	//~ //first evaluate e and fill the values  togethe into a vector which
-	//~ //is then sorted by row_major order
-	//~ //this gives this algorithm a run time of  O(eval(e)+k*log(k))
-	//~ //where eval(e) is the time to evaluate and k*log(k) the number of non-zero elements
-	//~ typedef typename M::value_type value_type;
-	//~ typedef typename M::size_type size_type;
-	//~ typedef row_major::sparse_element<value_type> Element;
-	//~ std::vector<Element> elements;
-
-	//~ size_type size2 = m().size2();
-	//~ size_type size1 = m().size1();
-	//~ for(size_type j = 0; j != size2; ++j){
-		//~ typename E::const_column_iterator pos_e = e().column_begin(j);
-		//~ typename E::const_column_iterator end_e = e().column_end(j);
-		//~ for(; pos_e != end_e; ++pos_e){
-			//~ Element element;
-			//~ element.i = pos_e.index();
-			//~ element.j = j;
-			//~ element.value = *pos_e;
-			//~ elements.push_back(element);
-		//~ }
-	//~ }
-	//~ std::sort(elements.begin(),elements.end());
-
-
-	//~ //assign the contents to m, applying the functor every time
-	//~ //that is we assign it for every element for e and m
-	//~ m().reserve(elements.size());//reserve a bit of space, we might need more, though.
-	//~ std::vector<Element>::const_iterator elem = elements.begin();
-	//~ std::vector<Element>::const_iterator elem_end = elements.end();
-	//~ value_type zero = value_type();
-	//~ for(size_type row = 0; row != m().size2(); ++row){
-		//~ //todo pre-reserve enough space in the row of m()
-		//~ //merge both rows with f as functor
-		//~ typename M::row_iterator it = m().row_begin(row);
-		//~ while(it != m().row_end(row) && elem != elem_end && elem->i == row) {
-			//~ size_type it_index = it.index();
-			//~ size_type elem_index = elem->j;
-			//~ if (it_index == elem_index) {
-				//~ f(*it, *elem);
-				//~ ++ elem;
-			//~ } else if (it_index < elem_index) {
-				//~ f(*it, zero);
-			//~ } else{//it_index > elem_index so insert new element in v()
-				//~ it = m().set_element(it,elem_index,zero);
-				//~ f(*it, *elem);
-				//~ ++elem;
-			//~ }
-			//~ ++it;
-		//~ }
-		//~ //apply f to remaining elemms in the row
-		//~ for(;it != v().end();++it) {
-			//~ f(*it, zero);
-		//~ }
-		//~ //add missing elements
-		//~ for(;elem != elem_end;++it,++elem) {
-			//~ it = m().set_element(it,elem.index(),zero);
-			//~ f(*it, zero);
-		//~ }
-	//~ }
 }
 
 
-//kernels for packed
-template<class F, class M, class E, class Triangular>
+//kernels for triangular
+template<class F, class M, class E, class Triangular, class Tag1, class Tag2>
 void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	F f,
-	triangular<row_major,Triangular>, triangular<row_major,Triangular>
+	triangular<row_major,Triangular>, triangular<row_major,Triangular>,
+	Tag1, Tag2
 ) {
-	typedef typename M::row_iterator MIter;
-	typedef typename E::const_row_iterator EIter;
 	//there is nothing we can do if F does not leave the non-stored elements 0
 	//this is the case for all current assignment functors, but you never know :)
-	static_assert(F::left_zero_identity || F::right_zero_identity, "cannot handle the given packed matrix assignment function");
 
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		MIter mpos = m().row_begin(i);
-		EIter epos = e().row_begin(i);
-		MIter mend = m().row_end(i);
+		auto mpos = m().major_begin(i);
+		auto epos = e().major_begin(i);
+		auto mend = m().major_end(i);
 		REMORA_SIZE_CHECK(mpos.index() == epos.index());
 		for(; mpos!=mend; ++mpos,++epos){
 			*mpos = f(*mpos,*epos);
@@ -435,20 +428,19 @@ void matrix_assign_functor(
 }
 
 //todo: this is suboptimal as we do strided access!!!!
-template<class F, class M, class E, class Triangular>
+template<class F, class M, class E, class Triangular, class Tag1, class Tag2>
 void matrix_assign_functor(
-	matrix_expression<M, cpu_tag> &m,
+	matrix_expression<M, cpu_tag>& m,
 	matrix_expression<E, cpu_tag> const& e,
 	F f,
-	triangular<row_major,Triangular>, triangular<column_major,Triangular>
+	triangular<row_major,Triangular>, triangular<column_major,Triangular>,
+	Tag1, Tag2
 ) {
-	typedef typename M::row_iterator MIter;
 	//there is nothing we can do, if F does not leave the non-stored elements 0
-	static_assert(F::left_zero_identity, "cannot handle the given packed matrix assignment function");
 
 	for(std::size_t i = 0; i != m().size1(); ++i){
-		MIter mpos = m().row_begin(i);
-		MIter mend = m().row_end(i);
+		auto mpos = m().major_begin(i);
+		auto mend = m().major_end(i);
 		for(; mpos!=mend; ++mpos){
 			*mpos = f(*mpos,e()(i,mpos.index()));
 		}

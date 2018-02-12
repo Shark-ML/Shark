@@ -30,8 +30,7 @@
 
 #include "detail/expression_optimizers.hpp"
 #include "kernels/matrix_fold.hpp"
-#include "matrix_proxy.hpp"
-#include "vector_proxy.hpp"
+#include "proxy_expressions.hpp"
 #include "vector_expression.hpp"
 
 namespace remora{
@@ -73,9 +72,9 @@ vector_repeater<VecV> repeat(vector_expression<VecV, Device> const& vector, std:
 ///@param rows the number of rows of the resulting vector
 ///@param columns the number of columns of the resulting vector
 template<class T>
-typename std::enable_if<std::is_arithmetic<T>::value, scalar_matrix<T,cpu_tag> >::type
+typename std::enable_if<std::is_arithmetic<T>::value, scalar_matrix<T,cpu_tag, row_major> >::type
 repeat(T scalar, std::size_t rows, std::size_t columns){
-	return scalar_matrix<T,cpu_tag>(rows, columns, scalar);
+	return scalar_matrix<T,cpu_tag, row_major>(rows, columns, scalar);
 }
 
 
@@ -113,10 +112,10 @@ matrix_scalar_multiply<MatA> operator-(matrix_expression<MatA, Device> const& A)
 
 #define REMORA_UNARY_MATRIX_TRANSFORMATION(name, F)\
 template<class MatA, class Device>\
-matrix_unary<MatA,typename device_traits<Device>:: template F<typename MatA::value_type> >\
-name(matrix_expression<MatA, Device> const& v){\
+typename detail::matrix_unary_optimizer<MatA,typename device_traits<Device>:: template F<typename MatA::value_type> >::type \
+name(matrix_expression<MatA, Device> const& m){\
 	typedef typename device_traits<Device>:: template F<typename MatA::value_type> functor_type;\
-	return matrix_unary<MatA, functor_type >(v(), functor_type());\
+	return detail::matrix_unary_optimizer<MatA, functor_type >::create(m(), functor_type());\
 }
 REMORA_UNARY_MATRIX_TRANSFORMATION(abs, abs)
 REMORA_UNARY_MATRIX_TRANSFORMATION(log, log)
@@ -164,48 +163,48 @@ matrix_addition<MatA, matrix_scalar_multiply<MatB> > operator- (
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value, 
-	matrix_addition<MatA, scalar_matrix<T,Device> >
+	matrix_addition<MatA, scalar_matrix<T,Device, typename MatA::orientation> >
 >::type operator+ (
 	matrix_expression<MatA, Device> const& A,
 	T t
 ){
-	return A + scalar_matrix<T,Device>(A().size1(),A().size2(),t);
+	return A + scalar_matrix<T,Device, typename MatA::orientation>(A().size1(),A().size2(),t);
 }
 
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class T, class MatA, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value,
-	matrix_addition<MatA, scalar_matrix<T,Device> >
+	matrix_addition<MatA, scalar_matrix<T,Device, typename MatA::orientation> >
 >::type operator+ (
 	T t,
 	matrix_expression<MatA, Device> const& A
 ){
-	return A + scalar_matrix<T,Device>(A().size1(),A().size2(),t);
+	return A + scalar_matrix<T,Device, typename MatA::orientation>(A().size1(),A().size2(),t);
 }
 
 ///\brief Subtracts a scalar which is interpreted as a constant matrix from a matrix.
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value ,
-	matrix_addition<MatA, matrix_scalar_multiply<scalar_matrix<T,Device> > >
+	matrix_addition<MatA, matrix_scalar_multiply<scalar_matrix<T,Device, typename MatA::orientation> > >
 >::type operator- (
 	matrix_expression<MatA, Device> const& A,
 	T t
 ){
-	return A - scalar_matrix<T,Device>(A().size1(),A().size2(),t);
+	return A - scalar_matrix<T,Device, typename MatA::orientation>(A().size1(),A().size2(),t);
 }
 
 ///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value,
-	matrix_addition<scalar_matrix<T,Device>, matrix_scalar_multiply<MatA> >
+	matrix_addition<scalar_matrix<T,Device, typename MatA::orientation>, matrix_scalar_multiply<MatA> >
 >::type operator- (
 	T t,
 	matrix_expression<MatA, Device> const& A
 ){
-	return scalar_matrix<T,Device>(A().size1(),A().size2(),t) - A;
+	return scalar_matrix<T,Device, typename MatA::orientation>(A().size1(),A().size2(),t) - A;
 }
 
 #define REMORA_BINARY_MATRIX_EXPRESSION(name, F)\
@@ -231,12 +230,13 @@ REMORA_BINARY_MATRIX_EXPRESSION(max,max)
 template<class T, class MatA, class Device> \
 typename std::enable_if< \
 	std::is_convertible<T, typename MatA::value_type >::value,\
-        matrix_binary<MatA, scalar_matrix<typename MatA::value_type,Device>,typename device_traits<Device>:: template  F<typename MatA::value_type> > \
+        matrix_binary<MatA, scalar_matrix<typename MatA::value_type,Device, typename MatA::orientation>,typename device_traits<Device>:: template  F<typename MatA::value_type> > \
 >::type \
 name (matrix_expression<MatA, Device> const& m, T t){ \
 	typedef typename MatA::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
-	return matrix_binary<MatA, scalar_matrix<type,Device>, functor_type >(m(), scalar_matrix<type,Device>(m().size1(), m().size2(), t) ,functor_type()); \
+	typedef scalar_matrix<type,Device, typename MatA::orientation> mat_type;\
+	return matrix_binary<MatA, mat_type, functor_type >(m(), mat_type(m().size1(), m().size2(), t) ,functor_type()); \
 }
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator/, divide)
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator<, less)
@@ -255,12 +255,13 @@ REMORA_MATRIX_SCALAR_TRANSFORMATION(pow, pow)
 template<class T, class MatA, class Device> \
 typename std::enable_if< \
 	std::is_convertible<T, typename MatA::value_type >::value,\
-	matrix_binary<scalar_matrix< typename MatA::value_type,Device>, MatA, typename device_traits<Device>:: template F< typename MatA::value_type> > \
+	matrix_binary<scalar_matrix< typename MatA::value_type,Device, typename MatA::orientation>, MatA, typename device_traits<Device>:: template F< typename MatA::value_type> > \
 >::type \
 name (T t, matrix_expression<MatA, Device> const& m){ \
 	typedef typename MatA::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
-	return  matrix_binary<scalar_matrix<type,Device>, MatA, functor_type >(scalar_matrix<type,Device>(m().size1(), m().size2(), t), m(), functor_type()); \
+	typedef scalar_matrix<type,Device, typename MatA::orientation> mat_type;\
+	return  matrix_binary<mat_type, MatA, functor_type >(mat_type(m().size1(), m().size2(), t), m(), functor_type()); \
 }
 REMORA_MATRIX_SCALAR_TRANSFORMATION_2(min, min)
 REMORA_MATRIX_SCALAR_TRANSFORMATION_2(max, max)
@@ -335,14 +336,12 @@ auto operator%(matrix_expression<MatA, Device> const& A,vector_expression<VecV, 
 ///
 ///Example: x += triangular_prod<lower>(A,v);
 template<class TriangularType, class MatA, class VecV, class Device>
-matrix_vector_prod<detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> ,VecV>
-triangular_prod(
+auto triangular_prod(
 	matrix_expression<MatA, Device> const& A,
 	vector_expression<VecV, Device>& v
-) {
+) -> decltype(prod(to_triangular(A, TriangularType()), v)){
 	REMORA_SIZE_CHECK(A().size2() == v().size());
-	typedef detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> Wrapper;
-	return matrix_vector_prod<Wrapper ,VecV>(Wrapper(A()), v());
+	return prod(to_triangular(A, TriangularType()), v);
 }
 
 /// \brief computes the matrix-matrix product X+=AB
@@ -352,8 +351,6 @@ typename detail::matrix_matrix_prod_optimizer<MatA,MatB>::type prod(
 	matrix_expression<MatB, Device> const& B
 ) {
 	REMORA_SIZE_CHECK(A().size2() == B().size1());
-	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
-	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
 	return detail::matrix_matrix_prod_optimizer<MatA,MatB>::create(A(),B());
 }
 
@@ -378,16 +375,12 @@ auto operator%(
 ///
 ///Example: x += triangular_prod<lower>(A,v);
 template<class TriangularType, class MatA, class MatB, class Device>
-matrix_matrix_prod<detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> ,MatB>
-triangular_prod(
+auto triangular_prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
-) {
+)  -> decltype(prod(to_triangular(A, TriangularType()), B)){
 	REMORA_SIZE_CHECK(A().size2() == B().size1());
-	static_assert(std::is_base_of<linear_structure, typename MatA::orientation>::value, "A must be linearly stored");
-	static_assert(std::is_base_of<linear_structure, typename MatB::orientation>::value, "B must be linearly stored");
-	typedef detail::dense_triangular_proxy<typename const_expression<MatA>::type,TriangularType> Wrapper;
-	return matrix_matrix_prod<Wrapper ,MatB>(Wrapper(A()), B());
+	return prod(to_triangular(A, TriangularType()), B);
 }
 
 template<class MatA, class Device>
@@ -543,7 +536,7 @@ auto operator|(
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value, 
-	matrix_concat<MatA, scalar_matrix<T, Device>, true > 
+	matrix_concat<MatA, scalar_matrix<T, Device, row_major>, true > 
 >::type operator|(
 	matrix_expression<MatA, Device> const& A,
 	T const& t
@@ -557,7 +550,7 @@ typename std::enable_if<
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value, 
-	matrix_concat<scalar_matrix<T, Device>, MatA, true > 
+	matrix_concat<scalar_matrix<T, Device, row_major>, MatA, true > 
 >::type operator|(
 	T const& t,
 	matrix_expression<MatA, Device> const& A
@@ -598,7 +591,7 @@ auto operator&(
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value, 
-	matrix_concat<MatA, scalar_matrix<T, Device>, false > 
+	matrix_concat<MatA, scalar_matrix<T, Device, row_major>, false > 
 >::type operator&(
 	matrix_expression<MatA, Device> const& A,
 	T const& t
@@ -612,7 +605,7 @@ typename std::enable_if<
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value, 
-	matrix_concat<scalar_matrix<T, Device>, MatA, false > 
+	matrix_concat<scalar_matrix<T, Device, row_major>, MatA, false > 
 >::type operator&(
 	T const& t,
 	matrix_expression<MatA, Device> const& A
@@ -620,18 +613,6 @@ typename std::enable_if<
 	return repeat(t,1, A().size2()) & A;
 }
 
-
-//copy between cpu and device
-template<class E>
-E const&  copy_to_cpu(matrix_expression<E, cpu_tag> const& e){
-	return e();
 }
-
-}
-
-#ifdef REMORA_USE_GPU
-#include "gpu/copy.hpp"
-#endif
-
 
 #endif

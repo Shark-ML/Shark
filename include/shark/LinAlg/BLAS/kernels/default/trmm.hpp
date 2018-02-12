@@ -32,8 +32,8 @@
 #define REMORA_KERNELS_DEFAULT_TRMM_HPP
 
 #include "../../expression_types.hpp"//for matrix_expression
+#include "../../proxy_expressions.hpp"//proxies for blocking
 #include "../../detail/traits.hpp"//triangular_tag
-#include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
 #include "simd.hpp"
 #include "mgemm.hpp" //block macro kernel for dense syrk
 #include <type_traits> //std::false_type marker for unoptimized, std::common_type
@@ -50,8 +50,7 @@ struct trmm_block_size {
 };
 
 template <class E, class T, class block_size, bool unit>
-void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<false,unit>)
-{
+void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<false,unit>){
 	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
 
 	std::size_t const mc = A().size1();
@@ -73,8 +72,7 @@ void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size,
 }
 
 template <class E, class T, class block_size, bool unit>
-void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<true,unit>)
-{
+void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<true,unit>){
 	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
 
 	std::size_t const mc = A().size1();
@@ -106,7 +104,7 @@ void trmm_impl(
 	typedef trmm_block_size<value_type> block_size;
 
 	static const std::size_t AC = block_size::lhs_block_size;
-    static const std::size_t BC = block_size::rhs_column_size;
+	static const std::size_t BC = block_size::rhs_column_size;
 
 	//obtain uninitialized aligned storage
 	boost::alignment::aligned_allocator<value_type,block_size::block::align> allocator;
@@ -114,16 +112,16 @@ void trmm_impl(
 	value_type* B = allocator.allocate(AC * BC);
 
 	//figure out number of blocks to use
-    const std::size_t  M = e1().size1();
-    const std::size_t  N = e2().size2();
-    const std::size_t Ab = (M+AC-1) / AC;
-    const std::size_t Bb = (N+BC-1) / BC;
+	const std::size_t  M = e1().size1();
+	const std::size_t  N = e2().size2();
+	const std::size_t Ab = (M+AC-1) / AC;
+	const std::size_t Bb = (N+BC-1) / BC;
 
 	//get access to raw storage of B
 	auto storageB = e2().raw_storage();
-    auto Bpointer = storageB.values;
-    const std::size_t stride1 = E2::orientation::index_M(storageB.leading_dimension,1);
-    const std::size_t stride2 = E2::orientation::index_m(storageB.leading_dimension,1);
+	auto Bpointer = storageB.values;
+	const std::size_t stride1 = E2::orientation::index_M(storageB.leading_dimension,1);
+	const std::size_t stride2 = E2::orientation::index_m(storageB.leading_dimension,1);
 
 	for (std::size_t j = 0; j < Bb; ++j) {//columns of B
 		std::size_t nc = std::min(BC, N - j * BC);
@@ -135,7 +133,7 @@ void trmm_impl(
 			std::size_t k = Triangular::is_upper? k0: Ab-k0-1;
 			std::size_t kc = std::min(AC, M - k * AC);
 			//read block of B
-			matrix_range<E2> Bs(e2(), k*AC, k*AC + kc, j * BC, j * BC + nc );
+			auto Bs = subrange(e2, k*AC, k*AC + kc, j * BC, j * BC + nc );
 			pack_B_dense(Bs, B, block_size());
 			Bs.clear();//its going to be overwritten with the result
 
@@ -145,7 +143,7 @@ void trmm_impl(
 			std::size_t i_end = Triangular::is_upper? k+1: Ab;
 			for (std::size_t i = i_start; i < i_end; ++i) {
 				std::size_t mc = std::min(AC, M - i * AC);
-				matrix_range<typename const_expression<E1>::type> As(e1(), i * AC, i * AC + mc, k * AC, k * AC + kc);
+				auto As = subrange(e1, i * AC, i * AC + mc, k * AC, k * AC + kc);
 				if(i == k){
 					pack_A_triangular(As, A, block_size(), t);
 				}else
