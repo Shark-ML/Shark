@@ -34,8 +34,6 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/functional/operator.hpp> //for multiplies
 
 namespace remora{ namespace kernels{
@@ -43,14 +41,14 @@ namespace remora{ namespace kernels{
 // C <- alpha * A * B + beta * C
 template <typename MatA, typename MatB, typename MatC>
 void gemm(
-	matrix_expression<MatA, gpu_tag> const& A,
-	matrix_expression<MatB, gpu_tag> const& B,
-	matrix_expression<MatC, gpu_tag>& C, 
+	matrix_expression<MatA, gpu_tag> const& A_unreg,
+	matrix_expression<MatB, gpu_tag> const& B_unreg,
+	matrix_expression<MatC, gpu_tag>& C_unreg, 
 	typename MatC::value_type const& alpha
 ) {
-	REMORA_SIZE_CHECK(A().size1() == C().size1());
-	REMORA_SIZE_CHECK(B().size2() == C().size2());
-	REMORA_SIZE_CHECK(A().size2()== B().size1());
+	REMORA_SIZE_CHECK(A_unreg().size1() == C_unreg().size1());
+	REMORA_SIZE_CHECK(B_unreg().size2() == C_unreg().size2());
+	REMORA_SIZE_CHECK(A_unreg().size2()== B_unreg().size1());
 	
 	// TUNING VARIABLES:
 	// TILE_SIZE: width and height of a tile computed in C
@@ -68,11 +66,16 @@ void gemm(
 	char const* options ="-DTILE_SIZE=32ul -DBLOCK_SIZE=4ul -DTILE_SIZE_K=16ul";
 	typedef typename MatC::value_type value_type;
 	
-	boost::compute::detail::meta_kernel k("blas_gemm");
+	gpu::detail::meta_kernel k("blas_gemm");
 	std::size_t M_index = k.add_arg<std::size_t>("M");
 	std::size_t N_index = k.add_arg<std::size_t>("N");
 	std::size_t K_index = k.add_arg<std::size_t>("K");
 	std::size_t alpha_index = k.add_arg<value_type>("alpha");
+	auto A = k.register_args(to_functor(A_unreg));
+	auto B = k.register_args(to_functor(B_unreg));
+	auto C = k.register_args(to_functor(C_unreg));
+	
+	
 	// Local memory to fit a tile of A and B
 	// we transpose A locally in memory
 	k << "__local " <<k.decl<value_type>("Asub")<< "[TILE_SIZE_K][TILE_SIZE+2];\n";//+2 to avoid bank conflicts
@@ -104,8 +107,8 @@ void gemm(
 	k << "	for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
 	k << "		for(ulong k = get_local_id(1); k < curTileK; k += numWorkers){\n";
 	k << "			ulong ktile = t * TILE_SIZE_K + k;\n";
-	k << "			Asub[k][i] ="<< A()(k.expr<cl_ulong>("min(M-1,TILE_SIZE * get_group_id(0)+i)"),k.expr<cl_ulong>("ktile"))<<";\n";
-	k << "			Bsub[k][i] ="<< B()(k.expr<cl_ulong>("ktile"),k.expr<cl_ulong>("min(N-1,TILE_SIZE * get_group_id(1)+i)"))<<";\n";
+	k << "			Asub[k][i] ="<< A(k.expr<cl_ulong>("min(M-1,TILE_SIZE * get_group_id(0)+i)"),k.expr<cl_ulong>("ktile"))<<";\n";
+	k << "			Bsub[k][i] ="<< B(k.expr<cl_ulong>("ktile"),k.expr<cl_ulong>("min(N-1,TILE_SIZE * get_group_id(1)+i)"))<<";\n";
 	k << "		}\n";
 	k << "	}\n";
 
@@ -143,24 +146,24 @@ void gemm(
 	k << "for (ulong i = get_local_id(0); i < maxCi; i += numWorkers, wm++){\n";
 	k << "	ulong wn = 0;\n";
 	k << "	for (ulong j =get_local_id(1); j < maxCj; j += numWorkers, wn++){\n";
-	k <<		C()(k.expr<cl_ulong>("(offTileCi + i)"), k.expr<cl_ulong>("(offTileCj + j)")) << "+= alpha * acc[wm][wn];\n";
+	k <<		C(k.expr<cl_ulong>("(offTileCi + i)"), k.expr<cl_ulong>("(offTileCj + j)")) << "+= alpha * acc[wm][wn];\n";
 	k << "	}\n";
 	k << "}\n";
 	
-	boost::compute::kernel kernel = k.compile(C().queue().get_context(), options);
+	boost::compute::kernel kernel = k.compile(C_unreg().queue().get_context(), options);
 	
 	//enqueue kernel with kernel args
-	kernel.set_arg(M_index, C().size1());
-	kernel.set_arg(N_index, C().size2());
-	kernel.set_arg(K_index, A().size2());
+	kernel.set_arg(M_index, C_unreg().size1());
+	kernel.set_arg(N_index, C_unreg().size2());
+	kernel.set_arg(K_index, A_unreg().size2());
 	kernel.set_arg(alpha_index, alpha);
 	
 	std::size_t global_work_size[2] = {
-		(C().size1()+TILE_SIZE-1)/ TILE_SIZE * NUM_WORKERS,
-		(C().size2()+TILE_SIZE-1)/ TILE_SIZE * NUM_WORKERS
+		(C_unreg().size1()+TILE_SIZE-1)/ TILE_SIZE * NUM_WORKERS,
+		(C_unreg().size2()+TILE_SIZE-1)/ TILE_SIZE * NUM_WORKERS
 	};
 	std::size_t local_work_size[2] = {NUM_WORKERS, NUM_WORKERS};
-	C().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
+	C_unreg().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
 }
 
 }}

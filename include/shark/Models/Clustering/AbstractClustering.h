@@ -155,7 +155,8 @@ public:
 	/// The default implementation creates a batch of size 1 
 	/// and calls the batched version. If this is not overriden, an xception is thrown.
 	virtual RealVector softMembership(InputType const& pattern) const{
-		return row(softMembership(Batch<InputType>::createBatch(pattern)),0);
+		auto output = softMembership(Batch<InputType>::createBatch(pattern));
+		return row(output,0);
 	}
 	
 	/// \brief Compute cluster membership function.

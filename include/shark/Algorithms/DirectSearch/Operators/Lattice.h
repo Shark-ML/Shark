@@ -101,7 +101,7 @@ Matrix sampleLatticeUniformly(
 	// First find all the corners and add them to our set of sampled points.
 	if(keep_corners){
 		for(std::size_t row = 0; row < matrix.size1(); ++row){
-			if(detail::isLatticeCorner(matrix.row_begin(row), matrix.row_end(row))){
+			if(detail::isLatticeCorner(matrix.major_begin(row), matrix.major_end(row))){
 				added_rows.insert(row);
 			}
 		}
@@ -111,11 +111,11 @@ Matrix sampleLatticeUniformly(
 		added_rows.insert(random::discrete(rng, std::size_t(0), matrix.size1() - 1));
 	}
 	std::size_t i = 0;
-	for(std::size_t row_idx : added_rows)
+	for(std::size_t major_idx : added_rows)
 	{
 		std::copy(
-			matrix.row_begin(row_idx), matrix.row_end(row_idx),
-			sampledMatrix.row_begin(i)
+			matrix.major_begin(major_idx), matrix.major_end(major_idx),
+			sampledMatrix.major_begin(i)
 		);
 		++i;
 	}
@@ -189,7 +189,7 @@ UIntMatrix computeClosestNeighbourIndicesOnLattice(
 			          return distances(i, a) < distances(i, b);
 		          });
 		// Copy the T closest indices into B.
-		std::copy_n(indices.begin(), n, neighbourIndices.row_begin(i));
+		std::copy_n(indices.begin(), n, neighbourIndices.major_begin(i));
 	}
 	return neighbourIndices;
 }

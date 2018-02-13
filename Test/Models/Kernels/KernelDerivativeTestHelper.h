@@ -65,9 +65,9 @@ void testKernelDerivative(AbstractKernelFunction<T>& kernel,std::size_t inputSiz
 		typename Batch<T>::type batch2(2*batchSize,inputSize);
 		for(std::size_t  i = 0; i != batchSize; ++i){
 			for(std::size_t j = 0; j != inputSize;++j) {
-				batch1(i,j) = random::uni(random::globalRng,-3,3);
-				batch2(i,j) = random::uni(random::globalRng,-3,3);
-				batch2(i+batchSize,j) = random::uni(random::globalRng,-3,3);
+				batch1.set_element(batch1.major_begin(i) + j, j, random::uni(random::globalRng,-3,3));
+				batch2.set_element(batch2.major_begin(i) + j, j, random::uni(random::globalRng,-3,3));
+				batch2.set_element(batch2.major_begin(i + batchSize) + j, j, random::uni(random::globalRng,-3,3));
 			}
 		}
 		

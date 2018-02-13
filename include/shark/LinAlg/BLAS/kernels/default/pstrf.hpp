@@ -31,8 +31,8 @@
 
 #include "../gemm.hpp" //gemm kernel
 #include "../gemv.hpp" //gemv kernel
-#include "simple_proxies.hpp"
-#include "../../vector.hpp"//matrix_transpose, matrix_range
+#include "../../proxy_expressions.hpp"
+#include "../../dense.hpp"
 #include <algorithm>
 namespace remora{namespace bindings {
 
@@ -81,8 +81,8 @@ std::size_t pstrf(
 	for(std::size_t k = 0; k < m; k += block_size){
 		std::size_t currentSize = std::min(m-k,block_size);//last iteration is smaller
 		//partition of the matrix
-		auto Ak = simple_subrange(A,k,m,k,m);
-		auto pivots = simple_subrange(pivotValues,k,m);
+		auto Ak = subrange(A,k,m,k,m);
+		auto pivots = subrange(pivotValues,k,m);
 		
 		//update current block L11
 		for(std::size_t j = 0; j != currentSize; ++j){
@@ -109,7 +109,7 @@ std::size_t pstrf(
 			auto pivotValue = pivots(j);
 			if(pivotValue < epsilon){
 				//the remaining part is so near 0, we can just ignore it
-				simple_subrange(Ak,j,m-k,j,m-k).clear();
+				subrange(Ak,j,m-k,j,m-k).clear();
 				return k+j;
 			}
 			
@@ -117,14 +117,13 @@ std::size_t pstrf(
 			Ak(j,j) = std::sqrt(pivotValue);
 			//the last updates of columns k...k+j-1 did not change
 			//this row, so do it now
-			auto curCol = simple_column(Ak,j);
-			auto colLowerPart = simple_subrange(curCol,j+1,m-k);
+			auto colLowerPart = subrange(column(Ak,j),j+1,m-k);
 			if(j > 0){
 				//the last updates of columns 0,1,...,j-1 did not change
 				//this column, so do it now
-				auto blockLL = simple_subrange(Ak,j+1,m-k,0,j);
-				auto curRow = simple_row(Ak,j);
-				auto rowLeftPart = simple_subrange(curRow,0,j);
+				auto blockLL = subrange(Ak,j+1,m-k,0,j);
+				auto curRow = row(Ak,j);
+				auto rowLeftPart = subrange(curRow,0,j);
 				
 				//suppose you are the j-th column
 				//than you want to get updated by the last
@@ -141,9 +140,9 @@ std::size_t pstrf(
 			subrange(Ak,j,j+1,j+1,Ak.size2()).clear();
 		}
 		if(k+currentSize < m){
-			auto blockLL = simple_subrange(Ak, block_size, m-k, 0, block_size);
-			auto blockLR = simple_subrange(Ak, block_size, m-k,  block_size, m-k);
-			kernels::gemm(blockLL,simple_trans(blockLL), blockLR, -1);
+			auto blockLL = subrange(Ak, block_size, m-k, 0, block_size);
+			auto blockLR = subrange(Ak, block_size, m-k,  block_size, m-k);
+			kernels::gemm(blockLL,trans(blockLL), blockLR, -1);
 		}
 	}
 	return m;
@@ -156,7 +155,7 @@ std::size_t pstrf(
 	vector_expression<VecP, cpu_tag>& P,
 	upper
 ){
-	auto transA = simple_trans(A);
+	auto transA = trans(A);
 	return pstrf(transA,P,lower());
 }
 

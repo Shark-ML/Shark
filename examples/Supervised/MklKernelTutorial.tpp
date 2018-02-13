@@ -17,13 +17,13 @@
     struct HeterogeneousInputStruct{
         shark::RealVector rv1;
         std::size_t st2;
-        shark::CompressedRealVector crv3;
+        shark::RealVector crv3;
     };
 
     #ifndef DOXYGEN_SHOULD_SKIP_THIS
         BOOST_FUSION_ADAPT_STRUCT(
             HeterogeneousInputStruct,
-            (shark::RealVector, rv1)(std::size_t, st2)(shark::CompressedRealVector, crv3)
+            (shark::RealVector, rv1)(std::size_t, st2)(shark::RealVector, crv3)
         )
     #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
@@ -32,7 +32,7 @@
         struct Batch< HeterogeneousInputStruct >{
             SHARK_CREATE_BATCH_INTERFACE_NO_TPL(
                 HeterogeneousInputStruct,
-                (shark::RealVector, rv1)(std::size_t, st2)(shark::CompressedRealVector, crv3)
+                (shark::RealVector, rv1)(std::size_t, st2)(shark::RealVector, crv3)
             )
         };
     }
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
     // set up base kernels
     DenseRbfKernel baseKernelRV1(0.1);
     DiscreteKernel baseKernelST2(matK);
-    CompressedLinearKernel baseKernelCRV3;
+    DenseLinearKernel baseKernelCRV3;
     MklKernel<HeterogeneousInputStruct> mkl_kernel( boost::fusion::make_vector( &baseKernelRV1, &baseKernelST2, &baseKernelCRV3) );
     //###end<mkl_kernel_create_kernels>
 

@@ -29,11 +29,8 @@
 #define REMORA_GPU_COPY_HPP
 
 #include "../detail/traits.hpp"
-//includes required for storage->vector/matrix and for scalar multiplication
-#include "../detail/vector_proxy_classes.hpp"
-#include "../detail/vector_expression_classes.hpp"
-#include "../detail/matrix_proxy_classes.hpp"
-#include "../detail/matrix_expression_classes.hpp"
+#include "../dense.hpp" //required for vector proxy on cpu
+#include "../assignment.hpp"
 
 namespace remora{
 
@@ -80,86 +77,46 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, cpu_tag>& x, value_type const& alpha = value_type(1) )const{
-		assign_to(x, m_expression, alpha, typename E::storage_type::storage_tag());
+	void assign_to(vector_expression<VecX, cpu_tag>& x, value_type const& alpha)const{
+		//in case the expression can not be mapped to memory, evaluate it
+		//this does nothing for proxies
+		auto e_eval = eval_expression(m_expression);
+		
+		auto storageE = e_eval.raw_storage();
+		auto& buffer = storageE.buffer;
+		
+		//map buffer to host memory
+		auto p = (typename E::value_type*) m_expression.queue().enqueue_map_buffer(
+			buffer, CL_MAP_READ, 0, buffer.size()
+		);
+		//adapt host memory buffer to vector and assign
+		auto adaptE = adapt_vector(size(), p + storageE.offset, storageE.stride);
+		assign(x, adaptE, alpha);
+		
+		//unmap memory
+		m_expression.queue().enqueue_unmap_buffer(buffer,p);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, cpu_tag>& x, value_type const& alpha = value_type(1) )const{
-		plus_assign_to(x, m_expression, alpha, typename E::storage_type::storage_tag());
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, cpu_tag>& x, value_type alpha = value_type(1) )const{
-		plus_assign_to(x,-alpha);
+	void plus_assign_to(vector_expression<VecX, cpu_tag>& x, value_type const& alpha)const{
+		//in case the expression can not be mapped to memory, evaluate it
+		//this does nothing for proxies
+		auto e_eval = eval_expression(m_expression);
+		
+		auto storageE = e_eval.raw_storage();
+		auto& buffer = storageE.buffer;
+		//map buffer to host memory
+		auto p = (value_type*) m_expression.queue().enqueue_map_buffer(
+			buffer, CL_MAP_READ, 0, buffer.size()
+		);
+		//adapt host memory buffer to vector and assign
+		auto adaptE = adapt_vector(size(), p + storageE.offset, storageE.stride);
+		plus_assign(x,adaptE, alpha);
+		
+		//unmap memory
+		m_expression.queue().enqueue_unmap_buffer(buffer,p);
 	}
 	
 private:
-	//result is represented as dense storage on gpu, i.e. does not need to be calculated
-	template<class VecX, class VecE>
-	void assign_to(
-		vector_expression<VecX, cpu_tag>& x, vector_expression<VecE, gpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
-		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer;
-		//map buffer to host memory
-		typename VecE::value_type* p = (typename VecE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, 0, buffer.size()
-		);
-		//adapt host memory buffer to vector and assign
-		typedef dense_vector_adaptor<typename VecE::value_type> AdaptE;
-		AdaptE adaptE(p + storageE.offset,size(), storageE.stride);
-		assign(x, vector_scalar_multiply<AdaptE >( adaptE, alpha));
-		
-		//unmap memory
-		e().queue().enqueue_unmap_buffer(buffer,p);
-	}
-	
-	template<class VecX, class VecE>
-	void plus_assign_to(
-		vector_expression<VecX, cpu_tag>& x, vector_expression<VecE, gpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
-		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer;
-		//map buffer to host memory
-		typename VecE::value_type* p = (typename VecE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, 0, buffer.size()
-		);
-		//adapt host memory buffer to vector and assign
-		typedef dense_vector_adaptor<typename VecE::value_type> AdaptE;
-		AdaptE adaptE(p + storageE.offset,size(), storageE.stride);
-		
-		plus_assign(x,vector_scalar_multiply<AdaptE >( adaptE, alpha));
-		
-		//unmap memory
-		e().queue().enqueue_unmap_buffer(buffer,p);
-	}
-	
-	//result has unknown storage, so evaluate into temporary on gpu and assign that to host
-	template<class VecX, class VecE>
-	void assign_to(
-		vector_expression<VecX, cpu_tag>& x, vector_expression<VecE, gpu_tag> const& e,
-		value_type const& alpha, unknown_tag
-	)const{
-		//evaluate expression on gpu and assign that to host
-		typedef typename vector_temporary<E>::type result_type;
-		result_type result = m_expression;
-		
-		assign_to(x, result, alpha, typename result_type::storage_type::storage_tag());
-	}
-	
-	template<class VecX, class VecE>
-	void plus_assign_to(
-		vector_expression<VecX, cpu_tag>& x, vector_expression<VecE, gpu_tag> const& e,
-		value_type const& alpha, unknown_tag
-	)const{
-		//evaluate expression on gpu and assign that to host
-		typedef typename vector_temporary<E>::type result_type;
-		result_type result = m_expression;
-		
-		plus_assign_to(x, result, alpha, typename result_type::storage_type::storage_tag());
-	}
 	expression_closure_type m_expression;
 };
 
@@ -202,58 +159,37 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, gpu_tag>& x, value_type const& alpha = value_type(1) )const{
-		assign_to(x, m_expression, alpha, typename E::storage_type::storage_tag());
-	}
-	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, gpu_tag>& x, value_type const& alpha = value_type(1) )const{
-		plus_assign_to(x, m_expression, alpha, typename E::storage_type::storage_tag());
-	}
-	
-	template<class VecX>
-	void minus_assign_to(vector_expression<VecX, gpu_tag>& x, value_type alpha = value_type(1) )const{
-		plus_assign_to(x,-alpha);
-	}
-	
-private:
-	//result is represented as dense storage on cpu, i.e. does not need to be calculated
-	template<class VecX, class VecE>
-	void assign_to(
-		vector_expression<VecX, gpu_tag>& x, vector_expression<VecE, cpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
+	void assign_to(vector_expression<VecX, gpu_tag>& x, value_type const& alpha)const{
 		auto storagex = x().raw_storage();
 		auto& buffer = storagex.buffer;
 		//map buffer to host memory
-		typename VecX::value_type* p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
+		auto p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
 			buffer, CL_MAP_WRITE, 0, buffer.size()
 		);
 		//adapt host memory buffer to vector and assign
-		dense_vector_adaptor<typename VecX::value_type> adaptX(p + storagex.offset,size(), storagex.stride);
-		assign(adaptX,vector_scalar_multiply<expression_closure_type>(m_expression,alpha));
+		auto adaptX = adapt_vector(size(), p + storagex.offset, storagex.stride);
+		assign(adaptX,m_expression,alpha);
 		
 		//unmap memory
 		x().queue().enqueue_unmap_buffer(buffer,p);
 	}
-	
-	template<class VecX, class VecE>
-	void plus_assign_to(
-		vector_expression<VecX, gpu_tag>& x, vector_expression<VecE, cpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
+	template<class VecX>
+	void plus_assign_to(vector_expression<VecX, gpu_tag>& x, value_type const& alpha)const{
 		auto storagex = x().raw_storage();
 		auto& buffer = storagex.buffer;
 		//map buffer to host memory
-		typename VecX::value_type* p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
-			buffer, CL_MAP_WRITE, storagex.offset, buffer.size() - storagex.offset
+		auto p = (typename VecX::value_type*) x().queue().enqueue_map_buffer(
+			buffer, CL_MAP_WRITE, 0, buffer.size()
 		);
 		//adapt host memory buffer to vector and assign
-		dense_vector_adaptor<typename VecX::value_type> adaptX(p,size(), storagex.stride);
-		plus_assign(adaptX,vector_scalar_multiply<expression_closure_type>(m_expression,alpha));
+		auto adaptX = adapt_vector(size(), p + storagex.offset, storagex.stride);
+		plus_assign(adaptX,m_expression,alpha);
 		
 		//unmap memory
-		x().queue().enqueue_unmap_buffer(buffer,p);
+		x().queue().enqueue_unmap_buffer(buffer,p); 
 	}
+	
+private:
 
 	expression_closure_type m_expression;
 	boost::compute::command_queue* m_queue;
@@ -281,11 +217,8 @@ public:
 	typedef blockwise<typename E::evaluation_category::tag> evaluation_category;
 	typedef typename E::orientation orientation;
 
-	//FIXME: This is required even though iterators for block expressions are meaningless
-	typedef typename E::const_row_iterator const_row_iterator;
-	typedef typename E::const_column_iterator const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
+	typedef no_iterator const_major_iterator;
+	typedef no_iterator major_iterator;
 
 	// Construction and destruction
 	explicit matrix_transport_to_cpu(
@@ -307,94 +240,50 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, cpu_tag>& X, value_type const& alpha = value_type(1) )const{
-		assign_to(X, m_expression, alpha, typename E::storage_type::storage_tag());
+	void assign_to(matrix_expression<MatX, cpu_tag>& X, value_type const& alpha) const{
+		//in case the expression can not be mapped to memory, evaluate it
+		//this does nothing for proxies
+		auto e_eval = eval_expression(m_expression);
+		
+		auto storageE = e_eval().raw_storage();
+		auto& buffer = storageE.buffer;
+		//map buffer to host memory
+		auto p = (typename E::value_type*) m_expression.queue().enqueue_map_buffer(
+			buffer, CL_MAP_READ, 0, buffer.size()
+		);
+		//adapt host memory buffer to matrix and assign
+		typedef typename decltype(e_eval)::orientation EOrientation;
+		typedef dense_matrix_adaptor<typename E::value_type, EOrientation> AdaptE;
+		AdaptE adaptE(p + storageE.offset,size1(), size2(), storageE.leading_dimension);
+		
+		assign(X, adaptE, alpha);
+		
+		//unmap memory
+		m_expression.queue().enqueue_unmap_buffer(buffer,p);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, cpu_tag>& X, value_type const& alpha = value_type(1) )const{
-		plus_assign_to(X, m_expression, alpha, typename E::storage_type::storage_tag());
+	void plus_assign_to(matrix_expression<MatX, cpu_tag>& X, value_type const& alpha)const{
+		//in case the expression can not be mapped to memory, evaluate it
+		//this does nothing for proxies
+		auto e_eval = eval_expression(m_expression);
+		
+		auto storageE = e_eval().raw_storage();
+		auto& buffer = storageE.buffer;
+		//map buffer to host memory
+		auto p = (typename E::value_type*) m_expression.queue().enqueue_map_buffer(
+			buffer, CL_MAP_READ, 0, buffer.size()
+		);
+		//adapt host memory buffer to matrix and assign
+		typedef typename decltype(e_eval)::orientation EOrientation;
+		typedef dense_matrix_adaptor<typename E::value_type, EOrientation> AdaptE;
+		AdaptE adaptE(p + storageE.offset, size1(), size2(), storageE.leading_dimension);
+		
+		plus_assign(X, adaptE, alpha);
+		
+		//unmap memory
+		m_expression.queue().enqueue_unmap_buffer(buffer,p);
 	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, cpu_tag>& X, value_type alpha = value_type(1) )const{
-		plus_assign_to(X,-alpha);
-	}
-	
 private:
-	//result is represented as dense storage on gpu, i.e. does not need to be calculated
-	template<class MatX, class MatE>
-	void assign_to(
-		matrix_expression<MatX, cpu_tag>& X, matrix_expression<MatE, gpu_tag>const& e,
-		value_type const& alpha, dense_tag
-	)const{
-		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer;
-		//map buffer to host memory
-		typename MatE::value_type* p = (typename MatE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, 0, buffer.size()
-		);
-		//adapt host memory buffer to matrix and assign
-		typedef typename MatE::orientation EOrientation;
-		std::size_t stride1 = EOrientation::index_M(storageE.leading_dimension,1);
-		std::size_t stride2 = EOrientation::index_m(storageE.leading_dimension,1);
-		typedef dense_matrix_adaptor<typename MatE::value_type, EOrientation> AdaptE;
-		AdaptE adaptE(p + storageE.offset,size1(), size2(), stride1,stride2);
-		
-		assign(X, matrix_scalar_multiply<AdaptE >( adaptE, alpha));
-		
-		//unmap memory
-		e().queue().enqueue_unmap_buffer(buffer,p);
-	}
-	
-	template<class MatX, class MatE>
-	void plus_assign_to(
-		matrix_expression<MatX, cpu_tag>& X, matrix_expression<MatE, gpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
-		auto storageE = e().raw_storage();
-		auto& buffer = storageE.buffer;
-		//map buffer to host memory
-		typename MatE::value_type* p = (typename MatE::value_type*) e().queue().enqueue_map_buffer(
-			buffer, CL_MAP_READ, 0, buffer.size()
-		);
-		//adapt host memory buffer to matrix and assign
-		typedef typename MatE::orientation EOrientation;
-		std::size_t stride1 = EOrientation::index_M(storageE.leading_dimension,1);
-		std::size_t stride2 = EOrientation::index_m(storageE.leading_dimension,1);
-		typedef dense_matrix_adaptor<typename MatE::value_type, EOrientation> AdaptE;
-		AdaptE adaptE(p + storageE.offset, size1(), size2(), stride1,stride2);
-		
-		plus_assign(X,matrix_scalar_multiply<AdaptE >( adaptE, alpha));
-		
-		//unmap memory
-		e().queue().enqueue_unmap_buffer(buffer,p);
-	}
-	
-	//result has unknown storage, so evaluate into temporary on gpu and assign that to host
-	template<class MatX, class MatE>
-	void assign_to(
-		matrix_expression<MatX, cpu_tag>& X, matrix_expression<MatE, gpu_tag>const& e,
-		value_type const& alpha, unknown_tag
-	)const{
-		//evaluate expression on gpu and assign that to host
-		typedef typename matrix_temporary<E>::type result_type;
-		result_type result = m_expression;
-		
-		assign_to(X, result, alpha, typename result_type::storage_type::storage_tag());
-	}
-	
-	template<class MatX, class MatE>
-	void plus_assign_to(
-		matrix_expression<MatX, cpu_tag>& X, matrix_expression<MatE, gpu_tag>const& e,
-		value_type const& alpha, unknown_tag
-	)const{
-		//evaluate expression on gpu and assign that to host
-		typedef typename matrix_temporary<E>::type result_type;
-		result_type result = m_expression;
-		
-		plus_assign_to(X, result, alpha, typename result_type::storage_type::storage_tag());
-	}
-
 	expression_closure_type m_expression;
 };
 
@@ -415,11 +304,8 @@ public:
 	typedef blockwise<typename E::evaluation_category::tag> evaluation_category;
 	typedef typename E::orientation orientation;
 
-	//FIXME: This is required even though iterators for block expressions are meaningless
-	typedef typename E::const_row_iterator const_row_iterator;
-	typedef typename E::const_column_iterator const_column_iterator;
-	typedef const_row_iterator row_iterator;
-	typedef const_column_iterator column_iterator;
+	typedef no_iterator const_major_iterator;
+	typedef no_iterator major_iterator;
 
 	// Construction and destruction
 	explicit matrix_transport_to_gpu(
@@ -442,26 +328,7 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, gpu_tag>& X, value_type const& alpha = value_type(1) )const{
-		assign_to(X, m_expression, alpha, typename E::storage_type::storage_tag());
-	}
-	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, gpu_tag>& X, value_type const& alpha = value_type(1) )const{
-		plus_assign_to(X, m_expression, alpha, typename E::storage_type::storage_tag());
-	}
-	
-	template<class MatX>
-	void minus_assign_to(matrix_expression<MatX, cpu_tag>& X, value_type alpha = value_type(1) )const{
-		plus_assign_to(X,-alpha);
-	}
-	
-private:
-	//result is represented as dense storage on gpu, i.e. does not need to be calculated
-	template<class MatX, class MatE>
-	void assign_to(
-		matrix_expression<MatX, gpu_tag>& X, matrix_expression<MatE, cpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
+	void assign_to(matrix_expression<MatX, gpu_tag>& X, value_type const& alpha)const{
 		auto storageX = X().raw_storage();
 		auto& buffer = storageX.buffer;
 		//map buffer to host memory
@@ -470,20 +337,14 @@ private:
 		);
 		//adapt host memory buffer to vector and assign
 		typedef typename MatX::orientation XOrientation;
-		std::size_t stride1 = XOrientation::index_M(storageX.leading_dimension, 1);
-		std::size_t stride2 = XOrientation::index_m(storageX.leading_dimension, 1);
-		dense_matrix_adaptor<typename MatX::value_type, XOrientation> adaptX(p, size1(), size2(), stride1, stride2);
-		assign(adaptX,matrix_scalar_multiply<MatE>(e(),alpha));
+		dense_matrix_adaptor<typename MatX::value_type, XOrientation> adaptX(p, size1(), size2(), storageX.leading_dimension);
+		assign(adaptX, m_expression, alpha);
 		
 		//unmap memory
 		X().queue().enqueue_unmap_buffer(buffer,p);
 	}
-	
-	template<class MatX, class MatE>
-	void plus_assign_to(
-		matrix_expression<MatX, gpu_tag>& X, matrix_expression<MatE, cpu_tag> const& e,
-		value_type const& alpha, dense_tag
-	)const{
+	template<class MatX>
+	void plus_assign_to(matrix_expression<MatX, gpu_tag>& X, value_type const& alpha) const{
 		auto storageX = X().raw_storage();
 		auto& buffer = storageX.buffer;
 		//map buffer to host memory
@@ -492,16 +353,16 @@ private:
 		);
 		//adapt host memory buffer to matrix and assign
 		typedef typename MatX::orientation XOrientation;
-		std::size_t stride1 = XOrientation::index_M(storageX.leading_dimension, 1);
-		std::size_t stride2 = XOrientation::index_m(storageX.leading_dimension, 1);
 		typedef dense_matrix_adaptor<typename MatX::value_type, XOrientation> AdaptX;
-		AdaptX adaptX(p + storageX.offset, size1(), size2(), stride1, stride2);
+		AdaptX adaptX(p + storageX.offset, size1(), size2(), storageX.leading_dimension);
 		
-		plus_assign(adaptX,matrix_scalar_multiply<MatE >( e(), alpha));
+		plus_assign(adaptX, m_expression, alpha);
 		
 		//unmap memory
 		X().queue().enqueue_unmap_buffer(buffer,p);
 	}
+
+private:
 
 	expression_closure_type m_expression;
 	boost::compute::command_queue* m_queue;
@@ -509,7 +370,7 @@ private:
 
 
 ///////////////////////////////////////////////
-////////Proxy expressions
+//////// Expressions
 ///////////////////////////////////////////////
 
 template<class E>

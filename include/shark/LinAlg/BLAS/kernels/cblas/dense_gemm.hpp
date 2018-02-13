@@ -33,7 +33,9 @@
 #define REMORA_KERNELS_CBLAS_DENSE_GEMM_HPP
 
 #include "cblas_inc.hpp"
-#include "../../detail/matrix_proxy_classes.hpp"
+#include "../../proxy_expressions.hpp"
+#include "../../assignment.hpp"
+#include "../../dense.hpp"
 #include "../default/simd.hpp"
 #include <type_traits>
 namespace remora{ namespace bindings {
@@ -139,12 +141,12 @@ void dense_gemm(
 	auto storageC = C().raw_storage();
 	dense_gemm(stor_ord, transA, transB, (int)m, (int)n, (int)k, alpha,
 		storageA.values,
-	    storageA.leading_dimension,
+		storageA.leading_dimension,
 		storageB.values,
-	    storageB.leading_dimension,
+		storageB.leading_dimension,
 		typename MatC::value_type(1),
 		storageC.values,
-	    storageC.leading_dimension
+		storageC.leading_dimension
 	);
 }
 
@@ -168,12 +170,10 @@ void dense_gemm(
 	for(std::size_t k = 0; k != num_blocks; ++k){
 		std::size_t start_k = k * tile_size;
 		std::size_t current_size = std::min(tile_size,A().size2() - start_k);
-		dense_matrix_adaptor<value_type,row_major> A_block(A_pointer, size1, current_size);
-		dense_matrix_adaptor<value_type,row_major> B_block(B_pointer, current_size, size2);
-		matrix_range<MatA const> A_range(A(), 0, size1, start_k, start_k + current_size);
-		matrix_range<MatB const> B_range(B(), start_k, start_k + current_size, 0, size2);
-		noalias(A_block) = A_range;
-		noalias(B_block) = B_range;
+		auto A_block = adapt_matrix(size1, current_size, A_pointer);
+		auto B_block = adapt_matrix(current_size, size2, B_pointer);
+		noalias(A_block) = subrange(A, 0, size1, start_k, start_k + current_size);
+		noalias(B_block) = subrange(B, start_k, start_k + current_size, 0, size2);
 		dense_gemm(A_block, B_block, C, alpha, std::true_type());
 	}
 	allocator.deallocate(A_pointer, size1 * tile_size);

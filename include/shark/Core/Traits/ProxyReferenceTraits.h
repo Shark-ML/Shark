@@ -59,11 +59,11 @@ namespace shark {
 	};
 	template<class T>
 	struct ConstProxyReference<blas::compressed_vector<T> >{
-		typedef blas::sparse_vector_adaptor<T const,std::size_t> const& type;
+		typedef blas::compressed_vector_adaptor<T const,std::size_t const> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::compressed_vector<T> const >{
-		typedef blas::sparse_vector_adaptor<T const,std::size_t> const& type;
+		typedef blas::compressed_vector_adaptor<T const,std::size_t const> const& type;
 	};
 	template<class T>
 	struct ConstProxyReference<blas::matrix<T> >{

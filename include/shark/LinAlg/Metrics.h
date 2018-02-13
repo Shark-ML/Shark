@@ -141,23 +141,18 @@ namespace detail{
 		sparse_tag, 
 		dense_tag
 	){
-		using shark::sqr;
-		typename VectorT::const_iterator iter=op1.begin();
-		typename VectorT::const_iterator end=op1.end();
-		
-		std::size_t index = 0;
 		std::size_t pos = 0;
 		typename VectorT::value_type sum=0;
-		
-		for(;iter != end;++iter,++pos){
-			index = iter.index();
-			for(;pos != index;++pos){
-				sum += weights(pos) * sqr(op2(pos));
+		auto end=op1.end();
+		for(auto iter=op1.begin();iter != end;++iter,++pos){
+			for(;pos != iter.index();++pos){
+				sum += weights(pos) * op2(pos) * op2(pos);
 			}
-			sum += weights(index) * sqr(*iter-op2(pos));
+			double diff =  *iter-op2(pos);
+			sum += weights(pos) * diff * diff;
 		}
 		for(;pos != op2.size();++pos){
-			sum += weights(pos) * sqr(op2(pos));
+			sum += weights(pos) * op2(pos) * op2(pos);
 		}
 		return sum;
 	}
@@ -212,7 +207,7 @@ namespace detail{
 		std::size_t sizeY=Y.size1();
 		if(sizeX  < sizeY){//iterate over the rows of the block with less rows
 			for(std::size_t i = 0; i != sizeX; ++i){
-				matrix_row<Result> distanceRow = row(distances,i);
+				auto distanceRow = row(distances,i);
 				distanceSqrBlockVector(
 					Y,row(X,i),distanceRow
 				);

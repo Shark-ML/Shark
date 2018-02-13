@@ -45,7 +45,6 @@
 #include <shark/Core/Shark.h>
 #include <shark/LinAlg/BLAS/remora.hpp>
 #include <shark/Core/Exception.h>
-#include <shark/LinAlg/Tools.h>
 #include <shark/LinAlg/Metrics.h>
 //this ensures, that Sequence is serializable
 #include <boost/serialization/deque.hpp>

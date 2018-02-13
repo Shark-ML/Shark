@@ -34,8 +34,8 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
+#include "../../proxy_expressions.hpp"
 #include <clblast.h>
-#include "../../detail/matrix_proxy_classes.hpp"
 namespace remora{ namespace kernels{
 	
 	
@@ -91,9 +91,8 @@ void trsm_impl(
 	Triangular,
 	right
 ){	
-	matrix_transpose<typename const_expression<MatA>::type> transA(A());
-	matrix_transpose<MatB> transB(B());
-	trsm_impl(transA, transB, typename Triangular::transposed_orientation(),  left());
+	auto transB = trans(B);
+	trsm_impl(trans(A), transB, typename Triangular::transposed_orientation(),  left());
 }
 
 // solve AX = B or XA=B with A being triangular

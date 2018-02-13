@@ -32,7 +32,7 @@
 #define REMORA_KERNELS_DEFAULT_SYRK_HPP
 
 #include "../../expression_types.hpp"//for matrix_expression
-#include "../../detail/matrix_proxy_classes.hpp"//for matrix_range/matrix_transpose
+#include "../../proxy_expressions.hpp"//for matrix range/transpose
 #include "mgemm.hpp" //block macro kernel for dense syrk
 #include <type_traits> //std::false_type marker for unoptimized, std::common_Type
 
@@ -58,7 +58,7 @@ void syrk_impl(
 	typedef syrk_block_size<value_type> block_size;
 
 	static const std::size_t MC = block_size::lhs_block_size;
-    static const std::size_t EC = block_size::rhs_k_size;
+	static const std::size_t EC = block_size::rhs_k_size;
 
 	//obtain uninitialized aligned storage
 	boost::alignment::aligned_allocator<value_type,block_size::block::align> allocatorE;
@@ -68,23 +68,23 @@ void syrk_impl(
 	auto M_diagonal_block = allocatorM.allocate(MC * MC);
 
 	//figure out number of blocks to use
-    const std::size_t  M = e().size1();
-    const std::size_t  K = e().size2();
-    const std::size_t Mb = (M+MC-1) / MC;//we split m in Mb x Mb blocks
-    const std::size_t Eb = (K+EC-1) / EC;//we split B in Mb x Eb blocks
+	const std::size_t  M = e().size1();
+	const std::size_t  K = e().size2();
+	const std::size_t Mb = (M+MC-1) / MC;//we split m in Mb x Mb blocks
+	const std::size_t Eb = (K+EC-1) / EC;//we split B in Mb x Eb blocks
 
 	//get access to raw storage of M
 	auto storageM = m().raw_storage();
-    auto Mpointer = storageM.values;
-    const std::size_t stride1 = Mat::orientation::index_M(storageM.leading_dimension,1);
-    const std::size_t stride2 = Mat::orientation::index_m(storageM.leading_dimension,1);
+	auto Mpointer = storageM.values;
+	const std::size_t stride1 = Mat::orientation::index_M(storageM.leading_dimension,1);
+	const std::size_t stride2 = Mat::orientation::index_m(storageM.leading_dimension,1);
 
 	for (std::size_t k = 0; k < Eb; ++k) {//column blocks of E
 		std::size_t kc = std::min(EC, K - k * EC);
 		for (std::size_t i = 0; i < Mb; ++i){//row-blocks of M
 			std::size_t mc = std::min(MC, M - i * MC);
 			//load block of the left E into memory
-			matrix_range<E const> E_lefts(e(), i * MC, i * MC + mc, k*EC, k*EC + kc );
+			auto E_lefts = subrange(e, i * MC, i * MC + mc, k*EC, k*EC + kc );
 			pack_A_dense(E_lefts, E_left, block_size());
 
 			std::size_t start_j = Triangular::is_upper? i : 0;
@@ -92,8 +92,9 @@ void syrk_impl(
 			for(std::size_t j = start_j; j < end_j; ++j){//traverse over the blocks that are to be computed
 				std::size_t mc2 = std::min(MC, M - j * MC);
 				//load block of the right E into memory
-				matrix_range<typename const_expression<E>::type> E_rights(e(), j * MC, j * MC + mc2, k*EC, k*EC + kc );
-				matrix_transpose<matrix_range<typename const_expression<E>::type> > E_rights_trans(E_rights);
+				auto E_rights = subrange(e, j * MC, j * MC + mc2, k*EC, k*EC + kc );
+				auto E_rights_trans = trans(E_rights);
+				//~ auto E_rights_trans = trans(subrange(e, j * MC, j * MC + mc2, k*EC, k*EC + kc ));
 				pack_B_dense(E_rights_trans, E_right, block_size());
 
 				if(i==j){//diagonal block: we have to ensure that we only access elements on the diagonal

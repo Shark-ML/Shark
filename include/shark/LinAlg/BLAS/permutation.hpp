@@ -28,7 +28,7 @@
 #ifndef REMORA_PERMUTATION_HPP
 #define REMORA_PERMUTATION_HPP
 
-#include "vector.hpp"
+#include "dense.hpp"
 
 namespace remora {
 struct permutation_matrix:public vector<int> {

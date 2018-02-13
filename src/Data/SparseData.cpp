@@ -98,11 +98,11 @@ void copySparsePoints(Data<blas::compressed_vector<T> >& dataset, std::vector<Li
 		//copy data into the batch
 		for(std::size_t i = 0; i != batch.size1(); ++i){
 			//allocate nonzeros for the row
-			batch.reserve_row(i,points[start+i].second.size());
+			batch.major_reserve(i,points[start+i].second.size());
 			//copy elements
 			auto const& inputs = points[start+i].second;
-			auto pos = batch.row_end(i);
-			for(std::size_t j = 0; j != inputs.size(); ++j,++pos){
+			auto pos = batch.major_end(i);
+			for(std::size_t j = 0; j != inputs.size(); ++j){
 				pos = batch.set_element(pos,inputs[j].first - delta,inputs[j].second);
 			}
 		}

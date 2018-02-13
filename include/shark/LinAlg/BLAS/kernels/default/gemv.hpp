@@ -31,7 +31,7 @@
 #define REMORA_KERNELS_DEFAULT_GEMatAV_HPP
 
 #include "../../expression_types.hpp" //matrix/vector_expression
-#include "../../detail/matrix_proxy_classes.hpp" //matrix_row, matrix_transpose
+#include "../../proxy_expressions.hpp" //matrix row,, transpose
 #include "../../detail/traits.hpp" //matrix orientations
 #include "../dot.hpp" //inner product
 #include "../../assignment.hpp" //plus_assign
@@ -51,8 +51,7 @@ void gemv_impl(
 	typedef typename ResultV::value_type value_type;
 	value_type value;
 	for(std::size_t i = 0; i != A().size1();++i){
-		matrix_row<typename const_expression<MatA>::type > rowA(A(),i);
-		kernels::dot(rowA,x,value);
+		kernels::dot(row(A,i),x,value);
 		if(value != value_type())//handling of sparse results.
 			result()(i) += alpha * value;
 	}
@@ -67,17 +66,11 @@ void gemv_impl(
 	typename ResultV::value_type alpha,
 	column_major
 ) {
-	//instead of a matrix column, we have matrix_row
-	typedef matrix_transpose<typename const_expression<MatA>::type > TransA;
-	TransA transA(A());
 	typedef typename V::const_iterator iterator;
-	typedef typename ResultV::value_type value_type;
 	iterator end = x().end();
 	for(iterator it = x().begin(); it != end; ++it) {
-		value_type multiplier = alpha * (*it);
-		matrix_row<TransA> colA(transA,it.index());
 		//FIXME: for sparse result vectors, this might hurt.
-		plus_assign(result,colA,multiplier);
+		plus_assign(result,column(A,it.index()),alpha * (*it));
 	}
 }
 

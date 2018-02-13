@@ -31,9 +31,10 @@
 #ifndef REMORA_KERNELS_DEFAULT_TRMV_HPP
 #define REMORA_KERNELS_DEFAULT_TRMV_HPP
 
-#include "../../expression_types.hpp" //vector/matrix_expression
-#include "../../detail/matrix_proxy_classes.hpp" //matrix_range, matrix_row
-#include "../../detail/vector_proxy_classes.hpp" //vector_range, dense_vector_adaptor
+#include "../../expression_types.hpp" //vector,matrix_expression
+#include "../../proxy_expressions.hpp" //matrix and vector proxies
+#include "../../assignment.hpp" //assignment
+#include "../../dense.hpp" //adapt_vector
 #include "../gemv.hpp" //gemv kernel
 #include "../dot.hpp" //dot kernel
 #include <type_traits> //std::false_type marker for unoptimized
@@ -65,12 +66,11 @@ void trmv_impl(
 	for(std::size_t bi = 1; bi <= numBlocks; ++bi){
 		std::size_t startbi = blockSize*(numBlocks-bi);
 		std::size_t sizebi = std::min(blockSize,size-startbi);
-		dense_vector_adaptor<value_typeA> values(valueStorage,sizebi);
+		auto values = adapt_vector(sizebi, valueStorage);
 
 		//store and save the values of b we are now changing
-		vector_range<V> bupper(b(),startbi,startbi+sizebi);
-		vector_range<V> blower(b(),startbi+sizebi,size);
-		noalias(values) = bupper;
+		auto blower = subrange(b,startbi+sizebi,size);
+		noalias(values) = subrange(b,startbi,startbi+sizebi);
 
 		//multiply with triangular part of the block
 		for (std::size_t i = 0; i != sizebi; ++i) {
@@ -82,8 +82,7 @@ void trmv_impl(
 			b()(posi) += values(i)*(Unit? value_typeA(1):A()(posi,posi));
 		}
 		//now compute the lower rectangular part of the current block of A
-		matrix_range<typename const_expression<MatA>::type > Alower(A(), startbi+sizebi,size,startbi,startbi+sizebi);
-		kernels::gemv(Alower,values,blower,1);
+		kernels::gemv(subrange(A, startbi+sizebi,size,startbi,startbi+sizebi),values,blower,1);
 	}
 }
 
@@ -99,12 +98,8 @@ void trmv_impl(
 		if(!Unit){
 			b()(i) *= A()(i,i);
 		}
-		vector_range<V> bblock(b(),i+1,size);
-		typedef typename const_expression<MatA>::type CMatA;
-		matrix_row<CMatA> Arow(A(),i);
-		vector_range<matrix_row<CMatA> > Asubrow(Arow,i+1,size);
 		typename V::value_type result;
-		kernels::dot(Asubrow,bblock,result);
+		kernels::dot(subrange(row(A,i),i+1,size),subrange(b(),i+1,size),result);
 		b()(i) += result;
 	}
 }
@@ -136,7 +131,6 @@ void trmv_impl(
 	vector_expression<V, cpu_tag>& b,
 	upper, column_major
 ){
-	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
 	std::size_t size = A().size1();
 	std::size_t const blockSize = 128;
@@ -155,11 +149,11 @@ void trmv_impl(
 	for(std::size_t bj = 0; bj != numBlocks; ++bj){
 		std::size_t startbj = blockSize*bj;
 		std::size_t sizebj = std::min(blockSize,size-startbj);
-		dense_vector_adaptor<value_typeA> values(valueStorage,sizebj);
+		auto values = adapt_vector(sizebj, valueStorage);
 
 		//store and save the values of b we are now changing
-		vector_range<V> bupper(b(),startbj,startbj+sizebj);
-		vector_range<V> blower(b(),startbj+sizebj,size);
+		auto bupper = subrange(b,startbj,startbj+sizebj);
+		auto blower = subrange(b,startbj+sizebj,size);
 		noalias(values) = bupper;
 		bupper.clear();
 		//multiply with triangular element
@@ -171,8 +165,7 @@ void trmv_impl(
 			b()(posj) += values(j)*(Unit? 1.0:A()(posj,posj));
 		}
 		//now compute the right rectangular part of the current block of A
-		matrix_range<typename const_expression<MatA>::type > Aright(A(), startbj,startbj+sizebj, startbj+sizebj,size);
-		kernels::gemv(Aright,blower,bupper,1);
+		kernels::gemv(subrange(A, startbj,startbj+sizebj, startbj+sizebj,size),blower,bupper,1);
 	}
 }
 

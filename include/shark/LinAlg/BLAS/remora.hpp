@@ -32,18 +32,13 @@
 #ifndef SHARK_LINALG_BLAS_REMORA_HPP
 #define SHARK_LINALG_BLAS_REMORA_HPP
 
-//proxies
-#include "vector_proxy.hpp"
-#include "matrix_proxy.hpp"
 //expressions
 #include "vector_expression.hpp"
 #include "matrix_expression.hpp"
 #include "solve.hpp"
 //containers
-#include "vector.hpp"
-#include "vector_sparse.hpp"
-#include "matrix.hpp"
-#include "matrix_sparse.hpp"
+#include "dense.hpp"
+#include "sparse.hpp"
 
 //misc
 #include "permutation.hpp"

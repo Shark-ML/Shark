@@ -94,11 +94,11 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 
 	// Find the leaf for a sample
 	std::vector<unsigned int> nodeIds;
-	for(auto m=0; m<model.numberOfModels(); ++m){
-	auto aTree = model.getModel(m);
-	auto result = aTree.findLeaf(test.inputs().element(0));
-	nodeIds.push_back(result);
-	BOOST_CHECK(result < aTree.numberOfNodes());
+	for(std::size_t m=0; m<model.numberOfModels(); ++m){
+		auto aTree = model.getModel(m);
+		auto result = aTree.findLeaf(test.inputs().element(0));
+		nodeIds.push_back(result);
+		BOOST_CHECK(result < aTree.numberOfNodes());
 	}
 }
 

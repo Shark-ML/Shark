@@ -28,18 +28,23 @@
 #ifndef REMORA_KERNELS_DEFAULT_VECTOR_ASSIGN_HPP
 #define REMORA_KERNELS_DEFAULT_VECTOR_ASSIGN_HPP
 
-#include "../../expression_types.hpp"
+#include "../../detail/traits.hpp"
 
 namespace remora{namespace bindings{
 
 template<class F, class V>
-void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
-	F f;
+void apply(vector_expression<V, cpu_tag>& v, F const& f) {
 	typedef typename V::iterator iterator;
 	iterator end = v().end();
 	for (iterator it = v().begin(); it != end; ++it){
-		*it = f(*it, t);
+		*it = f(*it);
 	}
+}
+
+template<class F, class V>
+void assign(vector_expression<V, cpu_tag>& v, typename V::value_type t) {
+	F f;
+	apply(v, [=](typename V::value_type x){return f(x,t);});
 }
 
 /////////////////////////////////////////////////////////
@@ -147,7 +152,7 @@ void vector_assign(
 	v().reserve(e().size());
 	typename V::iterator targetPos = v().begin();
 	REMORA_RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
-	for(std::size_t i = 0; i != e().size(); ++i,++targetPos){
+	for(std::size_t i = 0; i != e().size(); ++i){
 		targetPos = v().set_element(targetPos,i,e()(i));
 	}
 }
@@ -164,7 +169,7 @@ void vector_assign(
 	typename V::iterator targetPos = v().begin();
 	REMORA_RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
 	iteratorE end = e().end();
-	for(iteratorE it = e().begin(); it != end; ++it,++targetPos){
+	for(iteratorE it = e().begin(); it != end; ++it){
 		targetPos = v().set_element(targetPos,it.index(),*it);
 	}
 }
@@ -281,35 +286,26 @@ void vector_assign_functor(
 	F f,
 	sparse_tag tag, dense_tag
 ){	
-	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
-	value_type zero = value_type();
 	size_type size = e().size();
-	
-	typename V::iterator it = v().begin();
-	for(size_type i = 0; i != size; ++i,++it){
+	auto it = v().begin();
+	for(size_type i = 0; i != size; ++i){
+		auto val = e()(i);
 		if(it == v().end() || it.index() != i){//insert missing elements
-			it = v().set_element(it,i,zero); 
+			it = v().set_element(it,i,val); 
+		}else{
+			*it = f(*it, val);
+			++it;
 		}
-		*it = f(*it, e()(i));
 	}
 }
 
-// Sparse-Sparse case has three implementations.
-//the stupidity of this case is, that we have to assume in the general case v and e share the same 
-//array memory and thus changing v might invalidate the iterators of e. 
-//This is not the same as aliasing of v and e, as v might be for example one matrix row and e another
-//of the same matrix.
-//thus we look at the cases where (at least) one of the arguments is a vector-container, which means
-//that we are not facing the problem of same memory as this would otherwise mean that we are aliasing
-//in which case the expression is not defined anyways. 
-
-//called for independent argumeents v and e
 template<class V, class E, class F>
-void assign_sparse(
+void vector_assign_functor(
 	vector_expression<V, cpu_tag>& v,
 	vector_expression<E, cpu_tag> const& e,
-	F f
+	F f,
+	sparse_tag tag, sparse_tag
 ){	
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
@@ -324,14 +320,15 @@ void assign_sparse(
 		if (it_index == ite_index) {
 			*it = f(*it, *ite);
 			++ ite;
+			++it;
 		} else if (it_index < ite_index) {
 			*it = f(*it, zero);
+			++it;
 		} else{//it_index > ite_index so insert new element in v()
-			it = v().set_element(it,ite_index,zero); 
-			*it = f(*it, *ite);
+			it = v().set_element(it,ite_index,f(zero, *ite)); 
 			++ite;
 		}
-		++it;
+		
 	}
 	//apply zero transformation on elements which are not transformed yet
 	for(;it != v().end();++it) {
@@ -342,52 +339,6 @@ void assign_sparse(
 		it = v().set_element(it,ite.index(),zero); 
 		*it = f(*it, *ite);
 	}
-}
-//as long as one argument is not a proxy, we are in the good case.
-template<class V, class E, class F>
-void vector_assign_functor(
-	vector_expression<V, cpu_tag>& v,
-	vector_container<E, cpu_tag> const& e,
-	F f,
-	sparse_tag tag, sparse_tag
-){	
-	assign_sparse(v,e);
-}
-template<class V, class E, class F>
-void vector_assign_functor(
-	vector_container<V, cpu_tag>& v,
-	vector_expression<E, cpu_tag> const& e,
-	F f,
-	sparse_tag tag, sparse_tag
-){	
-	assign_sparse(v,e,f);
-}
-template<class V, class E, class F>
-void vector_assign_functor(
-	vector_container<V, cpu_tag>& v,
-	vector_container<E, cpu_tag> const& e,
-	F f,
-	sparse_tag tag, sparse_tag
-){	
-	assign_sparse(v,e,f);
-}
-
-
-//In the general case we have to take one bullet: 
-//either use a temporary, which has copying time and allocation time
-//or count the non-zero elements of e which might be expensive as well. we decide
-//to take the first route for now.
-template<class V, class E, class F>
-void vector_assign_functor(
-	vector_expression<V, cpu_tag>& v,
-	vector_expression<E, cpu_tag> const& e,
-	F f,
-	sparse_tag tag, sparse_tag
-){	
-	typename vector_temporary<V>::type temporary(v());
-	assign_sparse(temporary,e, f);
-	v().clear();
-	bindings::vector_assign(v, temporary, tag, tag);
 }
 
 }}

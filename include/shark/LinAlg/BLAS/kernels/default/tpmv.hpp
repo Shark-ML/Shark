@@ -52,13 +52,12 @@ void tpmv_impl(
 ){
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
-	typedef typename MatA::const_row_iterator row_iterator;
 	size_type size = A().size1();
 	
 	for(size_type i = 0; i != size; ++i){
 		value_type sum(0);
-		row_iterator end = A().row_end(i);
-		for(row_iterator pos = A().row_begin(i); pos != end; ++pos){
+		auto end = A().major_end(i);
+		for(auto pos = A().major_begin(i); pos != end; ++pos){
 			sum += *pos * b()(pos.index());
 		}
 		b()(i) = sum;
@@ -79,14 +78,13 @@ void tpmv_impl(
 ){
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
-	typedef typename MatA::const_row_iterator row_iterator;
 	size_type size = A().size1();
 	
 	for(size_type irev = size; irev != 0; --irev){
 		size_type i= irev-1;
 		value_type sum(0);
-		row_iterator end = A().row_end(i);
-		for(row_iterator pos = A().row_begin(i); pos != end; ++pos){
+		auto end = A().major_end(i);
+		for(auto pos = A().major_begin(i); pos != end; ++pos){
 			sum += *pos * b()(pos.index());
 		}
 		b()(i) = sum;
@@ -103,15 +101,14 @@ void tpmv_impl(
 	column_major,
 	upper
 ){
-	typedef typename MatA::const_column_iterator column_iterator;
 	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
 	size_type size = A().size1();
 	for(size_type i = 0; i != size; ++i){
 		value_type bi = b()(i);
 		b()(i)= value_type/*zero*/();
-		column_iterator end = A().column_end(i);
-		for(column_iterator pos = A().column_begin(i); pos != end; ++pos){
+		auto end = A().major_end(i);
+		for(auto pos = A().major_begin(i); pos != end; ++pos){
 			b()(pos.index()) += *pos*bi;
 		}
 	}
@@ -128,7 +125,6 @@ void tpmv_impl(
 	column_major,
 	lower
 ){
-	typedef typename MatA::const_column_iterator column_iterator;
 	typedef typename V::size_type size_type;
 	typedef typename V::value_type value_type;
 	size_type size = A().size1();
@@ -137,8 +133,8 @@ void tpmv_impl(
 		size_type i= irev-1;
 		value_type bi = b()(i);
 		b()(i)= value_type/*zero*/();
-		column_iterator end = A().column_end(i);
-		for(column_iterator pos = A().column_begin(i); pos != end; ++pos){
+		auto end = A().major_end(i);
+		for(auto pos = A().major_begin(i); pos != end; ++pos){
 			b()(pos.index()) += *pos*bi;
 		}
 	}

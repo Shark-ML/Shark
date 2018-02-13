@@ -150,8 +150,10 @@ public:
 		RealVector w(dim, 0.0);
 
 		// transpose the dataset and push it inside a single matrix
-		typename Batch<InputVectorType>::type data = trans(createBatch(dataset.inputs().elements()));
-		RealVector label = column(createBatch(dataset.labels().elements()),0);
+		auto data = createBatch(dataset.inputs().elements());
+		data = trans(data);
+		auto label_mat = createBatch(dataset.labels().elements());
+		RealVector label = column(label_mat,0);
 
 		RealVector diag(dim);
 		RealVector difference = -label;

@@ -30,7 +30,7 @@
 #ifndef REMORA_KERNELS_DEFAULT_POTRF_HPP
 #define REMORA_KERNELS_DEFAULT_POTRF_HPP
 
-#include "simple_proxies.hpp"
+#include "../../proxy_expressions.hpp"
 #include "../trsm.hpp" //trsm kernel
 #include "../syrk.hpp" //syrk kernel
 #include <type_traits> //std::false_type marker for unoptimized
@@ -98,7 +98,7 @@ std::size_t potrf_block(
     matrix_expression<MatA, cpu_tag>& A,
     column_major, Triangular
 ) {
-	auto Atrans = simple_trans(A);
+	auto Atrans = trans(A);
 	return potrf_block(Atrans, row_major(), typename Triangular::transposed_orientation());
 }
 
@@ -111,7 +111,7 @@ std::size_t potrf_recursive(
 	lower
 ){
 	std::size_t block_size = 32;
-	auto A = simple_subrange(Afull,start,end,start,end);
+	auto A = subrange(Afull,start,end,start,end);
 	std::size_t size = A.size1();
 	//if the matrix is small enough call the computation kernel directly for the block
 	if(size <= block_size){
@@ -125,10 +125,10 @@ std::size_t potrf_recursive(
 	std::size_t result = potrf_recursive(Afull,start,start+split,lower());
 	if(result) return result;
 	
-	auto Aul = simple_subrange(A,0,split,0,split);
-	auto All = simple_subrange(A,split,size,0,split);
-	auto Alr = simple_subrange(A,split,size,split,size);
-	kernels::trsm<upper,right>(simple_trans(Aul), All );
+	auto Aul = subrange(A,0,split,0,split);
+	auto All = subrange(A,split,size,0,split);
+	auto Alr = subrange(A,split,size,split,size);
+	kernels::trsm<upper,right>(trans(Aul), All );
 	kernels::syrk<false>(All,Alr, -1.0);
 	return potrf_recursive(Afull,start+split,end,lower());
 }
@@ -140,7 +140,7 @@ std::size_t potrf_recursive(
 	std::size_t end,
 	upper
 ){
-	auto Atrans = simple_trans(A);
+	auto Atrans = trans(A);
 	return potrf_recursive(Atrans,start,end,lower());
 }
 

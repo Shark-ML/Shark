@@ -34,6 +34,7 @@
 #define REMORA_DETAIL_STORAGE_HPP
 
 #include "structure.hpp"
+#include <type_traits>
 
 namespace remora{
 	
@@ -61,7 +62,7 @@ struct dense_vector_storage{
 	}
 	
 	
-	dense_vector_storage<T,Tag> sub_region(std::size_t offset){
+	dense_vector_storage<T,Tag> sub_region(std::size_t offset) const{
 		return {values+offset*stride, stride};
 	}
 };
@@ -74,6 +75,13 @@ struct dense_matrix_storage{
 		std::is_same<O,row_major>::value,
 		dense_vector_storage<T, Tag>,
 		dense_vector_storage<T, dense_tag>
+	>{};
+	
+	template<class O>
+	struct rows_storage: public std::conditional<
+		std::is_same<O,row_major>::value,
+		dense_matrix_storage<T, Tag>,
+		dense_matrix_storage<T, dense_tag>
 	>{};
 	
 	typedef dense_vector_storage<T, dense_tag> diag_storage;
@@ -91,19 +99,29 @@ struct dense_matrix_storage{
 	}
 	
 	template<class Orientation>
-	sub_region_storage sub_region(std::size_t offset1, std::size_t offset2, Orientation){
-		std::size_t offset_major = Orientation::index_M(offset1,offset2);
-		std::size_t offset_minor = Orientation::index_m(offset1,offset2);
-		return {values+offset_major*leading_dimension+offset_minor, leading_dimension};
+	sub_region_storage sub_region(std::size_t offset1, std::size_t offset2, Orientation) const{
+		std::size_t stride1 = Orientation::index_M(leading_dimension,(std::size_t)1);
+		std::size_t stride2 = Orientation::index_m(leading_dimension,(std::size_t)1);
+		return {values + offset1 * stride1 + offset2 * stride2, leading_dimension};
 	}
 	
 	template<class Orientation>
-	typename row_storage<Orientation>::type row(std::size_t i, Orientation){
+	typename rows_storage<Orientation>::type sub_rows(std::size_t offset, Orientation) const{
+		std::size_t stride = Orientation::index_M(leading_dimension,(std::size_t)1);
+		return {values + offset * stride, leading_dimension};
+	}
+	
+	template<class Orientation>
+	typename row_storage<Orientation>::type row(std::size_t i, Orientation) const{
 		return {values + i * Orientation::index_M(leading_dimension,(std::size_t)1), Orientation::index_m(leading_dimension,(std::size_t)1)};
 	}
 	
-	diag_storage diag(){
+	diag_storage diag() const{
 		return {values, leading_dimension+1};
+	}
+	
+	dense_vector_storage<T, continuous_dense_tag> linear() const{
+		return {values, 1};
 	}
 };
 
@@ -114,12 +132,17 @@ struct sparse_vector_storage{
 	T* values;
 	I* indices;
 	std::size_t nnz;
+	std::size_t capacity;
 	
 	sparse_vector_storage(){}
-	sparse_vector_storage(T* values, I* indices, std::size_t nnz):values(values), indices(indices), nnz(nnz){}
-	template<class U>
-	sparse_vector_storage(sparse_vector_storage<U, I> const& storage):
-	values(storage.values), indices(storage.indices), nnz(storage.nnz){}
+	sparse_vector_storage(T* values, I* indices, std::size_t nnz, std::size_t capacity)
+	:values(values), indices(indices), nnz(nnz), capacity(capacity){}
+	template<class U, class J>
+	sparse_vector_storage(sparse_vector_storage<U, J> const& storage)
+	: values(storage.values)
+	, indices(storage.indices)
+	, nnz(storage.nnz)
+	, capacity(storage.capacity){}
 };
 
 template<class T>
@@ -140,11 +163,31 @@ struct sparse_matrix_storage{
 	typedef sparse_matrix_storage<T,I> sub_region_storage;
 	T* values;
 	I* indices;
-	I* outer_indices_begin;
-	I* outer_indices_end;
+	I* major_indices_begin;
+	I* major_indices_end;
+	std::size_t capacity;
 	
-	sparse_vector_storage<T,I> row(std::size_t i, row_major){
-		return {values + outer_indices_begin[i], indices + outer_indices_begin[i],outer_indices_end[i] - outer_indices_begin[i]};
+	sparse_matrix_storage(
+		T* values, I* indices, 
+		I* major_indices_begin, I* major_indices_end,
+		std::size_t capacity
+	):values(values), indices(indices)
+	, major_indices_begin(major_indices_begin), major_indices_end(major_indices_end)
+	, capacity(capacity){}
+	
+	template<class U, class J>
+	sparse_matrix_storage(sparse_matrix_storage<U, J> const& storage)
+	: values(storage.values), indices(storage.indices)
+	, major_indices_begin(storage.major_indices_begin), major_indices_end(storage.major_indices_end)
+	, capacity(storage.capacity){}
+	
+	sparse_vector_storage<T,I> row(std::size_t i, row_major)const{
+		I start = major_indices_begin[i];
+		return {
+			values + start, indices + start,
+			major_indices_end[i] - start,
+			major_indices_begin[i + 1] - start
+		};
 	}
 };
 }

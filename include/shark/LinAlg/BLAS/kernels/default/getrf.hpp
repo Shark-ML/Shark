@@ -30,7 +30,7 @@
 #ifndef REMORA_KERNELS_DEFAULT_GETRF_HPP
 #define REMORA_KERNELS_DEFAULT_GETRF_HPP
 
-#include "simple_proxies.hpp" //proxies for recursive blocking
+#include "../../proxy_expressions.hpp" //proxies for recursive blocking
 #include "../trsm.hpp" //trsm kernel
 #include "../gemm.hpp" //gemm kernel
 #include "../../permutation.hpp" //pivoting
@@ -87,7 +87,7 @@ void getrf_block(
 	vector_expression<VecP, cpu_tag>& P,
 	row_major
 ) {
-	//ther eis no way to do fast row pivoting on row-major format.
+	//there is no way to do fast row pivoting on row-major format.
 	//so copy the block into column major format, perform the decomposition
 	// and copy back.
 	typedef typename MatA::value_type value_type;
@@ -132,14 +132,14 @@ void getrf_recursive(
 	std::size_t start,
 	std::size_t end
 ){
-	std::size_t block_size = 32;
+	std::size_t block_size = 4;
 	std::size_t size = end-start;
 	std::size_t end1=A().size1();
 	
 	//if the matrix is small enough, call the computation kernel directly for the block
 	if(size <= block_size){
-		auto Ablock = simple_subrange(A, start, end1, start, end); //recursive getrf needs all columns
-		auto Pblock = simple_subrange(P, start, end);
+		auto Ablock = subrange(A, start, end1, start, end); //recursive getrf needs all columns
+		auto Pblock = subrange(P, start, end);
 		getrf_block(Ablock,Pblock, typename MatA::orientation());
 		return;
 	}
@@ -147,13 +147,13 @@ void getrf_recursive(
 	//otherwise run the kernel recursively
 	std::size_t numBlocks = (size + block_size - 1) / block_size;
 	std::size_t split = start + numBlocks/2 * block_size;
-	auto A_2 = simple_subrange(A, start, end1, split, end);
-	auto A11 = simple_subrange(A, start, split, start, split);
-	auto A12 = simple_subrange(A, start, split, split, end);
-	auto A21 = simple_subrange(A, split, end1, start, split);
-	auto A22 = simple_subrange(A, split, end1, split, end);
-	auto P1 = simple_subrange(P, start, split);
-	auto P2 = simple_subrange(P, split, end);
+	auto A_2 = subrange(A, start, end1, split, end);
+	auto A11 = subrange(A, start, split, start, split);
+	auto A12 = subrange(A, start, split, split, end);
+	auto A21 = subrange(A, split, end1, start, split);
+	auto A22 = subrange(A, split, end1, split, end);
+	auto P1 = subrange(P, start, split);
+	auto P2 = subrange(P, split, end);
  
 	
 	//run recursively on the first block

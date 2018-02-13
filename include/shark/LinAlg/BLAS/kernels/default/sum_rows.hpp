@@ -46,8 +46,8 @@ void sum_rows(
 ){
 	for(std::size_t i = 0; i != A().size2(); ++i){
 		typename V::value_type s = 0;
-		auto end = A().column_end(i);
-		for(auto pos = A().column_begin(i); pos != end; ++pos){
+		auto end = A().major_end(i);
+		for(auto pos = A().major_begin(i); pos != end; ++pos){
 			s += *pos;
 		}
 		v()(i) += alpha * s;
@@ -62,8 +62,8 @@ void sum_rows(
 	row_major, Tag1, Tag2
 ){
 	for(std::size_t i = 0; i != A().size1(); ++i){
-		auto end = A().row_end(i);
-		for(auto pos = A().row_begin(i); pos != end; ++pos)
+		auto end = A().major_end(i);
+		for(auto pos = A().major_begin(i); pos != end; ++pos)
 			v()(pos.index()) += alpha * (*pos);
 	}
 }

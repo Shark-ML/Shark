@@ -57,7 +57,7 @@ void NormalizeComponentsWhitening::train(ModelType& model, UnlabeledData<RealVec
 	
 	//compute the whitening factor taking into account that
 	//it might not be full rank.
-	symm_pos_semi_definite_solver<RealMatrix> solver(covariance, 100);
+	symm_pos_semi_definite_solver<RealMatrix> solver(covariance);
 	RealMatrix whiteningMatrix(solver.rank(),dc);
 	solver.compute_inverse_factor(whiteningMatrix);
 	whiteningMatrix *= std::sqrt(m_targetVariance);

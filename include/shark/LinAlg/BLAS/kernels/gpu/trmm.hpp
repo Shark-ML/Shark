@@ -34,8 +34,6 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/functional/operator.hpp> //for multiplies
 #include "../gemm.hpp"
 
@@ -52,20 +50,22 @@ struct trmm_kernel{
 //Lower triangular - matrix(row-major)
 template<class MatA, class MatB>
 trmm_kernel createTRMMBlockKernel(
-	matrix_expression<MatA, gpu_tag> const& A,
-	matrix_expression<MatB, gpu_tag> &B,
+	matrix_expression<MatA, gpu_tag> const& A_unreg,
+	matrix_expression<MatB, gpu_tag>& B_unreg,
 	char const* options
 ){
 	typedef typename MatA::value_type value_typeA;
 	typedef typename MatB::value_type value_typeB;
 	boost::compute::multiplies<value_typeB> prod;
 	
-	boost::compute::detail::meta_kernel k("blas_trmm");
+	gpu::detail::meta_kernel k("blas_trmm");
 	std::size_t K_index = k.add_arg<std::size_t>("K");//number of columns in B
 	std::size_t start_index = k.add_arg<std::size_t>("start");//start of block of A
 	std::size_t end_index = k.add_arg<std::size_t>("end");//end of Block of A
 	std::size_t unit_index = k.add_arg<std::size_t>("unit");//whether A is unit triangular
 	std::size_t upper_index = k.add_arg<std::size_t>("upper");//whether A is unit triangular
+	auto A = k.register_args(to_functor(A_unreg));
+	auto B = k.register_args(to_functor(B_unreg));
 	// Local memory to fit a tile of A and B
 	// we store B as column major in local memory
 	// we also allocate memory to store results of B
@@ -78,7 +78,7 @@ trmm_kernel createTRMMBlockKernel(
 	k << "const ulong curTileA =  end-start;\n";
 	k << "for(ulong i = get_local_id(0); i < curTileA; i += numWorkers){\n";
 	k << "	for(ulong j = get_local_id(1); j < curTileA; j += numWorkers){\n";
-	k << "		Asub[i][j] ="<< A()(k.expr<cl_ulong>("(i+start)"),k.expr<cl_ulong>("(j+start)"))<<";\n";
+	k << "		Asub[i][j] ="<< A(k.expr<cl_ulong>("(i+start)"),k.expr<cl_ulong>("(j+start)"))<<";\n";
 	k << "	}\n";
 	k << "}\n";
 	
@@ -88,7 +88,7 @@ trmm_kernel createTRMMBlockKernel(
 	// Load Tile of B into local memory, store columns of B as rows
 	k << "for(ulong i = get_local_id(0); i < curTileA; i += numWorkers){\n";
 	k << "	for(ulong k = get_local_id(1); k < curTileK; k += numWorkers){\n";
-	k << "		Bsub[k][i] ="<< B()(k.expr<cl_ulong>("(i+start)"),k.expr<cl_ulong>("(t * TILE_SIZE_K+k)"))<<";\n";
+	k << "		Bsub[k][i] ="<< B(k.expr<cl_ulong>("(i+start)"),k.expr<cl_ulong>("(t * TILE_SIZE_K+k)"))<<";\n";
 	k << "	}\n";
 	k << "}\n";
 	// Synchronise to make sure the tile is loaded
@@ -124,11 +124,11 @@ trmm_kernel createTRMMBlockKernel(
 	// Store the final results back in B
 	k << "for(ulong i = get_local_id(0); i < curTileA; i += numWorkers){\n";
 	k << "	for(ulong k = get_local_id(1); k < curTileK; k += numWorkers){\n";
-	k << B()(k.expr<cl_ulong>("(start+i)"),k.expr<cl_ulong>("(t * TILE_SIZE_K+k)"))<<" =  BResult[k][i];\n";
+	k << B(k.expr<cl_ulong>("(start+i)"),k.expr<cl_ulong>("(t * TILE_SIZE_K+k)"))<<" =  BResult[k][i];\n";
 	k << "	}\n";
 	k << "}\n";
 	
-	boost::compute::kernel kernel = k.compile(B().queue().get_context(), options);
+	boost::compute::kernel kernel = k.compile(B_unreg().queue().get_context(), options);
 	return {kernel,K_index,start_index,end_index,unit_index,upper_index};
 }
 
@@ -165,18 +165,18 @@ void trmm_recursive(
 	}
 	//otherwise run the kernel recursively
 	std::size_t split = (size+tileSizeA-1)/tileSizeA/2*tileSizeA;//split at the next multiple of the TileSize
-	matrix_range<MatA> Aul(Afull(),start,start+split,start,start+split);
-	matrix_range<MatB> BFront(Bfull(),start,start+split,0,Bfull().size2());
-	matrix_range<MatB> Bback(Bfull(),start+split,end,0,Bfull().size2());
+	auto Aul = subrange(Afull,start,start+split,start,start+split);
+	auto BFront  = subrange(Bfull,start,start+split,0,Bfull().size2());
+	auto Bback =subrange(Bfull,start+split,end,0,Bfull().size2());
 	
 
 	if(Triangular::is_upper){ //Upper triangular case
-		matrix_range<typename const_expression<MatA>::type> Aur(Afull(),start,start+split,start+split,end);
+		auto Aur = subrange(Afull,start,start+split,start+split,end);
 		trmm_recursive(Afull, Bfull, kernel, start, start+split, tileSizeA, tileSizeB, numWorkers, t);
 		kernels::gemm(Aur, Bback, BFront, 1.0);
 		trmm_recursive(Afull, Bfull, kernel, start+split, end, tileSizeA, tileSizeB, numWorkers, t);
 	}else{// Lower triangular caste
-		matrix_range<typename const_expression<MatA>::type> All(Afull(),start+split,end,start,start+split);
+		auto All = subrange(Afull,start+split,end,start,start+split);
 		trmm_recursive(Afull, Bfull, kernel, start+split, end, tileSizeA, tileSizeB, numWorkers, t);
 		kernels::gemm(All, BFront, Bback, 1.0);
 		trmm_recursive(Afull, Bfull, kernel, start, start+split, tileSizeA, tileSizeB, numWorkers, t);

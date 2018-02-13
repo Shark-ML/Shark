@@ -105,12 +105,11 @@ BOOST_AUTO_TEST_CASE( Binary_CSVM_TRAINER_TEST )
 			unsigned int label = random::coinToss(random::globalRng);
 			for (unsigned int d=0; d<dim; d++)
 			{
-				input[i](d) = 0.3 * random::gauss(random::globalRng) + 2*label-1;
+				input[i].set_element(input[i].end(), d, 0.2 * random::gauss(random::globalRng) + 2*label-1);
 			}
 			target[i] = label;
 		}
 		LabeledData<CompressedRealVector, unsigned int> dataset = createLabeledDataFromRange(input, target);
-
 		// train machines
 		LinearClassifier<CompressedRealVector> linearNoBias;
 		LinearClassifier<CompressedRealVector> linearBias;
@@ -130,7 +129,7 @@ BOOST_AUTO_TEST_CASE( Binary_CSVM_TRAINER_TEST )
 		for (size_t j=0; j<dim; j++)
 		{
 			CompressedRealVector v(dim);
-			v(j) = 1.0;
+			v.set_element(v.end(),j,1.0);
 			column(nonlinear_w_noBias, j) = nonlinearNoBias.decisionFunction()(v);
 			column(nonlinear_w_Bias, j) = nonlinearBias.decisionFunction()(v)-nonlinearBias.decisionFunction().offset();
 		}
@@ -191,8 +190,8 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			unsigned int label = (unsigned int)random::discrete(random::globalRng, std::size_t(0), classes - 1);
 			for (unsigned int d=0; d<dim; d++)
 			{
-				if ((d / var_per_class) == label) input[i](d) = 0.3 * random::gauss(random::globalRng) + 1.0;
-				else input[i](d) = 0.3 * random::gauss(random::globalRng) - 1.0;
+				double y = ((d / var_per_class) == label) ? 1.0: -1.0;
+				input[i].set_element(input[i].end(), d, 0.3 * random::gauss(random::globalRng) + y);
 			}
 			target[i] = label;
 		}
@@ -228,7 +227,7 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 			for (size_t j=0; j<dim; j++)
 			{
 				CompressedRealVector v(dim);
-				v(j) = 1.0;
+				v.set_element(v.end(), j, 1.0);
 				column(nonlinear_w, j) = nonlinear.decisionFunction()(v);
 			}
 			ZeroSum(nonlinear_w);

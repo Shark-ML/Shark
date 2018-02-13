@@ -53,7 +53,7 @@ std::size_t CMACMap::getArrayIndexForTiling(std::size_t indexOfTiling,RealVector
 	return index;
 }
 
-std::vector<std::size_t> CMACMap::getIndizes(blas::matrix_row< const RealMatrix> const &point)const {
+std::vector<std::size_t> CMACMap::getIndizes(blas::dense_vector_adaptor<double const> const &point)const {
 	std::vector<size_t> output(m_tilings,0);
 
 	for (size_t tiling = 0; tiling != m_tilings; ++tiling) {
@@ -127,7 +127,7 @@ void CMACMap::eval(RealMatrix const& patterns,RealMatrix &output) const{
 	output.clear();
 	
 	for(std::size_t i = 0; i != numPatterns; ++i){
-		std::vector<std::size_t> indizes = getIndizes(row(patterns,i));
+		auto indizes = getIndizes(row(patterns,i));
 		for (std::size_t o = 0; o != output.size2(); ++o) {
 			for (std::size_t j = 0; j != m_tilings; ++j) {
 				output(i,o) += m_parameters(indizes[j] + o*m_parametersPerTiling);
@@ -150,7 +150,7 @@ void CMACMap::weightedParameterDerivative(
 	gradient.resize(m_parameters.size());
 	gradient.clear();
 	for(std::size_t i = 0; i != numPatterns; ++i){
-		std::vector<std::size_t> indizes = getIndizes(row(patterns,i));
+		auto indizes = getIndizes(row(patterns,i));
 		for (std::size_t o=0; o!= outputs.size2(); ++o) {
 			for (std::size_t j=0; j != m_tilings; ++j) {
 				gradient(indizes[j] + o*m_parametersPerTiling) += coefficients(i,o);

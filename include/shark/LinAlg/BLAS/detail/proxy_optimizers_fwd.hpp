@@ -1,8 +1,8 @@
 /*!
- * \brief       Implements the Dense vector class
+ * \brief       Proxy Optimizations
  * 
  * \author      O. Krause
- * \date        2014
+ * \date        2016
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -25,30 +25,36 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef REMORA_VECTOR_HPP
-#define REMORA_VECTOR_HPP
+ #ifndef REMORA_DETAIL_PROXY_OPTIMIZERS_FWD_HPP
+#define REMORA_DETAIL_PROXY_OPTIMIZERS_FWD_HPP
 
-#include "expression_types.hpp"
-#include "detail/traits.hpp"
-namespace remora{
+namespace remora{namespace detail{
 	
-/// \brief A dense vector of values of type \c T.
-///
-/// For a \f$n\f$-dimensional vector \f$v\f$ and \f$0\leq i < n\f$ every element \f$v_i\f$ is mapped
-/// to the \f$i\f$-th element of the container.
-/// The tag descripes whether the vector is residing on a cpu or gpu which change its semantics.
-template<class T, class Tag = cpu_tag>
-class vector;
+//forward declarations
+template<class V>
+struct vector_range_optimizer;
+	
+template<class M>
+struct matrix_transpose_optimizer;
+template<class M>
+struct matrix_row_optimizer;
+template<class M>
+struct matrix_range_optimizer;
+	
+template<class M>
+struct matrix_rows_optimizer;
 
-template<class T, class Tag>
-struct vector_temporary_type<T,dense_tag, Tag>{
-	typedef vector<T, Tag> type;
-};
-}
+template<class M>
+struct linearized_matrix_optimizer;
+	
+template<class M, class Orientation>
+struct vector_to_matrix_optimizer;
+    
+template<class M>
+struct matrix_diagonal_optimizer;
 
-#include "cpu/vector.hpp"
-#ifdef REMORA_USE_GPU
-#include "gpu/vector.hpp"
-#endif
+template<class M, class Tag>
+struct triangular_proxy_optimizer;
 
+}}
 #endif

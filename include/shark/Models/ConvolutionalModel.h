@@ -172,17 +172,16 @@ public:
 		std::size_t outputsForFilter = outputShape().numElements()/m_numFilters;
 		std::size_t paddingHeight = (m_type != Convolution::Valid) ? m_filterHeight - 1: 0;
 		std::size_t paddingWidth = (m_type != Convolution::Valid) ? m_filterWidth - 1: 0;
-		for(std::size_t i = 0; i != inputs.size1(); ++i){
-			auto output = row(outputs,i);
-			blas::kernels::conv2d(row(inputs,i), m_filters, output,
-				m_numChannels, m_numFilters, 
-				m_imageHeight, m_imageWidth,
-				m_filterHeight, m_filterWidth,
-				paddingHeight, paddingWidth
-			);
-			//apply offset
-			noalias(to_matrix(output, m_numFilters, outputsForFilter) ) += trans(blas::repeat(m_offset,outputsForFilter));
-		}
+		
+		blas::kernels::conv2d(inputs, m_filters, outputs,
+			m_numChannels, m_numFilters, 
+			m_imageHeight, m_imageWidth,
+			m_filterHeight, m_filterWidth,
+			paddingHeight, paddingWidth
+		);
+		//reshape matrix for offset
+		auto reshapedOutputs = to_matrix(to_vector(outputs), outputsForFilter * inputs.size1(), m_numFilters);
+		noalias(reshapedOutputs ) += blas::repeat(m_offset,outputsForFilter * inputs.size1());
 		m_activation.evalInPlace(outputs, state.toState<typename ActivationFunction::State>());
 	}
 
@@ -196,39 +195,34 @@ public:
 	)const{
 		SIZE_CHECK(coefficients.size2()==outputShape().numElements());
 		SIZE_CHECK(coefficients.size1()==inputs.size1());
-		
+		std::size_t n = inputs.size1();
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 
 		gradient.resize(numberOfParameters());
-		gradient.clear();
 		auto weightGradient = to_matrix(subrange(gradient,0,m_filters.size()), m_numFilters, m_filters.size()/m_numFilters);
 		auto offsetGradient = subrange(gradient, m_filters.size(),gradient.size());
 		
-		BatchInputType patches(outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
-		for(std::size_t i = 0; i != inputs.size1(); ++i){
-			if(m_type == Convolution::Valid){
-				blas::bindings::im2mat(//todo must get public interface in remora
-					row(inputs,i),patches,
-					m_numChannels, 
-					m_imageHeight, m_imageWidth,
-					m_filterHeight, m_filterWidth
-				);
-			}else{
-				blas::bindings::im2mat_pad(//todo must get public interface in remora
-					row(inputs,i),patches,
-					m_numChannels, 
-					m_imageHeight, m_imageWidth,
-					m_filterHeight, m_filterWidth,
-					m_filterHeight - 1, m_filterWidth - 1
-				);
-			}
-			auto delta_mat = to_matrix(row(delta,i), m_numFilters, patches.size1());
-			noalias(weightGradient) += delta_mat % patches;
-			noalias(offsetGradient) += sum_columns(delta_mat);
+		BatchInputType patches(n * outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
+		if(m_type == Convolution::Valid){
+			blas::bindings::im2mat(//todo must get public interface in remora
+				inputs,patches,
+				m_numChannels, 
+				m_imageHeight, m_imageWidth,
+				m_filterHeight, m_filterWidth
+			);
+		}else{
+			blas::bindings::im2mat_pad(//todo must get public interface in remora
+				inputs,patches,
+				m_numChannels, 
+				m_imageHeight, m_imageWidth,
+				m_filterHeight, m_filterWidth,
+				m_filterHeight - 1, m_filterWidth - 1
+			);
 		}
-		//derivative of offset
-		
+		auto delta_mat = to_matrix(to_vector(delta), patches.size1(), m_numFilters);
+		noalias(weightGradient) = trans(delta_mat) % patches;
+		noalias(offsetGradient) = sum_rows(delta_mat);
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all inputs of the last computed batch
 	void weightedInputDerivative(
@@ -252,15 +246,12 @@ public:
 		}
 		derivatives.resize(inputs.size1(),inputShape().numElements());
 		derivatives.clear();
-		for(std::size_t i = 0; i != inputs.size1(); ++i){
-			auto derivative = row(derivatives,i);
-			blas::kernels::conv2d(row(delta,i), m_backpropFilters, derivative,
-				m_numFilters, m_numChannels, 
-				shape[0], shape[1],
-				m_filterHeight, m_filterWidth,
-				paddingHeight, paddingWidth
-			);
-		}
+		blas::kernels::conv2d(delta, m_backpropFilters, derivatives,
+			m_numFilters, m_numChannels, 
+			shape[0], shape[1],
+			m_filterHeight, m_filterWidth,
+			paddingHeight, paddingWidth
+		);
 	}
 
 	/// From ISerializable

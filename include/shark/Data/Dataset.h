@@ -326,6 +326,30 @@ public:
 	std::vector<std::size_t> getPartitioning()const{
 		return m_data.getPartitioning();
 	}
+	
+	
+	/// \brief Reorders elements across batches
+	///
+	/// Takes a vector of indices so that the ith element is moved to index[i].
+	/// This will create a temporary copy of the dataset and thus requires a double amount of memory compared to the original dataset
+	/// during construction.
+	template<class Range>
+	void reorderElements(Range const& indices){
+		Data dataCopy(numberOfBatches());
+		std::vector<Type> batch_elements;
+		auto indexPos = indices.begin();
+		auto elemBegin = elements().begin();
+		for(std::size_t b = 0; b != numberOfBatches(); ++b){
+			std::size_t numElements = batchSize(batch(b));
+			batch_elements.clear();
+			for(std::size_t i = 0; i != numElements; ++i,++indexPos){
+				batch_elements.push_back(*(elemBegin+*indexPos));
+			}
+			dataCopy.batch(b) = createBatch<Type>(batch_elements);
+		}
+		
+		*this = dataCopy;
+	}
 
 	// SUBSETS
 
@@ -445,8 +469,11 @@ public:
 	}
 
 	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	virtual void shuffle(){
-		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
+	void shuffle(){
+		std::vector<std::size_t> indices(this->numberOfElements());
+		std::iota(indices.begin(),indices.end(),0);
+		std::shuffle(indices.begin(),indices.end(), random::globalRng);
+		this->reorderElements(indices);
 	}
 };
 
@@ -664,11 +691,6 @@ public:
 		m_data.makeIndependent();
 	}
 
-	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	virtual void shuffle(){
-		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
-	}
-
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
 		m_data.splitBatch(batch,elementIndex);
 		m_label.splitBatch(batch,elementIndex);
@@ -727,6 +749,20 @@ public:
 	friend void swap(LabeledData& a, LabeledData& b){
 		swap(a.m_data,b.m_data);
 		swap(a.m_label,b.m_label);
+	}
+	
+	template<class Range>
+	void reorderElements(Range const& indices){
+		m_data.reorderElements(indices);
+		m_label.reorderElements(indices);
+	}
+	
+	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
+	void shuffle(){
+		std::vector<std::size_t> indices(numberOfElements());
+		std::iota(indices.begin(),indices.end(),0);
+		std::shuffle(indices.begin(),indices.end(), random::globalRng);
+		reorderElements(indices);
 	}
 
 
@@ -1020,42 +1056,20 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	detail::batchPartitioning(classCounts, classStart, partitioning, batchSize);
 
 	data.repartition(partitioning);
-
-	// Now place examples into the batches reserved for their class...
-	std::vector<std::size_t> bat = classStart;           // batch index until which the class is already filled in
-	std::vector<std::size_t> idx(classStart.size(), 0);  // index within the batch until which the class is already filled in
-	std::size_t c = 0; // the current class space we are operating in
-	for (std::size_t b=0; b<data.numberOfBatches(); b++){
-		//check if we changed class space
-		if(b == classStart[c+1]) ++c;
-		auto&& batch = data.batch(b);
-		std::size_t e = 0;
-		while (true){
-			unsigned int label = batch.label[e];
-			if (label == c){  // leave element in place
-				++e;
-				++idx[c];
-				if (e == batch.size())
-				{
-					e = 0;
-					idx[c] = 0;
-					bat[c]++;
-					break;
-				}
-			}
-			else{   // swap elements
-				auto&& batch2 = data.batch(bat[label]);
-				using std::swap;
-				swap(batch[e],batch2[idx[label]]);
-				idx[label]++;
-				if (idx[label] == batch2.size())
-				{
-					idx[label] = 0;
-					bat[label]++;
-				}
-			}
-		}
+	
+	std::vector<std::size_t> classIndex(classCounts.size(),0);
+	for(std::size_t i = 1; i != classIndex.size();++i){
+		classIndex[i] = classIndex[i-1] + classCounts[i-1];
 	}
+	std::vector<std::size_t> elemIndex(data.numberOfElements(), 0); 
+	std::size_t index = 0;
+	for (auto const& elem: data.elements()){
+		std::size_t c = elem.label;
+		elemIndex[classIndex[c] ] = index;
+		++index;
+		++classIndex[c];
+	}
+	data.reorderElements(elemIndex);
 }
 
 template<class I>

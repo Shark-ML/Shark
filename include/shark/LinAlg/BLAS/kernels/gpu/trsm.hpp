@@ -33,8 +33,6 @@
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
-#include <boost/compute/kernel.hpp>
-#include <boost/compute/detail/meta_kernel.hpp>
 #include <boost/compute/functional/operator.hpp> //for multiplies
 ///solves systems of triangular matrices
 
@@ -50,20 +48,22 @@ struct trsm_kernel{
 //Lower triangular - matrix(row-major)
 template<class MatA, class MatB>
 trsm_kernel createTRSMDiagBlockKernel(
-	matrix_expression<MatA, gpu_tag> const& A,
-	matrix_expression<MatB, gpu_tag> &B,
+	matrix_expression<MatA, gpu_tag> const& A_unreg,
+	matrix_expression<MatB, gpu_tag>& B_unreg,
 	char const* options
 ){
 	typedef typename MatA::value_type value_typeA;
 	typedef typename MatB::value_type value_typeB;
 	boost::compute::multiplies<value_typeB> prod;
 	
-	boost::compute::detail::meta_kernel k("blas_trsm");
+	gpu::detail::meta_kernel k("blas_trsm");
 	std::size_t K_index = k.add_arg<std::size_t>("K");//number of columns in B
 	std::size_t start_index = k.add_arg<std::size_t>("start");//start of block of A
 	std::size_t end_index = k.add_arg<std::size_t>("end");//end of Block of A
 	std::size_t unit_index = k.add_arg<std::size_t>("unit");//whether A is unit triangular
 	std::size_t upper_index = k.add_arg<std::size_t>("upper");//whether A is upper triangular
+	auto A = k.register_args(to_functor(A_unreg));
+	auto B = k.register_args(to_functor(B_unreg));
 	// Local memory to fit a tile of A and B
 	// we store B as column major in local memory
 	// we also allocate memory to store results of B
@@ -78,7 +78,7 @@ trsm_kernel createTRSMDiagBlockKernel(
 	// Load tile of A into local memory
 	k << "for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
 	k << "	for(ulong j = get_local_id(1); j < TILE_SIZE; j += numWorkers){\n";
-	k << "		Asub[i][j] ="<< A()(k.expr<cl_ulong>("min(end-1, start + i)"),k.expr<cl_ulong>("min(end-1, start + j)"))<<";\n";
+	k << "		Asub[i][j] ="<< A(k.expr<cl_ulong>("min(end-1, start + i)"),k.expr<cl_ulong>("min(end-1, start + j)"))<<";\n";
 	k << "	}\n";
 	k << "}\n";
 	
@@ -86,7 +86,7 @@ trsm_kernel createTRSMDiagBlockKernel(
 	// Load Tile of B into local memory, store columns of B as rows
 	k << "for(ulong i = get_local_id(0); i < TILE_SIZE; i += numWorkers){\n";
 	k << "	for(ulong k = get_local_id(1); k < TILE_SIZE_K; k += numWorkers){\n";
-	k << "		Bsub[k][i] ="<< B()(k.expr<cl_ulong>("min(end-1,start + i)"),k.expr<cl_ulong>("min(K-1,t * TILE_SIZE_K+k)"))<<";\n";
+	k << "		Bsub[k][i] ="<< B(k.expr<cl_ulong>("min(end-1,start + i)"),k.expr<cl_ulong>("min(K-1,t * TILE_SIZE_K+k)"))<<";\n";
 	k << "	}\n";
 	k << "}\n";
 	// Synchronise to make sure the tiles are loaded
@@ -120,11 +120,11 @@ trsm_kernel createTRSMDiagBlockKernel(
 	// Store the final results back in B
 	k << "for(ulong i = get_local_id(0); i < curTileA; i += numWorkers){\n";
 	k << "	for(ulong k = get_local_id(1); k < curTileK; k += numWorkers){\n";
-	k << B()(k.expr<cl_ulong>("(start+i)"),k.expr<cl_ulong>("(t * TILE_SIZE_K+k)"))<<" =  Bsub[k][i];\n";
+	k << B(k.expr<cl_ulong>("(start+i)"),k.expr<cl_ulong>("(t * TILE_SIZE_K+k)"))<<" =  Bsub[k][i];\n";
 	k << "	}\n";
 	k << "}\n";
 	
-	boost::compute::kernel kernel = k.compile(B().queue().get_context(), options);
+	boost::compute::kernel kernel = k.compile(B_unreg().queue().get_context(), options);
 	return {kernel,K_index,start_index,end_index,unit_index,upper_index};
 }
 
@@ -202,9 +202,8 @@ void trsm_call(
 	Triangular,
 	right
 ){
-	matrix_transpose<typename const_expression<MatA>::type> transA(A());
-	matrix_transpose<MatB> transB(B());
-	trsm_call(transA,transB,typename Triangular::transposed_orientation(),left());
+	auto transB = trans(B);
+	trsm_call(trans(A),transB,typename Triangular::transposed_orientation(),left());
 }
 
 }

@@ -114,7 +114,7 @@ private:
 /// The second template argument represents the elements by the proxy reference type. it must offer
 /// a constructor Reference(sequence,i) which constructs a reference to the i-th proxy-element
 template<class Sequence, class ValueType, class Reference>
-class ProxyIterator: public  SHARK_ITERATOR_FACADE<
+class ProxyIterator: public SHARK_ITERATOR_FACADE<
 	ProxyIterator<Sequence,ValueType,Reference>,
 	ValueType,
 	//boost::random_access_traversal_tag,

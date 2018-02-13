@@ -40,16 +40,15 @@ struct gpu_tag{};
 /// The class defines a common base type and some common interface for all
 /// statically derived Vector Expression classes.
 /// We implement the casts to the statically derived type.
-template<class E, class Device>
+template<class V, class Device>
 struct vector_expression {
-	typedef E expression_type;
 	typedef Device device_type;
-	const expression_type &operator()() const {
-		return *static_cast<const expression_type *>(this);
+	V const& operator()() const {
+		return *static_cast<V const*>(this);
 	}
 
-	expression_type &operator()() {
-		return *static_cast<expression_type *>(this);
+	V& operator()() {
+		return *static_cast<V*>(this);
 	}
 };
 
@@ -60,17 +59,7 @@ struct vector_expression {
 /// statically derived Vector classes
 /// We implement the casts to the statically derived type.
 template<class C, class Device>
-struct vector_container:public vector_expression<C, Device> {
-	typedef C container_type;
-
-	const container_type &operator()() const {
-		return *static_cast<const container_type *>(this);
-	}
-
-	container_type &operator()() {
-		return *static_cast<container_type *>(this);
-	}
-};
+struct vector_container:public vector_expression<C, Device> {};
 
 
 /// \brief Base class for Matrix Expression models
@@ -79,17 +68,16 @@ struct vector_container:public vector_expression<C, Device> {
 /// The class defines a common base type and some common interface for all
 /// statically derived Matrix Expression classes
 /// We implement the casts to the statically derived type.
-template<class E, class Device>
+template<class M, class Device>
 struct matrix_expression {
-	typedef E expression_type;
 	typedef Device device_type;
 	
-	const expression_type &operator()() const {
-		return *static_cast<const expression_type *>(this);
+	M const& operator()() const {
+		return *static_cast<M const*>(this);
 	}
 
-	expression_type &operator()() {
-		return *static_cast<expression_type *>(this);
+	M& operator()() {
+		return *static_cast<M*>(this);
 	}
 };
 
@@ -106,14 +94,12 @@ struct matrix_expression {
 /// We implement the casts to the statically derived type.
 template<class E>
 struct vector_set_expression {
-	typedef E expression_type;
-
-	const expression_type &operator()() const {
-		return *static_cast<const expression_type *>(this);
+	E const& operator()() const {
+		return *static_cast<E const*>(this);
 	}
 
-	expression_type &operator()() {
-		return *static_cast<expression_type *>(this);
+	E& operator()() {
+		return *static_cast<E*>(this);
 	}
 };
 
@@ -124,31 +110,7 @@ struct vector_set_expression {
 /// statically derived Matrix classes
 /// We implement the casts to the statically derived type.
 template<class C, class Device>
-struct matrix_container: public matrix_expression<C, Device> {
-	typedef C container_type;
-
-	const container_type &operator()() const {
-		return *static_cast<const container_type *>(this);
-	}
-
-	container_type &operator()() {
-		return *static_cast<container_type *>(this);
-	}
-};
-
-template<class P>
-struct temporary_proxy:public P{
-	temporary_proxy(P const& p):P(p){}
-	
-	template<class E>
-	P& operator=(E const& e){
-		return static_cast<P&>(*this) = e;
-	}
-	
-	P& operator=(temporary_proxy<P> const& e){
-		return static_cast<P&>(*this) = e;
-	}
-};
+struct matrix_container: public matrix_expression<C, Device> {};
 
 }
 

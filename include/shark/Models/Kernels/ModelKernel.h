@@ -102,7 +102,9 @@ public:
 	}
 
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
-		return mpe_kernel->eval((*mpe_model)(x1),(*mpe_model)(x2));
+		auto mx1 = (*mpe_model)(x1);
+		auto mx2= (*mpe_model)(x2);
+		return mpe_kernel->eval(mx1,mx2);
 	}
 	
 	void eval(ConstBatchInputReference x1, ConstBatchInputReference x2, RealMatrix& result, State& state) const{
@@ -115,7 +117,9 @@ public:
 	}
 	
 	void eval(ConstBatchInputReference batchX1, ConstBatchInputReference batchX2, RealMatrix& result) const{
-		return mpe_kernel->eval((*mpe_model)(batchX1),(*mpe_model)(batchX2),result);
+		auto mx1 = (*mpe_model)(batchX1);
+		auto mx2 = (*mpe_model)(batchX2);
+		return mpe_kernel->eval(mx1,mx2,result);
 	}
 	
 	void weightedParameterDerivative(

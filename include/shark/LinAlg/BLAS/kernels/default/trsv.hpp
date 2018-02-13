@@ -30,12 +30,11 @@
 #ifndef REMORA_KERNELS_DEFAULT_TRSV_HPP
 #define REMORA_KERNELS_DEFAULT_TRSV_HPP
 
-#include "../../expression_types.hpp" //vector/matrix_expression
+#include "../../detail/traits.hpp" //structure tags, expression types etc
 #include "../../assignment.hpp" //plus_assign
 #include "../dot.hpp" //dot kernel
-#include "../../detail/vector_proxy_classes.hpp" //vector_range
-#include "../../detail/matrix_proxy_classes.hpp" //matrix_row, matrix_transpose
-#include "../../detail/structure.hpp" //structure tags
+#include "../../proxy_expressions.hpp" //range, row, transpose
+
 #include <stdexcept> //exception when matrix is singular
 #include <type_traits> //std::false_type marker for unoptimized
 
@@ -46,14 +45,12 @@ template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-    lower, column_major, left
+	lower, column_major, left
 ) {
 	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
-	typedef matrix_transpose<typename const_expression<MatA>::type> TransA;
-	TransA transA(A());
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n != size; ++ n) {
 		if(!Unit){
@@ -63,10 +60,8 @@ void trsv_impl(
 			b()(n) /= A()(n, n);
 		}
 		if (b()(n) != value_type/*zero*/()){
-			matrix_row<TransA> colA = row(transA,n);
-			vector_range<V> blower(b(),n+1,size);
-			vector_range<matrix_row<TransA> > colAlower(colA,n+1,size);
-			plus_assign(blower,colAlower,-b()(n));
+			auto blower = subrange(b,n+1,size);
+			plus_assign(blower,subrange(column(A,n),n+1,size),-b()(n));
 		}
 	}
 }
@@ -75,21 +70,17 @@ template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-    lower, row_major, left
+	lower, row_major, left
 ) {
 	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	REMORA_SIZE_CHECK(A().size2() == b().size());
 
-	typedef typename MatA::value_type value_type;
+	typedef typename V::value_type value_type;
 
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n < size; ++ n) {
-		typedef matrix_row<typename const_expression<MatA>::type> RowA;
-		RowA matRow(A(),n);
-		vector_range<V> blower(b(),0,n);
-		vector_range<RowA> matRowLower(matRow,0,n);
 		value_type value;
-		kernels::dot(blower,matRowLower,value);
+		kernels::dot(subrange(b,0,n),subrange(row(A,n),0,n),value);
 		b()(n) -= value;
 		if(!Unit){
 			if(A()(n, n) == value_type()){//matrix is singular
@@ -105,14 +96,12 @@ template<bool Unit, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-    upper, column_major, left
+	upper, column_major, left
 ) {
 	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
-	typedef matrix_transpose<typename const_expression<MatA>::type> TransA;
-	TransA transA(A());
 	std::size_t size = b().size();
 	for (std::size_t i = 0; i < size; ++ i) {
 		std::size_t n = size-i-1;
@@ -123,9 +112,8 @@ void trsv_impl(
 			b()(n) /= A()(n, n);
 		}
 		if (b()(n) != value_type/*zero*/()) {
-			matrix_row<TransA> colA = row(transA,n);
-			vector_range<V> blower(b(),0,n);
-			vector_range<matrix_row<TransA> > colAlower(colA,0,n);
+			auto blower = subrange(b(),0,n);
+			auto colAlower = subrange(column(A,n),0,n);
 			plus_assign(blower,colAlower, -b()(n));
 		}
 	}
@@ -145,12 +133,8 @@ void trsv_impl(
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
 		std::size_t n = size-i-1;
-		typedef matrix_row<typename const_expression<MatA>::type> RowA;
-		RowA matRow(A(),n);
-		vector_range<V> blower(b(),n+1,size);
-		vector_range<RowA> matRowLower(matRow,n+1,size);
 		value_type value;
-		kernels::dot(blower,matRowLower,value);
+		kernels::dot(subrange(b(),n+1,size),subrange(row(A,n),n+1,size),value);
 		b()(n) -= value;
 		if(!Unit){
 			if(A()(n, n) == value_type()){//matrix is singular
@@ -167,11 +151,10 @@ template<bool Unit, class Triangular, class Orientation, class MatA, class V>
 void trsv_impl(
 	matrix_expression<MatA, cpu_tag> const& A,
 	vector_expression<V, cpu_tag> &b,
-    Triangular, Orientation, right
+	Triangular, Orientation, right
 ) {
-	matrix_transpose<typename const_expression<MatA>::type> transA(A());
 	trsv_impl<Unit>(
-		transA, b,
+		trans(A), b,
 		typename Triangular::transposed_orientation(),
 		typename Orientation::transposed_orientation(),
 		left()
@@ -188,7 +171,8 @@ void trsv(
 	trsv_impl<Triangular::is_unit>(
 		A, b,
 		triangular_tag<Triangular::is_upper,false>(),
-		typename MatA::orientation(), Side());
+		typename MatA::orientation(), Side()
+	);
 }
 
 }}
