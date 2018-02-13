@@ -55,17 +55,6 @@ struct TwoStateSpace{
 	  
 	}
 
-	///\brief Returns the i-th state vector.
-	///
-	/// @param vec the vector the i-th state vector is stored in
-	/// @param stateNumber the number of the state   
-	template<class Vector>
-	static void state(Vector& vec,std::size_t stateNumber){
-		for (std::size_t i = 0; i != vec.size(); i++) {
-			bool secondState = stateNumber & (std::size_t(1)<<i);
-			vec(i) = secondState? State2 : State1;
-		}
-	}
 	///\brief Returns the i-th state vector for a matrix row
 	///
 	/// @param vec the vector the i-th state vector is stored in
