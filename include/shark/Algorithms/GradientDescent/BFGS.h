@@ -39,27 +39,33 @@
 #ifndef SHARK_ALGORITHMS_GRADIENTDESCENT_BFGS_H
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_BFGS_H
 
-#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
 namespace shark {
 
 //! \brief Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization
-class BFGS : public AbstractLineSearchOptimizer
+template<class SearchPointType = RealVector>
+class BFGS : public AbstractLineSearchOptimizer<SearchPointType>
 {
+public:
+	typedef typename AbstractLineSearchOptimizer<SearchPointType>::ObjectiveFunctionType ObjectiveFunctionType;
 protected:
-	SHARK_EXPORT_SYMBOL void initModel();
-	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const&);
+	void initModel();
+	void computeSearchDirection(ObjectiveFunctionType const&);
 public:
 	std::string name() const
 	{ return "BFGS"; }
 
 	//from ISerializable
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
+	void read( InArchive & archive );
+	void write( OutArchive & archive ) const;
 protected:
 	RealMatrix m_hessian;
 };
+
+//implementation is included in the library
+extern template class BFGS<RealVector>;
+extern template class BFGS<FloatVector>;
 
 }
 #endif

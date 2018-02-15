@@ -100,7 +100,7 @@ namespace shark{
  *  number of data points, and thus the size of the Gram matrix.
  */
 template<class InputType = RealVector,class LabelType = unsigned int>
-class KernelTargetAlignment : public SingleObjectiveFunction
+class KernelTargetAlignment : public AbstractObjectiveFunction< RealVector, double >
 {
 private:
 	typedef typename Batch<LabelType>::type BatchLabelType;

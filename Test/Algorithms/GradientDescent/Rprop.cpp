@@ -12,80 +12,53 @@ using namespace shark;
 
 BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_Rprop)
 
-BOOST_AUTO_TEST_CASE( RPropPlus_Simple )
-{
-	Ellipsoid function(5);
-	RpropPlus optimizer;
-	optimizer.init(function);
+typedef boost::mpl::list<Ellipsoid, Rosenbrock > Functions;
 
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
+BOOST_AUTO_TEST_CASE( RProp_Tests_Ellipsoid){
+	Ellipsoid function(5);
+	Rprop<> optimizer;
+	
+	std::cout<<"Testing: IRpropPlus"<<" with "<<function.name()<<"... "<<std::endl;
+	testFunction(optimizer,function,100,1000);
+	
+	optimizer.setUseOldValue(false);
+	std::cout<<"Testing: RpropPlus"<<" with "<<function.name()<<"... "<<std::endl;
+	optimizer.init(function);
+	testFunction(optimizer,function,100,1000);
+	
+	optimizer.setUseBacktracking(false);
+	std::cout<<"Testing: IRpropMinus"<<" with "<<function.name()<<"... "<<std::endl;
+	optimizer.init(function);	
+	testFunction(optimizer,function,100,1000);
+	
+	optimizer.setUseFreezing(false);
+	std::cout<<"Testing: RpropMinus"<<" with "<<function.name()<<"... "<<std::endl;
+	optimizer.init(function);
 	testFunction(optimizer,function,100,1000);
 }
-BOOST_AUTO_TEST_CASE( RPropMinus_Simple )
-{
-	Ellipsoid function(5);
-	RpropMinus optimizer;
+BOOST_AUTO_TEST_CASE( RProp_Tests_Rosenbrock){
+	Rosenbrock function(5);
+	Rprop<> optimizer;
+	
+	std::cout<<"Testing: IRpropPlus"<<" with "<<function.name()<<"... "<<std::endl;
 	optimizer.init(function);
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,1000);
-}
-BOOST_AUTO_TEST_CASE( IRPropPlus_Simple )
-{
-	Ellipsoid function(5);
-	IRpropPlus optimizer;
-	optimizer.init(function);
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,1000);
-}
-BOOST_AUTO_TEST_CASE( IRPropMinus_Simple )
-{
-	Ellipsoid function(5);
-	IRpropMinus optimizer;
-	optimizer.init(function);
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,10000);
-}
-BOOST_AUTO_TEST_CASE( RPropPlus_Rosenbrock )
-{
-	Rosenbrock function(3);
-	RpropPlus optimizer;
-	optimizer.init(function);
-
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
 	testFunction(optimizer,function,100,100000);
-}
-BOOST_AUTO_TEST_CASE( RPropMinus_Rosenbrock )
-{
-	Rosenbrock function(3);
-	RpropMinus optimizer;
+	
+	optimizer.setUseOldValue(false);
+	std::cout<<"Testing: RpropPlus"<<" with "<<function.name()<<"... "<<std::endl;
 	optimizer.init(function);
-
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
 	testFunction(optimizer,function,100,100000);
-}
-BOOST_AUTO_TEST_CASE( IRPropPlus_Rosenbrock )
-{
-	Rosenbrock function(3);
-	IRpropPlus optimizer;
+	
+	optimizer.setUseBacktracking(false);
+	std::cout<<"Testing: IRpropMinus"<<" with "<<function.name()<<"... "<<std::endl;
 	optimizer.init(function);
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::endl;
-	testFunction(optimizer,function,100,10000);
-}
-BOOST_AUTO_TEST_CASE( IRPropMinus_Rosenbrock )
-{
-	Rosenbrock function(3);
-	IRpropMinus optimizer;
-	optimizer.init(function);
-
-
-	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<"... "<<std::flush;
 	testFunction(optimizer,function,100,100000);
+	
+	optimizer.setUseFreezing(false);
+	std::cout<<"Testing: RpropMinus"<<" with "<<function.name()<<"... "<<std::endl;
+	optimizer.init(function);
+	testFunction(optimizer,function,100,100000);
+	
 }
 
 BOOST_AUTO_TEST_SUITE_END()

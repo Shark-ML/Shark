@@ -47,11 +47,11 @@ int main(){
 	//the ErrorFunction brings model, loss and data together and so automates evaluation
 	//###begin<error_function>
 	SquaredLoss<> loss;
-	ErrorFunction errorFunction(data, &model,&loss);
+	ErrorFunction<> errorFunction(data, &model,&loss);
 	//###end<error_function>
 
 	//###begin<optimize>
-	CG optimizer;
+	CG<> optimizer;
 	errorFunction.init();
 	optimizer.init(errorFunction);
 	for(int i = 0; i != 100; ++i)

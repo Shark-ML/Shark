@@ -225,8 +225,7 @@ KernelExpansion<RealVector> shark::approximateKernelExpansion(
 	
 	//optimize the basis iteratively to find a basis with small residual to the optimized vector
 	KernelBasisDistance distance(&model,k);
-	LBFGS optimizer;
-	optimizer.lineSearch().lineSearchType() = LineSearch::Dlinmin;
+	LBFGS<> optimizer;
 	optimizer.init(distance,parameters);
 	while(norm_sqr(optimizer.derivative()) > precision){
 		RealVector paramOld = optimizer.solution().point;

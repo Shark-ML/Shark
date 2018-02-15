@@ -63,14 +63,14 @@ BinaryRBM trainRBM(
 	//create derivative to optimize the rbm
 	//we want a simple vanilla CD-1.
 	BinaryCD estimator(&rbm);
-	TwoNormRegularizer regularizer;
+	TwoNormRegularizer<> regularizer;
 	//0.0 is the regularization strength. 0.0 means no regularization. choose as >= 0.0
 	estimator.setRegularizer(regularisation,&regularizer);
 	estimator.setK(1);//number of sampling steps
 	estimator.setData(data);//the data used for optimization
 
 	//create and configure optimizer
-	SteepestDescent optimizer;
+	SteepestDescent<> optimizer;
 	optimizer.setLearningRate(learningRate);//learning rate of the algorithm
 	
 	//now we train the rbm and evaluate the mean negative log-likelihood at the end
@@ -134,15 +134,15 @@ int main()
 //###end<pretraining_creation>
 	
 //###begin<supervised_training>
-	//create the supervised problem. Cross Entropy loss with one norm regularisation
-	CrossEntropy loss;
-	ErrorFunction error(data, &network, &loss);
-	OneNormRegularizer regularizer(error.numberOfVariables());
+	//create the supervised problem. Cross Entropy loss with two norm regularisation
+	CrossEntropy<RealVector> loss;
+	ErrorFunction<> error(data, &network, &loss);
+	TwoNormRegularizer<> regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 	
 	//optimize the model
 	std::cout<<"training supervised model"<<std::endl;
-	IRpropPlusFull optimizer;
+	Rprop<> optimizer;
 	error.init();
 	optimizer.init(error);
 	for(std::size_t i = 0; i != iterations; ++i){

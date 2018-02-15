@@ -26,10 +26,11 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- #define SHARK_COMPILE_DLL
-#include <shark/Algorithms/GradientDescent/LineSearch.h>
+#define SHARK_COMPILE_DLL
+#include <shark/Core/DLLSupport.h>
+#include  <shark/Algorithms/GradientDescent/LineSearch.h>
 
-using namespace shark;
+namespace shark{
 
 namespace{
 /// \brief backtracking line search statisfying the weak wolfe conditions
@@ -368,7 +369,7 @@ void wolfecubic(
 	const double c2 = 0.9;
 	double maxD = 0.0;
 	for (size_t i = 0; i < searchDirection.size(); ++i)
-		maxD = std::max(maxD, std::abs(searchDirection(i)));
+		maxD = std::max<double>(maxD, std::abs(searchDirection(i)));
 
 	// Previous step
 	double f_prev = value;
@@ -507,17 +508,23 @@ void wolfecubic(
 }
 
 
-void LineSearch::operator()(RealVector &searchPoint,double &pointValue,RealVector const& newtonDirection, RealVector &derivative, double stepLength)const{
+template<class SearchPointType>
+void LineSearch<SearchPointType>::operator()(SearchPointType &searchPoint,double &pointValue,SearchPointType const& newtonDirection, SearchPointType &derivative, double stepLength)const{
 	switch (m_lineSearchType) {
-	case Dlinmin:
+	case LineSearchType::Dlinmin:
 		dlinmin(searchPoint, newtonDirection, pointValue, *m_function, m_minInterval, m_maxInterval);
 		m_function->evalDerivative(searchPoint, derivative);
 		break;
-	case WolfeCubic:
+	case LineSearchType::WolfeCubic:
 		wolfecubic(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
 		break;
-	case Backtracking:
+	case LineSearchType::Backtracking:
 		backtracking(searchPoint, newtonDirection, pointValue, *m_function, derivative, stepLength);
 		break;
 	}
+}
+
+
+template class SHARK_EXPORT_SYMBOL LineSearch<RealVector>;
+template class SHARK_EXPORT_SYMBOL LineSearch<FloatVector>;
 }

@@ -48,13 +48,13 @@ namespace shark {
 /// objective functions. It assumed that the result type is
 /// capable of forming linear combinations with real coefficients.
 ///
-template <typename SearchSpaceType, typename ResultT>
-class CombinedObjectiveFunction : public AbstractObjectiveFunction<SearchSpaceType, ResultT>
+template <typename SearchPointType, typename ResultT>
+class CombinedObjectiveFunction : public AbstractObjectiveFunction<SearchPointType, ResultT>
 {
 public:
 
-	typedef AbstractObjectiveFunction<SearchSpaceType, ResultT> super;
-	typedef AbstractObjectiveFunction<SearchSpaceType, ResultT> element;
+	typedef AbstractObjectiveFunction<SearchPointType, ResultT> super;
+	typedef AbstractObjectiveFunction<SearchPointType, ResultT> element;
 
 	/// Constructor
 	CombinedObjectiveFunction(){

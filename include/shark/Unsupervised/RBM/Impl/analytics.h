@@ -105,7 +105,7 @@ namespace detail{
 		RatioOptimizationProblem f(energyDiff0,energyDiff1);
 		//initialize with solution of AIS-PT
 		RealVector C(1,soft_max(-energyDiff0)-std::log(double(energyDiff0.size())));
-		IRpropPlus optimizer;
+		Rprop<> optimizer;
 		optimizer.init(f,C);
 		while(optimizer.solution().value > 1.e-10){
 			optimizer.step(f);

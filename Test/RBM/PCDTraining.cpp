@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	cd.setData(data);
 	
 	
-	SteepestDescent optimizer;
+	SteepestDescent<> optimizer;
 	optimizer.setLearningRate(0.05);
 	optimizer.setMomentum(0);
 	optimizer.init(cd);

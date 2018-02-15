@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 		cd.numBatches()=2;
 		cd.setData(data);
 
-		SteepestDescent optimizer;
+		SteepestDescent<> optimizer;
 		optimizer.setLearningRate(learningRate);
 		optimizer.setMomentum(0);
 		optimizer.init(cd);

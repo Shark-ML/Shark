@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_CrossEntropy)
 BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_SINGLE_INPUT ){
 	unsigned int maxTests = 1000;
 	for(unsigned int test = 0; test != maxTests; ++test){
-		CrossEntropy loss;
+		CrossEntropy<RealVector> loss;
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,1);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_SINGLE_INPUT ){
 BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_TWO_INPUT ){
 	unsigned int maxTests = 10000;
 	for(unsigned int test = 0; test != maxTests; ++test){
-		CrossEntropy loss;
+		CrossEntropy<RealVector> loss;
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,2);
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_TWO_CLASSES_TWO_INPUT ){
 BOOST_AUTO_TEST_CASE( CROSSENTROPY_DERIVATIVES_MULTI_CLASS ){
 	unsigned int maxTests = 1000;
 	for(unsigned int test = 0; test != maxTests; ++test){
-		CrossEntropy loss;
+		CrossEntropy<RealVector> loss;
 
 		//sample point between -10,10
 		

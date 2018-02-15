@@ -42,7 +42,7 @@ int main(){
 
 	//generate optimizer
 	//###begin<optimizer>
-	SteepestDescent optimizer;
+	SteepestDescent<> optimizer;
 	optimizer.setMomentum(0);
 	optimizer.setLearningRate(0.1);
 	//###end<optimizer>

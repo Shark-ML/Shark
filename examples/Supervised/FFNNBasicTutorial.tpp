@@ -41,13 +41,13 @@ int main(int argc, char **argv)
 //###end<model_creation>
 //###begin<training>	
 	//create the supervised problem. 
-	CrossEntropy loss;
-	ErrorFunction error(data, &network, &loss, true);//enable minibatch training
+	CrossEntropy<RealVector> loss;
+	ErrorFunction<> error(data, &network, &loss, true);//enable minibatch training
 	
 	//optimize the model
 	std::cout<<"training network"<<std::endl;
 	initRandomNormal(network,0.001);
-	Adam optimizer;
+	Adam<> optimizer;
 	error.init();
 	optimizer.init(error);
 	for(std::size_t i = 0; i != iterations; ++i){

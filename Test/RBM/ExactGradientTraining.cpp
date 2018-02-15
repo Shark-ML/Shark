@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( ExactGradientTraining_Bars ){
 		initRandomUniform(rbm,-0.1,0.1);
 		ExactGradient<BinaryRBM> gradient(&rbm);
 		gradient.setData(data);
-		SteepestDescent optimizer;
+		SteepestDescent<> optimizer;
 		optimizer.setLearningRate(0.2);
 		optimizer.setMomentum(0);
 		optimizer.init(gradient);

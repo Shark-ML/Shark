@@ -56,7 +56,7 @@ namespace shark {
 /// of a binary hard-margin SVM.
 ///
 template<class InputType, class CacheType = float>
-class RadiusMarginQuotient : public SingleObjectiveFunction
+class RadiusMarginQuotient : public AbstractObjectiveFunction< RealVector, double >
 {
 public:
 	typedef CacheType QpFloatType;

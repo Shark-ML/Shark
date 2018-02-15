@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_NegativeLogLikelihood_Optimize ){
 	model.setParameterVector(point);
 	
 	NegativeLogLikelihood function(data,&model);
-	IRpropPlus optimizer;
+	Rprop<> optimizer;
 	optimizer.init(function);
 	
 	for(std::size_t i = 0; i != 100; ++i){

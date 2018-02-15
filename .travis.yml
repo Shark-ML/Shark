@@ -61,5 +61,5 @@ before_script:
   - cmake ..
   
 script:
-  - make -j3
+  - make -j2
   - CTEST_OUTPUT_ON_FAILURE=TRUE make test

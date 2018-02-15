@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 	std::cout<<"best gamma: "<< best_gamma<< "  radius margin quotient: "<<best_value<<std::endl;
 
 	// gradient-based alternative
-	IRpropPlus rprop;
+	Rprop<> rprop;
 	rprop.init(rm, RealVector(1, 100.0), 1.0);
 	std::cout<<"\nGradient-based optimization (IRprop+, 50 steps):"<<std::endl;
 	for (unsigned i=0; i<50; i++) rprop.step(rm);

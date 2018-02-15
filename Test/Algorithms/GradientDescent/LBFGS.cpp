@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE GradDesc_LBFGS
+#define BOOST_TEST_MODULE GradDesc_LBFGS<>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -16,9 +16,9 @@ BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_LBFGS)
 BOOST_AUTO_TEST_CASE( LBFGS_dlinmin )
 {
 	Ellipsoid function(20);
-	LBFGS optimizer;
+	LBFGS<> optimizer;
 	optimizer.setHistCount(10);
-	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::Dlinmin;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,100);
@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_CASE( LBFGS_dlinmin )
 BOOST_AUTO_TEST_CASE( LBFGS_wolfe )
 {
 	Ellipsoid function(20);
-	LBFGS optimizer;
+	LBFGS<> optimizer;
 	optimizer.setHistCount(10);
-	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and wolfe line search"<<std::endl;
 	testFunction(optimizer,function,100,100,1.e-8);
@@ -36,19 +36,19 @@ BOOST_AUTO_TEST_CASE( LBFGS_wolfe )
 BOOST_AUTO_TEST_CASE( LBFGS_Dlinmin_Rosenbrock )
 {
 	Rosenbrock function(3);
-	LBFGS optimizer;
+	LBFGS<> optimizer;
 	optimizer.setHistCount(3);
-	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::Dlinmin;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,100);
 }
-BOOST_AUTO_TEST_CASE( BFGS_wolfe_Rosenbrock )
+BOOST_AUTO_TEST_CASE( LBFGS_wolfe_Rosenbrock )
 {
 	Rosenbrock function(3);
-	LBFGS optimizer;
+	LBFGS<> optimizer;
 	optimizer.setHistCount(3);
-	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and wolfe line search"<<std::endl;
 	testFunction(optimizer,function,100,100);
@@ -105,7 +105,7 @@ public:
 
 BOOST_AUTO_TEST_CASE( LBFGS_Constrained ){
 	ConstrainedEllipsoid function(10);
-	LBFGS optimizer;
+	LBFGS<> optimizer;
 	optimizer.setHistCount(3);
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and wolfe line search"<<std::endl;

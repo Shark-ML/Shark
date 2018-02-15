@@ -54,7 +54,7 @@ int main()
 	ZeroOneLoss<unsigned int> loss;
 
 	// loss measuring training errors
-	CrossEntropy crossentropy;
+	CrossEntropy<RealVector> crossentropy;
 
 	// machine training
 	KernelSGDTrainer<RealVector> trainer(&kernel, &crossentropy, C, false);

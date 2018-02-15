@@ -36,7 +36,6 @@
 #ifndef SHARK_ALGORITHMS_GRADIENTDESCENT_ABSTRACTLINESEARCHOPTIMIZER_H
 #define SHARK_ALGORITHMS_GRADIENTDESCENT_ABSTRACTLINESEARCHOPTIMIZER_H
 
-#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 #include <shark/Algorithms/GradientDescent/LineSearch.h>
 
@@ -52,8 +51,12 @@ namespace shark {
 ///
 /// Also derived classes should specialise read() and write() methods for serialization if they have additional members
 /// as well as choose a name() for the optimizer.
-class AbstractLineSearchOptimizer : public AbstractSingleObjectiveOptimizer< RealVector > {
+template<class SearchPointType>
+class AbstractLineSearchOptimizer : public AbstractSingleObjectiveOptimizer< SearchPointType > {
+public:
+	typedef typename AbstractSingleObjectiveOptimizer< SearchPointType >::ObjectiveFunctionType ObjectiveFunctionType;
 protected:
+	using AbstractSingleObjectiveOptimizer< SearchPointType >::m_best;
 	/// \brief Initializes the internal model.
 	///
 	/// Line Search Methods use a Model to search for the next search direction.
@@ -69,47 +72,50 @@ protected:
 	virtual void computeSearchDirection(ObjectiveFunctionType const& objectiveFunction) = 0;
 
 public:
-	SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer();
+	AbstractLineSearchOptimizer();
 
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction,  SearchPointType const& startingPoint) ;
+	void init(ObjectiveFunctionType const& objectiveFunction,  SearchPointType const& startingPoint) ;
 	
-	using AbstractSingleObjectiveOptimizer< RealVector >::init;
+	using AbstractSingleObjectiveOptimizer< SearchPointType >::init;
 
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
+	void step(ObjectiveFunctionType const& objectiveFunction);
 
 	//from ISerializable
-	SHARK_EXPORT_SYMBOL void read(InArchive &archive);
-	SHARK_EXPORT_SYMBOL void write(OutArchive &archive) const;
+	void read(InArchive &archive);
+	void write(OutArchive &archive) const;
 
 
 	//linesearch handling
-	LineSearch const& lineSearch()const {
+	LineSearch<SearchPointType> const& lineSearch()const {
 		return m_linesearch;
 	}
-	LineSearch &lineSearch() {
+	LineSearch<SearchPointType>& lineSearch() {
 		return m_linesearch;
 	}
 	
 	/// \brief Returns the derivative at the current point. Can be used for stopping criteria.
-	RealVector const& derivative()const{
+	SearchPointType const& derivative()const{
 		return m_derivative;
 	}
 
 
 protected: // Instance vars
 
-	LineSearch m_linesearch; ///< used line search method.
+	LineSearch<SearchPointType> m_linesearch; ///< used line search method.
 	std::size_t m_dimension; ///< number of parameters
 	double m_initialStepLength;///< Initial step length to begin with the line search.
 
-	RealVector  m_derivative; ///< gradient of m_best.point
-	RealVector  m_searchDirection;///< search direction of next step
+	SearchPointType  m_derivative; ///< gradient of m_best.point
+	SearchPointType  m_searchDirection;///< search direction of next step
 
 	//information from previous step
-	RealVector m_lastPoint; ///<  previous point
-	RealVector m_lastDerivative; ///< gradient of the previous point
+	SearchPointType m_lastPoint; ///<  previous point
+	SearchPointType m_lastDerivative; ///< gradient of the previous point
 	double m_lastValue;     ///< value of the previous point
 };
+
+extern template class AbstractLineSearchOptimizer<RealVector>;
+extern template class AbstractLineSearchOptimizer<FloatVector>;
 
 }
 #endif

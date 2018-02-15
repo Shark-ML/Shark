@@ -235,8 +235,8 @@ public:
 			MergingProblemFunction mergingProblemFunction(a, b, k);
 			fret = mergingProblemFunction.evalDerivative(h,d);
 			//perform a line-search
-			LineSearch lineSearch;
-			lineSearch.lineSearchType() = LineSearch::Dlinmin;
+			LineSearch<RealVector> lineSearch;
+			lineSearch.lineSearchType() = LineSearchType::Dlinmin;
 			lineSearch.init(mergingProblemFunction);
 			lineSearch(h,fret,xi,d,1.0);
 

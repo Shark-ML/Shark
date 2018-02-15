@@ -60,7 +60,7 @@ namespace shark {
 /// to LooErrorCSvm for an example.
 ///
 template<class ModelTypeT, class LabelType = typename ModelTypeT::OutputType>
-class LooError : public SingleObjectiveFunction
+class LooError : public AbstractObjectiveFunction< RealVector, double >
 {
 public:
 	typedef ModelTypeT ModelType;

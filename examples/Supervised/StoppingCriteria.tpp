@@ -30,10 +30,10 @@ double experiment(
 
 	//The Cross Entropy maximises the activation of the cth output neuron 
 	// compared to all other outputs for a sample with class c.
-	CrossEntropy loss;
+	CrossEntropy<RealVector> loss;
 
 	//we use IRpropPlus for network optimization
-	IRpropPlus optimizer;
+	Rprop<> optimizer;
 	
 	//create an optimization trainer and train the model
 	OptimizationTrainer<AbstractModel<RealVector, RealVector>,unsigned int > trainer(&loss, &optimizer, &stoppingCriterion);
@@ -79,8 +79,8 @@ int main(){
 	
 	//for the validated stopping criteria we need to define an error function using the validation set
 	//###begin<generalization_quotient>
-	CrossEntropy loss;
-	ErrorFunction validationFunction(validation,&network,&loss);
+	CrossEntropy<RealVector> loss;
+	ErrorFunction<> validationFunction(validation,&network,&loss);
 	GeneralizationQuotient<> generalizationQuotient(10,0.1);
 	ValidatedStoppingCriterion validatedLoss(&validationFunction,&generalizationQuotient);
 	double resultGeneralizationQuotient = experiment(network, validatedLoss,data,test);

@@ -16,8 +16,8 @@ BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_CG)
 BOOST_AUTO_TEST_CASE( CG_dlinmin )
 {
 	Ellipsoid function(5);
-	CG optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+	CG<> optimizer;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::Dlinmin;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,100);
@@ -25,8 +25,8 @@ BOOST_AUTO_TEST_CASE( CG_dlinmin )
 BOOST_AUTO_TEST_CASE( CG_WolfeCubic )
 {
 	Ellipsoid function(5);
-	CG optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+	CG<> optimizer;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
 	testFunction(optimizer,function,100,5000,1.e-10);
@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE( CG_WolfeCubic )
 BOOST_AUTO_TEST_CASE( CG_Dlinmin_Rosenbrock )
 {
 	Rosenbrock function(3);
-	CG optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::Dlinmin;
+	CG<> optimizer;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::Dlinmin;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and dlinmin"<<std::endl;
 	testFunction(optimizer,function,100,3000,1.e-14);
@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE( CG_Dlinmin_Rosenbrock )
 BOOST_AUTO_TEST_CASE( CG_WolfeCubic_Rosenbrock )
 {
 	Rosenbrock function(3);
-	CG optimizer;
-	optimizer.lineSearch().lineSearchType()=LineSearch::WolfeCubic;
+	CG<> optimizer;
+	optimizer.lineSearch().lineSearchType()=LineSearchType::WolfeCubic;
 
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and WolfeCubic"<<std::endl;
 	testFunction(optimizer,function,100,2000);

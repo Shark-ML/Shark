@@ -3,9 +3,6 @@
  *
  * \brief       implements different versions of Resilient Backpropagation of error.
  * 
- * 
- * 
- *
  * \author      Oswin Krause
  * \date        2010
  *
@@ -34,20 +31,17 @@
 #ifndef SHARK_ML_OPTIMIZER_RPROP_H
 #define SHARK_ML_OPTIMIZER_RPROP_H
 
-#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
 
 namespace shark{
 
 /*!
  *  \brief This class offers methods for the usage of the
- *         Resilient-Backpropagation-algorithm without weight-backtracking.
+ *         Resilient-Backpropagation-algorithm with/out weight-backtracking.
  *
  *  The Rprop algorithm is an improvement of the algorithms with adaptive
- *  learning rates (as the Adaptive Backpropagation algorithm by Silva
- *  and Ameida, please see AdpBP.h for a description of the
- *  working of such an algorithm), that uses increments for the update
- *  of the weights, that are independent from the absolute partial
+ *  learning rates, which use increments for the update
+ *  of the weights which are independent from the absolute partial
  *  derivatives. This makes sense, because large flat regions
  *  in the search space (plateaus) lead to small absolute partial
  *  derivatives and so the increments are chosen small, but the increments
@@ -55,7 +49,8 @@ namespace shark{
  *  derivatives are very large at the "slopes" of very "narrow canyons",
  *  which leads to large increments that will skip the minimum lying
  *  at the bottom of the canyon, but it would make more sense to
- *  chose small increments to hit the minimum. <br>
+ *  chose small increments to hit the minimum.
+ *
  *  So, the Rprop algorithm only uses the signs of the partial derivatives
  *  and not the absolute values to adapt the parameters. <br>
  *  Instead of individual learning rates, it uses the parameter
@@ -87,7 +82,46 @@ namespace shark{
  *  \left( \frac{\partial E^{(t)}}{\partial w_i}\right) \cdot \Delta_i^{(t)}
  *  \f$
  *
+ * There are several variants of the algorithm depending on what happens
+ * when the optimum is overstepped, i.e. a sign change of the gradient occurs
+ * and/or the new objective value is larger than the old.
+ *
+ *  Weight-backtracking can be used to increase the
+ *  stability of the method.
+ *  if \f$\frac{\partial E^{(t-1)}}{\partial w_i} \cdot
+ *  \frac{\partial E^{(t)}}{\partial w_i} < 0\f$ then
+ *  \f$\Delta w_i^{(t)} := - \Delta w_i^{(t-1)};
+ *  This heuristic can be improved by further taking the value of the last iteration
+ *  into ccount: only undo an updated if the sign changed and the new function value 
+ *  is worse than the last. The idea of this modification is, that a change of the sign of the
+ *  partial derivation \f$\frac{\partial E}{\partial w_i}\f$
+ *  only states, that a minimum was skipped and not, whether this step
+ *  lead to an approach to the minimum or not.
+ *
+ *  Furthermore, it has been shown to be beneficial to use gradient freezing
+ *  when the rgadient changes sign, i.e. ,
+ *  if \f$\frac{\partial E^{(t-1)}}{\partial w_i} \cdot
+ *  \frac{\partial E^{(t)}}{\partial w_i} < 0\f$ then
+ *  \frac{\partial E^{(t)}}{\partial w_i} := 0\f$;
+ * Thus, after an unsuccessful step is performed, delta is not changed
+ * for one iteration.
+ *
+ * Based on this, 4 major algorithms can be derived:
+ * Rprop-: (no backtracking, no freezing)
+ * IRprop-: (no backtracking, freezing)
+ * Rprop+: (gradient based backtracking, freezing)
+ * IRprop+: (function value based backtracking, freezing)
+ *
+ * By default, IRprop+ is chosen.
+ *
  *  For further information about the algorithm, please refer to: <br>
+ *
+ *  Martin Riedmiller and Heinrich Braun, <br>
+ *  "A Direct Adaptive Method for Faster Backpropagation Learning: The
+ *  RPROP Algorithm". <br>
+ *  In "Proceedings of the IEEE International Conference on Neural Networks",
+ *  pp. 586-591, <br>
+ *  Published by IEEE Press in 1993
  *
  *  Martin Riedmiller, <br>
  *  "Advanced Supervised Learning in Multi-layer Perceptrons -
@@ -95,33 +129,29 @@ namespace shark{
  *  In "International Journal of Computer Standards and Interfaces", volume 16,
  *  no. 5, 1994, pp. 265-278 <br>
  *
- *  \author  C. Igel
- *  \date    1999
- *
- *  \par Changes:
- *      none
- *
- *  \par Status:
- *      stable
- *
+ *  Christian Igel and Michael H&uuml;sken, <br>
+ *  "Empirical Evaluation of the Improved Rprop Learning Algorithm". <br>
+ *  In Neurocomputing Journal, 2002, in press <br>
  */
-class RpropMinus : public AbstractSingleObjectiveOptimizer<RealVector >
+template<class SearchPointType = RealVector>
+class Rprop : public AbstractSingleObjectiveOptimizer<SearchPointType >
 {
 public:
-	SHARK_EXPORT_SYMBOL RpropMinus();
+	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunctionType;
+	Rprop();
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "RpropMinus"; }
+	{ return "Rprop"; }
 
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint);
-	SHARK_EXPORT_SYMBOL virtual void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
-	using AbstractSingleObjectiveOptimizer<RealVector >::init;
+	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint);
+	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
+	using AbstractSingleObjectiveOptimizer<SearchPointType >::init;
 
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
+	void step(ObjectiveFunctionType const& objectiveFunction);
 
-	SHARK_EXPORT_SYMBOL virtual void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL virtual void write( OutArchive & archive ) const;
+	virtual void read( InArchive & archive );
+	virtual void write( OutArchive & archive ) const;
 
 	//! set decrease factor
 	void setEtaMinus(double etaMinus) {
@@ -147,6 +177,20 @@ public:
 		RANGE_CHECK( d >= 0 );
 		m_minDelta = d;
 	}
+	
+	void setUseOldValue(bool useOldValue){
+		m_useOldValue = useOldValue;
+		if(m_useOldValue)
+			this->m_features |= this->REQUIRES_VALUE;
+		else
+			this->m_features.reset(this->REQUIRES_VALUE);
+	}
+	void setUseFreezing(bool useFreezing){
+		m_useFreezing = useFreezing;
+	}
+	void setUseBacktracking(bool useBacktracking){
+		m_useBacktracking = useBacktracking;
+	}
 
 	//! return the maximal step size component
 	double maxDelta() const {
@@ -154,11 +198,11 @@ public:
 	}
 	
 	/// \brief Returns the derivative at the current point. Can be used for stopping criteria.
-	RealVector const& derivative()const{
+	SearchPointType const& derivative()const{
 		return m_derivative;
 	}
 protected:
-	ObjectiveFunctionType::FirstOrderDerivative m_derivative;
+	SearchPointType m_derivative;
 
 	//! The increase factor \f$ \eta^+ \f$, set to 1.2 by default.
 	double m_increaseFactor;
@@ -171,376 +215,27 @@ protected:
 
 	//! The lower limit of the increments \f$ \Delta w_i^{(t)} \f$, set to 0.0 by default.
 	double m_minDelta;
+	//! The last function value observed
+	double m_oldValue;
 
 	size_t m_parameterSize;
 
 	//! The last error gradient.
-	RealVector m_oldDerivative;
+	SearchPointType m_oldDerivative;
+	//! the step eprformed last. used for weight backtracking
+	SearchPointType m_deltaw;
 
 	//! The absolute update values (increment) for all weights.
-	RealVector m_delta;
+	SearchPointType m_delta;
+	
+	bool m_useFreezing;
+	bool m_useBacktracking;
+	bool m_useOldValue;
 };
 
-//===========================================================================
-/*!
- *  \brief This class offers methods for the usage of the
- *         Resilient-Backpropagation-algorithm with weight-backtracking.
- *
- *  The Rprop algorithm is an improvement of the algorithms with adaptive
- *  learning rates (as the Adaptive Backpropagation algorithm by Silva
- *  and Ameida, please see AdpBP.h for a description of the
- *  working of such an algorithm), that uses increments for the update
- *  of the weights, that are independent from the absolute partial
- *  derivatives. This makes sense, because large flat regions
- *  in the search space (plateaus) lead to small absolute partial
- *  derivatives and so the increments are chosen small, but the increments
- *  should be large to skip the plateau. In contrast, the absolute partial
- *  derivatives are very large at the "slopes" of very "narrow canyons",
- *  which leads to large increments that will skip the minimum lying
- *  at the bottom of the canyon, but it would make more sense to
- *  chose small increments to hit the minimum. <br>
- *  So, the Rprop algorithm only uses the signs of the partial derivatives
- *  and not the absolute values to adapt the parameters. <br>
- *  Instead of individual learning rates, it uses the parameter
- *  \f$\Delta_i^{(t)}\f$ for weight \f$w_i,\ i = 1, \dots, n\f$ in
- *  iteration \f$t\f$, where the parameter will be adapted before the
- *  change of the weights: <br>
- *
- *  \f$
- *  \Delta_i^{(t)} = \Bigg\{
- *  \begin{array}{ll}
- *  min( \eta^+ \cdot \Delta_i^{(t-1)}, \Delta_{max} ), & \mbox{if\ }
- *  \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} > 0 \\
- *  max( \eta^- \cdot \Delta_i^{(t-1)}, \Delta_{min} ), & \mbox{if\ }
- *  \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} < 0 \\
- *  \Delta_i^{(t-1)}, & \mbox{otherwise}
- *  \end{array}
- *  \f$
- *
- *  The parameters \f$\eta^+ > 1\f$ and \f$0 < \eta^- < 1\f$ control
- *  the speed of the adaptation. To stabilize the increments, they are
- *  restricted to the interval \f$[\Delta_{min}, \Delta_{max}]\f$. <br>
- *  After the adaptation of the \f$\Delta_i\f$ the update for the
- *  weights will be calculated as
- *
- *  \f$
- *  \Delta w_i^{(t)} := - \mbox{sign}
- *  \left( \frac{\partial E^{(t)}}{\partial w_i}\right) \cdot \Delta_i^{(t)}
- *  \f$
- *
- *  Furthermore, weight-backtracking will take place to increase the
- *  stability of the method, i.e.
- *  if \f$\frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} < 0\f$ then
- *  \f$\Delta w_i^{(t)} := - \Delta w_i^{(t-1)};
- *  \frac{\partial E^{(t)}}{\partial w_i} := 0\f$, where
- *  the assignment of zero to the partial derivative of the error
- *  leads to a freezing of the increment in the next iteration.
- *
- *  For further information about the algorithm, please refer to: <br>
- *
- *  Martin Riedmiller and Heinrich Braun, <br>
- *  "A Direct Adaptive Method for Faster Backpropagation Learning: The
- *  RPROP Algorithm". <br>
- *  In "Proceedings of the IEEE International Conference on Neural Networks",
- *  pp. 586-591, <br>
- *  Published by IEEE Press in 1993
- *
- *  \author  C. Igel
- *  \date    1999
- *
- *  \par Changes:
- *      none
- *
- *  \par Status:
- *      stable
- *
- */
-class RpropPlus : public RpropMinus
-{
-public:
-	SHARK_EXPORT_SYMBOL RpropPlus();
+extern template class Rprop<RealVector>;
+extern template class Rprop<FloatVector>;
 
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "RpropPlus"; }
-
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint);
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
-	using AbstractSingleObjectiveOptimizer<RealVector >::init;
-
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
-
-protected:
-	//! The final update values for all weights.
-	RealVector m_deltaw;
-};
-
-
-
-
-/*!
- *  \brief This class offers methods for the usage of the improved
- *         Resilient-Backpropagation-algorithm with weight-backtracking.
- *
- *  The Rprop algorithm is an improvement of the algorithms with adaptive
- *  learning rates (as the Adaptive Backpropagation algorithm by Silva
- *  and Ameida, please see AdpBP.h for a description of the
- *  working of such an algorithm), that uses increments for the update
- *  of the weights, that are independent from the absolute partial
- *  derivatives. This makes sense, because large flat regions
- *  in the search space (plateaus) lead to small absolute partial
- *  derivatives and so the increments are chosen small, but the increments
- *  should be large to skip the plateau. In contrast, the absolute partial
- *  derivatives are very large at the "slopes" of very "narrow canyons",
- *  which leads to large increments that will skip the minimum lying
- *  at the bottom of the canyon, but it would make more sense to
- *  chose small increments to hit the minimum. <br>
- *  So, the Rprop algorithm only uses the signs of the partial derivatives
- *  and not the absolute values to adapt the parameters. <br>
- *  Instead of individual learning rates, it uses the parameter
- *  \f$\Delta_i^{(t)}\f$ for weight \f$w_i,\ i = 1, \dots, n\f$ in
- *  iteration \f$t\f$, where the parameter will be adapted before the
- *  change of the weights: <br>
- *
- *  \f$
- *  \Delta_i^{(t)} = \Bigg\{
- *  \begin{array}{ll}
- *  min( \eta^+ \cdot \Delta_i^{(t-1)}, \Delta_{max} ), & \mbox{if\ }
- *  \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} > 0 \\
- *  max( \eta^- \cdot \Delta_i^{(t-1)}, \Delta_{min} ), & \mbox{if\ }
- *  \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} < 0 \\
- *  \Delta_i^{(t-1)}, & \mbox{otherwise}
- *  \end{array}
- *  \f$
- *
- *  The parameters \f$\eta^+ > 1\f$ and \f$0 < \eta^- < 1\f$ control
- *  the speed of the adaptation. To stabilize the increments, they are
- *  restricted to the interval \f$[\Delta_{min}, \Delta_{max}]\f$. <br>
- *  After the adaptation of the \f$\Delta_i\f$ the update for the
- *  weights will be calculated as
- *
- *  \f$
- *  \Delta w_i^{(t)} := - \mbox{sign}
- *  \left( \frac{\partial E^{(t)}}{\partial w_i}\right) \cdot \Delta_i^{(t)}
- *  \f$
- *
- *  Furthermore, weight-backtracking will take place to increase the
- *  stability of the method. In contrast to the original Rprop algorithm
- *  with weight-backtracking (see RpropPlus) this weight-backtracking
- *  is improved by additionally taken the error of the last iteration
- *  \f$t - 1\f$ into account. <br>
- *  The idea of this modification is, that a change of the sign of the
- *  partial derivation \f$\frac{\partial E}{\partial w_i}\f$
- *  only states, that a minimum was skipped and not, whether this step
- *  lead to an approach to the minimum or not. <br>
- *  By using the old error value the improved weight-backtracking only
- *  undoes changes, when the error has increased and only the parameters
- *  \f$w_i\f$ are reset to the old values, where a sign change of
- *  \f$\frac{\partial E}{\partial w_i}\f$ has taken place. <br>
- *  So the new weight-backtracking rule is: <br>
- *
- *  \f$
- *  \mbox{if\ } \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} < 0 \mbox{\ then} \{
- *  \f$
- *
- *  \f$
- *  \begin{array}{lll}
- *   \Delta w_i^{(t)} = \bigg\{ &
- *   - \Delta w_i^{(t-1)}, & \mbox{if\ } E^{(t)} > E^{(t - 1)} \\
- *   & 0, & otherwise \\
- *  \frac{\partial E^{(t)}}{\partial w_i} := 0
- *  \end{array}
- *  \f$
- *
- *  \f$\}\f$
- *
- *  , where the assignment of zero to the partial derivative of the error
- *  leads to a freezing of the increment in the next iteration. <br>
- *
- *  This modification of the weight backtracking leads to a better
- *  optimization on artifical, paraboloidal error surfaces. <br>
- *
- *  For further information about the algorithm, please refer to: <br>
- *
- *  Christian Igel and Michael H&uuml;sken, <br>
- *  "Empirical Evaluation of the Improved Rprop Learning Algorithm". <br>
- *  In Neurocomputing Journal, 2002, in press <br>
- *
- *  \author  C. Igel, M. H&uuml;sken
- *  \date    1999
- *
- *  \par Changes:
- *      none
- *
- *  \par Status:
- *      stable
- *
- */
-class IRpropPlus : public RpropPlus
-{
-public:
-	SHARK_EXPORT_SYMBOL IRpropPlus();
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "IRpropPlus"; }
-
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint);
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
-	using AbstractSingleObjectiveOptimizer<RealVector >::init;
-
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
-
-	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
-
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
-
-protected:
-	//! The error of the last iteration.
-	double m_oldError;
-	//! A threshold below which partial derivatives are set to zero
-	double m_derivativeThreshold;
-
-};
-
-
-class IRpropPlusFull : public RpropPlus
-{
-public:
-	SHARK_EXPORT_SYMBOL IRpropPlusFull();
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "IRpropPlusFull"; }
-
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint);
-	SHARK_EXPORT_SYMBOL void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint, double initDelta);
-	using AbstractSingleObjectiveOptimizer<RealVector >::init;
-
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
-
-	SHARK_EXPORT_SYMBOL void setDerivativeThreshold(double derivativeThreshold);
-
-	SHARK_EXPORT_SYMBOL void read( InArchive & archive );
-	SHARK_EXPORT_SYMBOL void write( OutArchive & archive ) const;
-
-protected:
-	//! The error of the last iteration.
-	double m_oldError;
-	//! A threshold below which partial derivatives are set to zero
-	double m_derivativeThreshold;
-
-};
-
-//===========================================================================
-/*!
- *  \brief This class offers methods for the usage of the improved
- *         Resilient-Backpropagation-algorithm without weight-backtracking.
- *
- *  The Rprop algorithm is an improvement of the algorithms with adaptive
- *  learning rates (as the Adaptive Backpropagation algorithm by Silva
- *  and Ameida, please see AdpBP.h for a description of the
- *  working of such an algorithm), that uses increments for the update
- *  of the weights, that are independent from the absolute partial
- *  derivatives. This makes sense, because large flat regions
- *  in the search space (plateaus) lead to small absolute partial
- *  derivatives and so the increments are chosen small, but the increments
- *  should be large to skip the plateau. In contrast, the absolute partial
- *  derivatives are very large at the "slopes" of very "narrow canyons",
- *  which leads to large increments that will skip the minimum lying
- *  at the bottom of the canyon, but it would make more sense to
- *  chose small increments to hit the minimum. <br>
- *  So, the Rprop algorithm only uses the signs of the partial derivatives
- *  and not the absolute values to adapt the parameters. <br>
- *  Instead of individual learning rates, it uses the parameter
- *  \f$\Delta_i^{(t)}\f$ for weight \f$w_i,\ i = 1, \dots, n\f$ in
- *  iteration \f$t\f$, where the parameter will be adapted before the
- *  change of the weights. <br>
- *  As an improving modification, this algorithm
- *  adapts the "freezing" of the increment in the next iteration as
- *  usually only practiced by the Rprop algorithm with weight-backtracking
- *  (see RpropPlus), i.e. \f$\frac{\partial E^{(t)}}{\partial w_i} := 0\f$.
- *  Tests have shown a far more better optimization when using this
- *  modification. So the new adaptation rule of \f$\Delta\f$ is given
- *  as: <br>
- *
- *  \f$
- *  \Delta_i^{(t)} = \Bigg\{
- *  \begin{array}{ll}
- *  min( \eta^+ \cdot \Delta_i^{(t-1)}, \Delta_{max} ), & \mbox{if\ }
- *  \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} > 0 \\
- *  max( \eta^- \cdot \Delta_i^{(t-1)}, \Delta_{min} );
- *  \frac{\partial E^{(t)}}{\partial w_i} := 0, & \mbox{if\ }
- *  \frac{\partial E^{(t-1)}}{\partial w_i} \cdot
- *  \frac{\partial E^{(t)}}{\partial w_i} < 0 \\
- *  \Delta_i^{(t-1)}, & \mbox{otherwise}
- *  \end{array}
- *  \f$
- *
- *  The parameters \f$\eta^+ > 1\f$ and \f$0 < \eta^- < 1\f$ control
- *  the speed of the adaptation. To stabilize the increments, they are
- *  restricted to the interval \f$[\Delta_{min}, \Delta_{max}]\f$. <br>
- *  After the adaptation of the \f$\Delta_i\f$ the update for the
- *  weights will be calculated as
- *
- *  \f$
- *  \Delta w_i^{(t)} := - \mbox{sign}
- *  \left( \frac{\partial E^{(t)}}{\partial w_i}\right) \cdot \Delta_i^{(t)}
- *  \f$
- *
- *  For further information about the algorithm, please refer to: <br>
- *
- *  Christian Igel and Michael H&uuml;sken, <br>
- *  "Empirical Evaluation of the Improved Rprop Learning Algorithm". <br>
- *  In Neurocomputing Journal, 2002, in press <br>
- *
- *
- *  \author  C. Igel, M. H&uuml;sken
- *  \date    1999
- *
- *  \par Changes:
- *      none
- *
- *  \par Status:
- *      stable
- *
- */
-class IRpropMinus : public RpropMinus {
-public:
-	SHARK_EXPORT_SYMBOL IRpropMinus();
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "IRpropMinus"; }
-
-	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& objectiveFunction);
-};
-
-//! Used to connect the class names with the year of
-//! publication of the paper in which the algorithm was introduced.
-typedef IRpropPlus Rprop99;
-
-//! Used to connect the class names with the year of
-//! publication of the paper in which the algorithm was introduced.
-typedef IRpropMinus Rprop99d;
-
-//! Used to connect the class names with the year of
-//! publication of the paper in which the algorithm was introduced.
-typedef RpropPlus Rprop93;
-
-//! Used to connect the class names with the year of
-//! publication of the paper in which the algorithm was introduced.
-typedef RpropMinus Rprop94;
 }
 
 #endif

@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       CG
+ * \brief       CG<SearchPointType>
  * 
  * Conjugate-gradient method for unconstraint optimization.
  * 
@@ -31,50 +31,56 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
- #define SHARK_COMPILE_DLL
+#define SHARK_COMPILE_DLL
+#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/CG.h>
 
-using namespace shark;
+namespace shark{
 
-void CG::initModel(){
+template<class SearchPointType>
+void CG<SearchPointType>::initModel(){
 	m_count = 0;
 }
-void CG::computeSearchDirection(ObjectiveFunctionType const&){
+template<class SearchPointType>
+void CG<SearchPointType>::computeSearchDirection(ObjectiveFunctionType const&){
 	//after numReset conjugent gradient steps, we reset automatically to the original gradient.
 	//this ensure numerical stability near the optimum.
 	m_count++;
-	if (m_count == m_dimension)
+	if (m_count == this->m_dimension)
 	{
 		m_count = 0;
-		m_searchDirection = -m_derivative;
+		this->m_searchDirection = -this->m_derivative;
 		return;
 	}
 	
 	//compute beta - see class documentation for the formula
-	double gg = norm_sqr(m_derivative);
-	double divisor = inner_prod(m_searchDirection,m_derivative - m_lastDerivative);
+	double gg = norm_sqr(this->m_derivative);
+	double divisor = inner_prod(this->m_searchDirection, this->m_derivative - this->m_lastDerivative);
 	//double divisor = norm_sqr(m_lastDerivative);
 	if(gg == 0.0 || std::abs(divisor) <= 1.e-10*gg){
 		m_count = 0;
-		m_searchDirection -= m_derivative;
+		this->m_searchDirection -= this->m_derivative;
 		return;
 	}
 	double beta = gg/divisor;
 	
 	//Update search direction
-	m_searchDirection *= beta;
-	m_searchDirection -= m_derivative;
+	this->m_searchDirection *= beta;
+	this->m_searchDirection -= this->m_derivative;
 }
 
 //from ISerializable
-void CG::read( InArchive & archive )
-{
-	AbstractLineSearchOptimizer::read(archive);
+template<class SearchPointType>
+void CG<SearchPointType>::read( InArchive & archive ){
+	AbstractLineSearchOptimizer<SearchPointType>::read(archive);
 	archive>>m_count;
 }
-
-void CG::write( OutArchive & archive ) const
-{
-	AbstractLineSearchOptimizer::write(archive);
+template<class SearchPointType>
+void CG<SearchPointType>::write( OutArchive & archive ) const{
+	AbstractLineSearchOptimizer<SearchPointType>::write(archive);
 	archive <<m_count;
+}
+
+template class SHARK_EXPORT_SYMBOL CG<RealVector>;
+template class SHARK_EXPORT_SYMBOL CG<FloatVector>;
 }

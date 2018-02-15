@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoLone){
 	
 	//check gradient
 	{
-		CrossEntropy loss;
-		ErrorFunction error(dataset, &model.decisionFunction(),&loss);
+		CrossEntropy<RealVector> loss;
+		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(model.parameterVector(),derivative);
 		RealVector penalty = 0.1 * model.parameterVector();
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_NoLone){
 	
 	//check gradient
 	{
-		CrossEntropy loss;
-		ErrorFunction error(dataset, &model.decisionFunction(),&loss);
+		CrossEntropy<RealVector> loss;
+		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(model.parameterVector(),derivative);
 		RealVector penalty = 0.1 * model.parameterVector();
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone){
 	//check gradient
 	{
 		RealVector point = model.parameterVector();
-		CrossEntropy loss;
-		ErrorFunction error(dataset, &model.decisionFunction(),&loss);
+		CrossEntropy<RealVector> loss;
+		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(point,derivative);
 		RealVector penalty = 0.1 * point;
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_Lone){
 	//check gradient
 	{
 		RealVector point = model.parameterVector();
-		CrossEntropy loss;
-		ErrorFunction error(dataset, &model.decisionFunction(),&loss);
+		CrossEntropy<RealVector> loss;
+		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(point,derivative);
 		RealVector penalty = 0.1 * point;
@@ -176,8 +176,8 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone_Weighted){
 	//check gradient
 	{
 		RealVector point = model.parameterVector();
-		CrossEntropy loss;
-		ErrorFunction error(dataset, &model.decisionFunction(),&loss);
+		CrossEntropy<RealVector> loss;
+		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(point,derivative);
 		RealVector penalty = 0.1 * point;

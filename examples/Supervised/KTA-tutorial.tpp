@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	KernelTargetAlignment<RealVector> kta(data,&kernel);
 
 	// optimize parameters for best alignment
-	IRpropPlus rprop;
+	Rprop<> rprop;
 	rprop.init(kta);
 	cout << "initial parameter: " << kernel.gamma() << endl;
 	for (size_t i=0; i<50; i++)

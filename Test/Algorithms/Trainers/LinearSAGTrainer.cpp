@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Linear_SAG_Trainer)
 
 template<class Dataset>
 void testClassification(Dataset const& dataset, double lambda, unsigned int epochs, bool trainOffset){
-	CrossEntropy loss;
+	CrossEntropy<RealVector> loss;
 	LinearClassifier<RealVector> model;
 	
 	
@@ -74,8 +74,8 @@ void testClassification(Dataset const& dataset, double lambda, unsigned int epoc
 	if(classes == 2) classes = 1;
 	BOOST_REQUIRE_EQUAL(params.size(), classes * (inputDimension(dataset) +trainOffset));
 	
-	ErrorFunction error(dataset, &model.decisionFunction(), &loss);
-	TwoNormRegularizer regularizer;
+	ErrorFunction<>error(dataset, &model.decisionFunction(), &loss);
+	TwoNormRegularizer<> regularizer;
 	if(trainOffset){
 		RealVector mask(params.size(),1);
 		subrange(mask,mask.size()-classes,mask.size()).clear();//no punishing of offset parameters
@@ -110,8 +110,8 @@ void testRegression(Dataset const& dataset, double lambda, unsigned int epochs, 
 	RealVector params = model.parameterVector();
 	BOOST_REQUIRE_EQUAL(params.size(), labelDimension(dataset) *(inputDimension(dataset) +trainOffset));
 	
-	ErrorFunction error(dataset, &model, &loss);
-	TwoNormRegularizer regularizer;
+	ErrorFunction<> error(dataset, &model, &loss);
+	TwoNormRegularizer<> regularizer;
 	if(trainOffset){
 		RealVector mask(params.size(),1);
 		subrange(mask,mask.size()-labelDimension(dataset),mask.size()).clear();//no punishing of offset parameters

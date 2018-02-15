@@ -40,7 +40,6 @@
 #ifndef SHARK_ML_OPTIMIZER_LBFGS_H
 #define SHARK_ML_OPTIMIZER_LBFGS_H
 
-#include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 #include <deque>
 
@@ -69,10 +68,13 @@ namespace shark {
 /// This is the point with smallest value along the path.
 /// This does not find the true optimal step in the unconstrained problem, however a cheap and reasonably good optimum
 /// which often improves over naive coordinate descent.
-class LBFGS : public AbstractLineSearchOptimizer{
+template<class SearchPointType = RealVector>
+class LBFGS : public AbstractLineSearchOptimizer<SearchPointType>{
 public:
+	typedef typename AbstractLineSearchOptimizer<SearchPointType>::ObjectiveFunctionType ObjectiveFunctionType;
+
 	LBFGS() :m_numHist(100){
-		m_features |= CAN_SOLVE_CONSTRAINED;
+		this->m_features |= this->CAN_SOLVE_CONSTRAINED;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -88,24 +90,24 @@ public:
 	}
 
 	//from ISerializable
-	SHARK_EXPORT_SYMBOL void read(InArchive &archive);
-	SHARK_EXPORT_SYMBOL void write(OutArchive &archive) const;
+	void read(InArchive &archive);
+	void write(OutArchive &archive) const;
 protected: // Methods inherited from AbstractLineSearchOptimizer
-	SHARK_EXPORT_SYMBOL void initModel();
-	SHARK_EXPORT_SYMBOL void computeSearchDirection(ObjectiveFunctionType const&);
+	void initModel();
+	void computeSearchDirection(ObjectiveFunctionType const&);
 private:
 	///\brief Stores another step and searchDirection, discarding the oldest on if necessary.
 	///
 	/// \param step Last performed step
 	/// \param y difference in gradients
-	SHARK_EXPORT_SYMBOL void updateHist(RealVector& y, RealVector &step);
+	void updateHist(SearchPointType& y, SearchPointType &step);
 	/// \brief Compute B^{-1}x
 	///
 	/// The history is used to define B which is easy to invert
-	SHARK_EXPORT_SYMBOL void multBInv(RealVector& searchDirection)const;
+	void multBInv(SearchPointType& searchDirection)const;
 
 	/// \brief Compute Bx
-	SHARK_EXPORT_SYMBOL void multB(RealVector& searchDirection)const;
+	void multB(SearchPointType& searchDirection)const;
 
 	/// \brief Get the box-constrained LBFGS direction. 
 	///
@@ -120,10 +122,10 @@ private:
 	/// the cauchy point is computed. If the cauchy point is feasible, we search the point
 	/// along the line between unconstrained optimum and cauchy point that lies exactly on the constraint.
 	/// This is the point with smallest value along the path.
-	SHARK_EXPORT_SYMBOL void getBoxConstrainedDirection(
-		RealVector& searchDirection,
-		RealVector const& lower,
-		RealVector const& upper
+	void getBoxConstrainedDirection(
+		SearchPointType& searchDirection,
+		SearchPointType const& lower,
+		SearchPointType const& upper
 	)const;
 
 	double m_updThres;///<Threshold for when to update history.
@@ -136,9 +138,13 @@ private:
 	// Use deque as it gives fast pop.front, push.back and access. Supposedly.
 	// steps holds the values x_(k+1) - x_k
 	// gradientDifferences holds the values g_(k+1) - g_k
-	std::deque<RealVector> m_steps;
-	std::deque<RealVector> m_gradientDifferences;	
+	std::deque<SearchPointType> m_steps;
+	std::deque<SearchPointType> m_gradientDifferences;	
 };
+
+//implementation is included in the library
+extern template class LBFGS<RealVector>;
+extern template class LBFGS<FloatVector>;
 
 }
 #endif

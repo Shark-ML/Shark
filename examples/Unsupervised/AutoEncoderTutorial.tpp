@@ -62,14 +62,14 @@ int main(int argc, char **argv)
 	//create the objective function as a regression problem
 	LabeledData<RealVector,RealVector> trainSet(data.inputs(),data.inputs());//labels identical to inputs
 	SquaredLoss<RealVector> loss;
-	ErrorFunction error(trainSet, &autoencoder, &loss, true);//we enable minibatch learning
-	TwoNormRegularizer regularizer(error.numberOfVariables());
+	ErrorFunction<> error(trainSet, &autoencoder, &loss, true);//we enable minibatch learning
+	TwoNormRegularizer<> regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);
 	initRandomNormal(autoencoder,0.01);
 //###end<objective>	
 	//set up optimizer
 //###begin<optimizer>
-	Adam optimizer;
+	Adam<> optimizer;
 	error.init();
 	optimizer.init(error);
 	std::cout<<"Optimizing model "<<std::endl;

@@ -60,7 +60,7 @@ namespace shark {
 /// C-SVM parameters have to be optimized with regard to this measure
 ///
 template<class InputType = RealVector>
-class SvmLogisticInterpretation : public SingleObjectiveFunction {
+class SvmLogisticInterpretation : public AbstractObjectiveFunction< RealVector, double > {
 public:
 	typedef CVFolds< LabeledData<InputType, unsigned int> > FoldsType;
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -156,7 +156,7 @@ public:
 		LinearModel<> logistic_model = fitLogistic(validation_dataset);
 		
 		//to evaluate, we use cross entropy loss on the fitted model 
-		CrossEntropy logistic_loss;
+		CrossEntropy<RealVector> logistic_loss;
 		return logistic_loss(validation_dataset.labels(),logistic_model(validation_dataset.inputs()));
 	}
 
@@ -225,7 +225,7 @@ public:
 		std::size_t start = 0;
 		for(auto const& batch: validation_dataset.batches()){
 			std::size_t end = start+batch.size();
-			CrossEntropy logistic_loss;
+			CrossEntropy<RealVector> logistic_loss;
 			RealMatrix lossGradient;
 			error += logistic_loss.evalDerivative(batch.label,logistic_model(batch.input),lossGradient);
 			noalias(derivative) += column(lossGradient,0) % rows(all_validation_predict_derivs,start,end);
@@ -239,9 +239,9 @@ private:
 	LinearModel<> fitLogistic(ClassificationDataset const& data)const{
 		LinearModel<> logistic_model;
 		logistic_model.setStructure(1,1, true);//1 input, 1 output, bias = 2 parameters
-		CrossEntropy logistic_loss;
-		ErrorFunction error(data, &logistic_model, & logistic_loss);
-		BFGS optimizer;
+		CrossEntropy<RealVector> logistic_loss;
+		ErrorFunction<> error(data, &logistic_model, & logistic_loss);
+		BFGS<> optimizer;
 		optimizer.init(error);
 		//this converges after very few iterations (typically 20 function evaluations)
 		while(norm_2(optimizer.derivative())> 1.e-8){

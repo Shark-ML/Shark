@@ -38,12 +38,6 @@
 
 #include <shark/Models/LinearModel.h>
 #include <shark/Algorithms/Trainers/AbstractWeightedTrainer.h>
-#include <shark/Algorithms/GradientDescent/LBFGS.h>
-#include <shark/ObjectiveFunctions/ErrorFunction.h>
-#include <shark/ObjectiveFunctions/Loss/CrossEntropy.h>
-#include <shark/ObjectiveFunctions/Regularizer.h>
-#include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
-#include <cmath>
 
 
 namespace shark {
@@ -126,8 +120,8 @@ public:
 	}
 
 	/// \brief Set the regularization parameters lambda1 and lambda2 through the IParameterizable interface.
-	void setParameterVector(const RealVector& param){
-		SIZE_CHECK(param.size() == 1);
+	void setParameterVector(RealVector const& param){
+		SIZE_CHECK(param.size() == 2);
 		setLambda1(param(0));
 		setLambda2(param(1));
 	}
@@ -138,157 +132,22 @@ public:
 	}
 
 	/// \brief Train a linear model with logistic regression.
-	void train(ModelType& model, DatasetType const& dataset){
-		optimize(model, dataset);
-	}
+	void train(ModelType& model, DatasetType const& dataset);
 	
 	/// \brief Train a linear model with logistic regression using weights.
-	void train(ModelType& model, WeightedDatasetType const& dataset){
-		optimize(model, dataset);
-	}
-	
-private:
-	
-	template<class DatasetT>
-	void optimize(ModelType& model, DatasetT const& dataset){
-		//initialize model
-		std::size_t numOutputs = numberOfClasses(dataset);
-		if(numOutputs == 2) numOutputs = 1;
-		auto& innerModel = model.decisionFunction();
-		innerModel.setStructure(inputDimension(dataset),numOutputs, m_bias);
-		std::size_t dim = innerModel.numberOfParameters();
-		innerModel.setParameterVector(RealVector(dim,0.0));
-		
-		//setup error function
-		CrossEntropy loss;
-		ErrorFunction error(dataset, &innerModel, &loss);//note: chooses a different implementation depending on the dataset type
-		
-		//handle two-norm regularization
-		TwoNormRegularizer regularizer;
-		if(m_lambda2 > 0.0){
-			//set mask to skip bias weights
-			if(m_bias){
-				RealVector mask(dim,1.0);
-				subrange(mask,dim - numOutputs, dim).clear();
-				regularizer.setMask(mask);
-			}
-			error.setRegularizer(m_lambda2, &regularizer);
-		}
-		
-		//no l1-regularization needed -> simple case
-		if(m_lambda1 == 0){
-			LBFGS optimizer;
-			error.init();
-			optimizer.init(error);
-			RealVector lastPoint = optimizer.solution().point;
-			while(norm_inf(optimizer.derivative()) > m_accuracy){
-				optimizer.step(error);
-				//if no progress has been made, something is wrong or we have numerical problems
-				//=> abort.
-				if(norm_sqr(optimizer.solution().point - lastPoint) == 0) break;
-				noalias(lastPoint) = optimizer.solution().point;
-			}
-			model.setParameterVector(lastPoint);
-			return;
-		}
-		
-		//l1-regularization is more painful.
-		//we transform the l1-regularization |w|
-		// by adding two sets of parameters, w=u-v , u >= 0, v>=0 and |w| = 1^Tu +1^Tv
-		// the resulting function is differentiable, however we have added constraints
-		L1Reformulation function(&error, m_lambda1, dim - m_bias * numOutputs);
-		LBFGS optimizer;
-		function.init();
-		optimizer.init(function);
-		RealVector lastPoint = optimizer.solution().point;
-		for(;;){
-			//check whether we are done
-			bool optimal= true;
-			auto const& derivative = optimizer.derivative();
-			for(std::size_t i = 0; i != lastPoint.size(); ++i){
-				if(lastPoint(i) < 1.e-13 && -derivative(i) > m_accuracy){//coordinate on constraint and derivative pushes away from constraint
-					optimal = false;
-					break;
-				}else if(lastPoint(i) > 1.e-13 && std::abs(derivative(i)) > m_accuracy){//free coordinate and derivative is not close to 0
-					optimal = false;
-					break;
-				}
-			}
-			if(optimal)
-				break;
-			
-			
-			
-			optimizer.step(function);
-			//if no progress has been made, something is wrong or we have numerical problems
-			//=> abort.
-			if(norm_sqr(optimizer.solution().point - lastPoint) == 0) break;
-			noalias(lastPoint) = optimizer.solution().point;
-		}
-		
-		std::size_t n = dim - m_bias * numOutputs;
-		//construct parameter vector from solution
-		RealVector param = (subrange(lastPoint,0,n) - subrange(lastPoint,n, 2 * n)) | subrange(lastPoint,2*n,lastPoint.size());
-		model.setParameterVector(param);
-	}
-
+	void train(ModelType& model, WeightedDatasetType const& dataset);
 private:
 	bool m_bias; ///< whether to train with the bias parameter or not
 	double m_lambda1;             ///< l1-regularization parameter
 	double m_lambda2;             ///< l2-regularization parameter
 	double m_accuracy;           ///< gradient accuracy
-
-	class L1Reformulation: public SingleObjectiveFunction{
-	public:
-		L1Reformulation(ErrorFunction* error, double lambda1, std::size_t regularizedParams)
-		: mep_error(error), m_lambda1(lambda1), m_regularizedParams(regularizedParams){
-			m_features |= CAN_PROPOSE_STARTING_POINT;
-			m_features |= HAS_FIRST_DERIVATIVE;
-			
-			std::size_t dim = numberOfVariables();
-			double unconstrained =  1e100;
-			RealVector lower(dim,0.0);
-			subrange(lower, 2 * m_regularizedParams,dim) = blas::repeat(-unconstrained,dim - 2 * m_regularizedParams);
-			RealVector upper(dim,unconstrained);
-			m_handler.setBounds(lower,upper);
-			announceConstraintHandler(&m_handler);
-		}
-		
-		SearchPointType proposeStartingPoint()const {
-			return RealVector(numberOfVariables(),0.0);
-		}
-		
-		std::size_t numberOfVariables()const{
-			return mep_error->numberOfVariables() + m_regularizedParams;
-		}
-		
-		double eval(RealVector const& input) const{
-			std::size_t dim = input.size();
-			std::size_t n = m_regularizedParams;
-			RealVector params = (subrange(input,0,n) - subrange(input,n, 2 * n)) | subrange(input,2*n,dim);
-			return mep_error->eval(params) + m_lambda1 * sum(subrange(input,0,2*n));
-		}
-		ResultType evalDerivative( const SearchPointType & input, FirstOrderDerivative & derivative ) const{
-			std::size_t dim = input.size();
-			std::size_t n = m_regularizedParams;
-			RealVector params = (subrange(input,0,n) - subrange(input,n, 2 * n)) | subrange(input,2*n,dim);
-			FirstOrderDerivative paramDerivative;
-			double error = mep_error->evalDerivative(params, paramDerivative);
-			derivative.resize(numberOfVariables());
-			noalias(subrange(derivative,0,n)) = m_lambda1 + subrange(paramDerivative,0,n);
-			noalias(subrange(derivative,n,2 * n)) = m_lambda1 - subrange(paramDerivative,0,n);
-			noalias(subrange(derivative,2 * n,dim)) = subrange(paramDerivative,n,dim - n);
-			return error + m_lambda1 * sum(subrange(input,0,2*n));
-		}
-		
-	private:
-		ErrorFunction* mep_error;
-		double m_lambda1;
-		BoxConstraintHandler<RealVector> m_handler;
-		std::size_t m_regularizedParams;
-	};
 };
 
+//reference to explicit external template instantiation
+extern template class LogisticRegression<RealVector>;
+extern template class LogisticRegression<FloatVector>;
+extern template class LogisticRegression<CompressedRealVector>;
+extern template class LogisticRegression<CompressedFloatVector>;
 
 }
 #endif
