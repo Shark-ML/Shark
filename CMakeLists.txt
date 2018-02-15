@@ -328,25 +328,25 @@ if( ENABLE_CBLAS )
 endif()
 
 #####################################################################
-#           clBLAS configuration
+#           BLAS OpenCL configuration
 #####################################################################
-option( ENABLE_CLBLAS "Use GPU backend (currently only as BLAS backend for testing. unused by shark" OFF )
 
-if( ENABLE_CLBLAS )
+option( ENABLE_OPENCL "Use OpenCL and boost.compute" OFF )
+if(ENABLE_OPENCL)
 	if(${Boost_MINOR_VERSION} LESS 61)
 		message(FATAL_ERROR "Boost below 1.61 does not include Boost.Compute.")
 	endif()
+	find_package(OpenCL REQUIRED)
+	include_directories(${OpenCL_INCLUDE_DIRS})
+	list( APPEND LINK_LIBRARIES ${OpenCL_LIBRARY})
+	set(SHARK_USE_OPENCL 1)
+endif()
 
-	find_package( clBLAS REQUIRED)
-	if(NOT clBLAS_FOUND)
-		message(FATAL_ERROR "clBLAS could not be found.")
-	endif()
-
-	include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${CLBLAS_INCLUDE_DIRS} ${CLBLAS_INCLUDE_DIRS}/clBLAS/ )
-	# Set the libraries needed by Shark
-	list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES} ${CLBLAS_LIBRARIES})
-	set(SHARK_USE_CLBLAS 1)
-
+option( ENABLE_CLBLAST "Use CLBlast as GPU backend" OFF )
+if(ENABLE_CLBLAST)
+	find_package(CLBlast REQUIRED)
+	set(SHARK_USE_CLBLAST 1)
+	list( APPEND LINK_LIBRARIES clblast)
 endif()
 
 #####################################################################

@@ -112,11 +112,19 @@ struct DynamicLibraryTag{
 #endif
 
 /**
- * \brief Tags whether CLBLAS has been enabled.
+ * \brief Tags whether GPU support through OpenCL has been enabled.
  */
-#cmakedefine SHARK_USE_CLBLAS
-#ifdef SHARK_USE_CLBLAS
+#cmakedefine SHARK_USE_OPENCL
+#ifdef SHARK_USE_OPENCL
 #define REMORA_USE_GPU
+#endif
+
+/**
+ * \brief Tags whether OpenCL backend should use CLBLAST
+ */
+#cmakedefine SHARK_USE_CLBLAST
+#ifdef SHARK_USE_CLBLAST
+#define REMORA_USE_CLBLAST
 #endif
 
  /**
