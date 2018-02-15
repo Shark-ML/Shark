@@ -25,8 +25,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef REMORA_SOLVE_HPP
-#define REMORA_SOLVE_HPP
+#ifndef REMORA_RANDOM_HPP
+#define REMORA_RANDOM_HPP
 
 #include "assignment.hpp"
 #include "kernels/random.hpp"

@@ -123,6 +123,7 @@ public:
 	
 	typedef no_iterator iterator;
 	typedef no_iterator const_iterator;
+	
 private:
 	template<class,class,class> friend class dense_vector_adaptor;
 	dense_vector_adaptor(vector<value_type, gpu_tag> && v);//no construction from temporary vector
@@ -419,6 +420,10 @@ public:
 		std::swap(v2.m_queue,v2.m_queue);
 	}
 	
+	template<class Archive>
+	void serialize(Archive &ar, const unsigned int file_version) {
+	}
+	
 	// Iterator types
 	typedef no_iterator iterator;
 	typedef no_iterator const_iterator;
@@ -631,7 +636,9 @@ public:
 		std::swap(m1.m_size2,m2.m_size2);
 	}
 	
-	
+	template<class Archive>
+	void serialize(Archive &ar, const unsigned int file_version) {
+	}
 private:
 	std::size_t leading_dimension() const{
 		return orientation::index_m(m_size1, m_size2);

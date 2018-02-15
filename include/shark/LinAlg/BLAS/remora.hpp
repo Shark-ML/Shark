@@ -43,5 +43,7 @@
 //misc
 #include "permutation.hpp"
 #include "io.hpp"
+#include "random.hpp"
+#include "device_copy.hpp"
 
 #endif

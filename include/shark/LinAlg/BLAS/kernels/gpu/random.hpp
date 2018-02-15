@@ -37,7 +37,7 @@
 
 namespace remora{ namespace bindings{
 	
-boost::compute::kernel get_random_kernel32(std::string const& kernelname, boost::compute::context const& ctx){
+inline boost::compute::kernel get_random_kernel32(std::string const& kernelname, boost::compute::context const& ctx){
         const char source[] =
 		//rng4_32 is based on the implementation of the threefry algorithm by:
 		// Copyright 2010-2012, D. E. Shaw Research.
