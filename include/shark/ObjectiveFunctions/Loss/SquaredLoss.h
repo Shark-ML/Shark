@@ -70,10 +70,7 @@ public:
 		SIZE_CHECK(labels.size1()==predictions.size1());
 		SIZE_CHECK(labels.size2()==predictions.size2());
 
-		double error = 0;
-		for(std::size_t i = 0; i != labels.size1(); ++i){
-			error+=distanceSqr(row(predictions,i),row(labels,i));
-		}
+		double error = sum(sqr(labels - predictions));
 		return 0.5 * error;
 	}
 

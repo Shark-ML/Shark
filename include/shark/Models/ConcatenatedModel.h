@@ -76,7 +76,7 @@ public:
 	}
 
 
-	void add(AbstractModel<VectorType, VectorType>* layer, bool optimize){
+	void add(AbstractModel<VectorType, VectorType, VectorType>* layer, bool optimize){
 		m_layers.push_back({layer,optimize});
 		enableModelOptimization(m_layers.size()-1, optimize);//recompute capabilities
 	}
@@ -187,7 +187,7 @@ public:
 		BatchOutputType const & outputs,
 		BatchOutputType const& coefficients,
 		State const& state,
-		RealVector& gradient
+		ParameterVectorType& gradient
 	)const{
 		InternalState const& s = state.toState<InternalState>();
 		BatchOutputType inputDerivativeLast;
@@ -206,7 +206,7 @@ public:
 				if(i != 0) //check, if we are done, the input layer does not need to compute anything
 					m_layers[i].model->weightedInputDerivative(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], inputDerivative);
 			}else{
-				RealVector paramDerivative;
+				ParameterVectorType paramDerivative;
 				if(i != 0){//if we are in an intermediates layer, compute chain rule
 					m_layers[i].model->weightedDerivatives(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], paramDerivative,inputDerivative);					
 				}
@@ -246,7 +246,7 @@ public:
 		BatchOutputType const & outputs,
 		BatchOutputType const & coefficients,
 		State const& state,
-		RealVector& gradient,
+		ParameterVectorType& gradient,
 		BatchInputType& inputDerivative
 	)const{
 		InternalState const& s = state.toState<InternalState>();
@@ -265,7 +265,7 @@ public:
 			if(!m_layers[i].optimize || m_layers[i].model->numberOfParameters() == 0){
 				m_layers[i].model->weightedInputDerivative(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], inputDerivative);
 			}else{
-				RealVector paramDerivative;
+				ParameterVectorType paramDerivative;
 				m_layers[i].model->weightedDerivatives(*pInput,s.intermediates[i], inputDerivativeLast, *s.state[i], paramDerivative,inputDerivative);
 				noalias(subrange(gradient,paramEnd - paramDerivative.size(),paramEnd)) = paramDerivative;
 				paramEnd -= paramDerivative.size();
@@ -290,7 +290,7 @@ public:
 	}
 private:
 	struct Layer{
-		AbstractModel<VectorType, VectorType>* model;
+		AbstractModel<VectorType, VectorType, VectorType>* model;
 		bool optimize;
 	};
 	std::vector<Layer> m_layers;

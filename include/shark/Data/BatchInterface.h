@@ -244,8 +244,8 @@ struct Batch
 >::type{};
 
 /// \brief specialization for vectors which should be matrices in batch mode!
-template<class T>
-struct Batch<blas::vector<T> >: public detail::VectorBatch<blas::matrix<T> >{};
+template<class T, class Device>
+struct Batch<blas::vector<T, Device> >: public detail::VectorBatch<blas::matrix<T, blas::row_major, Device> >{};
 
 /// \brief specialization for ublas compressed vectors which are compressed matrices in batch mode!
 template<class T>
@@ -334,17 +334,17 @@ struct BatchTraits{
 	typedef Batch<typename std::decay<BatchType>::type::value_type> type;
 };
 
-template<class T>
-struct BatchTraits<blas::matrix<T> >{
-	typedef Batch<blas::vector<T> > type;
+template<class T, class Device>
+struct BatchTraits<blas::matrix<T, blas::row_major, Device> >{
+	typedef Batch<blas::vector<T, Device> > type;
 };
 template<class T>
 struct BatchTraits<blas::compressed_matrix<T> >{
 	typedef Batch<blas::compressed_vector<T> > type;
 };
-template<class T>
-struct BatchTraits<blas::dense_matrix_adaptor<T, blas::row_major> >{
-	typedef detail::VectorBatch<blas::dense_matrix_adaptor<T, blas::row_major> > type;
+template<class T, class Tag, class Device>
+struct BatchTraits<blas::dense_matrix_adaptor<T, blas::row_major, Tag, Device> >{
+	typedef detail::VectorBatch<blas::dense_matrix_adaptor<T, blas::row_major, Tag, Device> > type;
 };
 
 namespace detail{

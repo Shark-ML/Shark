@@ -136,11 +136,12 @@ struct RectifierNeuron{
 	template<class Output, class Derivative>
 	void multiplyDerivative(Output const& output, Derivative& der, State const& state)const{
 		//~ noalias(der) *= heaviside(output);
-		for(std::size_t i = 0; i != output.size1(); ++i){
-			for(std::size_t j = 0; j != output.size2(); ++j){
-				der(i,j) *= output(i,j) > 0? 1.0:0.0;
-			}
-		}
+		//~ for(std::size_t i = 0; i != output.size1(); ++i){
+			//~ for(std::size_t j = 0; j != output.size2(); ++j){
+				//~ der(i,j) *= output(i,j) > 0? 1.0:0.0;
+			//~ }
+		//~ }
+		noalias(der) *= output > 0;
 	}
 };
 

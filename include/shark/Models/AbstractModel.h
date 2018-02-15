@@ -141,7 +141,7 @@ public:
 	/// \brief From ISerializable, reads a model from an archive.
 	virtual void read( InArchive & archive ){
 		m_features.read(archive);
-		RealVector p;
+		ParameterVectorType p;
 		archive & p;
 		this->setParameterVector(p);
 	}
@@ -151,7 +151,7 @@ public:
 	/// the default implementation just saves the parameters, not the structure!
 	virtual void write( OutArchive & archive ) const{
 		m_features.write(archive);
-		RealVector p = this->parameterVector();
+		ParameterVectorType p = this->parameterVector();
 		archive & p;
 	}
 
@@ -278,10 +278,11 @@ public:
 ///
 /// \param model: model to be initialized
 /// \param s: variance of mean-free normal distribution
-template <class InputType, class OutputType>
-void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s){
-	RealVector weights(model.numberOfParameters());
-	std::generate(weights.begin(), weights.end(), [&](){return random::gauss(random::globalRng,0,s);});
+template <class InputType, class OutputType, class ParameterVectorType>
+void initRandomNormal(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double s){
+	typedef typename ParameterVectorType::value_type Float;
+	typedef typename ParameterVectorType::device_type Device;
+	auto weights = blas::normal(random::globalRng, model.numberOfParameters(), Float(0), Float(s), Device() );
 	model.setParameterVector(weights);
 }
 
@@ -291,10 +292,11 @@ void initRandomNormal(AbstractModel<InputType, OutputType>& model, double s){
 /// \param model model to be initialized
 /// \param lower lower bound of initialization interval
 /// \param upper upper bound of initialization interval
-template <class InputType, class OutputType>
-void initRandomUniform(AbstractModel<InputType, OutputType>& model, double lower, double upper){
-	RealVector weights(model.numberOfParameters());
-	std::generate(weights.begin(), weights.end(), [&](){return random::uni(random::globalRng,lower,upper);});
+template <class InputType, class OutputType, class ParameterVectorType>
+void initRandomUniform(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double lower, double upper){
+	typedef typename ParameterVectorType::value_type Float;
+	typedef typename ParameterVectorType::device_type Device;
+	auto weights = blas::uniform(random::globalRng, model.numberOfParameters(), Float(lower), Float(upper), Device() );
 	model.setParameterVector(weights);
 }
 
