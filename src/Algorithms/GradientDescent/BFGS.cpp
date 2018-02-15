@@ -36,7 +36,7 @@
  #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/BFGS.h>
 
-using namespace shark;
+namespace shark{
 
 template<class SearchPointType>
 void BFGS<SearchPointType>::initModel(){
@@ -82,3 +82,4 @@ void BFGS<SearchPointType>::write( OutArchive & archive ) const{
 
 template class SHARK_EXPORT_SYMBOL BFGS<RealVector>;
 template class SHARK_EXPORT_SYMBOL BFGS<FloatVector>;
+}

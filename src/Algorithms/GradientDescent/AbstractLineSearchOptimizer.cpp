@@ -30,7 +30,7 @@
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h>
 
-using namespace shark;
+namespace shark{
 
 template<class SearchPointType>
 AbstractLineSearchOptimizer<SearchPointType>::AbstractLineSearchOptimizer() {
@@ -110,3 +110,4 @@ void AbstractLineSearchOptimizer<SearchPointType>::write(OutArchive &archive) co
 
 template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<RealVector>;
 template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<FloatVector>;
+}

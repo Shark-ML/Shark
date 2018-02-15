@@ -37,7 +37,7 @@
 #include <boost/math/special_functions/sign.hpp>
 #include <boost/serialization/base_object.hpp>
  
-using namespace shark;
+namespace shark{
 
 template<class SearchPointType>
 Rprop<SearchPointType>::Rprop(){
@@ -151,3 +151,4 @@ void Rprop<SearchPointType>::write( OutArchive & archive ) const{
 
 template class SHARK_EXPORT_SYMBOL Rprop<RealVector>;
 template class SHARK_EXPORT_SYMBOL Rprop<FloatVector>;
+}

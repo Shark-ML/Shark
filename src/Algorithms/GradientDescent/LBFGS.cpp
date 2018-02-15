@@ -38,7 +38,7 @@
 #include <shark/Algorithms/GradientDescent/LBFGS.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
-using namespace shark;
+namespace shark{
 
 template<class SearchPointType>
 void LBFGS<SearchPointType>::initModel(){
@@ -245,3 +245,4 @@ void LBFGS<SearchPointType>::multB(SearchPointType& x)const{
 
 template class SHARK_EXPORT_SYMBOL LBFGS<RealVector>;
 template class SHARK_EXPORT_SYMBOL LBFGS<FloatVector>;
+}

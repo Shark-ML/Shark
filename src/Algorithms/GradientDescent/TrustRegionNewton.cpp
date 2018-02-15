@@ -34,7 +34,7 @@
 #define SHARK_COMPILE_DLL
 #include <shark/Algorithms/GradientDescent/TrustRegionNewton.h>
 
-using namespace shark;
+namespace shark{
 
 namespace{
 	/// \brief Compute the maximal step size given point z, direction, and trust region radius delta.
@@ -178,4 +178,5 @@ void TrustRegionNewton::step(const ObjectiveFunctionType& objectiveFunction) {
 		noalias(m_best.point) +=solution.second;
 		m_best.value = objectiveFunction.evalDerivative(m_best.point,m_derivatives);
 	}
+}
 }

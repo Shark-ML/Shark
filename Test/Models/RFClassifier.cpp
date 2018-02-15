@@ -75,14 +75,17 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	
 	
 	//serialisation test
-	std::ostringstream outputStream;
+	std::string str;
+	
 	{
+		std::ostringstream outputStream;
 		TextOutArchive oa(outputStream);  
 		oa << model;
+		str = outputStream.str();
 	}
 	//and create a new model from the serialization
 	RFClassifier<unsigned int> modelDeserialized;
-	std::istringstream inputStream(outputStream.str());  
+	std::istringstream inputStream(str);  
 	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	double error_train_serialized = loss.eval(train.labels(), modelDeserialized(train.inputs()));

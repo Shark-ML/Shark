@@ -41,7 +41,7 @@
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <cmath>
 
-using namespace shark;
+namespace shark{
 template<class SearchPointType>
 class L1Reformulation: public AbstractObjectiveFunction<SearchPointType, double>{
 public:
@@ -191,4 +191,4 @@ template class SHARK_EXPORT_SYMBOL LogisticRegression<RealVector>;
 template class SHARK_EXPORT_SYMBOL LogisticRegression<FloatVector>;
 template class SHARK_EXPORT_SYMBOL LogisticRegression<CompressedRealVector>;
 template class SHARK_EXPORT_SYMBOL LogisticRegression<CompressedFloatVector>;
-
+}

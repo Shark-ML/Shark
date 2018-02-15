@@ -35,7 +35,7 @@
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/GradientDescent/CG.h>
 
-using namespace shark;
+namespace shark{
 
 template<class SearchPointType>
 void CG<SearchPointType>::initModel(){
@@ -83,3 +83,4 @@ void CG<SearchPointType>::write( OutArchive & archive ) const{
 
 template class SHARK_EXPORT_SYMBOL CG<RealVector>;
 template class SHARK_EXPORT_SYMBOL CG<FloatVector>;
+}

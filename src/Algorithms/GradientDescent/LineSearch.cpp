@@ -30,7 +30,7 @@
 #include <shark/Core/DLLSupport.h>
 #include  <shark/Algorithms/GradientDescent/LineSearch.h>
 
-using namespace shark;
+namespace shark{
 
 namespace{
 /// \brief backtracking line search statisfying the weak wolfe conditions
@@ -527,3 +527,4 @@ void LineSearch<SearchPointType>::operator()(SearchPointType &searchPoint,double
 
 template class SHARK_EXPORT_SYMBOL LineSearch<RealVector>;
 template class SHARK_EXPORT_SYMBOL LineSearch<FloatVector>;
+}
