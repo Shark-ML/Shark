@@ -116,6 +116,9 @@ protected: // Instance vars
 
 extern template class AbstractLineSearchOptimizer<RealVector>;
 extern template class AbstractLineSearchOptimizer<FloatVector>;
-
+#ifdef SHARK_USE_OPENCL
+extern template class AbstractLineSearchOptimizer<RealGPUVector>;
+extern template class AbstractLineSearchOptimizer<FloatGPUVector>;
+#endif
 }
 #endif

@@ -70,6 +70,11 @@ using namespace remora;
         SHARK_VECTOR_MATRIX_TYPEDEFS(bool, Bool);
 #undef SHARK_VECTOR_MATRIX_TYPEDEFS
 
+typedef blas::vector< double, blas::gpu_tag > RealGPUVector;
+typedef blas::vector< float, blas::gpu_tag > FloatGPUVector;
+typedef blas::matrix< double, blas::row_major, blas::gpu_tag > RealGPUMatrix;
+typedef blas::matrix< float, blas::row_major, blas::gpu_tag > FloatGPUMatrix;
+
 typedef blas::permutation_matrix PermutationMatrix;
 
 ///Type of Data sequences.

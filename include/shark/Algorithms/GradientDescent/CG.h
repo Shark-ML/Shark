@@ -76,7 +76,10 @@ protected:
 //implementation is included in the library
 extern template class CG<RealVector>;
 extern template class CG<FloatVector>;
-
+#ifdef SHARK_USE_OPENCL
+extern template class CG<RealGPUVector>;
+extern template class CG<FloatGPUVector>;
+#endif
 }
 
 #endif

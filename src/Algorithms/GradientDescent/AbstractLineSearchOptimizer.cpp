@@ -57,11 +57,10 @@ void AbstractLineSearchOptimizer<SearchPointType>::init(ObjectiveFunctionType co
 
 	// Get space for the different vectors we store.
 	m_lastPoint.resize(m_dimension);
+	m_lastDerivative.resize(m_dimension);
 	m_searchDirection = -m_derivative;
 	
-	m_initialStepLength = 0.0;//1.0 as step length might be very wrong.
-	for (size_t i = 0; i < m_derivative.size(); ++i)
-		m_initialStepLength += std::abs(m_derivative(i));
+	m_initialStepLength = sum(abs(m_derivative));//1.0 as step length might be very wrong.
 	m_initialStepLength = std::min(1.0, 1.0 / m_initialStepLength);
 	while(!objectiveFunction.isFeasible(m_best.point + m_initialStepLength * m_searchDirection)){
 		m_initialStepLength /= 2.0;
@@ -73,8 +72,8 @@ void AbstractLineSearchOptimizer<SearchPointType>::init(ObjectiveFunctionType co
 template<class SearchPointType>
 void AbstractLineSearchOptimizer<SearchPointType>::step(ObjectiveFunctionType const& objectiveFunction) {
 	// Perform line search
-	m_lastDerivative = m_derivative;
-	m_lastPoint = m_best.point;
+	noalias(m_lastDerivative) = m_derivative;
+	noalias(m_lastPoint) = m_best.point;
 	m_lastValue = m_best.value;
 	m_linesearch(m_best.point, m_best.value, m_searchDirection, m_derivative, m_initialStepLength);
 	m_initialStepLength = 1.0;
@@ -110,4 +109,8 @@ void AbstractLineSearchOptimizer<SearchPointType>::write(OutArchive &archive) co
 
 template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<RealVector>;
 template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<FloatVector>;
+#ifdef SHARK_USE_OPENCL
+template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<RealGPUVector>;
+template class SHARK_EXPORT_SYMBOL AbstractLineSearchOptimizer<FloatGPUVector>;
+#endif
 }

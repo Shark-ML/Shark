@@ -130,6 +130,10 @@ protected:
 
 extern template class LineSearch<RealVector>;
 extern template class LineSearch<FloatVector>;
+#ifdef SHARK_USE_OPENCL
+extern template class LineSearch<RealGPUVector>;
+extern template class LineSearch<FloatGPUVector>;
+#endif
 }
 
 #endif

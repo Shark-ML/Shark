@@ -58,7 +58,7 @@ void backtracking(
 	
 	std::size_t iter = 0;
 	while(iter < maxIter) {
-		double f_new  = func.evalDerivative(point + t * searchDirection, g_new);
+		f_new  = func.evalDerivative(point + t * searchDirection, g_new);
 		if (f_new < value + c1 * t * gtd) {
 			break;
 		}else{
@@ -66,7 +66,7 @@ void backtracking(
 			++iter;
 		}
 	}
-
+	//~ std::cout<<f_new<<" "<<value<<std::endl;
 	if (iter < maxIter){
 		noalias(point) += t * searchDirection;
 		value = f_new;
@@ -362,14 +362,13 @@ void wolfecubic(
 	SIZE_CHECK(point.size() == searchDirection.size());
 	SIZE_CHECK(point.size() == gradient.size());
 
+	typedef typename VectorT::value_type Float;
 	// Constants
 	const double tol = 1e-9;
 	const size_t maxIter = 25;
 	const double c1 = 1e-4;
 	const double c2 = 0.9;
-	double maxD = 0.0;
-	for (size_t i = 0; i < searchDirection.size(); ++i)
-		maxD = std::max<double>(maxD, std::abs(searchDirection(i)));
+	double maxD = norm_1(searchDirection);
 
 	// Previous step
 	double f_prev = value;
@@ -379,7 +378,7 @@ void wolfecubic(
 
 	// Initial step values
 	VectorT g_new(point.size());
-	double f_new  = func.evalDerivative(point + t * searchDirection, g_new);
+	double f_new  = func.evalDerivative(point + Float(t) * searchDirection, g_new);
 	double gtd_new = inner_prod(g_new, searchDirection);
 
 	// Bracket vars
@@ -431,7 +430,7 @@ void wolfecubic(
 
 		f_prev = f_new;
 		g_prev = g_new;
-		f_new = func.evalDerivative(point + t * searchDirection, g_new);
+		f_new = func.evalDerivative(point + Float(t) * searchDirection, g_new);
 		gtd_new = inner_prod(g_new, searchDirection);
 	}
 
@@ -464,7 +463,7 @@ void wolfecubic(
 		} else
 			insuf = false;
 
-		f_new = func.evalDerivative(point + t * searchDirection, g_new);
+		f_new = func.evalDerivative(point + Float(t) * searchDirection, g_new);
 		gtd_new = inner_prod(g_new, searchDirection);
 
 		// If the new point doesn't decrease enough, make it new t_hi
@@ -494,11 +493,11 @@ void wolfecubic(
 
 	if (iter < maxIter || value > bracketf[0] || value > bracketf[1]) {
 		if (bracketf[0] < bracketf[1] || single) {
-			point += bracket[0] * searchDirection;
+			noalias(point) += bracket[0] * searchDirection;
 			value = bracketf[0];
 			gradient = bracketg[0];
 		} else {
-			point += bracket[1] * searchDirection;
+			noalias(point) += bracket[1] * searchDirection;
 			value = bracketf[1];
 			gradient = bracketg[1];
 		}
@@ -527,4 +526,8 @@ void LineSearch<SearchPointType>::operator()(SearchPointType &searchPoint,double
 
 template class SHARK_EXPORT_SYMBOL LineSearch<RealVector>;
 template class SHARK_EXPORT_SYMBOL LineSearch<FloatVector>;
+#ifdef SHARK_USE_OPENCL
+template class SHARK_EXPORT_SYMBOL LineSearch<RealGPUVector>;
+template class SHARK_EXPORT_SYMBOL LineSearch<FloatGPUVector>;
+#endif
 }

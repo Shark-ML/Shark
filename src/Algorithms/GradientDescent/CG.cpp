@@ -49,7 +49,7 @@ void CG<SearchPointType>::computeSearchDirection(ObjectiveFunctionType const&){
 	if (m_count == this->m_dimension)
 	{
 		m_count = 0;
-		this->m_searchDirection = -this->m_derivative;
+		noalias(this->m_searchDirection) = -this->m_derivative;
 		return;
 	}
 	
@@ -59,14 +59,14 @@ void CG<SearchPointType>::computeSearchDirection(ObjectiveFunctionType const&){
 	//double divisor = norm_sqr(m_lastDerivative);
 	if(gg == 0.0 || std::abs(divisor) <= 1.e-10*gg){
 		m_count = 0;
-		this->m_searchDirection -= this->m_derivative;
+		noalias(this->m_searchDirection) -= this->m_derivative;
 		return;
 	}
 	double beta = gg/divisor;
 	
 	//Update search direction
 	this->m_searchDirection *= beta;
-	this->m_searchDirection -= this->m_derivative;
+	noalias(this->m_searchDirection) -= this->m_derivative;
 }
 
 //from ISerializable
@@ -83,4 +83,8 @@ void CG<SearchPointType>::write( OutArchive & archive ) const{
 
 template class SHARK_EXPORT_SYMBOL CG<RealVector>;
 template class SHARK_EXPORT_SYMBOL CG<FloatVector>;
+#ifdef SHARK_USE_OPENCL
+template class SHARK_EXPORT_SYMBOL CG<RealGPUVector>;
+template class SHARK_EXPORT_SYMBOL CG<FloatGPUVector>;
+#endif
 }
