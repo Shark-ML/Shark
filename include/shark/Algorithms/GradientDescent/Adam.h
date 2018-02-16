@@ -65,8 +65,8 @@ public:
 		SHARK_RUNTIME_CHECK(startingPoint.size() == objectiveFunction.numberOfVariables(), "Initial starting point and dimensionality of function do not agree");
 		
 		//initialize long term averages
-		m_avgGrad = blas::repeat(0.0,startingPoint.size());
-		m_secondMoment = blas::repeat(0.0,startingPoint.size());
+		m_avgGrad = SearchPointType(startingPoint.size(),0.0);
+		m_secondMoment = SearchPointType(startingPoint.size(),0.0);
 		m_counter = 0;
 		
 		//set point to the current starting point
