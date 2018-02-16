@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 	double regularisation = 0.01;
 	
 	LabeledData<RealVector,unsigned int> data;
-	importSparseData( data, argv[1] );
+	importSparseData( data, argv[1], 784 );
 	
 	std::size_t numElems = data.numberOfElements();
 	for(std::size_t i = 0; i != numElems; ++i){
@@ -54,9 +54,6 @@ int main(int argc, char **argv)
 	
 	//Setup autoencoder model
 	auto autoencoder = encoder >> decoder;
-	//we have not implemented the derivatives of the noise model which turns the
-	//whole composite model to be not differentiable. we fix this by not optimizing the noise model
-	autoencoder.enableModelOptimization(0,false);
 //###end<model_creation>
 //###begin<objective>		
 	//create the objective function as a regression problem
