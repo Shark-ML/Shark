@@ -226,7 +226,7 @@ void CMA::doInit(
 	
 	m_numEvaluations = 1;
 	m_rLambda = std::max(0.1, 2.0 / m_lambda);
-	m_rankChangeQuantile = 0.2 * 0.5; //0.2 *50% quantile
+	m_rankChangeQuantile = 0.2 * 0.5; // 0.2 * 50% quantile
 	m_mean.resize(m_numberOfVariables);
 	m_evolutionPathC.resize(m_numberOfVariables);
 	m_evolutionPathSigma.resize(m_numberOfVariables);
@@ -236,7 +236,7 @@ void CMA::doInit(
 	m_evolutionPathSigma.clear();
 	
 		
-	//weighting of the k-best individuals
+	// weighting of the k-best individuals
 	m_weights.resize(m_mu);
 	switch (m_recombinationType) {
 	case EQUAL:
@@ -291,9 +291,9 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	
 	RealVector z(m_numberOfVariables, 0.);
 	RealVector m(m_numberOfVariables, 0.);
-	for( std::size_t j = 0; j < selectedOffspring.size(); j++ ){
-		noalias(z) += m_weights( j ) * selectedOffspring[j].chromosome();// eq. (38)
-		noalias(m) += m_weights( j ) * selectedOffspring[j].searchPoint();// eq. (39)
+	for ( std::size_t j = 0; j < selectedOffspring.size(); j++ ) {
+		noalias(z) += m_weights( j ) * selectedOffspring[j].chromosome(); // eq. (38)
+		noalias(m) += m_weights( j ) * selectedOffspring[j].searchPoint(); // eq. (39)
 	}
 	RealVector y = (m - m_mean) / m_sigma;
 
@@ -326,10 +326,10 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	m_evolutionPathSigma = (1. - m_cSigma)*m_evolutionPathSigma + std::sqrt( m_cSigma * (2. - m_cSigma) * m_muEff) * CInvY; // eq. (40)
 	m_sigma *= std::exp((m_cSigma / m_dSigma) * (norm_2(m_evolutionPathSigma) / expectedChi - 1.)); // eq. (39)
 
-	// update mutation distribution
+	// Update mutation distribution
 	m_mutationDistribution.update();
 	
-	//mean update
+	// Update mean
 	m_mean = m;
 	
 	// check for numerical stability
@@ -366,7 +366,7 @@ void CMA::step(ObjectiveFunctionType const& function) {
 				ranksOld[i].value = i;
 			}
 			
-			//compute and save new function values of the population
+			// Compute and save new function values of the population
 			penalizingEvaluator(function,offspring.begin(),offspring.begin() + lambdaReeval);
 			std::vector<shark::KeyValuePair<double,std::size_t> > ranksNew(m_lambda);
 			for(std::size_t i = 0; i != m_lambda; ++i) {
@@ -374,7 +374,7 @@ void CMA::step(ObjectiveFunctionType const& function) {
 				ranksNew[i].value = i;
 			}
 			
-			// update function values of the population to be the mean of old and new values,
+			// Update function values of the population to be the mean of old and new values,
 			// this gives some more stability
 			// This is a difference compared to
 			// Hansen, N., et al. "A method for handling uncertainty in evolutionary
@@ -393,8 +393,8 @@ void CMA::step(ObjectiveFunctionType const& function) {
 				offspring[i].unpenalizedFitness() /= 2;
 			}
 			
-			//compute the noise estimate by computing a statistic over the rank changes
-			//of the points that got evaluated twice
+			// Compute the noise estimate by computing a statistic over the rank changes
+			// of the points that got evaluated twice
 			
 			//compute old and new ranks
 			std::sort(ranksOld.begin(),ranksOld.end());
@@ -408,21 +408,21 @@ void CMA::step(ObjectiveFunctionType const& function) {
 					ranks[ranksNew[i].value].second = i;
 				}
 			}
-			//compute noise estimate based on rank changes
-			//s is our current noise estimate
+			// Compute noise estimate based on rank changes
+			// s is our current noise estimate
 			double s = 0;
 			for(std::size_t i = 0; i != lambdaReeval; ++i) {
-				//measured rank difference(number of ranks between old and new point
-				//we use ranks in-between because if both estimates have a very close estimate,
-				//they will be placed directly next to each other -> 0 ranks in-between.
+				// Measured rank difference(number of ranks between old and new point
+				// we use ranks in-between because if both estimates have a very close estimate,
+				// they will be placed directly next to each other -> 0 ranks in-between.
 				s += std::abs(ranks[i].first-ranks[i].second) - 1;
-				//minus a percentile of the expected difference on a truely random function
-				//as the first and second rank are interchangeable, the average is computed
+				// Minus a percentile of the expected difference on a truly random function
+				// as the first and second rank are interchangeable, the average is computed
 				s -= 0.5 * deltaLim(ranks[i].second - (ranks[i].second > ranks[i].first), 2 * m_lambda - 1, m_rankChangeQuantile);
 				s -= 0.5 * deltaLim(ranks[i].first - (ranks[i].first > ranks[i].second), 2 * m_lambda - 1, m_rankChangeQuantile);
 			}		
 			s /= lambdaReeval;
-			//simple adaptation of the number of reevaluations
+			// Simple adaptation of the number of reevaluations
 			if(s > 0) {
 				double rawIncrease = (m_numEvalIncreaseFactor - 1.0) * m_numEvaluations;
 				m_numEvaluations += std::max<std::size_t>(1,std::lround(rawIncrease));
