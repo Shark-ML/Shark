@@ -204,6 +204,20 @@ public:
 		return m_numEvaluations;
 	}
 
+	///\breif Return the population form the previous step
+	std::vector<SolutionType> population() const {
+		return m_population;
+	}
+
+	///\brief Returns the best solution of the previous step
+	SolutionType best() const {
+		return m_best;
+	}
+
+	///\brief Returns the best ever discovered solution
+	SolutionType bestEver() const {
+		return m_bestEver;
+	}
 
 protected:
 	/// \brief The type of individual used for the CMA
@@ -234,7 +248,6 @@ private:
 
 	RecombinationType m_recombinationType; ///< Stores the recombination type.
 
-	
 	double m_sigma;
 	double m_cC; 
 	double m_c1; 
@@ -242,6 +255,9 @@ private:
 	double m_cSigma;
 	double m_dSigma;
 	double m_muEff;
+
+	std::vector<SolutionType> m_population;
+	SolutionType m_bestEver;
 
 	double m_lowerBound;
 

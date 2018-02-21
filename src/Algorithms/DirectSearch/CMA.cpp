@@ -269,6 +269,8 @@ void CMA::doInit(
 	m_mean = initialSearchPoints[pos];
 	m_best.point = initialSearchPoints[pos];
 	m_best.value = initialValues[pos];
+	m_bestEver.point = initialSearchPoints[0];
+	m_bestEver.value = initialValues[0];
 	m_lowerBound = 1E-40;
 	m_counter = 0;
 }
@@ -291,7 +293,7 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	
 	RealVector z(m_numberOfVariables, 0.);
 	RealVector m(m_numberOfVariables, 0.);
-	for ( std::size_t j = 0; j < selectedOffspring.size(); j++ ) {
+	for (std::size_t j = 0; j < selectedOffspring.size(); j++) {
 		noalias(z) += m_weights( j ) * selectedOffspring[j].chromosome(); // eq. (38)
 		noalias(m) += m_weights( j ) * selectedOffspring[j].searchPoint(); // eq. (39)
 	}
@@ -301,7 +303,7 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
 	RealMatrix Z(m_numberOfVariables, m_numberOfVariables, 0.0); // matric for rank-mu update
 	for( std::size_t i = 0; i < m_mu; i++) {
-		noalias(Z) += m_weights( i ) * blas::outer_prod(
+		noalias(Z) += m_weights( i ) * blas::outer_prod (
 			selectedOffspring[i].searchPoint() - m_mean,
 			selectedOffspring[i].searchPoint() - m_mean
 		);
@@ -313,13 +315,13 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	double hSig = 0;
 
 	if (hSigLHS < hSigRHS) {
-        hSig = 1.;
-    }
+		hSig = 1.;
+	}
 
 	double deltaHSig = (1.-hSig*hSig) * m_cC * (2. - m_cC);
 
 	m_evolutionPathC = (1. - m_cC) * m_evolutionPathC + hSig * std::sqrt(m_cC * (2. - m_cC) * m_muEff) * y; // eq. (42)
-	noalias(C) = (1.-m_c1 - m_cMu) * C + m_c1 * ( blas::outer_prod( m_evolutionPathC, m_evolutionPathC ) + deltaHSig * C) + m_cMu * 1./sqr(m_sigma) * Z; // eq. (43)
+	noalias(C) = (1.-m_c1 - m_cMu) * C + m_c1 * (blas::outer_prod(m_evolutionPathC, m_evolutionPathC) + deltaHSig * C) + m_cMu * 1./sqr(m_sigma) * Z; // eq. (43)
 
 	// Step size update
 	RealVector CInvY = blas::prod(m_mutationDistribution.eigenVectors(), z); // C^(-1/2)y = Bz
@@ -336,30 +338,42 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	double ev = m_mutationDistribution.eigenValues()(m_mutationDistribution.eigenValues().size() - 1);
 	if (m_sigma * std::sqrt(std::fabs(ev)) < m_lowerBound ){
 		m_sigma = m_lowerBound / std::sqrt(std::fabs(ev));
-    }
+	}
 
-	//store best point
+	// Store best point
 	m_best.point = selectedOffspring[0].searchPoint();
 	m_best.value = selectedOffspring[0].unpenalizedFitness();
 
+	if (m_best.value < m_bestEver.value)
+	{
+		m_bestEver = m_best;
+	}
 }
 void CMA::step(ObjectiveFunctionType const& function) {
 	std::vector<IndividualType> offspring = generateOffspring();
 	PenalizingEvaluator penalizingEvaluator;
 	penalizingEvaluator.m_numEvaluations = m_numEvaluations;
-	penalizingEvaluator( function, offspring.begin(), offspring.end() );
-	//check if the number of Evaluations must be increased on a noisy function
-	if(function.isNoisy()) {
-		//compute number of points to reevaluate
+	penalizingEvaluator(function, offspring.begin(), offspring.end());
+
+	m_population = std::vector<SolutionType>(offspring.size());
+	for (int i = 0; i < offspring.size(); ++i)
+	{
+		m_population[i].point = offspring[i].searchPoint();
+		m_population[i].value = offspring[i].unpenalizedFitness();
+	}
+
+	// Check if the number of Evaluations must be increased on a noisy function
+	if (function.isNoisy()) {
+		// Compute number of points to reevaluate
 		double reevalFraction = m_rLambda * m_lambda;
 		std::size_t lambdaReeval = std::lround(m_rLambda * m_lambda);
 		double rest = reevalFraction - lambdaReeval;
-		if(rest > 0){
+		if (rest > 0){
 			lambdaReeval += random::coinToss(*mpe_rng, rest);
 		}
-		//only continue if we have at elast one point
-		if(lambdaReeval > 0) {
-			//save old function values of the population
+		// Only continue if we have at least one point
+		if (lambdaReeval > 0) {
+			// Save old function values of the population
 			std::vector<shark::KeyValuePair<double,std::size_t> > ranksOld(m_lambda);
 			for(std::size_t i = 0; i != m_lambda; ++i) {
 				ranksOld[i].key = offspring[i].penalizedFitness();
@@ -369,7 +383,7 @@ void CMA::step(ObjectiveFunctionType const& function) {
 			// Compute and save new function values of the population
 			penalizingEvaluator(function,offspring.begin(),offspring.begin() + lambdaReeval);
 			std::vector<shark::KeyValuePair<double,std::size_t> > ranksNew(m_lambda);
-			for(std::size_t i = 0; i != m_lambda; ++i) {
+			for (std::size_t i = 0; i != m_lambda; ++i) {
 				ranksNew[i].key = offspring[i].penalizedFitness();
 				ranksNew[i].value = i;
 			}
