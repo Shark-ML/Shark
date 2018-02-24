@@ -45,8 +45,6 @@ namespace shark {
 /// by the user of the optimizer instead of having the optimizer handle evaluation
 /// internally.
 ///
-/// Also when init() is called as offered by the AbstractOptimizer interface, the function
-/// is required to have the CAN_PROPOSE_STARTING_POINT flag.
 template<typename IndividualType>
 class AbstractEvolutionStrategy {
 public:

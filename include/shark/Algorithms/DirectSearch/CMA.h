@@ -39,6 +39,7 @@
 
 #include <shark/Core/DLLSupport.h>
 #include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
+#include <shark/Algorithms/AbstractEvolutionStrategy.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
 
@@ -62,7 +63,7 @@ namespace shark {
 /// the rank of the average function value is used for updating the strategy parameters
 /// which ensures asymptotic unbiasedness. We further do not have an upper bound on
 /// the number of reevaluations for the same reason.
-class CMA : public AbstractSingleObjectiveOptimizer<RealVector >
+class CMA : public AbstractSingleObjectiveOptimizer<RealVector >, AbstractEvolutionStrategy<Individual<RealVector, double, RealVector> >
 {
 public:
 	/// \brief Models the recombination type.
@@ -71,6 +72,9 @@ public:
 		LINEAR = 1,
 		SUPERLINEAR = 2
 	};
+
+	/// \brief The type of individual used for the CMA
+	typedef Individual<RealVector, double, RealVector> IndividualType;
 
 	/// \brief Default c'tor.
 	SHARK_EXPORT_SYMBOL CMA(random::rng_type& rng = random::globalRng);
@@ -104,7 +108,13 @@ public:
 
 	/// \brief Executes one iteration of the algorithm.
 	SHARK_EXPORT_SYMBOL void step(ObjectiveFunctionType const& function);
-	
+
+	///\brief Returns a population from the current distribution
+	SHARK_EXPORT_SYMBOL std::vector<Individual<RealVector, double, RealVector> > generateOffspring() const override;
+
+	///\brief Update the internal distribution
+	SHARK_EXPORT_SYMBOL void updatePopulation(std::vector<Individual<RealVector, double, RealVector> > const& offspring) override;
+
 	/// \brief sets the initial step length sigma
 	///
 	/// It is by default <=0 which means that sigma =1/sqrt(numVariables)
@@ -210,15 +220,6 @@ public:
 	}
 
 protected:
-	/// \brief The type of individual used for the CMA
-	typedef Individual<RealVector, double, RealVector> IndividualType;
-	
-	/// \brief Samples lambda individuals from the search distribution	
-	SHARK_EXPORT_SYMBOL std::vector<IndividualType> generateOffspring( ) const;
-
-	/// \brief Updates the strategy parameters based on the supplied offspring population.
-	SHARK_EXPORT_SYMBOL void updatePopulation( std::vector<IndividualType > const& offspring ) ;
-
 	SHARK_EXPORT_SYMBOL  void doInit(
 		std::vector<SearchPointType> const& points,
 		std::vector<ResultType> const& functionValues,
