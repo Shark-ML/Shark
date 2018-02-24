@@ -214,11 +214,6 @@ public:
 		return m_best;
 	}
 
-	///\brief Returns the best ever discovered solution
-	SolutionType bestEver() const {
-		return m_bestEver;
-	}
-
 protected:
 	/// \brief The type of individual used for the CMA
 	typedef Individual<RealVector, double, RealVector> IndividualType;
@@ -257,7 +252,6 @@ private:
 	double m_muEff;
 
 	std::vector<SolutionType> m_population;
-	SolutionType m_bestEver;
 
 	double m_lowerBound;
 
