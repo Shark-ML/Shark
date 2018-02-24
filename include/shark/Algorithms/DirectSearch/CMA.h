@@ -205,7 +205,7 @@ public:
 	}
 
 	///\breif Return the population form the previous step
-	std::vector<SolutionType> population() const {
+	std::vector<SolutionType> const& population() const {
 		return m_population;
 	}
 
