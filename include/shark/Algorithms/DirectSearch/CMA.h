@@ -209,11 +209,6 @@ public:
 		return m_population;
 	}
 
-	///\brief Returns the best solution of the previous step
-	SolutionType best() const {
-		return m_best;
-	}
-
 protected:
 	/// \brief The type of individual used for the CMA
 	typedef Individual<RealVector, double, RealVector> IndividualType;

@@ -269,8 +269,6 @@ void CMA::doInit(
 	m_mean = initialSearchPoints[pos];
 	m_best.point = initialSearchPoints[pos];
 	m_best.value = initialValues[pos];
-	m_bestEver.point = initialSearchPoints[0];
-	m_bestEver.value = initialValues[0];
 	m_lowerBound = 1E-40;
 	m_counter = 0;
 }
@@ -343,11 +341,6 @@ void CMA::updatePopulation(std::vector<IndividualType> const& offspring) {
 	// Store best point
 	m_best.point = selectedOffspring[0].searchPoint();
 	m_best.value = selectedOffspring[0].unpenalizedFitness();
-
-	if (m_best.value < m_bestEver.value)
-	{
-		m_bestEver = m_best;
-	}
 }
 void CMA::step(ObjectiveFunctionType const& function) {
 	std::vector<IndividualType> offspring = generateOffspring();
