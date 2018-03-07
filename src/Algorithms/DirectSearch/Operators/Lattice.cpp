@@ -81,13 +81,8 @@ std::size_t computeOptimalLatticeTicks(
 	if(n == 2){
 		return target_count - 1;
 	}
-	std::size_t cur = 0;
 	std::size_t dimension_ticks_count = 0;
-	const std::size_t d = n - 2;
-	while(cur < target_count){
-		cur += static_cast<std::size_t>(
-			boost::math::binomial_coefficient<double>(
-				dimension_ticks_count + d, d));
+	while(sumlength(n, dimension_ticks_count) < target_count){
 		++dimension_ticks_count;
 	}
 	return dimension_ticks_count;
