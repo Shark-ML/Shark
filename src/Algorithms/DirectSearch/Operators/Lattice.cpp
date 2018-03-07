@@ -82,7 +82,7 @@ std::size_t computeOptimalLatticeTicks(
 		return target_count - 1;
 	}
 	std::size_t dimension_ticks_count = 0;
-	while(sumlength(n, dimension_ticks_count) < target_count){
+	while(detail::sumlength(n, dimension_ticks_count) < target_count){
 		++dimension_ticks_count;
 	}
 	return dimension_ticks_count;
