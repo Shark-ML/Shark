@@ -58,21 +58,27 @@ namespace shark{
 /// outputs. The outputs and loss function used for the encoder p is arbitrary, but a SquaredLoss will work well, however also other losses 
 /// like pixel probabilities can be used.
 
-class VariationalAutoencoderError : public AbstractObjectiveFunction<RealVector, double>
+template<class SearchPointType>
+class VariationalAutoencoderError : public AbstractObjectiveFunction<SearchPointType, double>
 {
+private:
+	typedef typename SearchPointType::device_type device_type;
+	typedef typename SearchPointType::value_type value_type;
+	typedef blas::matrix<value_type, blas::row_major, device_type> MatrixType;
 public:
-	typedef UnlabeledData<RealVector> DatasetType;
+	typedef UnlabeledData<SearchPointType> DatasetType;
 
 	VariationalAutoencoderError(
 		DatasetType const& data,
-		AbstractModel<RealVector,RealVector>* encoder,
-		AbstractModel<RealVector,RealVector>* decoder,
-		AbstractLoss<RealVector, RealVector>* visible_loss
-	):mep_decoder(decoder), mep_encoder(encoder), mep_loss(visible_loss), m_data(data){
+		AbstractModel<SearchPointType,SearchPointType>* encoder,
+		AbstractModel<SearchPointType,SearchPointType>* decoder,
+		AbstractLoss<SearchPointType, SearchPointType>* visible_loss,
+		double lambda = 1.0
+	):mep_decoder(decoder), mep_encoder(encoder), mep_loss(visible_loss), m_data(data), m_lambda(lambda){
 		if(mep_decoder->hasFirstParameterDerivative() && mep_encoder->hasFirstParameterDerivative())
-			m_features |= HAS_FIRST_DERIVATIVE;
-		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_features |= IS_NOISY;
+			this->m_features |= this->HAS_FIRST_DERIVATIVE;
+		this->m_features |= this->CAN_PROPOSE_STARTING_POINT;
+		this->m_features |= this->IS_NOISY;
 	}
 
 	/// \brief From INameable: return the class name.
@@ -86,74 +92,77 @@ public:
 	std::size_t numberOfVariables()const{
 		return mep_decoder->numberOfParameters() + mep_encoder->numberOfParameters();
 	}
-
-	ResultType eval(SearchPointType const& parameters) const{
-		SIZE_CHECK(parameters.size() == numberOfVariables());
-		m_evaluationCounter++;
+	
+	MatrixType sampleZ(SearchPointType const& parameters, MatrixType const& batch) const{
 		mep_decoder->setParameterVector(subrange(parameters,0,mep_decoder->numberOfParameters()));
 		mep_encoder->setParameterVector(subrange(parameters,mep_decoder->numberOfParameters(), numberOfVariables()));
 		
-		auto const& batch = m_data.batch(random::discrete(*mep_rng, std::size_t(0), m_data.numberOfBatches() -1));
-		RealMatrix hiddenResponse = (*mep_encoder)(batch);
+		MatrixType hiddenResponse = (*mep_encoder)(batch);
+		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
+		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
+		//sample random point from distribution
+		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), 0.0, 1.0, device_type());
+		return mu + exp(0.5*log_var) * epsilon;
+	}
+
+	double eval(SearchPointType const& parameters) const{
+		SIZE_CHECK(parameters.size() == numberOfVariables());
+		this->m_evaluationCounter++;
+		mep_decoder->setParameterVector(subrange(parameters,0,mep_decoder->numberOfParameters()));
+		mep_encoder->setParameterVector(subrange(parameters,mep_decoder->numberOfParameters(), numberOfVariables()));
+		
+		auto const& batch = m_data.batch(random::discrete(*this->mep_rng, std::size_t(0), m_data.numberOfBatches() -1));
+		MatrixType hiddenResponse = (*mep_encoder)(batch);
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
 		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
 		//compute kulback leibler divergence term
 		double klError = 0.5 * (sum(exp(log_var)) + sum(sqr(mu))  - mu.size1() * mu.size2()  - sum(log_var));
 		//sample random point from distribution
-		RealMatrix epsilon(mu.size1(), mu.size2());
-		for(std::size_t i = 0; i != epsilon.size1(); ++i){
-			for(std::size_t j = 0; j != epsilon.size2(); ++j){
-				epsilon(i,j) = random::gauss(*mep_rng,0,1);
-			}
-		}
-		RealMatrix z = mu + exp(0.5*log_var) * epsilon;
+		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
+		MatrixType z = mu + exp(0.5*log_var) * epsilon;
 		//reconstruct and compute reconstruction error
-		RealMatrix reconstruction = (*mep_decoder)(z);
+		MatrixType reconstruction = (*mep_decoder)(z);
 		return ((*mep_loss)(batch, reconstruction) + klError) / batch.size1();
 	}
 	
 	
-	ResultType evalDerivative( 
+	double evalDerivative( 
 		SearchPointType const& parameters, 
-		FirstOrderDerivative & derivative 
+		SearchPointType & derivative 
 	) const{
 		SIZE_CHECK(parameters.size() == numberOfVariables());
-		m_evaluationCounter++;
+		this->m_evaluationCounter++;
 		mep_decoder->setParameterVector(subrange(parameters,0,mep_decoder->numberOfParameters()));
 		mep_encoder->setParameterVector(subrange(parameters,mep_decoder->numberOfParameters(), numberOfVariables()));
 		
 		boost::shared_ptr<State> stateEncoder = mep_encoder->createState();
 		boost::shared_ptr<State> stateDecoder = mep_decoder->createState();
-		auto const& batch = m_data.batch(random::discrete(*mep_rng, std::size_t(0), m_data.numberOfBatches() -1));
-		RealMatrix hiddenResponse;
+		auto const& batch = m_data.batch(random::discrete(*this->mep_rng, std::size_t(0), m_data.numberOfBatches() -1));
+		MatrixType hiddenResponse;
 		mep_encoder->eval(batch,hiddenResponse,*stateEncoder);
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
 		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
 		//compute kulback leibler divergence term
 		double klError = 0.5 * (sum(exp(log_var)) + sum(sqr(mu))  - mu.size1() * mu.size2() - sum(log_var));
-		RealMatrix klDerivative = mu | (0.5 * exp(log_var) - 0.5);
-		RealMatrix epsilon(mu.size1(), mu.size2());
-		for(std::size_t i = 0; i != epsilon.size1(); ++i){
-			for(std::size_t j = 0; j != epsilon.size2(); ++j){
-				epsilon(i,j) = random::gauss(*mep_rng,0,1);
-			}
-		}
-		RealMatrix z = mu + exp(0.5*log_var) * epsilon;
-		RealMatrix reconstructions;
+		MatrixType klDerivative = mu | (0.5 * exp(log_var) - 0.5);
+		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
+		MatrixType z = mu + exp(0.5*log_var) * epsilon;
+		MatrixType reconstructions;
 		mep_decoder->eval(z,reconstructions, *stateDecoder);
 		
 		
 		//compute loss derivative
-		RealMatrix lossDerivative;
-		double recError = mep_loss->evalDerivative(batch,reconstructions,lossDerivative);
+		MatrixType lossDerivative;
+		double recError = m_lambda * mep_loss->evalDerivative(batch,reconstructions,lossDerivative);
+		lossDerivative *= m_lambda;
 		//backpropagate error from the reconstruction loss to the Decoder
-		RealVector derivativeDecoder;
-		RealMatrix backpropDecoder;
+		SearchPointType derivativeDecoder;
+		MatrixType backpropDecoder;
 		mep_decoder->weightedDerivatives(z,reconstructions, lossDerivative,*stateDecoder, derivativeDecoder, backpropDecoder);
 		
 		//compute coefficients of the backprop from mep_decoder and the KL-term
-		RealMatrix backprop=(backpropDecoder | (backpropDecoder * 0.5*(z - mu))) + klDerivative;
-		RealVector derivativeEncoder;
+		MatrixType backprop=(backpropDecoder | (backpropDecoder * 0.5*(z - mu))) + klDerivative;
+		SearchPointType derivativeEncoder;
 		mep_encoder->weightedParameterDerivative(batch,hiddenResponse, backprop,*stateEncoder, derivativeEncoder);
 	
 		derivative.resize(numberOfVariables());
@@ -163,10 +172,11 @@ public:
 	}
 
 private:
-	AbstractModel<RealVector,RealVector>* mep_decoder;
-	AbstractModel<RealVector,RealVector>* mep_encoder;
-	AbstractLoss<RealVector, RealVector>* mep_loss;
-	UnlabeledData<RealVector> m_data;
+	AbstractModel<SearchPointType,SearchPointType>* mep_decoder;
+	AbstractModel<SearchPointType,SearchPointType>* mep_encoder;
+	AbstractLoss<SearchPointType, SearchPointType>* mep_loss;
+	UnlabeledData<SearchPointType> m_data;
+	double m_lambda;
 };
 
 }

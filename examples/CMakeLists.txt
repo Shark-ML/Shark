@@ -83,6 +83,7 @@ shark_add_example( Supervised/KNNCrossValidationTutorial KNNCrossValidationTutor
 shark_add_example( Supervised/linearRegressionTutorial linearRegressionTutorial "Supervised" )
 shark_add_example( Supervised/LassoRegression LassoRegression "Supervised" )
 shark_add_example( Supervised/FFNNBasicTutorial FFNNBasicTutorial "Supervised" )
+shark_add_example( Supervised/MNISTForExperts MNISTForExperts "Supervised" )
 shark_add_example( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
 shark_add_example( Supervised/RFTutorial RFTutorial "Supervised" )
 shark_add_example( Supervised/KTA-tutorial KTA-tutorial "Supervised" )

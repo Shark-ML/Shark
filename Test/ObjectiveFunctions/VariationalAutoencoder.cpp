@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_NoLoss )
 	LinearModel<> decoder(2,2,false);
 	initRandomNormal(encoder,1);
 	initRandomNormal(decoder,1);
-	VariationalAutoencoderError error(dataset, &encoder, &decoder,&loss);
+	VariationalAutoencoderError<RealVector> error(dataset, &encoder, &decoder,&loss);
 
 	RealVector gradEst(error.numberOfVariables(),0.0);
 	RealVector p = error. proposeStartingPoint();
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_Full )
 	LinearModel<> decoder(2,2,false);
 	initRandomNormal(encoder,1);
 	initRandomNormal(decoder,1);
-	VariationalAutoencoderError error(dataset, &encoder, &decoder,&loss);
+	VariationalAutoencoderError<RealVector> error(dataset, &encoder, &decoder,&loss);
 
 	RealVector gradEst(error.numberOfVariables(),0.0);
 	RealVector p = error. proposeStartingPoint();
