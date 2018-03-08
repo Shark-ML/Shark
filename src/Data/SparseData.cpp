@@ -184,7 +184,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 }
 
 template<class T>//We assume T to be vectorial
-shark::LabeledData<T, RealVector> libsvm_importer_regression(
+shark::LabeledData<T, blas::vector<typename T::value_type> > libsvm_importer_regression(
 	std::istream& stream,
 	unsigned int dimensions,
 	std::size_t batchSize
@@ -217,8 +217,8 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 	}
 
 	//copy contents into a new dataset
-	typename shark::LabeledData<T, RealVector>::element_type blueprint(T(maxIndex + (hasZero ? 1 : 0)), RealVector(1));
-	shark::LabeledData<T, RealVector> data(numPoints, blueprint, batchSize);//create dataset with the right structure
+	typename shark::LabeledData<T, blas::vector<typename T::value_type>>::element_type blueprint(T(maxIndex + (hasZero ? 1 : 0)), RealVector(1));
+	shark::LabeledData<T, blas::vector<typename T::value_type>> data(numPoints, blueprint, batchSize);//create dataset with the right structure
 	copySparsePoints(data.inputs(),contents, hasZero);
 	{
 		std::size_t i = 0;
@@ -233,6 +233,8 @@ shark::LabeledData<T, RealVector> libsvm_importer_regression(
 }
 
 }
+
+//impl for double
 
 void shark::importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
@@ -312,4 +314,85 @@ void shark::importSparseData(
 	std::ifstream ifs(fn.c_str());
 	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
 	dataset =  libsvm_importer_regression<CompressedRealVector>(ifs, highestIndex, batchSize);
+}
+
+//impl for float
+void shark::importSparseData(
+	LabeledData<FloatVector, unsigned int>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	dataset =  libsvm_importer_classification<FloatVector>(stream, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<FloatVector, FloatVector>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	dataset =  libsvm_importer_regression<FloatVector>(stream, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<CompressedFloatVector, unsigned int>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	dataset =  libsvm_importer_classification<CompressedFloatVector>(stream, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<CompressedFloatVector, FloatVector>& dataset,
+	std::istream& stream,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	dataset =  libsvm_importer_regression<CompressedFloatVector>(stream, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<FloatVector, unsigned int>& dataset,
+	std::string fn,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	std::ifstream ifs(fn.c_str());
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
+	dataset =  libsvm_importer_classification<FloatVector>(ifs, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<FloatVector, FloatVector>& dataset,
+	std::string fn,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	std::ifstream ifs(fn.c_str());
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
+	dataset =  libsvm_importer_regression<FloatVector>(ifs, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<CompressedFloatVector, unsigned int>& dataset,
+	std::string fn,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	std::ifstream ifs(fn.c_str());
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
+	dataset =  libsvm_importer_classification<CompressedFloatVector>(ifs, highestIndex, batchSize);
+}
+
+void shark::importSparseData(
+	LabeledData<CompressedFloatVector, FloatVector>& dataset,
+	std::string fn,
+	unsigned int highestIndex,
+	std::size_t batchSize
+){
+	std::ifstream ifs(fn.c_str());
+	SHARK_RUNTIME_CHECK(ifs, "failed to open file for input");
+	dataset =  libsvm_importer_regression<CompressedFloatVector>(ifs, highestIndex, batchSize);
 }
