@@ -81,13 +81,13 @@ public:
 
 
 /// \brief 0-1-loss for classification.
-template <>
-class ZeroOneLoss<unsigned int, RealVector> : public AbstractLoss<unsigned int, RealVector>
+template <class Float>
+class ZeroOneLoss<unsigned int, blas::vector<Float> > : public AbstractLoss<unsigned int, blas::vector<Float> >
 {
 public:
-	typedef AbstractLoss<unsigned int, RealVector> base_type;
-	typedef base_type::BatchLabelType BatchLabelType;
-	typedef base_type::BatchOutputType BatchOutputType;
+	typedef AbstractLoss<unsigned int, blas::vector<Float> > base_type;
+	typedef typename base_type::BatchLabelType BatchLabelType;
+	typedef typename base_type::BatchOutputType BatchOutputType;
 
 	/// constructor
 	///
@@ -122,7 +122,7 @@ public:
 		return error;
 	}
 	
-	double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions, RealVector const& weights) const{
+	double eval(Data<unsigned int> const& targets, Data< blas::vector<Float>> const& predictions, RealVector const& weights) const{
 		SIZE_CHECK(predictions.numberOfElements() == weights.size());
 		SIZE_CHECK(targets.numberOfElements() == weights.size());
 		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
