@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(best_point_count){
 		{
 			std::size_t b = computeOptimalLatticeTicks(n, sum);
 			RealMatrix w = weightLattice(n, b);
-			BOOST_CHECK(detail::sumlength(n, b) > sum);
+			BOOST_CHECK(detail::sumlength(n, b) >= sum);
 			BOOST_CHECK_EQUAL(w.size1(), detail::sumlength(n, b));
 		}
 	}

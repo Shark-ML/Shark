@@ -76,7 +76,7 @@ struct ConstrainedSphere : public SingleObjectiveFunction {
 			x(i) = std::abs(random::gauss(*mep_rng, 0, 1))+1;
 		}
 		for (std::size_t i = m_constraints; i < x.size(); i++) {
-			x(i) = random::gauss(0, 1);
+			x(i) = random::gauss(*mep_rng,0, 1);
 		}
 		return x;
 	}
