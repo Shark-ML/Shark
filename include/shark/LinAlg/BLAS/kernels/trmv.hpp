@@ -66,7 +66,7 @@ void trmv(
 
 #ifdef REMORA_USE_CLBLAST
 #include "clBlast/trmv.hpp"
-#elif REMORA_USE_GPU
+#elif defined REMORA_USE_GPU
 #include "gpu/trmv.hpp"
 #endif
 

@@ -70,7 +70,7 @@ void syrk(
 
 #ifdef REMORA_USE_CLBLAST
 #include "clBlast/syrk.hpp"
-#elif REMORA_USE_GPU
+#elif defined REMORA_USE_GPU
 #include "gpu/syrk.hpp"
 #endif
 
