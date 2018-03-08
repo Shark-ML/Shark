@@ -109,6 +109,7 @@ shark_add_example( Unsupervised/PCATutorial PCATutorial "Unsupervised" )
 shark_add_example( Unsupervised/KMeansTutorial KMeansTutorial "Unsupervised" )
 shark_add_example( Unsupervised/BinaryRBM BinaryRBM "Unsupervised" )
 shark_add_example( Unsupervised/AutoEncoderTutorial AutoencoderTutorial "Unsupervised" )
+shark_add_example( Unsupervised/VariationalAutoencoder VariationalAutoencoder "Unsupervised" )
 shark_add_example( Unsupervised/HierarchicalClustering HierarchicalClustering "Unsupervised" )
 shark_add_example( Unsupervised/OneClassSvm OneClassSvm "Unsupervised" )
 

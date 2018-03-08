@@ -67,11 +67,12 @@ private:
 	typedef blas::matrix<value_type, blas::row_major, device_type> MatrixType;
 public:
 	typedef UnlabeledData<SearchPointType> DatasetType;
+	typedef AbstractModel<SearchPointType,SearchPointType, SearchPointType> ModelType;
 
 	VariationalAutoencoderError(
 		DatasetType const& data,
-		AbstractModel<SearchPointType,SearchPointType>* encoder,
-		AbstractModel<SearchPointType,SearchPointType>* decoder,
+		ModelType* encoder,
+		ModelType* decoder,
 		AbstractLoss<SearchPointType, SearchPointType>* visible_loss,
 		double lambda = 1.0
 	):mep_decoder(decoder), mep_encoder(encoder), mep_loss(visible_loss), m_data(data), m_lambda(lambda){
@@ -101,7 +102,7 @@ public:
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
 		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
 		//sample random point from distribution
-		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), 0.0, 1.0, device_type());
+		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
 		return mu + exp(0.5*log_var) * epsilon;
 	}
 
@@ -172,8 +173,8 @@ public:
 	}
 
 private:
-	AbstractModel<SearchPointType,SearchPointType>* mep_decoder;
-	AbstractModel<SearchPointType,SearchPointType>* mep_encoder;
+	ModelType* mep_decoder;
+	ModelType* mep_encoder;
 	AbstractLoss<SearchPointType, SearchPointType>* mep_loss;
 	UnlabeledData<SearchPointType> m_data;
 	double m_lambda;

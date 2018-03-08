@@ -35,6 +35,7 @@
 #define SHARK_DATA_DEVICE_SUPPORT_H
 
 #include <shark/Data/Dataset.h>
+#include <shark/LinAlg/BLAS/device_copy.hpp>
 
 namespace shark {
 
