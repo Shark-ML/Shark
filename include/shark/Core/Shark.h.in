@@ -116,9 +116,7 @@ struct DynamicLibraryTag{
  */
 #cmakedefine SHARK_USE_OPENCL
 #ifdef SHARK_USE_OPENCL
-	#define REMORA_USE_GPU 1
-#else
-	#define REMORA_USE_GPU 0
+	#define REMORA_USE_GPU
 #endif
 
 /**
