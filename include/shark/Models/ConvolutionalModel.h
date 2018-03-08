@@ -39,7 +39,7 @@ namespace shark {
 
 
 	
-enum class Convolution{
+enum class Padding{
 	Valid,
 	ZeroPad
 };
@@ -56,11 +56,11 @@ enum class Convolution{
 ///
 /// For handling edge condition, the Conv2D model handles two different convolution modes:
 ///
-/// Convolution::Valid:
+/// Padding::Valid:
 /// The output is only computed on patches which are fully inside the unpadded image as a linearized vector in the same format
 /// of size (width - filter_width+1) * (height - filter_height+1) * numFilters.
 ///
-/// Convolution::ZeroPad
+/// Padding::ZeroPad
 /// The output input is padded with zeros and the output has the same size as the input
 /// of size width * height * numFilters.
 template <class VectorType = RealVector, class ActivationFunction = LinearNeuron>
@@ -87,7 +87,7 @@ public:
 	/// \arg filterShape Shape of the filter matrix numFilters x fiHeight x fiWidth x channel
 	/// \arg type Type of convolution padding to perform
 	Conv2DModel(
-		Shape const& imageShape, Shape const& filterShape, Convolution type = Convolution::ZeroPad
+		Shape const& imageShape, Shape const& filterShape, Padding type = Padding::ZeroPad
 	){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
@@ -103,7 +103,7 @@ public:
 	}
 	///\brief Returns the shape of the output
 	Shape outputShape() const{
-		if(m_type != Convolution::Valid){
+		if(m_type != Padding::Valid){
 			return {m_imageHeight, m_imageWidth, m_numFilters};
 		}else{
 			return {m_imageHeight - m_filterHeight + 1, m_imageWidth - m_filterWidth + 1, m_numFilters};
@@ -144,7 +144,7 @@ public:
 	/// \arg filterShape Shape of the filter matrix numFilters x fiHeight x fiWidth
 	/// \arg type Type of convolution padding to perform
 	void setStructure(
-		Shape const& imageShape, Shape const& filterShape, Convolution type = Convolution::ZeroPad
+		Shape const& imageShape, Shape const& filterShape, Padding type = Padding::ZeroPad
 	){
 		m_type = type;
 		m_imageHeight = imageShape[0];
@@ -170,8 +170,8 @@ public:
 		outputs.resize(inputs.size1(),outputShape().numElements());
 		//geometry for "zero pad"
 		std::size_t outputsForFilter = outputShape().numElements()/m_numFilters;
-		std::size_t paddingHeight = (m_type != Convolution::Valid) ? m_filterHeight - 1: 0;
-		std::size_t paddingWidth = (m_type != Convolution::Valid) ? m_filterWidth - 1: 0;
+		std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterHeight - 1: 0;
+		std::size_t paddingWidth = (m_type != Padding::Valid) ? m_filterWidth - 1: 0;
 		
 		blas::kernels::conv2d(inputs, m_filters, outputs,
 			m_numChannels, m_numFilters, 
@@ -204,7 +204,7 @@ public:
 		auto offsetGradient = subrange(gradient, m_filters.size(),gradient.size());
 		
 		BatchInputType patches(n * outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
-		if(m_type == Convolution::Valid){
+		if(m_type == Padding::Valid){
 			blas::bindings::im2mat(//todo must get public interface in remora
 				inputs,patches,
 				m_numChannels, 
@@ -240,7 +240,7 @@ public:
 		Shape shape = outputShape();
 		std::size_t paddingHeight = m_filterHeight - 1;
 		std::size_t paddingWidth = m_filterWidth - 1;
-		if(m_type == Convolution::Valid){
+		if(m_type == Padding::Valid){
 			paddingHeight *=2;
 			paddingWidth *=2;
 		}
@@ -326,7 +326,7 @@ private:
 	std::size_t m_numChannels;
 	std::size_t m_numFilters;
 	
-	Convolution m_type;
+	Padding m_type;
 };
 
 

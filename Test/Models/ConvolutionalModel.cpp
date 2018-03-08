@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( Models_Conv2D_Valid)
 	Shape imageShape = {11,9,6};
 	Shape filterShape = {2,3,5};
 	Shape outputShape = {9,5,2};
-	Conv2DModel<RealVector, FastSigmoidNeuron> model(imageShape, filterShape, Convolution::Valid);
+	Conv2DModel<RealVector, FastSigmoidNeuron> model(imageShape, filterShape, Padding::Valid);
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), numParams);
 	BOOST_REQUIRE_EQUAL(model.inputShape(), imageShape);
 	BOOST_REQUIRE_EQUAL(model.outputShape(), outputShape);
