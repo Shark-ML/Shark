@@ -111,7 +111,9 @@ public:
 				//extract pixel coordinates in input image
 				std::size_t starti = (p / m_outputShape[1]) * m_patch[0];
 				std::size_t startj = (p % m_outputShape[1]) * m_patch[1];
+				
 				//traverse the patch on the input image and compute maximum
+				noalias(pixel) = row(imageIn, starti * m_inputShape[1] + startj);
 				for(std::size_t i = starti; i != starti + m_patch[0]; ++i){
 					for(std::size_t j = startj; j != startj + m_patch[1]; ++j){
 						std::size_t index = i * m_inputShape[1] + j;

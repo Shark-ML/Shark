@@ -123,7 +123,7 @@ public:
 		MatrixType z = mu + exp(0.5*log_var) * epsilon;
 		//reconstruct and compute reconstruction error
 		MatrixType reconstruction = (*mep_decoder)(z);
-		return ((*mep_loss)(batch, reconstruction) + klError) / batch.size1();
+		return (m_lambda * (*mep_loss)(batch, reconstruction) + klError) / batch.size1();
 	}
 	
 	

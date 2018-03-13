@@ -51,8 +51,9 @@ enum class Padding{
 /// \f$ y = f(x) = g(\text{convolution}(w, x) + b) \f$, where g is an arbitrary activation function and
 /// convolution is the convolution of the input image x with the filters w.  b is a vector with one entry for each filter which is then applied to each response above
 ///
-/// The image is allowed to have several channels andare linearized to a single vector of size width * height * numChannels.
-/// the linearization is performed as linearizing each channel as if it were a row-major matrix and then concatenating the different channels.
+/// The image is allowed to have several channels and are linearized to a single vector of size width * height * numChannels.
+/// This is done by itnerleaving channels, i.e. for a pixel all channels are stored contiguously. Then the pixels are stored in
+/// a row-major scheme.
 ///
 /// For handling edge condition, the Conv2D model handles two different convolution modes:
 ///
@@ -168,6 +169,7 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(inputs.size2() == inputShape().numElements());
 		outputs.resize(inputs.size1(),outputShape().numElements());
+		outputs.clear();
 		//geometry for "zero pad"
 		std::size_t outputsForFilter = outputShape().numElements()/m_numFilters;
 		std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterHeight - 1: 0;
@@ -198,10 +200,28 @@ public:
 		std::size_t n = inputs.size1();
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
-
+		
 		gradient.resize(numberOfParameters());
 		auto weightGradient = to_matrix(subrange(gradient,0,m_filters.size()), m_numFilters, m_filters.size()/m_numFilters);
+		//~ auto weightGradient = subrange(gradient,0,m_filters.size());
 		auto offsetGradient = subrange(gradient, m_filters.size(),gradient.size());
+		
+		//~ std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterHeight - 1: 0;
+		//~ std::size_t paddingWidth = (m_type != Padding::Valid) ? m_filterWidth - 1: 0;
+		
+		//derivative of filters
+		//~ BatchInputType responses(inputs.size1(), m_filters.size());
+		//~ blas::kernels::conv2d(inputs, to_vector(delta), responses,
+			//~ m_numChannels, m_numFilters, 
+			//~ m_imageHeight, m_imageWidth,
+			//~ m_imageHeight - paddingHeight, m_filterWidth - paddingWidth,
+			//~ paddingHeight, paddingWidth
+		//~ );
+		//~ noalias(weightGradient) = sum_rows(responses);
+		//derivatives of offset parameters
+		//reshape coefficient matrix  into a matrix where the rows are the single output pixels
+		//~ auto delta_pixels = to_matrix(to_vector(delta), coefficients.size1() * coefficients.size2()/m_numFilters, m_numFilters);
+		//~ noalias(offsetGradient) = sum_rows(delta_pixels);
 		
 		BatchInputType patches(n * outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
 		if(m_type == Padding::Valid){
