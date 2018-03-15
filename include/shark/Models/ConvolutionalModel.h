@@ -35,14 +35,9 @@
 #include <shark/Models/AbstractModel.h>
 #include <shark/Models/NeuronLayers.h>
 #include <shark/LinAlg/BLAS/kernels/conv2d.hpp>
+#include <shark/Core/Images/Padding.h>
 namespace shark {
 
-
-	
-enum class Padding{
-	Valid,
-	ZeroPad
-};
 ///
 /// \brief Convolutional Model for 2D image data.
 ///
