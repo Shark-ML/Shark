@@ -43,6 +43,17 @@ E const&  copy_to_cpu(matrix_expression<E, cpu_tag> const& e){
 	return e();
 }
 
+template<class E>
+E const& copy_to_device(vector_expression<E, cpu_tag> const& e, cpu_tag){
+	return e();
+}
+
+
+template<class E>
+E const&  copy_to_device(matrix_expression<E, cpu_tag> const& e, cpu_tag){
+	return e();
+}
+
 }
 
 #ifdef REMORA_USE_GPU

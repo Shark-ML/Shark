@@ -368,6 +368,11 @@ private:
 	boost::compute::command_queue* m_queue;
 };
 
+///////////////////////////////////////////////
+//////// Expression Optimizers
+///////////////////////////////////////////////
+
+//TODO: proxy(copy_to_gpu) should be possible...
 
 ///////////////////////////////////////////////
 //////// Expressions
@@ -398,7 +403,6 @@ matrix_transport_to_gpu<E> copy_to_gpu(
 	return matrix_transport_to_gpu<E>(e(),queue);
 }
 
-
 //moving gpu->gpu is for free
 template<class E>
 E const& copy_to_gpu(
@@ -415,7 +419,19 @@ E const& copy_to_gpu(
 ){
 	return e();
 }
+
+template<class E, class Device>
+auto copy_to_device(vector_expression<E, Device> const& e, gpu_tag)->decltype(copy_to_gpu(e)){
+	return copy_to_gpu(e);
+}
+
+
+template<class E, class Device>
+auto copy_to_device(matrix_expression<E, Device> const& e, gpu_tag)->decltype(copy_to_gpu(e)){
+	return copy_to_gpu(e);
+}
 	
+
 }
 
 #endif
