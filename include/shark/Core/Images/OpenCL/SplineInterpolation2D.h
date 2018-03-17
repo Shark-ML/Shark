@@ -2,7 +2,7 @@
 #define SHARK_CORE_IMAGES_GPU_SPLINE_INTERPOLATION_2D_H
 
 #include <shark/LinAlg/Base.h>
-
+#include <shark/Core/Shape.h>
 namespace shark{
 namespace image{
 template<class T>
@@ -66,8 +66,8 @@ void splineInterpolation2D(
 	
 	//enqueue kernel with kernel args
 	std::size_t stride = (pointsPerImage == points_unreg.size1())? 0: pointsPerImage;
-	kernel.set_arg(width_index, shape[1]);
 	kernel.set_arg(height_index, shape[0]);
+	kernel.set_arg(width_index, shape[1]);
 	kernel.set_arg(depth_index, shape[2]);
 	kernel.set_arg(stride_index, stride);
 	
@@ -139,8 +139,8 @@ void splineInterpolation2DDerivative(
 	
 	//enqueue kernel with kernel args
 	std::size_t stride = (pointsPerImage == points_unreg.size1())? 0: pointsPerImage;
-	kernel.set_arg(width_index, shape[1]);
 	kernel.set_arg(height_index, shape[0]);
+	kernel.set_arg(width_index, shape[1]);
 	kernel.set_arg(depth_index, shape[2]);
 	kernel.set_arg(stride_index, stride);
 	kernel.set_arg(numPoints_index, pointsPerImage);

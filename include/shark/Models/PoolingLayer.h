@@ -31,36 +31,38 @@
 #define SHARK_MODELS_POOLING_LAYER_H
  
 #include <shark/LinAlg/Base.h>
-#include <shark/Models/ConvolutionalModel.h>
+#include <shark/Models/AbstractModel.h>
+#include <shark/Core/Images/Padding.h>
+#include <shark/Core/Images/CPU/Pooling.h>
+#ifdef SHARK_USE_OPENCL
+#include <shark/Core/Images/OpenCL/Pooling.h>
+ #endif
  
 namespace shark{
+	
+enum class Pooling{
+	Maximum
+};
 
 template <class VectorType = RealVector>
 class PoolingLayer : public AbstractModel<VectorType, VectorType, VectorType>{
 private:
 	typedef AbstractModel<VectorType,VectorType, VectorType> base_type;
-	Shape m_inputShape;
-	Shape m_outputShape;
-	Shape m_patch;
-	Padding m_padding;
+	typedef typename VectorType::value_type value_type;
 public:
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
-	PoolingLayer(Shape const& inputShape, Shape const& patchShape, Padding padding)
-	: m_inputShape(inputShape), m_patch(patchShape), m_padding(padding){
+	PoolingLayer(){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
-		
-		if(m_padding == Padding::Valid)
-			m_outputShape =  {m_inputShape[0]/m_patch[0], m_inputShape[1]/m_patch[1], m_inputShape[2]};
-		else
-			m_outputShape = {
-				(m_inputShape[0] + m_patch[0] - 1)/m_patch[0], 
-				(m_inputShape[1] + m_patch[1] - 1)/m_patch[1], 
-				m_inputShape[2]
-			};
+	}
+	
+	PoolingLayer(Shape const& inputShape, Shape const& patchShape, Pooling pooling = Pooling::Maximum, Padding padding = Padding::Valid){
+		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
+		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
+		setStructure(inputShape, patchShape, pooling, padding);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -93,34 +95,39 @@ public:
 	boost::shared_ptr<State> createState()const{
 		return boost::shared_ptr<State>(new EmptyState());
 	}
+	
+	///\brief Configures the model.
+	///
+	/// \arg inputShape Shape of the image imHeight x imWidth x channel
+	/// \arg outputShape Shape of the resized output imHeight x imWidth
+	/// \arg type Type of interpolation to perform, default is Spline-Interpolation
+	void setStructure(
+		Shape const& inputShape, Shape const& patchShape, Pooling type = Pooling::Maximum, Padding padding = Padding::Valid
+	){
+		SHARK_RUNTIME_CHECK( padding == Padding::Valid, "Padding not implemented");
+		m_inputShape = inputShape;
+		m_patch = patchShape;
+		m_padding = padding;
+		m_type = type;
+		if(m_padding == Padding::Valid)
+			m_outputShape =  {m_inputShape[0]/m_patch[0], m_inputShape[1]/m_patch[1], m_inputShape[2]};
+		else
+			m_outputShape = {
+				(m_inputShape[0] + m_patch[0] - 1)/m_patch[0], 
+				(m_inputShape[1] + m_patch[1] - 1)/m_patch[1], 
+				m_inputShape[2]
+			};
+	}
 
 	using base_type::eval;
 
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State& state)const{
 		SIZE_CHECK(inputs.size2() == m_inputShape.numElements());
 		outputs.resize(inputs.size1(),m_outputShape.numElements());
-		
-		//for all images
-		for(std::size_t img = 0; img != inputs.size1(); ++img){
-			//Extract single images and create matrices (pixels,channels)
-			auto imageIn = to_matrix(row(inputs,img), m_inputShape[0] * m_inputShape[1], m_inputShape[2]);
-			auto imageOut = to_matrix(row(outputs,img), m_outputShape[0] * m_outputShape[1], m_outputShape[2]);
-			//traverse over all pixels of the output image
-			for(std::size_t p = 0; p != imageOut.size1(); ++p){
-				auto pixel = row(imageOut,p);
-				//extract pixel coordinates in input image
-				std::size_t starti = (p / m_outputShape[1]) * m_patch[0];
-				std::size_t startj = (p % m_outputShape[1]) * m_patch[1];
-				
-				//traverse the patch on the input image and compute maximum
-				noalias(pixel) = row(imageIn, starti * m_inputShape[1] + startj);
-				for(std::size_t i = starti; i != starti + m_patch[0]; ++i){
-					for(std::size_t j = startj; j != startj + m_patch[1]; ++j){
-						std::size_t index = i * m_inputShape[1] + j;
-						noalias(pixel) = max(pixel,row(imageIn, index));
-					}
-				}
-			}
+		switch(m_type){
+			case Pooling::Maximum:
+				image::maxPooling<value_type>(inputs, m_inputShape, m_patch, outputs);
+			break;
 		}
 	}
 
@@ -132,8 +139,9 @@ public:
 		State const& state, 
 		ParameterVectorType& gradient
 	)const{
-		SIZE_CHECK(coefficients.size1()==inputs.size1());
-		SIZE_CHECK(coefficients.size2()==inputs.size2());
+		SIZE_CHECK(coefficients.size1()==outputs.size1());
+		SIZE_CHECK(coefficients.size2()==outputs.size2());
+		gradient.resize(0);
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all inputs of the last computed batch
 	void weightedInputDerivative(
@@ -145,47 +153,36 @@ public:
 	)const{
 		SIZE_CHECK(coefficients.size1() == outputs.size1());
 		SIZE_CHECK(coefficients.size2() == outputs.size2());
-		std::size_t outputPixels = m_outputShape[0] * m_outputShape[1];
 		derivative.resize(inputs.size1(),inputs.size2());
-		derivative.clear();
-		
-		//for all images
-		for(std::size_t img = 0; img != inputs.size1(); ++img){
-			//Extract single images and create matrices (pixels,channels)
-			auto imageCoeffs = to_matrix(row(coefficients,img), m_outputShape[0] * m_outputShape[1], m_outputShape[2]);
-			auto imageIn = to_matrix(row(inputs,img), m_inputShape[0] * m_inputShape[1], m_inputShape[2]);
-			auto imageDer = to_matrix(row(derivative,img), m_inputShape[0] * m_inputShape[1], m_inputShape[2]);
-			//traverse over all pixels of the output image
-			for(std::size_t p = 0; p != outputPixels; ++p){
-				//extract pixel coordinates in input image
-				std::size_t starti = (p / m_outputShape[1]) * m_patch[0];
-				std::size_t startj = (p % m_outputShape[1]) * m_patch[1];
-				//traverse the patch on the input image and compute arg-max for each channel
-				for(std::size_t c = 0; c != m_inputShape[2]; ++c){
-					std::size_t maxIndex =  starti * m_inputShape[1] + startj;
-					double maxVal = imageIn(maxIndex,c);
-					for(std::size_t i = starti; i != starti + m_patch[0]; ++i){
-						for(std::size_t j = startj; j != startj + m_patch[1]; ++j){
-							std::size_t index = i * m_inputShape[1] + j;
-							double val = imageIn(index,c);
-							if(val > maxVal){
-								maxVal = val;
-								maxIndex = index;
-							}
-						}
-					}
-					//after arg-max is obtained, update gradient
-					imageDer(maxIndex, c) += imageCoeffs(p,c);
-				}
-			}
+		switch(m_type){
+			case Pooling::Maximum:
+				image::maxPoolingDerivative<value_type>(inputs, coefficients, m_inputShape, m_patch, derivative);
+			break;
 		}
-		
 	}
 
 	/// From ISerializable
-	void read(InArchive& archive){}
+	void read(InArchive& archive){
+		archive >> m_inputShape;
+		archive >> m_outputShape;
+		archive >> m_patch;
+		archive >> (int&)m_padding;
+		archive >> (int&)m_type;
+	}
 	/// From ISerializable
-	void write(OutArchive& archive) const{}
+	void write(OutArchive& archive) const{
+		archive << m_inputShape;
+		archive << m_outputShape;
+		archive << m_patch;
+		archive << (int)m_padding;
+		archive << (int)m_type;
+	}
+private:
+	Shape m_inputShape;
+	Shape m_outputShape;
+	Shape m_patch;
+	Padding m_padding;
+	Pooling m_type;
 };
 
 

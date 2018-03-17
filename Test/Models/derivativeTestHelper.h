@@ -6,6 +6,7 @@
 #include <shark/Models/AbstractModel.h>
 
 #include  <shark/Core/Random.h>
+#include  <iostream>
 
 namespace shark{
 //estimates Derivative using the formula:
@@ -113,6 +114,12 @@ void testWeightedInputDerivative(Model& net,const Point& point,const RealVector&
 	//calculate error between both
 	double error=norm_inf(row(testGradient,0)-resultGradient);
 	BOOST_CHECK_SMALL(error,epsilon);
+	if(error > epsilon){
+		std::cout<<"coefficients:"<<coefficients<<std::endl;
+		std::cout<<"point:"<<point<<std::endl;
+		std::cout<<"output:"<<row(testGradient,0)<<std::endl;
+		std::cout<<"expected"<<resultGradient<<std::endl;
+	}
 }
 
 ///convenience function which does automatic sampling of points,parameters and coefficients
@@ -200,10 +207,13 @@ void testWeightedDerivativesSame(Model& net,unsigned int numberOfTests = 100, do
 		RealVector testParameterDerivative;
 		net.weightedDerivatives(pointBatch, output, coeffBatch,*state, testParameterDerivative, testInputDerivative);
 		double errorInput = max(inputDerivative-testInputDerivative); 
-		double errorParameter = max(parameterDerivative-testParameterDerivative); 
-		
 		BOOST_CHECK_SMALL(errorInput,epsilon);
-		BOOST_CHECK_SMALL(errorParameter,epsilon);
+		BOOST_REQUIRE_EQUAL(parameterDerivative.size(), net.numberOfParameters());
+		BOOST_REQUIRE_EQUAL(testParameterDerivative.size(), net.numberOfParameters());
+		if(parameterDerivative.size() > 0){
+			double errorParameter = max(parameterDerivative-testParameterDerivative); 
+			BOOST_CHECK_SMALL(errorParameter,epsilon);
+		}
 	}
 }
 

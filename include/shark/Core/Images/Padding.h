@@ -5,8 +5,10 @@
 namespace shark{
 enum class Padding{
 	Valid,
-	ZeroPad
+	ZeroPad,
+	RepeatBorder
 };
+
 }
 
 #endif

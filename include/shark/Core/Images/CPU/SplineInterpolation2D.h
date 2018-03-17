@@ -2,6 +2,7 @@
 #define SHARK_CORE_IMAGES_CPU_SPLINE_INTERPOLATION_2D_H
 
 #include <shark/LinAlg/Base.h>
+#include <shark/Core/Shape.h>
 namespace shark{
 namespace image{
 template<class T>
@@ -11,8 +12,8 @@ void splineInterpolation2D(
 	blas::dense_matrix_adaptor<T const, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> points, std::size_t pointsPerImage, 
 	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> values
 ){
-	std::size_t width = shape[1];
 	std::size_t height = shape[0];
+	std::size_t width = shape[1];
 	std::size_t numChannels = shape[2];
 	std::size_t stride = (pointsPerImage == points.size1())? 0: pointsPerImage;
 	
@@ -68,8 +69,8 @@ void splineInterpolation2D(
 	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> valuesdx,
 	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> valuesdy
 ){
-	std::size_t width = shape[1];
 	std::size_t height = shape[0];
+	std::size_t width = shape[1];
 	std::size_t numChannels = shape[2];
 	std::size_t stride = (pointsPerImage == points.size1())? 0: pointsPerImage;
 	
@@ -134,8 +135,8 @@ void splineInterpolation2DDerivative(
 	blas::dense_matrix_adaptor<T const, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> points, std::size_t pointsPerImage, 
 	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> results
 ){
-	std::size_t width = shape[1];
 	std::size_t height = shape[0];
+	std::size_t width = shape[1];
 	std::size_t numChannels = shape[2];
 	std::size_t stride = (pointsPerImage == points.size1())? 0: pointsPerImage;
 	
