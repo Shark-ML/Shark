@@ -3,6 +3,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Shape.h>
+#include <shark/Core/OpenMP.h>
 namespace shark{
 namespace image{
 template<class T>
@@ -19,7 +20,7 @@ void splineInterpolation2D(
 	
 	values.clear();
 	
-	for(std::size_t im = 0; im != images.size1(); ++im){
+	SHARK_PARALLEL_FOR(int im = 0; im < (int)images.size1(); ++im){
 		auto image = to_matrix(row(images,im), width * height, numChannels);
 		auto v = to_matrix(row(values,im), pointsPerImage, numChannels);
 		for(std::size_t p = 0; p != pointsPerImage; ++p){
@@ -77,7 +78,7 @@ void splineInterpolation2D(
 	values.clear();
 	valuesdx.clear();
 	valuesdy.clear();
-	for(std::size_t im = 0; im != images.size1(); ++im){
+	SHARK_PARALLEL_FOR(int im = 0; im < (int)images.size1(); ++im){
 		auto image = to_matrix(row(images,im), width * height, numChannels);
 		auto v = to_matrix(row(values,im), pointsPerImage, numChannels);
 		auto vdx = to_matrix(row(valuesdx,im), pointsPerImage, numChannels);
@@ -142,7 +143,7 @@ void splineInterpolation2DDerivative(
 	
 	results.clear();
 	
-	for(std::size_t im = 0; im != imageDerivatives.size1(); ++im){
+	SHARK_PARALLEL_FOR(int im = 0; im < (int)imageDerivatives.size1(); ++im){
 		auto imageDer = to_matrix(row(imageDerivatives,im), pointsPerImage, numChannels);
 		auto result = to_matrix(row(results,im), width * height, numChannels);
 		for(std::size_t p = 0; p != points.size1(); ++p){
