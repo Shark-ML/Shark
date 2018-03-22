@@ -36,6 +36,7 @@
 #include <shark/Models/NeuronLayers.h>
 #include <shark/LinAlg/BLAS/kernels/conv2d.hpp>
 #include <shark/Core/Images/Padding.h>
+#include <shark/Core/Images/Reorder.h>
 namespace shark {
 
 ///
@@ -64,6 +65,8 @@ class Conv2DModel : public AbstractModel<VectorType,VectorType,VectorType>{
 private:
 	typedef AbstractModel<VectorType,VectorType, VectorType> base_type;
 	typedef Conv2DModel<VectorType, ActivationFunction> self_type;
+	typedef typename VectorType::value_type value_type;
+	typedef typename VectorType::device_type device_type;
 
 	static_assert(!std::is_same<typename VectorType::storage_type::storage_tag, blas::dense_tag>::value, "Conv2D not implemented for sparse inputs");
 public:
@@ -193,51 +196,54 @@ public:
 		SIZE_CHECK(coefficients.size2()==outputShape().numElements());
 		SIZE_CHECK(coefficients.size1()==inputs.size1());
 		std::size_t n = inputs.size1();
+		auto outputHeight = outputShape()[0]; 
+		auto outputWidth = outputShape()[1]; 
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 		
 		gradient.resize(numberOfParameters());
-		auto weightGradient = to_matrix(subrange(gradient,0,m_filters.size()), m_numFilters, m_filters.size()/m_numFilters);
-		//~ auto weightGradient = subrange(gradient,0,m_filters.size());
+		auto weightGradient = subrange(gradient,0,m_filters.size());
 		auto offsetGradient = subrange(gradient, m_filters.size(),gradient.size());
 		
-		//~ std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterHeight - 1: 0;
-		//~ std::size_t paddingWidth = (m_type != Padding::Valid) ? m_filterWidth - 1: 0;
+		std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterHeight - 1: 0;
+		std::size_t paddingWidth = (m_type != Padding::Valid) ? m_filterWidth - 1: 0;
 		
-		//derivative of filters
-		//~ BatchInputType responses(inputs.size1(), m_filters.size());
-		//~ blas::kernels::conv2d(inputs, to_vector(delta), responses,
-			//~ m_numChannels, m_numFilters, 
-			//~ m_imageHeight, m_imageWidth,
-			//~ m_imageHeight - paddingHeight, m_filterWidth - paddingWidth,
-			//~ paddingHeight, paddingWidth
-		//~ );
-		//~ noalias(weightGradient) = sum_rows(responses);
 		//derivatives of offset parameters
 		//reshape coefficient matrix  into a matrix where the rows are the single output pixels
-		//~ auto delta_pixels = to_matrix(to_vector(delta), coefficients.size1() * coefficients.size2()/m_numFilters, m_numFilters);
-		//~ noalias(offsetGradient) = sum_rows(delta_pixels);
+		auto delta_pixels = to_matrix(to_vector(delta), coefficients.size1() * coefficients.size2()/m_numFilters, m_numFilters);
+		noalias(offsetGradient) = sum_rows(delta_pixels);
 		
-		BatchInputType patches(n * outputShape().numElements()/m_numFilters, m_filters.size()/m_numFilters);
-		if(m_type == Padding::Valid){
-			blas::bindings::im2mat(//todo must get public interface in remora
-				inputs,patches,
-				m_numChannels, 
-				m_imageHeight, m_imageWidth,
-				m_filterHeight, m_filterWidth
-			);
-		}else{
-			blas::bindings::im2mat_pad(//todo must get public interface in remora
-				inputs,patches,
-				m_numChannels, 
-				m_imageHeight, m_imageWidth,
-				m_filterHeight, m_filterWidth,
-				m_filterHeight - 1, m_filterWidth - 1
-			);
-		}
-		auto delta_mat = to_matrix(to_vector(delta), patches.size1(), m_numFilters);
-		noalias(weightGradient) = trans(delta_mat) % patches;
-		noalias(offsetGradient) = sum_rows(delta_mat);
+		//derivative of filters:
+		//the idea is to phrase this derivative in terms of another convolution.
+		//for this we swap for coefficients and inputs the batch-size with the number of channels
+		// i.e. we transform NHWC to CHWN.
+		// afterwards the derivative is just convolving the coefficients with the inputs (padding the inputs as normal).
+		// after convolving, the output has the filters as channels, therefore the derivative has to be reordered back
+		// from CHWN to NHWC format.
+		BatchOutputType delta_CHWN(m_numFilters, outputHeight * outputWidth * n);
+		BatchOutputType inputs_CHWN(m_numChannels, inputShape().numElements() / m_numChannels * n);
+		image::reorder<value_type, device_type>(
+			to_vector(delta), to_vector(delta_CHWN), 
+			{n, outputHeight, outputWidth, m_numFilters},
+			ImageFormat::NHWC, ImageFormat::CHWN
+		);
+		image::reorder<value_type, device_type>(
+			to_vector(inputs), to_vector(inputs_CHWN),
+			{n, m_imageHeight, m_imageWidth, m_numChannels},
+			ImageFormat::NHWC, ImageFormat::CHWN
+		);
+		BatchInputType responses_CHWN(m_numChannels, m_filters.size() / m_numChannels);
+		blas::kernels::conv2d(inputs_CHWN, to_vector(delta_CHWN), responses_CHWN,
+			n, m_numFilters, 
+			m_imageHeight, m_imageWidth,
+			outputHeight, outputWidth,
+			paddingHeight, paddingWidth
+		);
+		image::reorder<value_type, device_type>(
+			to_vector(responses_CHWN), weightGradient, 
+			{m_numChannels, m_filterHeight, m_filterWidth, m_numFilters}, 
+			ImageFormat::CHWN, ImageFormat::NHWC
+		);
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all inputs of the last computed batch
 	void weightedInputDerivative(
