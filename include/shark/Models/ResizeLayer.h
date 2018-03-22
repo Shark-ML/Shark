@@ -179,14 +179,14 @@ public:
 	/// From ISerializable
 	void read(InArchive& archive){
 		archive >> m_points;
-		archive >> m_type;
+		archive >> (int&)m_type;
 		archive >> m_inputShape;
 		archive >> m_outputShape;
 	}
 	/// From ISerializable
 	void write(OutArchive& archive) const{
 		archive << m_points;
-		archive << m_type;
+		archive << (int&)m_type;
 		archive << m_inputShape;
 		archive << m_outputShape;
 	}

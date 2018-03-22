@@ -28,9 +28,9 @@ int main(int argc, char **argv)
 	//Step 2: define model
 //###begin<model_creation>
 	Conv2DModel<FloatVector, RectifierNeuron> conv1(data.inputShape(), {32, 5, 5});
-	PoolingLayer<FloatVector> pooling1(conv1.outputShape(), {2, 2}, Padding::Valid);
+	PoolingLayer<FloatVector> pooling1(conv1.outputShape(), {2, 2}, Pooling::Maximum, Padding::Valid);
 	Conv2DModel<FloatVector, RectifierNeuron> conv2(pooling1.outputShape(), {64, 5, 5});
-	PoolingLayer<FloatVector> pooling2(conv2.outputShape(), {2, 2}, Padding::Valid);
+	PoolingLayer<FloatVector> pooling2(conv2.outputShape(), {2, 2}, Pooling::Maximum, Padding::Valid);
 	LinearModel<FloatVector, RectifierNeuron> dense1(pooling2.outputShape(), 1024, true);
 	LinearModel<FloatVector> dense2(dense1.outputShape(), 10, true);
 	auto model = conv1 >> pooling1 >> conv2 >> pooling2 >> dense1 >> dense2;

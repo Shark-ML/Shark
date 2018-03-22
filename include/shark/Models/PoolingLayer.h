@@ -174,8 +174,8 @@ public:
 		archive << m_inputShape;
 		archive << m_outputShape;
 		archive << m_patch;
-		archive << (int)m_padding;
-		archive << (int)m_type;
+		archive << (int&)m_padding;
+		archive << (int&)m_type;
 	}
 private:
 	Shape m_inputShape;

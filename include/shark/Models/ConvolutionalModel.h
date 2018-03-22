@@ -285,7 +285,7 @@ public:
 		archive >> m_filterWidth;
 		archive >> m_numChannels;
 		archive >> m_numFilters;
-		archive >> m_type;
+		archive >> (int&) m_type;
 		updateBackpropFilters();
 	}
 	/// From ISerializable
@@ -298,7 +298,7 @@ public:
 		archive << m_filterWidth;
 		archive << m_numChannels;
 		archive << m_numFilters;
-		archive << m_type;
+		archive << (int&) m_type;
 	}
 	
 private:
