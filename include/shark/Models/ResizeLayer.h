@@ -29,8 +29,8 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_MODELS_CONV2DModel_H
-#define SHARK_MODELS_CONV2DModel_H
+#ifndef SHARK_MODELS_RESIZE_LAYER_H
+#define SHARK_MODELS_RESIZE_LAYER_H
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/Core/Images/Interpolation.h>

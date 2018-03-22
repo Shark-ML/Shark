@@ -55,7 +55,7 @@ namespace shark{
 /// The standard shape
 /// is the 1-D shape just describing that a model interprets every
 /// input as 1-D input.
-/// A 0-D shape descriebs the inputs of a model where the input can not be
+/// A 0-D shape describes the inputs of a model where the input can not be
 /// described by a shape, for example a class label or other scalar values are 0d shapes.
 /// A 3-D shape could describe an image patch with rows x columns x channels.
 ///
@@ -87,6 +87,17 @@ public:
 	///\brief Returns a 1-D shape with the same number of elements
 	Shape flatten() const{
 		return Shape({m_numElements});
+	}
+	
+	//stride of elements in memory when increasing dimension dim by 1
+	//assuming the underlying memory is contiguous
+	std::size_t stride(std::size_t dim) const{
+		std::size_t val = 1;
+		if(size() == 0) return val;
+		for(std::size_t i = size() - 1; i != dim; --i){
+			val *= m_dims[i];
+		}
+		return val;
 	}
 	
 	template<class Archive>
