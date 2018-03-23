@@ -225,6 +225,8 @@ public:
 	/// nodes.
 	Node& transformLeafNode(std::size_t nodeId, LabelType const& label){
 		Node& node = m_tree[nodeId];
+		node.attributeIndex = 0;
+		node. attributeValue = 0.0;
 		node.leftId = 0;
 		node.rightIdOrIndex = m_labels.size();
 		m_labels.push_back(label);
