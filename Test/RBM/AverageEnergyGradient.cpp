@@ -232,9 +232,9 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 {
 	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(10,16);
-	initRandomNormal(rbm,2);
+	initRandomNormal(rbm,0.1);
 	RealVector parameters = rbm.parameterVector();
-	initRandomNormal(rbm,2);
+	initRandomNormal(rbm,0.1);
 	
 	std::vector<RealVector> dataVec(50,RealVector(10));
 	for(std::size_t j = 0; j != 50; ++j){
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 	TestGradientVH gradient(&rbm);
 	gradient.setData(data);
 	
-	testDerivative(gradient,parameters,1.e-3,1.e-10,0.1);
+	testDerivative(gradient,parameters,1.e-4,1.e-10,0.1);
 }
 
 class TestGradientHV : public SingleObjectiveFunction{
