@@ -51,6 +51,7 @@ Data<blas::vector<Type, blas::gpu_tag> > toGPU(Data<blas::vector<T, blas::cpu_ta
 	for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
 		data_gpu.batch(i) = blas::copy_to_gpu(data.batch(i));
 	}
+	data_gpu.shape() = data.shape();
 	return data_gpu;
 }
 
@@ -69,6 +70,7 @@ Data<blas::vector<Type, blas::gpu_tag> > toGPU(Data<unsigned int > const& data){
 		}
 		data_gpu.batch(i) = blas::copy_to_gpu(batch);
 	}
+	data_gpu.shape() = data.shape();
 	return data_gpu;
 }
 

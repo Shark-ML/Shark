@@ -336,6 +336,8 @@ public:
 	template<class Range>
 	void reorderElements(Range const& indices){
 		Data dataCopy(numberOfBatches());
+		dataCopy.shape() = shape();
+		
 		std::vector<Type> batch_elements;
 		auto indexPos = indices.begin();
 		auto elemBegin = elements().begin();
@@ -347,7 +349,6 @@ public:
 			}
 			dataCopy.batch(b) = createBatch<Type>(batch_elements);
 		}
-		
 		*this = dataCopy;
 	}
 
