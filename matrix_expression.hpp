@@ -383,18 +383,64 @@ auto triangular_prod(
 	return prod(to_triangular(A, TriangularType()), B);
 }
 
+
+/// \brief Sums up the rows of A
+///
+/// returns a vector v_j = sum_i A_ij
 template<class MatA, class Device>
-sum_matrix_rows<MatA>
+fold_matrix_rows< MatA, typename device_traits<Device>:: template add<typename MatA::value_type> >
 sum_rows(matrix_expression<MatA, Device> const& A){
-	return sum_matrix_rows<MatA>(A());
+	typedef  typename device_traits<Device>:: template add<typename MatA::value_type> F;	
+	return fold_matrix_rows<MatA, F>(A(), F());
 }
 
+/// \brief Sums up the columns of A
+///
+/// returns a vector v_i = sum_j A_ij
 template<class MatA, class Device>
 auto sum_columns(matrix_expression<MatA, Device> const& A)->decltype(sum_rows(trans(A))){
 	return sum_rows(trans(A));
 }
 
+/// \brief Computes the elementwise maximum of rows of A
+///
+/// returns a vector v_j = max_i A_ij
+template<class MatA, class Device>
+fold_matrix_rows< MatA, typename device_traits<Device>:: template max<typename MatA::value_type> >
+max_rows(matrix_expression<MatA, Device> const& A){
+	typedef  typename device_traits<Device>:: template max<typename MatA::value_type> F;	
+	return fold_matrix_rows<MatA, F>(A(), F());
+}
 
+/// \brief Computes the elementwise maximum of columns of A
+///
+/// returns a vector v_i = max_j A_ij
+template<class MatA, class Device>
+auto max_columns(matrix_expression<MatA, Device> const& A)->decltype(max_rows(trans(A))){
+	return max_rows(trans(A));
+}
+
+/// \brief Computes the elementwise minimum of rows of A
+///
+/// returns a vector v_j = min_i A_ij
+template<class MatA, class Device>
+fold_matrix_rows< MatA, typename device_traits<Device>:: template min<typename MatA::value_type> >
+min_rows(matrix_expression<MatA, Device> const& A){
+	typedef  typename device_traits<Device>:: template min<typename MatA::value_type> F;	
+	return fold_matrix_rows<MatA, F>(A(), F());
+}
+
+/// \brief Computes the elementwise minimum of columns of A
+///
+/// returns a vector v_i = min_j A_ij
+template<class MatA, class Device>
+auto min_columns(matrix_expression<MatA, Device> const& A)->decltype(min_rows(trans(A))){
+	return min_rows(trans(A));
+}
+
+/// \brief Computes the elementwise sum over all elements of A
+///
+/// returns a scalar s = sum_ij A_ij
 template<class MatA, class Device>
 typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
 	typedef typename MatA::value_type value_type;
@@ -405,6 +451,9 @@ typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
 	return result;
 }
 
+/// \brief Computes the elementwise maximum over all elements of A
+///
+/// returns a scalar s = max_ij A_ij
 template<class MatA, class Device>
 typename MatA::value_type max(matrix_expression<MatA, Device> const& A){
 	typedef typename MatA::value_type value_type;
@@ -415,6 +464,9 @@ typename MatA::value_type max(matrix_expression<MatA, Device> const& A){
 	return result;
 }
 
+/// \brief Computes the elementwise minimum over all elements of A
+///
+/// returns a scalar s = min_ij A_ij
 template<class MatA, class Device>
 typename MatA::value_type min(matrix_expression<MatA, Device> const& A){
 	typedef typename MatA::value_type value_type;
