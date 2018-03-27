@@ -37,7 +37,7 @@ int main(int argc, char **argv)
 //###end<model_creation>
 	
 //###begin<objfunct>	
-	CrossEntropy<FloatVector> loss;
+	CrossEntropy<unsigned int, FloatVector> loss;
 	ErrorFunction<FloatVector> error(data, &model, &loss, true);
 //###end<objfunct>	
 	

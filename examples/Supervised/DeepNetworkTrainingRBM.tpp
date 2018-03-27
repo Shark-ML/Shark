@@ -135,7 +135,7 @@ int main()
 	
 //###begin<supervised_training>
 	//create the supervised problem. Cross Entropy loss with two norm regularisation
-	CrossEntropy<RealVector> loss;
+	CrossEntropy<unsigned int, RealVector> loss;
 	ErrorFunction<> error(data, &network, &loss);
 	TwoNormRegularizer<> regularizer(error.numberOfVariables());
 	error.setRegularizer(regularisation,&regularizer);

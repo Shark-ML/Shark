@@ -105,7 +105,7 @@ void logisticRegressionOptimize(ModelType& model, DatasetT const& dataset, doubl
 	innerModel.setParameterVector(SearchPointType(dim,0.0));
 	
 	//setup error function
-	CrossEntropy<typename ModelType::DecisionFunctionType::OutputType> loss;
+	CrossEntropy<unsigned int, typename ModelType::DecisionFunctionType::OutputType> loss;
 	ErrorFunction<SearchPointType> error(dataset, &innerModel, &loss);//note: chooses a different implementation depending on the dataset type
 	
 	//handle two-norm regularization

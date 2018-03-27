@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 //###end<model_creation>
 //###begin<training>	
 	//create the supervised problem. 
-	CrossEntropy<RealVector> loss;
+	CrossEntropy<unsigned int, RealVector> loss;
 	ErrorFunction<> error(data, &network, &loss, true);//enable minibatch training
 	
 	//optimize the model

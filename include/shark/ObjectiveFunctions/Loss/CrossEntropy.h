@@ -60,11 +60,16 @@ namespace shark{
  *  that when \f$ e^{-yx} \f$ is big, the error function is well approximated by the linear function \em x. Also if
  *  the exponential is very small, the case \f$ \ln(0) \f$ is avoided.
  *
- * The class labels must be integers starting from 0. Also for theoretical reasons, the output neurons of a neural
- *  Network must be linear.
+ * If the class labels are integers, they must be starting from 0. If class labels are vectors, there must be a proper
+ * probability vector. i.e. values must be bigger or equal to zero and sum to one. This incldues one-hot-encoding of labels.
+ * Also for theoretical reasons, the output neurons of a neural Network that is trained with this loss should be linear.
  */
+template<class LabelType, class OutputType>
+class CrossEntropy;
+
+
 template<class OutputType>
-class CrossEntropy : public AbstractLoss<unsigned int,OutputType>
+class CrossEntropy<unsigned int, OutputType> : public AbstractLoss<unsigned int,OutputType>
 {
 private:
 	typedef AbstractLoss<unsigned int,OutputType> base_type;
@@ -221,6 +226,56 @@ public:
 
 			return std::log(norm) - prediction(target) - maximum;
 		}
+	}
+};
+
+
+template<class T, class Device>
+class CrossEntropy<blas::vector<T, Device>, blas::vector<T, Device> >
+: public AbstractLoss<blas::vector<T, Device>, blas::vector<T, Device>>
+{
+private:
+	typedef blas::vector<T, Device> OutputType;
+	typedef AbstractLoss<OutputType,OutputType> base_type;
+	typedef typename base_type::ConstLabelReference ConstLabelReference;
+	typedef typename base_type::ConstOutputReference ConstOutputReference;
+	typedef typename base_type::BatchOutputType BatchOutputType;
+	typedef typename base_type::MatrixType MatrixType;
+public:
+	CrossEntropy()
+	{ this->m_features |= base_type::HAS_FIRST_DERIVATIVE;}
+
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "CrossEntropy"; }
+
+	// annoyingness of C++ templates
+	using base_type::eval;
+
+	double eval(BatchOutputType const& target, BatchOutputType const& prediction) const {
+		SIZE_CHECK(target.size1() == prediction.size1());
+		SIZE_CHECK(target.size2() == prediction.size2());
+		std::size_t m = target.size2();
+		
+		OutputType maximum = max_columns(prediction);
+		auto safeExp = exp(prediction - trans(blas::repeat(maximum, m)));
+		OutputType norm = sum_columns(safeExp);
+		double error = sum(log(norm)) - sum(target * prediction) + sum(maximum);
+		return error;
+	}
+
+	double evalDerivative(BatchOutputType const& target, BatchOutputType const& prediction, BatchOutputType& gradient) const {
+		gradient.resize(prediction.size1(),prediction.size2());
+		std::size_t m = target.size2();
+		
+		OutputType maximum = max_columns(prediction);
+		noalias(gradient) = exp(prediction - trans(blas::repeat(maximum, m)));
+		OutputType norm = sum_columns(gradient);
+		noalias(gradient) /= trans(blas::repeat(norm, m));
+		noalias(gradient) -= target;
+		double error = sum(log(norm)) - sum(target * prediction) + sum(maximum);
+		return error;
 	}
 };
 

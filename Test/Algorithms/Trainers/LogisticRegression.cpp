@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoLone){
 	
 	//check gradient
 	{
-		CrossEntropy<RealVector> loss;
+		CrossEntropy<unsigned int, RealVector> loss;
 		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(model.parameterVector(),derivative);
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_NoLone){
 	
 	//check gradient
 	{
-		CrossEntropy<RealVector> loss;
+		CrossEntropy<unsigned int, RealVector> loss;
 		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(model.parameterVector(),derivative);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone){
 	//check gradient
 	{
 		RealVector point = model.parameterVector();
-		CrossEntropy<RealVector> loss;
+		CrossEntropy<unsigned int, RealVector> loss;
 		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(point,derivative);
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_Lone){
 	//check gradient
 	{
 		RealVector point = model.parameterVector();
-		CrossEntropy<RealVector> loss;
+		CrossEntropy<unsigned int, RealVector> loss;
 		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(point,derivative);
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone_Weighted){
 	//check gradient
 	{
 		RealVector point = model.parameterVector();
-		CrossEntropy<RealVector> loss;
+		CrossEntropy<unsigned int, RealVector> loss;
 		ErrorFunction<> error(dataset, &model.decisionFunction(),&loss);
 		RealVector derivative;
 		error.evalDerivative(point,derivative);

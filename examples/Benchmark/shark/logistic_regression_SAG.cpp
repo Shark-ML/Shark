@@ -10,7 +10,7 @@ using namespace std;
 
 template<class InputType>
 void run(LabeledData<InputType,unsigned int> const& data, double alpha, unsigned int epochs){
-	CrossEntropy loss;
+	CrossEntropy<unsigned int, RealVector> loss;
 	LinearClassifier<InputType> model;
 	
 	

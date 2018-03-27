@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 	ClassificationDataset data;
 	importSparseData(data, "mnist",0,8192);
 	double alpha = 0.1;
-	CrossEntropy loss;
+	CrossEntropy<unsigned int, RealVector> loss;
 	LinearClassifier<> model;
 	
 	//Setting up the problem

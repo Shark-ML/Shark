@@ -156,7 +156,7 @@ public:
 		LinearModel<> logistic_model = fitLogistic(validation_dataset);
 		
 		//to evaluate, we use cross entropy loss on the fitted model 
-		CrossEntropy<RealVector> logistic_loss;
+		CrossEntropy<unsigned int, RealVector> logistic_loss;
 		return logistic_loss(validation_dataset.labels(),logistic_model(validation_dataset.inputs()));
 	}
 
@@ -225,7 +225,7 @@ public:
 		std::size_t start = 0;
 		for(auto const& batch: validation_dataset.batches()){
 			std::size_t end = start+batch.size();
-			CrossEntropy<RealVector> logistic_loss;
+			CrossEntropy<unsigned int, RealVector> logistic_loss;
 			RealMatrix lossGradient;
 			error += logistic_loss.evalDerivative(batch.label,logistic_model(batch.input),lossGradient);
 			noalias(derivative) += column(lossGradient,0) % rows(all_validation_predict_derivs,start,end);
@@ -239,7 +239,7 @@ private:
 	LinearModel<> fitLogistic(ClassificationDataset const& data)const{
 		LinearModel<> logistic_model;
 		logistic_model.setStructure(1,1, true);//1 input, 1 output, bias = 2 parameters
-		CrossEntropy<RealVector> logistic_loss;
+		CrossEntropy<unsigned int, RealVector> logistic_loss;
 		ErrorFunction<> error(data, &logistic_model, & logistic_loss);
 		BFGS<> optimizer;
 		optimizer.init(error);

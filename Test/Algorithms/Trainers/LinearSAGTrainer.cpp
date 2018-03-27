@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Linear_SAG_Trainer)
 
 template<class Dataset>
 void testClassification(Dataset const& dataset, double lambda, unsigned int epochs, bool trainOffset){
-	CrossEntropy<RealVector> loss;
+	CrossEntropy<unsigned int, RealVector> loss;
 	LinearClassifier<RealVector> model;
 	
 	
