@@ -34,7 +34,7 @@
 #include "../kernels/trmv.hpp"
 #include "../kernels/gemm.hpp"
 #include "../kernels/trmm.hpp"
-#include "../kernels/sum_rows.hpp"
+#include "../kernels/fold_rows.hpp"
 #include "../assignment.hpp"
 #include "../proxy_expressions.hpp"
 #include <type_traits>
@@ -755,18 +755,17 @@ private:
 	vector_closure_type m_vector;
 };
 
-
-template<class MatA>
-class sum_matrix_rows:public vector_expression<sum_matrix_rows<MatA>, typename MatA::device_type >{
+template<class MatA, class F>
+class fold_matrix_rows:public vector_expression<fold_matrix_rows<MatA, F>, typename MatA::device_type >{
 public:
 	typedef typename MatA::const_closure_type matrix_closure_type;
 public:
-	typedef typename MatA::value_type value_type;
+	typedef typename F::result_type value_type;
 	typedef typename MatA::size_type size_type;
 	typedef value_type const_reference;
 	typedef const_reference reference;
 
-	typedef sum_matrix_rows const_closure_type;
+	typedef fold_matrix_rows const_closure_type;
 	typedef const_closure_type closure_type;
 	typedef unknown_storage storage_type;
 	typedef unknown_storage const_storage_type;
@@ -774,9 +773,9 @@ public:
 	typedef blockwise<typename MatA::evaluation_category::tag> evaluation_category;
 	
 
-	explicit sum_matrix_rows(
-		matrix_closure_type const& matrix
-	):m_matrix(matrix){}
+	explicit fold_matrix_rows(
+		matrix_closure_type const& matrix, F f
+	):m_matrix(matrix), m_function(f){}
 
 	size_type size() const{
 		return m_matrix.size2();
@@ -784,6 +783,10 @@ public:
 	
 	matrix_closure_type const& matrix() const{
 		return m_matrix;
+	}
+	
+	F const& function() const{
+		return m_function;
 	}
 
 	typename device_traits<device_type>::queue_type& queue()const{
@@ -801,10 +804,12 @@ public:
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
-		kernels::sum_rows(eval_block(m_matrix), x, alpha);
+		kernels::fold_rows(eval_block(m_matrix), x, m_function, alpha);
 	}
 private:
 	matrix_closure_type m_matrix;
+	F m_function;
+	value_type m_init;
 };
 
 //matrix-matrix prod

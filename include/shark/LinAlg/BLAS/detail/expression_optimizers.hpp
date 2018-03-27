@@ -70,15 +70,14 @@ struct vector_range_optimizer<matrix_vector_prod<M,V> >{
 	}
 };
 
-
-// range(sum_rows(M),start,end) = sum_rows(columns(m,start,end))
-template<class M>
-struct vector_range_optimizer<sum_matrix_rows<M> >{
+// range(fold_rows(M, f),start,end) = fold_rows(columns(m,start,end), f)
+template<class M, class F>
+struct vector_range_optimizer<fold_matrix_rows<M, F> >{
 	typedef matrix_range_optimizer<typename M::const_closure_type> mat_opt;
-	typedef sum_matrix_rows<typename mat_opt::type> type;
+	typedef fold_matrix_rows<typename mat_opt::type, F> type;
 	
-	static type create(sum_matrix_rows<M> const& m, std::size_t start, std::size_t end){
-		return type(mat_opt::create(m.expression(),0, m.expression().size1(), start, end));
+	static type create(fold_matrix_rows<M, F> const& m, std::size_t start, std::size_t end){
+		return type(mat_opt::create(m.expression(),0, m.expression().size1(), start, end), m.function());
 	}
 };
 

@@ -1,10 +1,10 @@
 /*!
  * 
  *
- * \brief       Sums the rows of a row-major or column major matrix.
+ * \brief       Folds the rows of a row-major or column major matrix.
  *
  * \author      O. Krause
- * \date        2016
+ * \date        2018
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -28,8 +28,8 @@
  *
  */
 
-#ifndef REMORA_KERNELS_CLBLAS_SUM_ROWS_HPP
-#define REMORA_KERNELS_CLBLAS_SUM_ROWS_HPP
+#ifndef REMORA_KERNELS_CLBLAS_FOLD_ROWS_HPP
+#define REMORA_KERNELS_CLBLAS_FOLD_ROWS_HPP
 
 #include "../../expression_types.hpp"
 #include "../../detail/traits.hpp"
@@ -37,53 +37,61 @@
 
 namespace remora{namespace bindings{
 
-template<class M,class V, class Orientation>
-void sum_rows(
+template<class F, class M,class V, class Orientation>
+void fold_rows(
 	matrix_expression<M, gpu_tag> const& A_unreg, 
 	vector_expression<V, gpu_tag>& v_unreg,
+	F f_unreg,
 	typename V::value_type alpha,
-	Orientation, dense_tag, dense_tag
+	Orientation
 ){
 	typedef typename V::value_type value_type;
-	gpu::detail::meta_kernel k("blas_sum_rows_row");
+	gpu::detail::meta_kernel k("remora_fold_rows");
 	std::size_t alpha_index = k.add_arg<value_type>("alpha");
 	std::size_t size1_index = k.add_arg<std::size_t>("size1");
 	std::size_t size2_index = k.add_arg<std::size_t>("size2");
 	auto A = k.register_args(to_functor(A_unreg));
 	auto v = k.register_args(to_functor(v_unreg));
+	auto f = k.register_args(f_unreg);
 	//read all tiles in the assigned rows and sum them up
-	k << "__local " <<k.decl<value_type>("sums")<< "[TILE_DIM][TILE_DIM+1];\n";
-	k << "uint colid = get_global_id(1);\n";
-	k << "sums[get_local_id(0)][get_local_id(1)]  = 0.0;\n";
-	k << "for(uint i = get_local_id(0) ; i < size1 && colid < size2; i += TILE_DIM){\n";
-	auto exprRow = k.expr<cl_uint>("i");
-	auto exprCol = k.expr<cl_uint>("colid");
-	k<< "    sums[get_local_id(0)][get_local_id(1)] +=" << A(exprRow,exprCol)<<";\n";
-	k<<'}';
-	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";//wait until all threads are done with copying
-	//sum up the rows
+	k << "__local " <<k.decl<value_type>("folds")<< "[TILE_DIM][TILE_DIM+1];\n";
+	k << "ulong rowid = get_global_id(0);\n";
+	k << "ulong colid = get_global_id(1);\n";
+	k << "if(rowid < size1 && colid < size2){\n"; //can not compute rows/columns that are infeasible
+	//note: we can not simply step out here as we must ensure that all threads get to the barrier(...)
+	auto colid = k.expr<cl_ulong>("colid");
+	auto rowid = k.expr<cl_ulong>("rowid");
+	auto entry = k.expr<cl_ulong>("folds[get_local_id(0)][get_local_id(1)]");
+	k << "	"<<entry <<" = "<< A(rowid,colid) <<";\n";
+	k << "	rowid += TILE_DIM;\n";
+	k << "	for(; rowid < size1; rowid += TILE_DIM){\n";
+	k << "		"<< entry << " = " << f(entry, A(rowid,colid))<<";\n";
+	k << "	}\n";
+	k << "}\n";
+	k << "barrier(CLK_LOCAL_MEM_FENCE);\n";//wait until all threads are done with folding the columns
+	//final fold, just the threads in the first row compute this
 	k << "if(get_local_id(0) == 0 && colid < size2){\n";
-	k << "    for(uint i = 1 ; i < TILE_DIM; ++i){\n";
-	k << "        sums[0][get_local_id(1)] +=sums[i][get_local_id(1)];\n";
+	k << "    for(uint i = 1 ; i < min(TILE_DIM, size1); ++i){\n";
+	k << "        " << entry <<" = "<< f(entry, k.expr<cl_ulong>("folds[i][get_local_id(1)]"))<<";\n";
 	k << "    }\n";
-	k << v(exprCol) << "+= alpha * sums[0][get_local_id(1)];\n";
+	k << v(colid) << "+= alpha * folds[0][get_local_id(1)];\n";
 	k<< "}\n";
 	//create source
 
 	std::size_t TILE_DIM = 8;
-	char const* options ="-DTILE_DIM=8";
+	char const* options ="-DTILE_DIM=8ul";
 	boost::compute::kernel kernel = k.compile(v_unreg().queue().get_context(), options);
 	//enqueue kernel
 	kernel.set_arg(alpha_index, alpha);
 	kernel.set_arg(size1_index, A_unreg().size1());
 	kernel.set_arg(size2_index, A_unreg().size2());
 	
-	std::size_t global_work_size[2] = {
+	std::size_t global_TILE_DIM[2] = {
 		TILE_DIM,
 		((A_unreg().size2()+TILE_DIM-1)/TILE_DIM) * TILE_DIM
 	};
-	std::size_t local_work_size[2] = {TILE_DIM, TILE_DIM};
-	v_unreg().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_work_size, local_work_size);
+	std::size_t local_TILE_DIM[2] = {TILE_DIM, TILE_DIM};
+	v_unreg().queue().enqueue_nd_range_kernel(kernel, 2,nullptr, global_TILE_DIM, local_TILE_DIM);
 }
 
 

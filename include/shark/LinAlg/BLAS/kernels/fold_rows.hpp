@@ -1,10 +1,10 @@
 /*!
  * 
  *
- * \brief       Sums the rows of a row-major or column major matrix.
+ * \brief       Folds the rows of a row-major or column major matrix.
  *
  * \author      O. Krause
- * \date        2016
+ * \date        2018
  *
  *
  * \par Copyright 1995-2015 Shark Development Team
@@ -28,41 +28,45 @@
  *
  */
 
-#ifndef REMORA_KERNELS_SUM_ROWS_HPP
-#define REMORA_KERNELS_SUM_ROWS_HPP
+#ifndef REMORA_KERNELS_FOLD_ROWS_HPP
+#define REMORA_KERNELS_FOLD_ROWS_HPP
 
-#include "default/sum_rows.hpp"
+#include "default/fold_rows.hpp"
 #ifdef REMORA_USE_GPU
-#include "gpu/sum_rows.hpp"
+#include "gpu/fold_rows.hpp"
 #endif
 
 namespace remora {namespace bindings{
-template<class M,class V, class Device, class Tag1, class Tag2>
-void sum_rows(
+template<class F, class M,class V, class Device>
+void fold_rows(
 	matrix_expression<M, Device> const & A, 
 	vector_expression<V, Device>& b,
+	F f,
 	typename V::value_type alpha,
-	unknown_orientation,
-	Tag1, Tag2
+	unknown_orientation
 ){
-	sum_rows(A,b,alpha,row_major(), Tag1(), Tag2());
+	fold_rows(A, b, f, alpha, row_major());
 }
 }
 	
 namespace kernels{
-///\brief Sums the rows of a row-major or column major matrix.
+///\brief Folds the rows of a row-major or column major matrix with a function f
 ///
-/// This is equivalent to the operation v=1^TA where 1 is the vector of all-ones
-template <class M, class V, class Device>
-void sum_rows(
+/// output v_j is computed as v_j += alpha * f(A_0j, f(A_1j,...)))
+/// Note: the implementation may assume that f is commutative and associative, i.e. the order of computation can be changed arbitrarily.
+/// it is further assumed that if A only has 1 row, the result of just returning this value is correct
+template <class F, class M, class V, class Device>
+void fold_rows(
 	matrix_expression<M, Device> const & A, 
 	vector_expression<V, Device>& b,
+	F f,
 	typename V::value_type alpha
 ){
 	REMORA_SIZE_CHECK(A().size2() == b().size());
-	
-	bindings::sum_rows(A,b,alpha,typename M::orientation(),
-	typename M::evaluation_category::tag(), typename V::evaluation_category::tag());
+	if(A().size1() == 0) return; //undefined
+	bindings::fold_rows(
+		A, b, f, alpha, typename M::orientation()
+	);
 }
 
 }}
