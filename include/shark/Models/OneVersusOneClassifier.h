@@ -118,7 +118,7 @@ public:
 		return m_binary.empty()? Shape() : m_binary[0]->inputShape();
 	}
 	Shape outputShape() const{
-		return Shape();
+		return Shape({m_classes});
 	}
 
 	/// \brief Obtain binary classifier.

@@ -101,9 +101,9 @@ public:
 	}
 	///\brief Returns the shape of the output
 	///
-	/// For the classifier, Shape is 0 as the output is a scalar
+	/// For the classifier, Shape is a number representing the number of classes.
 	Shape outputShape() const{
-		return Shape();
+		return m_decisionFunction.outputShape().flatten();
 	}
 	
 	RealVector const& bias()const{

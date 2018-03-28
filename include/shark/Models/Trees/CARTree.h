@@ -73,7 +73,9 @@ public:
 	
 
 	/// Constructor
-	CARTree(std::size_t inputDimension = 0) : m_inputDimension(inputDimension){}
+	CARTree(std::size_t inputDimension = 0, Shape const& outputShape = {})
+	: m_inputDimension(inputDimension)
+	, m_outputShape(outputShape){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
@@ -126,6 +128,7 @@ public:
 		archive >> m_tree;
 		archive >> m_labels;
 		archive >> m_inputDimension;
+		archive >> m_outputShape;
 	}
 
 	/// from ISerializable, writes a model to an archive
@@ -133,6 +136,7 @@ public:
 		archive << m_tree;
 		archive << m_labels;
 		archive << m_inputDimension;
+		archive << m_outputShape;
 	}
 
 	//Count how often attributes are used
@@ -152,7 +156,7 @@ public:
 		return m_inputDimension;
 	}
 	Shape outputShape() const{
-		return Shape();
+		return m_outputShape;
 	}
 	
 	////////////////////////////////
@@ -286,6 +290,7 @@ private:
 	/// tree of the model
 	TreeType m_tree;
 	std::vector<LabelType> m_labels;
+	Shape m_outputShape;
 	
 	/// Evaluate the CART tree on a single sample
 	template<class Vector>

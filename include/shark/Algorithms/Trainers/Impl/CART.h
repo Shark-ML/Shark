@@ -410,7 +410,7 @@ public:
 		Bootstrap& bootstrap
 	){
 		//create root of the tree
-		CARTree<LabelType> tree(bootstrap.data.size2());
+		CARTree<LabelType> tree(bootstrap.data.size2(), bootstrap.labelDim);
 		tree.createRoot();
 		
 		//small helper function to create the leafs.
