@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 	Ensemble<LinearModel<>, unsigned int> linEnsembleClass;
 	Ensemble<LinearClassifier<> > classEnsemble;
 	Ensemble<LinearClassifier<>* > classEnsemblePtr;
-	//~ Ensemble<LinearClassifier<>, RealVector> classEnsembleLin;
+	Ensemble<LinearClassifier<>*, RealVector> classEnsembleLin;
 
 
 	RealMatrix weights(4,2,0.0);
@@ -50,6 +50,7 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 		modelsClass[i].setStructure(curWeights,curBias);
 		classEnsemble.addModel(modelsClass[i],curAlpha);
 		classEnsemblePtr.addModel(&modelsClass[i],curAlpha);
+		classEnsembleLin.addModel(&modelsClass[i],curAlpha);
 		
 		//check that adding the model worked
 		BOOST_CHECK_EQUAL(linEnsemble.weight(i), curAlpha);
@@ -104,12 +105,14 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 		UIntVector testClassPtr = classEnsemblePtr(point);
 		RealMatrix testResponse = classEnsemble.decisionFunction()(point);
 		RealMatrix testResponsePtr = classEnsemblePtr.decisionFunction()(point);
+		RealMatrix testResponseLin = classEnsembleLin(point);
 		for(std::size_t i = 0; i != point.size1(); ++i){
 			BOOST_CHECK_EQUAL(truthLabel(i), testClass(i));
 			BOOST_CHECK_EQUAL(truthLabel(i), testClassPtr(i));
 		}
 		BOOST_CHECK_SMALL(max(abs(testResponse - truthVotes)), 1.e-10);
 		BOOST_CHECK_SMALL(max(abs(testResponsePtr - truthVotes)), 1.e-10);
+		BOOST_CHECK_SMALL(max(abs(testResponseLin - truthVotes)), 1.e-10);
 	}
 }
 BOOST_AUTO_TEST_CASE( Ensemble_Serialize )
@@ -158,6 +161,11 @@ BOOST_AUTO_TEST_CASE( Ensemble_Serialize )
 	TextInArchive ia(inputStream);
 	ia >> modelDeserialized;
 	ia >> modelLinDeserialized;
+	
+	BOOST_CHECK_EQUAL(modelDeserialized.inputShape(), Shape({2}));
+	BOOST_CHECK_EQUAL(modelLinDeserialized.inputShape(), Shape({2}));
+	BOOST_CHECK_EQUAL(modelDeserialized.outputShape(), Shape({4}));
+	BOOST_CHECK_EQUAL(modelLinDeserialized.outputShape(), Shape({4}));
 	
 	for (size_t i=0; i<1000; i++)
 	{

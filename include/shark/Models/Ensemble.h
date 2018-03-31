@@ -180,14 +180,11 @@ public:
 
 //the following creates an ensemble base depending on whether the ensemble should be a classifier or not.
 
-// if you get an error here, there is a mismatch between the output type of the model and the chosen OutputType
-// and the OutputType chosen is not a class label (unsigned int).
 template<class ModelType, class OutputType>
 struct EnsembleBase : public detail::EnsembleImpl<ModelType, OutputType>{
 private:
 	typedef typename std::remove_pointer<ModelType>::type::OutputType ModelOutputType;
 protected:
-	static_assert(std::is_same<OutputType, ModelOutputType>::value, "OutputType must either be unsigned int or the same as ModelType");
 	detail::EnsembleImpl<ModelType, OutputType>& impl(){ return *this;};
 	detail::EnsembleImpl<ModelType, OutputType> const& impl() const{ return *this;};
 };
