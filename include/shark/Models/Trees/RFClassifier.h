@@ -36,108 +36,12 @@
 #define SHARK_MODELS_TREES_RFCLASSIFIER_H
 
 #include <shark/Models/Trees/CARTree.h>
-#include <shark/Models/MeanModel.h>
-#include <shark/Models/Classifier.h>
+#include <shark/Models/Ensemble.h>
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>        
 #include <shark/Data/DataView.h>
 
 namespace shark {
-
-namespace detail{
-//this class bridges the differences between random forests in classification and regression
-template<class LabelType>
-class RFClassifierBase : public MeanModel<CARTree<LabelType> >{
-protected:
-	double doComputeOOBerror(
-		UIntMatrix const& oobPoints, LabeledData<RealVector, RealVector> const& data
-	){
-		double OOBerror = 0;
-		//aquire votes for every element
-		RealVector mean(labelDimension(data));
-		RealVector input(inputDimension(data));
-		std::size_t elem = 0;
-		for(auto const& point: data.elements()){
-			noalias(input) = point.input;
-			mean.clear();
-			std::size_t oobModels = 0;
-			for(std::size_t m = 0; m != this->numberOfModels();++m){
-				if(oobPoints(m,elem)){
-					++oobModels;
-					auto const& model = this->getModel(m);
-					noalias(mean) += model(input);
-				}
-			}
-			mean /= oobModels;
-			OOBerror += 0.5 * norm_sqr(point.label - mean);
-			++elem;
-		}
-		OOBerror /= data.numberOfElements();
-		return OOBerror;
-	}
-	
-	double loss(RealMatrix const& labels, RealMatrix const& predictions) const{
-		SquaredLoss<RealVector, RealVector> loss;
-		return loss.eval(labels,  predictions);
-	}
-};
-
-template<>
-class RFClassifierBase<unsigned int> : public Classifier<MeanModel<CARTree<unsigned int> > >{
-public:
-	//make the interface of MeanModel publicly available for same basic interface for classification and regression case
-	CARTree<unsigned int> const& getModel(std::size_t index)const{
-		return this->decisionFunction().getModel(index);
-	}
-	
-	void addModel(CARTree<unsigned int> const& model, double weight = 1.0){
-		this->decisionFunction().addModel(model,weight);
-	}
-	void clearModels(){
-		this->decisionFunction().clearModels();
-	}
-	
-	void setOutputSize(std::size_t dim){
-		this->decisionFunction().setOutputSize(dim);
-	}
-	
-	/// \brief Returns the number of models.
-	std::size_t numberOfModels()const{
-		return this->decisionFunction().numberOfModels();
-	}
-protected:
-	double loss(UIntVector const& labels, UIntVector const& predictions) const{
-		ZeroOneLoss<unsigned int> loss;
-		return loss.eval(labels,  predictions);
-	}
-	
-	double doComputeOOBerror(
-		UIntMatrix const& oobPoints, LabeledData<RealVector, unsigned int> const& data
-	){
-		double OOBerror = 0;
-		//aquire votes for every element
-		RealVector votes(numberOfClasses(data));
-		RealVector input(inputDimension(data));
-		std::size_t elem = 0;
-		for(auto const& point: data.elements()){
-			noalias(input) = point.input;
-			votes.clear();
-			for(std::size_t m = 0; m != numberOfModels();++m){
-				if(oobPoints(m,elem)){
-					auto const& model = getModel(m);
-					unsigned int label = model(input);
-					votes(label) += 1;
-				}
-			}
-			OOBerror += (arg_max(votes) != point.label);
-			++elem;
-		}
-		OOBerror /= data.numberOfElements();
-		return OOBerror;
-	}
-};
-}
-
 ///
 /// \brief Random Forest Classifier.
 ///
@@ -148,12 +52,80 @@ protected:
 ///
 /// \par
 /// It is an ensemble learner that uses multiple decision trees built
-/// using the CART methodology.
-///
+/// using the CART methodology. The trees are created using bagging
+/// which allows the use the out-of-bag error estimates for an approximately
+/// unbiased estimate of the test-error as well as unbiased feature-importance
+/// estimates using feature permutation.
 template<class LabelType>
-class RFClassifier : public detail::RFClassifierBase<LabelType>
-{
+class RFClassifier : public Ensemble<CARTree<LabelType> >{
+private:
+	//OOB-Error for regression
+	template<class VectorType>
+	double doComputeOOBerror(
+		UIntMatrix const& oobPoints, LabeledData<VectorType, VectorType> const& data
+	){
+		double OOBerror = 0;
+		//aquire votes for every element
+		VectorType mean(labelDimension(data));
+		VectorType input(inputDimension(data));
+		std::size_t elem = 0;
+		for(auto const& point: data.elements()){
+			noalias(input) = point.input;
+			mean.clear();
+			double oobWeightSum = 0;
+			for(std::size_t m = 0; m != this->numberOfModels();++m){
+				if(oobPoints(m,elem)){
+					oobWeightSum += this->weight(m);
+					noalias(mean) += this->weight(m) * this->model(m)(input);
+				}
+			}
+			mean /= oobWeightSum;
+			OOBerror += 0.5 * norm_sqr(point.label - mean);
+			++elem;
+		}
+		OOBerror /= data.numberOfElements();
+		return OOBerror;
+	}
+	
+	//OOB-Error for Classification
+	template<class VectorType>
+	double doComputeOOBerror(
+		UIntMatrix const& oobPoints, LabeledData<VectorType, unsigned int> const& data
+	){
+		double OOBerror = 0;
+		//aquire votes for every element
+		RealVector votes(numberOfClasses(data));
+		RealVector input(inputDimension(data));
+		std::size_t elem = 0;
+		for(auto const& point: data.elements()){
+			noalias(input) = point.input;
+			votes.clear();
+			for(std::size_t m = 0; m != this->numberOfModels();++m){
+				if(oobPoints(m,elem)){
+					unsigned int label = this->model(m)(input);
+					votes(label) += this->weight(m);
+				}
+			}
+			OOBerror += (arg_max(votes) != point.label);
+			++elem;
+		}
+		OOBerror /= data.numberOfElements();
+		return OOBerror;
+	}
+	
+	//loss for regression
+	double loss(RealMatrix const& labels, RealMatrix const& predictions) const{
+		SquaredLoss<RealVector, RealVector> loss;
+		return loss.eval(labels,  predictions);
+	}
+	//loss for classification
+	double loss(UIntVector const& labels, UIntVector const& predictions) const{
+		ZeroOneLoss<unsigned int> loss;
+		return loss.eval(labels,  predictions);
+	}
+	
 public:
+
 	/// \brief From INameable: return the class name.
 	std::string name() const
 	{ return "RFClassifier"; }
@@ -173,14 +145,14 @@ public:
 	UIntVector countAttributes() const {
 		std::size_t n = this->numberOfModels();
 		if(!n) return UIntVector();
-		UIntVector r = this->getModel(0).countAttributes();
+		UIntVector r = this->model(0).countAttributes();
 		for(std::size_t i=1; i< n; i++ ) {
-			noalias(r) += this->getModel(i).countAttributes();
+			noalias(r) += this->model(i).countAttributes();
 		}
 		return r;
 	}
 	
-	/// Compute oob error, given an oob dataset (Classification)
+	/// Compute oob error, given an oob dataset
 	void computeOOBerror(std::vector<std::vector<std::size_t> > const& oobIndices, LabeledData<RealVector, LabelType> const& data){
 		UIntMatrix oobMatrix(oobIndices.size(), data.numberOfElements(),0);
 		for(std::size_t i = 0; i != oobMatrix.size1(); ++i){
@@ -201,19 +173,18 @@ public:
 		
 		for(std::size_t m = 0; m != this->numberOfModels();++m){
 			auto batch = subBatch(view, oobIndices[m]);
-			double errorBefore = this->loss(batch.label,this->getModel(m)(batch.input));
-			
+			double errorBefore = this->loss(batch.label,this->model(m)(batch.input));
 			for(std::size_t i=0; i!=inputs;++i) {
 				RealVector vOld= column(batch.input,i);
 				RealVector v = vOld;
 				std::shuffle(v.begin(), v.end(), rng);
 				noalias(column(batch.input,i)) = v;
-				double errorAfter = this->loss(batch.label,this->getModel(m)(batch.input));
+				double errorAfter = this->loss(batch.label,this->model(m)(batch.input));
 				noalias(column(batch.input,i)) = vOld;
-				m_featureImportances(i) += (errorAfter - errorBefore) / batch.size();
+				m_featureImportances(i) += this->weight(i) * (errorAfter - errorBefore) / batch.size();
 			}
 		}
-		m_featureImportances /= this->numberOfModels();
+		m_featureImportances /= this->sumOfWeights();
 	}
 
 private:

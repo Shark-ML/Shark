@@ -290,6 +290,8 @@ private:
 	/// tree of the model
 	TreeType m_tree;
 	std::vector<LabelType> m_labels;
+	///Number of attributes (set by trainer)
+	std::size_t m_inputDimension;
 	Shape m_outputShape;
 	
 	/// Evaluate the CART tree on a single sample
@@ -298,9 +300,6 @@ private:
 		auto nodeId = findLeaf(pattern);
 		return m_labels[m_tree[nodeId].rightIdOrIndex];
 	}
-
-	///Number of attributes (set by trainer)
-	std::size_t m_inputDimension;
 };
 
 
