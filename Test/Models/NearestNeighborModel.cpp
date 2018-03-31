@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple ) {
 	SimpleNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &kernel);
 	NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
 	BOOST_CHECK_EQUAL(dataset.inputShape(),model.inputShape());
-	BOOST_CHECK_EQUAL(dataset.labelShape(),model.outputShape());
+	BOOST_CHECK_EQUAL(Shape({3}),model.outputShape());
 
 	Data<unsigned int> prediction=model(dataset.inputs());
 	Data<RealVector> soft_prediction=model.decisionFunction()(dataset.inputs());
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KHCTree ) {
 	TreeNearestNeighbors<RealVector,unsigned int> algorithm(dataset, &tree);
 	NearestNeighborModel<RealVector, unsigned int> model(&algorithm, 3);
 	BOOST_CHECK_EQUAL(dataset.inputShape(),model.inputShape());
-	BOOST_CHECK_EQUAL(dataset.labelShape(),model.outputShape());
+	BOOST_CHECK_EQUAL(Shape({2}),model.outputShape());
 
 	for (size_t i = 0; i<6; ++i)
 	{
