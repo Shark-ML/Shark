@@ -73,9 +73,12 @@ public:
 	
 
 	/// Constructor
-	CARTree(std::size_t inputDimension = 0, Shape const& outputShape = {})
+	CARTree(): m_inputDimension(0){}
+	
+	CARTree(std::size_t inputDimension, Shape const& outputShape)
 	: m_inputDimension(inputDimension)
 	, m_outputShape(outputShape){}
+
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
