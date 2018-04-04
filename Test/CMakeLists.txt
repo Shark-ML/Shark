@@ -146,7 +146,7 @@ shark_add_test( Models/PoolingLayer.cpp Models_PoolingLayer )
 shark_add_test( Models/NearestNeighborModel.cpp Models_NearestNeighborModel )
 shark_add_test( Models/RBFLayer.cpp Models_RBFLayer ) 
 shark_add_test( Models/CMAC.cpp Models_CMAC )
-shark_add_test( Models/MeanModel.cpp Models_MeanModel )
+shark_add_test( Models/Ensemble.cpp Models_Ensemble )
 shark_add_test( Models/DropoutLayer.cpp Models_DropoutLayer )
 shark_add_test( Models/NeuronLayer.cpp Models_NeuronLayer )
 

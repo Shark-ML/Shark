@@ -130,7 +130,6 @@ public:
 	using AbstractWeightedTrainer<RFClassifier<unsigned int> >::train;
 	void train(RFClassifier<LabelType>& model, WeightedLabeledData<RealVector,LabelType> const& dataset){
 		model.clearModels();
-		model.setOutputSize(numberOfClasses(dataset));
 		
 		//setup treebuilder
 		CART::TreeBuilder<unsigned int,CART::ClassificationCriterion> builder;
@@ -248,7 +247,6 @@ public:
 	/// Train a random forest for classification.
 	void train(RFClassifier<LabelType>& model, WeightedLabeledData<RealVector,LabelType> const& dataset){
 		model.clearModels();
-		model.setOutputSize(labelDimension(dataset));
 		//setup treebuilder
 		CART::TreeBuilder<RealVector,CART::MSECriterion> builder;
 		builder.m_min_samples_leaf = m_min_samples_leaf;

@@ -59,9 +59,10 @@ class LinearModel : public AbstractModel<
 	blas::vector<typename InputType::value_type, typename InputType::device_type>,//type of output uses same device and precision as input
 	blas::vector<typename InputType::value_type, typename InputType::device_type>//type of parameters uses same device and precision as input
 >{
-private:
+public:
 	typedef blas::vector<typename InputType::value_type, typename InputType::device_type> VectorType;
 	typedef blas::matrix<typename InputType::value_type, blas::row_major, typename InputType::device_type> MatrixType;
+private:	
 	typedef AbstractModel<InputType,VectorType, VectorType> base_type;
 	typedef LinearModel<InputType, ActivationFunction> self_type;
 	Shape m_inputShape;
@@ -331,10 +332,31 @@ template<class VectorType = RealVector>
 class LinearClassifier : public Classifier<LinearModel<VectorType> >
 {
 public:
+	typedef typename LinearModel<VectorType>::MatrixType MatrixType;
 	LinearClassifier(){}
+	
+	/// Constructor creating a model with given dimensionalities and optional offset term.
+	LinearClassifier(Shape const& inputs, std::size_t numClasses, bool offset = false){
+		setStructure(inputs, numClasses, offset);
+	}
+	
+	/// Constructor from weight matrix (and optional offset).
+	LinearClassifier(MatrixType const& matrix, VectorType const& offset = VectorType()){
+		setStructure(matrix, offset);
+	}
 
 	std::string name() const
 	{ return "LinearClassifier"; }
+	
+	/// overwrite structure and parameters
+	void setStructure(Shape const& inputs, std::size_t numClasses, bool offset = false){
+		this->decisionFunction().setStructure(inputs, numClasses, offset);
+	}
+
+	/// overwrite structure and parameters
+	void setStructure(MatrixType const& matrix, VectorType const& offset = VectorType()){
+		this->decisionFunction().setStructure(matrix, offset);
+	}
 };
 
 }
