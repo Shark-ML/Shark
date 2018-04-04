@@ -64,7 +64,7 @@ private:
 	}
 	
 
-	//two implementations of eval, depending on whether the output of a model in the is a class label or a vector type.
+	//implements the pooling operation which creates a vector from the model responses to the given patterns
 	template<class T> struct tag{};
 
 	template<class InputBatch, class T, class Device>
@@ -194,11 +194,11 @@ template<class BaseModelType>
 struct EnsembleBase<BaseModelType, unsigned int>
 : public Classifier<detail::EnsembleImpl<BaseModelType, typename std::remove_pointer<BaseModelType>::type::ParameterVectorType> >{
 private:
-	typedef typename std::remove_pointer<BaseModelType>::type ModelType;
+	typedef typename std::remove_pointer<BaseModelType>::type::ParameterVectorType PoolingVectorType;
 protected:
-	detail::EnsembleImpl<BaseModelType, typename ModelType::ParameterVectorType>& impl()
+	detail::EnsembleImpl<BaseModelType, PoolingVectorType>& impl()
 	{ return this->decisionFunction();}
-	detail::EnsembleImpl<BaseModelType, typename ModelType::ParameterVectorType> const& impl() const
+	detail::EnsembleImpl<BaseModelType, PoolingVectorType> const& impl() const
 	{ return this->decisionFunction();}
 };
 
@@ -211,7 +211,7 @@ struct EnsembleBase<ModelType, void>
 /// \brief Represents en weighted ensemble of models. 
 ///
 /// In an ensemble, each model computes a response for an input independently. The responses are then pooled
-/// to form a single label. The hope is that models in an ensemble do not produce the sample type of errors
+/// to form a single label. The hope is that models in an ensemble do not produce the same type of errors
 /// and thus the averaged response is more reliable. An example for this is AdaBoost, where a series
 /// of weak models is trained and weighted to create one final prediction. 
 ///
@@ -219,8 +219,8 @@ struct EnsembleBase<ModelType, void>
 /// based on the output type of the ensemble models, and the mapping of the output of the pooling function
 /// to the model output.
 /// 
-/// If the ensemble consists of models returning vectors, simple
-/// weighted averaging is performed. If the models return class labels, those are first transformed
+/// If the ensemble consists of models returning vectors, pooling is implemented
+/// using weighted averaging. If the models return class labels, those are first transformed
 /// into a one-hot encoding before averaging. Thus the output can be interpreted
 /// as the probability of a class label when picking a member of the emsemble randomly with probability 
 /// proportional to its weights. 
@@ -228,21 +228,21 @@ struct EnsembleBase<ModelType, void>
 /// The final mapping to the output is based on the OutputType template parameter, which by default
 /// is the same as the output type of the model. If it is unsigned int, the Ensemble is treated as Classifier
 /// with decision function being the result of the pooling function (i.e. the class with maximum response in
-/// the weighted average is chosen). In this case, the Class is derived from Classifier<>. 
+/// the weighted average is chosen). In this case, Essemble is derived from Classifier<>. 
 /// Otherwise the weighted average is returned.
 ///
-/// Note, by the rules above, for classifiers there is a crucial decision in algorithm design:
+/// Note that there is a decision in algorihm design tot ake for classifiers:
 /// We can either let each member of the Ensemble predict
-/// a label and then pool the labels as described above, or we can create an ensemble of
+/// a class-label and then pool the labels as described above, or we can create an ensemble of
 /// decision functions and weight them into one decision function to produce the class-label.
 /// Those approaches will lead to different results. For example if the underlying models
-/// produce class probabilities, the class with the largest average probability might not be
-/// the same as the class with most votes from the individual models.
+/// produce class probabilities, the class with the largest average probability
+/// might not be the same as the class with most votes from the individual models.
 ///
 /// Models are added using addModel.
 /// The ModelType is allowed to be either a concrete model like LinearModel<>, in which
 /// case a copy of each added model is stored. If the ModelType is a pointer, for example
-/// LinearModel<>* or AbstractModel<...>, only pointers are stored and all added models
+/// AbstractModel<...>*, only pointers are stored and all added models
 /// must outlive the lifetime of the ensemble. This also entails differences in serialization.
 /// In the first case, the model can be serialized completely without any setup. In the second
 /// case before deserializing, the models must be constructed and added.
