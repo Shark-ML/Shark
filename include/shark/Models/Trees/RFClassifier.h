@@ -181,7 +181,7 @@ public:
 				noalias(column(batch.input,i)) = v;
 				double errorAfter = this->loss(batch.label,this->model(m)(batch.input));
 				noalias(column(batch.input,i)) = vOld;
-				m_featureImportances(i) += this->weight(i) * (errorAfter - errorBefore) / batch.size();
+				m_featureImportances(i) += this->weight(m) * (errorAfter - errorBefore) / batch.size();
 			}
 		}
 		m_featureImportances /= this->sumOfWeights();
