@@ -32,27 +32,18 @@
 #include "kernels/matrix_fold.hpp"
 #include "proxy_expressions.hpp"
 #include "vector_expression.hpp"
+//~ #include "vector_set_expressions.hpp"
 
 namespace remora{
-
-
-///\brief Computes the outer product of two vectors.
-///
-/// The outer product of two vectors v1 and v2 is defined as the matrix
-/// (outer_prod (v1, v2))_ij [i] [j] = v1[i] * v2 [j]
-template<class VecA, class VecB, class Device>
-outer_product<VecA, VecB >
-outer_prod(
-	vector_expression<VecA, Device> const& v1,
-        vector_expression<VecB, Device> const& v2
-) {
-	return outer_product<VecA, VecB>(v1(), v2());
-}
-
+	
+/////////////////////////////////////////////
+//////////Vector->Matrix Operations
+/////////////////////////////////////////////
 
 
 ///\brief Creates a matrix from a vector by repeating the vector in every row of the matrix.
 ///
+///TODO: cpu only!
 ///example: vector = (1,2,3)
 ///repeat(vector,3) results in
 ///(1,2,3)
@@ -77,37 +68,37 @@ repeat(T scalar, std::size_t rows, std::size_t columns){
 	return scalar_matrix<T,cpu_tag, row_major>(rows, columns, scalar);
 }
 
+/// \brief An identity matrix with values of type \c T
+/// 
+/// Elements or cordinates \f$(i,i)\f$ are equal to 1 (one) and all others to 0 (zero).
+template<class T>
+class identity_matrix: public diagonal_matrix<scalar_vector<T, cpu_tag> > {
+	typedef diagonal_matrix<scalar_vector<T, cpu_tag> > base_type;
+public:
+	identity_matrix(){}
+	identity_matrix(std::size_t size):base_type(scalar_vector<T, cpu_tag>(size,T(1))){}
+};
 
-/// \brief Computes the multiplication of a matrix-expression A with a scalar t.
-///
-/// \f$ (A*t)_{ij} = e_{ij}*t \f$
-template<class MatA, class T, class Device>
-typename std::enable_if<
-	std::is_convertible<T, typename MatA::value_type >::value,
-        matrix_scalar_multiply<MatA> 
->::type
-operator* (matrix_expression<MatA, Device> const& A, T scalar){
-	return matrix_scalar_multiply<MatA>(A(), typename MatA::value_type(scalar));
+
+
+/// \brief Creates a nxn diagonal matrix with with diagonal given by a vector.
+template<class MatA, class Device>
+diagonal_matrix<MatA> to_diagonal(vector_expression<MatA, Device> const& v){
+	return diagonal_matrix<MatA>(v());
 }
 
-/// \brief Computes the multiplication of a matrix-expression A with a scalar t.
-///
-/// \f$ (t*A)_{ij} = t*e_{ij} \f$
-template<class T, class MatA, class Device>
-typename std::enable_if<
-	std::is_convertible<T, typename MatA::value_type >::value,
-        matrix_scalar_multiply<MatA> 
->::type
-operator* (T scalar, matrix_expression<MatA, Device> const& A){
-	return matrix_scalar_multiply<MatA>(A(), typename MatA::value_type(scalar));
-}
+/////////////////////////////////////////////
+//////////Unary Matrix Transformations
+/////////////////////////////////////////////
+
 
 /// \brief Negates the matrix-expression A.
 ///
 /// \f$ (-A)_{ij} = - e_{ij} \f$
 template<class MatA, class Device>
-matrix_scalar_multiply<MatA> operator-(matrix_expression<MatA, Device> const& A){
-	return matrix_scalar_multiply<MatA>(A(), typename MatA::value_type(-1));
+typename detail::matrix_scalar_multiply_optimizer<MatA>::type
+operator-(matrix_expression<MatA, Device> const& A){
+	return detail::matrix_scalar_multiply_optimizer<MatA>::create(A(), typename MatA::value_type(-1));
 }
 
 #define REMORA_UNARY_MATRIX_TRANSFORMATION(name, F)\
@@ -117,6 +108,7 @@ name(matrix_expression<MatA, Device> const& m){\
 	typedef typename device_traits<Device>:: template F<typename MatA::value_type> functor_type;\
 	return detail::matrix_unary_optimizer<MatA, functor_type >::create(m(), functor_type());\
 }
+
 REMORA_UNARY_MATRIX_TRANSFORMATION(abs, abs)
 REMORA_UNARY_MATRIX_TRANSFORMATION(log, log)
 REMORA_UNARY_MATRIX_TRANSFORMATION(exp, exp)
@@ -137,27 +129,62 @@ REMORA_UNARY_MATRIX_TRANSFORMATION(softPlus, soft_plus)
 REMORA_UNARY_MATRIX_TRANSFORMATION(elem_inv, inv)
 #undef REMORA_UNARY_MATRIX_TRANSFORMATION
 
-///\brief Adds two Matrices
-template<class MatA, class MatB, class Device>
-matrix_addition<MatA, MatB > operator+ (
-	matrix_expression<MatA, Device> const& A,
-	matrix_expression<MatB, Device> const& B
-){
-	REMORA_SIZE_CHECK(A().size1() == B().size1());
-	REMORA_SIZE_CHECK(A().size2() == B().size2());
-	return matrix_addition<MatA, MatB>(A(),B());
+#define REMORA_UNARY_VECTOR_SET_TRANSFORMATION(name)\
+template<class S, class Device>\
+auto name(vector_set_expression<S, Device> const& set)\
+-> decltype(as_set(name( set().expression()), typename S::point_orientation())){\
+	return as_set(name( set().expression()), typename S::point_orientation());\
+}
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(abs)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(log)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(exp)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(tanh)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(sin)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(cos)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(tan)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(asin)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(acos)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(atan)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(erf)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(erfc)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(sqr)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(sqrt)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(cbrt)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(sigmoid)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(softPlus)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(elem_inv)
+REMORA_UNARY_VECTOR_SET_TRANSFORMATION(operator-)
+#undef REMORA_UNARY_VECTOR_SET_TRANSFORMATION
+
+
+/////////////////////////////////////////////
+//////////Matrix-Scalar Operations
+/////////////////////////////////////////////
+
+/// \brief Computes the multiplication of a matrix-expression A with a scalar t.
+///
+/// \f$ (A*t)_{ij} = e_{ij}*t \f$
+template<class MatA, class T, class Device>
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type >::value,
+	typename detail::matrix_scalar_multiply_optimizer<MatA>::type
+>::type
+operator* (matrix_expression<MatA, Device> const& A, T scalar){
+	return detail::matrix_scalar_multiply_optimizer<MatA>::create(A(), typename MatA::value_type(scalar));
 }
 
-///\brief Subtracts two Matrices
-template<class MatA, class MatB, class Device>
-matrix_addition<MatA, matrix_scalar_multiply<MatB> > operator- (
-	matrix_expression<MatA, Device> const& A,
-	matrix_expression<MatB, Device> const& B
-){
-	REMORA_SIZE_CHECK(A().size1() == B().size1());
-	REMORA_SIZE_CHECK(A().size2() == B().size2());
-	return matrix_addition<MatA, matrix_scalar_multiply<MatB> >(A(),-B());
+/// \brief Computes the multiplication of a matrix-expression A with a scalar t.
+///
+/// \f$ (t*A)_{ij} = t*e_{ij} \f$
+template<class T, class MatA, class Device>
+typename std::enable_if<
+	std::is_convertible<T, typename MatA::value_type >::value,
+        typename detail::matrix_scalar_multiply_optimizer<MatA>::type
+>::type
+operator* (T scalar, matrix_expression<MatA, Device> const& A){
+	return detail::matrix_scalar_multiply_optimizer<MatA>::create(A(), typename MatA::value_type(scalar));
 }
+
 
 ///\brief Adds a matrix plus a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
@@ -187,44 +214,25 @@ typename std::enable_if<
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value ,
-	matrix_addition<MatA, matrix_scalar_multiply<scalar_matrix<T,Device, typename MatA::orientation> > >
+	decltype(std::declval<MatA const&>() + T())
 >::type operator- (
 	matrix_expression<MatA, Device> const& A,
 	T t
 ){
-	return A - scalar_matrix<T,Device, typename MatA::orientation>(A().size1(),A().size2(),t);
+	return A + (-t);
 }
 
 ///\brief Subtracts a matrix from a scalar which is interpreted as a constant matrix
 template<class MatA, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename MatA::value_type>::value,
-	matrix_addition<scalar_matrix<T,Device, typename MatA::orientation>, matrix_scalar_multiply<MatA> >
+	decltype(T() + (-std::declval<MatA const&>()))
 >::type operator- (
 	T t,
 	matrix_expression<MatA, Device> const& A
 ){
-	return scalar_matrix<T,Device, typename MatA::orientation>(A().size1(),A().size2(),t) - A;
+	return t + (-A);
 }
-
-#define REMORA_BINARY_MATRIX_EXPRESSION(name, F)\
-template<class MatA, class MatB, class Device>\
-matrix_binary<MatA, MatB, typename device_traits<Device>:: template F<typename common_value_type<MatA,MatB>::type> >\
-name(matrix_expression<MatA, Device> const& m1, matrix_expression<MatB, Device> const& m2){\
-	REMORA_SIZE_CHECK(m1().size1() == m2().size1());\
-	REMORA_SIZE_CHECK(m1().size2() == m2().size2());\
-	typedef typename common_value_type<MatA,MatB>::type type;\
-	typedef typename device_traits<Device>:: template F<type> functor_type;\
-	return matrix_binary<MatA, MatB, functor_type >(m1(),m2(), functor_type());\
-}
-REMORA_BINARY_MATRIX_EXPRESSION(operator*, multiply)
-REMORA_BINARY_MATRIX_EXPRESSION(element_prod, multiply)
-REMORA_BINARY_MATRIX_EXPRESSION(operator/, divide)
-REMORA_BINARY_MATRIX_EXPRESSION(element_div, divide)
-REMORA_BINARY_MATRIX_EXPRESSION(pow,pow)
-REMORA_BINARY_MATRIX_EXPRESSION(min,min)
-REMORA_BINARY_MATRIX_EXPRESSION(max,max)
-#undef REMORA_BINARY_MATRIX_EXPRESSION
 
 #define REMORA_MATRIX_SCALAR_TRANSFORMATION(name, F)\
 template<class T, class MatA, class Device> \
@@ -267,6 +275,34 @@ REMORA_MATRIX_SCALAR_TRANSFORMATION_2(min, min)
 REMORA_MATRIX_SCALAR_TRANSFORMATION_2(max, max)
 #undef REMORA_MATRIX_SCALAR_TRANSFORMATION_2
 
+
+/////////////////////////////////////////////
+//////////Simple Matrix-Binary Operations
+/////////////////////////////////////////////
+
+
+///\brief Adds two Matrices
+template<class MatA, class MatB, class Device>
+matrix_addition<MatA, MatB > operator+ (
+	matrix_expression<MatA, Device> const& A,
+	matrix_expression<MatB, Device> const& B
+){
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
+	return matrix_addition<MatA, MatB>(A(),B());
+}
+
+///\brief Subtracts two Matrices
+template<class MatA, class MatB, class Device>
+auto operator- (
+	matrix_expression<MatA, Device> const& A,
+	matrix_expression<MatB, Device> const& B
+) -> decltype(A() + (-B)){
+	REMORA_SIZE_CHECK(A().size1() == B().size1());
+	REMORA_SIZE_CHECK(A().size2() == B().size2());
+	return A() + (-B);
+}
+
 template<class MatA, class MatB, class Device>
 matrix_binary<MatA, MatB, 
 	typename device_traits<Device>:: template  safe_divide<typename common_value_type<MatA,MatB>::type> 
@@ -281,6 +317,44 @@ safe_div(
 	typedef typename common_value_type<MatA,MatB>::type result_type;
 	typedef typename device_traits<Device>:: template safe_divide<result_type> functor_type;
 	return matrix_binary<MatA, MatB, functor_type>(A(),B(), functor_type(defaultValue));
+}
+
+
+#define REMORA_BINARY_MATRIX_EXPRESSION(name, F)\
+template<class MatA, class MatB, class Device>\
+matrix_binary<MatA, MatB, typename device_traits<Device>:: template F<typename common_value_type<MatA,MatB>::type> >\
+name(matrix_expression<MatA, Device> const& m1, matrix_expression<MatB, Device> const& m2){\
+	REMORA_SIZE_CHECK(m1().size1() == m2().size1());\
+	REMORA_SIZE_CHECK(m1().size2() == m2().size2());\
+	typedef typename common_value_type<MatA,MatB>::type type;\
+	typedef typename device_traits<Device>:: template F<type> functor_type;\
+	return matrix_binary<MatA, MatB, functor_type >(m1(),m2(), functor_type());\
+}
+REMORA_BINARY_MATRIX_EXPRESSION(operator*, multiply)
+REMORA_BINARY_MATRIX_EXPRESSION(element_prod, multiply)
+REMORA_BINARY_MATRIX_EXPRESSION(operator/, divide)
+REMORA_BINARY_MATRIX_EXPRESSION(element_div, divide)
+REMORA_BINARY_MATRIX_EXPRESSION(pow,pow)
+REMORA_BINARY_MATRIX_EXPRESSION(min,min)
+REMORA_BINARY_MATRIX_EXPRESSION(max,max)
+#undef REMORA_BINARY_MATRIX_EXPRESSION
+
+/////////////////////////////////////////
+/////////Matrix-Products
+/////////////////////////////////////////
+
+
+///\brief Computes the outer product of two vectors.
+///
+/// The outer product of two vectors v1 and v2 is defined as the matrix
+/// (outer_prod (v1, v2))_ij [i] [j] = v1[i] * v2 [j]
+template<class VecA, class VecB, class Device>
+outer_product<VecA, VecB >
+outer_prod(
+	vector_expression<VecA, Device> const& v1,
+        vector_expression<VecB, Device> const& v2
+) {
+	return outer_product<VecA, VecB>(v1(), v2());
 }
 
 
@@ -384,59 +458,141 @@ auto triangular_prod(
 }
 
 
-/// \brief Sums up the rows of A
+//~ // inner_prod (set, v)_i = inner_prod(set_i,v)
+//~ template<class S, class V, class Device>
+//~ typename detail::vector_set_inner_prod_optimizer<S,V>::type
+//~ inner_prod(
+	//~ vector_set_expression<S, Device> const& set,
+	//~ vector_expression<V, Device> const& v
+//~ ){
+	//~ REMORA_SIZE_CHECK(set().point_size() == v().size());
+	//~ return detail::vector_set_inner_prod_optimizer<S,V>::create(set,v);
+//~ }
+
+//~ template<class S, class V, class Device>
+//~ typename detail::vector_set_inner_prod_optimizer<S,V>::type
+//~ inner_prod(
+	//~ vector_expression<V, Device> const& v
+	//~ vector_set_expression<S, Device> const& set
+//~ ){
+	//~ REMORA_SIZE_CHECK(set1().point_size() == v().size());
+	//~ return detail::vector_set_inner_prod_optimizer<S,V>::create(set,v);
+//~ }
+
+//~ template<class S, class M, class Device>
+//~ typename detail::vector_set_matrix_prod_optimizer<S,M>::type
+//~ operator%(
+	//~ vector_set_expression<S, Device> const& set,
+	//~ matrix_expression<M, Device> const& m
+//~ ){
+	//~ REMORA_SIZE_CHECK(set().point_size() == m().size1());
+	//~ return detail::vector_set_matrix_prod_optimizer<S,M>::create(set,m);
+//~ }
+
+//~ template<class S, class M, class Device>
+//~ auto operator%(
+	//~ matrix_expression<M, Device> const& m
+	//~ vector_set_expression<S, Device> const& set
+//~ )->decltype(set % trans(m)){
+	//~ REMORA_SIZE_CHECK(set().point_size() == m().size2());
+	//~ return set % trans(m);
+//~ }
+
+
+/////////////////////////////////////////
+//////////VECTOR-SET REDUCTIONS
+/////////////////////////////////////////
+
+/// \brief Computes the sum of elements for each point in the set
 ///
-/// returns a vector v_j = sum_i A_ij
-template<class MatA, class Device>
-fold_matrix_rows< MatA, typename device_traits<Device>:: template add<typename MatA::value_type> >
-sum_rows(matrix_expression<MatA, Device> const& A){
-	typedef  typename device_traits<Device>:: template add<typename MatA::value_type> F;	
-	return fold_matrix_rows<MatA, F>(A(), F());
+/// Formula: (sum S)_i = sum_j S_ij
+template<class S, class Device>
+typename detail::fold_vector_set_optimizer<
+	S, typename device_traits<Device>:: template add<typename S::value_type>
+	, typename device_traits<Device>:: template identity<typename S::value_type>
+>::type
+sum(vector_set_expression<S, Device> const& set) {
+	typedef typename device_traits<Device>:: template add<typename S::value_type> Add;
+	typedef typename device_traits<Device>:: template identity<typename S::value_type> Identity;
+	return detail::fold_vector_set_optimizer<S, Add, Identity>::create(set(), Add(), Identity());
 }
 
-/// \brief Sums up the columns of A
+/// \brief Computes the maximum of elements for each point in the set
 ///
-/// returns a vector v_i = sum_j A_ij
-template<class MatA, class Device>
-auto sum_columns(matrix_expression<MatA, Device> const& A)->decltype(sum_rows(trans(A))){
-	return sum_rows(trans(A));
+/// Formula: (max S)_i = max_j S_ij
+template<class S, class Device>
+typename detail::fold_vector_set_optimizer<
+	S, typename device_traits<Device>:: template max<typename S::value_type>
+	, typename device_traits<Device>:: template identity<typename S::value_type>
+>::type
+max(vector_set_expression<S, Device> const& set) {
+	typedef typename device_traits<Device>:: template max<typename S::value_type> Max;
+	typedef typename device_traits<Device>:: template identity<typename S::value_type> Identity;
+	return detail::fold_vector_set_optimizer<S, Max, Identity>::create(set(), Max(), Identity());
 }
 
-/// \brief Computes the elementwise maximum of rows of A
+/// \brief Computes the minimum of elements for each point in the set
 ///
-/// returns a vector v_j = max_i A_ij
-template<class MatA, class Device>
-fold_matrix_rows< MatA, typename device_traits<Device>:: template max<typename MatA::value_type> >
-max_rows(matrix_expression<MatA, Device> const& A){
-	typedef  typename device_traits<Device>:: template max<typename MatA::value_type> F;	
-	return fold_matrix_rows<MatA, F>(A(), F());
+/// Formula: (min S)_i = min_j S_ij
+template<class S, class Device>
+typename detail::fold_vector_set_optimizer<
+	S, typename device_traits<Device>:: template min<typename S::value_type>
+	, typename device_traits<Device>:: template identity<typename S::value_type>
+>::type
+min(vector_set_expression<S, Device> const& set) {
+	typedef typename device_traits<Device>:: template min<typename S::value_type> Min;
+	typedef typename device_traits<Device>:: template identity<typename S::value_type> Identity;
+	return detail::fold_vector_set_optimizer<S, Min, Identity>::create(set(), Min(), Identity());
 }
 
-/// \brief Computes the elementwise maximum of columns of A
+//~ /// \brief arg_max v = arg max_i v_i
+//~ template<class M, class Device>
+//~ std::size_t arg_max(vector_set_expression<M, Device> const& set) {
+	//~ return kernels::vector_max(elem_result);
+//~ }
+
+//~ /// \brief arg_min v = arg min_i v_i
+//~ template<class VecV, class Device>
+//~ auto arg_min(vector_expression<VecV, Device> const& v) -> decltype(arg_max(-v)){
+	//~ return arg_max(-v);
+//~ }
+
+/// \brief Computes norm_1 for each element in the set.
 ///
-/// returns a vector v_i = max_j A_ij
-template<class MatA, class Device>
-auto max_columns(matrix_expression<MatA, Device> const& A)->decltype(max_rows(trans(A))){
-	return max_rows(trans(A));
+/// Formula: norm_1(S)_i = norm_1(point(S,i)) 
+template<class S, class Device>
+auto norm_1(vector_set_expression<S, Device> const& set) ->decltype(sum(abs(set))) {
+	return sum(abs(set));
 }
 
-/// \brief Computes the elementwise minimum of rows of A
+/// \brief Computes norm_sqr for each element in the set.
 ///
-/// returns a vector v_j = min_i A_ij
-template<class MatA, class Device>
-fold_matrix_rows< MatA, typename device_traits<Device>:: template min<typename MatA::value_type> >
-min_rows(matrix_expression<MatA, Device> const& A){
-	typedef  typename device_traits<Device>:: template min<typename MatA::value_type> F;	
-	return fold_matrix_rows<MatA, F>(A(), F());
+/// Formula: norm_sqr(S)_i = norm_sqr(point(S,i)) 
+template<class S, class Device>
+auto norm_sqr(vector_set_expression<S, Device> const& set) ->decltype(sum(sqr(set))){
+	return sum(sqr(set));
 }
 
-/// \brief Computes the elementwise minimum of columns of A
+/// \brief Computes norm_2 for each element in the set.
 ///
-/// returns a vector v_i = min_j A_ij
-template<class MatA, class Device>
-auto min_columns(matrix_expression<MatA, Device> const& A)->decltype(min_rows(trans(A))){
-	return min_rows(trans(A));
+/// Formula: norm_2(S)_i = norm_2(point(S,i)) 
+template<class S, class Device>
+auto norm_2(vector_set_expression<S, Device> const& set) ->decltype(sqrt(norm_sqr(set))){
+	return sqrt(norm_sqr(set));
 }
+
+/// \brief Computes norm_inf for each element in the set.
+///
+/// Formula: norm_inf(S)_i = norm_inf(point(S,i)) 
+template<class S, class Device>
+auto norm_inf(vector_set_expression<S, Device> const& set) ->decltype(max(abs(set))){
+	return max(abs(set));
+}
+
+
+/////////////////////////////////////////
+//////////MATRIX REDUCTIONS
+/////////////////////////////////////////
 
 /// \brief Computes the elementwise sum over all elements of A
 ///
@@ -450,6 +606,8 @@ typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
 	kernels::matrix_fold<functor_type>(elem_result,result);
 	return result;
 }
+
+
 
 /// \brief Computes the elementwise maximum over all elements of A
 ///
@@ -486,7 +644,7 @@ decltype(typename MatA::value_type() * typename MatB::value_type())
 frobenius_prod(
 	matrix_expression<MatA, Device> const& A,
 	matrix_expression<MatB, Device> const& B
-) {
+){
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
 	return sum(eval_block(A*B));
@@ -498,7 +656,7 @@ frobenius_prod(
 template<class MatA, class Device>
 typename real_traits<typename MatA::value_type>::type
 norm_1(matrix_expression<MatA, Device> const& A) {
-	return max(sum_rows(abs(A)));
+	return max(norm_1(as_columns(A)));
 }
 
 /// \brief computes the frobenius norm |A|_F
@@ -517,43 +675,25 @@ norm_frobenius(matrix_expression<MatA, Device> const& A) {
 template<class MatA, class Device>
 typename real_traits<typename MatA::value_type>::type
 norm_inf(matrix_expression<MatA, Device> const& A) {
-	return max(sum_columns(abs(A)));
+	return max(norm_1(as_rows(A)));
 }
 
 /// \brief Evaluates the trace of matrix A
 ///
-/// The rtace is defined as the sum of the diagonal elements of A,
+/// The trace is defined as the sum of the diagonal elements of A,
 /// \f$ \text{trace}(A) = \sum_i A_{ii}\f$
 ///
 /// \param  A square matrix
 /// \return the sum of the values at the diagonal of \em A
 template < class MatA, class Device>
-typename MatA::value_type trace(matrix_expression<MatA, Device> const& A)
-{
+typename MatA::value_type trace(matrix_expression<MatA, Device> const& A){
 	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	return sum(diag(A));
 }
 
-/** \brief An identity matrix with values of type \c T
- *
- * Elements or cordinates \f$(i,i)\f$ are equal to 1 (one) and all others to 0 (zero).
- */
-template<class T>
-class identity_matrix: public diagonal_matrix<scalar_vector<T, cpu_tag> > {
-	typedef diagonal_matrix<scalar_vector<T, cpu_tag> > base_type;
-public:
-	identity_matrix(){}
-	identity_matrix(std::size_t size):base_type(scalar_vector<T, cpu_tag>(size,T(1))){}
-};
-
-
-template<class MatA, class Device>
-diagonal_matrix<MatA> to_diagonal(vector_expression<MatA, Device> const& A){
-	return diagonal_matrix<MatA>(A());
-}
-
-
-// Block-Matrix Creation
+/////////////////////////////////////////
+//////// Block-Matrix Creation
+/////////////////////////////////////////
 
 /// \brief Forms the block matrix (A|B) where B is to the right of A
 template<class MatA, class MatB, class Device>

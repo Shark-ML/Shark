@@ -307,6 +307,12 @@ public:
 		REMORA_SIZE_CHECK(size2() == e().size2());
 		return assign(*this, typename matrix_temporary<dense_matrix_adaptor>::type(e));
 	}
+	template<class E>
+	dense_matrix_adaptor& operator = (vector_set_expression<E, cpu_tag> const& e) {
+		REMORA_SIZE_CHECK(size1() == typename E::point_orientation::index_M(e().size(), e().point_size()));
+		REMORA_SIZE_CHECK(size2() == typename E::point_orientation::index_M(e().size(), e().point_size()));
+		return assign(*this, typename matrix_temporary<dense_matrix_adaptor>::type(e));
+	}
 	
 	// --------------
 	// Element access
@@ -467,6 +473,20 @@ public:
 		assign(*this,e);
 	}
 	
+	/// \brief Constructor of a dense matrix from a vector-set expression.
+	/// 
+	/// Constructs the matrix by evaluating the expression and assigning the
+	/// results to the newly constructed matrix using a call to assign.
+	///
+	/// \param e is a vector set expression
+	template<class E>
+	matrix(vector_set_expression<E, cpu_tag> const& e)
+	: m_size1(E::point_orientation::index_M(e().size(), e().point_size()))
+	, m_size2(E::point_orientation::index_m(e().size(), e().point_size()))
+	, m_data(m_size1 * m_size2) {
+		assign(*this,e().expression());
+	}
+	
 	// Assignment
 	
 	/// \brief Assigns m to this
@@ -504,6 +524,20 @@ public:
 	/// \param e is a matrix expression
 	template<class E>
 	matrix& operator = (matrix_expression<E, cpu_tag> const& e) {
+		matrix temporary(e);
+		swap(temporary);
+		return *this;
+	}
+	
+	/// \brief Assigns e to this
+	/// 
+	/// evaluates the vector-set expression and assign the
+	/// results to this using a call to assign.
+	/// A temporary is created to prevent aliasing.
+	///
+	/// \param e is a matrix expression
+	template<class E>
+	matrix& operator = (vector_set_expression<E, cpu_tag> const& e) {
 		matrix temporary(e);
 		swap(temporary);
 		return *this;

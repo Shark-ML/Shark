@@ -87,17 +87,17 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
-		assign(x,m_rhs,alpha);
+	void assign_to(vector_expression<VecX, device_type>& x)const{
+		assign(x,m_rhs);
 		solver<MatA,SystemType> alg(m_matrix, m_system_type);
 		alg.solve(x,Side());
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
+	void plus_assign_to(vector_expression<VecX, device_type>& x)const{
 		typename vector_temporary<VecX>::type temp(m_rhs);
 		solver<MatA,SystemType> alg(m_matrix, m_system_type);
 		alg.solve(temp,Side());
-		plus_assign(x,temp,alpha);
+		plus_assign(x,temp);
 	}
 private:
 	matrix_closure_type m_matrix;
@@ -161,17 +161,17 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
-		assign(X,m_rhs,alpha);
+	void assign_to(matrix_expression<MatX, device_type>& X)const{
+		assign(X,m_rhs);
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(X,Side());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X)const{
 		typename matrix_temporary<MatX>::type temp(m_rhs);
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(temp,Side());
-		plus_assign(X,temp,alpha);
+		plus_assign(X,temp);
 	}
 private:
 	matrixA_closure_type m_matrix;
@@ -226,19 +226,19 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
+	void assign_to(matrix_expression<MatX, device_type>& X)const{
 		typedef scalar_vector<value_type, device_type> diag_vec;
-		assign(X,diagonal_matrix<diag_vec>(diag_vec(size1(),value_type(1))),alpha);
+		assign(X,diagonal_matrix<diag_vec>(diag_vec(size1(),value_type(1))));
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(X,left());
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
+	void plus_assign_to(matrix_expression<MatX, device_type>& X)const{
 		typedef scalar_vector<value_type, device_type> diag_vec;
-		typename matrix_temporary<MatX>::type temp = diagonal_matrix<diag_vec>(diag_vec(size1(),value_type(1)),alpha);
+		typename matrix_temporary<MatX>::type temp = diagonal_matrix<diag_vec>(diag_vec(size1(),value_type(1)));
 		solver<MatA,SystemType> alg(m_matrix,m_system_type);
 		alg.solve(temp,left());
-		plus_assign(X,temp,alpha);
+		plus_assign(X,temp);
 	}
 private:
 	matrix_closure_type m_matrix;

@@ -77,7 +77,7 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, cpu_tag>& x, value_type const& alpha)const{
+	void assign_to(vector_expression<VecX, cpu_tag>& x)const{
 		//in case the expression can not be mapped to memory, evaluate it
 		//this does nothing for proxies
 		auto e_eval = eval_expression(m_expression);
@@ -91,13 +91,13 @@ public:
 		);
 		//adapt host memory buffer to vector and assign
 		auto adaptE = adapt_vector(size(), p + storageE.offset, storageE.stride);
-		assign(x, adaptE, alpha);
+		assign(x, adaptE);
 		
 		//unmap memory
 		m_expression.queue().enqueue_unmap_buffer(buffer,p);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, cpu_tag>& x, value_type const& alpha)const{
+	void plus_assign_to(vector_expression<VecX, cpu_tag>& x)const{
 		//in case the expression can not be mapped to memory, evaluate it
 		//this does nothing for proxies
 		auto e_eval = eval_expression(m_expression);
@@ -110,7 +110,7 @@ public:
 		);
 		//adapt host memory buffer to vector and assign
 		auto adaptE = adapt_vector(size(), p + storageE.offset, storageE.stride);
-		plus_assign(x,adaptE, alpha);
+		plus_assign(x,adaptE);
 		
 		//unmap memory
 		m_expression.queue().enqueue_unmap_buffer(buffer,p);
@@ -159,7 +159,7 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, gpu_tag>& x, value_type const& alpha)const{
+	void assign_to(vector_expression<VecX, gpu_tag>& x)const{
 		auto storagex = x().raw_storage();
 		auto& buffer = storagex.buffer;
 		//map buffer to host memory
@@ -168,13 +168,13 @@ public:
 		);
 		//adapt host memory buffer to vector and assign
 		auto adaptX = adapt_vector(size(), p + storagex.offset, storagex.stride);
-		assign(adaptX,m_expression,alpha);
+		assign(adaptX,m_expression);
 		
 		//unmap memory
 		x().queue().enqueue_unmap_buffer(buffer,p);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, gpu_tag>& x, value_type const& alpha)const{
+	void plus_assign_to(vector_expression<VecX, gpu_tag>& x)const{
 		auto storagex = x().raw_storage();
 		auto& buffer = storagex.buffer;
 		//map buffer to host memory
@@ -183,7 +183,7 @@ public:
 		);
 		//adapt host memory buffer to vector and assign
 		auto adaptX = adapt_vector(size(), p + storagex.offset, storagex.stride);
-		plus_assign(adaptX,m_expression,alpha);
+		plus_assign(adaptX,m_expression);
 		
 		//unmap memory
 		x().queue().enqueue_unmap_buffer(buffer,p); 
@@ -240,7 +240,7 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, cpu_tag>& X, value_type const& alpha) const{
+	void assign_to(matrix_expression<MatX, cpu_tag>& X) const{
 		//in case the expression can not be mapped to memory, evaluate it
 		//this does nothing for proxies
 		auto e_eval = eval_expression(m_expression);
@@ -256,13 +256,13 @@ public:
 		typedef dense_matrix_adaptor<typename E::value_type, EOrientation> AdaptE;
 		AdaptE adaptE(p + storageE.offset,size1(), size2(), storageE.leading_dimension);
 		
-		assign(X, adaptE, alpha);
+		assign(X, adaptE);
 		
 		//unmap memory
 		m_expression.queue().enqueue_unmap_buffer(buffer,p);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, cpu_tag>& X, value_type const& alpha)const{
+	void plus_assign_to(matrix_expression<MatX, cpu_tag>& X)const{
 		//in case the expression can not be mapped to memory, evaluate it
 		//this does nothing for proxies
 		auto e_eval = eval_expression(m_expression);
@@ -278,7 +278,7 @@ public:
 		typedef dense_matrix_adaptor<typename E::value_type, EOrientation> AdaptE;
 		AdaptE adaptE(p + storageE.offset, size1(), size2(), storageE.leading_dimension);
 		
-		plus_assign(X, adaptE, alpha);
+		plus_assign(X, adaptE);
 		
 		//unmap memory
 		m_expression.queue().enqueue_unmap_buffer(buffer,p);
@@ -328,7 +328,7 @@ public:
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, gpu_tag>& X, value_type const& alpha)const{
+	void assign_to(matrix_expression<MatX, gpu_tag>& X)const{
 		auto storageX = X().raw_storage();
 		auto& buffer = storageX.buffer;
 		//map buffer to host memory
@@ -338,13 +338,13 @@ public:
 		//adapt host memory buffer to vector and assign
 		typedef typename MatX::orientation XOrientation;
 		dense_matrix_adaptor<typename MatX::value_type, XOrientation> adaptX(p, size1(), size2(), storageX.leading_dimension);
-		assign(adaptX, m_expression, alpha);
+		assign(adaptX, m_expression);
 		
 		//unmap memory
 		X().queue().enqueue_unmap_buffer(buffer,p);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, gpu_tag>& X, value_type const& alpha) const{
+	void plus_assign_to(matrix_expression<MatX, gpu_tag>& X) const{
 		auto storageX = X().raw_storage();
 		auto& buffer = storageX.buffer;
 		//map buffer to host memory
@@ -356,14 +356,13 @@ public:
 		typedef dense_matrix_adaptor<typename MatX::value_type, XOrientation> AdaptX;
 		AdaptX adaptX(p + storageX.offset, size1(), size2(), storageX.leading_dimension);
 		
-		plus_assign(adaptX, m_expression, alpha);
+		plus_assign(adaptX, m_expression);
 		
 		//unmap memory
 		X().queue().enqueue_unmap_buffer(buffer,p);
 	}
 
 private:
-
 	expression_closure_type m_expression;
 	boost::compute::command_queue* m_queue;
 };
@@ -371,6 +370,43 @@ private:
 ///////////////////////////////////////////////
 //////// Expression Optimizers
 ///////////////////////////////////////////////
+
+namespace detail{
+template<class E>
+struct matrix_scalar_multiply_optimizer<vector_transport_to_gpu<E> >{
+	typedef vector_scalar_multiply_optimizer<E> opt;
+	typedef vector_transport_to_gpu<typename opt::type> type;
+	static type create(vector_transport_to_gpu<E> const& v, typename type::value_type alpha){
+		return type(opt::create(v.expression(), alpha), v.queue());
+	}
+};
+template<class E>
+struct matrix_scalar_multiply_optimizer<vector_transport_to_cpu<E> >{
+	typedef vector_scalar_multiply_optimizer<E> opt;
+	typedef vector_transport_to_cpu<typename opt::type> type;
+	static type create(vector_transport_to_cpu<E> const& v, typename type::value_type alpha){
+		return type(opt::create(v.expression(), alpha));
+	}
+};
+
+template<class E>
+struct matrix_scalar_multiply_optimizer<matrix_transport_to_gpu<E> >{
+	typedef matrix_scalar_multiply_optimizer<E> opt;
+	typedef matrix_transport_to_gpu<typename opt::type> type;
+	static type create(matrix_transport_to_gpu<E> const& m, typename type::value_type alpha){
+		return type(opt::create(m.expression(), alpha), m.queue());
+	}
+};
+
+template<class E>
+struct matrix_scalar_multiply_optimizer<matrix_transport_to_cpu<E> >{
+	typedef matrix_scalar_multiply_optimizer<E> opt;
+	typedef matrix_transport_to_cpu<typename opt::type> type;
+	static type create(matrix_transport_to_cpu<E> const& m, typename type::value_type alpha){
+		return type(opt::create(m.expression(), alpha));
+	}
+};
+}
 
 //TODO: proxy(copy_to_gpu) should be possible...
 

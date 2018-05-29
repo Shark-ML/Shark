@@ -29,39 +29,40 @@
  */
 
 #ifndef REMORA_KERNELS_DEFAULT_FOLD_ROWS_HPP
-#define REMORA_KERNELS_DEFAULT_FOLD__ROWS_HPP
+#define REMORA_KERNELS_DEFAULT_FOLD_ROWS_HPP
 
 #include "../../expression_types.hpp"//for vector/matrix_expression
 #include "../../detail/traits.hpp"
 
 namespace remora{namespace bindings{
 	
-template<class F, class M,class V>
+template<class F, class G, class M,class V>
 void fold_rows(
 	matrix_expression<M, cpu_tag> const& A, 
 	vector_expression<V, cpu_tag>& v,
 	F f,
-	typename V::value_type alpha,
-	column_major
+	G g,
+	row_major
 ){
-	for(std::size_t i = 0; i != A().size2(); ++i){
+	for(std::size_t i = 0; i != v().size(); ++i){
 		auto end = A().major_end(i);
 		auto pos = A().major_begin(i);
-		typename V::value_type s = *(pos++);
+		typename V::value_type s = *pos;
+		++pos;
 		for(; pos != end; ++pos){
 			s = f(s,*pos);
 		}
-		v()(i) += alpha * s;
+		v()(i) += g(s);
 	}
 }
 
-template<class F, class M,class V>
+template<class F, class G, class M,class V>
 void fold_rows(
 	matrix_expression<M, cpu_tag> const& A, 
 	vector_expression<V, cpu_tag>& v,
 	F f,
-	typename V::value_type alpha,
-	row_major
+	G g,
+	column_major
 ){
 	std::size_t n = v().size();
 	const std::size_t BLOCK_SIZE = 16;
@@ -71,30 +72,30 @@ void fold_rows(
 	for(std::size_t b = 0; b != numBlocks; ++b){
 		std::size_t start = b * BLOCK_SIZE;
 		std::size_t cur_size = std::min(BLOCK_SIZE, n - start);
-		for(std::size_t j = 0; j != cur_size; ++j){
-			storage[j] = A()(0, start + j);
+		for(std::size_t i = 0; i != cur_size; ++i){
+			storage[i] = A()(start + i, 0);
 		}
-		for(std::size_t i = 1; i != A().size1(); ++i){
-			for(std::size_t j = 0; j != cur_size; ++j){
-				storage[j] = f(storage[j],A()(i, start + j));
+		for(std::size_t j = 1; j != A().size2(); ++j){
+			for(std::size_t i = 0; i != cur_size; ++i){
+				storage[i] = f(storage[i], A()(start + i, j));
 			}
 		}
-		for(std::size_t j = 0; j != cur_size; ++j){
-			v()(start + j) += alpha * storage[j];
+		for(std::size_t i = 0; i != cur_size; ++i){
+			v()(start + i) += g(storage[i]);
 		}
 	}
 }
 
 //dispatcher for triangular matrix
-template<class F, class M,class V,class Orientation,class Triangular>
+template<class F, class G, class M,class V,class Orientation,class Triangular>
 void fold_rows(
 	matrix_expression<M, cpu_tag> const& A, 
 	vector_expression<V, cpu_tag>& v,
 	F f,
-	typename V::value_type alpha,
+	G g,
 	triangular<Orientation,Triangular>
 ){
-	fold_rows(A,v,Orientation(), f, alpha);
+	fold_rows(A,v, f, g, Orientation());
 }
 
 }}

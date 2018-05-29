@@ -30,6 +30,7 @@
 
 #include "assignment.hpp"
 #include "kernels/random.hpp"
+#include "detail/proxy_optimizers_fwd.hpp"
 
 namespace remora{ namespace detail{
 template<class T, class Rng>
@@ -92,8 +93,9 @@ public:
 	random_vector(
 		Distribution const& distribution,
 		typename device_traits<device_type>::queue_type& queue,
-		std::size_t size
-	):m_distribution(distribution), m_queue(&queue), m_size(size){};
+		std::size_t size,
+		value_type alpha = value_type(1)
+	):m_distribution(distribution), m_queue(&queue), m_size(size), m_alpha(alpha){};
 
 	size_type size() const {
 		return m_size;
@@ -106,22 +108,27 @@ public:
 		return m_distribution;
 	}
 	
+	value_type alpha() const{
+		return m_alpha;
+	}
+	
 	typedef no_iterator iterator;
 	typedef iterator const_iterator;
 	
 	//dispatcher to computation kernels
 	template<class VecX>
-	void assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
-		m_distribution.generate(x(),alpha);
+	void assign_to(vector_expression<VecX, device_type>& x)const{
+		m_distribution.generate(x(), m_alpha);
 	}
 	template<class VecX>
-	void plus_assign_to(vector_expression<VecX, device_type>& x, typename VecX::value_type alpha)const{
-		plus_assign(x,typename vector_temporary<VecX>::type(*this),alpha);
+	void plus_assign_to(vector_expression<VecX, device_type>& x)const{
+		plus_assign(x,typename vector_temporary<VecX>::type(*this));
 	}
 private:
 	Distribution m_distribution;
 	typename device_traits<device_type>::queue_type* m_queue;
 	std::size_t m_size;
+	value_type m_alpha;
 };
 
 template<class Distribution, class Device>
@@ -143,8 +150,9 @@ public:
 	random_matrix(
 		Distribution const& distribution,
 		typename device_traits<device_type>::queue_type& queue,
-		std::size_t size1, std::size_t size2
-	):m_distribution(distribution), m_queue(&queue), m_size1(size1), m_size2(size2){};
+		std::size_t size1, std::size_t size2,
+		value_type alpha = value_type(1)
+	):m_distribution(distribution), m_queue(&queue), m_size1(size1), m_size2(size2), m_alpha(alpha){};
 
 	size_type size1() const {
 		return m_size1;
@@ -160,24 +168,101 @@ public:
 		return m_distribution;
 	}
 	
+	value_type alpha() const{
+		return m_alpha;
+	}
+	
 	typedef no_iterator major_iterator;
 	typedef no_iterator const_major_iterator;
 	
 	//dispatcher to computation kernels
 	template<class MatX>
-	void assign_to(matrix_expression<MatX, device_type>& x, typename MatX::value_type alpha)const{
-		m_distribution.generate(x(),alpha);
+	void assign_to(matrix_expression<MatX, device_type>& x)const{
+		m_distribution.generate(x(),m_alpha);
 	}
 	template<class MatX>
-	void plus_assign_to(matrix_expression<MatX, device_type>& x, typename MatX::value_type alpha)const{
-		plus_assign(x,typename matrix_temporary<MatX>::type(*this),alpha);
+	void plus_assign_to(matrix_expression<MatX, device_type>& x)const{
+		plus_assign(x,typename matrix_temporary<MatX>::type(*this));
 	}
 private:
 	Distribution m_distribution;
 	typename device_traits<device_type>::queue_type* m_queue;
 	std::size_t m_size1;
 	std::size_t m_size2;
+	value_type m_alpha;
 };
+
+namespace detail{
+template<class Distribution, class Device>
+struct vector_scalar_multiply_optimizer<random_vector<Distribution, Device> >{
+	typedef random_vector<Distribution, Device> type;
+	static type create(type const& v, typename type::value_type alpha){
+		return type(v.dist(), v.queue(), v.size(), v.alpha() * alpha);
+	}
+};
+
+template<class Distribution, class Device>
+struct vector_range_optimizer<random_vector<Distribution, Device> >{
+	typedef random_vector<Distribution, Device> type;
+	static type create(type const& v, std::size_t start, std::size_t end){
+		return type(v.dist(), v.queue(), end - start, v.alpha());
+	}
+};
+
+
+template<class Distribution, class Device>
+struct matrix_scalar_multiply_optimizer<random_matrix<Distribution, Device> >{
+	typedef random_matrix<Distribution, Device> type;
+	static type create(type const& m, typename type::value_type alpha){
+		return type(m.dist(), m.queue(), m.size1(), m.size2(), m.alpha() * alpha);
+	}
+};
+
+template<class Distribution, class Device>
+struct matrix_transpose_optimizer<random_matrix<Distribution, Device> >{
+	typedef random_matrix<Distribution, Device> type;
+	static type create(type const& m){
+		return type(m.dist(), m.queue(), m.size2(), m.size1(), m.alpha());
+	}
+};
+
+template<class Distribution, class Device>
+struct matrix_row_optimizer<random_matrix<Distribution, Device> >{
+	typedef random_vector<Distribution, Device> type;
+	static type create(random_matrix<Distribution, Device> const& m){
+		return type(m.dist(), m.queue(), m.size2(), m.alpha());
+	}
+};
+
+template<class Distribution, class Device>
+struct matrix_diagonal_optimizer<random_matrix<Distribution, Device> >{
+	typedef random_vector<Distribution, Device> type;
+	static type create(type const& m){
+		return type(m.dist(), m.queue(), std::min(m.size1(),m.size2()), m.alpha());
+	}
+};
+
+template<class Distribution, class Device>
+struct matrix_range_optimizer<random_matrix<Distribution, Device> >{
+	typedef random_matrix<Distribution, Device> type;
+	
+	static type create(type const& m,
+		std::size_t start1, std::size_t end1, std::size_t start2, std::size_t end2
+	){
+		return type(m.dist(), m.queue(), end1 - start1, end2-start2, m.alpha());
+	}
+};
+
+template<class Distribution, class Device>
+struct matrix_rows_optimizer<random_matrix<Distribution, Device> >{
+	typedef random_matrix<Distribution, Device> type;
+	static type create(type const& m, std::size_t start, std::size_t end
+	){
+		return type(m.dist(), m.queue(), end - start, m.size2(), m.alpha());
+	}
+};
+
+}
 
 
 //////////////////////////////////////////////////////
