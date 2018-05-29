@@ -69,7 +69,7 @@ struct vector_container:public vector_expression<C, Device> {};
 /// statically derived Matrix Expression classes
 /// We implement the casts to the statically derived type.
 template<class M, class Device>
-struct matrix_expression {
+struct matrix_expression{
 	typedef Device device_type;
 	
 	M const& operator()() const {
@@ -85,15 +85,16 @@ struct matrix_expression {
 ///
 /// The vector set expression type is similar to a matrix type. However it behaves
 /// like a vector of vectors with elements of the vector being vectors. Moreover
-/// all usual vector-space operations can be used . There is no distinction to the sizes of the elements
-/// and all vectors may have different dimensionalities.
+/// all usual vector-space operations can be used . All vectors have the same number of elements
 ///
 /// it does not model the Matrix Expression concept but all derived types should.
 /// The class defines a common base type and some common interface for all
 /// statically derived Matrix Expression classes
 /// We implement the casts to the statically derived type.
-template<class E>
-struct vector_set_expression {
+template<class E, class Device>
+struct vector_set_expression{
+	typedef Device device_type;
+	
 	E const& operator()() const {
 		return *static_cast<E const*>(this);
 	}

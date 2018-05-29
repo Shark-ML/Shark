@@ -34,7 +34,7 @@
 #include "../../proxy_expressions.hpp" //matrix row,, transpose
 #include "../../detail/traits.hpp" //matrix orientations
 #include "../dot.hpp" //inner product
-#include "../../assignment.hpp" //plus_assign
+#include "../vector_assign.hpp" //assignment of vectors
 #include <type_traits> //std::false_type marker for unoptimized
 
 namespace remora{namespace bindings {
@@ -67,10 +67,12 @@ void gemv_impl(
 	column_major
 ) {
 	typedef typename V::const_iterator iterator;
+	typedef typename ResultV::value_type value_type;
+	typedef device_traits<cpu_tag>::multiply_and_add<value_type> MultAdd;
 	iterator end = x().end();
 	for(iterator it = x().begin(); it != end; ++it) {
 		//FIXME: for sparse result vectors, this might hurt.
-		plus_assign(result,column(A,it.index()),alpha * (*it));
+		kernels::assign(result, column(A,it.index()), MultAdd(alpha * (*it)));
 	}
 }
 

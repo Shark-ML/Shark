@@ -32,7 +32,7 @@
 #define REMORA_KERNELS_DEFAULT_GEMM_HPP
 
 #include "../gemv.hpp"//for dispatching to gemv
-#include "../../assignment.hpp"//plus_assign
+#include "../vector_assign.hpp" //assignment of vectors
 #include "../../dense.hpp"//sparse gemm needs temporary vector
 #include "../../proxy_expressions.hpp"//matrix row,column,transpose,range
 #include <type_traits> //std::false_type marker for unoptimized, std::common_type
@@ -80,10 +80,12 @@ void gemm(
 	row_major, column_major, row_major,
 	dense_tag, sparse_tag
 ){
+	typedef typename M::value_type value_type;
+	typedef device_traits<cpu_tag>::multiply_and_add<value_type> MultAdd;
 	for (std::size_t k = 0; k != e1().size2(); ++k) {
 		for(std::size_t i = 0; i != e1().size1(); ++i){
 			auto row_m = row(m,i);
-			plus_assign(row_m,row(e2,k),alpha * e1()(i,k));
+			kernels::assign(row_m, row(e2,k), MultAdd(alpha * e1()(i,k)));
 		}
 	}
 }
@@ -128,12 +130,14 @@ void gemm(
 	row_major, column_major, row_major,
 	sparse_tag, dense_tag
 ){
+	typedef typename M::value_type value_type;
+	typedef device_traits<cpu_tag>::multiply_and_add<value_type> MultAdd;
 	for (std::size_t k = 0; k != e1().size2(); ++k) {
 		auto e1end = e1().major_end(k);
 		for(auto e1pos = e1().major_begin(k); e1pos != e1end; ++e1pos){
 			std::size_t i = e1pos.index();
 			auto row_m = row(m,i);
-			plus_assign(row_m,row(e2,k),alpha * (*e1pos));
+			kernels::assign(row_m, row(e2,k), MultAdd(alpha * (*e1pos)));
 		}
 	}
 }

@@ -51,6 +51,7 @@ void trsv_impl(
 	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
+	typedef device_traits<cpu_tag>::multiply_and_add<value_type> MultAdd;
 	std::size_t size = b().size();
 	for (std::size_t n = 0; n != size; ++ n) {
 		if(!Unit){
@@ -61,7 +62,8 @@ void trsv_impl(
 		}
 		if (b()(n) != value_type/*zero*/()){
 			auto blower = subrange(b,n+1,size);
-			plus_assign(blower,subrange(column(A,n),n+1,size),-b()(n));
+			auto colAlower = subrange(column(A,n),n+1,size);
+			kernels::assign(blower, colAlower, MultAdd(-b()(n)));
 		}
 	}
 }
@@ -102,6 +104,7 @@ void trsv_impl(
 	REMORA_SIZE_CHECK(A().size2() == b().size());
 
 	typedef typename MatA::value_type value_type;
+	typedef device_traits<cpu_tag>::multiply_and_add<value_type> MultAdd;
 	std::size_t size = b().size();
 	for (std::size_t i = 0; i < size; ++ i) {
 		std::size_t n = size-i-1;
@@ -114,7 +117,7 @@ void trsv_impl(
 		if (b()(n) != value_type/*zero*/()) {
 			auto blower = subrange(b(),0,n);
 			auto colAlower = subrange(column(A,n),0,n);
-			plus_assign(blower,colAlower, -b()(n));
+			kernels::assign(blower, colAlower, MultAdd(-b()(n)));
 		}
 	}
 }

@@ -197,6 +197,12 @@ public:
 		REMORA_SIZE_CHECK(size2() == e().size2());
 		return assign(*this, typename matrix_temporary<dense_matrix_adaptor>::type(e));
 	}
+	template<class E>
+	dense_matrix_adaptor& operator = (vector_set_expression<E, gpu_tag> const& e) {
+		REMORA_SIZE_CHECK(size1() == typename E::point_orientation::index_M(e().size(), e().point_size()));
+		REMORA_SIZE_CHECK(size2() == typename E::point_orientation::index_M(e().size(), e().point_size()));
+		return assign(*this, typename matrix_temporary<dense_matrix_adaptor>::type(e));
+	}
 
 	// ---------
 	// Storage interface
@@ -517,6 +523,15 @@ public:
 		assign(*this, e);
 	}
 	
+	template<class E>
+	matrix(vector_set_expression<E, gpu_tag> const& e)
+	: m_storage(e().size() * e().point_size(), e().queue().get_context())
+	, m_queue(&e().queue())
+	, m_size1(E::point_orientation::index_M(e().size(), e().point_size()))
+	, m_size2(E::point_orientation::index_m(e().size(), e().point_size())){
+		assign(*this, e().expression());
+	}
+	
 	// -------------------
 	// Assignment operators
 	// -------------------
@@ -559,6 +574,18 @@ public:
 	matrix& operator = (matrix_expression<E, gpu_tag> const& e) {
 		matrix temporary(e);
 		swap(*this,temporary);
+		return *this;
+	}
+	
+	
+	/// \brief Assign the result of a vector_set to the matrix
+	///
+	/// \param e is a const reference to the vector_set_expression
+	/// \return a reference to the resulting matrix
+	template<class E>
+	matrix& operator = (vector_set_expression<E, gpu_tag> const& e) {
+		matrix temporary(e);
+		swap(temporary);
 		return *this;
 	}
 
