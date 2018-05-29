@@ -58,7 +58,7 @@ void meanvar
 	//sum of variances of each column
 	for(auto& batch: data.batches()){
 		std::size_t batchSize = batch.size1();
-		noalias(varianceVec()) += sum_rows(sqr(batch-repeat(meanVec,batchSize)));
+		noalias(varianceVec()) += norm_sqr(as_columns(batch-repeat(meanVec,batchSize)));
 	}
 	varianceVec() /= double(dataSize);
 }
@@ -142,7 +142,7 @@ VectorType mean(Data<VectorType> const& data){
 	VectorType mean(dataDimension(data),0.0);
 	 
 	for(auto& batch: data.batches()){
-		mean += sum_rows(batch);
+		mean += sum(as_columns(batch));
 	}
 	mean /= double(data.numberOfElements());
 	return mean;

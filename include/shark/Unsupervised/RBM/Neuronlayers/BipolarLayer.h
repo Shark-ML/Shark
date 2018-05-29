@@ -231,20 +231,6 @@ public:
 		}
 		return logFactorization;
 	}
-
-	
-	///\brief Calculates the expectation of the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights.
-	/// The expectation is taken with respect to the conditional probability distribution of the layer given the state of the connected layer.
-	///
-	///This function takes a batch of samples and extracts the required informations out of it.
-	///@param derivative the derivative with respect to the parameters, the result is added on top of it to accumulate derivatives
-	///@param samples the samples from which the informations can be extracted
-	template<class Vector, class SampleBatch>
-	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples )const{
-		SIZE_CHECK(derivative.size() == size());
-		sumRows(2*samples.statistics,derivative);
-		derivative -= samples.size();
-	}
 	
 	///\brief Calculates the expectation of the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights.
 	/// The expectation is taken with respect to the conditional probability distribution of the layer given the state of the connected layer.
@@ -257,18 +243,6 @@ public:
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, WeightVector const& weights )const{
 		SIZE_CHECK(derivative.size() == size());
 		noalias(derivative) += 2*prod(weights,samples.statistics) - sum(weights);
-	}
-
-
-	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 
-	///
-	///This function takes a batch of samples and extracts the required informations out of it.
-	///@param derivative the derivative with respect to the parameters, the result is added on top of it to accumulate derivatives
-	///@param samples the sample from which the informations can be extracted
-	template<class Vector, class SampleBatch>
-	void parameterDerivative(Vector& derivative, SampleBatch const& samples)const{
-		SIZE_CHECK(derivative.size() == size());
-		sumRows(samples.state,derivative);
 	}
 	
 	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 

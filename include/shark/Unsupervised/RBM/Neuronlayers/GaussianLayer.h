@@ -218,34 +218,10 @@ public:
 		return lnResult;
 	}
 
-
-	///\brief Calculates the expectation of the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights.
-	/// The expectation is taken with respect to the conditional probability distribution of the layer given the state of the connected layer.
-	///
-	///This function takes a batch of samples and extracts the required informations out of it.
-	///@param derivative the derivative with respect to the parameters, the result is added on top of it to accumulate derivatives
-	///@param samples the samples from which the informations can be extracted
-	template<class Vector, class SampleBatch>
-	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples )const{
-		SIZE_CHECK(derivative.size() == size());
-		sum_rows(samples.statistics,derivative);
-	}
-
 	template<class Vector, class SampleBatch, class Vector2 >
 	void expectedParameterDerivative(Vector& derivative, SampleBatch const& samples, Vector2 const& weights )const{
 		SIZE_CHECK(derivative.size() == size());
 		noalias(derivative) += prod(weights,samples.statistics);
-	}
-	
-	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 
-	///
-	///This function takes a batch of samples and extracts the required informations out of it.
-	///@param derivative the derivative with respect to the parameters, the result is added on top of it to accumulate derivatives
-	///@param samples the sample from which the informations can be extracted
-	template<class Vector, class SampleBatch>
-	void parameterDerivative(Vector& derivative, SampleBatch const& samples)const{
-		SIZE_CHECK(derivative.size() == size());
-		sum_rows(samples.state,derivative);
 	}
 	
 	///\brief Calculates the derivatives of the energy term of this neuron layer with respect to it's parameters - the bias weights. 

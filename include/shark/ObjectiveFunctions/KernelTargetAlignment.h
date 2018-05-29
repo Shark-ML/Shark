@@ -377,13 +377,13 @@ private:
 				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
 					threadKK += frobenius_prod(blockK,blockK);
-					subrange(threadk,startColumn,startColumn+columnSize)+=sum_rows(blockK);//update sum_rows(K)
+					subrange(threadk,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));//update sum_rows(K)
 					threadYK += updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				else{//use symmetry ok K
 					threadKK += 2.0 * frobenius_prod(blockK,blockK);
-					subrange(threadk,startColumn,startColumn+columnSize)+=sum_rows(blockK);
-					subrange(threadk,startRow,startRow+rowSize)+=sum_columns(blockK);//symmetry: block(j,i)
+					subrange(threadk,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));
+					subrange(threadk,startRow,startRow+rowSize)+=sum(as_rows(blockK));//symmetry: block(j,i)
 					threadYK += 2.0 * updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				startColumn+=columnSize;

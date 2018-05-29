@@ -211,7 +211,7 @@ public:
 		//derivatives of offset parameters
 		//reshape coefficient matrix  into a matrix where the rows are the single output pixels
 		auto delta_pixels = to_matrix(to_vector(delta), coefficients.size1() * coefficients.size2()/m_numFilters, m_numFilters);
-		noalias(offsetGradient) = sum_rows(delta_pixels);
+		noalias(offsetGradient) = sum(as_columns(delta_pixels));
 		
 		//derivative of filters:
 		//the idea is to phrase this derivative in terms of another convolution.
