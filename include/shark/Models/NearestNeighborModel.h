@@ -188,6 +188,8 @@ private:
 ///
 /// For Regression, the (weighted) mean of the k nearest
 /// neighbours is computed.
+///
+/// \ingroup models
 template <class InputType, class LabelType>
 class NearestNeighborModel: public detail::BaseNearestNeighbor<InputType,LabelType>
 {

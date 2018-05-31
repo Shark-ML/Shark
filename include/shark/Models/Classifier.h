@@ -60,6 +60,8 @@ namespace shark {
 /// values of the decision function. Thus adding positive weights on a class makes it
 /// more likely to be predicted. In the binary case with a single output, a positive weight
 /// makes class one more likely and a negative weight class 0.
+///
+/// \ingroup models
 template<class Model>
 class Classifier : public AbstractModel<
 	typename Model::InputType,

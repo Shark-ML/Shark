@@ -75,6 +75,7 @@ namespace shark {
 /// such that there is a unique point in each leaf
 /// cell.
 ///
+/// \ingroup space_trees
 template <class VectorType = RealVector, int CuttingAccuracy = 25>
 class LCTree : public BinaryTree<VectorType>
 {

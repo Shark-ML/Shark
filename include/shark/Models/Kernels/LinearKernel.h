@@ -42,6 +42,7 @@ namespace shark{
 
 
 /// \brief Linear Kernel, parameter free
+/// \ingroup kernels
 template<class InputType=RealVector>
 class LinearKernel : public AbstractKernelFunction<InputType>
 {

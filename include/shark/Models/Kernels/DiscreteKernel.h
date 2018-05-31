@@ -52,7 +52,7 @@ namespace shark {
 /// by the integers 0, ..., N-1. The kernel function is
 /// defined by a symmetric, positive semi-definite N x N
 /// matrix.
-///
+/// \ingroup kernels
 class DiscreteKernel : public AbstractKernelFunction<std::size_t>
 {
 public:

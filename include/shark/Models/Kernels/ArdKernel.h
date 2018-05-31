@@ -54,7 +54,7 @@ namespace shark {
 /// argument to the constructor corresponds to the value of the true weights, while the set
 /// and get methods for the parameter vector set the parameterized values and not the true weights.
 ///
-/// \todo slow default implementation. Use BLAS3 calls to make things faster
+/// \ingroup kernels
 template<class InputType=RealVector>
 class ARDKernelUnconstrained : public AbstractKernelFunction<InputType>
 {

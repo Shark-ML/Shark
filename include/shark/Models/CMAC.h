@@ -38,16 +38,17 @@
 
 namespace shark{
 
-//!
-//! \brief The CMACMap class represents a linear combination of piecewise constant functions
-//!
-//! when a point is fed into the CMAC, it is first mapped into a vector of binary features.
-//! For this purpose the inputspace is divided into several tilings. Every tiling produces a bitstring where an element
-//! is 1 if the point lies inside the tile, 0 otherwise. The concatenation of all tilings forms the feature vector which is then fed
-//! into a linear function.
-//! Usually the CMAC is only good for low dimensional input data since the size of the featurevector grows exponentially with the
-//! number of dimensions.
-//!
+///
+/// \brief The CMACMap class represents a linear combination of piecewise constant functions
+///
+/// when a point is fed into the CMAC, it is first mapped into a vector of binary features.
+/// For this purpose the inputspace is divided into several tilings. Every tiling produces a bitstring where an element
+/// is 1 if the point lies inside the tile, 0 otherwise. The concatenation of all tilings forms the feature vector which is then fed
+/// into a linear function.
+/// Usually the CMAC is only good for low dimensional input data since the size of the featurevector grows exponentially with the
+/// number of dimensions.
+///
+/// \ingroup models
 class CMACMap :public AbstractModel<RealVector,RealVector>{
 protected:
 	///offset of the position of every tiling

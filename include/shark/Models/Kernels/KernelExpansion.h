@@ -61,8 +61,10 @@ namespace shark {
 /// is as allowing for a KernelExpansion model for \f$ d \f$ different classes/outputs in multi-class problems. Then,
 /// the i-th column of the matrix #m_alpha is the KernelExpansion for class/output i.
 ///
-/// \tparam InputType Type of basis elements supplied to the kernel
+/// For a choice of kernel, see \ref kernels.
 ///
+/// \tparam InputType Type of basis elements supplied to the kernel
+/// \ingroup models
 template<class InputType>
 class KernelExpansion : public AbstractModel<InputType, RealVector>
 {

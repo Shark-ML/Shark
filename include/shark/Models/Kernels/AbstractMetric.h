@@ -42,7 +42,10 @@
 #include <shark/Core/Traits/ProxyReferenceTraits.h>
 namespace shark {
 	
-	
+/// \brief Base-class for metrics.
+///
+/// A metric is a distance measure between objects. All kernels in shark define metrics.
+/// \ingroup kernels
 template<class InputTypeT>
 class AbstractMetric: public INameable, public IParameterizable<>, public ISerializable{
 public:

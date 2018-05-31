@@ -45,6 +45,7 @@ namespace shark {
 /// \par
 /// The degree \f$ m_exponent \f$ is a non-trainable but configurable parameter.
 /// The default value is one - exactly the same as a LinearKernel.
+/// \ingroup kernels
 template<class InputType=RealVector>
 class MonomialKernel : public AbstractKernelFunction<InputType>
 {

@@ -66,6 +66,7 @@ namespace shark {
 /// such that there is a unique point in each leaf
 /// cell.
 ///
+/// \ingroup space_trees
 template <class InputT>
 class KDTree : public BinaryTree<InputT>
 {

@@ -70,6 +70,7 @@ namespace shark {
 ///Since the KHCTree needs direct access to the elements, it's template parameter is not the actual point type
 ///But the Range, the points are stored in. Be aware that this range should be a View when a Dataset is used as storage,
 ///since during construction, the KHC-Tree needs random access to the elements.
+/// \ingroup space_trees
 template <class Container, int CuttingAccuracy = 25>
 class KHCTree : public BinaryTree<typename Container::value_type>
 {

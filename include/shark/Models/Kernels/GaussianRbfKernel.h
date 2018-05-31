@@ -46,6 +46,7 @@ namespace shark{
 /// with single bandwidth parameter \f$ \gamma \f$.
 /// Optionally, the parameter can be encoded as \f$ \exp(\eta) \f$,
 /// which allows for unconstrained optimization.
+/// \ingroup kernels
 template<class InputType=RealVector>
 class GaussianRbfKernel : public AbstractKernelFunction<InputType>
 {

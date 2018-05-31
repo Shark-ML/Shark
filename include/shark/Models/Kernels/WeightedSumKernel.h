@@ -59,6 +59,7 @@ namespace shark {
 /// kernel weights, so that in total, this amounts to fixing the sum
 /// of the of the weights to one.
 ///
+/// \ingroup kernels
 template<class InputType=RealVector>
 class WeightedSumKernel : public AbstractKernelFunction<InputType>
 {

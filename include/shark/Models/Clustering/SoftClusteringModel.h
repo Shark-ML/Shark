@@ -46,7 +46,7 @@ namespace shark {
 /// \brief Model for "soft" clustering.
 ///
 /// \par
-/// The SoftClusteringModel is based on an AbstractClustering
+/// The SoftClusteringModel is based on an \ref clustering
 /// object. Given an input, the model outputs the cluster
 /// membership function, which consists of a non-negative
 /// value per cluster, and all memberships add up to one.
@@ -54,6 +54,7 @@ namespace shark {
 /// \par
 /// See also HardClusteringModel for the best matching cluster.
 ///
+/// \ingroup clustering
 template <class InputT>
 class SoftClusteringModel : public ClusteringModel<InputT, RealVector>
 {

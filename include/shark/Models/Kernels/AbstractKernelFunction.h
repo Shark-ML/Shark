@@ -3,7 +3,7 @@
  * 
  *
  * \brief       abstract super class of all kernel functions
- * 
+ * \file
  * 
  *
  * \author      T.Glasmachers, O. Krause, M. Tuma
@@ -46,6 +46,12 @@ namespace shark {
 #else
 	#define INCREMENT_KERNEL_COUNTER( counter ) {  }
 #endif
+	
+///\defgroup kernels Kernels
+///\ingroup models
+///
+/// A kernel is a positive definite function k(x,y), which can be understood as a generalized scalar product. Kernel methods.
+/// like support vector machines or gaussian processes rely on the kernels.
 
 /// \brief Base class of all Kernel functions.
 ///
@@ -60,7 +66,7 @@ namespace shark {
 /// In Shark a kernel function class represents a parametric
 /// family of such kernel functions: The AbstractKernelFunction
 /// interface inherits the IParameterizable interface.
-///
+/// \ingroup kernels
 template<class InputTypeT>
 class AbstractKernelFunction : public AbstractMetric<InputTypeT>
 {

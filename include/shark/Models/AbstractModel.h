@@ -1,14 +1,8 @@
 //===========================================================================
 /*!
- * 
- *
- * \brief       base class for all models, as well as a specialized differentiable model
- * 
- * 
- *
  * \author      T.Glasmachers, O. Krause
  * \date        2010
- *
+ * \file
  *
  * \par Copyright 1995-2017 Shark Development Team
  * 
@@ -35,6 +29,12 @@
 #ifndef SHARK_MODELS_ABSTRACTMODEL_H
 #define SHARK_MODELS_ABSTRACTMODEL_H
 
+/// \defgroup models Models
+///
+/// \brief Model classes for statistical prediction.
+///
+/// Models in shark define the classes that can perform statistical predictions on supplied input data.
+/// Models can have different types of inputs and outputs so that they can be sued for classification and regression tasks.
 #include <shark/Core/Flags.h>
 #include <shark/Core/IParameterizable.h>
 #include <shark/Core/INameable.h>
@@ -45,7 +45,7 @@
 
 namespace shark {
 
-///\brief Base class for all Models
+///\brief Base class for all Models.
 ///
 /// \par
 /// A model is one of the three fundaments of supervised learning: model, error measure
@@ -76,6 +76,7 @@ namespace shark {
 /// \par
 /// Models have names and can be serialised and have parameters. The type of the parameter vector
 /// can be set as third argument. By default, this is RealVector.
+/// \ingroup models
 template<class InputTypeT, class OutputTypeT, class ParameterVectorType=RealVector>
 class AbstractModel : public IParameterizable<ParameterVectorType>, public INameable, public ISerializable
 {

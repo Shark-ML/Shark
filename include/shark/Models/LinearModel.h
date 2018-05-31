@@ -43,7 +43,7 @@ namespace shark {
 ///
 /// \par
 /// This model computes the result of
-/// \f$ y = f(x) = g(A x + b) \f$, where g is an arbitrary activation function.
+/// \f$ y = f(x) = g(A x + b) \f$, where g is an arbitrary activation function, see \ref activations..
 /// By default g is the identity and the model is a simple linear model. 
 /// Otherwise, this is known as a generalized linear model. There are two important special cases:
 /// The output may be a single number, and the offset term b may be
@@ -53,6 +53,8 @@ namespace shark {
 /// the weight matrix and the ouputs are dense. There are some cases where this is not
 /// good behavior. Check for example Normalizer for a class which is designed for sparse
 /// inputs and outputs.
+///
+/// \ingroup models
 template <class InputType = RealVector, class ActivationFunction = LinearNeuron>
 class LinearModel : public AbstractModel<
 	InputType,

@@ -46,6 +46,7 @@ namespace shark {
 ///
 /// \par
 /// The CARTree predicts a class label using a decision tree
+/// \ingroup models
 template<class LabelType>
 class CARTree : public AbstractModel<RealVector,LabelType>
 {

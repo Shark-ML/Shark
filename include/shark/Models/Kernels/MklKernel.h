@@ -65,9 +65,7 @@ namespace shark {
 /// In the current implementation, we expect the InputType to be a
 /// boost::fusion::vector. For example, boost::fusion::vector<RealVector,RealVector>
 /// represents a tuple of two vectors.
-///
-
-
+/// \ingroup kernels
 template<class InputType>
 class MklKernel
 : private detail::MklKernelBase<InputType>//order is important!

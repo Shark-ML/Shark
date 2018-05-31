@@ -48,6 +48,7 @@ namespace shark {
 /// with degree \f$ n \in \mathbb{N} \f$ and non-negative offset
 /// \f$ b \geq 0 \f$. For n=1 and b=0 it matches the linear kernel
 /// (standard inner product).
+/// \ingroup kernels
 template<class InputType = RealVector>
 class PolynomialKernel : public AbstractKernelFunction<InputType>
 {

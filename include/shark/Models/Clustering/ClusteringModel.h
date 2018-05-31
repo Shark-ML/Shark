@@ -3,7 +3,7 @@
  * 
  *
  * \brief       Super class for clustering models.
- * 
+ * \file
  * 
  *
  * \author      T. Glasmachers
@@ -41,11 +41,12 @@
 
 
 namespace shark {
-
-
+	
 /// \brief Abstract model with associated clustering object.
 ///
-/// See HardClusteringModel and SoftClusteringModel for details.
+/// See HardClusteringModel and SoftClusteringModel for details and \ref clustering for possible clusterings
+///
+/// \ingroup clustering
 template <class InputT, class OutputT>
 class ClusteringModel : public AbstractModel<InputT, OutputT>
 {

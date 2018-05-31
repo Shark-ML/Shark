@@ -49,7 +49,7 @@ namespace shark {
 /// Generic data structure for augmenting arbitrary data
 /// with an integer. This integer is typically used as a
 /// task identifier in multi-task and transfer learning.
-///
+/// \ingroup kernels
 template <class InputTypeT>
 struct MultiTaskSample : public ISerializable
 {
@@ -124,7 +124,7 @@ namespace shark {
 ///     k(t, t') = \exp \left( -\gamma \cdot \left\| \frac{1}{\ell_{t}\ell{t'}} \sum_{i | t_i = t}\sum_{j | t_j = t'} k'(x_i, x_j) \right\|^2 \right)
 /// \f]
 /// where k' is an arbitrary kernel on inputs.
-///
+/// \ingroup kernels
 template <class InputTypeT >
 class GaussianTaskKernel : public DiscreteKernel
 {

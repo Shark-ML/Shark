@@ -42,7 +42,6 @@
 namespace shark {
 
 
-///
 /// \brief One-versus-one Classifier.
 ///
 /// \par
@@ -58,6 +57,8 @@ namespace shark {
 /// the fly, without a need for re-training the existing
 /// binary models.
 ///
+///
+/// \ingroup models
 template <class InputType, class VectorType = RealVector>
 class OneVersusOneClassifier : public AbstractModel<InputType, unsigned int, VectorType>
 {

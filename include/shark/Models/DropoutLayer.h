@@ -35,6 +35,15 @@
 #include <shark/Models/AbstractModel.h>
 namespace shark{
 
+/// \brief Implements Dropout layer semantics
+///
+/// A dropout layer drops its input, i.e. sets it to 0 with a given probability. This is done for each element
+/// separately. This means, model prodections are not deterministic any more. Thus, after training the 
+/// output of several evaluations should be averaged. 
+///
+/// Dropout during training often leads to better regularized solutions in deep neural networks.
+///
+/// \ingroup models
 template <class VectorType = RealVector>
 class DropoutLayer : public AbstractModel<VectorType, VectorType, VectorType>{
 private:

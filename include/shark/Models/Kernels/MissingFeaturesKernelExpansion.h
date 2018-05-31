@@ -38,7 +38,9 @@
 
 namespace shark {
 
-/// Kernel expansion with missing features support
+/// \brief Kernel expansion with missing features support
+/// For a choice of kernel, see \ref kernels.
+/// \ingroup models
 template<class InputType>
 class MissingFeaturesKernelExpansion : public KernelExpansion<InputType>
 {

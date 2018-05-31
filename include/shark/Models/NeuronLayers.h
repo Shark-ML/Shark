@@ -1,7 +1,7 @@
 /*!
  * 
  *
- * \brief       -
+ * \file
  *
  * \author      O.Krause
  * \date        2011
@@ -35,12 +35,20 @@
  
 namespace shark{
 	
+
+/// \defgroup activations Neuron activation functions
+/// \ingroup models
+/// Neuron activation functions used for neural network nonlinearities.
+
+	
 ///\brief Neuron which computes the hyperbolic tangenst with range [-1,1].
 ///
 ///The Tanh function is 
 ///\f[ f(x)=\tanh(x) = \frac 2 {1+exp^(-2x)}-1 \f]
 ///it's derivative can be computed as
 ///\f[ f'(x)= 1-f(x)^2 \f]
+///
+/// \ingroup activations
 struct TanhNeuron{
 	typedef EmptyState State;
 	template<class Arg>
@@ -65,6 +73,8 @@ struct TanhNeuron{
 ///\f[ f(x)=\frac 1 {1+exp^(-x)}\f]
 ///it's derivative can be computed as
 ///\f[ f'(x)= f(x)(1-f(x)) \f]
+///
+/// \ingroup activations
 struct LogisticNeuron{
 	typedef EmptyState State;
 	template<class Arg>
@@ -89,6 +99,8 @@ struct LogisticNeuron{
 ///\f[ f(x)=\frac x {1+|x|}\f]
 ///it's derivative can be computed as
 ///\f[ f'(x)= (1 - |f(x)|)^2 \f]
+///
+/// \ingroup activations
 struct FastSigmoidNeuron{
 	typedef EmptyState State;
 	template<class Arg>
@@ -108,6 +120,11 @@ struct FastSigmoidNeuron{
 };
 
 ///\brief Linear activation Neuron. 
+///
+///It is defined as
+///\f[ f(x)=x\f]
+///
+/// \ingroup activations
 struct LinearNeuron{
 	typedef EmptyState State;
 	template<class Arg>
@@ -121,6 +138,8 @@ struct LinearNeuron{
 };
 
 ///\brief Rectifier Neuron f(x) = max(0,x)
+///
+/// \ingroup activations
 struct RectifierNeuron{
 	typedef EmptyState State;
 	template<class Arg>
@@ -145,6 +164,12 @@ struct RectifierNeuron{
 	}
 };
 
+///\brief Normalizes the sum of inputs to one.
+///
+/// \f[ f_i(x)= x_i \ \sum_j x_j \f]
+/// Normalization will reinterpret the input as probabilities. Therefore no negative valeus are allowed.
+///
+/// \ingroup activations
 template<class VectorType = RealVector>
 struct NormalizerNeuron{
 	struct State: public shark::State{
@@ -181,7 +206,14 @@ struct NormalizerNeuron{
 	}
 };
 
-
+///\brief Computes the softmax activation function.
+///
+/// \f[ f_i(x)= \exp(x_i) \ \sum_j \exp(x_j) \f]
+///
+/// computes the exponential function of the inputs and normalizes the outputs to sum to one. This is 
+/// the NormalizerNeuron just without the constraint of values being positive
+///
+/// \ingroup activations
 template<class VectorType = RealVector>
 struct SoftmaxNeuron{
 	typedef EmptyState State;
@@ -208,13 +240,17 @@ struct SoftmaxNeuron{
 		auto mass = eval_block(sum(as_rows(der * output)));
 		noalias(der) -= trans(blas::repeat(mass, der.size2()));
 		noalias(der) *= output;
-		//~ for(size_t i = 0; i != output.size1(); ++i){
-			//~ double mass=inner_prod(row(der,i),row(output,i));
-			//~ noalias(row(der,i)) = (row(der,i) - mass) *row(output,i);
-		//~ }
 	}
 };
 
+
+
+///\brief Neuron activation layer.
+///
+/// Applies a nonlinear activation function to the given input. Various choices for activations
+/// are given in \ref activations.
+///
+/// \ingroup models
 template <class NeuronType, class VectorType = RealVector>
 class NeuronLayer : public AbstractModel<VectorType, VectorType, VectorType>{
 private:

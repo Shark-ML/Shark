@@ -44,6 +44,14 @@ enum class Pooling{
 	Maximum
 };
 
+/// \brief Performs Pooling operations for a given input image.
+///
+/// Pooling partitions the input images in rectangular regions, typically 2x2 and computes 
+/// a statistic over the data. This could for example be the maximum or average of values. This is
+/// done channel-by-channel. The output is a smaller image where each pixel includes
+/// for each channel the computed statistic. Therefore, if the patch is 2x2 the output image will have half width and height.
+///
+/// \ingroup models
 template <class VectorType = RealVector>
 class PoolingLayer : public AbstractModel<VectorType, VectorType, VectorType>{
 private:

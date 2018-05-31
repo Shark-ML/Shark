@@ -40,7 +40,8 @@
 namespace shark {
 namespace detail{
 /// \brief given two vectors of input x = (x_1,...,x_n), y = (y_1,...,y_n), a subrange 1<=k<l<=n and a kernel k, computes the result of
-///   th subrange k((x_k,...x_l),(y_k,...,y_l))
+///   the subrange k((x_k,...x_l),(y_k,...,y_l))
+/// \ingroup kernels
 template<class InputType>
 class SubrangeKernelWrapper : public AbstractKernelFunction<InputType>{
 private:

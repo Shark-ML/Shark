@@ -56,6 +56,7 @@ namespace shark {
 /// which allows the use the out-of-bag error estimates for an approximately
 /// unbiased estimate of the test-error as well as unbiased feature-importance
 /// estimates using feature permutation.
+/// \ingroup models
 template<class LabelType>
 class RFClassifier : public Ensemble<CARTree<LabelType> >{
 private:

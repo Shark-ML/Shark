@@ -53,6 +53,8 @@ namespace shark {
 /// which is why there is no sparse version of this model (as opposed to
 /// the more general linear model). Also, the addition of b is optional.
 ///
+///
+/// \ingroup models
 template <class VectorType = RealVector>
 class Normalizer : public AbstractModel<VectorType, VectorType>
 {

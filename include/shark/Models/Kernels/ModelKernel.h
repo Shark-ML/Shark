@@ -193,6 +193,7 @@ private:
 ///\f]
 /// This requires the derivative of the inputs of the kernel wrt both parameters which,
 /// by limitation of the current kernel interface, requires to compute \f$k(f(x),f(y))\f$ and \f$k(f(y),f(x))\f$. 
+/// \ingroup kernels
 template<class InputType=RealVector>
 class ModelKernel: public AbstractKernelFunction<InputType>{
 private:

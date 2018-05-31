@@ -56,6 +56,7 @@ namespace shark{
 /// kernel value can be computed. Everyone is free to add this
 /// functionality :)
 ///
+/// \ingroup kernels
 template<class InputType>
 class ProductKernel : public AbstractKernelFunction<InputType>
 {

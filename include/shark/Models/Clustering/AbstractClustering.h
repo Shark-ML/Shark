@@ -3,7 +3,7 @@
  * 
  *
  * \brief       Super class for clustering definitions.
- * 
+ * \file
  * 
  *
  * \author      T. Glasmachers
@@ -44,7 +44,11 @@
 #include <shark/Core/Shape.h>
 
 namespace shark {
-
+	
+///\defgroup clustering Clustering Algorithms
+/// 
+/// A variety of models and algorithms for clustering
+/// \ingroup models
 
 ///
 /// \brief Base class for clustering.
@@ -88,6 +92,7 @@ namespace shark {
 /// clustering model classes: HardClusteringModel and
 /// SoftClusteringModel.
 ///
+/// \ingroup clustering
 template <class InputT>
 class AbstractClustering : public INameable, public IParameterizable<>, public ISerializable
 {

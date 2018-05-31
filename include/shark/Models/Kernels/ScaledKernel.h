@@ -45,6 +45,7 @@ namespace shark {
 /// For a positive definite kernel k, the scaled kernel
 /// \f[ \tilde k(x_1, x_2) := c k(x_1, x_2) \f]
 /// is again a positive definite kernel function as long as \f$ c > 0 \f$.
+/// \ingroup kernels
 template<class InputType=RealVector>
 class ScaledKernel : public AbstractKernelFunction<InputType>
 {

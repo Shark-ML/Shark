@@ -46,6 +46,7 @@ namespace shark {
 /// For a positive definite kernel k, the normalized kernel
 /// \f[ \tilde k(x, y) := \frac{k(x, y)}{\sqrt{k(x, x) \cdot k(y, y)}} \f]
 /// is again a positive definite kernel function.
+/// \ingroup kernels
 template<class InputType=RealVector>
 class NormalizedKernel : public AbstractKernelFunction<InputType>
 {

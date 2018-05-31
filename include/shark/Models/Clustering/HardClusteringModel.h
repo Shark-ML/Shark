@@ -44,13 +44,13 @@ namespace shark {
 /// \brief Model for "hard" clustering.
 ///
 /// \par
-/// The HardClusteringModel is based on an AbstractClustering
+/// The HardClusteringModel is based on an \ref clustering
 /// object. Given an input, the model outputs the index of the
 /// best matching cluster.
 ///
 /// \par
 /// See also SoftClusteringModel for general cluster membership.
-///
+/// \ingroup clustering
 template <class InputT>
 class HardClusteringModel : public ClusteringModel<InputT, unsigned int>
 {

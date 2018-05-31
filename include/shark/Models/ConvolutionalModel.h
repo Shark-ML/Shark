@@ -44,7 +44,7 @@ namespace shark {
 ///
 /// \par
 /// This model computes the result of
-/// \f$ y = f(x) = g(\text{convolution}(w, x) + b) \f$, where g is an arbitrary activation function and
+/// \f$ y = f(x) = g(\text{convolution}(w, x) + b) \f$, where g is an arbitrary activation function  \ref activations and
 /// convolution is the convolution of the input image x with the filters w.  b is a vector with one entry for each filter which is then applied to each response above
 ///
 /// The image is allowed to have several channels and are linearized to a single vector of size width * height * numChannels.
@@ -60,6 +60,8 @@ namespace shark {
 /// Padding::ZeroPad
 /// The output input is padded with zeros and the output has the same size as the input
 /// of size width * height * numFilters.
+///
+/// \ingroup models
 template <class VectorType = RealVector, class ActivationFunction = LinearNeuron>
 class Conv2DModel : public AbstractModel<VectorType,VectorType,VectorType>{
 private:

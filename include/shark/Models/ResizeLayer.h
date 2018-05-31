@@ -38,6 +38,9 @@
 namespace shark {
 
 
+	
+	
+	
 
 ///
 /// \brief Resizes an input image to a given size
@@ -48,6 +51,8 @@ namespace shark {
 /// over a 4x4 grid. This also means that resizing to the same size is not an identity operation
 ///
 /// The derivative of the model wrt its input images is available.
+///
+/// \ingroup models
 template <class VectorType = RealVector>
 class ResizeLayer : public AbstractModel<VectorType,VectorType,VectorType>{
 private:

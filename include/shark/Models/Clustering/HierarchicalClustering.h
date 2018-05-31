@@ -55,6 +55,7 @@ namespace shark {
 /// expressed as a flat parameter vector. Therefore, the
 /// parameter vector of this model is empty.
 ///
+/// \ingroup clustering
 template < class InputT>
 class HierarchicalClustering : public AbstractClustering<InputT>
 {

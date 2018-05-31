@@ -55,6 +55,7 @@ namespace shark {
 /// clustering memberships. This is arbitrary and can be changed
 /// by overriding the membershipKernel function.
 ///
+///\ingroup clustering
 class Centroids : public AbstractClustering<RealVector>
 {
 	typedef AbstractClustering<RealVector> base_type;

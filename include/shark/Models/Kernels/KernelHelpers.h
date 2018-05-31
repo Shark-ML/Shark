@@ -48,6 +48,7 @@ namespace shark{
 ///  \param dataset the set of points used in the gram matrix
 ///  \param matrix the target kernel matrix
 ///  \param regularizer the regularizer of the matrix which is always >= 0. default is 0.
+///  \ingroup kernels
 template<class InputType, class M, class Device>
 void calculateRegularizedKernelMatrix(
 	AbstractKernelFunction<InputType>const& kernel,
@@ -91,6 +92,7 @@ void calculateRegularizedKernelMatrix(
 ///  \param dataset1 the set of points corresponding to rows of the Gram matrix
 ///  \param dataset2 the set of points corresponding to columns of the Gram matrix
 ///  \param matrix the target kernel matrix
+///  \ingroup kernels
 template<class InputType, class M, class Device>
 void calculateMixedKernelMatrix(
 	AbstractKernelFunction<InputType>const& kernel,
@@ -137,6 +139,7 @@ void calculateMixedKernelMatrix(
 ///  \param dataset the set of points used in the gram matrix
 ///  \param regularizer the regularizer of the matrix which is always >= 0. default is 0.
 /// \return the kernel gram matrix
+///  \ingroup kernels
 template<class InputType>
 RealMatrix calculateRegularizedKernelMatrix(
 	AbstractKernelFunction<InputType>const& kernel,
@@ -155,6 +158,7 @@ RealMatrix calculateRegularizedKernelMatrix(
 ///  \param dataset1 the set of points corresponding to rows of the Gram matrix
 ///  \param dataset2 the set of points corresponding to columns of the Gram matrix
 ///  \return matrix the target kernel matrix
+///  \ingroup kernels
 template<class InputType>
 RealMatrix calculateMixedKernelMatrix(
 	AbstractKernelFunction<InputType>const& kernel,
@@ -177,6 +181,7 @@ RealMatrix calculateMixedKernelMatrix(
 ///  \param dataset the set of points used in the gram matrix
 ///  \param weights the weights of the derivative, they must be symmetric!
 ///  \return the weighted derivative w.r.t the parameters.
+///  \ingroup kernels
 template<class InputType,class WeightMatrix>
 RealVector calculateKernelMatrixParameterDerivative(
 		AbstractKernelFunction<InputType> const& kernel,

@@ -54,6 +54,7 @@ namespace shark {
 ///
 /// The kernel k(x,y) is evaluated taking missing features into account. For this it is checked whether a feature
 /// of x or y is nan and in this case the corresponding features in @a inputA and @a inputB won't be considered.
+///  \ingroup kernels
 template <typename InputType,typename InputTypeT1,typename InputTypeT2>
 double evalSkipMissingFeatures(
 	const AbstractKernelFunction<InputType>& kernelFunction,
@@ -100,6 +101,7 @@ double evalSkipMissingFeatures(
 /// @param missingness
 ///     used to decide which features in the inputs to take into consideration for the purpose of evaluation.
 ///     If a feature is NaN, then the corresponding features in @a inputA and @a inputB won't be considered.
+///  \ingroup kernels
 template <typename InputType,typename InputTypeT1,typename InputTypeT2,typename InputTypeT3>
 double evalSkipMissingFeatures(
 	const AbstractKernelFunction<InputType>& kernelFunction,

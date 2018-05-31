@@ -246,6 +246,8 @@ struct EnsembleBase<ModelType, void>
 /// must outlive the lifetime of the ensemble. This also entails differences in serialization.
 /// In the first case, the model can be serialized completely without any setup. In the second
 /// case before deserializing, the models must be constructed and added.
+///
+/// \ingroup models
 template<class ModelType, class OutputType  = void>
 class Ensemble: public detail::EnsembleBase<ModelType, OutputType>{
 public:

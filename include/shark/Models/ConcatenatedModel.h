@@ -52,6 +52,8 @@ namespace shark {
 ///of model2 must match. Another way of construction is calling the constructor of ConcatenatedModel using the constructor:
 /// ConcatenatedModel<InputType,OutputType> model (&modell,&model2);
 ///warning: model1 and model2 must outlive model. When they are destroyed first, behavior is undefined.
+///
+/// \ingroup models
 template<class VectorType>
 class ConcatenatedModel: public AbstractModel<VectorType, VectorType, VectorType> {
 private:

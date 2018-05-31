@@ -52,6 +52,8 @@ namespace shark {
 /// kernel function parameters.  In case of a Gaussian kernel a call
 /// to k-Means or the EM-algorithm can be used to get a good
 /// initialisation for the network.
+///
+/// \ingroup models
 class RBFLayer : public AbstractModel<RealVector,RealVector>
 {
 private:

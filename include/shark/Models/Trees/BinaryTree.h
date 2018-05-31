@@ -1,7 +1,7 @@
 //===========================================================================
 /*!
  * 
- *
+ * \file
  * \brief       Binary space-partitioning tree of data points.
  * 
  * 
@@ -45,6 +45,13 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 namespace shark {
+	
+	
+/// \defgroup space_trees Space Partitioning Trees
+/// \ingroup models
+///
+/// Space partitioning trees in shark used for quick lookup of points in a low-dimensional space.
+/// They are no model, but important building blocks, for example for nearest neighbour or clustering algorithms.
 
 
 /// \brief Stopping criteria for tree construction.
@@ -62,6 +69,7 @@ namespace shark {
 /// is because a space partitioning tree has no
 /// means of separating a single point.
 ///
+/// \ingroup space_trees
 class TreeConstruction
 {
 public:
@@ -124,6 +132,7 @@ protected:
 /// underlying metric. This allows for linear separation,
 /// but also for kernel-induced feature spaces and other
 /// embeddings.
+/// \ingroup space_trees
 template <class InputT>
 class BinaryTree
 {
