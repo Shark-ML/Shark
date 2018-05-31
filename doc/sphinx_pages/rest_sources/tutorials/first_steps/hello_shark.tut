@@ -59,9 +59,7 @@ Declaring a model and trainer
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Shark strictly separates the concepts of models and optimizers. This means that we
-need to declare a learning algorithm and the right model for it separately (see more
-information about the building blocks and implementation design rationales in the
-concept tutorial :doc:`../concepts/optimization/optimizationtrainer`). Since the LDA
+need to declare a learning algorithm and the right model for it separately. Since the LDA
 uses a linear classifier, we declare an instance of such. It is not needed to specify
 the dimensionality of the input data or the number of classes of our problem, the LDA
 will infer this from the training data itself. The LDA is a separate entity playing

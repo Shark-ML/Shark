@@ -46,7 +46,7 @@
 
 #include <shark/LinAlg/rotations.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /*! \brief Multi-objective optimization benchmark function ELLI2.
 *
 *  The function is described in
@@ -54,6 +54,7 @@ namespace shark {
 *  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
 *  Covariance Matrix Adaptation for Multi-objective Optimization. 
 *  Evolutionary Computation 15(1), pp. 1-28, 2007 
+* \ingroup benchmarks
 */
 struct ELLI2 : public MultiObjectiveFunction{
 
@@ -127,5 +128,5 @@ private:
 	RealVector m_coefficients;
 };
 
-}
+}}
 #endif

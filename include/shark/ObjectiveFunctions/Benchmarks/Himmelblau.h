@@ -37,7 +37,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /** 
 * \brief Multi-modal two-dimensional continuous Himmelblau benchmark function.
 *
@@ -45,6 +45,7 @@ namespace shark {
 * function is limited to two dimensions. Please see:
 *   http://en.wikipedia.org/wiki/Himmelblau%27s_function
 * for further information.
+* \ingroup benchmarks
 */
 struct Himmelblau : public SingleObjectiveFunction {
 	/**
@@ -87,6 +88,6 @@ struct Himmelblau : public SingleObjectiveFunction {
 	}
 };
 
-}
+}}
 
 #endif

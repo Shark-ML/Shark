@@ -29,10 +29,7 @@ In this tutorial, we will focus on a simple regression task. In regression,
 the parameters of a model are chosen such that it fits the training data as well
 as possible, usually in a least-squares sense. After its parameters have been
 found, the model can be used to predict the output values of new input points.
-The Shark model also provides a way to calculate various derivatives. For more
-information on Shark models, optimization, and trainers, see the concept
-tutorial :doc:`../concepts/optimization/optimizationtrainer`. Other components
-relevant to task-specific optimization tasks are described in the following. The
+The Shark model also provides a way to calculate various derivatives. The
 code for this example can be found in
 :doxy:`regressionTutorial.cpp <regressionTutorial.cpp>`.
 
@@ -125,8 +122,6 @@ computes the mean
 
 of the loss :math:`L` over the data set. There are many more objective functions available in
 Shark, see the concept tutorial on :doc:`../concepts/library_design/objective_functions`.
-In addition, also see the concept tutorial on :doc:`../concepts/optimization/optimizationtrainer`.
-
 
 
 Optimization

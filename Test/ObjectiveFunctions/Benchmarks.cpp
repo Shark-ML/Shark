@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_Benchmarks)
 
 BOOST_AUTO_TEST_CASE( Himmelblau ) {
-	shark::Himmelblau hb;
+	shark::benchmarks::Himmelblau hb;
 	shark::RealVector v( 2 );
 	
 	v( 0 ) = -0.270844;
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( Rosenbrock_Derivative )
 	const std::size_t dimensions = 5;
 	const unsigned int trials = 10000;
 	
-	shark::Rosenbrock rosenbrock(dimensions);
+	shark::benchmarks::Rosenbrock rosenbrock(dimensions);
 	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = rosenbrock.proposeStartingPoint();
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
 	const std::size_t dimensions = 5;
 	const unsigned int trials = 10000;
 	
-	shark::Ellipsoid ellipsoid(dimensions);
+	shark::benchmarks::Ellipsoid ellipsoid(dimensions);
 	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = ellipsoid.proposeStartingPoint();

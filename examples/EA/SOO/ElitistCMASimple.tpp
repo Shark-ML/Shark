@@ -39,7 +39,7 @@ int main( int argc, char ** argv ) {
 	std::cout.precision( 10 );
 
 	// Instantiate both the problem and the optimizer.
-	shark::Sphere sphere( 2 );
+	shark::benchmarks::Sphere sphere( 2 );
 	sphere.setNumberOfVariables( 2 );
 	shark::ElitistCMA cma;
 

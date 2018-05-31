@@ -11,6 +11,7 @@
 
 using namespace shark;
 using namespace shark::blas;
+using namespace shark::benchmarks;
 
 
 class TestObjective : public SingleObjectiveFunction

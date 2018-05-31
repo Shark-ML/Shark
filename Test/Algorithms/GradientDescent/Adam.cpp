@@ -6,6 +6,7 @@
 #include <shark/Algorithms/GradientDescent/Adam.h>
 
 using namespace shark;
+using namespace shark::benchmarks;
 
 template<class VectorType>
 struct NoisyEllipsoid : public AbstractObjectiveFunction<VectorType,double> {

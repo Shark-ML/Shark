@@ -38,7 +38,7 @@
 #include <shark/LinAlg/rotations.h>
 #include <tuple>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 
 namespace detail{
 	//taken from the web. implements an std::integer_sequence type representing a sequence 0,...,N-1, std::integer_sequence is not here until C++14
@@ -66,6 +66,7 @@ namespace detail{
 /// by the same distribution around a random optimum (assuming the optimum is at (0,0) of the untranslated function
 ///
 /// Note that all objectives must have scalable dimensionality
+/// \ingroup benchmarks
 template<class ... Objectives>
 class MultiObjectiveBenchmark: public MultiObjectiveFunction{
 public:
@@ -189,5 +190,5 @@ private:
 };
 
 
-}
+}}
 #endif

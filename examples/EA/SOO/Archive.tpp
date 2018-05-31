@@ -44,7 +44,7 @@ int main() {
 	cout.precision( 10 );
 
 	// Instantiate the problem
-	Sphere sphere( 2 );
+	benchmarks::Sphere sphere( 2 );
 	sphere.setNumberOfVariables( 2 );
 
 	// Create an archive object as a wrapper around the problem

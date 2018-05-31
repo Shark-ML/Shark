@@ -200,20 +200,6 @@ Operation           			Effect
 
 Matrix and Vector Reductions
 *************************************************************************************
-Matrix reductions leaving either a vector or a scalar:
-
-======================================= ==================================================================
-Operation           			Effect
-======================================= ==================================================================
-``sum(A)``				Sum of elements of A: :math:`\sum_{ij} A_{ij}`
-``max(A), min(A)``			Maximum/Minimum element of A: :math:`\max_{ij} A_{ij}`
-``sum_rows(A)``				Sum of rows of A: :math:`a_i = \sum_{j} A_{ij}`
-``sum_columns(A)``			Sum of columns of A: :math:`a_j = \sum_{i} A_{ij}`
-``trace(A)``				Sum of diagonal entries of A: :math:`a_j = \sum_{i} A_{ii}`
-``norm_1(A), norm_inf(A)``		p-norm of A
-``norm_sqr(A)``				squared 2-norm of A
-``norm_frobenius(A)``			Frobenius norm of A :math:`\sum_{ij} A_{ij}A_{ij}`
-======================================= ==================================================================
 
 Vector reductions to a scalar:
 
@@ -225,6 +211,33 @@ Operation           			Effect
 ``norm_1(v), norm_2(v), norm_inf(v)``	p-norm of v
 ``norm_sqr(v)``				squared 2-norm of v
 ======================================= ==================================================================
+
+Vector Sets interpret matrices as sets of vectors where each row or column is one point. This allows
+to perform vector operations on all points at the same time:
+
+======================================= ==================================================================
+Operation           			Effect
+======================================= ==================================================================
+``as_rows(A), as_columns(A)``		Interpret rows or columns as independent points.
+``sum(as_rows(A)), ...`` 		For each row, compute its sum, maximum element, etc
+``norm_1(as_rows(A)), ...`` 		Compute norms of all rows of A
+======================================= ==================================================================
+
+
+Matrix reductions leaving either a vector or a scalar:
+
+======================================= ==================================================================
+Operation           			Effect
+======================================= ==================================================================
+``sum(A)``				Sum of elements of A: :math:`\sum_{ij} A_{ij}`
+``max(A), min(A)``			Maximum/Minimum element of A: :math:`\max_{ij} A_{ij}`
+``trace(A)``				Sum of diagonal entries of A: :math:`a_j = \sum_{i} A_{ii}`
+``norm_1(A), norm_inf(A), norm_2(A)``	p-norm of A
+``norm_sqr(A)``				squared 2-norm of A
+``norm_frobenius(A)``			Frobenius norm of A :math:`\sum_{ij} A_{ij}A_{ij}`
+======================================= ==================================================================
+
+
 
 
 Misc

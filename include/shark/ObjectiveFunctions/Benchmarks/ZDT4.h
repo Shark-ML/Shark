@@ -44,7 +44,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /*! \brief Multi-objective optimization benchmark function ZDT4
 *
 *  The function is described in
@@ -53,6 +53,7 @@ namespace shark {
 *  Eckart Zitzler, Kalyanmoy Deb, and Lothar Thiele. Comparison of
 *  Multiobjective Evolutionary Algorithms: Empirical
 *  Results. Evolutionary Computation 8(2):173-195, 2000
+*  \ingroup benchmarks
 */
 struct ZDT4 : public MultiObjectiveFunction
 {
@@ -111,5 +112,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-}
+}}
 #endif

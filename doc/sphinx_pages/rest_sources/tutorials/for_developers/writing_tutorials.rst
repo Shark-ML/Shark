@@ -119,8 +119,8 @@ Linking to Doxygen
 
 Here's a doxylink:
 
-    :doxy:`choleskyDecomposition`
+    :doxy:`AbstractModel`
 
 The syntax for this link is:
-    ``:doxy:`choleskyDecomposition```
+    ``:doxy:`AbstractModel```
 

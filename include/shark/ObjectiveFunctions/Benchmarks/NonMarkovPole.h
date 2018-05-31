@@ -47,24 +47,25 @@
 #include <shark/ObjectiveFunctions/Benchmarks/PoleSimulators/SinglePole.h>
 #include <shark/ObjectiveFunctions/Benchmarks/PoleSimulators/DoublePole.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 
-//! \brief Objective function for single and double non-Markov poles
-//! 
-//! Class for balancing one or two poles on a cart using a fitness function
-//! that decreases the longer the pole(s) balance(s).
-//! Based on code written by Verena Heidrich-Meisner for the paper
-//! 
-//! V. Heidrich-Meisner and C. Igel. Neuroevolution strategies for episodic reinforcement learn-ing. Journal of Algorithms, 64(4):152–168, 2009.
+/// \brief Objective function for single and double non-Markov poles
+/// 
+/// Class for balancing one or two poles on a cart using a fitness function
+/// that decreases the longer the pole(s) balance(s).
+/// Based on code written by Verena Heidrich-Meisner for the paper
+/// 
+/// V. Heidrich-Meisner and C. Igel. Neuroevolution strategies for episodic reinforcement learn-ing. Journal of Algorithms, 64(4):152–168, 2009.
+/// \ingroup benchmarks
 class NonMarkovPole : public SingleObjectiveFunction {
 
 public:
-  //! \param single Is this an instance of the single pole problem?
-  //! \param hidden Number of hidden neurons in underlying neural network
-  //! \param bias Whether to use bias in neural network
-  //! \param sigmoidType Activation sigmoid function for neural network
-  //! \param normalize Whether to normalize input before use in neural network
-  //! \param max_pole_evaluations Balance goal of the function, i.e. number of steps that pole should be able to balance without failure
+  /// \param single Is this an instance of the single pole problem?
+  /// \param hidden Number of hidden neurons in underlying neural network
+  /// \param bias Whether to use bias in neural network
+  /// \param sigmoidType Activation sigmoid function for neural network
+  /// \param normalize Whether to normalize input before use in neural network
+  /// \param max_pole_evaluations Balance goal of the function, i.e. number of steps that pole should be able to balance without failure
   NonMarkovPole(bool single, std::size_t hidden, bool bias, 
 		RecurrentStructure::SigmoidType sigmoidType = RecurrentStructure::FastSigmoid,
 		bool normalize = true,
@@ -126,12 +127,12 @@ public:
     return "Objective Function for Non-Markovian pole balancing.";
   }
   
-  //! \brief Returns degrees of freedom
+  /// \brief Returns degrees of freedom
   std::size_t numberOfVariables()const{
     return m_dimensions;
   }
   
-  //! \brief Always proposes to start in a zero vector with appropriate degrees of freedom
+  /// \brief Always proposes to start in a zero vector with appropriate degrees of freedom
   SearchPointType proposeStartingPoint() const{
     SearchPointType startingPoint(m_dimensions);
     for(std::size_t i = 0; i != m_dimensions; i++) {
@@ -140,9 +141,9 @@ public:
     return startingPoint;
   }
   
-  //! \brief Evaluates weight vector on fitness function
-  //! \param input Vector to be evaluated.
-  //! \return Fitness of vector
+  /// \brief Evaluates weight vector on fitness function
+  /// \param input Vector to be evaluated.
+  /// \return Fitness of vector
   ResultType eval(const SearchPointType &input) const{
     SIZE_CHECK(input.size() == m_dimensions);
     
@@ -171,9 +172,9 @@ private:
     }
   };
 
-  //! \brief Converts neural network output for use with pole simulator
-  //! \param output Output of the neural network.
-  //! \return double precision floating point between 0 and 1.
+  /// \brief Converts neural network output for use with pole simulator
+  /// \param output Output of the neural network.
+  /// \return double precision floating point between 0 and 1.
   double convertToPoleMovement(double output) const{
     switch(mp_struct->sigmoidType())
       {
@@ -190,9 +191,9 @@ private:
     
   }
   
-  //! \brief Fitness function for single poles. Gets lower as pole balances for longer.
-  //! \param input Vector to be evaluated.
-  //! \return Fitness of vector
+  /// \brief Fitness function for single poles. Gets lower as pole balances for longer.
+  /// \param input Vector to be evaluated.
+  /// \return Fitness of vector
   ResultType evalSingle(const SearchPointType &input) const{
     double init_angle = 0.07;
     SinglePole pole(false, m_normalize);
@@ -219,9 +220,9 @@ private:
     return m_maxPoleEvals - eval_count;
   }
 
-  //! \brief Fitness function for double poles. Gets lower as poles balance for longer.
-  //! \param input Vector to be evaluated.
-  //! \return Fitness of vector
+  /// \brief Fitness function for double poles. Gets lower as poles balance for longer.
+  /// \param input Vector to be evaluated.
+  /// \return Fitness of vector
   ResultType evalDouble(const SearchPointType &input) const{
     double init_angle = 0.07;
     DoublePole pole(false, m_normalize);
@@ -247,20 +248,20 @@ private:
     return m_maxPoleEvals - eval_count;
   }
 
-  //! True if this is a single pole, false if double pole.
+  /// True if this is a single pole, false if double pole.
   bool m_single;
-  //! True if neural network input is normalized, false otherwise
+  /// True if neural network input is normalized, false otherwise
   bool m_normalize;
-  //! Degrees of freedom
+  /// Degrees of freedom
   std::size_t m_dimensions;
-  //! Balance goal
+  /// Balance goal
   std::size_t m_maxPoleEvals;
   
-  //! Neural network
+  /// Neural network
   RecurrentStructure *mp_struct;
   OnlineRNNet *mp_net;
   
 };
 
-}
+}}
 #endif

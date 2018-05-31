@@ -3,7 +3,7 @@
 
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 
 // The optimal hypervolumes for various population sizes.  All with a reference
 // point of (11, 11).
@@ -31,6 +31,6 @@ HV(ZDT6, 117.483246, 117.514950)
 
 #undef HV
 
-} // namespace shark
+}} // namespace shark
 
 #endif

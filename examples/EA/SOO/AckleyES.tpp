@@ -28,7 +28,7 @@ int main( int argc, char ** argv ) {
 	const double InitialSigma   = 3.;
 	
 	// Instantiate the objective function
-	Ackley ackley( Dimension );
+	benchmarks::Ackley ackley( Dimension );
 	
 	// Initialize the mutation distribution
 	MultiVariateNormalDistribution mutationDistribution;

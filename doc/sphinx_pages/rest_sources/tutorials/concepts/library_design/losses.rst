@@ -63,18 +63,6 @@ function. For example, the *area under the curve* (AUC).
 In other words, all loss functions generate a cost function, but not all cost
 functions must be based on a loss function.
 
-.. todo::
-
-    i think what is missing here is a comment on the normalization
-    conventions. i can't even quite figure them out on my own from the code.
-    it seems that for losses, when the type passed to eval is data-of-something,
-    then the result is normalized by the number of samples, and if i use the
-    batch interface of eval, it is not normalized, correct? so, using the
-    data interface is a statement that one wants normalization and otherwise
-    on always does it oneself? i am aware that this could also go down to where
-    the eval-interfaces are explained, but i think it should be at a more
-    prominent place actually.
-
 
 Derivatives
 &&&&&&&&&&&
@@ -141,14 +129,9 @@ on a complete set of data. The following functions can be used for evaluation of
 ==============================================================================================   ===============================================================================
 Method                                                                                           Description
 ==============================================================================================   ===============================================================================
-``double eval(Data<L> const& label, Data<O> const& predictions)``                                Returns the cumulated cost of the predictions :math:`z_i` given the label 
-                                                                                                 :math:`t_i`. The loss is normalized by the number of points in the datasets, 
-												 thus the mean loss is returned.
+``double eval(Data<L> const& label, Data<O> const& predictions)``                                Returns the mean cost of the predictions :math:`z_i` given the label 
+                                                                                                 :math:`t_i`.
 ``double operator()(Data<L> const& label, Data<O> const& predictions)``                          Convenience function Returning eval(label,predictions)
-``double evalDerivative(Data<L> const&label, Data<O> const& predictions, Data<O>& gradient)``    Returns the error of the predictions :math:`z_i` given the label :math:`t_i`
-                                                                                                 and computes :math:`\frac 1 N \frac {\partial}{\partial z_i}L(z_i,t_i)`, where
-												 :math:`N` is the number of data points. This function also returns the mean of
-												 the loss as its return value.
 ==============================================================================================   ===============================================================================
 
 
@@ -169,9 +152,9 @@ following much more efficient interface:
 Method                                                                                                        Description
 ===========================================================================================================   =========================================================================================
 ``double eval(LabelType const& t, InputType const& z)``                                                       Returns the error of the prediction :math:`z` given the label :math:`t`.
-``double eval(BatchLabelType const& T, BatchInputType const& Z)``                                             Returns the error of the predictions :math:`z_i \in Z` given the label :math:`t_i \in T`.
+``double eval(BatchLabelType const& T, BatchInputType const& Z)``                                             Returns the sum of errors of the predictions :math:`z_i \in Z` given the label :math:`t_i \in T`.
 ``double operator()(LabelType const& t, InputType const& z)``                                                 Calls eval(t,z)
-``double operator()(BatchLabelType const& T, BatchInputType const& Z)``                                       Calls eval(T,Z)
+``double operator()(BatchLabelType const& T, BatchInputType const& Z)``                                       Calls eval(T,Z
 ``double evalDerivative(BatchLabelType const& T, BatchInputType const& Z, BatchInputType const& gradient)``   Returns the error of the predictions :math:`z_i` given the label :math:`t_i`
                                                                                                               and computes :math:`\frac {\partial}{\partial z_i}L(z_i,t_i)`
 ===========================================================================================================   =========================================================================================
@@ -219,8 +202,6 @@ Model                                         Description
 					      Thus very close points are not punished.
 :doxy:`HuberLoss`			      Robust loss for rgression. It is quadratic close to 0 and becomes
 					      a linear function for big discrepancies between model prediction and target.
-:doxy:`TukeyBiweightLoss`		      Robust loss for regression. It is similar to the Huber loss, but instead
-					      of becoming linear, it becomes constant.
 ============================================  ==============================================================================
 
 

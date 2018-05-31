@@ -33,7 +33,12 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+
+/// \brief Different powers objective function.
+///
+/// each dimension is of the form x^a for varying a. This function is ill-conditioned close to the optimum.
+/// \ingroup benchmarks
+namespace shark {namespace benchmarks{
 struct DiffPowers : public SingleObjectiveFunction {
 
 	DiffPowers(std::size_t numberOfVariables = 5) {
@@ -79,6 +84,6 @@ struct DiffPowers : public SingleObjectiveFunction {
 private:
 	std::size_t m_numberOfVariables;
 };
-}
+}}
 
 #endif

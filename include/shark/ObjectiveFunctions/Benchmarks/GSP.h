@@ -32,8 +32,9 @@
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /// \brief Real-valued benchmark function with two objectives.
+/// \ingroup benchmarks
 struct GSP : public MultiObjectiveFunction
 {
 	GSP(std::size_t numVariables=5) : m_handler(SearchPointType(numVariables,0),SearchPointType(numVariables,10000))  {
@@ -88,5 +89,5 @@ private:
 	double m_gamma;
 };
 
-}
+}}
 #endif

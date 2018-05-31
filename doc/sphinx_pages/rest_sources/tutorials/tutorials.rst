@@ -57,8 +57,6 @@ component specific tutorials further down the page.
 Before we can introduce the main interface classes of shark, we need to define more properly
 a few basic terms as well as the design goals.
 
-* :doc:`concepts/library_design/designgoals`
-* :doc:`concepts/optimization/optimizationtrainer`
 * :doc:`concepts/optimization/conventions_derivatives`
 * :doc:`concepts/library_design/batches`
 
@@ -73,8 +71,6 @@ as well as the behavior and are written in a more formal language.
 * :doc:`concepts/library_design/stopping_criteria`
 * :doc:`concepts/library_design/trainers`
 * :doc:`concepts/library_design/kernels`
-* :doc:`concepts/library_design/writing_kernels`
-* :doc:`concepts/library_design/writing_objective_functions`
 
 
 

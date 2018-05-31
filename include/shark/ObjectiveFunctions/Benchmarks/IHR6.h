@@ -47,7 +47,7 @@
 
 #include <vector>
 
-namespace shark{
+namespace shark{namespace benchmarks{
 /*! \brief Multi-objective optimization benchmark function IHR 6.
 *
 *  The function is described in
@@ -55,6 +55,7 @@ namespace shark{
 *  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
 *  Covariance Matrix Adaptation for Multi-objective Optimization. 
 *  Evolutionary Computation 15(1), pp. 1-28, 2007 
+* \ingroup benchmarks
 */
 struct IHR6 : public MultiObjectiveFunction{
 
@@ -129,5 +130,5 @@ private:
 	RealMatrix m_rotationMatrix;
 };
 
-}
+}}
 #endif

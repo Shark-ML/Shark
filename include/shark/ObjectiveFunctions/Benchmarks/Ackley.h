@@ -35,9 +35,10 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
  * \brief Convex quadratic benchmark function with single dominant axis
+ * \ingroup benchmarks
  */
 struct Ackley : public SingleObjectiveFunction {
 	Ackley(std::size_t numberOfVariables = 5) {
@@ -94,6 +95,6 @@ private:
 	std::size_t m_numberOfVariables;
 };
 
-}
+}}
 
 #endif

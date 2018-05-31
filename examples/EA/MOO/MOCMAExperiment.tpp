@@ -36,6 +36,7 @@
 #include <shark/ObjectiveFunctions/Benchmarks/ZDT6.h>
 		
 using namespace shark;
+using namespace shark::benchmarks;
 //###end<includes>
 
 //###begin<hypervolume>

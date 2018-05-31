@@ -1,10 +1,7 @@
 /*!
  * 
  *
- * \brief       -
- *
- * \author      -
- * \date        -
+ * \file
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -68,4 +65,11 @@
 #include <shark/ObjectiveFunctions/Benchmarks/CigarDiscus.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Cigar.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Ackley.h>
+
+
+/// \defgroup benchmarks Benchmark functions
+/// \ingroup objfunctions
+///
+/// A large set of benchmarks for single and multi-objective optimization.
+/// Benchmarks are in the namespace shark::benchmark
 

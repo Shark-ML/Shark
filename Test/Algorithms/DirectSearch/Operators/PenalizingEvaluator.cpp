@@ -7,6 +7,7 @@
 #include <shark/ObjectiveFunctions/Benchmarks/Rosenbrock.h>
 
 using namespace shark;
+using namespace shark::benchmarks;
 
 
 struct TestIndividualMOO{

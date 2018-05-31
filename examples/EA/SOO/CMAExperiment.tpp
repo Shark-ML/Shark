@@ -52,10 +52,10 @@ int main( int argc, char ** argv ) {
 	//assortment of test functions
 	typedef boost::shared_ptr<SingleObjectiveFunction > Function;
 	std::vector<Function > functions;
-	functions.push_back(Function(new Rosenbrock(numDimensions)));
-	functions.push_back(Function(new Cigar(numDimensions)));
-	functions.push_back(Function(new Discus(numDimensions)));
-	functions.push_back(Function(new Ellipsoid(numDimensions)));
+	functions.push_back(Function(new benchmarks::Rosenbrock(numDimensions)));
+	functions.push_back(Function(new benchmarks::Cigar(numDimensions)));
+	functions.push_back(Function(new benchmarks::Discus(numDimensions)));
+	functions.push_back(Function(new benchmarks::Ellipsoid(numDimensions)));
 //###end<functions>	
 	
 //###begin<optimization>

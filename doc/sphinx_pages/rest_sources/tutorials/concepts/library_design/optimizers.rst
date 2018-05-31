@@ -43,12 +43,13 @@ bottom of this tutorial :ref:`here <label_for_list_of_so_optimizers>`.
     :math:`\arg \max_x f(x) = \arg \min_x -f(x)`.
 
 
-The base class 'AbstractOptimizer<SearchPointType, ResultT, SetT>'
----------------------------------------------------------------------
+The base class 'AbstractOptimizer<SearchPointType, ResultType, SolutionSetType>'
+-------------------------------------------------------------------------------------
 
 
 :doxy:`AbstractOptimizer` is a general and flexible interface for single- as well as
-multi-objective optimization. We first describe the general interface before we take
+multi-objective optimization on different search sapces. 
+We first describe the general interface before we take
 a look at the special cases of both single- and multi-objective optimization.
 
 The three template parameters are used to infer the objective function type and
@@ -114,7 +115,7 @@ Method                                                               Description
 ``init(ObjectiveFunctionType,std::vector<SearchPointType>)``         Initialize the algorithm using a prespecified set of starting points.
                                                                      Number of points should be ``numInitPoints()`` but the algorithm can try
                                                                      to generate additional points if required.
-``numInitPoints()``						     Returns the number of initialisation points needed by the algorithm.
+``numInitPoints()``						     Returns the number of initialisation points required by the algorithm.
 ``step(ObjectiveFunctionType)``                                      Performs one step of the learning algorithm on the objective function.
 ``SolutionSetType solution()``                                       Returns the current best solution found.
 ==================================================================   =========================================================================
@@ -123,8 +124,6 @@ Method                                                               Description
 
 Also, optimizers offer several other helper functions
 (and, in addition to the below, are serializable):
-
-
 
 ============================================   =========================================================================
 Method                                         Description
@@ -150,8 +149,8 @@ Here is a short example on how this interface can be used::
 
 
 
-The base class 'AbstractSingleObjectiveOptimizer<SearchSpaceT>'
----------------------------------------------------------------
+The base class 'AbstractSingleObjectiveOptimizer<SearchPointType>'
+--------------------------------------------------------------------------
 
 To this point, we have not clarified how the result of ``solution()`` looks
 like. For Single objective optimizers,
@@ -180,8 +179,8 @@ need to be implemented. The optimizer is allowed to evaluate the given
 starting point during initialization.
 
 
-The base class 'AbstractMultiObjectiveOptimizer<SearchSpaceT>'
---------------------------------------------------------------
+The base class 'AbstractMultiObjectiveOptimizer<SearchPointType>'
+---------------------------------------------------------------------------
 
 .. todo::
 
@@ -202,25 +201,24 @@ Gradient descent methods:
 ================================  =================================================================================
 Model                             Description
 ================================  =================================================================================
+:doxy:`SteepestDescent`           Follows the gradient in the direction of steepest descent with fixed step size.
+:doxy:`Adam`		          Optimizer for stochastic optimization. Uses long term averages of mean and variance
+				  of the gradient.
 :doxy:`BFGS`                      Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstrained optimization.
 :doxy:`LBFGS`                     Limited Memory BFGS which optionally supports box constraints
 :doxy:`CG`                        Nonlinear conjugate gradients method.
-:doxy:`IRpropPlus` and variants   Resilient propagation, keeps its own adaptive step size for every variable
-                                  and updates it according to the direction of the gradient. The variants of
-                                  the algorithm use different step size adaptation rules. :doxy:`IRpropPlus`
-                                  is the prefered method of choice for nonlinear optimization.
+:doxy:`Rprop`   		  Resilient propagation, keeps its own adaptive step size for every variable
+                                  and updates it according to the direction of the gradient.
 :doxy:`TrustRegionNewton`         Second order Method with superlinear convergence. It uses the hessian to compute
 				  the optimal point with a certain maximum distance. Does not require the hessian
 				  to be positive definite and its steps are often much cheaper to compute than cubic
 				  time.
-:doxy:`SteepestDescent`           Follows the gradient in the direction of steepest descent with fixed step size.
+
 ================================  =================================================================================
 
 
 
 Some examples of direct search methods:
-
-
 
 ================================  ========================================================================
 Model                             Description

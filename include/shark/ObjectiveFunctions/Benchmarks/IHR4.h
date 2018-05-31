@@ -45,14 +45,15 @@
 
 #include <shark/LinAlg/rotations.h>
 
-namespace shark{
+namespace shark{namespace benchmarks{
 /*! \brief Multi-objective optimization benchmark function IHR 4.
 *
 *  The function is described in
 *
 *  Christian Igel, Nikolaus Hansen, and Stefan Roth. 
 *  Covariance Matrix Adaptation for Multi-objective Optimization. 
-*  Evolutionary Computation 15(1), pp. 1-28, 2007 
+*  Evolutionary Computation 15(1), pp. 1-28, 2007
+* \ingroup benchmarks
 */
 struct IHR4 : public MultiObjectiveFunction
 {
@@ -122,5 +123,5 @@ private:
 	RealMatrix m_rotationMatrix;
 };
 
-}
+}}
 #endif // IHR1_H

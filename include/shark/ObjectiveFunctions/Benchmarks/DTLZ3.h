@@ -37,13 +37,14 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
 * \brief Implements the benchmark function DTLZ3.
 *
 * See: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.18.7531&rep=rep1&type=pdf
 * The benchmark function exposes the following features:
 *	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
+* \ingroup benchmarks
 */
 struct DTLZ3 : public MultiObjectiveFunction
 {
@@ -109,5 +110,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-}
+}}
 #endif

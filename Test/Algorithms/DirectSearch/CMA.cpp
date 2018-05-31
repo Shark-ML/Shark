@@ -13,6 +13,7 @@
 #include "../testFunction.h"
 
 using namespace shark;
+using namespace shark::benchmarks;
 
 
 struct MultiplicativeNoisySphere : public SingleObjectiveFunction {

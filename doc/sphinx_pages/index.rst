@@ -18,7 +18,6 @@
    rest_sources/tutorials/first_steps/shark_layout
 
 
-   rest_sources/tutorials/concepts/library_design/designgoals
    rest_sources/tutorials/concepts/library_design/models
    rest_sources/tutorials/concepts/library_design/kernels
    rest_sources/tutorials/concepts/library_design/losses
@@ -28,16 +27,12 @@
    rest_sources/tutorials/concepts/library_design/trainers
    rest_sources/tutorials/concepts/library_design/batches
 
-   rest_sources/tutorials/concepts/library_design/writing_kernels
-   rest_sources/tutorials/concepts/library_design/writing_objective_functions
-
    rest_sources/tutorials/concepts/data/datasets
    rest_sources/tutorials/concepts/data/labels
    rest_sources/tutorials/concepts/data/import_data
    rest_sources/tutorials/concepts/data/dataset_subsets
    rest_sources/tutorials/concepts/data/normalization
 
-   rest_sources/tutorials/concepts/optimization/optimizationtrainer
    rest_sources/tutorials/concepts/optimization/directsearch
    rest_sources/tutorials/concepts/optimization/conventions_derivatives
 

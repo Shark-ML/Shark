@@ -6,6 +6,7 @@
 
 using namespace shark;
 
+
 template<class VectorType>
 struct TestFunction : public AbstractObjectiveFunction<VectorType, double>{
 

@@ -199,15 +199,13 @@ One single evaluation of the objective function at this current point looks like
 A simple ``cout`` command can tell us that the value we get from that last call
 (on our development machine) is ``0.337388``.
 
-Next, we set up an :doxy:`IRpropPlus` optimizer, choosing the same parameters
+Next, we set up an :doxy:`Rprop` optimizer, choosing the same parameters
 for it as in the original paper, except with a lower number of total iterations::
 
     ..sharkcode<Supervised/CSvmMaxLikelihoodMS.tpp, setup_optimizer>
 
 The main process of this tutorial -- optimizing the SVM hyperparameters under the
-SvmLogisticInterpretation objective function -- is now straightforward and follows
-the general optimization schemes in Shark (see :doc:`../first_steps/general_optimization_tasks`
-as well as :doc:`../concepts/optimization/optimizationtrainer` and following)::
+SvmLogisticInterpretation objective function -- is now straightforward::
 
     ..sharkcode<Supervised/CSvmMaxLikelihoodMS.tpp, go_go_optimize>
 

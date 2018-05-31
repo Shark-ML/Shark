@@ -11,6 +11,7 @@
 #include <iostream>
 
 using namespace shark;
+using namespace shark::benchmarks;
 
 typedef boost::mpl::list<DTLZ1, DTLZ2, ZDT1, ZDT2, ZDT3, ZDT4, ZDT6> obj_funs;
 

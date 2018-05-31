@@ -34,12 +34,13 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
 *  \brief Convex quadratic benchmark function
 *
 *  The eigenvalues of the Hessian of this convex quadratic benchmark
 *  function are equally distributed on logarithmic scale.
+* \ingroup benchmarks
 */
 struct Ellipsoid : public SingleObjectiveFunction {
 	Ellipsoid(size_t numberOfVariables = 5, double alpha=1E-3) : m_alpha(alpha) {
@@ -110,6 +111,6 @@ private:
 	double m_alpha;
 };
 
-}
+}}
 
 #endif

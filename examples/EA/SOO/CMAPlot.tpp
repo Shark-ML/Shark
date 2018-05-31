@@ -59,7 +59,7 @@ int main( int argc, char ** argv ) {
 
 	// Instantiate both the problem and the optimizer.
 //###begin<optimizer>
-	Himmelblau hb;
+	benchmarks::Himmelblau hb;
 	CMA cma;
 	hb.init();
 	cma.init( hb );

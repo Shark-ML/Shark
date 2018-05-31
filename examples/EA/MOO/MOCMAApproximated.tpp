@@ -44,7 +44,7 @@ int main( int argc, char ** argv ) {
 
 	// Instantiate both the problem and the optimizer.
 //###begin<problem>
-	shark::DTLZ2 dtlz2;
+	shark::benchmarks::DTLZ2 dtlz2;
 	dtlz2.setNumberOfObjectives( 5 );
 	dtlz2.setNumberOfVariables( 25 );
 	

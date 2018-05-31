@@ -10,6 +10,7 @@
 #include "../testFunction.h"
 
 using namespace shark;
+using namespace shark::benchmarks;
 
 BOOST_AUTO_TEST_SUITE (Algorithms_GradientDescent_LBFGS)
 

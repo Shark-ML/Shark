@@ -34,9 +34,10 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
  * \brief Convex benchmark function.
+*  \ingroup benchmarks
  */
 struct Schwefel : public SingleObjectiveFunction {
 	
@@ -83,6 +84,6 @@ private:
 	std::size_t m_numberOfVariables;
 };
 
-}
+}}
 
 #endif

@@ -34,7 +34,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
  * \brief Constrained Sphere function
  *
@@ -42,7 +42,8 @@ namespace shark {
  *  \f$ x_i \geq 1\f$ for \f$ i = 1,\dots,m \f$. The minimum is at \f$ x_1=\dots = x_m = 1\f$ and 
  * \f$ x_{m+1}=\dots = x_N = 0 \f$ with function value 0.
  *
- * This is a simple benchmark for evolutionary algorithms as, the closer the algorithm is to the optimu
+ * This is a simple benchmark for evolutionary algorithms as, the closer the algorithm is to the optimum
+* \ingroup benchmarks
  */
 struct ConstrainedSphere : public SingleObjectiveFunction {
 	
@@ -97,6 +98,6 @@ private:
 	std::size_t m_constraints;
 };
 
-}
+}}
 
 #endif

@@ -34,9 +34,10 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
  * \brief Convex quadratic benchmark function.
+*  \ingroup benchmarks
  */
 struct Sphere : public SingleObjectiveFunction {
 	
@@ -87,6 +88,6 @@ private:
 	std::size_t m_numberOfVariables;
 };
 
-}
+}}
 
 #endif

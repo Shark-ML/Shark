@@ -45,7 +45,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /*! \brief Generalized Rosenbrock benchmark function 
 *
 *  This non-convex benchmark function for real-valued optimization is a
@@ -55,6 +55,7 @@ namespace shark {
 *  H. H. Rosenbrock. An automatic method for finding the greatest or
 *  least value of a function. The Computer Journal 3: 175-184,
 *  1960  
+*  \ingroup benchmarks
 */
 struct Rosenbrock : public SingleObjectiveFunction {
 
@@ -151,6 +152,6 @@ private:
 	double m_initialSpread;
 };
 
-}
+}}
 
 #endif

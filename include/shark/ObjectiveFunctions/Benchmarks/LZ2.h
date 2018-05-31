@@ -43,7 +43,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /*! \brief Multi-objective optimization benchmark function LZ2.
 *
 *  The function is described in
@@ -51,6 +51,7 @@ namespace shark {
 *  H. Li and Q. Zhang. 
 *  Multiobjective Optimization Problems with Complicated Pareto Sets, MOEA/D and NSGA-II, 
 *  IEEE Trans on Evolutionary Computation, 2(12):284-302, April 2009. 
+* \ingroup benchmarks
 */
 struct LZ2 : public MultiObjectiveFunction
 {
@@ -113,5 +114,5 @@ private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
 
-}
+}}
 #endif

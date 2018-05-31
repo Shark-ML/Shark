@@ -39,7 +39,7 @@
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 #include <shark/Core/Random.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 
 /// \brief Bi-objective real-valued benchmark function proposed by Fonseca and Flemming.
 ///
@@ -51,7 +51,7 @@ namespace shark {
 /// 
 /// The default search space dimension is 3, but the function can
 /// handle more dimensions.
-
+/// \ingroup benchmarks
 struct Fonseca : public MultiObjectiveFunction {
 
 	Fonseca(std::size_t numVariables)
@@ -102,5 +102,5 @@ struct Fonseca : public MultiObjectiveFunction {
 private:
 	BoxConstraintHandler<SearchPointType> m_handler;
 };
-}
+}}
 #endif

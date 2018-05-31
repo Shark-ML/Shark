@@ -34,7 +34,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/LinAlg/rotations.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 ///  \brief Rotates an objective function using a randomly initialized rotation.
 ///
 /// Most benchmark functions are axis aligned because it is assumed that the algorithm
@@ -42,6 +42,7 @@ namespace shark {
 /// Especially linear algebra routines might take longer when the problem is not
 /// axis aligned. This function creates a random rotation function and 
 /// applies it to the given input points to make it no longer axis aligned.
+///  \ingroup benchmarks
 struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 	RotatedObjectiveFunction(SingleObjectiveFunction* objective)
 	:m_objective(objective){
@@ -96,6 +97,6 @@ private:
 	RealMatrix m_rotation;
 };
 
-}
+}}
 
 #endif

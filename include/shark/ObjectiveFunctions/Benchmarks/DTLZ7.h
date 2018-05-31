@@ -37,7 +37,7 @@
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/ObjectiveFunctions/BoxConstraintHandler.h>
 
-namespace shark {
+namespace shark {namespace benchmarks{
 /**
 * \brief Implements the benchmark function DTLZ7.
 *
@@ -45,6 +45,7 @@ namespace shark {
 * The benchmark function exposes the following features:
 *	- Scalable w.r.t. the searchspace and w.r.t. the objective space.
 *	- Disconnected Pareto front.
+* \ingroup benchmarks
 */
 struct DTLZ7 : public MultiObjectiveFunction
 {
@@ -115,5 +116,5 @@ private:
 	
 };
 
-}
+}}
 #endif

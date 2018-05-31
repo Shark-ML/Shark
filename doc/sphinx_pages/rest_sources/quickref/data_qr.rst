@@ -75,10 +75,24 @@ data.elements()                     stl-compliant access to (proxies to) element
 =================================== =============================================================== =================
 
 
+Batch Access
+------------
+
+=================================== =============================================================== =================
+data.empty()                        true iff data.numberOfBatches() == 0                            ``Dataset.h``
+data.numberOfBatches()              number of batches in the container                              ``Dataset.h``
+data.batch(i)                       (reference to) the i-th batch                                   ``Dataset.h``
+data.batches()                      stl-compliant access to batches as a range                      ``Dataset.h``
+=================================== =============================================================== =================
+
+
 Further Methods
 ---------------
 
 =================================== =============================================================== =================
+:doxy:`LabeledData::inputShape`	    Shape of the input vectors					    ``Dataset.h``
+:doxy:`LabeledData::labelShape`     Shape of the label vectors					    ``Dataset.h``
+:doxy:`Data::shape`     	    Shape of the data vectors					    ``Dataset.h``
 swap()                              swap container contents (constant time)                         ``Dataset.h``
 makeIndependent()                   make sure data is not shared with other containers              ``Dataset.h``
 shuffle()                           randomly reorder elements (not only batches)                    ``Dataset.h``
@@ -113,7 +127,6 @@ Subset Creation and Folds for Cross-validation
 :doxy:`createCVFullyIndexed`        create folds explicitly by index with reordering                ``CVDatasetTools.h``
 :doxy:`Data::splice`                split data at batch boundaries (contrary of append)             ``Dataset.h``
 :doxy:`indexedSubset`               obtain subset of batches from indices                           ``Dataset.h``
-:doxy:`rangeSubset`                 obtain subset of batches from range                             ``Dataset.h``
 :doxy:`selectFeatures`              filter out a subset of features from :doxy:`Data`               ``Dataset.h``
 :doxy:`selectInputFeatures`         filter out a subset of features from :doxy:`LabeledData`        ``Dataset.h``
 =================================== =============================================================== =================
@@ -129,7 +142,6 @@ Import / Export
 :doxy:`exportSparseData`            export to sparse vector (libSVM) format                         ``SparseData.h``
 :doxy:`importHDF5`                  import from HDF5 file used by mldata.org                        ``HDF5.h``
 :doxy:`importPGM`                   import single PGM image                                         ``Pgm.h``
-:doxy:`importPGMDir`                import directory of PGM images                                  ``Pgm.h``
 :doxy:`importPGMSet`                import set of PGM images                                        ``Pgm.h``
 :doxy:`exportPGM`                   export single PGM image                                         ``Pgm.h``
 =================================== =============================================================== =================

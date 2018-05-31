@@ -202,6 +202,8 @@ Some models for Classification or Regression:
 =====================================    ========================================================================
 Model                                    Description
 =====================================    ========================================================================
+:doxy:`Ensemble`			 Implements a weighted ensembles of models. Handels different cases
+					 of classification and regression.
 :doxy:`Classifier`	                 Wraps another model with 1(for binary) or n (for multi-class) output.
 					 Returns the index of the class with largest value for the given point.
 :doxy:`LinearClassifier`                 Classifier based on the prediction of a :doxy:`LinearModel`
@@ -237,7 +239,6 @@ Special purpose models:
 Model                                   Description
 ======================================  ======================================================================
 :doxy:`MissingFeaturesKernelExpansion`  KernelExpansion with support for missing input values.
-:doxy:`MeanModel`			Computes the mean output of a set of models.
 :doxy:`Normalizer`			Special case of the :doxy:`LinearModel` which only has a diagonal
 					matrix and an optional offset. Used for normalisation
 :doxy:`DropoutLayer`			Implements dropout of inputs

@@ -47,7 +47,7 @@ int main( int argc, char ** argv ) {
 
 	// Instantiate the problem.
 	//###begin<problem>
-	Sphere sphere( 2 );
+	benchmarks::Sphere sphere( 2 );
 	//###end<problem>
 	// Initialize the optimizer for the objective function instance.
 	//###begin<optimizer>
