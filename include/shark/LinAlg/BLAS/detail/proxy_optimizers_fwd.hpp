@@ -56,5 +56,11 @@ struct matrix_diagonal_optimizer;
 template<class M, class Tag>
 struct triangular_proxy_optimizer;
 
+template<class V>
+struct vector_scalar_multiply_optimizer;
+
+template<class M>
+struct matrix_scalar_multiply_optimizer;
+
 }}
 #endif

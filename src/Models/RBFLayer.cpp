@@ -122,8 +122,8 @@ void RBFLayer::weightedParameterDerivative(
 	InternalState const& s = state.toState<InternalState>();
 
 	//compute d_ij = c_ij * p(x_i|j)
-	RealMatrix delta = element_prod(coefficients,outputs);
-	RealVector deltaSum = sum_rows(delta);
+	RealMatrix delta = coefficients * outputs;
+	RealVector deltaSum = sum(as_columns(delta));
 	
 	std::size_t currentParameter = 0;
 	if(m_trainCenters){
@@ -155,7 +155,7 @@ void RBFLayer::weightedParameterDerivative(
 		//and so gamma_i is in fact e^(pgamma_i) which leads to the fact, that 
 		//we have to derive with respect to pgamma_i.
 		auto gammaDerivative = subrange(gradient,currentParameter,gradient.size());
-		noalias(gammaDerivative) = sum_rows(-element_prod(delta,s.norm2));
+		noalias(gammaDerivative) = sum(as_columns(-delta * s.norm2));
 		noalias(gammaDerivative) = element_prod(gammaDerivative,m_gamma);
 		noalias(gammaDerivative) += 0.5*m_centers.size2()*deltaSum;
 	}

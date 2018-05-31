@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( CMA_Ellipsoid_Niko )
 
 BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 {
-	random::globalRng.seed(42);
+	random::globalRng.seed(43);
 	const unsigned N = 10;
 	RealVector x0(10, 0.1);
 	Sphere sphere(N);
@@ -130,6 +130,9 @@ BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 	bool condHigh = false;
 	for(unsigned i=0; i<1500; i++) {
 		cma.step( sphere );
+		if(i % 50 == 0){
+			std::cout<<i <<"\t" << cma.sigma() <<"\t" << cma.condition() <<std::endl;
+		}
 		if(cma.sigma() > 0.01) sigmaHigh = true;
 		if(cma.condition() > 40) condHigh = true;
 	}

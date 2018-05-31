@@ -13,7 +13,7 @@
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
- * 
+ * 3
  * <BR><HR>
  * This file is part of Shark.
  * <http://shark-ml.org/>
@@ -258,9 +258,9 @@ public:
 		SIZE_CHECK(target.size2() == prediction.size2());
 		std::size_t m = target.size2();
 		
-		OutputType maximum = max_columns(prediction);
+		OutputType maximum = max(as_rows(prediction));
 		auto safeExp = exp(prediction - trans(blas::repeat(maximum, m)));
-		OutputType norm = sum_columns(safeExp);
+		OutputType norm = sum(as_rows(safeExp));
 		double error = sum(log(norm)) - sum(target * prediction) + sum(maximum);
 		return error;
 	}
@@ -269,9 +269,9 @@ public:
 		gradient.resize(prediction.size1(),prediction.size2());
 		std::size_t m = target.size2();
 		
-		OutputType maximum = max_columns(prediction);
+		OutputType maximum = max(as_rows(prediction));
 		noalias(gradient) = exp(prediction - trans(blas::repeat(maximum, m)));
-		OutputType norm = sum_columns(gradient);
+		OutputType norm = sum(as_rows(gradient));
 		noalias(gradient) /= trans(blas::repeat(norm, m));
 		noalias(gradient) -= target;
 		double error = sum(log(norm)) - sum(target * prediction) + sum(maximum);

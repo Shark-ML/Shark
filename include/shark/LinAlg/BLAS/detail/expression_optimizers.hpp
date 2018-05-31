@@ -70,14 +70,14 @@ struct vector_range_optimizer<matrix_vector_prod<M,V> >{
 	}
 };
 
-// range(fold_rows(M, f),start,end) = fold_rows(columns(m,start,end), f)
-template<class M, class F>
-struct vector_range_optimizer<fold_matrix_rows<M, F> >{
+// range(fold_rows(M, f, g),start,end) = fold_rows(columns(m,start,end), f, g)
+template<class M, class F, class G>
+struct vector_range_optimizer<matrix_row_transform<M, F, G> >{
 	typedef matrix_range_optimizer<typename M::const_closure_type> mat_opt;
-	typedef fold_matrix_rows<typename mat_opt::type, F> type;
+	typedef matrix_row_transform<typename mat_opt::type, F, G> type;
 	
-	static type create(fold_matrix_rows<M, F> const& m, std::size_t start, std::size_t end){
-		return type(mat_opt::create(m.expression(),0, m.expression().size1(), start, end), m.function());
+	static type create(matrix_row_transform<M, F, G> const& m, std::size_t start, std::size_t end){
+		return type(mat_opt::create(m.expression(),0, m.expression().size1(), start, end), m.f(), m.g());
 	}
 };
 
@@ -741,6 +741,205 @@ struct matrix_rows_optimizer<matrix_matrix_prod<M1,M2> >{
 //~ };
 
 ////////////////////////////////////
+//// Vector - Scalar Product
+////////////////////////////////////
+
+
+//default impl for alpha * v, creates just the expression
+// handles all V that can not be blockwise, e.g. : all containers, proxies, scalar_vector, unit_vector
+template<class V>
+struct vector_scalar_multiply_optimizer{
+	typedef vector_scalar_multiply<V> type;
+	
+	static type create(typename V::const_closure_type const& v, typename V::value_type alpha){
+		return type(v, alpha);
+	}
+};
+
+
+// alpha * (beta * v) = (alpha * beta) * v
+template<class V>
+struct vector_scalar_multiply_optimizer<vector_scalar_multiply<V> >{
+	typedef vector_scalar_multiply<V> type;
+	
+	static type create(vector_scalar_multiply<V> const& v, typename V::value_type alpha){
+		return type(v.expression(), alpha * v.scalar());
+	}
+};
+
+
+// alpha * (v + w) = alpha * v + alpha * w
+template<class V1, class V2>
+struct vector_scalar_multiply_optimizer<vector_addition<V1, V2> >{
+	typedef typename vector_addition<V1, V2>::value_type value_type;
+	typedef vector_scalar_multiply_optimizer<V1> opt1;
+	typedef vector_scalar_multiply_optimizer<V2> opt2;
+	typedef vector_addition<typename opt1::type, typename opt2::type> type;
+	static type create(vector_addition<V1, V2> const& m, value_type alpha){
+		return type(opt1::create(m.lhs(), alpha), opt2::create(m.rhs(), alpha));
+	}
+};
+
+// alpha * f(v) = (alpha * f)(v)
+template<class V, class F>
+struct vector_scalar_multiply_optimizer<vector_unary<V, F> >{
+	typedef typename V::device_type device_type;
+	typedef typename vector_unary<V, F>::value_type value_type;
+	typedef typename device_traits<device_type>::template multiply_scalar<value_type> Multiplier;
+	typedef vector_unary_optimizer <vector_unary<V, F>, Multiplier > opt;
+	typedef typename opt::type type;
+	static type create(vector_unary<V, F> const& m, value_type alpha){
+		return opt::create(m, Multiplier(alpha));
+	}
+};
+
+// alpha * f(v, w) = (alpha * f)(v, w)
+template<class V1, class V2, class F>
+struct vector_scalar_multiply_optimizer<vector_binary<V1, V2, F> >{
+	typedef typename V1::device_type device_type;
+	typedef typename vector_binary<V1, V2, F>::value_type value_type;
+	typedef typename device_traits<device_type>::template multiply_scalar<value_type> Multiplier;
+	typedef vector_unary_optimizer <vector_binary<V1, V2, F>, Multiplier > opt;
+	typedef typename opt::type type;
+	static type create(vector_binary<V1, V2, F> const& m, value_type alpha){
+		return opt::create(m, Multiplier(alpha));
+	}
+};
+
+
+//alpha * (A * v) can be folded into matrix_vector_prod 
+template<class M, class V>
+struct vector_scalar_multiply_optimizer<matrix_vector_prod<M, V> >{
+	typedef matrix_vector_prod<M, V> type;
+	static type create(matrix_vector_prod<M, V> const& m, typename type::value_type alpha){
+		return type(m.matrix(), m.vector(), alpha * m.alpha());
+	}
+};
+
+
+// alpha * (v | w) = (alpha * v) | (alpha * w) 
+template<class V1, class V2>
+struct vector_scalar_multiply_optimizer<vector_concat<V1, V2> >{
+	typedef vector_scalar_multiply_optimizer<V1> opt1;
+	typedef vector_scalar_multiply_optimizer<V2> opt2;
+	typedef vector_concat<typename opt1::type,typename  opt2::type> type;
+	typedef typename type::value_type value_type;
+	static type create(vector_concat<V1, V2> const& m, value_type alpha){
+		return type(opt1::create(m.lhs(), alpha), opt2::create(m.rhs(), alpha));
+	}
+};
+
+////////////////////////////////////
+//// Matrix - Scalar Product
+////////////////////////////////////
+
+
+//default impl for alpha * A, creates just the expression
+// handles all M that can not be blockwise, e.g. : all containers, proxies, scalar_matrix
+template<class M>
+struct matrix_scalar_multiply_optimizer{
+	typedef matrix_scalar_multiply<M> type;
+	
+	static type create(typename M::const_closure_type const& m, typename M::value_type alpha){
+		return type(m, alpha);
+	}
+};
+
+
+// alpha * (beta * A) = (alpha * beta) * A
+template<class M>
+struct matrix_scalar_multiply_optimizer<matrix_scalar_multiply<M> >{
+	typedef matrix_scalar_multiply<M> type;
+	
+	static type create(matrix_scalar_multiply<M> const& m, typename M::value_type alpha){
+		return type(m.expression(), alpha * m.scalar());
+	}
+};
+
+
+// alpha * (A + B) = alpha * A + alpha * B
+template<class E1, class E2>
+struct matrix_scalar_multiply_optimizer<matrix_addition<E1, E2> >{
+	typedef typename matrix_addition<E1, E2>::value_type value_type;
+	typedef matrix_scalar_multiply_optimizer<E1> opt1;
+	typedef matrix_scalar_multiply_optimizer<E2> opt2;
+	typedef matrix_addition<typename opt1::type, typename opt2::type> type;
+	static type create(matrix_addition<E1, E2> const& m, value_type alpha){
+		return type(opt1::create(m.lhs(), alpha), opt2::create(m.rhs(), alpha));
+	}
+};
+
+
+// alpha * repeat(v,n) = repeat(alpha * v, n)
+template<class V, class O>
+struct matrix_scalar_multiply_optimizer<vector_repeater<V, O> >{
+	typedef vector_scalar_multiply_optimizer<V> opt;
+	typedef vector_repeater<typename opt::type, O> type;
+	static type create(vector_repeater<V, O> const& m, typename V::value_type alpha){
+		return type(opt::create(m.expression(), alpha), m.num_repetitions());
+	}
+};
+
+// alpha * f(A) = (alpha * f)(A)
+template<class M, class F>
+struct matrix_scalar_multiply_optimizer<matrix_unary<M, F> >{
+	typedef typename M::device_type device_type;
+	typedef typename F::result_type value_type;
+	typedef typename device_traits<device_type>::template multiply_scalar<value_type> Multiplier;
+	typedef matrix_unary_optimizer <matrix_unary<M, F>, Multiplier > opt;
+	typedef typename opt::type type;
+	static type create(matrix_unary<M, F> const& m, value_type alpha){
+		return opt::create(m, Multiplier(alpha));
+	}
+};
+
+// alpha * f(A, B) = (alpha * f)(A, B)
+template<class M1, class M2, class F>
+struct matrix_scalar_multiply_optimizer<matrix_binary<M1, M2, F> >{
+	typedef typename M1::device_type device_type;
+	typedef typename F::result_type value_type;
+	typedef typename device_traits<device_type>::template multiply_scalar<value_type> Multiplier;
+	typedef matrix_unary_optimizer <matrix_binary<M1, M2, F>, Multiplier > opt;
+	typedef typename opt::type type;
+	static type create(matrix_binary<M1, M2, F> const& m, value_type alpha){
+		return opt::create(m, Multiplier(alpha));
+	}
+};
+
+
+//alpha * v * u^T = (alpha * v) * u^T 
+template<class V1, class V2>
+struct matrix_scalar_multiply_optimizer<outer_product<V1, V2> >{
+	typedef vector_scalar_multiply_optimizer<V1> opt;
+	typedef outer_product<typename opt::type, V2> type;
+	typedef typename type::value_type value_type;
+	static type create(outer_product<V1, V2> const& m, value_type alpha){
+		return type(opt::create(m.lhs(), alpha),m.rhs());
+	}
+};
+
+//alpha * (A * B) can be folded into matrix_vector_prod 
+template<class M1, class M2>
+struct matrix_scalar_multiply_optimizer<matrix_matrix_prod<M1, M2> >{
+	typedef matrix_matrix_prod<M1, M2> type;
+	typedef typename type::value_type value_type;
+	static type create(matrix_matrix_prod<M1, M2> const& m, value_type alpha){
+		return type(m.lhs(), m.rhs(), alpha * m.alpha());
+	}
+};
+
+// alpha*(A | B) = (alpha * A) | (alpha * B) 
+template<class M1, class M2, bool b>
+struct matrix_scalar_multiply_optimizer<matrix_concat<M1, M2, b> >{
+	typedef matrix_scalar_multiply_optimizer<M1> opt1;
+	typedef matrix_scalar_multiply_optimizer<M2> opt2;
+	typedef matrix_concat<typename opt1::type, typename opt2::type, b> type;
+	typedef typename type::value_type value_type;
+	static type create(matrix_concat<M1, M2, b> const& m, value_type alpha){
+		return type(opt1::create(m.lhs(), alpha), opt2::create(m.rhs(), alpha));
+	}
+};
+////////////////////////////////////
 //// Matrix Vector Product
 ////////////////////////////////////
 	
@@ -750,40 +949,43 @@ struct matrix_vector_prod_optimizer{
 	typedef matrix_vector_prod<M,V> type;
 	
 	static type create(typename M::const_closure_type const& m, typename V::const_closure_type const& v){
-		return type(m,v);
+		return type(m, v, typename type::value_type(1));
 	}
 };
 
-//(alpha M)*v = alpha (M*v)
+//(alpha M)*v = alpha * (M * v)
 template<class M, class V>
 struct matrix_vector_prod_optimizer<matrix_scalar_multiply<M>,V >{
-	typedef matrix_vector_prod_optimizer<M, V> opt;
-	typedef vector_scalar_multiply<typename opt::type> type;
+	typedef matrix_vector_prod_optimizer<M, V> inner_opt;
+	typedef vector_scalar_multiply_optimizer<typename inner_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(matrix_scalar_multiply<M> const& m, typename V::const_closure_type const& v){
-		return type(opt::create(m.expression(),v), m.scalar());
+		return opt::create(inner_opt::create(m.expression(), v), m.scalar());
 	}
 };
 
-//M*(alpha*v) = alpha (M*v)
+//M*(alpha*v) = alpha * (M * v)
 template<class M, class V>
 struct matrix_vector_prod_optimizer<M,vector_scalar_multiply<V> >{
-	typedef matrix_vector_prod_optimizer<M, V> opt;
-	typedef vector_scalar_multiply<typename opt::type> type;
+	typedef matrix_vector_prod_optimizer<M, V> inner_opt;
+	typedef vector_scalar_multiply_optimizer<typename inner_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(typename M::const_closure_type const& m, vector_scalar_multiply<V> const& v){
-		return type(opt::create(m,v.expression()), v.scalar());
+		return opt::create(inner_opt::create(m, v.expression()), v.scalar());
 	}
 };
 
-//(alpha M)*(beta*v) = (alpha*beta) (M*v)
+//(alpha M)*(beta*v) = (alpha*beta) (M*v) can be folded into matrix-vector product
 template<class M, class V>
 struct matrix_vector_prod_optimizer<matrix_scalar_multiply<M>,vector_scalar_multiply<V> >{
-	typedef matrix_vector_prod_optimizer<M, V> opt;
-	typedef vector_scalar_multiply<typename opt::type> type;
+	typedef matrix_vector_prod_optimizer<M, V> inner_opt;
+	typedef vector_scalar_multiply_optimizer<typename inner_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(matrix_scalar_multiply<M> const& m, vector_scalar_multiply<V>const& v){
-		return type(opt::create(m.expression(),v.expression()), v.scalar()*m.scalar());
+		return opt::create(inner_opt::create(m.expression(), v.expression()), v.scalar() * m.scalar());
 	}
 };
 
@@ -793,12 +995,14 @@ struct matrix_vector_prod_optimizer<matrix_matrix_prod<M1,M2>,V>{
 private:
 	typedef matrix_vector_prod_optimizer<M2,V> inner_opt;
 	typedef matrix_vector_prod_optimizer<M1, typename inner_opt::type> outer_opt;
+	typedef vector_scalar_multiply_optimizer<typename outer_opt::type> scalar_opt;
 public:
-	typedef typename outer_opt::type type;
+	typedef typename scalar_opt::type type;
 	
 	static type create(matrix_matrix_prod<M1,M2> const& m, typename V::const_closure_type const& v){
 		auto inner_result = inner_opt::create(m.rhs(),v);
-		return outer_opt::create(m.lhs(),inner_result);
+		auto outer_result = outer_opt::create(m.lhs(),inner_result);
+		return scalar_opt::create(outer_result, m.alpha());
 	}
 };
 
@@ -825,7 +1029,7 @@ struct matrix_vector_prod_optimizer<outer_product<V1,V2>,V3>{
 	
 	static type create(outer_product<V1,V2> const& m, typename V3::const_closure_type const& v){
 		auto alpha = inner_prod(m.rhs(),v);
-		return type(m.lhs(),alpha);
+		return type(m.lhs(), alpha);
 	}
 };
 
@@ -849,14 +1053,12 @@ struct matrix_vector_prod_optimizer<vector_repeater<V1, column_major>, V2 >{
 	}
 };
 
-
-
-//(diag(v1) * v2) = v1 .* v2
+//diag(v1) * v2 = v1 .* v2
 template<class V1,class V2>
 struct matrix_vector_prod_optimizer<diagonal_matrix<V1>,V2>{
 	typedef typename common_value_type<V1,V2>::type value_type;
 	typedef typename device_traits<typename V1::device_type>:: template multiply<value_type> functor;
-	typedef vector_binary<V1, V2, functor  > type;
+	typedef vector_binary<V1, V2, functor> type;
 	static type create(diagonal_matrix<V1> const& m, typename V2::const_closure_type const& v){
 		return type(m.expression(),v, functor());
 	}
@@ -872,7 +1074,7 @@ struct matrix_matrix_prod_optimizer{
 	typedef matrix_matrix_prod<M1,M2> type;
 	
 	static type create(typename M1::const_closure_type const& lhs, typename M2::const_closure_type const& rhs){
-		return type(lhs,rhs);
+		return type(lhs, rhs, typename type::value_type(1));
 	}
 };
 
@@ -880,33 +1082,36 @@ struct matrix_matrix_prod_optimizer{
 //(alpha M1)*B = alpha (M1*B)
 template<class M1, class M2>
 struct matrix_matrix_prod_optimizer<matrix_scalar_multiply<M1>,M2 >{
-	typedef matrix_matrix_prod_optimizer<M1, M2> opt;
-	typedef matrix_scalar_multiply<typename opt::type> type;
+	typedef matrix_matrix_prod_optimizer<M1, M2> inner_opt;
+	typedef matrix_scalar_multiply<typename inner_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(matrix_scalar_multiply<M1> const& A, typename M2::const_closure_type const& B){
-		return type(opt::create(A.expression(),B), A.scalar());
+		return opt::create(inner_opt::create(A.expression(), B), A.scalar());
 	}
 };
 
 //M1*(alpha*B) = alpha (M1*B)
 template<class M1, class M2>
 struct matrix_matrix_prod_optimizer<M1,matrix_scalar_multiply<M2> >{
-	typedef matrix_matrix_prod_optimizer<M1, M2> opt;
-	typedef matrix_scalar_multiply<typename opt::type> type;
+	typedef matrix_matrix_prod_optimizer<M1, M2> inner_opt;
+	typedef matrix_scalar_multiply<typename inner_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(typename M1::const_closure_type const& A, matrix_scalar_multiply<M2> const& B){
-		return type(opt::create(A,B.expression()), B.scalar());
+		return opt::create(inner_opt::create(A, B.expression()), B.scalar());
 	}
 };
 
 //(alpha M1)*(beta*B) = (alpha*beta) (M1*B)
 template<class M1, class M2>
 struct matrix_matrix_prod_optimizer<matrix_scalar_multiply<M1>,matrix_scalar_multiply<M2> >{
-	typedef matrix_matrix_prod_optimizer<M1, M2> opt;
-	typedef matrix_scalar_multiply<typename opt::type> type;
+	typedef matrix_matrix_prod_optimizer<M1, M2> inner_opt;
+	typedef matrix_scalar_multiply<typename inner_opt::type> opt;
+	typedef typename opt::type type;
 	
 	static type create(matrix_scalar_multiply<M1> const& A, matrix_scalar_multiply<M2>const& B){
-		return type(opt::create(A.expression(),B.expression()), B.scalar()*A.scalar());
+		return opt::create(inner_opt::create(A.expression(), B.expression()), A.scalar() * B.scalar());
 	}
 };
 
@@ -980,6 +1185,87 @@ struct vector_unary_optimizer<vector_binary<V1,V2, F1>, F2 >{
 		return type(v.lhs(), v.rhs(), composed_type(v.functor(),f));
 	}
 };
+
+//g2(fold(A, f, g)) = fold(A, f, g2 o g)
+template<class M, class F, class G, class G2>
+struct vector_unary_optimizer<matrix_row_transform<M, F, G>, G2>{
+	typedef typename device_traits<typename M::device_type>::template compose<G, G2> composed_type;
+	typedef matrix_row_transform<M, F, composed_type> type;
+	
+	static type create(matrix_row_transform<M, F, G> const& v, G2 const& g2){
+		return type(v.matrix(), v.f(), composed_type(v.g(),g2) );
+	}
+};
+
+
+
+////////////////////////////////////
+//// Vector-Set Fold
+////////////////////////////////////
+
+template<class S, class F, class G>
+struct fold_vector_set_optimizer;
+
+template<class M, class F, class G>
+struct fold_vector_set_optimizer<vector_set<M, row_major>, F, G>{
+	typedef matrix_row_transform<M, F, G> type;
+	static type create(vector_set<M, row_major> const& set, F const& f, G const& g){
+		return type(set.expression(), f, g);
+	}
+};
+
+template<class M, class F, class G>
+struct fold_vector_set_optimizer<vector_set<M, column_major>, F, G>{
+	typedef matrix_transpose_optimizer<M> opt;
+	typedef matrix_row_transform<typename opt::type, F, G> type;
+	static type create(vector_set<M, column_major> const& set, F const& f, G const& g){
+		return type(opt::create(set.expression()), f, g);
+	}
+};
+
+//~ template<class S, class M>
+//~ struct vector_set_matrix_prod_optimizer;
+
+//~ template<class M1, class M2>
+//~ struct vector_set_matrix_prod_optimizer<vector_set<M1, row_major>, M2>{
+	//~ typedef matrix_matrix_prod_optimizer<M1, M2> opt;
+	//~ typedef vector_set<typename opt::type, row_major> type;
+	//~ static type create(vector_set<M1, row_major> const& set, typename M2::const_closure_type const& m2){
+		//~ return as_set(opt::create(set.expression(), m2), row_major());
+	//~ }
+//~ };
+
+//~ template<class M1, class M2>
+//~ struct vector_set_matrix_prod_optimizer<vector_set<M1, column_major>, M2>{
+	//~ typedef matrix_transpose_optimizer<M2> trans_opt;
+	//~ typedef matrix_matrix_prod_optimizer<typename trans_opt::type, M1> opt;
+	//~ typedef vector_set<typename opt::type, column_major> type;
+	//~ static type create(vector_set<M1, column_major> const& set, typename M2::const_closure_type const& m2){
+		//~ return as_set(opt::create(trans_opt::create(m2),set.expression()), column_major());
+	//~ }
+//~ };
+
+//~ template<class S, class V>
+//~ struct vector_set_inner_prod_optimizer;
+
+//~ template<class M, class V>
+//~ struct vector_set_inner_prod_optimizer<vector_set<M, row_major>, V>{
+	//~ typedef matrix_vector_prod_optimizer<M, V> opt;
+	//~ typedef typename opt::type type;
+	//~ static type create(vector_set<M, row_major> const& set, typename V::const_closure_type const& v){
+		//~ return opt::create(set.expression(), v);
+	//~ }
+//~ };
+//~ template<class M, class V>
+//~ struct vector_set_inner_prod_optimizer<vector_set<M, column_major>, V>{
+	//~ typedef matrix_transpose_optimizer<M> trans_opt;
+	//~ typedef matrix_vector_prod_optimizer<typename trans_opt::type, V> opt;
+	//~ typedef typename opt::type type;
+	//~ static type create(vector_set<M, column_major> const& set, typename V::const_closure_type const& v){
+		//~ return opt::create(trans_opt::create(set.expression()), v);
+	//~ }
+//~ };
+
 
 }}
 #endif

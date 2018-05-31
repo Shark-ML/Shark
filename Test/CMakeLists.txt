@@ -231,7 +231,6 @@ shark_add_test( Rng/MultiNomial.cpp random_MultiNomialDistribution )
 shark_add_test( RBM/BinaryLayer.cpp RBM_BinaryLayer)
 shark_add_test( RBM/BipolarLayer.cpp RBM_BipolarLayer)
 shark_add_test( RBM/GaussianLayer.cpp RBM_GaussianLayer)
-shark_add_test( RBM/TruncatedExponentialLayer.cpp RBM_TruncatedExponentialLayer)
 
 shark_add_test( RBM/MarkovChain.cpp RBM_MarkovChain)
 #shark_add_test( RBM/GibbsOperator.cpp RBM_GibbsOperator)//not compiling anymore needs rewrite

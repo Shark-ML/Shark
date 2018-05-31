@@ -34,6 +34,7 @@
 #define REMORA_MATRIX_PROXY_HPP
 
 #include "detail/proxy_optimizers_fwd.hpp"
+#include "detail/vector_set.hpp"
 #include "expression_types.hpp"
 #include "detail/traits.hpp"
 #include "detail/check.hpp"
@@ -377,6 +378,41 @@ typename detail::vector_to_matrix_optimizer<typename V::closure_type, row_major 
 ){
 	static_assert(!std::is_base_of<vector_container<V, Device>,V>::value, "It is unsafe to create a proxy from a temporary container");
 	return to_matrix(v, size1, size2);
+}
+
+////////////////////////////////////
+//// Matrix to vector set
+////////////////////////////////////
+
+template <class O, class M, class Device>
+vector_set<typename M::const_closure_type, O >
+as_set(matrix_expression<M, Device> const& m, O){
+	return vector_set<typename M::const_closure_type, O >(m());
+}
+
+template <class O, class M, class Device>
+vector_set<typename M::closure_type, O >
+as_set(matrix_expression<M, Device>& m, O){
+	return vector_set<typename M::closure_type, O >(m());
+}
+
+template <class O, class M, class Device>
+vector_set<typename M::closure_type, O > 
+as_set(matrix_expression<M, Device>&& m, O){
+	static_assert(!std::is_base_of<matrix_container<M, Device>,M>::value, "It is unsafe to create a proxy from a temporary container");
+	return vector_set<typename M::closure_type, O >(m());
+}
+
+/// \brief Transforms the matrix m to a set of points where each point is one row of m
+template <class M>
+auto as_rows(M&& m)-> decltype(as_set(std::forward<M>(m), row_major())){
+	return as_set(std::forward<M>(m), row_major());
+}
+
+/// \brief Transforms the matrix m to a set of points where each point is one column of m
+template <class M>
+auto as_columns(M&& m)-> decltype(as_set(std::forward<M>(m), column_major())){
+	return as_set(std::forward<M>(m), column_major());
 }
 
 }

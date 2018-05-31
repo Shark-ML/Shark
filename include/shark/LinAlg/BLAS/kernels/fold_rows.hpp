@@ -37,35 +37,34 @@
 #endif
 
 namespace remora {namespace bindings{
-template<class F, class M,class V, class Device>
+template<class F,  class G, class M,class V, class Device>
 void fold_rows(
 	matrix_expression<M, Device> const & A, 
 	vector_expression<V, Device>& b,
 	F f,
-	typename V::value_type alpha,
+	G g,
 	unknown_orientation
 ){
-	fold_rows(A, b, f, alpha, row_major());
+	fold_rows(A, b, f, g, row_major());
 }
 }
 	
 namespace kernels{
-///\brief Folds the rows of a row-major or column major matrix with a function f
+///\brief Folds each row of a matrix with a function f and transforms the result with another function g
 ///
-/// output v_j is computed as v_j += alpha * f(A_0j, f(A_1j,...)))
-/// Note: the implementation may assume that f is commutative and associative, i.e. the order of computation can be changed arbitrarily.
-/// it is further assumed that if A only has 1 row, the result of just returning this value is correct
-template <class F, class M, class V, class Device>
+/// output v_i is computed as v_i += g( f(A_i0, f(A_i1,... f(A_n-2i, A_n-1i) ))). That is, the result is the same
+/// as folding each row separately as if it was a collection of numbers.
+template <class F, class G, class M, class V, class Device>
 void fold_rows(
 	matrix_expression<M, Device> const & A, 
 	vector_expression<V, Device>& b,
 	F f,
-	typename V::value_type alpha
+	G g
 ){
-	REMORA_SIZE_CHECK(A().size2() == b().size());
+	REMORA_SIZE_CHECK(A().size1() == b().size());
 	if(A().size1() == 0) return; //undefined
 	bindings::fold_rows(
-		A, b, f, alpha, typename M::orientation()
+		A, b, f, g, typename M::orientation()
 	);
 }
 

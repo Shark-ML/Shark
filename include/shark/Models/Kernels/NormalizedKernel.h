@@ -207,8 +207,8 @@ public:
 		m_base->weightedParameterDerivative(batchX1,batchX2,weights,*s.stateKxy,gradient);
 		
 		noalias(weights) *= s.kxy;
-		RealVector wx = sum_columns(weights) / (2.0 * s.kxx);
-		RealVector wy = sum_rows(weights) / (2.0 * s.kyy);
+		RealVector wx = sum(as_rows(weights)) / (2.0 * s.kxx);
+		RealVector wy = sum(as_columns(weights)) / (2.0 * s.kyy);
 		
 		//the following mess could be made easier with an interface like 
 		//m_base->weightedParameterDerivative(batchX1,wx,s.statekxx,subGradient);
@@ -252,7 +252,7 @@ public:
 		m_base->weightedInputDerivative(batchX1,batchX2,weights,*s.stateKxy,gradient);
 		
 		noalias(weights) *= s.kxy;
-		RealVector wx = sum_columns(weights)/s.kxx;
+		RealVector wx = sum(as_rows(weights))/s.kxx;
 		
 		//the following mess could be made easier with an interface like 
 		//m_base->weightedInputDerivative(batchX1,wx,s.statekxx,subGradient);

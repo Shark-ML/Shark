@@ -243,7 +243,7 @@ public:
 		noalias(weightGradient) = trans(delta) % patterns;
 
 		if (hasOffset()){
-			noalias(subrange(gradient, matrixParams, matrixParams + numOutputs)) = sum_rows(delta);
+			noalias(subrange(gradient, matrixParams, matrixParams + numOutputs)) = sum(as_columns(delta));
 		}
 	}
 	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all patterns of the last computed batch
@@ -297,7 +297,7 @@ public:
 		//sum_i coefficients(output,i)*pattern(i))
 		noalias(weightGradient) = trans(delta) % patterns;
 		if (hasOffset()){
-			noalias(offsetGradient) = sum_rows(delta);
+			noalias(offsetGradient) = sum(as_columns(delta));
 		}
 	}
 

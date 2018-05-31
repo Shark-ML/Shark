@@ -38,26 +38,27 @@ namespace remora{
 template<class T, class VecV, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename VecV::value_type >::value,
-	vector_scalar_multiply<VecV>
+	typename detail::vector_scalar_multiply_optimizer<VecV>::type
 >::type
 operator* (vector_expression<VecV, Device> const& v, T scalar){
 	typedef typename VecV::value_type value_type;
-	return vector_scalar_multiply<VecV>(v(), value_type(scalar));
+	return detail::vector_scalar_multiply_optimizer<VecV>::create(v(),value_type(scalar));
 }
 template<class T, class VecV, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename VecV::value_type >::value,
-        vector_scalar_multiply<VecV>
+        typename detail::vector_scalar_multiply_optimizer<VecV>::type
 >::type
 operator* (T scalar, vector_expression<VecV, Device> const& v){
 	typedef typename VecV::value_type value_type;
-	return vector_scalar_multiply<VecV>(v(), value_type(scalar));//explicit cast prevents warning, alternative would be to template functors::scalar_multiply on T as well
+	return detail::vector_scalar_multiply_optimizer<VecV>::create(v(),value_type(scalar));
 }
 
 template<class VecV, class Device>
-vector_scalar_multiply<VecV> operator-(vector_expression<VecV, Device> const& v){
+typename detail::vector_scalar_multiply_optimizer<VecV>::type
+operator-(vector_expression<VecV, Device> const& v){
 	typedef typename VecV::value_type value_type;
-	return vector_scalar_multiply<VecV>(v(), value_type(-1));//explicit cast prevents warning, alternative would be to template functors::scalar_multiply on T as well
+	return detail::vector_scalar_multiply_optimizer<VecV>::create(v(),value_type(-1));
 }
 
 ///\brief Creates a vector having a constant value.
@@ -109,12 +110,12 @@ vector_addition<VecV1, VecV2 > operator+ (
 }
 ///\brief Subtracts two vectors
 template<class VecV1, class VecV2, class Device>
-vector_addition<VecV1, vector_scalar_multiply<VecV2> > operator- (
+auto operator- (
 	vector_expression<VecV1, Device> const& v1,
 	vector_expression<VecV2, Device> const& v2
-){
+) -> decltype (v1 + (-v2)){
 	REMORA_SIZE_CHECK(v1().size() == v2().size());
-	return vector_addition<VecV1, vector_scalar_multiply<VecV2> >(v1(),-v2());
+	return v1 + (-v2);
 }
 
 ///\brief Adds a vector plus a scalar which is interpreted as a constant vector
@@ -145,24 +146,24 @@ typename std::enable_if<
 template<class VecV, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename VecV::value_type>::value ,
-	vector_addition<VecV, vector_scalar_multiply<scalar_vector<T, Device> > >
+	decltype(std::declval<VecV const&>() + T())
 >::type operator- (
 	vector_expression<VecV, Device> const& v,
 	T t
 ){
-	return v - scalar_vector<T, Device>(v().size(),t);
+	return v + (-t);
 }
 
 ///\brief Subtracts a vector from a scalar which is interpreted as a constant vector
 template<class VecV, class T, class Device>
 typename std::enable_if<
 	std::is_convertible<T, typename VecV::value_type>::value,
-	vector_addition<scalar_vector<T, Device>, vector_scalar_multiply<VecV> >
+	decltype(T() + (-std::declval<VecV const&>()))
 >::type operator- (
 	T t,
 	vector_expression<VecV, Device> const& v
 ){
-	return scalar_vector<T, Device>(v().size(),t) - v;
+	return t + (-v);
 }
 
 #define REMORA_BINARY_VECTOR_EXPRESSION(name, F)\

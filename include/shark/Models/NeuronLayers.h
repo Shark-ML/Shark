@@ -162,13 +162,13 @@ struct NormalizerNeuron{
 	
 	template<class Arg, class Device>
 	void evalInPlace(blas::matrix_expression<Arg,Device>& arg)const{
-		noalias(trans(arg)) /= blas::repeat(sum_columns(arg),arg().size2());
+		noalias(trans(arg)) /= blas::repeat(sum(as_rows(arg)),arg().size2());
 	}
 	
 	template<class Arg, class Device>
 	void evalInPlace(blas::matrix_expression<Arg,Device>& arg, State& state)const{
 		state.norm.resize(arg().size1());
-		noalias(state.norm) = sum_columns(arg);
+		noalias(state.norm) = sum(as_rows(arg));
 		noalias(arg) /= trans(blas::repeat(state.norm,arg().size2()));
 	}
 	
@@ -195,7 +195,7 @@ struct SoftmaxNeuron{
 	template<class Arg, class Device>
 	void evalInPlace(blas::matrix_expression<Arg,Device>& arg)const{
 		noalias(arg) = exp(arg);
-		noalias(arg) /= trans(blas::repeat(sum_columns(arg),arg().size2()));
+		noalias(arg) /= trans(blas::repeat(sum(as_rows(arg)),arg().size2()));
 	}
 	
 	template<class Arg, class Device>
@@ -205,10 +205,13 @@ struct SoftmaxNeuron{
 	
 	template<class Output, class Derivative>
 	void multiplyDerivative(Output const& output, Derivative& der, State const& s)const{
-		for(size_t i = 0; i != output.size1(); ++i){
-			double mass=inner_prod(row(der,i),row(output,i));
-			noalias(row(der,i)) = (row(der,i) - mass) *row(output,i);
-		}
+		auto mass = eval_block(sum(as_rows(der * output)));
+		noalias(der) -= trans(blas::repeat(mass, der.size2()));
+		noalias(der) *= output;
+		//~ for(size_t i = 0; i != output.size1(); ++i){
+			//~ double mass=inner_prod(row(der,i),row(output,i));
+			//~ noalias(row(der,i)) = (row(der,i) - mass) *row(output,i);
+		//~ }
 	}
 };
 

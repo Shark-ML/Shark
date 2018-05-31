@@ -126,7 +126,7 @@ inline double estimateLogFreeEnergyFromEnergySamples(
 	double deltaF = 0;
 	switch(algorithm){
 	case AIS:
-		deltaF = soft_max(-sum_rows(energyDiffUp))-std::log(double(samples));
+		deltaF = soft_max(-sum(as_columns(energyDiffUp)))-std::log(double(samples));
 	break;
 	case AISMean:
 		for(std::size_t i = chains-1; i != 0; --i){
@@ -144,7 +144,7 @@ inline double estimateLogFreeEnergyFromEnergySamples(
 		}
 	break;
 	case AcceptanceRatio:
-		deltaF = detail::acceptanceRatio(sum_rows(energyDiffUp),sum_rows(energyDiffDown));
+		deltaF = detail::acceptanceRatio(sum(as_columns(energyDiffUp)),sum(as_columns(energyDiffDown)));
 	}
 	
 	return deltaF;
@@ -175,7 +175,7 @@ double annealedImportanceSampling(
 	RealMatrix energyDiffTempering(chains,samples,0.0);
 	detail::sampleEnergiesWithTempering(rbm,beta,energyDiffTempering);
 	
-	return soft_max(-sum_rows(energyDiffTempering))-std::log(double(samples));
+	return soft_max(-sum(as_columns(energyDiffTempering)))-std::log(double(samples));
 }
 
 template<class RBMType>

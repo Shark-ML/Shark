@@ -104,7 +104,7 @@ template<class Kernel, class Data>
 RealMatrix calculateCenteredKernelMatrix(Kernel const& kernel, Data const& data){
 	std::size_t numInputs = data.numberOfElements();
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data);
-	RealVector k = sum_rows(K)/numInputs;
+	RealVector k = sum(as_columns(K))/numInputs;
 	double meanK = sum(k)/numInputs;
 	K-= repeat(k,numInputs);
 	K-= trans(repeat(k,numInputs));
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_numerics){
 	GaussianRbfKernel<> kernel(1.0);
 	RealMatrix K = calculateRegularizedKernelMatrix(kernel,data.inputs());
 	RealMatrix Kc = calculateCenteredKernelMatrix(kernel,data.inputs());
-	RealVector k = sum_rows(K)/numInputs;
+	RealVector k = sum(as_columns(K))/numInputs;
 	double meanK = sum(k)/numInputs;
 	
 	double YKc=sum(element_prod(Kc,Y));

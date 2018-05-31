@@ -1022,16 +1022,6 @@ private:
 		return m_index;
 	}
 
-	// Assignment
-	binary_transform_iterator &operator = (binary_transform_iterator const &it) {
-		m_index = it.m_index;
-		m_iterator1 = it.m_iterator1;
-		m_end1 = it.m_end1;
-		m_iterator2 = it.m_iterator2;
-		m_end2 = it.m_end2;
-		return *this;
-	}
-
 	// Comparison
 	bool operator == (binary_transform_iterator const &it) const {
 		return m_iterator1 == it.m_iterator1 && m_iterator2 == it.m_iterator2;

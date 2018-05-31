@@ -66,7 +66,7 @@ public:
 		SIZE_CHECK(predictions.size1() == labels.size1());
 		SIZE_CHECK(predictions.size2() == labels.size2());
 
-		return 0.5*sum(max(0.0,sum_columns(sqr(labels-predictions)) - m_sqrEpsilon));
+		return 0.5*sum(max(0.0,norm_sqr(as_rows(labels-predictions)) - m_sqrEpsilon));
 	}
 
 	double evalDerivative(BatchLabelType const& labels, BatchOutputType const& predictions, BatchOutputType& gradient)const{
