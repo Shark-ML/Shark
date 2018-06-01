@@ -55,8 +55,7 @@ namespace shark {
 /// Given a ScaledKernel, which itself holds an arbitrary underlying kernel k, we compute
 /// \f[ \frac{1}{N}\sum_{i=1}^N k(x_i,x_i) - \frac{1}{N^2} \sum_{i,j=1}^N k(x_i,x_j) \f]
 /// 
-/// 
-/// 
+/// \ingroup unsupervised_trainer
 template < class InputType = RealVector >
 class NormalizeKernelUnitVariance : public AbstractUnsupervisedTrainer<ScaledKernel<InputType> >
 {

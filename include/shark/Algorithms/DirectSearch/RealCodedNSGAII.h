@@ -56,6 +56,7 @@ namespace shark {
 ///  Deb, Agrawal, Pratap and Meyarivan. 
 ///  A Fast and Elitist Multiobjective Genetic Algorithm: NSGA-II 
 ///  IEEE TRANSACTIONS ON EVOLUTIONARY COMPUTATION, VOL. 6, NO. 2, APRIL 2002
+/// \ingroup multidirect
 template<typename Indicator>
 class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<RealVector>{		
 public:

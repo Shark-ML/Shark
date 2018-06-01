@@ -49,14 +49,13 @@
 
 namespace shark {
 
-/**
-* \brief Implements the SMS-EMOA.
-*
-* Please see the following paper for further reference:
-*	- Beume, Naujoks, Emmerich. 
-*	SMS-EMOA: Multiobjective selection based on dominated hypervolume. 
-*	European Journal of Operational Research.
-*/
+/// \brief Implements the SMS-EMOA.
+///
+/// Please see the following paper for further reference:
+///	- Beume, Naujoks, Emmerich. 
+///	SMS-EMOA: Multiobjective selection based on dominated hypervolume. 
+///	European Journal of Operational Research.
+/// \ingroup multidirect
 class SMSEMOA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:
 	SMSEMOA(random::rng_type& rng = random::globalRng):mpe_rng(&rng) {

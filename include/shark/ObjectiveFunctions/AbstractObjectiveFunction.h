@@ -3,7 +3,7 @@
  * 
  *
  * \brief       AbstractObjectiveFunction
-
+ * \file
  * 
  *
  * \author      T.Voss, T. Glasmachers, O.Krause
@@ -41,9 +41,15 @@
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
 
 namespace shark {
+	
+/// \defgroup objfunctions Objective functions
+/// \brief Objective functions for optimization.
+///
+/// In shark, the learning problem is phrased as an objective function which is then optimized using an \ref optimizer. This allows
+/// to test and develop algorithms using \ref benchmarks independent of the problem to solve.
 
 /// \brief Super class of all objective functions for optimization and learning.
-
+///
 /// \par
 /// The AbstractObjectiveFunction template class is the most general
 /// interface for a function to be minimized by an
@@ -78,7 +84,8 @@ namespace shark {
 /// will throw an exception.
 /// The features can be queried using the method features() as in
 /// if(!(f.features()&Function::HAS_VALUE))
-
+///
+/// \ingroup objfunctions
 /// \tparam PointType The search space the function is defined upon.
 /// \tparam ResultT The objective space the function is defined upon.
 template <typename PointType, typename ResultT>

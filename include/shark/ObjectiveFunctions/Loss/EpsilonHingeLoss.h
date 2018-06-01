@@ -48,6 +48,7 @@ namespace shark {
 /// Epsilon describes the size of the margin.
 ///
 /// The hinge-loss is not differentiable at the points y_{i,j}+epsilon and y_{i,j}-epsilon.
+/// \ingroup lossfunctions
 class EpsilonHingeLoss : public AbstractLoss<RealVector, RealVector>
 {
 public:

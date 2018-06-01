@@ -58,7 +58,7 @@ namespace shark {
 /// requires training of a large number of learning machines. However,
 /// certain machines allow for a more efficient implementation. Refer
 /// to LooErrorCSvm for an example.
-///
+/// \ingroup objfunctions
 template<class ModelTypeT, class LabelType = typename ModelTypeT::OutputType>
 class LooError : public AbstractObjectiveFunction< RealVector, double >
 {

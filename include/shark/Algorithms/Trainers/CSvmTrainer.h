@@ -69,7 +69,7 @@ enum class McSvm{
 /// Machine Learning, vol. 20 (1995), pp. 273-297.</p>
 /// or simply to the Wikipedia article:<br/>
 /// http://en.wikipedia.org/wiki/Support_vector_machine
-///
+/// \ingroup supervised_trainer
 template <class InputType, class CacheType = float>
 class CSvmTrainer : public AbstractSvmTrainer<
 	InputType, unsigned int, 

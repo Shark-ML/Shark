@@ -2,24 +2,10 @@
 Kernels
 =======
 
-
-The term *kernel function*, or kernel for short, is overloaded. Here,
-we refer to *positive semi-definite kernels*, that is, the functions inducing
+Shark offers a large library of *positive semi-definite kernels*, that is, functions inducing
 reproducing kernel Hilbert spaces [Aronszajn1950]_. They underlie
 the "kernel trick" [Schölkopf2002]_, which is used, for instance, in non-linear
 support vector machines (SVMs).
-
-This tutorial covers all knowledge required for using existing and
-writing you own kernel based predictors and learning algorithms.
-That is, this tutorial explains the kernel interface from a user
-perspective. Writing a specialized kernel function is explained in
-the tutorial :doc:`writing_kernels`.
-
-
-
-
-Background
-----------
 
 Given some set :math:`\mathcal X`, a positive semi-definite kernel
 :math:`k:\mathcal X\times\mathcal X\to\mathbb R`
@@ -38,12 +24,21 @@ feature space:
 
 .. math::
   k(x,y) = \langle \phi(x),\phi(y) \rangle_{\mathcal H}
-
+  
 where :math:`x` and :math:`y` are elements of :math:`\mathcal X` ,
 :math:`\phi` is a map from :math:`\mathcal X` to :math:`\mathcal H`, and
 :math:`\langle \cdot, \cdot \rangle_{\mathcal H}` is the scalar product in
 :math:`\mathcal H`.
 For details we refer to [Aronszajn1950]_ and [Mercer1909]_.
+
+List of Classes
+---------------------------------
+The list of kernels is available in the :doxy:`class documentation <kernels>`.
+Functions for optimizing kernel functions are given :doxy:`here <kerneloptimization>`.
+
+
+Background
+----------
 
 Many machine learning algorithms can be written in a way that the only
 operations involving input elements are scalar products between those
@@ -80,8 +75,8 @@ the distance reduces to :math:`d(x,y) =\sqrt{2 - 2k(x,y)}`.
 
 .. _label_for_kernels_in_shark:
 
-Kernels in Shark
-&&&&&&&&&&&&&&&&
+The base class 'AbstractKernelFunction<InputTypeT>'
+----------------------------------------------------
 
 Shark provides strong support for kernel-based algorithms.  All kernel
 functions' base class is the :doxy:`AbstractKernelFunction`. A linear
@@ -104,23 +99,7 @@ a few hundred thousand can make this prohibitive. Therefore, often only
 parts of :math:`K` are calculated at a time, most often matrix rows
 or blocks. In Shark, the classes :doxy:`KernelMatrix` and
 :doxy:`CachedMatrix` as well as some derived and sibling classes
-encapsulate kernel Gram matrices. The :doxy:`CachedMatrix` also
-automatically takes care of memory handling.
-
-
-
-The base class 'AbstractKernelFunction<InputTypeT>'
-----------------------------------------------------
-
-
-The interface of kernels can be understood as a generalization of the interface
-of Models to functions taking two arguments of the same type. All kernels
-are derived from the abstract class :doxy:`AbstractKernelFunction`. Due to the
-demanding computations involving kernel evaluations, the interface is optimized
-for speed, and to allow parallelization of the evaluation of different parts of
-the kernel Gram matrix at a time. In the following, the basic design decisions
-are outlined and explained. Since kernels and models have much in common,
-consider reading the :doc:`models` tutorial first.
+encapsulate kernel Gram matrices.
 
 Types
 &&&&&
@@ -310,62 +289,6 @@ Method                            Description
 ``setParameterVector``            Sets the new parameter vector
 ``createState``                   Returns a newly created State object holding the state to be stored in eval
 ===============================   ===============================================================================
-
-
-
-Kernel Helper Functions
-------------------------
-
-
-The file :doxy:`KernelHelpers.h` defines some free functions that help dealing with
-common tasks in kernel usage. Currently this file offers the following functions:
-
-
-=============================================   ===============================================================================
-Method                                          Description
-=============================================   ===============================================================================
-``calculateRegularizedKernelMatrix``            Evaluates the whole kernel Gram matrix given a kernel and a dataset;
-                                                optionally, a regularization value is added to the main diagonal
-``calculateKernelMatrixParameterDerivative``    Computes the parameter derivative for a kernel Gram matrix defined by a
-                                                kernel, dataset, and a weight matrix
-=============================================   ===============================================================================
-
-
-List of Kernels
-----------------------------------------------------------------
-
-Shark implements a number of general purpose kernels:
-
-================================  ========================================================================================================================
-Model                             Description
-================================  ========================================================================================================================
-:doxy:`LinearKernel`              Standard Euclidean inner product :math:`k(x,y) = \langle x,y \rangle`
-:doxy:`MonomialKernel`            For a given exponent n, computes :math:`k(x,y) = \langle x,y \rangle^n`
-:doxy:`PolynomialKernel`          For a given exponent n and offset b, computes :math:`k(x,y) = \left(\langle x,y \rangle+b\right)^n`
-:doxy:`DiscreteKernel`            This kernel on a discrete space is explicitly defined by a symmetric, positive semi definite Gram matrix
-:doxy:`GaussianRbfKernel`         Gaussian isotropic ("radial basis function") kernel :math:`k(x,y) = e^{-\gamma ||x-y||^2}`
-:doxy:`ARDKernelUnconstrained`    Gaussian kernel :math:`k(x,y) = e^{-(x-y)^T C(x-y)}` with diagonal parameter matrix C
-================================  ========================================================================================================================
-
-
-Valid positive semi-definite kernels can be formed, among others, by
-adding and multiplying kernels. This leads to a range of what we call
-combined kernels listed below:
-
-
-=================================================      ==========================================================================================
-Model                                                  Description
-=================================================      ==========================================================================================
-:doxy:`WeightedSumKernel`                              For a given set of kernels computes :math:`k(x,y) = k_1(x,y)+\dots + k_n(x,y)`
-:doxy:`ProductKernel`                                  For a given set of kernels computes :math:`k(x,y) = k_1(x,y) \dots k_n(x,y)`
-:doxy:`NormalizedKernel`                               Normalizes a given kernel; computes: :math:`k(x,y) = k_1(x,y) / \sqrt{k_1(x,x) k_1(y,y)}`
-:doxy:`ScaledKernel`                                   Scales a kernel by a fixed constant
-:doxy:`SubrangeKernel`                                 Weighted sum kernel for vector spaces; every kernel receives only a subrange of the input
-:doxy:`MklKernel`                                      Weighted sum kernel for heterogenous type input tuples;
-                                                       every kernel receives one part of the input tuple
-GaussianTaskKernel, see :doxy:`MultiTaskKernel.h`      Specialization of the DiscreteKernel for multi task learning
-MultiTaskKernel, see :doxy:`MultiTaskKernel.h`         Framework kernel for multi task learning with kernels
-=================================================      ==========================================================================================
 
 
 References

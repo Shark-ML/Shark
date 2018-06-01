@@ -47,7 +47,7 @@ namespace shark {
 /// Tom Fawcett. ROC Graphs: Notes and Practical Considerations for Researchers. 2004
 ///
 /// The area is negated so that optimizing the AUC corresponds to a minimization task. 
-///
+/// \ingroup costfunctions
 template<class LabelType = unsigned int, class OutputType = RealVector>
 class NegativeAUC : public AbstractCost<LabelType, OutputType>
 {
@@ -159,7 +159,7 @@ protected:
 /// Corinna Cortes, Mehryar Mohri. Confidence Intervals for the Area under the ROC Curve. NIPS, 2004
 ///
 /// The area is negated so that optimizing the AUC corresponds to a minimization task. 
-///
+/// \ingroup costfunctions
 template<class LabelType = unsigned int, class OutputType = LabelType>
 class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, OutputType>
 {

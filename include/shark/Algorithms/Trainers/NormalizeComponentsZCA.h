@@ -51,6 +51,7 @@ namespace shark {
 /// However in contrast to NormalizeComponentsWhitening it makes sure that the initial and end coordinate
 /// system are the same and just rescales the data.  The effect is, that image data still resembles images
 /// after applying ZCA in contrast to other methods which rotate the data randomly.
+/// \ingroup unsupervised_trainer
 class NormalizeComponentsZCA : public AbstractUnsupervisedTrainer<LinearModel<RealVector> >
 {
 	typedef AbstractUnsupervisedTrainer<LinearModel<RealVector> > base_type;

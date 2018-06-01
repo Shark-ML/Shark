@@ -46,7 +46,7 @@ namespace shark {
 /// operator == for its LabelType template parameter. The
 /// loss function returns zero of the predictions exactly
 /// matches the label, and one otherwise.
-///
+/// \ingroup lossfunctions
 template<class LabelType = unsigned int, class OutputType = LabelType>
 class ZeroOneLoss : public AbstractLoss<LabelType, LabelType>
 {

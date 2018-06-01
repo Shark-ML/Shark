@@ -75,6 +75,7 @@ namespace shark {
 /// \f]
 /// is the \f$ \varepsilon \f$ insensitive absolute loss.
 ///
+/// \ingroup supervised_trainer
 template <class InputType, class CacheType = float>
 class EpsilonSvmTrainer : public AbstractSvmTrainer<InputType, RealVector, KernelExpansion<InputType> >
 {

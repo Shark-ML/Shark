@@ -53,7 +53,7 @@ namespace shark {
 /// model training via iterative minimization of a
 /// loss function, such as in neural network
 /// "backpropagation" training.
-///
+/// \ingroup supervised_trainer
 template <class Model, class LabelTypeT = typename Model::OutputType>
 class OptimizationTrainer : public AbstractTrainer<Model,LabelTypeT>
 {

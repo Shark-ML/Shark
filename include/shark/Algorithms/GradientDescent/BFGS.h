@@ -43,7 +43,8 @@
 
 namespace shark {
 
-//! \brief Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization
+/// \brief Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization
+/// \ingroup gradientopt
 template<class SearchPointType = RealVector>
 class BFGS : public AbstractLineSearchOptimizer<SearchPointType>
 {

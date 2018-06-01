@@ -43,15 +43,14 @@
 
 namespace shark {
 
-/**
- * \brief Implements the RVEA algorithm.
- *
- * Implementation of the RVEA algorithm from the following paper:
- * R. Cheng, Y. Jin, M. Olhofer, and B. Sendhoff, “A reference vector guided
- * evolutionary algorithm for many-objective optimization,” IEEE Transactions on
- * Evolutionary Computation, Vol 20, Issue 5, October 2016
- * http://dx.doi.org/10.1109/TEVC.2016.2519378
- */
+/// \brief Implements the RVEA algorithm.
+///
+/// Implementation of the RVEA algorithm from the following paper:
+/// R. Cheng, Y. Jin, M. Olhofer, and B. Sendhoff, “A reference vector guided
+/// evolutionary algorithm for many-objective optimization,” IEEE Transactions on
+/// Evolutionary Computation, Vol 20, Issue 5, October 2016
+/// http://dx.doi.org/10.1109/TEVC.2016.2519378
+/// \ingroup multidirect
 class RVEA : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:

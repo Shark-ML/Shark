@@ -3,7 +3,7 @@
  * 
  *
  * \brief       Base class for Line Search Optimizer
- * 
+ * \file
  * 
  *
  * \author      O. Krause
@@ -51,6 +51,7 @@ namespace shark {
 ///
 /// Also derived classes should specialise read() and write() methods for serialization if they have additional members
 /// as well as choose a name() for the optimizer.
+/// \ingroup gradientopt
 template<class SearchPointType>
 class AbstractLineSearchOptimizer : public AbstractSingleObjectiveOptimizer< SearchPointType > {
 public:

@@ -15,6 +15,11 @@ some multi-class support vector machines. But in most cases, trainers
 are used to reach analytical solutions to relatively simple problems
 which are not stated as an iterative optimization problem underneath.
 
+List of Classes
+---------------------------------
+* :doxy:`Supervised Trainers<supervised_trainer>`,
+* :doxy:`Unsupervised Trainers<unsupervised_trainer>`
+
 
 
 The base class 'AbstractTrainer<ModelT, LabelTypeT>'
@@ -32,6 +37,8 @@ Types                        Description
 ``ModelType``                The type of model the trainer optimizes
 ``InputType``                The type of inputs the model takes
 ``LabelType``                The type of the labels in the data set
+``DatasetType``              The type of dataset that the trainer expects,
+			     this is `LabeledData<InputType, LabelType>`
 ==========================   =======================================
 
 
@@ -69,6 +76,8 @@ Types                        Description
 ==========================   ==============================================
 ``ModelType``                Type of model which the trainer optimizes
 ``InputType``                Type of inputs the model takes
+``DatasetType``              The type of dataset that the trainer expects,
+			     this is `UnlabeledData<InputType>`
 ==========================   ==============================================
 
 
@@ -83,60 +92,29 @@ Method                                                  Description
 =====================================================   ================================================
 
 
+Weighting
+----------------------------------------------------
 
+Both variants of trainers also come in a version with support for weighting,
+:doxy:`AbstractWeightedTrainer` and :doxy:`AbstractWeightedUnsupervisedTrainer`. Both support an additional
+verion of train which can use a :doxy:`WeightedUnlabeledData` or :doxy:`WeightedLabeledData` object which adds
+an additional weighting factor for each element. This factor must be positive, but does not need to sum to one.
+Using a weighted dataset with all weights equal will lead to the same result as not weighting the dataset.
 
-List of trainers
-----------------
+Both classes declare a new typedef
 
+==========================   ==============================================
+Types                        Description
+==========================   ==============================================
+``WeightedDatasetType``      The weighted dataset that the trainer expects,
+			     this is `WeightedUnlabeledData<InputType>`
+			     or `WeightedLabeledData<InputType,LabeledType>`
+==========================   ==============================================
 
-We first list the unsupervised trainers in Shark. Many
-of these operate on models for data normalization.
+and the following version of train, additionally to the known versions:
 
-
-========================================  ========================  ============================================================
-Trainer                                     Model                     Description
-========================================  ========================  ============================================================
-:doxy:`NormalizeComponentsUnitInterval`   :doxy:`Normalizer`        Trains a linear model to normalize the components of data
-                                                                    to the unit interval.
-:doxy:`NormalizeComponentsUnitVariance`   :doxy:`Normalizer`        Trains a linear model to normalize the components of data
-                                                                    to unit variance.
-:doxy:`NormalizeComponentsWhitening`      :doxy:`LinearModel`       Trains a linear model to whiten the data (uncorrelate all
-                                                                    components, and normalize to unit variance).
-:doxy:`PCA`                               :doxy:`LinearModel`       Trains a linear model for a principal component analysis, 
-                                                                    see the :doc:`PCA tutorial<../../algorithms/pca>`.
-:doxy:`NormalizeKernelUnitVariance`       :doxy:`ScaledKernel`      Trains the scaling factor of a ScaledKernel such that the
-                                                                    data has unit variance in its induced feature space. Note
-                                                                    how this trainer operates on a kernel rather than a (linear)
-                                                                    model.
-:doxy:`OneClassSvmTrainer`                :doxy:`KernelExpansion`   Trains a one-class SVM which can be used for outlier detection
-========================================  ========================  ============================================================
-
-
-
-List of some supervised trainers:
-
-
-
-========================================  ========================================   ===================================================================
-Trainer                                     Model                                      Description
-========================================  ========================================   ===================================================================
-:doxy:`FisherLDA`                         :doxy:`LinearModel`                        Performs Fisher Linear Discriminant.
-:doxy:`KernelMeanClassifier`              :doxy:`KernelExpansion`                    Computes the class means in the kernel induced feature
-                                                                                     space and generates a classifier which assigns the points
-                                                                                     to the class of the nearest mean.
-:doxy:`LDA`                               :doxy:`LinearClassifier`                   Performs Linear Discriminant Analysis, see the :doc:`LDA tutorial<../../algorithms/lda>`.
-:doxy:`LinearRegression`                  :doxy:`LinearModel`                        Finds the best linear regression model for the labels.
-:doxy:`OptimizationTrainer`               all                                        Combines the elements of a given learning problem -- optimizer,
-                                                                                     model, error function and stopping criterion -- into a trainer.
-:doxy:`Perceptron`                        :doxy:`KernelExpansion`                    Kernelized perceptron -- tries to find a separating hyperplane of
-                                                                                     the data in the feature space induced by the kernel.
-:doxy:`RFTrainer`                         :doxy:`RFClassifier`                       Implements a random forest of decision trees,
-                                                                                     see the :doc:`random forest tutorial<../../algorithms/rf>`.
-:doxy:`AbstractSvmTrainer`                :doxy:`KernelExpansion`                    Base class for all support vector machine trainers.
-:doxy:`MissingFeatureSvmTrainer`          :doxy:`MissingFeaturesKernelExpansion`     Trainer for binary SVMs supporting missing features.
-:doxy:`CSvmTrainer`                       :doxy:`KernelExpansion`                    Trainer for binary and multiclass SVMs, with one-norm regularization,
-                                                                                     see the :doc:`SVM introduction<../../algorithms/svm>`.
-:doxy:`EpsilonSvmTrainer`                 :doxy:`KernelExpansion`                    Trains an epsilon-SVM for regression.
-:doxy:`RegularizationNetworkTrainer`      :doxy:`KernelExpansion`                    Trains a Gaussian Process model / regularization network.
-:doxy:`AbstractLinearSvmTrainer`          :doxy:`LinearModel`                        Base class for all linear-SVM trainers
-========================================  ========================================   ===================================================================
+=====================================================   ================================================
+Method                                                  Description
+=====================================================   ================================================
+``train(ModelType&, WeightedDatasetType)``              Solves the weighted problem and stores it in the model.
+=====================================================   ================================================

@@ -86,6 +86,7 @@ namespace detail{
 /// Schmidt, Mark, Nicolas Le Roux, and Francis Bach.
 /// "Minimizing finite sums with the stochastic average gradient."
 /// arXiv preprint arXiv:1309.2388 (2013).
+/// \ingroup supervised_trainer
 template <class InputType, class LabelType>
 class LinearSAGTrainer : public detail::LinearSAGTrainerBase<InputType,LabelType>::type, public IParameterizable<>
 {

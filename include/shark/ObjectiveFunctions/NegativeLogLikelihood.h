@@ -52,6 +52,7 @@ namespace shark{
 /// For this error function, the model is only allowed to have a single output
 /// - the probability of the sample. The distribution must be normalized as otherwise
 /// the likeelihood does not mean anything. 
+/// \ingroup objfunctions
 class NegativeLogLikelihood : public AbstractObjectiveFunction< RealVector, double >
 {
 public:

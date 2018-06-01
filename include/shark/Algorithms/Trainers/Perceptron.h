@@ -40,7 +40,8 @@
 
 namespace shark{
 
-//! \brief Perceptron online learning algorithm
+/// \brief Perceptron online learning algorithm
+/// \ingroup supervised_trainer
 template<class InputType>
 class Perceptron : public AbstractTrainer<KernelClassifier<InputType>,unsigned int >
 {

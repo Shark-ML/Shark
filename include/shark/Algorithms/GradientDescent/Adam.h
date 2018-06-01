@@ -38,10 +38,11 @@
 
 namespace shark{
 
-///@brief Adaptive Moment Estimation Algorithm (ADAM)
+/// \brief Adaptive Moment Estimation Algorithm (ADAM)
 ///
 /// Performs SGD by using a long term average of the gradient as well as its second moment to adapt
 /// a step size for each coordinate.
+/// \ingroup gradientopt
 template<class SearchPointType = RealVector>
 class Adam : public AbstractSingleObjectiveOptimizer<SearchPointType >
 {

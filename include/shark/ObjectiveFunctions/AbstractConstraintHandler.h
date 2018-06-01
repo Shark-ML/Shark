@@ -3,7 +3,7 @@
  * 
  *
  * \brief       Base class for constraints.
- * 
+ *  \file
  *
  * \author      O.Krause
  * \date        2013
@@ -39,11 +39,16 @@
 
 namespace shark{
 
-
+/// \defgroup constraint_handling Constraint Handling
+/// \ingroup objfunctions
+/// \brief Objects for handling constraints
+///
+	
 /// \brief Implements the base class for constraint handling.
 ///
 /// A constraint handler provides information about the feasible region of a constrained optimization problem.
 /// In the minimum it checks whether a point is feasible, or what the next fasible point would be.
+/// \ingroup constraint_handling
 template<class SearchPointType>
 class AbstractConstraintHandler{
 public:

@@ -38,6 +38,11 @@
 
 namespace shark {
 
+/// \defgroup optimizers
+/// Algorithms to find a local minimum of \ref objfunctions.
+
+
+
 /// \brief An optimizer that optimizes general objective functions
 /// 
 /// After construction and configurationg the optimizer, init() is called with the objective function
@@ -64,6 +69,7 @@ namespace shark {
 /// \tparam PointType The type of search space the optimizer works upon.
 /// \tparam ResultT The objective space the optimizer works upon.
 /// \tparam SolutionTypeT The type of the final solution.
+/// \ingroup optimizers
 template <typename PointType, typename ResultT, typename SolutionTypeT>
 class AbstractOptimizer : public INameable, public ISerializable {
 public:

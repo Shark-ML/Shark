@@ -47,6 +47,7 @@
 ///
 /// The implementation differs from the paper to be closer to the reference implementation and to have better numerical
 /// accuracy.
+/// \ingroup singledirect
 namespace shark {
 class VDCMA : public AbstractSingleObjectiveOptimizer<RealVector >
 {

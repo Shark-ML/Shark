@@ -52,6 +52,7 @@ enum class LineSearchType {
 ///This class is a wrapper for the linesearch class of functions of the linear algebra library.
 ///The class is used for example in CG or BFGS for their internal linesearch learning steps.
 ///It is NOT an Optimizer on its own, since it needs the Newton direction to be specified.
+/// \ingroup gradientopt
 template<class SearchPointType>
 class LineSearch:public ISerializable {
 public:

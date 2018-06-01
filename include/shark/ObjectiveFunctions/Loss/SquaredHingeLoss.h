@@ -54,6 +54,7 @@ namespace shark {
 /// The difference to the normal hinge loss is, that the squared hinge-loss is always differentiable.
 /// However compared to the hinge loss, small margin violations are not as much punished - but big deviations
 /// are punished much stronger.
+/// \ingroup lossfunctions
 class SquaredHingeLoss : public AbstractLoss<unsigned int, RealVector>
 {
 public:

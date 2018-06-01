@@ -17,7 +17,9 @@ in Shark also manage their own search space. In detail, they provide a method
 indicating if a given point is feasible, and possibly also a method which can
 provide the feasible point closest to an infeasible one.
 
-
+List of Classes
+---------------------------------
+The list of objective functions is available in the :doxy:`class documentation <objfunctions>`.
 
 The base class 'AbstractObjectiveFunction <SearchPointType, ResultT>'
 ---------------------------------------------------------------------
@@ -180,36 +182,4 @@ In summary, an objective functions has a very simple life
 cycle. First, it is created and configured. After that, ``init`` is
 called. Then the function can be evaluated using the different forms
 of ``eval`` or ``evalDerivative``.
-
-List of Objective functions
-----------------------------------------------------------------
-
-There are various single- and multi-objective benchmark functions
-implemented in Shark, which can be found in
-``shark/ObjectiveFunctions/Benchmarks``.
-
-Furthermore, Shark offers a variety of single-objective functions:
-
-============================================  ===================================================================================
-Model                                         Description
-============================================  ===================================================================================
-:doxy:`CombinedObjectiveFunction`             Weighted sum of several other objective functions.
-:doxy:`ErrorFunction`                         Uses a Model, some data and one of the :doc:`losses` to define a supervised problem.
-					      The class also allows for minibatch training
-:doxy:`CrossValidationError`                  *k*-fold cross validation. The mean error over all *k* validation sets
-                                              is returned. Training time is proportional to the number of partitions.
-:doxy:`LooError`                              Leave-one-out error, the most extreme form of cross validation in which all but one 
-                                              point are part of the training sets.
-:doxy:`LooErrorCSvm`                          Special case of the ``LooError`` for SVMs using the structure of the SVM solution
-                                              to speed-up evaluation.
-:doxy:`SvmLogisticInterpretation`             Model selection for SVMs using a maximum-likelihood criterion
-:doxy:`RadiusMarginQuotient`                  Model selection for SVMs by optimizing the radius-margin quotient.
-:doxy:`NegativeGaussianProcessEvidence`       Model selection for a regularization network/Gaussian process.
-:doxy:`KernelTargetAlignment`                 Model selection algorithm which measures for a given kernel,
-					      how similar points of the same class are and how dissimilar points of
-					      different classes.
-:doxy:`NegativeLogLikelihood`                 Measures how probable a dataset is under a given model parameterized
-					      by the vector of parameters given in the function argument.
-============================================  ===================================================================================
-
 

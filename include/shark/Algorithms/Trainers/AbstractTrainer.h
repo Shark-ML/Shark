@@ -5,7 +5,7 @@
  * \brief       Abstract Trainer Interface.
  * 
  * 
- *
+ * \file
  * \author      O. Krause, T.Glasmachers
  * \date        2010-2011
  *
@@ -42,6 +42,17 @@
 namespace shark {
 
 
+/// \defgroup supervised_trainer Supervised Trainers
+/// \brief Optimized algorithms to solve specialized supervised optimization problems
+///
+/// A supervised problem consists of data with inputs and labels. Typical tasks are regression, ranking, or classification.
+	
+/// \defgroup unsupervised_trainer Unsupervised Trainers
+/// \brief Optimized algorithms to solve specialized unsupervised optimization problems
+///
+/// A supervised problem consists only of input data. Typical tasks are normalization distribution learning
+	
+
 ///
 /// \brief Superclass of supervised learning algorithms
 ///
@@ -59,7 +70,7 @@ namespace shark {
 /// type. The virtual train method should be overriden
 /// with a method that checks the type of the model and
 /// calls the specialized train method.
-///
+/// \ingroup supervised_trainer
 template <class Model, class LabelTypeT = typename Model::OutputType>
 class AbstractTrainer: public INameable, public ISerializable
 {
@@ -90,15 +101,16 @@ public:
 /// method should be overriden with a method that checks
 /// the type of the model and calls the specialized train
 /// method.
-///
+/// \ingroup unsupervised_trainer
 template <class Model>
 class AbstractUnsupervisedTrainer : public INameable, public ISerializable
 {
 public:
 	typedef Model ModelType;
 	typedef typename Model::InputType InputType;
+	typedef UnlabeledData<InputType> DatasetType;
 	/// Core of the Trainer interface
-	virtual void train(ModelType& model, const UnlabeledData<InputType>& inputset) = 0;
+	virtual void train(ModelType& model, DatasetType const& inputset) = 0;
 };
 
 

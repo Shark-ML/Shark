@@ -41,41 +41,40 @@
 namespace shark {
 
 
-/*!
- * \brief Fisher's Linear Discriminant Analysis for data compression
- *
- * Similar to PCA, \em Fisher's \em Linear \em Discriminant \em Analysis is a
- * method for reducing the datas dimensionality. In contrast to PCA it also uses
- * class information.
- *
- * Consider the data's covariance matrix \f$ S \f$ and a unit vector \f$ u \f$
- * which defines a one-dimensional subspace of the data. Then, PCA would
- * maximmize the objective \f$ J(u) = u^T S u \f$, namely the datas variance in
- * the subspace. Fisher-LDA, however, maximizes
- * \f[
- *   J(u) = ( u^T S_W u )^{-1} ( u^T S_B u ),
- * \f]
- * where \f$ S_B \f$ is the covariance matrix of the class-means and \f$ S_W \f$
- * is the average covariance matrix of all classes (in both cases, each class'
- * influence is weighted by it's size). As a result, Fisher-LDA finds a subspace
- * in which the class means are wide-spread while (in average) the variance of
- * each class becomes small. This leads to good lower-dimensional
- * representations of the data in cases where the classes are linearly
- * separable.
- *
- * If a subspace with more than one dimension is requested, the above step is
- * executed consecutively to find the next optimal subspace-dimension
- * orthogonally to the others.
- *
- *
- * \b Note: the max. dimensionality for the subspace is \#NumOfClasses-1.
- *
- * It is possible to choose how many dimnsions are used by setting the appropriate value
- * by calling setSubspaceDImension or in the constructor.
- * Also optionally whitening can be applied.
- * For more detailed information about Fisher-LDA, see \e Bishop, \e Pattern
- * \e Recognition \e and \e Machine \e Learning.
- */
+/// \brief Fisher's Linear Discriminant Analysis for data compression
+///
+/// Similar to PCA, \em Fisher's \em Linear \em Discriminant \em Analysis is a
+/// method for reducing the datas dimensionality. In contrast to PCA it also uses
+/// class information.
+///
+/// Consider the data's covariance matrix \f$ S \f$ and a unit vector \f$ u \f$
+/// which defines a one-dimensional subspace of the data. Then, PCA would
+/// maximmize the objective \f$ J(u) = u^T S u \f$, namely the datas variance in
+/// the subspace. Fisher-LDA, however, maximizes
+/// \f[
+///   J(u) = ( u^T S_W u )^{-1} ( u^T S_B u ),
+/// \f]
+/// where \f$ S_B \f$ is the covariance matrix of the class-means and \f$ S_W \f$
+/// is the average covariance matrix of all classes (in both cases, each class'
+/// influence is weighted by it's size). As a result, Fisher-LDA finds a subspace
+/// in which the class means are wide-spread while (in average) the variance of
+/// each class becomes small. This leads to good lower-dimensional
+/// representations of the data in cases where the classes are linearly
+/// separable.
+///
+/// If a subspace with more than one dimension is requested, the above step is
+/// executed consecutively to find the next optimal subspace-dimension
+/// orthogonally to the others.
+///
+///
+/// \b Note: the max. dimensionality for the subspace is \#NumOfClasses-1.
+///
+/// It is possible to choose how many dimnsions are used by setting the appropriate value
+/// by calling setSubspaceDImension or in the constructor.
+/// Also optionally whitening can be applied.
+/// For more detailed information about Fisher-LDA, see \e Bishop, \e Pattern
+/// \e Recognition \e and \e Machine \e Learning.
+/// \ingroup supervised_trainer
 class FisherLDA : public AbstractTrainer<LinearModel<>, unsigned int>
 {
 public:

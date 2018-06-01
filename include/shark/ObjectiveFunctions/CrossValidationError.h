@@ -67,7 +67,7 @@ namespace shark {
 /// Thus, the cross-validation procedure requires a "meta"
 /// IParameterizable object, a model, a trainer, a data set,
 /// and a cost function.
-///
+/// \ingroup objfunctions
 template<class ModelTypeT, class LabelTypeT = typename ModelTypeT::OutputType>
 class CrossValidationError : public AbstractObjectiveFunction< RealVector, double >
 {

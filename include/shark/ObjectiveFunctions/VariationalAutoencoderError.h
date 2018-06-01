@@ -57,6 +57,7 @@ namespace shark{
 /// the second half of outputs is interpreted as the log of the variance. So if z should be a 100 dimensional variable, q must have 200
 /// outputs. The outputs and loss function used for the encoder p is arbitrary, but a SquaredLoss will work well, however also other losses 
 /// like pixel probabilities can be used.
+/// \ingroup objfunctions
 
 template<class SearchPointType>
 class VariationalAutoencoderError : public AbstractObjectiveFunction<SearchPointType, double>

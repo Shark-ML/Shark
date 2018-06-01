@@ -40,30 +40,30 @@
 
 namespace shark{
 
-/*!
- *  \brief Error measure for classification tasks that can be used
- *         as the objective function for training.
- *
- *  If your model should return a vector whose components reflect the
- *  logarithmic conditional probabilities of class membership given any input vector
- *  'CrossEntropy' is the adequate error measure for model-training.
- *  For \em C>1 classes the loss function is defined as
- *  \f[
- *      E = - \ln \frac{\exp{x_c}} {\sum_{c^{\prime}=1}^C \exp{x_c^{\prime}}} = - x_c + \ln \sum_{c^{\prime}=1}^C \exp{x_c^{\prime}} 
- *  \f]
- *  where \em x is the prediction vector of the model and \em c is the class label. In the case of only one
- *  model output and binary classification, another more numerically stable formulation is used:
- *  \f[
- *     E = \ln(1+ e^{-yx})
- *  \f]
- *  here, \em y are class labels between -1 and 1 and y = -2 c+1. The reason why this is numerically more stable is,
- *  that when \f$ e^{-yx} \f$ is big, the error function is well approximated by the linear function \em x. Also if
- *  the exponential is very small, the case \f$ \ln(0) \f$ is avoided.
- *
- * If the class labels are integers, they must be starting from 0. If class labels are vectors, there must be a proper
- * probability vector. i.e. values must be bigger or equal to zero and sum to one. This incldues one-hot-encoding of labels.
- * Also for theoretical reasons, the output neurons of a neural Network that is trained with this loss should be linear.
- */
+///  \brief Error measure for classification tasks that can be used
+///         as the objective function for training.
+///
+///  If your model should return a vector whose components reflect the
+///  logarithmic conditional probabilities of class membership given any input vector
+///  'CrossEntropy' is the adequate error measure for model-training.
+///  For \em C>1 classes the loss function is defined as
+///  \f[
+///      E = - \ln \frac{\exp{x_c}} {\sum_{c^{\prime}=1}^C \exp{x_c^{\prime}}} = - x_c + \ln \sum_{c^{\prime}=1}^C \exp{x_c^{\prime}} 
+///  \f]
+///  where \em x is the prediction vector of the model and \em c is the class label. In the case of only one
+///  model output and binary classification, another more numerically stable formulation is used:
+///  \f[
+///     E = \ln(1+ e^{-yx})
+///  \f]
+///  here, \em y are class labels between -1 and 1 and y = -2 c+1. The reason why this is numerically more stable is,
+///  that when \f$ e^{-yx} \f$ is big, the error function is well approximated by the linear function \em x. Also if
+///  the exponential is very small, the case \f$ \ln(0) \f$ is avoided.
+///
+/// If the class labels are integers, they must be starting from 0. If class labels are vectors, there must be a proper
+/// probability vector. i.e. values must be bigger or equal to zero and sum to one. This incldues one-hot-encoding of labels.
+/// Also for theoretical reasons, the output neurons of a neural Network that is trained with this loss should be linear.
+/// \ingroup lossfunctions
+
 template<class LabelType, class OutputType>
 class CrossEntropy;
 

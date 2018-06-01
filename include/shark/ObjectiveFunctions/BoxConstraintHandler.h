@@ -38,6 +38,10 @@
 
 namespace shark{
 
+/// \brief Handler for box-constraints
+///
+/// Handles box-constraints i.e. function values in \f$ l_i < x_i < u_i \f$.
+/// \ingroup constraint_handling
 template<class Vector>
 class BoxConstraintHandler:public AbstractConstraintHandler<Vector> {
 public:

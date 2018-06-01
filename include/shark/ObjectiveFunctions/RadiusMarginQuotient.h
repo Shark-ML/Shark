@@ -54,7 +54,7 @@ namespace shark {
 /// The radius margin quotient is a common objective
 /// function for the adaptation of the kernel parameters
 /// of a binary hard-margin SVM.
-///
+/// \ingroup kerneloptimization
 template<class InputType, class CacheType = float>
 class RadiusMarginQuotient : public AbstractObjectiveFunction< RealVector, double >
 {

@@ -37,12 +37,18 @@
 
 namespace shark {
 
+///\defgroup multidirect Multi-objective Direct-Search optimizers
+///\ingroup optimizers
+/// Group of optimization algorithms that find a pareto front of the solutions on a multi-objective function
+/// without using gradient information, only function values	
+	
 /// \brief base class for abstract multi-objective optimizers for arbitrary search spaces.
 ///
 /// Models an abstract multi-objective optimizer for arbitrary search spaces. The objective space
 /// is assumed to be \f$ \mathbb{R}^m\f$.
 ///
 /// \tparam PointType The type of the points that make up the searchspace.
+/// \ingroup optimizers
 template<typename PointTypeT>
 class AbstractMultiObjectiveOptimizer : 
 public AbstractOptimizer<

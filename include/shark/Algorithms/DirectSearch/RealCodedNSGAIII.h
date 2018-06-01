@@ -50,6 +50,7 @@ namespace shark {
 /// reference-point-based nondominated sorting approach, 
 /// part I: Solving problems with box constraints."
 /// IEEE Trans. Evolutionary Computation 18.4 (2014): 577-601.
+/// \ingroup multidirect
 class RealCodedNSGAIII : public IndicatorBasedRealCodedNSGAII<NSGA3Indicator>{
 	typedef IndicatorBasedRealCodedNSGAII<NSGA3Indicator> base;
 public:

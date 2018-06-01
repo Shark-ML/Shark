@@ -55,7 +55,7 @@ namespace shark {
 /// The implementation of the algorithm is along the lines of the
 /// Wikipedia article
 /// https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method
-///
+/// \ingroup singledirect
 class SimplexDownhill : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:

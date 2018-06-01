@@ -47,7 +47,7 @@ namespace shark {
 /// The OneNormRegularizer is intended to be used together with other
 /// objective functions within a CombinedObjectiveFunction, in order to
 /// obtain a more smooth and more sparse solution.
-///
+/// \ingroup objfunctions
 template<class SearchPointType = RealVector>
 class OneNormRegularizer : public AbstractObjectiveFunction< SearchPointType, double >
 {
@@ -117,7 +117,7 @@ private:
 /// The TwoNormRegularizer is intended to be used together with other
 /// objective functions within a CombinedObjectiveFunction, in order to
 /// obtain a more smooth solution.
-///
+/// \ingroup objfunctions
 template<class SearchPointType = RealVector>
 class TwoNormRegularizer : public AbstractObjectiveFunction< SearchPointType, double >
 {

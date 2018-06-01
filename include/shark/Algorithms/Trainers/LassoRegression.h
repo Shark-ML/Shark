@@ -44,27 +44,27 @@
 namespace shark {
 
 
-/*!
- *  \brief LASSO Regression
- *
- *  LASSO Regression extracts a sparse vector of regression
- *  coefficients. The original method amounts to L1-constrained
- *  least squares regression, while this implementation uses an
- *  L1 penalty instead of a constraint (which is equivalent).
- *
- *  For data vectors \f$ x_i \f$ with real-valued labels \f$ y_i \f$
- *  the trainer solves the problem
- *  \f$ \min_w \quad \frac{1}{2} \sum_i (w^T x_i - y_i)^2 + \lambda \|w\|_1 \f$.
- *  The target accuracy of the solution is measured in terms of the
- *  smallest component of the gradient of the objective function.
- *
- *  The trainer has one template parameter, namely the type of
- *  the input vectors \f$ x_i \f$. These need to be vector valued,
- *  typically either RealVector of CompressedRealVector. The
- *  resulting weight vector w is represented by a LinearModel
- *  object. Currently model outputs and labels are restricted to a
- *  single dimension.
- */
+
+///  \brief LASSO Regression
+///
+///  LASSO Regression extracts a sparse vector of regression
+///  coefficients. The original method amounts to L1-constrained
+///  least squares regression, while this implementation uses an
+///  L1 penalty instead of a constraint (which is equivalent).
+///
+///  For data vectors \f$ x_i \f$ with real-valued labels \f$ y_i \f$
+///  the trainer solves the problem
+///  \f$ \min_w \quad \frac{1}{2} \sum_i (w^T x_i - y_i)^2 + \lambda \|w\|_1 \f$.
+///  The target accuracy of the solution is measured in terms of the
+///  smallest component of the gradient of the objective function.
+///
+///  The trainer has one template parameter, namely the type of
+///  the input vectors \f$ x_i \f$. These need to be vector valued,
+///  typically either RealVector of CompressedRealVector. The
+///  resulting weight vector w is represented by a LinearModel
+///  object. Currently model outputs and labels are restricted to a
+///  single dimension.
+/// \ingroup supervised_trainer
 template <class InputVectorType = RealVector>
 class LassoRegression : public AbstractTrainer<LinearModel<InputVectorType> >, public IParameterizable<>
 {

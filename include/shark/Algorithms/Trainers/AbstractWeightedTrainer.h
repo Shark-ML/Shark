@@ -56,6 +56,7 @@ namespace shark {
 /// with a dataset with duplicate points is the same as counting the duplicates
 /// and run the algorithm with a weighted dataset where all points are unique and
 /// have their weight is the multiplicity.
+/// \ingroup supervised_trainer
 template <class Model, class LabelTypeT = typename Model::OutputType>
 class AbstractWeightedTrainer : public AbstractTrainer<Model,LabelTypeT>
 {
@@ -89,6 +90,7 @@ public:
 /// that support weighted datasets. See AbstractWeightedTrainer for more information on
 /// the weights.
 /// \see AbstractWeightedTrainer
+/// \ingroup unsupervised_trainer
 template <class Model>
 class AbstractWeightedUnsupervisedTrainer : public AbstractUnsupervisedTrainer<Model>
 {

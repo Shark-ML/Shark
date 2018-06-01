@@ -42,19 +42,20 @@
 namespace shark {
 
 
-//!
-//! \brief Linear Discriminant Analysis (LDA)
-//!
-//! This classes implements the well known linear discriminant analysis. LDA assumes that
-//! every point is drawn from a multivariate normal distributions. Every class has its own mean
-//! but all classes have the same covariance.
-//!
-//! An arbitrary number of classes is supported. The resulting model is of the form
-//! \f[ \arg \max_c \log(p(x|c)*P(c)) \f]
-//! where \f$ p(x|c) = \exp(-(x-m_c)^T(C+\alpha I)(x-m_c)) \f$.
-//! \f$ m_c\f$ are the means of class c, \f$ C \f$ is the covariance matrix formed by all data points.
-//! The regularization paramter \f$ \alpha \f$ is by default 0. The trainer is implemented such, that
-//! it still works when C is singular, in this case the singular directions are ignored. 	
+///
+/// \brief Linear Discriminant Analysis (LDA)
+///
+/// This classes implements the well known linear discriminant analysis. LDA assumes that
+/// every point is drawn from a multivariate normal distributions. Every class has its own mean
+/// but all classes have the same covariance.
+///
+/// An arbitrary number of classes is supported. The resulting model is of the form
+/// \f[ \arg \max_c \log(p(x|c)*P(c)) \f]
+/// where \f$ p(x|c) = \exp(-(x-m_c)^T(C+\alpha I)(x-m_c)) \f$.
+/// \f$ m_c\f$ are the means of class c, \f$ C \f$ is the covariance matrix formed by all data points.
+/// The regularization paramter \f$ \alpha \f$ is by default 0. The trainer is implemented such, that
+/// it still works when C is singular, in this case the singular directions are ignored. 
+/// \ingroup supervised_trainer
 class LDA : public AbstractWeightedTrainer<LinearClassifier<>, unsigned int>, public IParameterizable<>
 {
 public:
@@ -94,15 +95,15 @@ public:
 		return 1;
 	}
 
-	//! Compute the LDA solution for a multi-class problem.
+	/// Compute the LDA solution for a multi-class problem.
 	SHARK_EXPORT_SYMBOL void train(LinearClassifier<>& model, LabeledData<RealVector, unsigned int> const& dataset);
-	//! Compute the LDA solution for a weighted multi-class problem.
+	/// Compute the LDA solution for a weighted multi-class problem.
 	SHARK_EXPORT_SYMBOL void train(LinearClassifier<>& model, WeightedLabeledData<RealVector, unsigned int> const& dataset);
 
 protected:
-	//!The regularization parameter \f$ \lambda \f$ adds
-	//! \f$ - \lambda I \f$ to the second moment matrix, where
-	//! \f$ I \f$ is the identity matrix
+	///The regularization parameter \f$ \lambda \f$ adds
+	/// \f$ - \lambda I \f$ to the second moment matrix, where
+	/// \f$ I \f$ is the identity matrix
 	double m_regularization;
 };
 

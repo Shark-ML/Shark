@@ -132,6 +132,7 @@ namespace shark{
  *  Christian Igel and Michael H&uuml;sken, <br>
  *  "Empirical Evaluation of the Improved Rprop Learning Algorithm". <br>
  *  In Neurocomputing Journal, 2002, in press <br>
+ * \ingroup gradientopt
  */
 template<class SearchPointType = RealVector>
 class Rprop : public AbstractSingleObjectiveOptimizer<SearchPointType >

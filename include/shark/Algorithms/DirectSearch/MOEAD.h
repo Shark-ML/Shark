@@ -41,15 +41,14 @@
 
 namespace shark {
 
-/**
- * \brief Implements the MOEA/D algorithm.
- *
- * Implementation of the MOEA/D algorithm from the following paper:
- * Q. Zhang and H. Li, MOEA/D: a multi-objective evolutionary algorithm based
- * on decomposition, IEEE Transactions on Evolutionary Computation, vol. 11,
- * no. 6, pp. 712 - 731, 2007
- * DOI: 10.1109/TEVC.2007.892759
- */
+/// \brief Implements the MOEA/D algorithm.
+///
+/// Implementation of the MOEA/D algorithm from the following paper:
+/// Q. Zhang and H. Li, MOEA/D: a multi-objective evolutionary algorithm based
+/// on decomposition, IEEE Transactions on Evolutionary Computation, vol. 11,
+/// no. 6, pp. 712 - 731, 2007
+/// DOI: 10.1109/TEVC.2007.892759
+/// \ingroup multidirect
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:

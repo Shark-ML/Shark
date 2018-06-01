@@ -50,6 +50,7 @@ namespace shark {
 /// The resulting classifier is a kernel expansion as assigning the label
 /// with minimum distance (or maximum  negative distance by convention for classifiers)
 /// \f[ max -1/2 ||\phi(x) - m_i||^2 = <\phi(x), m_i> - 1/2<m_i,m_i> \f]
+/// \ingroup supervised_trainer
 template<class InputType>
 class KernelMeanClassifier : public AbstractWeightedTrainer<KernelClassifier<InputType>, unsigned int>{
 public:

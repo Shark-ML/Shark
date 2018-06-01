@@ -45,7 +45,7 @@ namespace shark {
 
 ///
 /// \brief Leave-one-out error, specifically optimized for C-SVMs.
-///
+/// \ingroup kerneloptimization
 template<class InputType, class CacheType = float>
 class LooErrorCSvm : public AbstractObjectiveFunction< RealVector, double >
 {

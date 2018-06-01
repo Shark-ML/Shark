@@ -74,7 +74,7 @@ namespace shark{
 /// \param centroids      centroids input/output
 /// \param maxIterations  maximum number of k-means iterations; 0: unlimited
 /// \return               number of k-means iterations
-///
+/// \ingroup clustering
 SHARK_EXPORT_SYMBOL std::size_t kMeans(Data<RealVector> const& data, std::size_t k, Centroids& centroids, std::size_t maxIterations = 0);
 
 ///

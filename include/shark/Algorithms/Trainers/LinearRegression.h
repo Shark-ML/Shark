@@ -48,16 +48,15 @@
 namespace shark {
 
 
-/*!
- *  \brief Linear Regression
- *
- *  Linear Regression builds an affine linear model
- *  \f$ f(x) = A x + b \f$ minimizing the squared
- *  error from a dataset of pairs of vectors (x, y).
- *  That is, the error
- *  \f$ \sum_i (f(x_i) - y_i)^2 \f$ is minimized.
- *  The solution to this problem is found analytically.
- */
+///  \brief Linear Regression
+///
+///  Linear Regression builds an affine linear model
+///  \f$ f(x) = A x + b \f$ minimizing the squared
+///  error from a dataset of pairs of vectors (x, y).
+///  That is, the error
+///  \f$ \sum_i (f(x_i) - y_i)^2 \f$ is minimized.
+///  The solution to this problem is found analytically.
+/// \ingroup supervised_trainer
 class LinearRegression : public AbstractTrainer<LinearModel<> >, public IParameterizable<>
 {
 public:

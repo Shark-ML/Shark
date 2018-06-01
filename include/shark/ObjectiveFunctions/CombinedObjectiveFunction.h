@@ -47,7 +47,7 @@ namespace shark {
 /// The CombinedObjectiveFunction is a linear combination of
 /// objective functions. It assumed that the result type is
 /// capable of forming linear combinations with real coefficients.
-///
+/// \ingroup objfunctions
 template <typename SearchPointType, typename ResultT>
 class CombinedObjectiveFunction : public AbstractObjectiveFunction<SearchPointType, ResultT>
 {

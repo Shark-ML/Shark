@@ -62,6 +62,7 @@ namespace shark {
 /// The regularization parameter can be encoded in different ways.
 /// The exponential encoding is the proper choice for unconstraint optimization.
 /// Be careful not to mix up different encodings between trainer and evidence.
+/// \ingroup kerneloptimization
 template<class InputType = RealVector, class OutputType = RealVector, class LabelType = RealVector>
 class NegativeGaussianProcessEvidence : public AbstractObjectiveFunction< RealVector, double >
 {

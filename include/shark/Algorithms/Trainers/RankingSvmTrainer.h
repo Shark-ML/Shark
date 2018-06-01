@@ -67,6 +67,7 @@ namespace shark {
 ///
 ///   bool a_better_than_b = (f(a) < f(b));
 ///
+/// \ingroup supervised_trainer
 template <class InputType, class CacheType = float>
 class RankingSvmTrainer : public AbstractSvmTrainer< InputType, unsigned int, KernelExpansion<InputType> >
 {

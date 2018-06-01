@@ -53,7 +53,7 @@ namespace shark {
 /// \par
 /// Note: As a special case, this loss can be used to provide
 /// a balanced error signal for unbalanced data sets.
-///
+/// \ingroup lossfunctions
 class DiscreteLoss : public AbstractLoss<unsigned int, unsigned int>
 {
 public:

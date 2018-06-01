@@ -38,6 +38,17 @@
 #include <shark/Core/ResultSets.h>
 
 namespace shark {
+	
+	///\defgroup gradientopt Gradient-based Single objective optimizers
+	///\ingroup optimizers
+	/// Gradient-Based optimizers use the gradient of an objective function to find a local minimum in the search space.
+	/// If a function is not convex this local optimum might not be the global one.
+	
+	///\defgroup singledirect Single-objective Direct-Search optimizers
+	///\ingroup optimizers
+	/// Group of optimization algorithms that find the local optimum of a function without using gradient information, only
+	/// the function values are used.
+	
 	///\brief Base class for all single objective optimizer
 	///
 	/// This class is a spezialization of the AbstractOptimizer itnerface for the class of single objective optimizers. A single objective optimizer is an optimizer
@@ -45,6 +56,7 @@ namespace shark {
 	/// the class requires the ObjectiveFunction to provide a feasible starting point. If this is not possible, a second version of init is provided where the starting point can be 
 	/// explicitely defined. 
 	/// The Return type of an SingleObjectiveOptimizer is the SingleObjectiveResultSet which is a struct returning the best value of the function and together with it's point.
+	/// \ingroup optimizers
 	template<class PointType>
 	class AbstractSingleObjectiveOptimizer: public AbstractOptimizer<PointType,double,SingleObjectiveResultSet<PointType> >{
 	private:

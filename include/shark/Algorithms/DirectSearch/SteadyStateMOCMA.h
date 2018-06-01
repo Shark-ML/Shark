@@ -41,13 +41,12 @@
 
 namespace shark {
 
-/**
- * \brief Implements the \f$(\mu+1)\f$-MO-CMA-ES.
- *
- * Please see the following papers for further reference:
- *	- Igel, Suttorp and Hansen. Steady-state Selection and Efficient Covariance Matrix Update in the Multi-Objective CMA-ES.
- *	- Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
- */
+/// \brief Implements the \f$(\mu+1)\f$-MO-CMA-ES.
+///
+/// Please see the following papers for further reference:
+/// - Igel, Suttorp and Hansen. Steady-state Selection and Efficient Covariance Matrix Update in the Multi-Objective CMA-ES.
+/// - Voﬂ, Hansen and Igel. Improved Step Size Adaptation for the MO-CMA-ES.
+/// \ingroup multidirect
 template<typename Indicator=HypervolumeIndicator>
 class IndicatorBasedSteadyStateMOCMA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:

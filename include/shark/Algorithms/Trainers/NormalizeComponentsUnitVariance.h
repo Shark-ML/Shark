@@ -69,7 +69,7 @@ namespace shark {
 /// If you have non-sparse data and you need to
 /// move data to zero mean, not only to unit variance,
 /// then enable the flag zeroMean in the constructor.
-///
+/// \ingroup unsupervised_trainer
 template <class DataType = RealVector>
 class NormalizeComponentsUnitVariance : public AbstractUnsupervisedTrainer< Normalizer<DataType> >
 {

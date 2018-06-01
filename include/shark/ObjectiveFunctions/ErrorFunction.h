@@ -64,6 +64,7 @@ namespace shark{
 /// It automatically infers the input und label type from the given dataset and the output type
 /// of the model in the constructor and ensures that Model and loss match. Thus the user does
 /// not need to provide the types as template parameters. 
+/// \ingroup objfunctions
 template<class SearchPointType = RealVector>
 class ErrorFunction : public AbstractObjectiveFunction<SearchPointType, double>
 {

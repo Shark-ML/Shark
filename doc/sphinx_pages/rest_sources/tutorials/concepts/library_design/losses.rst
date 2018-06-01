@@ -63,6 +63,10 @@ function. For example, the *area under the curve* (AUC).
 In other words, all loss functions generate a cost function, but not all cost
 functions must be based on a loss function.
 
+List of Classes
+---------------------------------
+See the documentation for :doxy:`Loss functions<lossfunctions>` and :doxy:`Cost functions <costfunctions>`.
+
 
 Derivatives
 &&&&&&&&&&&
@@ -158,55 +162,3 @@ Method                                                                          
 ``double evalDerivative(BatchLabelType const& T, BatchInputType const& Z, BatchInputType const& gradient)``   Returns the error of the predictions :math:`z_i` given the label :math:`t_i`
                                                                                                               and computes :math:`\frac {\partial}{\partial z_i}L(z_i,t_i)`
 ===========================================================================================================   =========================================================================================
-
-
-List of Cost and Loss functions
--------------------------------
-
-
-Currently only one instance of AbstractCost is implemented:
-
-
-====================  ======================================================
-Model                 Description
-====================  ======================================================
-:doxy:`NegativeAUC`   Area under the ROC (receiver operating characteristic)
-                      curve. Value is negated so that it plays well with
-                      optimizers (which perform minimization by convention)
-====================  ======================================================
-
-
-
-Loss Functions:
-
-
-============================================  ==============================================================================
-Model                                         Description
-============================================  ==============================================================================
-:doxy:`AbsoluteLoss`                          Returns the :math:`L_2`-norm of the distance, :math:`|t-z|_2`
-:doxy:`SquaredLoss`                           Returns the squared distance in two-norm
-                                              :math:`|t-z|_2^2`; standard regression loss
-:doxy:`ZeroOneLoss`                           Returns 0 if :math:`t_i=z_i` otherwise standard classification loss
-:doxy:`DiscreteLoss`                          Uses a cost matrix to calculate losses in a discrete output and label
-                                              space (general classification loss)
-:doxy:`CrossEntropy`                          Logarithmic likelihood function if the model outputs are 
-                                              interpreted as exponents of a softmax classifier;
-                                              useful, e.g., for training of neural networks with linear outputs
-:doxy:`HingeLoss`			      Loss used in Maximum margin classification. Binary and multiclass implemented.
-:doxy:`SquaredHingeLoss`		      Loss used in Maximum margin classification. It is the pointwise
-					      Square of the HingeLoss. It is differentiable everywhere.
-:doxy:`EpsilonHingeLoss`		      Loss for regression. It can be underestood as the 1-norm loss which is
-					      cut off to 0 in a box of size epsilon around the label.
-:doxy:`SquaredEpsilonHingeLoss`		      Maximum margin regression. It is zero in a ball of size epsilon around the 
-					      label and outside the squared two-norm of the distance of prediction and label.
-					      Thus very close points are not punished.
-:doxy:`HuberLoss`			      Robust loss for rgression. It is quadratic close to 0 and becomes
-					      a linear function for big discrepancies between model prediction and target.
-============================================  ==============================================================================
-
-
-
-.. todo::
-
-    i think the descriptions in the right table need some update.
-    for example, the one for CrossEntropyIndependent does not make sense;

@@ -63,7 +63,7 @@ namespace shark {
 /// be a considerable performance killer. However, whenever function
 /// evaluations are costly (and an archive makes sense) then the
 /// storage and maintenance overhead should be negligible.
-///
+/// \ingroup objfunctions
 template <typename PointType, typename ResultT>
 class EvaluationArchive : public AbstractObjectiveFunction<PointType, ResultT>
 {

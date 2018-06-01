@@ -41,7 +41,13 @@ bottom of this tutorial :ref:`here <label_for_list_of_so_optimizers>`.
 
     Shark always assumes minimization tasks. This is no restriction as
     :math:`\arg \max_x f(x) = \arg \min_x -f(x)`.
-
+    
+List of Classes
+---------------------------------
+* :doxy:`Overview and Base-Classes<optimizers>`
+* :doxy:`Gradient-Based Optimizers<gradientopt>`
+* :doxy:`Direct-Search Optimizers<singledirect>`
+* :doxy:`Multi-Objective Optimizers <multidirect>`
 
 The base class 'AbstractOptimizer<SearchPointType, ResultType, SolutionSetType>'
 -------------------------------------------------------------------------------------
@@ -190,43 +196,3 @@ The base class 'AbstractMultiObjectiveOptimizer<SearchPointType>'
 
 .. _label_for_list_of_so_optimizers:
 
-
-List of Single Objective Optimizers
-------------------------------------
-
-
-
-Gradient descent methods:
-
-================================  =================================================================================
-Model                             Description
-================================  =================================================================================
-:doxy:`SteepestDescent`           Follows the gradient in the direction of steepest descent with fixed step size.
-:doxy:`Adam`		          Optimizer for stochastic optimization. Uses long term averages of mean and variance
-				  of the gradient.
-:doxy:`BFGS`                      Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstrained optimization.
-:doxy:`LBFGS`                     Limited Memory BFGS which optionally supports box constraints
-:doxy:`CG`                        Nonlinear conjugate gradients method.
-:doxy:`Rprop`   		  Resilient propagation, keeps its own adaptive step size for every variable
-                                  and updates it according to the direction of the gradient.
-:doxy:`TrustRegionNewton`         Second order Method with superlinear convergence. It uses the hessian to compute
-				  the optimal point with a certain maximum distance. Does not require the hessian
-				  to be positive definite and its steps are often much cheaper to compute than cubic
-				  time.
-
-================================  =================================================================================
-
-
-
-Some examples of direct search methods:
-
-================================  ========================================================================
-Model                             Description
-================================  ========================================================================
-:doxy:`GridSearch`                Evaluates all points defined in a grid and returns the best of this set.
-:doxy:`CMA`                       Covariance Matrix Adaptation
-                                  Evolution Strategy (CMA-ES)
-:doxy:`CMSA`                      Covariance Matrix Self-Adaptation
-                                  Evolution Strategy (CMSA_ES)
-:doxy:`ElitistCMA`                CMA-ES using the elitist selection rule
-================================  ========================================================================

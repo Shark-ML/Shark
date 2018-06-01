@@ -1,27 +1,36 @@
 Tutorials
 =========
 
-.. contents:: Contents:
-
 
 This page lists all tutorials available for the Shark machine learning library.
 Together with a comprehensive set of example and test programs, they are
 excellent starting points towards developing and evaluating machine learning
 software using Shark.
 
-If you are familiar with the Shark architecture and/or just want
-a concise overview over usage patterns and interfaces, see the
-:doc:`quick references <../quickref/quickref>`.
+If you are already familiar with the Shark architecture, the documentation of the key concepts
+and list of classes can be found below:
 
-Also see the guide to the different documentation pages
-available :doc:`here <../getting_started/using_the_documentation>`.
+======================================================	========================================================
+Concept 						Class List
+======================================================	========================================================
+:doc:`concepts/library_design/models`			:doxy:`List<models>`
+:doc:`concepts/library_design/losses` 			:doxy:`List<lossfunctions>`
+:doc:`concepts/library_design/optimizers`		:doxy:`Gradient-Based Optimization<gradientopt>`,
+							:doxy:`Direct-Search Optimizers<singledirect>`, 
+							:doxy:`Multi-Objective Optimizers<multidirect>`
+:doc:`concepts/library_design/objective_functions` 	:doxy:`List<objfunctions>`
+:doc:`concepts/library_design/trainers`			:doxy:`Supervised Trainers<supervised_trainer>`,
+							:doxy:`Unsupervised Trainers<unsupervised_trainer>`
+:doc:`concepts/library_design/kernels` 			:doxy:`List<kernels>`
+======================================================	========================================================
 
+..
+	* :doc:`concepts/library_design/stopping_criteria`
 
-
-Very first steps
+Quick tutorial
 ++++++++++++++++
 
-
+In case ou are new to Shark, we give you a quick tour over the core components.
 We first show how to set up either a traditional Makefile or a CMake file
 for your application program. Then we move on to a simple Hello-World example
 of what linear binary classification can look like in Shark. The third tutorial
@@ -31,7 +40,10 @@ a simple regression task.
 * :doc:`first_steps/your_programs`
 * :doc:`first_steps/hello_shark`
 * :doc:`first_steps/general_optimization_tasks`
-* :doc:`first_steps/when_to_stop`
+
+..
+	* :doc:`first_steps/when_to_stop`
+
 
 
 Neural Networks
@@ -60,17 +72,7 @@ a few basic terms as well as the design goals.
 * :doc:`concepts/optimization/conventions_derivatives`
 * :doc:`concepts/library_design/batches`
 
-The main interfaces, or concepts in shark are the base classes from which nearly
-all components  are derived. These tutorials are meant as a specification of the interfaces
-as well as the behavior and are written in a more formal language.
 
-* :doc:`concepts/library_design/models`
-* :doc:`concepts/library_design/losses`
-* :doc:`concepts/library_design/optimizers`
-* :doc:`concepts/library_design/objective_functions`
-* :doc:`concepts/library_design/stopping_criteria`
-* :doc:`concepts/library_design/trainers`
-* :doc:`concepts/library_design/kernels`
 
 
 

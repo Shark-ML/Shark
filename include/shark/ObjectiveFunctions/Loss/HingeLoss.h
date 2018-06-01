@@ -54,6 +54,7 @@ namespace shark {
 /// The hinge-loss is differentiable except on one point. 
 /// For points violating the margin, the derivative is -1,
 /// for points that are not violating it, it is 0. Boundary counts as non-violating.
+/// \ingroup lossfunctions
 class HingeLoss : public AbstractLoss<unsigned int, RealVector>
 {
 public:

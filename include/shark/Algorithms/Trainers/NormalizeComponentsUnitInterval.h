@@ -67,7 +67,7 @@ namespace shark{
 /// trainer destroys sparsity of the data. Therefore
 /// one may prefer NormalizeComponentsUnitVariance
 /// particularly on sparse data.
-///
+/// \ingroup unsupervised_trainer
 template <class DataType = RealVector>
 class NormalizeComponentsUnitInterval : public AbstractUnsupervisedTrainer< Normalizer<DataType> >
 {

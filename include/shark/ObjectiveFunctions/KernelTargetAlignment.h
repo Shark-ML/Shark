@@ -2,7 +2,7 @@
  *
  *
  * \brief       Kernel Target Alignment - a measure of alignment of a kernel Gram matrix with labels.
- *
+ * \file
  *
  *
  * \author      T. Glasmachers, O.Krause
@@ -39,66 +39,58 @@
 
 
 namespace shark{
+	
+	
+/// \defgroup kerneloptimization Kernel Optimization
+/// \ingroup objfunctions
+/// \ingroup kernels
+/// \brief All kinds of objective functions to optimize kernel functions.
+///
 
-/*!
- *  \brief Kernel Target Alignment - a measure of alignment of a kernel Gram matrix with labels.
- *
- *  \par
- *  The Kernel Target Alignment (KTA) was originally proposed in the paper:<br/>
- *  <i>On Kernel-Target Alignment</i>. N. Cristianini, J. Shawe-Taylor,
- *  A. Elisseeff, J. Kandola. Innovations in Machine Learning, 2006.<br/>
- *  Here we provide a version with centering of the features as proposed
- *  in the paper:<br/>
- *  <i>Two-Stage Learning Kernel Algorithms</i>. C. Cortes, M. Mohri,
- *  A. Rostamizadeh. ICML 2010.<br/>
- *
- *  \par
- *  The kernel target alignment is defined as
- *  \f[ \hat A = \frac{\langle K, y y^T \rangle}{\sqrt{\langle K, K \rangle \cdot \langle y y^T, y y^T \rangle}} \f]
- *  where K is the kernel Gram matrix of the data and y is the vector of
- *  +1/-1 valued labels. The outer product \f$ y y^T \f$ corresponds to
- *  an &quot;ideal&quot; Gram matrix corresponding to a kernel that maps
- *  the two classes each to a single point, thus minimizing within-class
- *  distance for fixed inter-class distance. The inner products denote the
- *  Frobenius product of matrices:
- *  http://en.wikipedia.org/wiki/Matrix_multiplication#Frobenius_product
- *
- *  \par
- *  In kernel-based learning, the kernel Gram matrix K is of the form
- *  \f[ K_{i,j} = k(x_i, x_j) = \langle \phi(x_i), \phi(x_j) \rangle \f]
- *  for a Mercer kernel function k and inputs \f$ x_i, x_j \f$. In this
- *  version of the KTA we use centered feature vectors. Let
- *  \f[ \psi(x_i) = \phi(x_i) - \frac{1}{\ell} \sum_{j=1}^{\ell} \phi(x_j) \f]
- *  denote the centered feature vectors, then the centered Gram matrix
- *  \f$ K^c \f$ is given by
- *  \f[ K^c_{i,j} = \langle \psi(x_i), \psi(x_j) \rangle = K_{i,j} - \frac{1}{\ell} \sum_{n=1}^\ell K_{i,n} + K_{j,n} + \frac{1}{\ell^2} \sum_{m,n=1}^\ell K_{n,m} \f]
- *  The alignment measure computed by this class is the exact same formula
- *  for \f$ \hat A \f$, but with \f$ K^c \f$ plugged in in place of $\f$ K \f$.
- *
- *  \par
- *  KTA measures the Frobenius inner product between a kernel Gram matrix
- *  and this ideal matrix. The interpretation is that KTA measures how
- *  well a given kernel fits a classification problem. The actual measure
- *  is invariant under kernel rescaling.
- *  In Shark, objective functions are minimized by convention. Therefore
- *  the negative alignment \f$ - \hat A \f$ is implemented. The measure is
- *  extended for multi-class problems by using prototype vectors instead
- *  of scalar labels.
- *
- *  \par
- *  The following properties of KTA are important from a model selection
- *  point of view: it is relatively fast and easy to compute, it is
- *  differentiable w.r.t. the kernel function, and it is independent of
- *  the actual classifier.
- *
- *  \par
- *  The following notation is used in several of the methods of the class.
- *  \f$ K^c \f$ denotes the centered Gram matrix, y is the vector of labels,
- *  Y is the outer product of this vector with itself, k is the row
- *  (or column) wise average of the uncentered Gram matrix K, my is the
- *  label average, and u is the vector of all ones, and \f$ \ell \f$ is the
- *  number of data points, and thus the size of the Gram matrix.
- */
+///  \brief Kernel Target Alignment - a measure of alignment of a kernel Gram matrix with labels.
+///
+///The Kernel Target Alignment (KTA) was originally proposed in the paper:<br/>
+///<i>On Kernel-Target Alignment</i>. N. Cristianini, J. Shawe-Taylor,
+///A. Elisseeff, J. Kandola. Innovations in Machine Learning, 2006.<br/>
+///Here we provide a version with centering of the features as proposed
+///in the paper:<br/>
+///<i>Two-Stage Learning Kernel Algorithms</i>. C. Cortes, M. Mohri,
+///A. Rostamizadeh. ICML 2010.<br/>
+///
+///The kernel target alignment is defined as
+///where K is the kernel Gram matrix of the data and y is the vector of
+///\f[ \hat A = \frac{\langle K, y y^T \rangle}{\sqrt{\langle K, K \rangle \cdot \langle y y^T, y y^T \rangle}} \f]
+///+1/-1 valued labels. The outer product \f$y y^T\f$ corresponds to
+///an ideal Gram matrix corresponding to a kernel that maps
+///the two classes each to a single point, thus minimizing within-class
+///distance for fixed inter-class distance. The inner products denote the
+///Frobenius product of matrices:
+///http://en.wikipedia.org/wiki/Matrix_multiplication#Frobenius_product
+///
+///In kernel-based learning, the kernel Gram matrix \f$K\f$ is of the form
+///\f[ K_{i,j} = k(x_i, x_j) = \langle \phi(x_i), \phi(x_j) \rangle \f]
+///for a Mercer kernel function k and inputs \f$x_i, x_j\f$. In this
+///version of the KTA we use centered feature vectors. Let
+///\f[ \psi(x_i) = \phi(x_i) - \frac{1}{\ell} \sum_{j=1}^{\ell} \phi(x_j) \f]
+///denote the centered feature vectors, then the centered Gram matrix \f$K^c\f$ is given by
+///\f[ K^c_{i,j} = \langle \psi(x_i), \psi(x_j) \rangle = K_{i,j} - \frac{1}{\ell} \sum_{n=1}^\ell K_{i,n} + K_{j,n} + \frac{1}{\ell^2} \sum_{m,n=1}^\ell K_{n,m} \f]
+///The alignment measure computed by this class is the exact same formula
+///for \f$ \hat A \f$, but with \f$K^c\f$ plugged in in place of \f$K\f$.
+///
+///KTA measures the Frobenius inner product between a kernel Gram matrix
+///and this ideal matrix. The interpretation is that KTA measures how
+///well a given kernel fits a classification problem. The actual measure
+///is invariant under kernel rescaling.
+///In Shark, objective functions are minimized by convention. Therefore
+///the negative alignment \f$- \hat A\f$ is implemented. The measure is
+///extended for multi-class problems by using prototype vectors instead
+///of scalar labels.
+///
+///The following properties of KTA are important from a model selection
+///point of view: it is relatively fast and easy to compute, it is
+///differentiable w.r.t. the kernel function, and it is independent of
+///the actual classifier.
+/// \ingroup kerneloptimization
 template<class InputType = RealVector,class LabelType = unsigned int>
 class KernelTargetAlignment : public AbstractObjectiveFunction< RealVector, double >
 {

@@ -85,7 +85,7 @@ namespace shark
 /// differentiable loss functions such as the logistic loss (class CrossEntropy).
 /// It suffers from significantly slower convergence for non-differentiable
 /// losses, e.g., the hinge loss for SVM training.
-///
+/// \ingroup supervised_trainer
 template <class InputType, class CacheType = float>
 class KernelSGDTrainer : public AbstractTrainer< KernelClassifier<InputType> >, public IParameterizable<>
 {

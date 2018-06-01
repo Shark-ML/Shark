@@ -54,6 +54,7 @@ namespace shark {
 /// while ensuring a descent direction.
 /// 
 /// We implement restarting to ensure quadratic convergence near the optimum as well as numerical stability
+/// \ingroup gradientopt
 template<class SearchPointType = RealVector>
 class CG : public AbstractLineSearchOptimizer<SearchPointType>
 {

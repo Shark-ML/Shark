@@ -42,7 +42,6 @@
 
 namespace shark {
 
-///
 /// \brief Maximum-likelihood model selection score for binary support vector machines
 ///
 /// \par
@@ -58,7 +57,7 @@ namespace shark {
 /// be optimized for externally via gradient-based optimizers. In other words, this
 /// class provides a score, not an optimization method or a training algorithm. The
 /// C-SVM parameters have to be optimized with regard to this measure
-///
+/// \ingroup kerneloptimization
 template<class InputType = RealVector>
 class SvmLogisticInterpretation : public AbstractObjectiveFunction< RealVector, double > {
 public:

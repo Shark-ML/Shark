@@ -51,7 +51,7 @@ namespace detail{
 ///
 /// This is the corrected algorithm as proposed in 
 /// Ilya Loshchilov, "A Computationally Efficient Limited Memory CMA-ES for Large Scale Optimization"
-///
+/// \ingroup singledirect
 class IncrementalCholeskyMatrix{
 public:
 	IncrementalCholeskyMatrix(){}

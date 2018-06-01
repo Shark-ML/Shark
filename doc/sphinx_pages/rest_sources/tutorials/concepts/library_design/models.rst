@@ -27,6 +27,11 @@ which requires the model to be differentiable
 with respect to its own parameters.
 
 
+List of Classes
+---------------------------------
+The list of models is available in the :doxy:`class documentation <models>`
+
+
 The base class 'AbstractModel'
 ------------------------------
 
@@ -160,89 +165,8 @@ Method                   Description
 ``numberOfParameters``   Number of parameters which can be optimized
 ``parameterVector``      Returns the current parameter vector of the model
 ``setParameterVector``   Sets the parameter vector to new values
+``inputShape``		 Defines the shape that the model expects as input
+``outputShape``		 Defines the shape the model will output
 ``read``, ``write``      Loads and saves a serializable object
 ``createState``          Returns a newly created State object holding the state to be stored in eval
 ======================   ==============================================================================
-
-
-
-
-
-List of Models
---------------
-
-
-We end this tutorial with a list of some  models currently implemented in Shark,
-together with a brief description.
-
-
-We start with general purpose models:
-
-==========================   ==================================================================================
-Model                        Description
-==========================   ==================================================================================
-:doxy:`LinearModel`          A simple linear model mapping an n-dimensional input to an m-dimensional output
-			     It offers the possibility to add an activation function
-:doxy:`Conv2DModel`          A simple linear model mapping an n-dimensional input to an m-dimensional output
-			     It offers the possibility to add an activation function
-:doxy:`ConcatenatedModel`    Chains two models together by using the output of one model as the
-                             input to the second.
-:doxy:`NeuronLayer`	     Implements a nonlinear activation function.
-:doxy:`RBFLayer`             Implements a layer of a radial basis function network using gaussian distributions
-:doxy:`CMACMap`              Discretizes the space using several randomized tile maps and calculates a
-                             weighted sum of the discretized activation
-:doxy:`KernelExpansion`      linear combination of outputs of :doxy:`AbstractKernelFunction`, given
-                             points of a dataset and the point to be evaluated (input point)
-==========================   ==================================================================================
-
-
-
-Some models for Classification or Regression:
-
-=====================================    ========================================================================
-Model                                    Description
-=====================================    ========================================================================
-:doxy:`Ensemble`			 Implements a weighted ensembles of models. Handels different cases
-					 of classification and regression.
-:doxy:`Classifier`	                 Wraps another model with 1(for binary) or n (for multi-class) output.
-					 Returns the index of the class with largest value for the given point.
-:doxy:`LinearClassifier`                 Classifier based on the prediction of a :doxy:`LinearModel`
-:doxy:`KernelClassifier`                 Classifier based on the prediction of a :doxy:`KernelExpansion`
-:doxy:`OneVersusOneClassifier`           Multi-class classifier which does majority voting using binary
-                                         classifiers for every class combination
-:doxy:`NearestNeighborModel`             Nearest neighbor search for classification and regression
-					 using a (weighted) majority vote system.
-:doxy:`RFClassifier`         		 Random Forest based on a collection of decision trees. Can be used for
-					 classification and regression
-=====================================    ========================================================================
-
-
-
-
-Models for Clustering:
-
-========================================== =====================================================================================
-Model                                      Description
-========================================== =====================================================================================
-:doxy:`ClusteringModel`                    Base class for all clustering models, requires an :doxy:`AbstractClustering` to work.
-:doxy:`SoftClusteringModel`                Returns for a given point :math:`x` a vector of propabilities :math:`p(c_i|x)`
-                                           indicating the propability of the point to be in the cluster :math:`c_i`
-:doxy:`HardClusteringModel`                Returns the index of the cluster with highest probability for a given point,
-                                           :math:`\arg \max_i p(c_i|x)`.
-========================================== =====================================================================================
-
-
-
-Special purpose models:
-
-======================================  ======================================================================
-Model                                   Description
-======================================  ======================================================================
-:doxy:`MissingFeaturesKernelExpansion`  KernelExpansion with support for missing input values.
-:doxy:`Normalizer`			Special case of the :doxy:`LinearModel` which only has a diagonal
-					matrix and an optional offset. Used for normalisation
-:doxy:`DropoutLayer`			Implements dropout of inputs
-======================================  ======================================================================
-
-
-

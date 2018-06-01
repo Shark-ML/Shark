@@ -39,6 +39,7 @@
 namespace shark{
 
 ///@brief Standard steepest descent.
+/// \ingroup gradientopt
 template<class SearchPointType = RealVector>
 class SteepestDescent : public AbstractSingleObjectiveOptimizer<SearchPointType>
 {

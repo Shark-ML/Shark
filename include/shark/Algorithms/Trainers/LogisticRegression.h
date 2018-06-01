@@ -54,6 +54,7 @@ namespace shark {
 /// the problem is transformed into a constrained problem and the constrined-LBFGS algorithm
 /// is used. This is one of the most efficient solvers for logistic regression as long as the
 /// number of data points is not too large.
+/// \ingroup supervised_trainer
 template <class InputVectorType = RealVector>
 class LogisticRegression : public AbstractWeightedTrainer<LinearClassifier<InputVectorType> >, public IParameterizable<>
 {

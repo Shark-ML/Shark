@@ -48,6 +48,7 @@ namespace shark {
 ///
 /// computes a linear model that normlizes the data to be 0 mean, a given target variance and covariance 0.
 /// By default the trainer makes the data unit variance, but the target variance can be changed as well.
+/// \ingroup unsupervised_trainer
 class NormalizeComponentsWhitening : public AbstractUnsupervisedTrainer<LinearModel<RealVector> >
 {
 public:

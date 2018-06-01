@@ -176,7 +176,7 @@ protected:
 /// meta-information of the training process, like the maximal
 /// size of the kernel cache, the stopping criterion, as well
 /// as information on the actual solution.
-///
+/// \ingroup supervised_trainer
 template <
 	class InputType, class LabelType, 
 	class Model = KernelClassifier<InputType>, 
@@ -315,7 +315,7 @@ protected:
 /// regularization parameter of the SVM. The class also manages
 /// meta-information of the training process, like the stopping
 /// criterion and information on the actual solution.
-///
+/// \ingroup supervised_trainer
 template <class InputType>
 class AbstractLinearSvmTrainer
 : public AbstractTrainer<LinearClassifier<InputType>, unsigned int>

@@ -43,7 +43,7 @@ namespace shark{
 /// between target and prediction. It is defined for both
 /// vectorial as well as integral labels. In the case of integral labels,
 /// the label c is interpreted as unit-vector having the c-th component activated.
-///
+/// \ingroup lossfunctions
 template<class OutputType = RealVector, class LabelType = OutputType >
 class SquaredLoss : public AbstractLoss<LabelType,OutputType>
 {

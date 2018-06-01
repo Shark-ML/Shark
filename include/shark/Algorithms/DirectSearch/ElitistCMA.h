@@ -53,19 +53,19 @@
 
 namespace shark {
 
-/**
-* \brief Implements the elitist CMA-ES.
-* 
-* The algorithm is based on
-* 
-* C. Igel, T. Suttorp, and N. Hansen. A Computational Efficient
-* Covariance Matrix Update and a (1+1)-CMA for Evolution
-* Strategies. In Proceedings of the Genetic and Evolutionary
-* Computation Conference (GECCO 2006), pp. 453-460, ACM Press, 2006
-* 
-* D. V. Arnold and N. Hansen: Active covariance matrix adaptation for
-* the (1+1)-CMA-ES. In Proceedings of the Genetic and Evolutionary
-*/
+
+/// \brief Implements the elitist CMA-ES.
+/// 
+/// The algorithm is based on
+/// 
+/// C. Igel, T. Suttorp, and N. Hansen. A Computational Efficient
+/// Covariance Matrix Update and a (1+1)-CMA for Evolution
+/// Strategies. In Proceedings of the Genetic and Evolutionary
+/// Computation Conference (GECCO 2006), pp. 453-460, ACM Press, 2006
+/// 
+/// D. V. Arnold and N. Hansen: Active covariance matrix adaptation for
+/// the (1+1)-CMA-ES. In Proceedings of the Genetic and Evolutionary
+/// \ingroup singledirect
 class ElitistCMA : public AbstractSingleObjectiveOptimizer<RealVector >{	    
 public:
 

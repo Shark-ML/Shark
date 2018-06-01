@@ -127,9 +127,11 @@
 
   <!-- Layout definition for a group page -->
   <group>
-    <briefdescription visible="yes"/>
+    <briefdescription visible="no"/>
+    <detaileddescription title=" "/>
     <groupgraph visible="$GROUP_GRAPHS"/>
     <memberdecl>
+      <membergroups visible="yes"/>
       <classes visible="yes" title=""/>
       <namespaces visible="yes" title=""/>
       <dirs visible="yes" title=""/>
@@ -148,9 +150,9 @@
       <events title=""/>
       <properties title=""/>
       <friends title=""/>
-      <membergroups visible="yes"/>
+      
     </memberdecl>
-    <detaileddescription title=""/>
+    
     <memberdef>
       <pagedocs/>
       <defines title=""/>

@@ -3,12 +3,12 @@
  * 
  *
  * \brief       cost function for quantitative judgement of deviations of predictions from target values
- * 
+ * \file
  * 
  *
  * \author      T. Glasmachers
  * \date        2011
- *
+ * \file
  *
  * \par Copyright 1995-2017 Shark Development Team
  * 
@@ -41,6 +41,11 @@
 #include <shark/Data/Dataset.h>
 
 namespace shark {
+	
+/// \defgroup costfunctions Cost functions
+/// \brief Defines cost functions used for optimization
+///
+/// Unlike \ref lossfunctions, cost functions are defined on a set of points.
 
 
 /// \brief Cost function interface
@@ -63,7 +68,7 @@ namespace shark {
 /// making the predictions, and thus it can not handle LabeledData
 /// directly. However, it is one of the components necessary to
 /// process LabeledData in an ErrorFunction.
-///
+/// \ingroup costfunctions
 template<class LabelT, class OutputT = LabelT>
 class AbstractCost : public INameable
 {

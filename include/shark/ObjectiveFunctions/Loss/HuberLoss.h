@@ -45,6 +45,7 @@ namespace shark {
 /// Please not that, due to its nature, the error function is not scale invariant. thus rescaling the dataset
 /// changes the behaviour. This function has the hyper parameter delta which marks thee region where
 /// the function changes from quadratic to linear.
+/// \ingroup lossfunctions
 class HuberLoss : public AbstractLoss<RealVector, RealVector>
 {
 public:

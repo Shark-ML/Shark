@@ -8,7 +8,7 @@
  *
  * \author      T. Glasmachers
  * \date        2010-2011
- *
+ * \file
  *
  * \par Copyright 1995-2017 Shark Development Team
  * 
@@ -38,7 +38,9 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Traits/ProxyReferenceTraits.h>
 namespace shark {
-
+	
+/// \defgroup lossfunctions Loss Functions
+/// \brief Loss functions define loss values between a model prediction and a given label.
 
 /// \brief Loss function interface
 ///
@@ -55,6 +57,7 @@ namespace shark {
 /// is not formally checked, but instead left to the various
 /// sub-classes.
 ///
+/// \ingroup lossfunctions
 template<class LabelT, class OutputT = LabelT>
 class AbstractLoss : public AbstractCost<LabelT, OutputT>
 {
@@ -138,27 +141,7 @@ public:
 		SHARK_FEATURE_EXCEPTION_DERIVED(HAS_FIRST_DERIVATIVE);
 		return 0.0;  // dead code, prevent warning
 	}
-
-	//~ /// \brief evaluate the loss and fist and second derivative w.r.t. the prediction
-	//~ ///
-	//~ /// \par
-	//~ /// The default implementations throws an exception.
-	//~ /// If you overwrite this method, don't forget to set
-	//~ /// the flag HAS_FIRST_DERIVATIVE.
-	//~ /// \param  target      target value
-	//~ /// \param  prediction  prediction, typically made by a model
-	//~ /// \param  gradient    the gradient of the loss function with respect to the prediction
-	//~ /// \param  hessian      the hessian matrix of the loss function with respect to the prediction
-	//~ virtual double evalDerivative(
-			//~ LabelType const& target,
-			//~ OutputType const& prediction,
-			//~ OutputType& gradient,
-			//~ MatrixType& hessian) const
-	//~ {
-		//~ SHARK_FEATURE_EXCEPTION_DERIVED(HAS_SECOND_DERIVATIVE);
-		//~ return 0.0;  // dead code, prevent warning
-	//~ }
-
+	
 	/// from AbstractCost
 	///
 	/// \param  targets      target values

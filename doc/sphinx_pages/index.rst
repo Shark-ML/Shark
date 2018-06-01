@@ -6,7 +6,6 @@
 
    rest_sources/getting_started/installation
    rest_sources/getting_started/troubleshooting
-   rest_sources/getting_started/using_the_documentation
 
 
    rest_sources/tutorials/tutorials
@@ -126,8 +125,6 @@ Where to start
 
 In the menu above, click on "Getting started", or use this direct link to the
 :doc:`installation instructions <rest_sources/getting_started/installation>`.
-After installation, there is a guide to the different documentation pages available
-:doc:`here <rest_sources/getting_started/using_the_documentation>`.
 
 
 Why Shark?

@@ -62,6 +62,7 @@ namespace shark {
 /// the rank of the average function value is used for updating the strategy parameters
 /// which ensures asymptotic unbiasedness. We further do not have an upper bound on
 /// the number of reevaluations for the same reason.
+/// \ingroup singledirect
 class CMA : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:

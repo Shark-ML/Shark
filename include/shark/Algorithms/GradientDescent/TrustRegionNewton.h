@@ -66,6 +66,7 @@ namespace shark {
 /// Jorge Nocedal, Stephen J. Wright
 /// Numerical Optimization, 2nd Edition
 /// Algorithm 4.1 with Algorithm 7.2 to solve the sub-problem
+/// \ingroup gradientopt
 class TrustRegionNewton : public AbstractSingleObjectiveOptimizer<RealVector >
 {
 public:

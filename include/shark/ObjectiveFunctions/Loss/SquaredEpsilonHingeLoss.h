@@ -48,6 +48,7 @@ namespace shark {
 /// the margin.
 ///
 /// Contrary to th EpsilonHingeLoss, this loss is differentiable.
+/// \ingroup lossfunctions
 class SquaredEpsilonHingeLoss : public AbstractLoss<RealVector, RealVector>
 {
 public:

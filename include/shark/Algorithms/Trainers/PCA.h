@@ -43,34 +43,33 @@
 
 namespace shark{
 
-/*!
- *  \brief Principal Component Analysis
- *
- *  The Principal Component Analysis, also known as
- *  Karhunen-Loeve transformation, takes a symmetric
- *  \f$ n \times n \f$ matrix \f$ A \f$ and uses its decomposition
- *
- *  \f$
- *      A = \Gamma \Lambda \Gamma^T,
- *  \f$
- *
- *  where \f$ \Lambda \f$ is the diagonal matrix of eigenvalues
- *  of \f$ A \f$ and \f$ \Gamma \f$ is the orthogonal matrix
- *  with the corresponding eigenvectors as columns.
- *  \f$ \Lambda \f$ then defines a successive orthogonal rotation
- *  that maximizes the variances of the coordinates, i.e. the
- *  coordinate system is rotated in such a way that the correlation
- *  between the new axes becomes zero. If there are \f$ p \f$ axes,
- *  the first axis is rotated in a way that the points on the new axis
- *  have maximum variance. Then the remaining \f$ p - 1 \f$ axes are
- *  rotated such that a another axis covers a maximum part of the rest
- *  variance, that is not covered by the first axis. After the
- *  rotation of \f$ p - 1 \f$ axes, the rotation destination of axis
- *  no. \f$ p \f$ is fixed.  An application for PCA is the reduction
- *  of dimensions by skipping the components with the least
- *  corresponding eigenvalues/variances. Furthermore, the eigenvalues
- *  may be rescaled to one, resulting in a whitening of the data.
- */
+///  \brief Principal Component Analysis
+///
+///  The Principal Component Analysis, also known as
+///  Karhunen-Loeve transformation, takes a symmetric
+///  \f$ n \times n \f$ matrix \f$ A \f$ and uses its decomposition
+///
+///  \f$
+///      A = \Gamma \Lambda \Gamma^T,
+///  \f$
+///
+///  where \f$ \Lambda \f$ is the diagonal matrix of eigenvalues
+///  of \f$ A \f$ and \f$ \Gamma \f$ is the orthogonal matrix
+///  with the corresponding eigenvectors as columns.
+///  \f$ \Lambda \f$ then defines a successive orthogonal rotation
+///  that maximizes the variances of the coordinates, i.e. the
+///  coordinate system is rotated in such a way that the correlation
+///  between the new axes becomes zero. If there are \f$ p \f$ axes,
+///  the first axis is rotated in a way that the points on the new axis
+///  have maximum variance. Then the remaining \f$ p - 1 \f$ axes are
+///  rotated such that a another axis covers a maximum part of the rest
+///  variance, that is not covered by the first axis. After the
+///  rotation of \f$ p - 1 \f$ axes, the rotation destination of axis
+///  no. \f$ p \f$ is fixed.  An application for PCA is the reduction
+///  of dimensions by skipping the components with the least
+///  corresponding eigenvalues/variances. Furthermore, the eigenvalues
+///  may be rescaled to one, resulting in a whitening of the data.
+/// \ingroup unsupervised_trainer
 class PCA : public AbstractUnsupervisedTrainer<LinearModel<> >
 {
 private:

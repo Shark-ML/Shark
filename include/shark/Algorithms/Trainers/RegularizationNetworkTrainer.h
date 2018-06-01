@@ -81,7 +81,7 @@ namespace shark {
 /// of the noise. The variance of the noise is denoted by \f$
 /// \sigma_n^2 \f$ in the textbook by Rasmussen and
 /// Williams. Accordingly, \f$ C = 1/\sigma_n^2 \f$.
-
+/// \ingroup supervised_trainer
 template <class InputType>
 class RegularizationNetworkTrainer : public AbstractSvmTrainer<InputType, RealVector,KernelExpansion<InputType> >
 {

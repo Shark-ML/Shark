@@ -68,6 +68,7 @@ namespace shark {
 /// Gal Chechik, Geremy Heitz, Gal Elidan, Pieter Abbeel and Daphne Koller. JMLR 2008.</p>
 ///
 /// \note Much of the code in this class is borrowed from the class CSvmTrainer
+/// \ingroup supervised_trainer
 template <class InputType, class CacheType = float>
 class MissingFeatureSvmTrainer : public AbstractSvmTrainer<InputType, unsigned int,MissingFeaturesKernelExpansion<InputType> >
 {

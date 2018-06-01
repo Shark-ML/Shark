@@ -51,16 +51,15 @@
 
 
 namespace shark {
-/**
-* \brief Implements the CMSA.
-*
-*  The algorithm is described in
-*
-*  H. G. Beyer, B. Sendhoff (2008). 
-*  Covariance Matrix Adaptation Revisited: The CMSA Evolution Strategy
-*  In Proceedings of the Tenth International Conference on Parallel Problem Solving from Nature
-*  (PPSN X), pp. 123-132, LNCS, Springer-Verlag
-*/
+/// \brief Implements the CMSA.
+///
+///  The algorithm is described in
+///
+///  H. G. Beyer, B. Sendhoff (2008). 
+///  Covariance Matrix Adaptation Revisited: The CMSA Evolution Strategy
+///  In Proceedings of the Tenth International Conference on Parallel Problem Solving from Nature
+///  (PPSN X), pp. 123-132, LNCS, Springer-Verlag
+/// \ingroup singledirect
 class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
 	/** \cond */
 

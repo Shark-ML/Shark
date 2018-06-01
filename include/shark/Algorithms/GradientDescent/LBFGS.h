@@ -68,6 +68,7 @@ namespace shark {
 /// This is the point with smallest value along the path.
 /// This does not find the true optimal step in the unconstrained problem, however a cheap and reasonably good optimum
 /// which often improves over naive coordinate descent.
+/// \ingroup gradientopt
 template<class SearchPointType = RealVector>
 class LBFGS : public AbstractLineSearchOptimizer<SearchPointType>{
 public:
