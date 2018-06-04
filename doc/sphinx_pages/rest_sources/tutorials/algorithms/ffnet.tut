@@ -73,5 +73,5 @@ including radial basis function networks using :doxy:`RBFLayer` and
 Convolutional Neural Networks using :doxy:`Conv2DModel`
 
 What next?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------
 The next tutorials covers :doc:`DeepMNIST`
