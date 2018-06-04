@@ -40,7 +40,7 @@ int main(){
 	
 	//a linear model with as many in and outputs as the data has
 	//###begin<model>
-	LinearModel<> model(inputDimension(data), outputDimension(data));
+	LinearModel<> model(inputDimension(data), labelDimension(data));
 	//###end<model>
 	
 	//the squared loss can be used to calculate the mean squared error of the data and the model
