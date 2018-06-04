@@ -45,7 +45,8 @@ int main(int argc, char **argv){
 
 	//###begin<eval>
 	ZeroOneLoss<> loss;
-	double error = loss(test.labels(),classifier(test.inputs()));
+	Data<unsigned int> predictions = classifier(test.inputs());
+	double error = loss(test.labels(),predictions);
 	//###end<eval>
 	
 	//print results

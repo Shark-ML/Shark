@@ -1,7 +1,7 @@
 //###begin<includes>
 //the model
 #include <shark/Models/LinearModel.h>//single dense layer
-#include <shark/Models/ConcatenatedModel.h>//for stacking layers, proveides operator>>
+#include <shark/Models/ConcatenatedModel.h>//for stacking layers, provides operator>>
 //training the  model
 #include <shark/ObjectiveFunctions/ErrorFunction.h>//error function, allows for minibatch training
 #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h> // loss used for supervised training
@@ -28,15 +28,16 @@ int main(int argc, char **argv)
 	data.shuffle(); //shuffle data randomly
 	auto test = splitAtElement(data, 70 * data.numberOfElements() / 100);//split a test set
 	std::size_t numClasses = numberOfClasses(data);
+	std::size_t inputDim = inputDimension(data);
 //###end<data>	
 //###begin<model_creation>
 	//We use a dense linear model with rectifier activations
 	typedef LinearModel<RealVector, RectifierNeuron> DenseLayer;
 	
 	//build the network
-	DenseLayer layer1(data.inputShape(),hidden1);
-	DenseLayer layer2(layer1.outputShape(),hidden2);
-	LinearModel<RealVector> output(layer2.outputShape(),numClasses);
+	DenseLayer layer1(inputDim,hidden1, true);
+	DenseLayer layer2(hidden1,hidden2, true);
+	LinearModel<RealVector> output(hidden2,numClasses, true);
 	auto network = layer1 >> layer2 >> output;
 //###end<model_creation>
 //###begin<training>	

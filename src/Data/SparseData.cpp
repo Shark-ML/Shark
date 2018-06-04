@@ -180,6 +180,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 		}
 	}
 	data.inputs().shape() = {maxIndex};
+	data.labels().shape() = numberOfClasses(data);
 	return data;
 }
 

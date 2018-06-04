@@ -1,0 +1,38 @@
+Variational Autoencoders
+==============================================
+
+Variational autoencoders are an extension to normal autoencoders. 
+They have an underlying generative model which is trained using an lower bound of the
+maximum likelihood objective function.
+The optimisation problem for input data :math:`\vec{x}_1,\dots,\vec{x}_N` is stated as:
+
+.. math ::
+	\min_{\theta} \frac 1 N \sum_{i=1}^N E_{q(\vec z \| \vec x_i)}\left\{(\vec x_i - f(\vec z))^2\right\} + \lambda \cdot KL( q(\vec z \| \vec x_i)|| \mathcal{N}(0,I)) \enspace .
+	
+	
+The encoder is represented by a distribution ``q``, that is learning a normal distribution from which we sample hidden states ``z``.
+The decoder then performs the reconstruction ``f(z)`` and the squared loss between original point and reconstruction is computed. Without
+an regularization term, the encoder will learn a distribution with a very small variance as larger variances would make reconstruction harder. 
+Tehrefore, a second term, the KL divergence is added which measures how different the ``q`` is from a standard normal distribution.
+In this tutorial, we will train such a model. The full example program is given in :doxy:`VariationalAutoencoder.cpp`.
+
+For this tutorial, we need the following includes::
+
+..sharkcode<Unsupervised/VariationalAutoencoder.tpp,includes>
+
+Defining the model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A variational autoencoder consists of two models, the encoder and the decoder. The encoder must have linear output
+neurons and two times the number of outputs as the inputs of the decoder. For each input of the decoder, the encoder must learn the
+mean and variance. We will showcase only a very simple pair of models::
+
+..sharkcode<Unsupervised/VariationalAutoencoder.tpp,model_creation>
+
+Instead of the :doxy:`ErrorFunction` we will use the :doxy:`VariationalAutoencoderError`. It takes the dataset, encoder and decoder models, the loss function and the strength
+of regularization, lambda::
+
+..sharkcode<Unsupervised/VariationalAutoencoder.tpp,objfunct>
+
+Lastly, we optimize the objective using :doxy:`Adam`. Take into account that encoder and decoder have to be initialized separately::
+
+..sharkcode<Unsupervised/VariationalAutoencoder.tpp,training>

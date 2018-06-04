@@ -40,7 +40,8 @@ int main(int argc, char **argv)
 	
 //###begin<objfunct>	
 	SquaredLoss<FloatVector> loss;
-	VariationalAutoencoderError<FloatVector> error(data.inputs(), &encoder, &decoder,&loss, 1.0);
+	double lambda = 1.0;
+	VariationalAutoencoderError<FloatVector> error(data.inputs(), &encoder, &decoder,&loss, lambda);
 //###end<objfunct>	
 	
 	//Step 4 set up optimizer and run optimization

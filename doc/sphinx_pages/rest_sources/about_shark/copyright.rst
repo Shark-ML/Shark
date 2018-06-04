@@ -14,7 +14,9 @@ We kindly ask you to cite Shark in academic work as:
 	`Shark <http://jmlr.csail.mit.edu/papers/v9/igel08a.html>`_.
 	Journal of Machine Learning Research 9, pp. 993-996, 2008
 
-The article's bibtex entry reads: ::
+The article's bibtex entry reads:
+
+.. code-block:: none
 
 	@Article{shark08,
 		author = {Christian Igel and Verena Heidrich-Meisner and Tobias Glasmachers},
@@ -47,21 +49,25 @@ The Shark machine learning library is jointly maintained by researchers from
 Present and previous contributors
 ----------------------------------
 
-Shark is currently developed and maintained by the following people (in alphabetical order)::
+Shark is currently developed and maintained by the following people:
 
-	Asja Fischer, Tobias Glasmachers, Kasper Nybo Hansen,
-	Christian Igel, Oswin Krause, Bill Li, Trinh Xuan Tuan,
-	Matthias Tuma, Thomas Voss
+.. code-block:: none
+
+	Oswin Krause, Tobias Glasmachers, Christian Igel
 
 
 The following people have been contributors to past versions of
-Shark (in alphabetical order)::
+Shark (in alphabetical order):
+
+Oswin Krause
 
 	Rüdiger Alberts, Lukas Arnold, Thomas Bücher, Eduard Diner,
 	Verena Heidrich-Meisner, Michael Hüsken, Martin Kreutz,
 	Marc Nunkesser, Tatsuya Okabe, Stefan Roth, Pavel Saviankou,
 	Bernhard Sendhoff, Peter Stagge, Thorsten Suttorp,
-	Marc Toussaint, Björn Weghenkel, Stefan Wiegand, Aimin Zhou
+	Marc Toussaint, Björn Weghenkel, Stefan Wiegand, Aimin Zhou,
+	Asja Fischer, Kasper Nybo Hansen, Bill Li, Trinh Xuan Tuan,
+	Matthias Tuma, Thomas Voss
 
 Past and present supporters
 ---------------------------

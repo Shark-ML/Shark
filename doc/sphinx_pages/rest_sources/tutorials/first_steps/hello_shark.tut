@@ -30,9 +30,9 @@ The first line creates a dataset, the data structure used in Shark for holding
 data for supervised learning tasks. Such containers hold pairs
 of input data points and labels. The ``ClassificationDataset`` used here is
 simply a typedef for
-``LabeledData < RealVector, unsigned int >``, as we will use real-valued feature
+``LabeledData<RealVector,unsigned int>``, as we will use real-valued feature
 vectors and integer labels. The second line loads the data file using ``importCSV``,
-which can read many CSV-like file formats. Passing `LAST_COLUMN``  as argument indicates
+which can read many CSV-like file formats. Passing ``LAST_COLUMN``  as argument indicates
 that the last column of the file holds the class labels.
 
 For example, let us consider the data in
@@ -97,9 +97,9 @@ What you learned
 
 You should have learned the following aspects in this Tutorial:
 
-* What the main building blocks of a general optimization task are: Data, Error Function, Model, Optimizer
-
+* How to use a trainer to train a model
 * How to load data from from a csv file.
+* How to evaluate your model on a test set.
 
 During the course of all tutorials, you will gain a more fine grained knowledge
 about these different aspects.

@@ -310,6 +310,7 @@ protected:
 /// This model is a simple wrapper for the KernelExpansion calculating the arg max
 /// of the outputs of the model. This is the model used by kernel classifier models like SVMs.
 ///
+/// \ingroup models
 template<class InputType>
 struct KernelClassifier: public Classifier<KernelExpansion<InputType> >{
 	typedef AbstractKernelFunction<InputType> KernelType;

@@ -1,21 +1,12 @@
 Autoencoders
 ==============================================
 
-Training deep neural networks (i.e., networks with several hidden
-layers) is challenging, because normal training easily gets stuck in
-undesired local optima. This prevents the lower layers from learning
-useful features. This problem can be partially circumvented by
-pre-training the layers in an unsupervised fashion and thereby
-initialising them in a region of the error function which is easier to
-train (or fine-tune) using steepest descent techniques.
-
-One of these unsupervised learning techniques are autoencoders. An autoencoder
-is a feed forward neural network which is trained to map
+An autoencoder is a feed forward neural network which is trained to map
 its input to itself via the representation formed by the hidden units. The optimisation
 problem for input data :math:`\vec{x}_1,\dots,\vec{x}_N` is stated as:
 
 .. math ::
-	\min_{\theta} \frac 1 N \sum_{i=1}^N (\vec x_i - f_{\theta}(\vec x_i)^2 \enspace .
+	\min_{\theta} \frac 1 N \sum_{i=1}^N (\vec x_i - f_{\theta}(\vec x_i))^2 \enspace .
 
 Of course, without any constraints this is a simple task as the model
 will just try to learn the identity. It becomes a bit more challenging
@@ -24,17 +15,13 @@ the number of hidden units). An image with several hundred input
 points can not be squeezed in a representation of a few hidden
 neurons. Thus, it is assumed that this intermediate representation
 learns something meaningful about the problem.  Of course, using this
-simple technique only works if the number of hidden neurons is smaller than
-the number of dimensions of the image. We need more advanced
-regularisation techniques, like dropout to work with overcomplete representations
-(i.e., if the size of the intermediate representation is larger than
-the input dimension). But especially for images it is obvious that a
-good intermediate representation must be somehow more complex: the
-number of objects that can be seen on an image is larger than the
-number of its pixels.
+simple technique without any additional regularization
+only works if the number of hidden neurons is smaller than
+the number of dimensions of the image.
 
 As a dataset for this tutorial, we use a subset of the MNIST dataset which needs to
 be unzipped first. It can be found in ``examples/Supervised/data/mnist_subset.zip``.
+The full example program can be found in  :doxy:`AutoEncoderTutorial.cpp`.
 
 The following includes are needed for this tutorial::
 
@@ -78,11 +65,6 @@ After training the different architectures, we printed the feature maps of the f
 .. figure:: ../images/featuresAutoencoder.png
   :alt: Plot of features learned by the normal autoencoders
 
-Full example program
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The full example program is  :doxy:`AutoEncoderTutorial.cpp`.
-
-.. attention::
-  The settings of the parameters of the program will reproduce the filters. However the program
-  takes some time to run! This might be too long for weaker machines.
+What next?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The next tutorials covers :doc:`variational_autoencoders`

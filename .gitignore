@@ -206,6 +206,7 @@ examples/Benchmark/shark/build/
 /doc/MOO-EALib
 /doc/FileUtil
 /doc/html
+/doc/sphinx_pages/doxylink/__pycache__/
 
 # /doc/doxygen_pages/
 /doc/doxygen_pages/html

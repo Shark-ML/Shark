@@ -1,13 +1,9 @@
 Tutorials
 =========
 
-
-This page lists all tutorials available for the Shark machine learning library.
-Together with a comprehensive set of example and test programs, they are
-excellent starting points towards developing and evaluating machine learning
-software using Shark.
-
-If you are already familiar with the Shark architecture, the documentation of the key concepts
+This page gives a gentle introduction into Shark. The quick tutorial section gives an introduction
+into the most important core components. For neural network training, following the neural entwork tutorials is very helpful for a 
+first step. If you are already familiar with the Shark architecture, the documentation of the key concepts
 and list of classes can be found below:
 
 ======================================================	========================================================
@@ -52,8 +48,9 @@ A very important class of machine-learning models are Neural Networks. This sect
 discusses the creation and training of multi-layer neural networks
 
 * :doc:`algorithms/ffnet`
-* :doc:`algorithms/activations`
+* :doc:`algorithms/DeepMNIST`
 * :doc:`algorithms/autoencoders`
+* :doc:`algorithms/variational_autoencoders`
 
 Overarching concepts
 ++++++++++++++++++++

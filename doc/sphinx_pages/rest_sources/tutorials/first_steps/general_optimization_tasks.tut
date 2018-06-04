@@ -3,20 +3,14 @@
 General Optimization Tasks
 ==========================
 
-
 Introduction
 ------------
-
-
-In the previous tutorial we employed the LDA trainer to solve the simple LDA
+In the previous tutorial we used the LDA trainer to solve the simple LDA
 optimization task in one shot. In Shark, a trainer implements a solution
-strategy for a standard problems, often providing an analytic solution.
-In this sense, trainers are one-step optimizers. Given both data and a
-model, a trainer finds the solution for its particular task. However,
-many problems cannot be solved analytically, and in addition, it may not be
-an easy decision when the optimization should stop. For this reason, Shark
-provides a framework to set up task-specific optimization problems and solve them
-iteratively. We have already seen one part of this general framework, the
+strategy for a standard problems, often providing an analytic solution in a single step.
+Given both data and a model, a trainer finds the solution for its particular task.
+To define our own task we can use the general purpose framework of shark.
+We have already seen one part of this general framework, the
 model. A model is parameterized by a set of real values which define its
 behavior. In many simple cases, a model represents a function, mapping inputs to
 outputs, chosen from a parametric family (e.g., the family of linear functions).
@@ -24,7 +18,6 @@ outputs, chosen from a parametric family (e.g., the family of linear functions).
 
 Regression
 ----------
-
 In this tutorial, we will focus on a simple regression task. In regression,
 the parameters of a model are chosen such that it fits the training data as well
 as possible, usually in a least-squares sense. After its parameters have been
@@ -33,12 +26,12 @@ The Shark model also provides a way to calculate various derivatives. The
 code for this example can be found in
 :doxy:`regressionTutorial.cpp <regressionTutorial.cpp>`.
 
-
+Linear regression can be solved analytically. As before, this can be done by the
+trainer class ``LinearRegression`` which is demonstrated in the tutorial on
+:doc:`../algorithms/linearRegression`. 
 
 Data preparation
 %%%%%%%%%%%%%%%%
-
-
 For this tutorial, we need the following include files::
 
 ..sharkcode<Supervised/regressionTutorial.tpp,includes>
@@ -59,12 +52,8 @@ into the test set. Our original data set from then on only contains the training
 ..sharkcode<Supervised/regressionTutorial.tpp,split>
 
 
-
 Setting up the model
 %%%%%%%%%%%%%%%%%%%%
-
-
-
 In this example, we want to do linear regression. So what we first need
 is a linear model. Since we are not using a trainer which nicely sets up the model
 for us, we have to configure it for the task. This mainly includes initializing
@@ -74,8 +63,10 @@ the dataset for the correct values: ::
 
 ..sharkcode<Supervised/regressionTutorial.tpp,model>
 
-The first argument is the dimensionality of the data points and the second parameter
-that of the outputs. An affine linear model is a model of the form
+The first argument is the dimensionality, of the data points and the second parameter
+that of the outputs.
+
+An affine linear model is a model of the form
 
 .. math::
    f(x) = Ax+b
@@ -94,53 +85,28 @@ Setting up the objective function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 In order to optimize the model defined above, we need to set up some criterion.
-For this, we choose the squared loss of the model when applied to the training
-data set::
-
-..sharkcode<Supervised/regressionTutorial.tpp,error_function>
-
-The ``ErrorFunction`` is an instance of ``AbstractObjectiveFunction`` -- see the
-concept tutorial on :doc:`../concepts/library_design/objective_functions` for details.
-An objective function is a concept of a
-function that evaluates a point in the search space of solutions and returns
-its performance for the given problem. In the case of the ``ErrorFunction``,
-the search space is formed by the parameters of the model. For evaluation, the
-error function retrieves the performance of the given model with the specified
-parameters on a data set which is specified as the first argument in the constructor. 
 To assess the performance, it applies a loss function to each data point. For linear regression,
-we want to use the mean squared error, so we use the ``SquaredLoss`` class.
+we want to use the mean squared error, so we use the :doxy:`SquaredLoss` class.
 This loss function computes the squared difference
 
 .. math ::
    L(f(x), y) = (f(x) - y)^2
 
-between the model output :math:`f(x)` and the training label :math:`y`. The ErrorFunction itself
-computes the mean
+between the model output :math:`f(x)` and the training label :math:`y`. 
+We combine dataset, model and loss function using an :doxy:`ErrorFunction`::
 
-.. math ::
-   \frac 1 n \sum_{i=1}^n L(f(x_i),y_i)
+..sharkcode<Supervised/regressionTutorial.tpp,error_function>
 
-of the loss :math:`L` over the data set. There are many more objective functions available in
-Shark, see the concept tutorial on :doc:`../concepts/library_design/objective_functions`.
-
+The ``ErrorFunction`` is an instance of ``AbstractObjectiveFunction`` -- see the
+concept tutorial on :doc:`../concepts/library_design/objective_functions`. It computes the average
+loss of the model on the supplied dataset, i.e. the mean squared error.
 
 Optimization
 %%%%%%%%%%%%
 
-
-Linear regression can be solved analytically. This is done by the
-trainer class ``LinearRegression`` and demonstrated in the tutorial on
-:doc:`../algorithms/linearRegression`.  However, the purpose
-of this tutorial is to introduce the general optimization framework
-for learning, which applies to more complex losses and models, where
-no analytic solution is available. So, let us optimize the model by a
-general-purpose gradient-based method.
-
-
 To optimize the above instantiated model under the above defined objective function
 ``ErrorFunction``, we need an optimizer. For our regression task, a conjugate gradient
-method is just fine. Also, training for 100 iterations should be more than sufficient,
-even for more complex data::
+method is just fine and we run it for 100 iterations::
 
 ..sharkcode<Supervised/regressionTutorial.tpp,optimize>
 
@@ -171,26 +137,15 @@ The result should read
     test error: 0.151367
 
 
-
-
-
 What you learned
 ----------------
-
-
 You should have learned the following aspects in this Tutorial:
 
 * What the main building blocks of a general optimization task are: Data, Error Function, Model, Optimizer
 * How to load regression data from two files and split them into training and test set.
-* Different ways of error evaluation.
-
-
 
 What next?
 ----------
+Now you know the basic architecture of Shark. From here on you should follow the more specialized sets ot tutorials:
 
-
-Now you know the basic architecture of Shark. We will continue with one more introductory
-tutorial on stopping criteria, which is most relevant for those working with task-specific
-optimization problems. Afterwards, the "first steps" tutorials are completed, and all
-other tutorials do not build on each other any longer.
+* :doc:`../algorithms/ffnet`

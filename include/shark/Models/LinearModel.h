@@ -319,17 +319,18 @@ public:
 	}
 };
 
-/*! \brief Basic linear classifier.
- *
- *  The LinearClassifier class is a multi class classifier model
- *  suited for linear discriminant analysis. For c classes
- *  \f$ 0, \dots, c-1 \f$  the model computes
- *   
- *  \f$ \arg \max_i w_i^T x + b_i \f$
- *  
- *  Thus is it a linear model with arg max computation.
- *  The internal linear model can be queried using decisionFunction().
- */ 
+/// \brief Basic linear classifier.
+///
+/// The LinearClassifier class is a multi class classifier model
+/// suited for linear discriminant analysis. For c classes
+/// \f$ 0, \dots, c-1 \f$  the model computes
+///  
+/// \f$ \arg \max_i w_i^T x + b_i \f$
+/// 
+/// Thus is it a linear model with arg max computation.
+/// The internal linear model can be queried using decisionFunction().
+///
+/// \ingroup models
 template<class VectorType = RealVector>
 class LinearClassifier : public Classifier<LinearModel<VectorType> >
 {

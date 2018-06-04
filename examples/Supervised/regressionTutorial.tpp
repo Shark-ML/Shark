@@ -40,7 +40,7 @@ int main(){
 	
 	//a linear model with as many in and outputs as the data has
 	//###begin<model>
-	LinearModel<> model(inputDimension(data), labelDimension(data));
+	LinearModel<> model(inputDimension(data), outputDimension(data));
 	//###end<model>
 	
 	//the squared loss can be used to calculate the mean squared error of the data and the model
@@ -58,6 +58,8 @@ int main(){
 	{
 		optimizer.step(errorFunction);
 	}
+	//copy solution parameters into model
+	model.setParameterVector(optimizer.solution().point);
 	//###end<optimize>
 	
 	//save training error
@@ -65,7 +67,6 @@ int main(){
 
 	//evaluate test error
 	//###begin<test_error>
-	model.setParameterVector(optimizer.solution().point);
 	Data<RealVector> predictions = model(test.inputs());
 	double testError = loss.eval(test.labels(),predictions);
 	//###end<test_error>
