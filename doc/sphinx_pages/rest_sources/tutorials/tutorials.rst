@@ -52,30 +52,8 @@ discusses the creation and training of multi-layer neural networks
 * :doc:`algorithms/autoencoders`
 * :doc:`algorithms/variational_autoencoders`
 
-Overarching concepts
-++++++++++++++++++++
-
-
-Many generic concepts that Shark implements span across the whole library or
-are relevant in many different application scenarios. We collect a number of
-such generic tutorials here which explain these concepts in detail.
-We believe that these are useful if you want to thoroughly familiarize yourself with Shark.
-If you are looking for a quick introduction on how to set up a specific algorithm, take a look at the
-component specific tutorials further down the page.
-
-Before we can introduce the main interface classes of shark, we need to define more properly
-a few basic terms as well as the design goals.
-
-* :doc:`concepts/optimization/conventions_derivatives`
-* :doc:`concepts/library_design/batches`
-
-
-
-
-
 Data Handling
 +++++++++++++
-
 
 .. _label_for_data_tutorials:
 
@@ -106,13 +84,6 @@ Let's start with some classical methods:
 * :doc:`algorithms/LASSO`
 * :doc:`algorithms/kmeans`
 
-Neural networks and deep learning:
-
-* :doc:`algorithms/rbm_module`
-* :doc:`algorithms/binary_rbm`
-
-
-
 Tree-based algorithms:
 
 * :doc:`algorithms/rf`
@@ -127,14 +98,20 @@ Kernel methods -- support vector machine training and model selection:
 * :doc:`algorithms/kta`
 * :doc:`algorithms/kernelBudgetedSGD`
 
-Direct search methods -- the covariance matrix adaptation evolution strategy:
+Optimization:Direct-Search
+++++++++++++++++++++++++++++++++++++
+
+Shark offers many direct-search algorithms. The most important one is the CMA-ES in the single and multi-objective variants
 
 * :doc:`concepts/optimization/directsearch`
 * :doc:`algorithms/cma`
 * :doc:`algorithms/mocma`
 * :doc:`algorithms/MOOExperiment`
 
-
+Restricted Boltzman Machines
+++++++++++++++++++++++++++++++++++++
+* :doc:`algorithms/rbm_module`
+* :doc:`algorithms/binary_rbm`
 
 Tools
 +++++
@@ -142,16 +119,6 @@ Tools
 
 Finally, we present functionality which are not machine learning facilities
 themselves, but necessary or helpful tools.
-
-Shark provides support for random numbers, the basic concepts are introduce here:
-
-* :doc:`concepts/misc/random_numbers`
-
-Sharks comes with its own solver for Quadratic Programs:
-
-* :doc:`algorithms/quadratic_programs`
-
-.. _label_for_linalg_tutorials:
 
 For convenience, Shark provides a statistics class wrapper, as well as generic
 support for serialization:
@@ -173,5 +140,7 @@ If you contribute to Shark, you might also find these documents helpful:
 * :doc:`for_developers/the_build_system`
 * :doc:`for_developers/writing_tutorials`
 * :doc:`for_developers/managing_the_documentation`
+* :doc:`concepts/optimization/conventions_derivatives`
+* :doc:`concepts/library_design/batches`
 
 

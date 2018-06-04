@@ -13,8 +13,6 @@
    rest_sources/tutorials/first_steps/your_programs
    rest_sources/tutorials/first_steps/hello_shark
    rest_sources/tutorials/first_steps/general_optimization_tasks
-   rest_sources/tutorials/first_steps/when_to_stop
-   rest_sources/tutorials/first_steps/shark_layout
 
 
    rest_sources/tutorials/concepts/library_design/models
@@ -35,7 +33,6 @@
    rest_sources/tutorials/concepts/optimization/directsearch
    rest_sources/tutorials/concepts/optimization/conventions_derivatives
 
-   rest_sources/tutorials/concepts/misc/random_numbers
    rest_sources/tutorials/concepts/misc/statistics
    rest_sources/tutorials/concepts/misc/serialization
 
@@ -70,8 +67,6 @@
    rest_sources/tutorials/algorithms/rbm_module
    rest_sources/tutorials/algorithms/binary_rbm
 
-   rest_sources/tutorials/algorithms/quadratic_programs
-
    rest_sources/tutorials/for_developers/codingconvention
    rest_sources/tutorials/for_developers/the_build_system
    rest_sources/tutorials/for_developers/development_environment
@@ -85,11 +80,6 @@
    rest_sources/quickref/data_qr
    rest_sources/quickref/remora
 
-
-   rest_sources/faq/faq
-
-
-   rest_sources/showroom/showroom
 
 
    rest_sources/about_shark/news
