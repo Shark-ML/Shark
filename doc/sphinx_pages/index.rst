@@ -69,7 +69,6 @@
 
    rest_sources/tutorials/for_developers/codingconvention
    rest_sources/tutorials/for_developers/the_build_system
-   rest_sources/tutorials/for_developers/development_environment
    rest_sources/tutorials/for_developers/writing_tutorials
    rest_sources/tutorials/for_developers/managing_the_documentation
    rest_sources/tutorials/for_developers/issuing_a_release

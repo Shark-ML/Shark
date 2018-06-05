@@ -2,9 +2,7 @@ Stopping Criteria
 =================
 
 This concept tutorial gives some additional information on stopping criteria
-in Shark and notably a list of all those implemented. You will probably want
-to read the :doc:`introductory tutorial on stopping criteria
-<../../first_steps/when_to_stop>` first.
+in Shark and notably a list of all those implemented.
 
 A stopping criterion determines when optimization processes carried
 out by :doc:`optimizers` should halt. Deciding when to stop is rather
@@ -90,8 +88,7 @@ Model                                Description
 :doxy:`TrainingError`                Stops when the training error seems to converge, i.e., :math:`E(t-T)-E(t)< \epsilon`.
 :doxy:`TrainingProgress`             Tracks the progress of the training error over a period of time, i.e.,
                                      :math:`\text{mean}\{E(t),\dots, E(t-T)\}/ \min_t E(t)< \epsilon`.
-:doxy:`ValidatedStoppingCriterion`   Evaluates the validation error and hands the validated result to another criterion,
-                                     see the :doc:`introductory tutorial on stopping criteria <../../first_steps/when_to_stop>`.
+:doxy:`ValidatedStoppingCriterion`   Evaluates the validation error and hands the validated result to another criterion.
 :doxy:`GeneralizationLoss`           Calculates the quotient :math:`V(t)/\min_t E(t)-1` as a relative measure of the gap
                                      between training and validation error.
 :doxy:`GeneralizationQuotient`       Uses the quotient of training progress and generalization loss.

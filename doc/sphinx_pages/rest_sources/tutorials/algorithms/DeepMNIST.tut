@@ -34,7 +34,7 @@ When loading the MNIST dataset, this prints
 	output shape:(10)
 	input shape:(28, 28, 1)
 		
-Most models in shark do not care about exact shape they get. 
+Most models in shark do not care about the exact shape of objects they get as input or return as outputs. 
 For example a linear model can be initialized to return a vector with shape (2352) or a multi-channel image (28,28,3).
 Similarly when a model returns an image (28,28,3) as output shape, the next model can interpret it as (2352), as long as dimensions match, this
 is not a problem.

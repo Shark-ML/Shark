@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.8 )
 
 find_package( Doxygen REQUIRED )
-find_package( PythonInterp REQUIRED )
+find_package( PythonInterp 3 REQUIRED)
 
 ADD_SUBDIRECTORY(tutToRst)
 
