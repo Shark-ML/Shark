@@ -55,7 +55,7 @@ is
 	cmake "-DShark_DIR=~/lib/CMake/Shark" .
 
 
-You can easily change the build options using cmake or its guis (e.g., ccmake), see :doc:`../../getting_started/installation` for specific options.
+You can easily change the build options using cmake or its guis (e.g., ccmake), see :doc:`../../installation` for specific options.
 
 
 

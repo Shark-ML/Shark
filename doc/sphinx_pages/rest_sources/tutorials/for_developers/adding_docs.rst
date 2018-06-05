@@ -1,10 +1,6 @@
 Adding Examples, Tests and Documentation
 ==============================================
 
-Some information on Shark's configuration options for CMake is already provided
-on the :doc:`installation page <../../getting_started/installation>`.
-We here give supplemental information for developers.
-
 How to Add Examples and Unit Tests
 ---------------------------------------------
 

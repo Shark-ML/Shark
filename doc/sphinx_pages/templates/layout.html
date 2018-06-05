@@ -47,14 +47,10 @@
                         </ul>
                     </li>
                     <li {% if 'downloads' in pagename %} class="active" {% else %} class="first" {% endif %}>
-                        <a href="{{ pathto('rest_sources/downloads/downloads') }}">Downloads</a>
+                        <a href="{{ pathto('rest_sources/downloads') }}">Downloads</a>
                     </li>
-                    <li {% if 'getting_started' in pagename %} class="active" {% else %} class="first" {% endif %}>
-                        <a href="{{ pathto('rest_sources/getting_started/installation') }}">Getting Started</a>
-                        <ul>
-                            <li class="first"><a href="{{ pathto('rest_sources/getting_started/installation') }}">Installation</a></li>
-                            <li class="last"><a href="{{ pathto('rest_sources/getting_started/using_the_documentation') }}">Using the docs</a></li>
-                        </ul>
+                    <li {% if 'installation' in pagename %} class="active" {% else %} class="first" {% endif %}>
+                        <a href="{{ pathto('rest_sources/installation') }}">Installation</a>
                     </li>
                     <li {% if '/tutorials/' in pagename %} class="active"   {% elif '/quickref/' in pagename %} class="active" {% else %} class="first" {% endif %}>
                         <a href="{{ pathto(master_doc, 1) }}/../../../../doxygen_pages/html/classes.html">Documentation</a>
@@ -65,10 +61,6 @@
                             <li><a href="{{ pathto(master_doc, 1) }}/../../../../doxygen_pages/html/classes.html">Class list</a></li>
                             <li class="last"><a href="{{ pathto(master_doc, 1) }}/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
                         </ul>
-                    <li {% if 'faq' in pagename %} class="active" {% else %} class="first" {% endif %}>
-                        <a href="{{ pathto('rest_sources/faq/faq') }}">FAQ</a>
-                    <li {% if 'showroom' in pagename %} class="active" {% else %} class="first" {% endif %}>
-                        <a href="{{ pathto('rest_sources/showroom/showroom') }}">Showroom</a>
                     </li>
                 </ul>
 

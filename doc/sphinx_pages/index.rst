@@ -1,11 +1,8 @@
 .. toctree::
    :hidden:
 
-   rest_sources/downloads/downloads
-
-
-   rest_sources/getting_started/installation
-   rest_sources/getting_started/troubleshooting
+   rest_sources/downloads
+   rest_sources/installation
 
 
    rest_sources/tutorials/tutorials
@@ -112,7 +109,7 @@ Where to start
 %%%%%%%%%%%%%%
 
 In the menu above, click on "Getting started", or use this direct link to the
-:doc:`installation instructions <rest_sources/getting_started/installation>`.
+:doc:`installation instructions <rest_sources/installation>`.
 
 
 Why Shark?
