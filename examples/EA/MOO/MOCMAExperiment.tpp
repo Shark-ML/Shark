@@ -40,13 +40,6 @@ using namespace shark::benchmarks;
 //###end<includes>
 
 //###begin<hypervolume>
-//functor returning the value vector of a solution object
-struct PointExtractor{
-	template<class T>
-	RealVector const& operator()(T const& arg)const{
-		return arg.value;
-	}
-};
 template<class Solution>
 double hypervolume( Solution const& solution){
 	// the reference point (11,11).
