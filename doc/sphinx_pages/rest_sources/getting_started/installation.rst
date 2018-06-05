@@ -69,12 +69,12 @@ Boost_USE_STATIC_LIBS   ON/**OFF**            Searches and uses the static boost
 					      can result in problems during build!
 BOOST_ROOT              Path                  Path to boost, if it is not installed in a default path.
 ENABLE_CBLAS            **ON**/OFF            Searches for a linear algebra library on the system
-CBLAS_INCLUDE_PATH      Path **/usr/include** Sets the path to the cblas include directory.
+CBLAS_LIBRARY_PATH      Path **/usr/include** Sets the path to the cblas include directory.
 CBLAS_INCLUDE_PATH      Path **/usr/lib64/**  Sets the path to the cblas library directory.
 ENABLE_OPENMP           **ON**/OFF            Enables OpenMP support if supported by the platform
 ENABLE_SIMD	        **ON**/OFF            Enables SIMD in linear algebra
-ENABLE_OPENCL           **ON**/OFF            Enables OpenCL support if boost.compute is available. EXPERIMENTAL!
-ENABLE_CLBLAST          **ON**/OFF            Uses CLBLAST as OpenCL linear algebra backend. EXPERIMENTAL!
+ENABLE_OPENCL           ON/**OFF**            Enables OpenCL support if boost.compute is available. EXPERIMENTAL!
+ENABLE_CLBLAST          ON/**OFF**            Uses CLBLAST as OpenCL linear algebra backend. EXPERIMENTAL!
 ======================= ===================== ===============================================
 
 To change options, either use one of the cmake guis (e.g., ccmake) or add the options to the cmake call.
