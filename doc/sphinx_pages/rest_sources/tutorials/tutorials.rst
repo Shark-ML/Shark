@@ -137,9 +137,7 @@ Note that Shark follows a
 
 If you contribute to Shark, you might also find these documents helpful:
 
-* :doc:`for_developers/the_build_system`
-* :doc:`for_developers/writing_tutorials`
-* :doc:`for_developers/managing_the_documentation`
+* :doc:`for_developers/adding_docs`
 * :doc:`concepts/optimization/conventions_derivatives`
 * :doc:`concepts/library_design/batches`
 

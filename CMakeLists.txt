@@ -226,6 +226,8 @@ if( ENABLE_SIMD )
 endif()
 
 option( ENABLE_CBLAS "Use Installed Linear Algebra Library" ON )
+set(CBLAS_LIBRARY_PATH "/usr/lib64/" CACHE PATH "Linear algebra library path")
+set(CBLAS_INCLUDE_PATH "/usr/include/" CACHE PATH "Linear algebra include path")
 if( ENABLE_CBLAS )
 	set(CBLAS_VENDOR FALSE)
 	if( APPLE )
@@ -235,16 +237,16 @@ if( ENABLE_CBLAS )
 	else()
 		#todo: do a propper vendor check
 		find_library(OPENBLAS_LIBRARY openblas
-			HINTS ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib/openblas-base
+			HINTS ${CBLAS_LIBRARY_PATH}
 		)
 		find_library(CBLAS_LIBRARY cblas
-			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/libblas
+			HINTS ${CBLAS_LIBRARY_PATH}
 		)
 		find_library(CLAPACK_LIBRARY lapack
-			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/lapack
+			HINTS ${CBLAS_LIBRARY_PATH}
 		)
 		find_library(ATLAS_LIBRARY atlas
-			HINTS ${ATLAS_ROOT}/lib ${CBLAS_ROOT}/lib /opt/local/lib /usr/lib64/atlas/ /usr/lib/atlas-base
+			HINTS ${CBLAS_LIBRARY_PATH}
 		)
 		mark_as_advanced(
 			OPENBLAS_LIBRARY
@@ -252,30 +254,10 @@ if( ENABLE_CBLAS )
 			CLAPACK_LIBRARY
 			ATLAS_LIBRARY
 		)
-		#find the cblas.h include path
-		if(CBLAS_LIBRARY )
-			get_filename_component(CBLAS_LIB_PATH ${CBLAS_LIBRARY} PATH )
-		elseif( OPENBLAS_LIBRARY)	
-			get_filename_component(CBLAS_LIB_PATH ${OPENBLAS_LIBRARY} PATH )
-		endif()
-		if(CBLAS_LIB_PATH)
-			find_file(CBLAS_INCLUDES cblas.h 
-				PATHS ${CBLAS_LIB_PATH} ${CBLAS_LIB_PATH}/../include
-			)
-			get_filename_component(CBLAS_INCLUDES ${CBLAS_INCLUDES} PATH )
-		endif()
-		if(ATLAS_LIBRARY)
-			get_filename_component(ATLAS_LIBRARY_PATH ${ATLAS_LIBRARY} PATH )
-			find_file(CLAPACK_INCLUDES clapack.h 
-				PATHS
-				${ATLAS_LIBRARY_PATH} 
-				${ATLAS_LIBRARY_PATH}/../include
-				${ATLAS_LIBRARY_PATH}/../include/atlas
-				${ATLAS_LIBRARY_PATH}/../../include/atlas
-			)
-			get_filename_component(CLAPACK_INCLUDES ${CLAPACK_INCLUDES} PATH )
-			set(CBLAS_INCLUDES ${CBLAS_INCLUDES} ${CLAPACK_INCLUDES})
-		endif()
+		
+		find_file(CBLAS_INCLUDES cblas.h 
+			PATHS ${CBLAS_INCLUDE_PATH}
+		)
 
 		if( OPENBLAS_LIBRARY AND CBLAS_INCLUDES)
 			set(CBLAS_VENDOR "OpenBLAS")
@@ -289,24 +271,26 @@ if( ENABLE_CBLAS )
 			try_compile(CBLAS_COMPILE 
 				"${PROJECT_BINARY_DIR}/cBlasCheck"
 				"${CMAKE_SOURCE_DIR}/cBlasCheck.cpp"
-				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDES}"
+				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDE_PATH}"
 				LINK_LIBRARIES ${CBLAS_LIBRARY}
 			)
 			if(CBLAS_COMPILE)
 				set(CBLAS_VENDOR "GENERIC")
 				set(CBLAS_LIBRARIES ${CBLAS_LIBRARY})
 			else()
-				message(WARNING "Unknown CBLAS. Can not use it")
+				message(WARNING "Can not compile basic program with cblas library")
 			endif()
 		endif()
 	endif()
 	
 	if(CBLAS_VENDOR)
-		message(STATUS "CBLAS FOUND: " ${CBLAS_VENDOR} " with include directory " ${CBLAS_INCLUDES} )
+		message(STATUS "CBLAS FOUND: " ${CBLAS_VENDOR})
+		message(STATUS "CBLAS include file " ${CBLAS_INCLUDES} )
+		message(STATUS "CBLAS library files " ${CBLAS_LIBRARIES} )
 		set(SHARK_USE_CBLAS 1)
-		list(APPEND EXTRA_INCLUDE_DIRECTORIES ${CBLAS_INCLUDES} )
+		list(APPEND EXTRA_INCLUDE_DIRECTORIES ${CBLAS_INCLUDE_PATH} )
 		list(APPEND LINK_LIBRARIES ${CBLAS_LIBRARIES})
-		include_directories ( ${CBLAS_INCLUDES} )
+		include_directories ( ${CBLAS_INCLUDE_PATH} )
 	else()
 		message(STATUS "No usable CBLAS Library found. No fast linear Algebra used.")
 	endif()
@@ -314,15 +298,17 @@ if( ENABLE_CBLAS )
 	#Special setup for ATLAS
 	if( CBLAS_VENDOR MATCHES "ATLAS" )
 		set( SHARK_USE_ATLAS_LAPACK 1) # ATLAS always contains some LAPACK methods that we can use
-		
+	endif()
+
+	if(CLAPACK_LIBRARY)
 		#check for full lapack
 		set(CMAKE_REQUIRE_QUIET 1)
 		set(CMAKE_REQUIRED_LIBRARIES ${CBLAS_LIBRARIES})
-		check_function_exists(dsyev_ ATLAS_FULL_LAPACK)
+		check_function_exists(dsyev_ HAS_FULL_LAPACK)
 		
-		if( ATLAS_FULL_LAPACK )
+		if( HAS_FULL_LAPACK )
 			set( SHARK_USE_LAPACK 1)
-			message(STATUS "Detected ATLAS with full LAPACK package. Using it!")
+			message(STATUS "Using Lapack!")
 		endif()
 	endif()
 endif()

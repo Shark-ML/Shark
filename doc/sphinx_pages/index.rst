@@ -68,9 +68,7 @@
    rest_sources/tutorials/algorithms/binary_rbm
 
    rest_sources/tutorials/for_developers/codingconvention
-   rest_sources/tutorials/for_developers/the_build_system
-   rest_sources/tutorials/for_developers/writing_tutorials
-   rest_sources/tutorials/for_developers/managing_the_documentation
+   rest_sources/tutorials/for_developers/adding_docs
    rest_sources/tutorials/for_developers/issuing_a_release
 
 
