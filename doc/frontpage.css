@@ -9,15 +9,15 @@
 a:link,
 a:visited
 {
-	color: #677;
+	color: #a50;
 	text-decoration: none;
 }
 a:hover,
 a:active
 {
-	color: #455;
+	color: #a50;
 	text-decoration: none;
-	border-bottom: 1px solid #bbb;
+	border-bottom: 1px solid #000;
 }
 input
 {
@@ -37,7 +37,7 @@ input:focus
 h1
 {
 	text-align: center;
-	font-size: 40px;
+	font-size: 60px;
 	font-weight: bold;
 	margin: 20px 0px 20px 0px;
 	color: #a50;
@@ -64,7 +64,7 @@ p
 {
 	margin: 10px 0px 10px 0px;
 	text-align: justify;
-	text-justify: distribute;
+	text-justify: auto;
 }
 ul
 {
@@ -77,10 +77,35 @@ li
 	text-align: justify;
 	text-justify: distribute;
 }
-pre
+
+.code {
+	white-space: pre;
+	overflow: hidden;
+	background: #eee;
+	padding: 5px 15px 5px 15px;
+	margin: 10px 0 10px 0;
+	border: 1px solid #888;
+	font-family: monospace;
+	font-size: 11pt;
+}
+
+span.keyword
 {
 	font-family: monospace;
-	font-size: 0.8em;
+	font-size: 11pt;
+	color: #00a;
+}
+span.preproc
+{
+	font-family: monospace;
+	font-size: 11pt;
+	color: #060;
+}
+span.string
+{
+	font-family: monospace;
+	font-size: 11pt;
+	color: #a00;
 }
 table.status
 {

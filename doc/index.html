@@ -64,16 +64,28 @@
 <!-- header -->
 <div id="header"><div id="header-content">
 	<a href="#section-home" onclick="smoothScroll('section-home'); return false;"><span id="shark">Shark</span></a>
+	&nbsp;
 	<input id="search" class="menu" type="text" placeholder="search" />
+	&nbsp;
 	<a href="#section-news" onclick="smoothScroll('section-news'); return false;"><span class="menu">News</span></a>
+	&nbsp;
+	<a href="#section-downloads" onclick="smoothScroll('section-downloads'); return false;"><span class="menu">Downloads</span></a>
+	&nbsp;
+	<a href="#section-getting-started" onclick="smoothScroll('section-getting-started'); return false;"><span class="menu">Quick&nbsp;Start</span></a>
+	&nbsp;
+<!--
 	<a href="#section-about" onclick="smoothScroll('section-about'); return false;"><span class="menu">About</span></a>
-	<a href="#section-download" onclick="smoothScroll('section-download'); return false;"><span class="menu">Download</span></a>
-	<a href="#section-getting-started" onclick="smoothScroll('section-getting-started'); return false;"><span class="menu">Get&nbsp;Started</span></a>
+	&nbsp;
 	<a href="#section-why-shark" onclick="smoothScroll('section-why-shark'); return false;"><span class="menu">Why&nbsp;Shark?</span></a>
+	&nbsp;
 	<a href="#section-features" onclick="smoothScroll('section-features'); return false;"><span class="menu">Features</span></a>
-	<a href="#section-credit" onclick="smoothScroll('section-credit'); return false;"><span class="menu">Credits</span></a>
-	<a href="sphinx_pages/build/html/rest_sources/tutorials/tutorials.html"><span class="menu">Docs</span></a>
+	&nbsp;
+-->
+	<a href="sphinx_pages/build/html/rest_sources/tutorials/tutorials.html"><span class="menu">Documentation</span></a>
+	&nbsp;
 	<a href="sphinx_pages/build/html/rest_sources/faq/faq.html"><span class="menu">FAQ</span></a>
+	&nbsp;
+	<a href="#section-credit" onclick="smoothScroll('section-credit'); return false;"><span class="menu">Credits</span></a>
 </div></div>
 
 <div id="spacer"></div>
@@ -81,8 +93,17 @@
 <!-- eye-catcher -->
 <div class="section-white"><div class="section-content">
 <a name="section-home"></a>
-<h1>Shark &ndash; Machine Learning 3.1</h1>
+<h1>Shark &ndash; Machine Learning</h1>
 <div id="eye-catcher"></div>
+<b>Shark is a fast, modular, feature-rich open-source C++ machine learning library.</b>
+</p>
+<p>
+It provides methods for linear and nonlinear optimization, kernel-based learning
+algorithms, neural networks, and various other machine learning techniques.
+It serves as a powerful toolbox for real world applications as well as for research.
+Shark works on Windows, MacOS&nbsp;X, and Linux. It comes with extensive documentation.
+Shark is licensed under the GNU Lesser General Public License.
+</p>
 </div></div>
 
 <!-- news -->
@@ -109,27 +130,9 @@ of Shark 3.0 has won the Gold Prize at the
 
 </div></div>
 
-<!-- about -->
+<!-- downloads -->
 <div class="section-white"><div class="section-content">
-<a name="section-about"></a>
-<h2>About Shark</h2>
-<p>
-<b>Shark is a fast, modular, feature-rich open-source C++ machine learning library.</b>
-</p>
-<p>
-It provides methods for linear and nonlinear optimization, kernel-based learning
-algorithms, neural networks, and various other machine learning techniques (see the
-<a href="#section-features" onclick="smoothScroll('section-features'); return false;">feature list</a>
-below). It serves as a powerful toolbox for real world applications as well as
-research. Shark depends on Boost and CMake. It is compatible with Windows, Solaris,
-MacOS&nbsp;X, and Linux. Shark is licensed under the permissive
-GNU Lesser General Public License.
-</p>
-</div></div>
-
-<!-- download -->
-<div class="section-colored"><div class="section-content">
-<a name="section-download"></a>
+<a name="section-downloads"></a>
 <h2>Downloads</h2>
 <p>
 The current stable version is Shark&nbsp;3.1, released 1-3-2015.
@@ -176,18 +179,53 @@ git clone https://github.com/Shark-ML/Shark/
 </p>
 </div></div>
 
-<!-- where to start? -->
-<div class="section-white"><div class="section-content">
+<!-- quick start -->
+<div class="section-colored"><div class="section-content">
 <a name="section-getting-started"></a>
-<h2>Where to start?</h2>
+<h2>Quick Start</h2>
+<p>
+Let's demonstrate basic use of Shark with very few lines of code.
+This is C++, so we start with includes.
+</p>
+<div class="code"><span class="preproc">#include &lt;shark/Data/Download.h&gt;
+#include &lt;shark/Algorithms/Trainers/LDA.h&gt;
+#include &lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span>
+<span class="keyword">using namespace</span> shark;</div>
+<p>
+Let's load some data for learning.
+</p>
+<div class="code">ClassificationDataset traindata;
+downloadSparseData(traindata, <span class="string">"http://shark-ml.org/quickstart-train"</span>);</div>
+<p>
+The next step is to create a predictive model. Here we use a simple linear classifier.
+</p>
+<div class="code">LinearClassifier&lt;&gt; classifier;</div>
+<p>
+The core step of learning is to train the model on data using a trainer.
+In Shark, the trainer is not glued to the model. Instead it is a separate object.
+Here, good old Linear Discriminant Analysis (LDA) suits our needs.
+</p>
+<div class="code">LDA lda;
+lda.train(classifier, traindata);</div>
+<p>
+Congrats! We have a readily trained classifier.
+Let's try it out by applying it to new data.
+</p>
+<div class="code">ClassificationDataset testdata;
+downloadSparseData(testdata, <span class="string">"http://shark-ml.org/quickstart-test"</span>);
+ZeroOneLoss&lt;&gt; loss;
+<span class="keyword">double</span> error = loss(testdata.labels(), classifier(testdata.inputs()));</div>
+<p>
+Further reading:
 <ul>
 	<li><a href="sphinx_pages/build/html/rest_sources/getting_started/installation.html">Installation Guide</a></li>
 	<li><a href="sphinx_pages/build/html/rest_sources/getting_started/using_the_documentation.html">Guide to the Documentation</a></li>
 </ul>
+</p>
 </div></div>
 
 <!-- Why Shark? -->
-<div class="section-colored"><div class="section-content">
+<div class="section-white"><div class="section-content">
 <a name="section-why-shark"></a>
 <h2>Why Shark?</h2>
 
@@ -209,6 +247,7 @@ Shark comes with a lot of powerful algorithms that are to our best knowledge not
 </div></div>
 
 <!-- selected features -->
+<!--
 <div class="section-white"><div class="section-content">
 <a name="section-features"></a>
 <h2>Selected features</h2>
@@ -242,6 +281,7 @@ Shark currently supports:
 </ul>
 </p>
 </div></div>
+-->
 
 <!-- credits and copyright -->
 <div class="section-colored"><div class="section-content">
@@ -288,8 +328,8 @@ The Shark library is made available under the
 <p>
 The Shark machine learning library is jointly maintained by researchers from
 <ul>
-	<li><a href="http://www.ini.rub.de/">Institut für Neuroinformatik (INI), Ruhr-Universität Bochum, Germany</a></li>
-	<li><a href="http://www.diku.dk/">Department of Computer Science (DIKU), University of Copenhagen, Denmark</a></li>
+	<li><a target="_blank" href="http://www.ini.rub.de/">Institut für Neuroinformatik (INI), Ruhr-Universität Bochum, Germany</a></li>
+	<li><a target="_blank" href="http://www.diku.dk/">Department of Computer Science (DIKU), University of Copenhagen, Denmark</a></li>
 </ul>
 </p>
 
