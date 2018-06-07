@@ -119,13 +119,13 @@ add_custom_target(tpp2cpp DEPENDS ${TPP_FILES})
 if( BUILD_EXAMPLES )
 	install( DIRECTORY
 		"${CMAKE_CURRENT_SOURCE_DIR}/Supervised/data"
-		DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Supervised
+		DESTINATION "${SHARK_INSTALL_EXAMPLE_DIR}/Supervised/data/"
 		PATTERN ".*" EXCLUDE
 	)
 
 	install( DIRECTORY
 		"${CMAKE_CURRENT_SOURCE_DIR}/Unsupervised/data"
-		DESTINATION ${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised
+		DESTINATION "${SHARK_INSTALL_EXAMPLE_DIR}/Unsupervised/data"
 		PATTERN ".*" EXCLUDE
 	)
 endif()

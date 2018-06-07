@@ -1550,7 +1550,7 @@ TAGFILES               =
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create
 # a tag file that is based on the input files it reads.
 
-GENERATE_TAGFILE       = @CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/tag_files/all.tag
+GENERATE_TAGFILE       = @CMAKE_CURRENT_BINARY_DIR@/doxygen_pages/tag_files/all.tag
 
 # If the ALLEXTERNALS tag is set to YES all external classes will be listed
 # in the class index. If set to NO only the inherited external classes

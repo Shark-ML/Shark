@@ -21,7 +21,7 @@ Further, if the input is a convolutional model, its output may have a different 
 track of change of dimensionality is an errorprone task which should be avoided.
 Therefore, in this tutorial we will introduce the concept of a :doxy:`Shape`. A shape adds information about the input or output types
 in a vectorial format. For example, images have a 3-d shape: ``height x width x channels``. The class label has a 1-d shape: the number
-of classes. The batchsize is not stored in a batch but separately in each batch. 
+of classes. The batchsize is not stored in the shape but separately in each batch. 
 By default, when loading a dataset from a file, we have to adapt the shape to its actual dimensionalities::
 
 ..sharkcode<Supervised/MNISTForExperts.tpp,data>

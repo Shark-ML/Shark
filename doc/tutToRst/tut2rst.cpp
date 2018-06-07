@@ -76,7 +76,7 @@ string readFile(string filename)
 
 void help()
 {
-	cerr << "usage: ./tut2rst <filename> <sharkpath>" << endl;
+	cerr << "usage: ./tut2rst <inputpath.tut> <outputpath.rst> <sharkpath>" << endl;
 }
 
 int main(int argc, char** argv)
@@ -84,15 +84,16 @@ int main(int argc, char** argv)
 	try
 	{
 		// parse command line
-		if (argc != 3){ help(); return 1;}
+		if (argc != 4){ help(); return 1;}
 		string filename = argv[1];
-		string sharkpath = argv[2];
+		string outputname = argv[2];
+		string sharkpath = argv[3];
 		if (! sharkpath.empty() && sharkpath[sharkpath.size() - 1] != '/') sharkpath += "/";
 
 		cout << "tut2rst: processing " << filename << endl;
 
 		// read input
-		string input = readFile(filename + ".tut");
+		string input = readFile(filename);
 		string output;
 
 		// process
@@ -184,7 +185,7 @@ int main(int argc, char** argv)
 		}
 
 		// write output
-		ofstream ofs((filename + ".rst").c_str(), ios_base::binary);
+		ofstream ofs(outputname.c_str(), ios_base::binary);
 		ofs.write(output.c_str(), output.size());
 		cout << "done." << endl;
 	}

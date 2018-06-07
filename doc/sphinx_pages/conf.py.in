@@ -6,8 +6,7 @@
 # serve to show the default.
 import sys, os, glob
 
-print(os.path.abspath('doxylink'))
-sys.path.append(os.path.abspath('doxylink'))
+sys.path.append('@CMAKE_CURRENT_SOURCE_DIR@/sphinx_pages/doxylink')
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
@@ -21,7 +20,7 @@ todo_include_todos = True
 #set up doxylink tag file
 print 'current working directory', os.path.abspath(os.path.curdir)
 doxylink = {
-        'doxy' : (os.path.abspath('@CMAKE_CURRENT_SOURCE_DIR@/doxygen_pages/tag_files/all.tag'), '../../../doxygen_pages/html/')
+        'doxy' : (os.path.abspath('@CMAKE_CURRENT_BINARY_DIR@/doxygen_pages/tag_files/all.tag'), '../../../doxygen_pages/html/')
 }
 
 

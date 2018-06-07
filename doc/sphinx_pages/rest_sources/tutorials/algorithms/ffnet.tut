@@ -13,7 +13,7 @@ For this tutorial the following includes are needed::
 Loading the Data
 ------------------------------
 In this tutorial, we want to learn to recognize handwriten digits from the mnist dataset
-using a feed-forward network. This is done similar to the previous tutorials
+using a simple feed-forward network. This is done similar to the previous tutorials
 by loading a dataset and splitting it into training and test part::
 
 ..sharkcode<Supervised/FFNNBasicTutorial.tpp,data>
@@ -65,13 +65,17 @@ speed and noise of the evaluation::
 ..sharkcode<Supervised/FFNNBasicTutorial.tpp,training>
 
 
-Other network types
----------------------
+What you learned
+----------------
 
-Shark offers many different types of neural other neural networks,
-including radial basis function networks using :doxy:`RBFLayer` and
-Convolutional Neural Networks using :doxy:`Conv2DModel`
+You should have learned the following aspects in this Tutorial:
+
+* How to stack models to create a feed-forward neural network
+* How to choose activation functions
+* How to perform batch learning using the :doxy:`ErrorFunction`
+
 
 What next?
 ---------------------
-The next tutorials covers :doc:`DeepMNIST`
+The network architecture used for training MNIST is not state of the art. In real applications, deep convolutional architectures are used.
+This is covered in the next tutorial, :doc:`DeepMNIST`.
