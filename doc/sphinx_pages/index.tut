@@ -1,10 +1,7 @@
 .. toctree::
    :hidden:
 
-   rest_sources/downloads
    rest_sources/installation
-
-
    rest_sources/tutorials/tutorials
 
    rest_sources/tutorials/first_steps/your_programs
@@ -69,102 +66,5 @@
 
 
    rest_sources/quickref/quickref
-
    rest_sources/quickref/data_qr
    rest_sources/quickref/remora
-
-
-
-   rest_sources/about_shark/news
-   rest_sources/about_shark/copyright
-
-
-Summary
-=======
-
-**SHARK is a fast, modular, feature-rich open-source C++ machine learning library**.
-It provides methods for linear and nonlinear optimization, kernel-based learning
-algorithms, neural networks, and various other machine learning techniques (see the
-feature list :ref:`below <label_for_feature_list>`).
-It serves as a powerful toolbox for real world applications as well as research.
-Shark depends on `Boost <http://www.boost.org>`_ and `CMake <http://www.cmake.org/>`_.
-It is compatible with Windows, Solaris, MacOS X, and Linux. Shark is licensed under
-the permissive
-`GNU Lesser General Public License <http://www.gnu.org/copyleft/lesser.html>`_.
-
-
-For an overview over the previous major release of Shark (2.0) we
-refer to:
-
-.. container:: cibox
-
-  Christian Igel, Verena Heidrich-Meisner, and Tobias Glasmachers.
-  `Shark <http://jmlr.csail.mit.edu/papers/v9/igel08a.html>`_.
-  Journal of Machine Learning Research 9, pp. 993-996, 2008.
-  [:ref:`Bibtex <label_for_citing_shark>`]
-
-
-Where to start
-%%%%%%%%%%%%%%
-
-In the menu above, click on "Getting started", or use this direct link to the
-:doc:`installation instructions <rest_sources/installation>`.
-
-
-Why Shark?
-%%%%%%%%%%
-
-**Speed and flexibility**
-
-Shark provides an excellent trade-off between flexibility and
-ease-of-use on the one hand, and computational efficiency on the other.
-
-**One for all**
-
-Shark offers numerous algorithms from various machine learning and
-computational intelligence domains in a way that they can be easily
-combined and extended.
-
-**Unique features**
-
-Shark comes with a lot of powerful algorithms that are to our best
-knowledge not implemented in any other library, for example in the
-domains of model selection and training of binary and multi-class SVMs,
-or evolutionary single- and multi-objective optimization.
-
-
-.. _label_for_feature_list:
-
-Selected features
-%%%%%%%%%%%%%%%%%
-
-Shark currently supports:
-
-* Supervised learning
-
-  * Linear discriminant analysis (LDA), Fisher--LDA
-  * Linear regression
-  * Support vector machines (SVMs) for one-class, binary and true
-    multi-category classification as well as regression; includes fast variants for linear kernels.
-  * Feed-forward and recurrent multi-layer artificial neural networks
-  * Radial basis function networks
-  * Regularization networks as well as Gaussian processes for regression
-  * Iterative nearest neighbor classification and regression
-  * Decision trees and random forests
-
-* Unsupervised learning
-
-  * Principal component analysis
-  * Restricted Boltzmann machines (including many state-of-the-art
-    learning algorithms)
-  * Hierarchical clustering
-  * Data structures for efficient distance-based clustering
-
-* Evolutionary algorithms
-
-  * Single-objective optimization (e.g., CMA--ES)
-  * Multi-objective optimization (in particular, highly efficient
-    algorithms for computing as well as approximating the contributing hypervolume)
-
-* Basic linear algebra and optimization algorithms
-

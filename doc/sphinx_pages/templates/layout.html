@@ -34,21 +34,6 @@
             <div id="header">
                 <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
                 <ul id="nav">
-                    <li {% if pagename == 'index' or 'about_shark' in pagename %}
-                            class="active"
-                        {% else %}
-                            class="first"
-                        {% endif %}>
-                        <a href="{{ pathto(master_doc) }}">About Shark</a>
-                        <ul>
-                            <li class="first"><a href="{{ pathto('rest_sources/about_shark/news') }}">News!</a></li>
-                            <!-- <li><a href="{{ pathto('rest_sources/about_shark/todo') }}">Contribute</a></li> -->
-                            <li class="last"><a href="{{ pathto('rest_sources/about_shark/copyright') }}">Credits and copyright</a></li>
-                        </ul>
-                    </li>
-                    <li {% if 'downloads' in pagename %} class="active" {% else %} class="first" {% endif %}>
-                        <a href="{{ pathto('rest_sources/downloads') }}">Downloads</a>
-                    </li>
                     <li {% if 'installation' in pagename %} class="active" {% else %} class="first" {% endif %}>
                         <a href="{{ pathto('rest_sources/installation') }}">Installation</a>
                     </li>

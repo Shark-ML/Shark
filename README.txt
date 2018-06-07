@@ -81,11 +81,6 @@ src/                Source files of the Shark library. Note that
                     from Shark version 3 onwards large parts of the
                     library are templated and therefore header-only.
 
-contrib/            The contrib directory contains (non-standard)
-                    tools by third parties. Typically, there is no
-                    need for users of Shark to deal with these
-                    tools directly.
-
 gpl-3.0.txt         GNU general public license, version 3.
 
 
@@ -97,22 +92,6 @@ and directories are present.
 
 
 PACKAGE STRUCTURE
------------------
-
-  >> Note for users of Shark 2: <<
-  The internal structure of the Shark library has changed in the
-  transition to version 3. The old infrastructure packages Array, Rng,
-  and FileUtil, as well as parts of LinAlg, have been replaced with
-  more modern solutions provided by Boost. The machine learning
-  related components EALib, MOO-EALib, Mixture, ReClaM, and TimeSeries
-  have been unified and organized into competely new interfaces.
-  Therefore there is no one-to-one correspondance between files or
-  even concepts in version 3 and in older versions of Shark. In fact,
-  the lion's share of the library has been rewritten from scratch,
-  and this is also reflected in a completely new structure. In
-  particular, many of the rather independent sub-modules (such as
-  Mixture and MOO-EALib) have been unified. They now share the same
-  top-level interfaces and thus form a coherent learning architecture.
 
 The organization of the include/ directory reflects the structure of
 the Shark library. It consists of the following modules:
@@ -178,11 +157,31 @@ Algorithms          All actual learning algorithms reside in this
                     also ships with algorithms for efficient
                     nearest neighbor search.
 
-Fuzzy               The fuzzy module provides classes for the
-                    representation of linguistic terms, variables,
-                    operators and rules, as well as fuzzy logic
-                    interference engines and controllers.
-
 Unsupervised        This module contains the Shark implementation
                     of restricted Bolzmann machines (RBMs),
                     a recent experimental feature of Shark.
+
+
+
+We use external libraries, images and code:
+
+* Shark uses the `Doxygen documentation system http://www.doxygen.org
+  Doxygen is available under the LGPL, as Shark.
+* Shark also uses the `Sphinx documentation system: http://sphinx.pocoo.org/
+  Sphinx is available under the 2-clause (simplified/Free) BSD license 
+  http://www.opensource.org/licenses/bsd-license.php.
+* The Shark documentation links between Sphinx and Doxygen using Doxylink
+  http://pypi.python.org/pypi/sphinxcontrib-doxylink written
+  by Matt Williams and released under a 2-clause (simplified/Free) BSD license
+  http://www.opensource.org/licenses/bsd-license.php.
+* The website header is derived from the Mollio, http://mollio.org/ set
+  of html/css templates. Mollio is licensed under the
+  GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html
+* The page icon in the local table of contents is one of Nicolas Gallagher's
+  pure CSS GUI icons http://nicolasgallagher.com/pure-css-gui-icons/.
+  Nicolas Gallagher's work is licensed under the
+  GNU GPLv2 <http://www.gnu.org/licenses/gpl-2.0.html
+* Download icon from the Steel System Icons set by Uriy1966,iconarchive.com 
+  http://www.iconarchive.com/show/steel-system-icons-by-uriy1966/Download-icon.html
+  free for non-commercial use.
+

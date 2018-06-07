@@ -5,6 +5,22 @@ Installing Shark
 
 .. contents:: Contents:
 
+
+Downloads
+**********************************************************
+We have two source packages available:
+
+`Shark-4.0.0.zip <https://github.com/Shark-ML/Shark/archive/v4.0.0.zip>`_
+
+`Shark-4.0.0.tar.gz <https://github.com/Shark-ML/Shark/archive/v4.0.0.tar.gz>`_
+
+You can also get the latest snapshot from github:
+
+.. code-block:: none
+
+      git clone https://github.com/Shark-ML/Shark/
+
+
 CMake Options
 **********************************************************
 The cmake file of Shark has several options. See the following table
@@ -58,9 +74,9 @@ We are supporting packages for the following platforms:
 Installation
 ---------------------------------------------
 
-To install Shark, get the sources from our :doc:`Downloads page <downloads>`
-	
-Then build the library::
+On may systems, installing shark is as easy as:
+
+.. code-block:: none
 
 	mkdir Shark/build/
 	cd Shark/build
@@ -127,7 +143,7 @@ and add ``;C:\locale\boost_1.59\lib64-msvc-12.0`` (or your equivalent path) to t
 Installing Shark
 -----------------------
 
-* Download the sources from our :doc:`Downloads page <downloads>` and unpack them
+* Download the sources and unpack them
 * Open the CMake GUI
 * Next to "Where is the source code" set the path to the unpacked Shark location
 * Next to "Where to build the directory" set the path to where you want the Visual Studio project files to be
