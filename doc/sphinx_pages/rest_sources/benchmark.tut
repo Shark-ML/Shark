@@ -39,7 +39,7 @@ Kernel-CSVM
 --------------------------
 
 
-.. figure:: ../images/BenchmarkKernelCSvm.*
+.. figure:: ./tutorials/images/BenchmarkKernelCSvm.*
   :scale: 100 %
   :alt: Benchmark results of training CSVM
 
@@ -54,7 +54,7 @@ Linear-CSVM
 -----------------------
 
 
-.. figure:: ../images/BenchmarkLinearCSvm.*
+.. figure:: ./tutorials/images/BenchmarkLinearCSvm.*
   :scale: 100 %
   :alt: Benchmark results of training a linear CSVM
 
@@ -67,7 +67,7 @@ which require much less iterations to reach a desired accuracy.
 Logistic Regression
 -----------------------------
 
-.. figure:: ../images/BenchmarkLogisticRegression.*
+.. figure:: ./tutorials/images/BenchmarkLogisticRegression.*
   :scale: 100 %
   :alt: Benchmark results of training logistic regression
 
@@ -82,7 +82,7 @@ uses the abstract optimizer and objective function framework instead of a specia
 Nearest-Neighbours
 -----------------------------
 
-.. figure:: ../images/BenchmarkNearestNeighbours.*
+.. figure:: ./tutorials/images/BenchmarkNearestNeighbours.*
   :scale: 100 %
   :alt: Benchmark results of training nearest neighbours
   
@@ -92,7 +92,7 @@ to compare the brute-force algorithm on high dimensional data. We use k=10 neare
 Others
 -----------------------------
 
-.. figure:: ../images/BenchmarkGeneral.*
+.. figure:: ./tutorials/images/BenchmarkGeneral.*
   :scale: 100 %
   :alt: Benchmark results of linear regression and random forrest
   
