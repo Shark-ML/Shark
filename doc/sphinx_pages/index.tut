@@ -2,6 +2,9 @@
    :hidden:
 
    rest_sources/installation
+   rest_sources/benchmark
+
+
    rest_sources/tutorials/tutorials
 
    rest_sources/tutorials/first_steps/your_programs
@@ -37,7 +40,6 @@
    rest_sources/tutorials/algorithms/nearestNeighbor
    rest_sources/tutorials/algorithms/kmeans
    rest_sources/tutorials/algorithms/LASSO
-   rest_sources/tutorials/algorithms/Benchmark
 
    rest_sources/tutorials/algorithms/ffnet
    rest_sources/tutorials/algorithms/DeepMNIST
@@ -66,5 +68,7 @@
 
 
    rest_sources/quickref/quickref
+
    rest_sources/quickref/data_qr
    rest_sources/quickref/remora
+
