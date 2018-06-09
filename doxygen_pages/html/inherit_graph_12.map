@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classshark_1_1_abstract_stopping_criterion.html" title="shark::AbstractStoppingCriterion\l\&lt; ValidatedSingleObjectiveResultSet\l\&lt; PointType \&gt; \&gt;" alt="" coords="5,31,268,87"/>
+<area shape="rect" id="node2" href="$classshark_1_1_generalization_loss.html" title="The generalization loss calculates the relative increase of the validation error compared to the mini..." alt="" coords="329,5,520,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_generalization_quotient.html" title="SStopping criterion monitoring the quotient of generalization loss and training progress. " alt="" coords="316,71,533,112"/>
+</map>

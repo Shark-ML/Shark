@@ -1,0 +1,4 @@
+<map id="shark::CrossEntropyMethod::INoiseType" name="shark::CrossEntropyMethod::INoiseType">
+<area shape="rect" id="node2" href="$classshark_1_1_cross_entropy_method_1_1_constant_noise.html" title="Constant noise term z_t = noise. " alt="" coords="5,95,205,136"/>
+<area shape="rect" id="node3" href="$classshark_1_1_cross_entropy_method_1_1_linear_noise.html" title="Linear noise term z_t = a + t / b. " alt="" coords="229,95,429,136"/>
+</map>

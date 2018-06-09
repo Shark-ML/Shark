@@ -1,0 +1,6 @@
+<map id="shark::statistics::BaseStatisticsObject" name="shark::statistics::BaseStatisticsObject">
+<area shape="rect" id="node2" href="$classshark_1_1statistics_1_1_fraction_missing.html" title="for a vector of points computes for every dimension the fraction of missing values ..." alt="" coords="227,5,360,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1statistics_1_1_mean.html" title="For a vector of points computes for every dimension the mean. " alt="" coords="209,71,377,98"/>
+<area shape="rect" id="node4" href="$classshark_1_1statistics_1_1_quantile.html" title="For a vector of points computes for every dimension the p&#45;quantile. " alt="" coords="227,123,360,164"/>
+<area shape="rect" id="node5" href="$classshark_1_1statistics_1_1_variance.html" title="For a vector of points computes for every dimension the variance. " alt="" coords="227,188,360,229"/>
+</map>

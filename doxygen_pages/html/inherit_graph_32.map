@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classshark_1_1_box_constrained_problem.html" title="shark::BoxConstrainedProblem\l\&lt; Problem \&gt;" alt="" coords="5,13,228,54"/>
+<area shape="rect" id="node2" href="$structshark_1_1_box_based_shrinking_strategy.html" title="shark::BoxBasedShrinking\lStrategy\&lt; BoxConstrainedProblem\l\&lt; Problem \&gt; \&gt;" alt="" coords="276,5,525,61"/>
+<area shape="rect" id="node3" href="$classshark_1_1_box_constrained_shrinking_problem.html" title="shark::BoxConstrainedShrinking\lProblem\&lt; Problem \&gt;" alt="" coords="573,13,804,54"/>
+</map>

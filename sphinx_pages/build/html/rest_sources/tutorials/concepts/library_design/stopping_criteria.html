@@ -1,0 +1,252 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Stopping Criteria &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Trainers" href="trainers.html" />
+    <link rel="prev" title="Objective Functions" href="objective_functions.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../index.html">
+          <img class="logo" src="../../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Stopping Criteria</a><ul>
+<li><a class="reference internal" href="#the-base-class-abstractstoppingcriterion-resultsett">The base class ‘AbstractStoppingCriterion&lt;ResultSetT&gt;’</a></li>
+<li><a class="reference internal" href="#list-of-stopping-criteria">List of Stopping Criteria</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="objective_functions.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Objective Functions</a>
+  <a class="topless" href="trainers.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Trainers</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/library_design/stopping_criteria.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="stopping-criteria">
+<h1>Stopping Criteria<a class="headerlink" href="#stopping-criteria" title="Permalink to this headline">¶</a></h1>
+<p>This concept tutorial gives some additional information on stopping criteria
+in Shark and notably a list of all those implemented.</p>
+<p>A stopping criterion determines when optimization processes carried
+out by <a class="reference internal" href="optimizers.html"><span class="doc">Optimizers</span></a> should halt. Deciding when to stop is rather
+difficult.  Typically, we would like to stop when the improvement
+between two optimization steps is small, i.e., <span class="math notranslate">\(|E(t+1)-E(t)|&lt;
+\epsilon\)</span> for an objective function <span class="math notranslate">\(E\)</span>, for example an error
+function computed on some training data, and some criterion for
+“smallness” <span class="math notranslate">\(\epsilon\)</span>. However, there is no guarantee that a
+solution obtained this way really is close to any local optimum – it
+could as well be just a saddle point or an area with small gradient.</p>
+<p>When the optimization is employed for learning, an important aspect of
+stopping a trial is early-stopping for regularization (i.e., avoiding
+overfitting to the training set). A class of stopping heuristics
+therefore monitors the development of the error on a hold-out part of the data
+set – the validation error <span class="math notranslate">\(V(t)\)</span>. The idea is that learning
+should be stopped as soon as the validation error is not improving any
+more, assuming that from then on overfitting takes over. Even this
+error measurement is not perfect, since the validation error often
+follows a very noisy path during training.  That fact has led to the
+proposal of several different stopping critera, and this tutorial will
+introduce those implemented in Shark.</p>
+<div class="section" id="the-base-class-abstractstoppingcriterion-resultsett">
+<h2>The base class ‘AbstractStoppingCriterion&lt;ResultSetT&gt;’<a class="headerlink" href="#the-base-class-abstractstoppingcriterion-resultsett" title="Permalink to this headline">¶</a></h2>
+<p>Stopping criteria are represented by the abstract interface
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_abstract_stopping_criterion.html">AbstractStoppingCriterion</a>. They are templatized on the <code class="docutils literal notranslate"><span class="pre">ResultSet</span></code> used:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="27%" />
+<col width="73%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Types</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ResultSet</span></code></td>
+<td>Defines the type of the result set used. This can be either the
+<a class="reference external" href="../../../../../../../doxygen_pages/html/structshark_1_1_single_objective_result_set.html">SingleObjectiveResultSet</a> returned by most optimizers
+or a <a class="reference external" href="../../../../../../../doxygen_pages/html/structshark_1_1_validated_single_objective_result_set.html">ValidatedSingleObjectiveResultSet</a> that makes the
+validation error of the current time step available to the algorithm.</td>
+</tr>
+</tbody>
+</table>
+<p>Every stopping criterion extracts useful information from the result set
+at every time step and accumulates the information over time. Thus the
+interface consists only of two functions.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="36%" />
+<col width="64%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">stop(ResultSet)</span></code></td>
+<td>Updates the internal statistics and stops when the stopping criterion is met.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">reset()</span></code></td>
+<td>Resets the internal state before a new trial is started.</td>
+</tr>
+</tbody>
+</table>
+<p>Applying a stopping criterion is simple. For an iterative optimizer we
+can simply write:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">MyStoppingCriterion</span> <span class="n">criterion</span><span class="p">;</span>
+<span class="n">MyOptimizer</span> <span class="n">opt</span><span class="p">;</span>
+<span class="n">MyTrainingErrorFunction</span> <span class="n">E</span><span class="p">;</span>
+<span class="n">opt</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="n">E</span><span class="p">);</span>
+<span class="k">do</span><span class="p">{</span>
+    <span class="n">opt</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">E</span><span class="p">);</span>
+<span class="p">}</span> <span class="k">while</span><span class="p">(</span> <span class="o">!</span><span class="n">criterion</span><span class="p">.</span><span class="n">stop</span><span class="p">(</span> <span class="n">opt</span><span class="p">.</span><span class="n">solution</span><span class="p">()</span> <span class="p">)</span> <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="list-of-stopping-criteria">
+<h2>List of Stopping Criteria<a class="headerlink" href="#list-of-stopping-criteria" title="Permalink to this headline">¶</a></h2>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">give the exact equations for all criteria in the table. also check the
+code again if they all really adhere to the Prechelt paper, i.e., .</p>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Model</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_max_iterations.html">MaxIterations</a></td>
+<td>Stops after a fixed number of Iterations.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_training_error.html">TrainingError</a></td>
+<td>Stops when the training error seems to converge, i.e., <span class="math notranslate">\(E(t-T)-E(t)&lt; \epsilon\)</span>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_training_progress.html">TrainingProgress</a></td>
+<td>Tracks the progress of the training error over a period of time, i.e.,
+<span class="math notranslate">\(\text{mean}\{E(t),\dots, E(t-T)\}/ \min_t E(t)&lt; \epsilon\)</span>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_validated_stopping_criterion.html">ValidatedStoppingCriterion</a></td>
+<td>Evaluates the validation error and hands the validated result to another criterion.</td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_generalization_loss.html">GeneralizationLoss</a></td>
+<td>Calculates the quotient <span class="math notranslate">\(V(t)/\min_t E(t)-1\)</span> as a relative measure of the gap
+between training and validation error.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_generalization_quotient.html">GeneralizationQuotient</a></td>
+<td>Uses the quotient of training progress and generalization loss.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+<map id="shark::statistics::Quantile" name="shark::statistics::Quantile">
+<area shape="rect" id="node3" href="$classshark_1_1statistics_1_1_lower_quantile.html" title="For a vector of points computes for every dimension the 25%&#45;quantile. " alt="" coords="391,5,524,47"/>
+<area shape="rect" id="node4" href="$classshark_1_1statistics_1_1_median.html" title="For a vector of points computes for every dimension the median. " alt="" coords="391,71,524,112"/>
+<area shape="rect" id="node5" href="$classshark_1_1statistics_1_1_upper_quantile.html" title="For a vector of points computes for every dimension the 75%&#45;quantile. " alt="" coords="391,136,524,177"/>
+<area shape="rect" id="node2" href="$classshark_1_1statistics_1_1_base_statistics_object.html" title="Base class for all Statistic Objects to be used with Statistics. " alt="" coords="5,71,161,112"/>
+</map>

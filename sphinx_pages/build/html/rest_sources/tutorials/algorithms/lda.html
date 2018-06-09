@@ -1,0 +1,270 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Linear Discriminant Analysis &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Linear Regression" href="linearRegression.html" />
+    <link rel="prev" title="Principal Component Analysis" href="pca.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Linear Discriminant Analysis</a><ul>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#linear-discriminant-analysis-in-shark">Linear Discriminant Analysis in Shark</a></li>
+<li><a class="reference internal" href="#full-example-program">Full example program</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="pca.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Principal Component Analysis</a>
+  <a class="topless" href="linearRegression.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Linear Regression</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/lda.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="linear-discriminant-analysis">
+<h1>Linear Discriminant Analysis<a class="headerlink" href="#linear-discriminant-analysis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>Linear Discriminant Analysis (LDA) is a basic classification method
+from parametric statistics. It is based on a maximum a posteriori
+estimate of the class membership under the assumption that the class
+conditional densities are multi-variate Gaussians having different
+means but a common covariance matrix. Despite its simplicity, LDA
+gives surprisingly good results in practice, of course crucially
+depending on the representation of the input patterns and the
+underlying distribution. Details can be found, for instance, in
+<a class="reference internal" href="#hastietibshiranifriedman2008" id="id1">[HastieTibshiraniFriedman2008]</a>.</p>
+</div>
+<div class="section" id="linear-discriminant-analysis-in-shark">
+<h2>Linear Discriminant Analysis in Shark<a class="headerlink" href="#linear-discriminant-analysis-in-shark" title="Permalink to this headline">¶</a></h2>
+<p>We assume that a data file in csv format is provided as a command line argument.
+As a first step, we inspect and split the data as described in the
+<a class="reference internal" href="nearestNeighbor.html"><span class="doc">Nearest Neighbor Classification</span></a> tutorial:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">argc</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;usage: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; (filename)&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+                <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="c1">// read data</span>
+        <span class="n">ClassificationDataset</span> <span class="n">data</span><span class="p">;</span>
+        <span class="k">try</span> <span class="p">{</span>
+                <span class="n">importCSV</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">LAST_COLUMN</span><span class="p">,</span> <span class="sc">&#39; &#39;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">catch</span> <span class="p">(...)</span> <span class="p">{</span>
+                <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;unable to read data from file &quot;</span> <span class="o">&lt;&lt;</span>  <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+                <span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;overall number of data points: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">data</span><span class="p">.</span><span class="n">numberOfElements</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span>
+             <span class="o">&lt;&lt;</span> <span class="s">&quot;number of classes: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">numberOfClasses</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span>
+             <span class="o">&lt;&lt;</span> <span class="s">&quot;input dimension: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">inputDimension</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+        <span class="c1">// split data into training and test set</span>
+        <span class="n">ClassificationDataset</span> <span class="n">dataTest</span> <span class="o">=</span> <span class="n">splitAtElement</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mf">.5</span> <span class="o">*</span> <span class="n">data</span><span class="p">.</span><span class="n">numberOfElements</span><span class="p">()</span> <span class="p">);</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;training data points: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">data</span><span class="p">.</span><span class="n">numberOfElements</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;test data points: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">dataTest</span><span class="p">.</span><span class="n">numberOfElements</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="model-and-learning-algorithm">
+<h3>Model and learning algorithm<a class="headerlink" href="#model-and-learning-algorithm" title="Permalink to this headline">¶</a></h3>
+<p>We include the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_l_d_a.html">LDA</a> class</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;shark/Algorithms/Trainers/LDA.h&gt;</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>and define the LDA trainer</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LDA</span> <span class="n">ldaTrainer</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>and the linear classifier to be trained by the LDA trainer:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LinearClassifier</span><span class="o">&lt;&gt;</span> <span class="n">lda</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The model is trained by calling:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ldaTrainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">lda</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="evaluating-the-model">
+<h3>Evaluating the model<a class="headerlink" href="#evaluating-the-model" title="Permalink to this headline">¶</a></h3>
+<p>After training the model, we can evaluate it.  As a performance
+measure, we consider the standard 0-1 loss.  The corresponding risk is
+the probability of error, the empirical risk is the average
+classification error.  When measured on set of sample patterns, it
+simply computes the fraction of wrong predictions.
+We define the loss for <code class="docutils literal notranslate"><span class="pre">unsigned</span> <span class="pre">integer</span></code> labels and
+create a new data container for the predictions of our model:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">prediction</span><span class="p">;</span>
+<span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">loss</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Let’s apply the classifier to the training and the test data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">prediction</span> <span class="o">=</span> <span class="n">lda</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;LDA on training set accuracy: &quot;</span> <span class="o">&lt;&lt;</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">loss</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span> <span class="n">prediction</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">prediction</span> <span class="o">=</span> <span class="n">lda</span><span class="p">(</span><span class="n">dataTest</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;LDA on test set accuracy:     &quot;</span> <span class="o">&lt;&lt;</span> <span class="mf">1.</span> <span class="o">-</span> <span class="n">loss</span><span class="p">(</span><span class="n">dataTest</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span> <span class="n">prediction</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Of course, the accuracy is given by one minus the error.
+In this example, the (parametric) LDA performs worse than the
+(non-parametric) nearest neighbor classifier, but still much better
+than random guessing.</p>
+</div>
+</div>
+<div class="section" id="full-example-program">
+<h2>Full example program<a class="headerlink" href="#full-example-program" title="Permalink to this headline">¶</a></h2>
+<p>The full example program is
+<a class="reference external" href="../../../../../../doxygen_pages/html/_l_d_a_tutorial_8cpp.html">LDATutorial.cpp</a>.</p>
+<div class="section" id="sample-classification-problem-protein-fold-prediction">
+<h3>Sample classification problem: Protein fold prediction<a class="headerlink" href="#sample-classification-problem-protein-fold-prediction" title="Permalink to this headline">¶</a></h3>
+<p>Let us consider the same bioinformatics problem as in the
+<a class="reference internal" href="nearestNeighbor.html"><span class="doc">Nearest Neighbor Classification</span></a> tutorial, namely the prediction of the
+secondary structure of proteins. The goal is to assign a protein to
+one out of 27 SCOP fold types <a class="reference internal" href="#dingdubchak2001a" id="id2">[DingDubchak2001a]</a>.  We again consider
+the descriptions of amino-acid sequences provided by
+<a class="reference internal" href="#damoulasgirolami2008a" id="id3">[DamoulasGirolami2008a]</a>.  The data <a class="reference download internal" href="../../../_downloads/C.csv" download=""><code class="xref download docutils literal notranslate"><span class="pre">C.csv</span></code></a>
+provide a description of the amino-acid compositions of 695 proteins
+together with the corresponding fold type. Each row corresponds to a
+protein.  After downloading the data <a class="reference download internal" href="../../../_downloads/C.csv" download=""><code class="xref download docutils literal notranslate"><span class="pre">C.csv</span></code></a> we
+can envoke the example program:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">LDATutorial</span> <span class="n">C</span><span class="p">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="damoulasgirolami2008a" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id3">[DamoulasGirolami2008a]</a></td><td>T. Damoulas and M. Girolami.
+Probabilistic multi-class multi-kernel learning: on protein fold
+recognition and remote homology detection. Bioinformatics,
+24(10):1264-1270, 2008.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="dingdubchak2001a" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[DingDubchak2001a]</a></td><td>C.H.Q. Ding and I. Dubchak.  Multi-class
+protein fold recognition using support vector machines and neural
+networks. Bioinformatics, 17(4):349-358, 2001.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="hastietibshiranifriedman2008" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[HastieTibshiraniFriedman2008]</a></td><td>T. Hastie, R. Tibshirani and
+J. Friedman.  <a class="reference external" href="http://www-stat.stanford.edu/~tibs/ElemStatLearn">The Elements of Statistical Learning</a>, section 4.3. Springer-Verlag,
+2008.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

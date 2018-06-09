@@ -1,0 +1,6 @@
+<map id="shark::AbstractClustering&lt; InputT &gt;" name="shark::AbstractClustering&lt; InputT &gt;">
+<area shape="rect" id="node5" href="$classshark_1_1_hierarchical_clustering.html" title="Clusters defined by a binary space partitioning tree. " alt="" coords="161,169,371,211"/>
+<area shape="rect" id="node2" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="5,5,143,32"/>
+<area shape="rect" id="node3" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="167,5,365,32"/>
+<area shape="rect" id="node4" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="390,5,537,32"/>
+</map>

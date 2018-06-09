@@ -1,0 +1,5 @@
+<map id="shark::AbstractModel&lt; InputTypeT, OutputTypeT, ParameterVectorType &gt;" name="shark::AbstractModel&lt; InputTypeT, OutputTypeT, ParameterVectorType &gt;">
+<area shape="rect" id="node2" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; ParameterVectorType \&gt;" alt="" coords="5,5,200,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="34,71,171,98"/>
+<area shape="rect" id="node4" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="29,122,176,149"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classshark_1_1_svm_problem.html" title="shark::SvmProblem\&lt;\l Problem \&gt;" alt="" coords="5,13,165,54"/>
+<area shape="rect" id="node2" href="$structshark_1_1_box_based_shrinking_strategy.html" title="shark::BoxBasedShrinking\lStrategy\&lt; SvmProblem\&lt;\l Problem \&gt; \&gt;" alt="" coords="213,5,405,61"/>
+<area shape="rect" id="node3" href="$classshark_1_1_svm_shrinking_problem.html" title="shark::SvmShrinkingProblem\l\&lt; Problem \&gt;" alt="" coords="453,13,664,54"/>
+</map>

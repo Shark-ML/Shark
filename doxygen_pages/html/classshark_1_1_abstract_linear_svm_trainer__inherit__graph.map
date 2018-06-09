@@ -1,0 +1,7 @@
+<map id="shark::AbstractLinearSvmTrainer&lt; InputType &gt;" name="shark::AbstractLinearSvmTrainer&lt; InputType &gt;">
+<area shape="rect" id="node5" href="$classshark_1_1_linear_c_svm_trainer.html" title="shark::LinearCSvmTrainer\l\&lt; InputType \&gt;" alt="" coords="515,45,705,86"/>
+<area shape="rect" id="node6" href="$classshark_1_1_squared_hinge_linear_c_svm_trainer.html" title="shark::SquaredHingeLinear\lCSvmTrainer\&lt; InputType \&gt;" alt="" coords="509,110,711,151"/>
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearClassifier\&lt; InputType\l \&gt;, unsigned int \&gt;" alt="" coords="5,5,224,61"/>
+<area shape="rect" id="node3" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers. " alt="" coords="51,85,178,112"/>
+<area shape="rect" id="node4" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="15,136,214,163"/>
+</map>

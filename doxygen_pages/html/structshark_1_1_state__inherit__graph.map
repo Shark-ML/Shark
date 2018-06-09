@@ -1,0 +1,4 @@
+<map id="shark::State" name="shark::State">
+<area shape="rect" id="node2" href="$structshark_1_1_empty_state.html" title="Default State of an Object which does not need a State. " alt="" coords="5,87,148,114"/>
+<area shape="rect" id="node3" href="$structshark_1_1_normalizer_neuron_1_1_state.html" title="shark::NormalizerNeuron\l\&lt; VectorType \&gt;::State" alt="" coords="172,80,357,121"/>
+</map>

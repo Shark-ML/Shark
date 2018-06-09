@@ -1,0 +1,379 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installing Shark &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Benchmarks" href="benchmark.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="../index.html" />
+    <link rel="stylesheet" href="../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="active" >
+                        <a href="#">Installation</a>
+                    </li>
+                    <li  class="first" >
+                        <a href="tutorials/tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../index.html">
+          <img class="logo" src="../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Installing Shark</a><ul>
+<li><a class="reference internal" href="#downloads">Downloads</a></li>
+<li><a class="reference internal" href="#cmake-options">CMake Options</a></li>
+<li><a class="reference internal" href="#linux-macos-and-other-unix-based-systems">Linux, MacOS, and other Unix-based systems</a></li>
+<li><a class="reference internal" href="#windows-and-visual-studio">Windows and Visual Studio</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#troubleshooting-the-installation-procedure">Troubleshooting the installation procedure</a><ul>
+<li><a class="reference internal" href="#getting-shark-to-find-boost">Getting Shark to find Boost</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="../index.html" title="previous chapter">
+	  <img class="navicon" src="../_static/icon_backward.png" alt="prev"/> &lt;no title&gt;</a>
+  <a class="topless" href="benchmark.html" title="next chapter">
+	  <img class="navicon" src="../_static/icon_forward.png" alt="next"/> Benchmarks</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../_sources/rest_sources/installation.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installing-shark">
+<h1><a class="toc-backref" href="#id3">Installing Shark</a><a class="headerlink" href="#installing-shark" title="Permalink to this headline">¶</a></h1>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#installing-shark" id="id3">Installing Shark</a><ul>
+<li><a class="reference internal" href="#downloads" id="id4">Downloads</a></li>
+<li><a class="reference internal" href="#cmake-options" id="id5">CMake Options</a></li>
+<li><a class="reference internal" href="#linux-macos-and-other-unix-based-systems" id="id6">Linux, MacOS, and other Unix-based systems</a><ul>
+<li><a class="reference internal" href="#packages" id="id7">Packages</a></li>
+<li><a class="reference internal" href="#installation" id="id8">Installation</a></li>
+<li><a class="reference internal" href="#dependencies" id="id9">Dependencies</a></li>
+<li><a class="reference internal" href="#building-the-documentation" id="id10">Building the documentation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#windows-and-visual-studio" id="id11">Windows and Visual Studio</a><ul>
+<li><a class="reference internal" href="#id1" id="id12">Dependencies</a></li>
+<li><a class="reference internal" href="#setting-up-boost" id="id13">Setting Up Boost</a></li>
+<li><a class="reference internal" href="#id2" id="id14">Installing Shark</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#troubleshooting-the-installation-procedure" id="id15">Troubleshooting the installation procedure</a><ul>
+<li><a class="reference internal" href="#getting-shark-to-find-boost" id="id16">Getting Shark to find Boost</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="downloads">
+<h2><a class="toc-backref" href="#id4">Downloads</a><a class="headerlink" href="#downloads" title="Permalink to this headline">¶</a></h2>
+<p>We have two source packages available:</p>
+<p><a class="reference external" href="https://github.com/Shark-ML/Shark/archive/v4.0.0.zip">Shark-4.0.0.zip</a></p>
+<p><a class="reference external" href="https://github.com/Shark-ML/Shark/archive/v4.0.0.tar.gz">Shark-4.0.0.tar.gz</a></p>
+<p>You can also get the latest snapshot from github:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/Shark-ML/Shark/
+</pre></div>
+</div>
+</div>
+<div class="section" id="cmake-options">
+<h2><a class="toc-backref" href="#id5">CMake Options</a><a class="headerlink" href="#cmake-options" title="Permalink to this headline">¶</a></h2>
+<p>The cmake file of Shark has several options. See the following table
+for a list of options. The default values are <strong>bold</strong>:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="19%" />
+<col width="60%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Option</th>
+<th class="head">Values</th>
+<th class="head">Effect</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>CMAKE_BUILD_TYPE</td>
+<td>Debug/<strong>Release</strong></td>
+<td>Builds Shark in Debug or Release mode.
+In debug, the linbrary is called shark_debug</td>
+</tr>
+<tr class="row-odd"><td>CMAKE_INSTALL_PREFIX</td>
+<td>Path <strong>/usr/local</strong></td>
+<td>Installation path for Shark</td>
+</tr>
+<tr class="row-even"><td>BUILD_DOCUMENTATION</td>
+<td>ON/<strong>OFF</strong></td>
+<td>Builds the documentation, see “build documentation”</td>
+</tr>
+<tr class="row-odd"><td>BUILD_EXAMPLES</td>
+<td><strong>ON</strong>/OFF</td>
+<td>Builds the examples</td>
+</tr>
+<tr class="row-even"><td>BUILD_TESTING</td>
+<td><strong>ON</strong>/OFF</td>
+<td>Builds the tests</td>
+</tr>
+<tr class="row-odd"><td>BUILD_SHARED_LIBS</td>
+<td>ON/<strong>OFF</strong></td>
+<td>Builds Shark as shared library</td>
+</tr>
+<tr class="row-even"><td>Boost_USE_STATIC_LIBS</td>
+<td>ON/<strong>OFF</strong></td>
+<td>Searches and uses the static boost libraries,
+Be aware, that linking static Boost
+libraries to a dynamic Shark
+can result in problems during build!</td>
+</tr>
+<tr class="row-odd"><td>BOOST_ROOT</td>
+<td>Path</td>
+<td>Path to boost, if it is not installed in a default path.</td>
+</tr>
+<tr class="row-even"><td>ENABLE_CBLAS</td>
+<td><strong>ON</strong>/OFF</td>
+<td>Searches for a linear algebra library on the system</td>
+</tr>
+<tr class="row-odd"><td>CBLAS_LIBRARY_PATH</td>
+<td>Path <strong>/usr/include</strong></td>
+<td>Sets the path to the cblas include directory.</td>
+</tr>
+<tr class="row-even"><td>CBLAS_INCLUDE_PATH</td>
+<td>Path <strong>/usr/lib64/</strong></td>
+<td>Sets the path to the cblas library directory.</td>
+</tr>
+<tr class="row-odd"><td>ENABLE_OPENMP</td>
+<td><strong>ON</strong>/OFF</td>
+<td>Enables OpenMP support if supported by the platform</td>
+</tr>
+<tr class="row-even"><td>ENABLE_SIMD</td>
+<td><strong>ON</strong>/OFF</td>
+<td>Enables SIMD in linear algebra</td>
+</tr>
+<tr class="row-odd"><td>ENABLE_OPENCL</td>
+<td>ON/<strong>OFF</strong></td>
+<td>Enables OpenCL support if boost.compute is available. EXPERIMENTAL!</td>
+</tr>
+<tr class="row-even"><td>ENABLE_CLBLAST</td>
+<td>ON/<strong>OFF</strong></td>
+<td>Uses CLBLAST as OpenCL linear algebra backend. EXPERIMENTAL!</td>
+</tr>
+</tbody>
+</table>
+<p>To change options, either use one of the cmake guis (e.g., ccmake) or add the options to the cmake call.
+Choosing another path to boost and disabling OpenMP would look like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cmake <span class="s2">&quot;-DBOOST_ROOT=/path/to/boost&quot;</span> <span class="s2">&quot;-DENABLE_OPENMP=OFF&quot;</span> ../
+</pre></div>
+</div>
+<p>An introduction on how to run cmake can be found <a class="reference external" href="http://cmake.org/runningcmake/">here</a>.</p>
+</div>
+<div class="section" id="linux-macos-and-other-unix-based-systems">
+<h2><a class="toc-backref" href="#id6">Linux, MacOS, and other Unix-based systems</a><a class="headerlink" href="#linux-macos-and-other-unix-based-systems" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="packages">
+<h3><a class="toc-backref" href="#id7">Packages</a><a class="headerlink" href="#packages" title="Permalink to this headline">¶</a></h3>
+<p>We are supporting packages for the following platforms:</p>
+<ul class="simple">
+<li><dl class="first docutils">
+<dt>Arch Linux</dt>
+<dd><ul class="first last">
+<li>current development version downloadable from AUR as packages <code class="docutils literal notranslate"><span class="pre">shark-ml-atlas-git</span></code> and <code class="docutils literal notranslate"><span class="pre">shark-ml-git</span></code>
+for a shark version with and without ATLAS.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>More to come!</li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h3><a class="toc-backref" href="#id8">Installation</a><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
+<p>On may systems, installing shark is as easy as:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkdir Shark/build/
+cd Shark/build
+cmake ../
+make
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h3><a class="toc-backref" href="#id9">Dependencies</a><a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<p>Shark relies on <a class="reference external" href="http://www.boost.org">Boost</a> and uses <a class="reference external" href="http://www.cmake.org/">CMake</a>.
+Furthermore, Shark can make use of different linear algebra libraries.
+On MacOsX, Accelerate is used by default. On Linux and Windows, ATLAS, CBLAS and openblas
+is used if available.
+Under <strong>Ubuntu</strong>, you install all required packages by:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt-get install cmake cmake-curses-gui libatlas-base-dev libboost-all-dev
+</pre></div>
+</div>
+<p>Under <strong>MacOS</strong> using MacPorts, you get the required packages by:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo port install boost cmake
+</pre></div>
+</div>
+</div>
+<div class="section" id="building-the-documentation">
+<h3><a class="toc-backref" href="#id10">Building the documentation</a><a class="headerlink" href="#building-the-documentation" title="Permalink to this headline">¶</a></h3>
+<p>This section will tell you how to <strong>build the documentation on your computer</strong>, and
+also how to first install the tools needed for it. Besides Doxygen, we rely on two
+relevant Python modules, namely Sphinx and Doxylink (aka sphinxcontrib-doxylink).
+Since this tutorial page is created by Sphinx, you will most likely read it off a
+webserver or as part of a Shark package including the generated documentation pages.
+After having built the documentation yourself, you will be able to read it from your
+local folder, too.</p>
+<ol class="arabic simple">
+<li>Make sure Doxygen, Graphviz, Python and Sphinx are properly installed on your system,</li>
+<li>run cmake in your build directory and set <code class="docutils literal notranslate"><span class="pre">BUILD_DOCUMENTATION</span></code> to <code class="docutils literal notranslate"><span class="pre">ON</span></code></li>
+<li>run <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">doc</span></code></li>
+</ol>
+</div>
+</div>
+<div class="section" id="windows-and-visual-studio">
+<h2><a class="toc-backref" href="#id11">Windows and Visual Studio</a><a class="headerlink" href="#windows-and-visual-studio" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3><a class="toc-backref" href="#id12">Dependencies</a><a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>First start by download and installing:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://cmake.org/download/">CMake</a></li>
+<li>The most recent <a class="reference external" href="http://sourceforge.net/projects/boost/files/boost-binaries/">boost binaries</a></li>
+</ul>
+</div>
+<div class="section" id="setting-up-boost">
+<h3><a class="toc-backref" href="#id13">Setting Up Boost</a><a class="headerlink" href="#setting-up-boost" title="Permalink to this headline">¶</a></h3>
+<p>For simplicity, we assume that you installed boost in <code class="docutils literal notranslate"><span class="pre">C:\locale\boost_1.59\</span></code>.
+The boost libraries will be located in a subfolder whose name depends on your compiler (e.g.
+<code class="docutils literal notranslate"><span class="pre">C:\locale\boost_1.59\lib64-msvc-12.0</span></code>). Next, you need to tell Windows
+about the location of the binaries as otherwise compilation will work, but running the compiled binaries
+will not be possible.</p>
+<p>For this you go to
+My Computer&gt;Properties&gt;Advanced&gt;Environment Variables&gt;System Variables&gt;Path&gt;Edit&gt;Variable Value
+and add <code class="docutils literal notranslate"><span class="pre">;C:\locale\boost_1.59\lib64-msvc-12.0</span></code> (or your equivalent path) to the end.</p>
+</div>
+<div class="section" id="id2">
+<h3><a class="toc-backref" href="#id14">Installing Shark</a><a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Download the sources and unpack them</li>
+<li>Open the CMake GUI</li>
+<li>Next to “Where is the source code” set the path to the unpacked Shark location</li>
+<li>Next to “Where to build the directory” set the path to where you want the Visual Studio project files to be</li>
+<li>Click on “Add Entry”</li>
+<li>Add an Entry BOOST_ROOT of type PATH and set it to your boost intall directory (e.g. <code class="docutils literal notranslate"><span class="pre">C:\locale\boost_1.59</span></code>)</li>
+<li>Add an Entry BOOST_LIBRARYDIR of type PATH and set it to your boost library directory (e.g. <code class="docutils literal notranslate"><span class="pre">C:\locale\boost_1.59\lib64-msvc-12.0</span></code>)</li>
+<li>Set the right Visual Studio compiler and click on Configure (possibly twice) and then on generate</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="troubleshooting-the-installation-procedure">
+<h1><a class="toc-backref" href="#id15">Troubleshooting the installation procedure</a><a class="headerlink" href="#troubleshooting-the-installation-procedure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="getting-shark-to-find-boost">
+<h2><a class="toc-backref" href="#id16">Getting Shark to find Boost</a><a class="headerlink" href="#getting-shark-to-find-boost" title="Permalink to this headline">¶</a></h2>
+<p>If you obtained Boost through your package manager, Shark should (in theory) be able to find
+Boost automatically. If Boost is not found automatically (e.g., after issuing <code class="docutils literal notranslate"><span class="pre">make</span></code> the
+compilation aborts with long error messages involving the word “boost”; or the Makefile
+cannot even be generated because the Shark CMake configuration does not complete), also
+possibly because you compiled/installed Boost yourself to some custom location, you can
+try the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li>The most proven approach is to invoke CMake with the additional options
+<code class="docutils literal notranslate"><span class="pre">-DBoost_NO_SYSTEM_PATHS=TRUE</span> <span class="pre">-DBOOST_INCLUDEDIR=/path/to/boost/include/</span> <span class="pre">-DBOOST_LIBRARYDIR=/path/to/boost/lib/</span></code>.
+Here, <code class="docutils literal notranslate"><span class="pre">DBOOST_LIBRARYDIR</span></code> could for example be <code class="docutils literal notranslate"><span class="pre">/opt/local/include</span></code> or <code class="docutils literal notranslate"><span class="pre">/home/user/mine/boost_153/lib</span></code>, etc.
+This should work in 90% of all cases.</li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

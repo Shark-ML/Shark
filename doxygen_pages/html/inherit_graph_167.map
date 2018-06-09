@@ -1,0 +1,5 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$structshark_1_1_state.html" title="Represents the State of an Object. " alt="" coords="5,35,105,61"/>
+<area shape="rect" id="node2" href="$structshark_1_1_empty_state.html" title="Default State of an Object which does not need a State. " alt="" coords="175,5,317,32"/>
+<area shape="rect" id="node3" href="$structshark_1_1_normalizer_neuron_1_1_state.html" title="shark::NormalizerNeuron\l\&lt; VectorType \&gt;::State" alt="" coords="153,57,339,98"/>
+</map>

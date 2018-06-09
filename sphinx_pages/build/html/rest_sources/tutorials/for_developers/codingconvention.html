@@ -1,0 +1,366 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Coding Convention &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Adding Examples, Tests and Documentation" href="adding_docs.html" />
+    <link rel="prev" title="Training Binary Restricted Boltzmann Machines" href="../algorithms/binary_rbm.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Coding Convention</a><ul>
+<li><a class="reference internal" href="#naming-conventions">Naming Conventions</a></li>
+<li><a class="reference internal" href="#formatting-and-white-space-usage">Formatting and White Space Usage</a></li>
+<li><a class="reference internal" href="#namespaces">Namespaces</a></li>
+<li><a class="reference internal" href="#class-layout">Class Layout</a></li>
+<li><a class="reference internal" href="#interface-layout">Interface Layout</a></li>
+<li><a class="reference internal" href="#header-and-source-files">Header and Source Files</a></li>
+<li><a class="reference internal" href="#unit-tests">Unit Tests</a></li>
+<li><a class="reference internal" href="#other-tasks">Other tasks</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="../algorithms/binary_rbm.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Training Binary Restricted Boltzmann Machines</a>
+  <a class="topless" href="adding_docs.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Adding Examples, Tests and Documentation</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/for_developers/codingconvention.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="coding-convention">
+<h1>Coding Convention<a class="headerlink" href="#coding-convention" title="Permalink to this headline">¶</a></h1>
+<p>This document specifies the coding conventions for the Shark library.</p>
+<p>Most of the conventions are considered mandatory.
+A few optional rules are marked as such.</p>
+<div class="section" id="naming-conventions">
+<h2>Naming Conventions<a class="headerlink" href="#naming-conventions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="class-interface-names">
+<h3>Class/Interface Names<a class="headerlink" href="#class-interface-names" title="Permalink to this headline">¶</a></h3>
+<p>All type names (classes, interfaces, enumerations) should use the
+InfixCaps style. Start with an upper-case letter, and capitalize the
+first letter of any subsequent word in the name, as well as any letters
+that are part of an acronym. All other characters in the name are
+lower-case. Do not use underscores to separate words. Class names
+should be nouns or noun phrases. Interface names depend on the salient
+purpose of the interface and are prefixed with a capitalized I. If the
+purpose is primarily to endow an object with a particular capability,
+then the name should be an adjective (ending in -able or -ible if
+possible) that describes the capability; e.g., ISearchable, ISortable,
+INetworkAccessible. Otherwise use nouns or noun phrases.</p>
+</div>
+<div class="section" id="member-names">
+<h3>Member Names<a class="headerlink" href="#member-names" title="Permalink to this headline">¶</a></h3>
+<p>Names of non-constant, non-pointer fields are prefixed with <code class="docutils literal notranslate"><span class="pre">m_</span></code>
+and use the camelCase-style. Pointers that are owned by the class,
+i.e. they are freed on destruction, are prefixed with <code class="docutils literal notranslate"><span class="pre">mp_</span></code> and
+use the camelCase-style. Pointers that are not owned by the class are
+prefixed with <code class="docutils literal notranslate"><span class="pre">mep_</span></code>.</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">m_</span></code>: Member</li>
+<li><code class="docutils literal notranslate"><span class="pre">mp_</span></code>: Member Pointer (optional rule)</li>
+<li><code class="docutils literal notranslate"><span class="pre">mep_</span></code>: Member External Pointer (optional rule)</li>
+</ul>
+<p>Names of fields being used as constants should be all upper-case, with
+underscores separating words. The following are considered to be
+constants:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">MIN_VALUE</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">MAX_BUFFER_SIZE</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">OPTIONS_FILE_NAME</span></code></li>
+</ul>
+<p>One-character field names should be avoided except for temporary and
+looping variables. In these cases use (optional rule):</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">c</span></code> for a char</li>
+<li><code class="docutils literal notranslate"><span class="pre">d</span></code> d for a double</li>
+<li><code class="docutils literal notranslate"><span class="pre">e</span></code> for an Exception object</li>
+<li><code class="docutils literal notranslate"><span class="pre">f</span></code> for a float</li>
+<li><code class="docutils literal notranslate"><span class="pre">i</span></code>, <code class="docutils literal notranslate"><span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">k</span></code>, <code class="docutils literal notranslate"><span class="pre">m</span></code>, <code class="docutils literal notranslate"><span class="pre">n</span></code> for integers</li>
+<li><code class="docutils literal notranslate"><span class="pre">p</span></code>, <code class="docutils literal notranslate"><span class="pre">q</span></code>, <code class="docutils literal notranslate"><span class="pre">r</span></code>, <code class="docutils literal notranslate"><span class="pre">s</span></code> for strings</li>
+</ul>
+<p>An exception is where a strong convention for the one-character name
+exists, such as <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code> for coordinates.</p>
+</div>
+<div class="section" id="method-names">
+<h3>Method Names<a class="headerlink" href="#method-names" title="Permalink to this headline">¶</a></h3>
+<p>Method names should use the infixCaps style. Start with a lower-case
+letter, and capitalize the first letter of any subsequent word in the
+name, as well as any letters that are part of an acronym. All other
+characters in the name are lower-case. Do not use underscores to
+separate words. Method names should be imperative verbs or verb
+phrases, for example:</p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">showStatus()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">drawCircle()</span></code></li>
+<li><code class="docutils literal notranslate"><span class="pre">addLayoutComponent()</span></code></li>
+</ul>
+<p>A method to get or set some property or member of the class should be
+called <code class="docutils literal notranslate"><span class="pre">property()</span></code> or <code class="docutils literal notranslate"><span class="pre">setProperty()</span></code> respectively, where
+“property” is the name of the property.</p>
+<p>A method to test some boolean property of the class should be called
+<code class="docutils literal notranslate"><span class="pre">isProperty()</span></code>, where “property” is the name of the property.</p>
+</div>
+</div>
+<div class="section" id="formatting-and-white-space-usage">
+<h2>Formatting and White Space Usage<a class="headerlink" href="#formatting-and-white-space-usage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="blank-lines">
+<h3>Blank Lines<a class="headerlink" href="#blank-lines" title="Permalink to this headline">¶</a></h3>
+<p>Blank lines can improve readability by grouping sections of the code
+that are logically related. Blank lines should also be used in the
+following places:</p>
+<ul class="simple">
+<li>After the copyright block comment.</li>
+<li>Between class declarations.</li>
+<li>Between method declarations.</li>
+<li>Before a block or single-line comment, unless it is the first line in a block.</li>
+</ul>
+</div>
+<div class="section" id="indentation">
+<h3>Indentation<a class="headerlink" href="#indentation" title="Permalink to this headline">¶</a></h3>
+<p>Only tabulators should be used to indent lines, i.e., no space character
+should be part of the white space at the beginning of a line.
+The reasoning behind this convention is: (1) convenient tabulator
+characters are used for indentation, (2) code is well-aligned in any
+text editor, independent of the interpretation of tabulator characters,
+and (3) text further on in a line remains aliged as long as it does not
+spread beyond a single level of indentation.
+Example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___</span><span class="p">{</span>
+<span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___int</span> <span class="n">a</span> <span class="o">=</span> <span class="mi">42</span><span class="p">;.......................................</span><span class="c1">//.magic.answer</span>
+<span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___char</span> <span class="n">q</span><span class="p">[]</span> <span class="o">=</span> <span class="s">&quot;The.ultimate.question.of.life,.&quot;</span>
+<span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___</span><span class="p">...........</span><span class="s">&quot;the.universe,.and.everything&quot;</span><span class="p">;........</span><span class="c1">//.corresponding.question</span>
+<span class="p">.</span><span class="n">___</span><span class="p">.</span><span class="n">___</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Here, “.___” is used to indicate a tabulator, while a single dot “.”
+indicates a space character. Obviously, the code block will look pretty
+with different tabulator sizes in place, and the comments at the end of
+lines two and four remain aligned.</p>
+<p>A single tabulator should be added at each indentation level. Usually
+curly braces indicate the next level of indentation, with the exception
+of namespaces.</p>
+</div>
+</div>
+<div class="section" id="namespaces">
+<h2>Namespaces<a class="headerlink" href="#namespaces" title="Permalink to this headline">¶</a></h2>
+<p>All code in the Shark library is placed into the namespace <code class="docutils literal notranslate"><span class="pre">shark</span></code>.
+Currently, the only other namespace is <code class="docutils literal notranslate"><span class="pre">shark::detail</span></code>. Content within
+the detail namespace is considered ‘protected’, and it is often found in
+files placed in ‘impl’ sub-directories. This code may be less
+well-documented than the ‘public’ code base since it is not intended to
+be used directly from outside the library.</p>
+</div>
+<div class="section" id="class-layout">
+<h2>Class Layout<a class="headerlink" href="#class-layout" title="Permalink to this headline">¶</a></h2>
+<p>A class definition should be structured as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">/// Documentation of the role of the class as a whole</span>
+<span class="k">class</span> <span class="nc">ClassName</span> <span class="o">:</span> <span class="k">public</span> <span class="n">BaseClass</span> <span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+        <span class="c1">/// Documentation for the constructor, if necessary</span>
+        <span class="n">ClassName</span><span class="p">();</span>
+
+        <span class="o">~</span><span class="n">ClassName</span><span class="p">();</span>
+
+        <span class="c1">/// Documentation for property 1</span>
+        <span class="n">PropertyType1</span> <span class="nf">property1</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setProperty1</span><span class="p">(</span> <span class="k">const</span> <span class="n">PropertyType1</span> <span class="o">&amp;</span> <span class="n">property</span> <span class="p">);</span>
+
+        <span class="c1">/// Documentation for property 2</span>
+        <span class="n">PropertyType2</span> <span class="o">&amp;</span> <span class="n">property2</span><span class="p">();</span>
+        <span class="k">const</span> <span class="n">PropertyType2</span> <span class="o">&amp;</span> <span class="n">property2</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setProperty2</span><span class="p">();</span>
+
+        <span class="c1">/// Documentation for property 3</span>
+        <span class="n">PropertyType3</span> <span class="o">*</span> <span class="nf">property3</span><span class="p">();</span>
+        <span class="k">const</span> <span class="n">PropertyType3</span> <span class="o">*</span> <span class="nf">property3</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setProperty3</span><span class="p">();</span>
+
+        <span class="c1">/// Documentation for property 4</span>
+        <span class="kt">bool</span> <span class="nf">isProperty4</span><span class="p">()</span> <span class="k">const</span><span class="p">;</span>
+        <span class="kt">void</span> <span class="nf">setProperty4</span><span class="p">(</span> <span class="kt">bool</span> <span class="n">value</span> <span class="p">);</span>
+
+<span class="k">protected</span><span class="o">:</span>
+        <span class="c1">/// Documentation for member m_property1</span>
+        <span class="n">PropertyType1</span> <span class="n">m_property1</span><span class="p">;</span>
+
+        <span class="c1">/// Documentation for member m_property2</span>
+        <span class="n">PropertyType2</span> <span class="n">m_property2</span><span class="p">;</span>
+
+        <span class="c1">/// Documentation for member m_property3</span>
+        <span class="n">PropertyType3</span> <span class="o">*</span> <span class="nf">mp_property3</span><span class="p">();</span>
+
+        <span class="c1">/// Documentation for member m_property4</span>
+        <span class="kt">bool</span> <span class="n">m_property4</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="interface-layout">
+<h2>Interface Layout<a class="headerlink" href="#interface-layout" title="Permalink to this headline">¶</a></h2>
+<p>An interface should only contain pure virtual methods and a virtual,
+empty destructor. No members should be put within an interface
+declaration. To reduce the effort to implement an interface, a general
+purpose default implementation can be provided in an abstract class that
+inherits the respective interface.</p>
+</div>
+<div class="section" id="header-and-source-files">
+<h2>Header and Source Files<a class="headerlink" href="#header-and-source-files" title="Permalink to this headline">¶</a></h2>
+<p>The general rule is that declarations should be put into header
+files and implementations should go into source files. There may be
+exceptions for declarations that are used only locally within one
+source file, such as in example files or unit test.</p>
+<p>A declaration in the above sense is everything that does not directly
+generate code, while everything that has a direct imprint as executable
+code or data in the library is an implementation. Examples of
+declarations are:</p>
+<ul class="simple">
+<li>class declarations</li>
+<li>inline functions, including their implementations</li>
+<li>template classes and functions, including their implementations</li>
+</ul>
+<p>Examples of implementations are</p>
+<ul class="simple">
+<li>bodies of non-template functions, free or members of a class</li>
+<li>static variables</li>
+</ul>
+<p>All header files have to be protected against multiple inclusion by
+the following sequence of pre-processor statements:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#ifndef SHARK_&lt;MODULE&gt;_&lt;FILENAME&gt;_H</span>
+<span class="cp">#define SHARK_&lt;MODULE&gt;_&lt;FILENAME&gt;_H</span>
+
+<span class="p">[...</span><span class="n">declarations</span><span class="p">...]</span>
+
+<span class="cp">#endif</span>
+</pre></div>
+</div>
+<p>For example, the file <strong>Exception.h</strong> in the module <strong>Core</strong> is
+protected by the name <code class="docutils literal notranslate"><span class="pre">SHARK_CORE_EXCEPTION_H</span></code>.</p>
+<p>Shark makes extensive use of templates. Therefore large parts of the
+code base are found in header files. To maintain a clean structure some
+headers are ‘hidden’ in sub-directories with name <em>impl</em>.</p>
+<p>Statements with strong side effects should be avoided in header files.
+<code class="docutils literal notranslate"><span class="pre">using</span></code> statements must not be used at global scope or the scope of
+the <em>shark</em> namespace in header files. Definition of names by means of
+<code class="docutils literal notranslate"><span class="pre">#define</span></code> statements should be avoided where possible.</p>
+</div>
+<div class="section" id="unit-tests">
+<h2>Unit Tests<a class="headerlink" href="#unit-tests" title="Permalink to this headline">¶</a></h2>
+<p>When adding functionality to Shark it is <strong>mandatory</strong> to also add
+meaningful test cases.</p>
+</div>
+<div class="section" id="other-tasks">
+<h2>Other tasks<a class="headerlink" href="#other-tasks" title="Permalink to this headline">¶</a></h2>
+<p>It is one feature of the Shark tutorials that they list all Models,
+Kernels, Losses, Optimizers, StoppingCriteria, and Trainers implemented
+in Shark. These lists are one of the few components that do not update
+automatically via Sphinx-Doxygen-Code magic. Thus, if you add a new
+class implementing any of the above, please make this known in the
+corresponding list. Thank you!</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

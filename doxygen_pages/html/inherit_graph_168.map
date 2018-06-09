@@ -1,0 +1,10 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classshark_1_1statistics_1_1_base_statistics_object.html" title="Base class for all Statistic Objects to be used with Statistics. " alt="" coords="5,93,161,135"/>
+<area shape="rect" id="node2" href="$classshark_1_1statistics_1_1_fraction_missing.html" title="for a vector of points computes for every dimension the fraction of missing values ..." alt="" coords="227,5,360,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1statistics_1_1_mean.html" title="For a vector of points computes for every dimension the mean. " alt="" coords="209,71,377,98"/>
+<area shape="rect" id="node4" href="$classshark_1_1statistics_1_1_quantile.html" title="For a vector of points computes for every dimension the p&#45;quantile. " alt="" coords="227,123,360,164"/>
+<area shape="rect" id="node8" href="$classshark_1_1statistics_1_1_variance.html" title="For a vector of points computes for every dimension the variance. " alt="" coords="227,188,360,229"/>
+<area shape="rect" id="node5" href="$classshark_1_1statistics_1_1_lower_quantile.html" title="For a vector of points computes for every dimension the 25%&#45;quantile. " alt="" coords="425,57,559,99"/>
+<area shape="rect" id="node6" href="$classshark_1_1statistics_1_1_median.html" title="For a vector of points computes for every dimension the median. " alt="" coords="425,123,559,164"/>
+<area shape="rect" id="node7" href="$classshark_1_1statistics_1_1_upper_quantile.html" title="For a vector of points computes for every dimension the 75%&#45;quantile. " alt="" coords="425,188,559,229"/>
+</map>

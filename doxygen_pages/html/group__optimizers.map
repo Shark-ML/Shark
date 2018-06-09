@@ -1,0 +1,5 @@
+<map id="Optimizers" name="Optimizers">
+<area shape="rect" id="node1" href="$group__singledirect.html" title="Single&#45;objective Direct\l&#45;Search optimizers" alt="" coords="147,5,317,47"/>
+<area shape="rect" id="node3" href="$group__multidirect.html" title="Multi&#45;objective Direct\l&#45;Search optimizers" alt="" coords="151,71,313,112"/>
+<area shape="rect" id="node4" href="$group__gradientopt.html" title="Gradient&#45;based Single\l objective optimizers" alt="" coords="149,136,315,177"/>
+</map>

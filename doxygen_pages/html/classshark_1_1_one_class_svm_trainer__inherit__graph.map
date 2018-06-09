@@ -1,0 +1,5 @@
+<map id="shark::OneClassSvmTrainer&lt; InputType, CacheType &gt;" name="shark::OneClassSvmTrainer&lt; InputType, CacheType &gt;">
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="shark::AbstractUnsupervised\lTrainer\&lt; KernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="5,5,215,61"/>
+<area shape="rect" id="node3" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers. " alt="" coords="47,85,173,112"/>
+<area shape="rect" id="node4" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="11,136,209,163"/>
+</map>

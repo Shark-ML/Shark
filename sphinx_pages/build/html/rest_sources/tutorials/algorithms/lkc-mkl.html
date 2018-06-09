@@ -1,0 +1,854 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Linear Kernel Combinations (and a bit of MKL) &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Linear Support Vector Machines" href="linear-svm.html" />
+    <link rel="prev" title="Support Vector Machines: Likelihood-based Model Selection" href="svmLikelihoodModelSelection.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Linear Kernel Combinations (and a bit of MKL)</a><ul>
+<li><a class="reference internal" href="#mkl-and-lkcs-background">MKL and LKCs: Background</a></li>
+<li><a class="reference internal" href="#mkl-and-lkcs-in-shark">MKL and LKCs in Shark</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="svmLikelihoodModelSelection.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Support Vector Machines: Likelihood-based Model Selection</a>
+  <a class="topless" href="linear-svm.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Linear Support Vector Machines</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/lkc-mkl.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="linear-kernel-combinations-and-a-bit-of-mkl">
+<h1>Linear Kernel Combinations (and a bit of MKL)<a class="headerlink" href="#linear-kernel-combinations-and-a-bit-of-mkl" title="Permalink to this headline">¶</a></h1>
+<p>This tutorial first lists some background information on Multiple Kernel
+Learning (MKL) algorithms and Linear Kernel Combinations (LKCs). In the
+second part, we start with the actual, hands-on Shark tutorial. This
+includes a tour of the different kernel functions which might be handy,
+as well as the MKL-typical kernel normalization techniques.</p>
+<p>Shark does not currently include a “canonical” MKL algorithm that
+optimizes the kernel weights and the parameters of an SVM kernel
+expansion jointly. Rather, it offers three kernel classes generally
+used in MKL algorithms. The most general of these is the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_mkl_kernel.html">MklKernel</a>,
+which adds up sub-kernels that can operate on completely different input
+types. The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_subrange_kernel.html">SubrangeKernel</a> lets the sub-kernels operate on different
+index ranges of the same input vector. Finally, the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a>
+simply passes its inputs to all sub-kernels unchanged.</p>
+<p>What you then do with these kernels, i.e., how you choose their weights
+and train the resulting SVM is so far up to you.</p>
+<div class="section" id="mkl-and-lkcs-background">
+<h2>MKL and LKCs: Background<a class="headerlink" href="#mkl-and-lkcs-background" title="Permalink to this headline">¶</a></h2>
+<p>In recent years, so-called Multiple Kernel Learning (MKL) algorithms for
+SVMs have become fashionable; see for example <a class="reference internal" href="#gonen2011" id="id1">[Gonen2011]</a> for a review.
+That line of research has at its core the idea of using, instead of one
+single kernel, a (convex) linear combination of base kernels as a compound
+kernel within an SVM.</p>
+<p>In more detail: if <span class="math notranslate">\(k_1\)</span> and <span class="math notranslate">\(k_2\)</span> are positive definite kernel
+functions, then</p>
+<div class="math notranslate">
+\[k = a \cdot k_1 + b \cdot k_2\]</div>
+<p>is again a positive definite kernel for <span class="math notranslate">\(a \geq 0\)</span> and <span class="math notranslate">\(b \geq 0\)</span>
+(and <span class="math notranslate">\(k \neq 0\)</span>). Most of the MKL literature is based on linear kernel
+combinations (LKCs) of the general form</p>
+<div class="math notranslate">
+\[\begin{split}k = \sum_i \theta_i k_i \; , \\
+\theta_i \geq 0\end{split}\]</div>
+<p>Multiple Kernel Learning then refers to learning the positive, real-valued weight vector
+<span class="math notranslate">\(\theta\)</span>. Often, an additional constraint is enforced on the kernel weights, for
+example <span class="math notranslate">\(\|\theta\|^2 \leq 1\)</span>. It should be noted that the process of learning the
+kernel weights (and possibly including training the SVM at the same time) is referred to
+as MKL, but merely employing an LKC is not. The most prominent school of MKL algorithms
+share the following characteristics:</p>
+<ul class="simple">
+<li>The kernel weights <span class="math notranslate">\(\theta\)</span> are optimized together with the SVM weight vector
+<span class="math notranslate">\(\alpha\)</span> (or <span class="math notranslate">\(w\)</span> ) in one single, joint optimization problem. See
+<a class="reference internal" href="#kloft2011" id="id2">[Kloft2011]</a> or <a class="reference internal" href="#gonen2011" id="id3">[Gonen2011]</a>.</li>
+<li>The sub-kernels <span class="math notranslate">\(k_i\)</span> are usually regarded as (pseudo-)parameterless. In other
+words, if the sub-kernels do have parameters, these are fixed to one particular value
+and not optimized.</li>
+</ul>
+<p>Since learning the kernel weights is integrated into the (modified) main SVM problem
+such that it remains convex, proponents of MKL argue that MKL is a convincing way of
+“learning a kernel”: the weights are guaranteed to reach “the” global optimum to the
+optimization problem. On the other hand, just because a problem is convex does not
+mean that it is helpful and/or that the base kernels were selected in a helpful way.</p>
+<p>A second school of MKL algorithms employ a two-stage process. First, the kernel weights
+are optimized using, for example, the kernel-target alignment as a criterion. In the
+second step, the full SVM is then trained as usual with fixed kernel weights.</p>
+<p>In practice and for many applications, the experimental results of a wide range of MKL
+algorithms have proven not very convincing <a class="reference internal" href="#gonen2011" id="id4">[Gonen2011]</a>.</p>
+<p>Regardless of the kernel weight optimization strategy used and its respective success,
+it is instructive to recall the two (different) main motivations for using LKCs in a
+learning task:</p>
+<ul class="simple">
+<li>In the first scenario, each kernel operates on the exact same set of features.
+That is, the input to each sub-kernel <span class="math notranslate">\(k_i\)</span> is the same as the one to the
+“mother” kernel <span class="math notranslate">\(k\)</span>. The sub-kernels may then either stem from different
+kernel function families, or basically be the same mathematical function but
+with different parameters. The most popular scenario or argument made for such
+a setting is that this way, each sub-kernel can be viewed as a candidate kernel
+for solving the problem at hand. Instead of selecting the kernel family type and/or
+the sub-kernels’ parameters in a traditional grid-search (or other hyperparameter
+optimization) setting, MKL algorithms can “choose” their favorite kernel themselves,
+and thus the best sub-kernel parameter, by increasing the weights <span class="math notranslate">\(\theta_i\)</span>
+for all sub-kernels <span class="math notranslate">\(k_i\)</span> which have a meaningful sub-kernel parameter. This
+is sometimes seen by MKL proponents as eliminating or circumventing the SVM model
+selection problem. We will refer to this first scenario as the MKL kernel selection
+scenario.</li>
+<li>In the second scenario, each kernel operates on a different sub-range of the
+input feature vectors. This is for example desired when the feature vector is a
+concatenation of data obtained through different methods, or reflecting different
+properties of the samples. For example, in image processing and computer vision,
+it is common practice to concatenate a color histogram and a histogram of gradients,
+etc. Another typical application domain is biological data, where many different
+ways to characterize or measure the properties of a molecule are conceivable.
+We will refer to this second scenario as the MKL information integration scenario.</li>
+</ul>
+<p>Of course, hybrid scenarios, combining both of the above approaches, are conceiveable.</p>
+</div>
+<div class="section" id="mkl-and-lkcs-in-shark">
+<h2>MKL and LKCs in Shark<a class="headerlink" href="#mkl-and-lkcs-in-shark" title="Permalink to this headline">¶</a></h2>
+<p>Shark offers three classes which allow for positive linear combinations of
+sub-kernels: The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a>, the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_subrange_kernel.html">SubrangeKernel</a>, and
+the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_mkl_kernel.html">MklKernel</a>. All three will be described below. But here in short:
+in the WeightedSumKernel, the same input gets passed to all sub-kernels. With
+the SubrangeKernel, each sub-kernel operates on a certain index range of an
+input vector. The MklKernel allows the sub-kernels to be completely heterogenous
+(e.g., one operating on a custom data structure and one on a RealVector).</p>
+<p>Throughout the tutorial, we will use the following includes and namespaces:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;shark/Data/Dataset.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Core/Random.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Algorithms/Trainers/NormalizeKernelUnitVariance.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/GaussianRbfKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/WeightedSumKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/SubrangeKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/MklKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/LinearKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/DiscreteKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/PolynomialKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;boost/fusion/algorithm/iteration/fold.hpp&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;boost/fusion/include/as_vector.hpp&gt;</span><span class="cp"></span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">shark</span><span class="p">;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>and (almost everywhere) two two-dimensional test points like so:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// test points</span>
+<span class="n">RealVector</span> <span class="nf">x1</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">x1</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+<span class="n">x1</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+<span class="n">RealVector</span> <span class="nf">x2</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">x2</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">=-</span><span class="mi">2</span><span class="p">;</span>
+<span class="n">x2</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+</pre></div>
+</div>
+<div class="section" id="the-weightedsumkernel">
+<h3>The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a><a class="headerlink" href="#the-weightedsumkernel" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a> class implements a kernel</p>
+<div class="math notranslate">
+\[k(x,z) = \frac{\sum_i \theta_i k_i(x,z)}{\sum_i \theta_i} \;\]</div>
+<p>with the first kernel weight always fixed to one (eliminating one redundant
+degree of freedom). The denominator serves to normalize the kernel by the
+sum of the sub-kernel weights. Note that internally, <strong>the kernel weights
+are computed as exponentials of the externally visible parameters</strong>. To be
+clear: in other words, when you set a parameter vector, it will only affect
+the <span class="math notranslate">\(N-1\)</span> last kernel weights (the first one being fixed to one [or
+zero, in parameter space]), and the weights will be the exponentials
+of what you passed as parameter vector. The latter is done to support
+unconstrained optimization (no matter what parameters you set, you always
+get positive weights). We next set up two base kernels like so:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// initialize kernels</span>
+<span class="n">DenseRbfKernel</span> <span class="nf">baseKernel1</span><span class="p">(</span> <span class="mf">0.1</span> <span class="p">);</span>
+<span class="n">DenseRbfKernel</span> <span class="nf">baseKernel2</span><span class="p">(</span> <span class="mf">0.01</span> <span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span> <span class="n">AbstractKernelFunction</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="o">*</span> <span class="o">&gt;</span> <span class="n">kernels1</span><span class="p">;</span>
+<span class="n">kernels1</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">baseKernel1</span> <span class="p">);</span>
+<span class="n">kernels1</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">baseKernel2</span> <span class="p">);</span>
+<span class="n">DenseWeightedSumKernel</span> <span class="nf">kernel1</span><span class="p">(</span> <span class="n">kernels1</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>where DenseRbfKernel is a shorthand typedef for an template input type of
+RealVector. This is all needed to know to get started – with maybe one
+addition: the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a> (and in fact, all three LKC kernels
+presented in this tutorial) offer three further methods, <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html#aa433177f587bf2a79c7ec36977f15f00">setAdaptive()</a>,
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html#a227f996baf7f509c9cfe2e95f0ba1135">setAdaptiveAll()</a>, and <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html#a86efd4f545c8abf4caea4d9c38589e80">isAdaptive()</a>. These set or show whether a
+sub-kernel’s sub-parameters are part of the overall parameter vector:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span> <span class="nf">setAdaptive</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">index</span><span class="p">,</span> <span class="kt">bool</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">true</span> <span class="p">){...}</span>
+<span class="kt">void</span> <span class="nf">setAdaptiveAll</span><span class="p">(</span> <span class="kt">bool</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">true</span> <span class="p">)</span> <span class="p">{...}</span>
+<span class="kt">bool</span> <span class="nf">isAdaptive</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">index</span> <span class="p">)</span> <span class="k">const</span> <span class="p">{...}</span>
+</pre></div>
+</div>
+<p>By default, the sub-kernels contribution to the overall parameter vector is turned
+<strong>off</strong>. That is, the only parameters initially visible are the <span class="math notranslate">\(N-1\)</span> last
+kernel weights (the first one being fixed to one [or zero, in parameter space]).
+Lines of code say it best:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// examine initial state</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ======================= WeightedSumKernel: ======================= &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// change something</span>
+<span class="n">RealVector</span> <span class="nf">new_params_1</span><span class="p">(</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="p">);</span>
+<span class="n">new_params_1</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+<span class="n">kernel1</span><span class="p">.</span><span class="n">setParameterVector</span><span class="p">(</span> <span class="n">new_params_1</span> <span class="p">);</span>
+
+
+<span class="c1">// examine again</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.parameterVector() with 1st parameter set to 1: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// change something else</span>
+<span class="n">kernel1</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// examine once more</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// another change</span>
+<span class="n">kernel1</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">false</span><span class="p">);</span>
+<span class="n">kernel1</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// examining again</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// last change</span>
+<span class="n">kernel1</span><span class="p">.</span><span class="n">setAdaptiveAll</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// last examination</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel1.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel1</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The output of this should be:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>kernel1.isAdaptive(0): 0
+kernel1.isAdaptive(1): 0
+kernel1.numberOfParameters(): 1
+kernel1.parameterVector(): [1](0)
+kernel1.eval(x1,x2): 0.52702
+
+kernel1.parameterVector() with 1st parameter set to 1: [1](1)
+kernel1.eval(x1,x2): 0.677265
+
+kernel1.isAdaptive(0): 1
+kernel1.isAdaptive(1): 0
+kernel1.numberOfParameters(): 2
+kernel1.parameterVector(): [2](1,0.1)
+
+kernel1.isAdaptive(0): 0
+kernel1.isAdaptive(1): 1
+kernel1.numberOfParameters(): 2
+kernel1.parameterVector(): [2](1,0.01)
+
+kernel1.isAdaptive(0): 1
+kernel1.isAdaptive(1): 1
+kernel1.numberOfParameters(): 3
+kernel1.parameterVector(): [3](1,0.1,0.01)
+kernel1.eval(x1,x2): 0.677265
+</pre></div>
+</div>
+<p>The kernel evaluations yield exactly what we would expect:</p>
+<div class="math notranslate">
+\[\begin{split}\frac{( 1.0*\exp(-0.1*16) + 1.0*\exp(-0.01*16) ) }{ ( 1.0 + 1.0 )} = 0.527020 \\
+\frac{( 1.0*\exp(-0.1*16) + e*\exp(-0.01*16) ) }{ ( 1.0 + e )} = 0.677265 \; .\end{split}\]</div>
+<p>The above should also make clear how the sub-kernels’ sub-parameters are “seen”
+by other Shark algorithms, for example during external parameter optimization.</p>
+</div>
+<div class="section" id="the-subrangekernel">
+<h3>The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_subrange_kernel.html">SubrangeKernel</a><a class="headerlink" href="#the-subrangekernel" title="Permalink to this headline">¶</a></h3>
+<p>The second LKC class is the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_subrange_kernel.html">SubrangeKernel</a>. This is similar to the
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a>, but tailored to the above mentioned “information
+integration scenario”. Before, in the “kernel selection scenario”, each
+sub-kernel operated on the entire, full feature vector. In the “information
+integration scenario”, each sub-kernel only operates on a continuous sub-set
+of the feature vector:</p>
+<div class="math notranslate">
+\[k(x,z) = \frac{ \sum_i \theta_i k_i(x_{b_{i}-e_{i}},z_{b_{i}-e_{i}}) } { \sum_i \theta_i } \, .\]</div>
+<p>The index range <span class="math notranslate">\(b_{i}-e_{i}\)</span> denotes the <span class="math notranslate">\(i\)</span>-th continuous
+sub-range (inclusive beginning to exclusive end) of the overall feature vector.
+Naturally, we need to pass these index pairs to the SubrangeKernel for each
+sub-kernel. This is done during construction. First, we set up the sub-kernels
+as before:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DenseRbfKernel</span> <span class="nf">baseKernel3</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span>
+<span class="n">DenseRbfKernel</span> <span class="nf">baseKernel4</span><span class="p">(</span><span class="mf">0.01</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">AbstractKernelFunction</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;*</span> <span class="o">&gt;</span> <span class="n">kernels2</span><span class="p">;</span>
+<span class="n">kernels2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">&amp;</span><span class="n">baseKernel3</span><span class="p">);</span>
+<span class="n">kernels2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">&amp;</span><span class="n">baseKernel4</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Next, we set up a vector of index pairs for the begin- and end-indices for
+each sub-kernel. The SubrangeKernel itself is constructed by passing one
+vector of kernels and one of indices:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">indcs_1</span><span class="p">;</span>
+<span class="n">indcs_1</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">2</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">indcs_1</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">2</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">DenseSubrangeKernel</span> <span class="nf">kernel2</span><span class="p">(</span> <span class="n">kernels2</span><span class="p">,</span> <span class="n">indcs_1</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>In fact, the SubrangeKernel inherits from the WeightedSumKernel. Thus, besides
+the constructor, the interfaces are identical. For starters, we let both kernels
+treat all features. This is equivalent to the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a> example
+above, as shown by the corresponding commands:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// examine initial state</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ======================= SubrangeKernel, full index range: ======================= &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// change something</span>
+<span class="n">RealVector</span> <span class="nf">new_params_2</span><span class="p">(</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="p">);</span>
+<span class="n">new_params_2</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+<span class="n">kernel2</span><span class="p">.</span><span class="n">setParameterVector</span><span class="p">(</span> <span class="n">new_params_2</span> <span class="p">);</span>
+
+
+<span class="c1">// examine again</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.parameterVector() with 1st parameter set to 1: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// change something else</span>
+<span class="n">kernel2</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// examine once more</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// another change</span>
+<span class="n">kernel2</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">false</span><span class="p">);</span>
+<span class="n">kernel2</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// examining again</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// last change</span>
+<span class="n">kernel2</span><span class="p">.</span><span class="n">setAdaptiveAll</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// last examination</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel2.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel2</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>and its resulting output:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>kernel2.isAdaptive(0): 0
+kernel2.isAdaptive(1): 0
+kernel2.numberOfParameters(): 1
+kernel2.parameterVector(): [1](0)
+kernel2.eval(x1,x2): 0.52702
+
+kernel2.parameterVector() with 1st parameter set to 1: [1](1)
+kernel2.eval(x1,x2): 0.677265
+
+kernel2.isAdaptive(0): 1
+kernel2.isAdaptive(1): 0
+kernel2.numberOfParameters(): 2
+kernel2.parameterVector(): [2](1,0.1)
+
+kernel2.isAdaptive(0): 0
+kernel2.isAdaptive(1): 1
+kernel2.numberOfParameters(): 2
+kernel2.parameterVector(): [2](1,0.01)
+
+kernel2.isAdaptive(0): 1
+kernel2.isAdaptive(1): 1
+kernel2.numberOfParameters(): 3
+kernel2.parameterVector(): [3](1,0.1,0.01)
+kernel2.eval(x1,x2): 0.677265
+</pre></div>
+</div>
+<p>Now we repeat the above scenario again, however with each sub-kernel operating
+on different feature ranges. Setting up the kernels and indices…:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DenseRbfKernel</span> <span class="nf">baseKernel5</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span>
+<span class="n">DenseRbfKernel</span> <span class="nf">baseKernel6</span><span class="p">(</span><span class="mf">0.01</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">AbstractKernelFunction</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;*</span> <span class="o">&gt;</span> <span class="n">kernels3</span><span class="p">;</span>
+<span class="n">kernels3</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">&amp;</span><span class="n">baseKernel5</span><span class="p">);</span>
+<span class="n">kernels3</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="o">&amp;</span><span class="n">baseKernel6</span><span class="p">);</span>
+
+
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">indcs_2</span><span class="p">;</span>
+<span class="n">indcs_2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">indcs_2</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">1</span><span class="p">,</span><span class="mi">2</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">DenseSubrangeKernel</span> <span class="nf">kernel3</span><span class="p">(</span> <span class="n">kernels3</span><span class="p">,</span> <span class="n">indcs_2</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>… and again issuing the familiar commands:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// examine initial state</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ======================= SubrangeKernel partial index range: ======================= &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// change something</span>
+<span class="n">RealVector</span> <span class="nf">new_params_3</span><span class="p">(</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="p">);</span>
+<span class="n">new_params_3</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+<span class="n">kernel3</span><span class="p">.</span><span class="n">setParameterVector</span><span class="p">(</span> <span class="n">new_params_3</span> <span class="p">);</span>
+
+
+<span class="c1">// examine again</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.parameterVector() with 1st parameter set to 1: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// change something else</span>
+<span class="n">kernel3</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// examine once more</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// another change</span>
+<span class="n">kernel3</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">false</span><span class="p">);</span>
+<span class="n">kernel3</span><span class="p">.</span><span class="n">setAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// examining again</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+
+
+<span class="c1">// last change</span>
+<span class="n">kernel3</span><span class="p">.</span><span class="n">setAdaptiveAll</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+
+
+<span class="c1">// last examination</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;kernel3.eval(x1,x2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel3</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We would now expect as outcome of the kernel computations:</p>
+<div class="math notranslate">
+\[\begin{split}\frac{( 1.0*\exp(-0.1*16) + 1.0*\exp(-0.01*0) )}{( 1.0 + 1.0 )} = 0.600948 \\
+\frac{( 1.0*\exp(-0.1*16) + e*\exp(-0.01*0) )} {( 1.0 + e )} = 0.785357\end{split}\]</div>
+<p>Both values are exactly what we get from the code output:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>kernel3.isAdaptive(0): 0
+kernel3.isAdaptive(1): 0
+kernel3.numberOfParameters(): 1
+kernel3.parameterVector(): [1](0)
+kernel3.eval(x1,x2): 0.600948
+
+kernel3.parameterVector() with 1st parameter set to 1: [1](1)
+kernel3.eval(x1,x2): 0.785357
+
+kernel3.isAdaptive(0): 1
+kernel3.isAdaptive(1): 0
+kernel3.numberOfParameters(): 2
+kernel3.parameterVector(): [2](1,0.1)
+
+kernel3.isAdaptive(0): 0
+kernel3.isAdaptive(1): 1
+kernel3.numberOfParameters(): 2
+kernel3.parameterVector(): [2](1,0.01)
+
+kernel3.isAdaptive(0): 1
+kernel3.isAdaptive(1): 1
+kernel3.numberOfParameters(): 3
+kernel3.parameterVector(): [3](1,0.1,0.01)
+kernel3.eval(x1,x2): 0.785357
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-mklkernel">
+<h3>The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_mkl_kernel.html">MklKernel</a><a class="headerlink" href="#the-mklkernel" title="Permalink to this headline">¶</a></h3>
+<p>The third class is the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_mkl_kernel.html">MklKernel</a>. It is similar to the WeightedSumKernel
+and the SubrangeKernel, except that it adds up kernels operating on possibly
+completely different inputs:</p>
+<div class="math notranslate">
+\[k(x,z) = \frac{ \sum_i \theta_i k_i(x_i,z_i) } { \sum_i \theta_i } \, .\]</div>
+<p>That is, <span class="math notranslate">\(x_i\)</span> and <span class="math notranslate">\(x_j\)</span> (and hence <span class="math notranslate">\(k_i\)</span> and <span class="math notranslate">\(k_j\)</span>)
+are allowed to have very different structure (rather than merely being different
+subranges of the same input vector). The MklKernel thus allows for the most
+diverse information integration settings. This flexibility comes at a small
+price of added usage code complexity.</p>
+<p>First, there is the question what data type the aggregated tuple of sub-inputs
+<span class="math notranslate">\(x=(x_0,x_1,...)\)</span> should have. Shark currently supports binding macros for
+arbitrary structures to boost::fusion. For most purposes, it is easiest to declare a
+struct as a composite data type and then adapt it for boost::fusion, like so:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">HeterogeneousInputStruct</span><span class="p">{</span>
+    <span class="n">shark</span><span class="o">::</span><span class="n">RealVector</span> <span class="n">rv1</span><span class="p">;</span>
+    <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">st2</span><span class="p">;</span>
+    <span class="n">shark</span><span class="o">::</span><span class="n">RealVector</span> <span class="n">crv3</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="cp">#ifndef DOXYGEN_SHOULD_SKIP_THIS</span>
+    <span class="n">BOOST_FUSION_ADAPT_STRUCT</span><span class="p">(</span>
+        <span class="n">HeterogeneousInputStruct</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">shark</span><span class="o">::</span><span class="n">RealVector</span><span class="p">,</span> <span class="n">rv1</span><span class="p">)(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">st2</span><span class="p">)(</span><span class="n">shark</span><span class="o">::</span><span class="n">RealVector</span><span class="p">,</span> <span class="n">crv3</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="cp">#endif </span><span class="cm">/* DOXYGEN_SHOULD_SKIP_THIS */</span><span class="cp"></span>
+
+<span class="k">namespace</span> <span class="n">shark</span><span class="p">{</span>
+    <span class="k">template</span><span class="o">&lt;&gt;</span>
+    <span class="k">struct</span> <span class="n">Batch</span><span class="o">&lt;</span> <span class="n">HeterogeneousInputStruct</span> <span class="o">&gt;</span><span class="p">{</span>
+        <span class="n">SHARK_CREATE_BATCH_INTERFACE_NO_TPL</span><span class="p">(</span>
+            <span class="n">HeterogeneousInputStruct</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">shark</span><span class="o">::</span><span class="n">RealVector</span><span class="p">,</span> <span class="n">rv1</span><span class="p">)(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">st2</span><span class="p">)(</span><span class="n">shark</span><span class="o">::</span><span class="n">RealVector</span><span class="p">,</span> <span class="n">crv3</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">};</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Here, the first block declares the structure itself. The second block tells
+boost::fusion that the struct can be seen or treated as a tuple. The third
+block tells Shark to create a suitable batch structure (cf.
+<a class="reference internal" href="../concepts/library_design/batches.html"><span class="doc">the Batch tutorial</span></a>) for it. (Side
+note: the code is in the beginning of the overall tutorial .cpp file because
+the two macros require to be called at global scope.)</p>
+<p>Now that we created and announced the data structure, we fill it with data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set dimensions for data</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="k">const</span> <span class="n">num_samples</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="k">const</span> <span class="n">dim_nonzeros</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="k">const</span> <span class="n">max_elem_discr_kernel</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="k">const</span> <span class="n">dim_sparse</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+<span class="c1">// create temporary helper container</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">HeterogeneousInputStruct</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">(</span> <span class="n">num_samples</span> <span class="p">);</span>
+<span class="c1">// and fill it</span>
+<span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">rv1</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span> <span class="n">dim_nonzeros</span> <span class="p">);</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">crv3</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span> <span class="n">dim_sparse</span><span class="p">);</span> <span class="c1">//size 5</span>
+<span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">rv1</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span> <span class="n">dim_nonzeros</span> <span class="p">);</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">crv3</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span> <span class="n">dim_sparse</span><span class="p">);</span> <span class="c1">//size 5</span>
+<span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">rv1</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">rv1</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">crv3</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">crv3</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="mf">8.0</span><span class="p">;</span>
+<span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">rv1</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">rv1</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">crv3</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span>  <span class="mf">1.0</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">crv3</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+<span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="n">st2</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">st2</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+<span class="c1">// and use it to create the &#39;real&#39; dataset</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="n">HeterogeneousInputStruct</span><span class="o">&gt;</span> <span class="n">dataset</span> <span class="o">=</span> <span class="n">createDataFromRange</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="mi">10</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>Next, we create all sub-kernels and the overall MklKernel:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">//create state matrix for the discrete kernel. necessary but not so relevant</span>
+<span class="n">RealMatrix</span> <span class="nf">matK</span><span class="p">(</span> <span class="n">max_elem_discr_kernel</span><span class="p">,</span> <span class="n">max_elem_discr_kernel</span> <span class="p">);</span>
+<span class="n">matK</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">;</span> <span class="n">matK</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>  <span class="n">matK</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
+<span class="n">matK</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">matK</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">;</span> <span class="n">matK</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">matK</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">;</span>  <span class="n">matK</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">matK</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.6</span><span class="p">;</span>
+<span class="c1">// set up base kernels</span>
+<span class="n">DenseRbfKernel</span> <span class="nf">baseKernelRV1</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span>
+<span class="n">DiscreteKernel</span> <span class="nf">baseKernelST2</span><span class="p">(</span><span class="n">matK</span><span class="p">);</span>
+<span class="n">DenseLinearKernel</span> <span class="n">baseKernelCRV3</span><span class="p">;</span>
+<span class="n">MklKernel</span><span class="o">&lt;</span><span class="n">HeterogeneousInputStruct</span><span class="o">&gt;</span> <span class="n">mkl_kernel</span><span class="p">(</span> <span class="n">boost</span><span class="o">::</span><span class="n">fusion</span><span class="o">::</span><span class="n">make_vector</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">baseKernelRV1</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">baseKernelST2</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">baseKernelCRV3</span><span class="p">)</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>The first three lines provide a state matrix for the discrete kernel (basically
+a look-up matrix). The second three set up the three base kernels as usual.
+The last line finally creates the MklKernel via yet another boost::fusion
+command.</p>
+<p>We now again examine the MklKernel’s state after creation:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// examine initial state</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ======================= MklKernel: ======================= &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.isAdaptive(2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.eval( dataset.element(0), dataset.element(1) ): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span> <span class="n">dataset</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">dataset</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>It behaves similar to what we saw from the previous kernels. Next we
+make all sub-parameters (i.e., the RbfKernel’s bandwidth) adaptive and
+change two parameters:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// change something</span>
+<span class="n">mkl_kernel</span><span class="p">.</span><span class="n">setAdaptiveAll</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">RealVector</span> <span class="nf">new_params_4</span><span class="p">(</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="p">);</span>
+<span class="n">new_params_4</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
+<span class="n">new_params_4</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">;</span>
+<span class="n">mkl_kernel</span><span class="p">.</span><span class="n">setParameterVector</span><span class="p">(</span> <span class="n">new_params_4</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>Code to examine the outcome:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// examine effects</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.isAdaptive(0): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.isAdaptive(1): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.isAdaptive(2): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">isAdaptive</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.numberOfParameters(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">numberOfParameters</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.parameterVector(): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;mkl_kernel.eval( dataset.element(0), dataset.element(1) ): &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">mkl_kernel</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span> <span class="n">dataset</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">dataset</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>We would expect the kernel evaluations to yield:</p>
+<div class="math notranslate">
+\[\begin{split}\frac{( 1.0*\exp(-0.1*1.0) + 1.0*0.6 + 1.0*(-0.5*1.0) )} {( 1.0 + 1.0 + 1.0 )} = 0.334946 \\
+\frac{( 1.0*\exp(-0.2*1.0) + e*0.6 + 1.0*(-0.5*1.0) )} {( 1.0 + e + 1.0   )} = 0.413222\end{split}\]</div>
+<p>Both values are exactly what we get from the code’s output:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>mkl_kernel.isAdaptive(0): 0
+mkl_kernel.isAdaptive(1): 0
+mkl_kernel.isAdaptive(2): 0
+mkl_kernel.numberOfParameters(): 2
+mkl_kernel.parameterVector(): [2](0,0)
+mkl_kernel.eval( dataset.element(0), dataset.element(1) ): 0.334946
+
+mkl_kernel.isAdaptive(0): 1
+mkl_kernel.isAdaptive(1): 1
+mkl_kernel.isAdaptive(2): 1
+mkl_kernel.numberOfParameters(): 3
+mkl_kernel.parameterVector(): [3](1,0,0.2)
+mkl_kernel.eval( dataset.element(0), dataset.element(1) ): 0.413222
+</pre></div>
+</div>
+</div>
+<div class="section" id="mkl-kernel-normalization">
+<h3>MKL Kernel Normalization<a class="headerlink" href="#mkl-kernel-normalization" title="Permalink to this headline">¶</a></h3>
+<p>Since many MKL formulations penalize the (<span class="math notranslate">\(l_p\)</span>-) norm of the kernel weights,
+the optimization objective could always be improved by substituting the base kernels
+for a common multiple of themselves. For this reason, the (<span class="math notranslate">\(l_p\)</span>-) norm is
+usually constrained to a certain value or value range. Similarly, rescaling of
+individual kernels (as opposed to changing their associated kernel weight) can
+influence the solution found by MKL algorithms. Canonical MKL formulations hence rely
+on normalization of the kernel (or data) to unit interval in feature space. Although
+Shark does not currently offer a canonical MKL SVM algorithm, we provide a trainer
+for “multiplicative normalization” of a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_mkl_kernel.html">MklKernel</a> function (see <a class="reference internal" href="#kloft2011" id="id5">[Kloft2011]</a>).</p>
+<p>In detail, the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_scaled_kernel.html">ScaledKernel</a> wraps an existing kernel to multiply it by a
+fixed constant. The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_normalize_kernel_unit_variance.html">NormalizeKernelUnitVariance</a> class is a Trainer which
+initializes this scaling factor of the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_scaled_kernel.html">ScaledKernel</a>. To normalize a kernel
+to unit variance in feature space, we first create and fill an example dataset of
+200 9-dimensional samples with random content:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">num_dims</span> <span class="o">=</span> <span class="mi">9</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">num_points</span> <span class="o">=</span> <span class="mi">200</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="n">input</span><span class="p">(</span><span class="n">num_points</span><span class="p">);</span>
+<span class="n">RealVector</span> <span class="nf">v</span><span class="p">(</span><span class="n">num_dims</span><span class="p">);</span>
+<span class="k">for</span> <span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">num_points</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">num_dims</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span> <span class="p">)</span>
+        <span class="n">v</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="o">=</span> <span class="n">random</span><span class="o">::</span><span class="n">uni</span><span class="p">(</span><span class="n">random</span><span class="o">::</span><span class="n">globalRng</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+    <span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">UnlabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="n">rand_data</span> <span class="o">=</span> <span class="n">createDataFromRange</span><span class="p">(</span> <span class="n">input</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>Now let’s say we have the following three member kernels and want to build an LKC
+from them:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// declare kernels</span>
+<span class="n">DenseRbfKernel</span>         <span class="nf">unnormalized_kernel1</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span>
+<span class="n">DenseLinearKernel</span>      <span class="n">unnormalized_kernel2</span><span class="p">;</span>
+<span class="n">DensePolynomialKernel</span>  <span class="nf">unnormalized_kernel3</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">);</span>
+<span class="c1">// declare indices</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="o">&gt;</span> <span class="o">&gt;</span> <span class="n">indices</span><span class="p">;</span>
+<span class="n">indices</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span><span class="mi">3</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">indices</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">3</span><span class="p">,</span><span class="mi">6</span> <span class="p">)</span> <span class="p">);</span>
+<span class="n">indices</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="n">make_pair</span><span class="p">(</span> <span class="mi">6</span><span class="p">,</span><span class="mi">9</span> <span class="p">)</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>From the first kernel, we declare a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_scaled_kernel.html">ScaledKernel</a>, which we then
+normalize on the given dataset using a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_normalize_kernel_unit_variance.html">NormalizeKernelUnitVariance</a>
+trainer:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">DenseScaledKernel</span> <span class="nf">scale</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">unnormalized_kernel3</span> <span class="p">);</span>
+<span class="n">NormalizeKernelUnitVariance</span><span class="o">&lt;&gt;</span> <span class="n">normalizer</span><span class="p">;</span>
+<span class="n">normalizer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span> <span class="n">scale</span><span class="p">,</span> <span class="n">rand_data</span> <span class="p">);</span>
+</pre></div>
+</div>
+<p>Note that the kernel does not know about the dataset, but is influenced by it
+indirectly through the trainer. Now we’re done. We finally examine the results
+from the scaled kernel and trainer, and also re-calculate the kernel’s variance
+after normalization by hand to verify that it indeed is equal to 1.0:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; ======================= Kernel normalization: ======================= &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Done training. Factor is &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">scale</span><span class="p">.</span><span class="n">factor</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Mean                   = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">normalizer</span><span class="p">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Trace                  = &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">normalizer</span><span class="p">.</span><span class="n">trace</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="c1">//check in feature space</span>
+<span class="kt">double</span> <span class="n">control</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">num_points</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+    <span class="n">control</span> <span class="o">+=</span> <span class="n">scale</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">j</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">&lt;</span><span class="n">num_points</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span> <span class="p">)</span> <span class="p">{</span>
+        <span class="n">control</span> <span class="o">-=</span> <span class="n">scale</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">input</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">input</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">/</span> <span class="n">num_points</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">control</span> <span class="o">/=</span> <span class="n">num_points</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Resulting variance of scaled Kernel: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">control</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This will result in output similar to the following (the first three lines
+may vary due to the randomized dataset):</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Done training. Factor is 0.0677846
+Mean                   = 83774.4
+Trace                  = 3369.39
+
+Resulting variance of scaled Kernel: 1
+</pre></div>
+</div>
+<p>In the same way, we could also normalize the other two sub-kernels to unit variance
+in feature space. Then, we could correct the following code snippet to build a
+SubrangeKernel from three properly normalized kernels:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">AbstractKernelFunction</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;*</span> <span class="o">&gt;</span> <span class="n">kernels4</span><span class="p">;</span>
+<span class="n">kernels4</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">unnormalized_kernel1</span> <span class="p">);</span>
+<span class="n">kernels4</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">unnormalized_kernel2</span> <span class="p">);</span>
+<span class="n">kernels4</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span> <span class="o">&amp;</span><span class="n">scale</span> <span class="p">);</span>
+<span class="n">DenseSubrangeKernel</span> <span class="nf">kernel4</span><span class="p">(</span> <span class="n">kernels4</span><span class="p">,</span> <span class="n">indices</span> <span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tutorial-source-code">
+<h3>Tutorial source code<a class="headerlink" href="#tutorial-source-code" title="Permalink to this headline">¶</a></h3>
+<p>You can find the aggregated version of this tutorial’s code in
+<code class="docutils literal notranslate"><span class="pre">examples/Supervised/MklKernelTutorial.cpp</span></code> (as generated from
+its according .tpp file).</p>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="gonen2011" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Gonen2011]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> <ol class="last upperalpha simple" start="13">
+<li>Gönen, E. Alpaydin: Multiple Kernel Learning Algorithms. Journal of Machine Learning Research 12, 2011.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="kloft2011" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Kloft2011]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id5">2</a>)</em> <ol class="last upperalpha simple" start="13">
+<li>Kloft, U. Brefeld, S. Sonnenburg, A. Zien: <span class="math notranslate">\(l_p\)</span>-Norm Multiple Kernel Learning. Journal of Machine Learning Research 12, 2011.</li>
+</ol>
+</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

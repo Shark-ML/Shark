@@ -1,0 +1,188 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Iterative Calculation of Statistics &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Serialization" href="serialization.html" />
+    <link rel="prev" title="Shark Conventions for Derivatives" href="../optimization/conventions_derivatives.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../index.html">
+          <img class="logo" src="../../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+<div>
+  <a class="topless" href="../optimization/conventions_derivatives.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Shark Conventions for Derivatives</a>
+  <a class="topless" href="serialization.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Serialization</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/misc/statistics.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="iterative-calculation-of-statistics">
+<h1>Iterative Calculation of Statistics<a class="headerlink" href="#iterative-calculation-of-statistics" title="Permalink to this headline">¶</a></h1>
+<p>The Shark machine learning library includes a component for
+iteratively calculating simple descriptive statistics of a
+sequence of points for experimental evaluation. The class <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1statistics_1_1_result_table.html">ResultTable</a>
+includes a simple data aggregation tool that for a set of experiments
+with different parameters  aggregates results over a set of trials. It
+supports missing values to reflect failed trials as well.
+The class <a class="reference external" href="../../../../../../../doxygen_pages/html/structshark_1_1statistics_1_1_statistics.html">Statistics</a> takes these results to cpmpute a set of statistics.
+The class offers the possibility to label the dimensions of the points and statistics
+to automatically generate human readable output, for example in a csv table.</p>
+<p>For this simple application, we are going to generate some points from
+a gaussian distribution and then mark some points as missing.
+For this experiment, we need the following header files:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;shark/Statistics/Statistics.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Core/Random.h&gt;</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>We start out by creating an object of class <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1statistics_1_1_result_table.html">ResultTable</a>.
+We give the table a name and also label the inputs as to generate
+a more readable output later on:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">statistics</span><span class="o">::</span><span class="n">ResultTable</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">table</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="s">&quot;VarianceOfGaussian&quot;</span><span class="p">);</span><span class="c1">//set a name for the results</span>
+<span class="n">table</span><span class="p">.</span><span class="n">setDimensionName</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s">&quot;input1&quot;</span><span class="p">);</span>
+<span class="n">table</span><span class="p">.</span><span class="n">setDimensionName</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="s">&quot;input2&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Now we feed numbers into this object. For demonstration purposes we
+sample 10,000 i.i.d. standard normally distributed values with varying
+variance. To simulate a failed experiment, we make a coin toss for variable two
+and mark this input as missing. Finally, we insert the values into the table:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Fill the table with randomly generated numbers for different variances and mean and also add missing values</span>
+<span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">k</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">;</span> <span class="o">++</span><span class="n">k</span><span class="p">){</span>
+        <span class="kt">double</span> <span class="n">var</span><span class="o">=</span> <span class="mf">10.0</span><span class="o">*</span><span class="n">k</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+                <span class="kt">double</span> <span class="n">value1</span><span class="o">=</span><span class="n">random</span><span class="o">::</span><span class="n">gauss</span><span class="p">(</span><span class="n">random</span><span class="o">::</span><span class="n">globalRng</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="n">var</span><span class="p">);</span>
+                <span class="kt">double</span> <span class="n">value2</span><span class="o">=</span><span class="n">random</span><span class="o">::</span><span class="n">gauss</span><span class="p">(</span><span class="n">random</span><span class="o">::</span><span class="n">globalRng</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="n">var</span><span class="p">);</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">random</span><span class="o">::</span><span class="n">coinToss</span><span class="p">(</span><span class="n">random</span><span class="o">::</span><span class="n">globalRng</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">value2</span><span class="o">=</span><span class="n">statistics</span><span class="o">::</span><span class="n">missingValue</span><span class="p">();</span>
+                <span class="n">table</span><span class="p">.</span><span class="n">update</span><span class="p">(</span><span class="n">var</span><span class="p">,</span><span class="n">value1</span><span class="p">,</span><span class="n">value2</span> <span class="p">);</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Next, we generate a <a class="reference external" href="../../../../../../../doxygen_pages/html/structshark_1_1statistics_1_1_statistics.html">Statistics</a> object and add the statistics, here
+we use Mean, Variance and Percentage of Missing values:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">statistics</span><span class="o">::</span><span class="n">Statistics</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span> <span class="n">stats</span><span class="p">(</span><span class="o">&amp;</span><span class="n">table</span><span class="p">);</span>
+<span class="n">stats</span><span class="p">.</span><span class="n">addStatistic</span><span class="p">(</span><span class="n">statistics</span><span class="o">::</span><span class="n">Mean</span><span class="p">());</span><span class="c1">//adds a statistic &quot;Mean&quot; for each variable</span>
+<span class="n">stats</span><span class="p">.</span><span class="n">addStatistic</span><span class="p">(</span><span class="s">&quot;Variance&quot;</span><span class="p">,</span> <span class="n">statistics</span><span class="o">::</span><span class="n">Variance</span><span class="p">());</span><span class="c1">//explicit name</span>
+<span class="n">stats</span><span class="p">.</span><span class="n">addStatistic</span><span class="p">(</span><span class="s">&quot;Missing&quot;</span><span class="p">,</span> <span class="n">statistics</span><span class="o">::</span><span class="n">FractionMissing</span><span class="p">());</span>
+</pre></div>
+</div>
+<p>We can output a summary as csv file to the console:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">printCSV</span><span class="p">(</span><span class="n">stats</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The results looks similar to:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp"># VarianceOfGausian Mean-input1 Mean-input2 Variance-input1 Variance-input2 Missing-input1 Missing-input2</span>
+<span class="mi">10</span> <span class="mf">0.00500042</span> <span class="o">-</span><span class="mf">0.073452</span> <span class="mf">9.77016</span> <span class="mf">10.1016</span> <span class="mi">0</span> <span class="mf">0.5061</span>
+<span class="mi">20</span> <span class="mf">0.0359687</span> <span class="o">-</span><span class="mf">0.0400334</span> <span class="mf">20.1318</span> <span class="mf">20.2767</span> <span class="mi">0</span> <span class="mf">0.5038</span>
+<span class="mi">30</span> <span class="mf">0.0216264</span> <span class="o">-</span><span class="mf">0.120275</span> <span class="mf">30.3096</span> <span class="mf">29.0293</span> <span class="mi">0</span> <span class="mf">0.5044</span>
+<span class="mi">40</span> <span class="o">-</span><span class="mf">0.0301033</span> <span class="mf">0.0995221</span> <span class="mf">40.3523</span> <span class="mf">40.4839</span> <span class="mi">0</span> <span class="mf">0.4961</span>
+<span class="mi">50</span> <span class="mf">0.00692523</span> <span class="mf">0.118349</span> <span class="mf">48.9781</span> <span class="mf">50.5156</span> <span class="mi">0</span> <span class="mf">0.4936</span>
+<span class="mi">60</span> <span class="o">-</span><span class="mf">0.0133728</span> <span class="o">-</span><span class="mf">0.0109795</span> <span class="mf">57.4287</span> <span class="mf">59.8386</span> <span class="mi">0</span> <span class="mf">0.4903</span>
+<span class="mi">70</span> <span class="o">-</span><span class="mf">0.190326</span> <span class="mf">0.0259554</span> <span class="mf">67.0553</span> <span class="mf">70.0034</span> <span class="mi">0</span> <span class="mf">0.4987</span>
+<span class="mi">80</span> <span class="o">-</span><span class="mf">0.0198076</span> <span class="o">-</span><span class="mf">0.0493343</span> <span class="mf">83.1629</span> <span class="mf">78.0985</span> <span class="mi">0</span> <span class="mf">0.4917</span>
+<span class="mi">90</span> <span class="o">-</span><span class="mf">0.103546</span> <span class="o">-</span><span class="mf">0.263991</span> <span class="mf">92.152</span> <span class="mf">89.3462</span> <span class="mi">0</span> <span class="mf">0.4992</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

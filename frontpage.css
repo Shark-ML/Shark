@@ -1,0 +1,303 @@
+*
+{
+	margin: 0px;
+	padding: 0px;
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 20px;
+	line-height: 130%;
+}
+a:link,
+a:visited
+{
+	color: #a50;
+	text-decoration: none;
+}
+a:hover,
+a:active
+{
+	color: #a50;
+	text-decoration: none;
+	border-bottom: 1px solid #000;
+}
+input
+{
+	background: #fff;
+	color: #aaa;
+	border: #aaa 1px solid;
+	border-radius: 4px;
+	font-size: 14px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+input:focus
+{
+	background: #fff;
+	color: #000;
+}
+h1
+{
+	text-align: center;
+	font-size: 60px;
+	font-weight: bold;
+	margin: 20px 0px 20px 0px;
+	color: #a50;
+}
+h2
+{
+	text-align: center;
+	font-size: 30px;
+	font-weight: bold;
+	font-variant: small-caps;
+	margin: 15px 0px 15px 0px;
+	color: #a50;
+}
+h3
+{
+	text-align: left;
+	font-size: 20px;
+	font-weight: bold;
+	font-variant: small-caps;
+	margin: 20px 0px 10px 0px;
+	color: #a50;
+}
+p
+{
+	margin: 10px 0px 10px 0px;
+	text-align: justify;
+	text-justify: auto;
+}
+ul
+{
+	margin-left: 10px;
+	padding-left: 30px;
+}
+li
+{
+	padding: 4px 0 4px 10px;
+	text-align: justify;
+	text-justify: distribute;
+}
+
+.code {
+	white-space: pre;
+	overflow: hidden;
+	background: #eee;
+	padding: 5px 15px 5px 15px;
+	margin: 10px 0 10px 0;
+	border: 1px solid #888;
+	font-family: monospace;
+	font-size: 11pt;
+}
+
+span.keyword
+{
+	font-family: monospace;
+	font-size: 11pt;
+	color: #00a;
+}
+span.preproc
+{
+	font-family: monospace;
+	font-size: 11pt;
+	color: #060;
+}
+span.string
+{
+	font-family: monospace;
+	font-size: 11pt;
+	color: #a00;
+}
+table.status
+{
+	width: 800px;
+	border: 1px solid #bbb;
+	background: #eee;
+}
+.status th
+{
+	text-align: left;
+	padding: 10px 20px 10px 20px;
+	border-bottom: 1px solid #bbb;
+}
+.status td
+{
+	text-align: left;
+	padding: 10px 20px 10px 20px;
+}
+#header
+{
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	background: #eee;
+	color: #000;
+	border-bottom: 1px solid #bbb;
+	overflow: hidden;
+	z-index: 20;
+}
+#header-content
+{
+	width: 800px;
+	height: 50px;
+	line-height: 50px;
+	margin: 0px auto 0px auto;
+}
+#shark
+{
+	font-size: 30px;
+	vertical-align: middle;
+	margin-right: 3px;
+}
+#search
+{
+	width: 120px;
+	height: 30px;
+	vertical-align: middle;
+}
+.menu
+{
+	font-size: 14px;
+	margin: 0px 3px 0px 3px;
+	vertical-align: middle;
+}
+#spacer
+{
+	height: 50px;
+}
+#footer
+{
+	width: 100%;
+	background: #eee;
+	color: #000;
+	overflow: hidden;
+}
+#footer-content
+{
+	width: 800px;
+	margin: 0px auto 0px auto;
+	text-align: right;
+}
+.legal-notice
+{
+	font-size: 11px;
+	cursor: pointer;
+	color: #677;
+}
+.legal-notice:hover
+{
+	font-size: 11px;
+	cursor: pointer;
+	color: #455;
+	border-bottom: 1px solid #bbb;
+}
+#legal
+{
+	display: none;
+}
+#legal p
+{
+	font-size: 11px;
+	text-align: justify;
+	text-justify: distribute;
+	color: #666;
+}
+.section-white
+{
+	width: 100%;
+	background: #fff;
+	overflow: hidden;
+	border-bottom: solid 1px #bbb;
+}
+.section-colored
+{
+	width: 100%;
+	background: #cdd;
+	overflow: hidden;
+	border-bottom: solid 1px #bbb;
+}
+.section-content
+{
+	width: 800px;
+	padding: 30px 0px 30px 0px;
+	margin: 0px auto 0px auto;
+}
+#eye-catcher
+{
+	display: block;
+	margin: 20px auto 20px auto;
+	background: url(SharkLogo.png);
+	width: 399px;
+	height: 244px;
+}
+.download
+{
+	display: inline-block;
+	background: #fff;
+	width: 290px;
+	height: 50px;
+	line-height: 50px;
+	vertical-align: middle;
+	text-align: center;
+	border: 2px solid #999;
+	border-radius: 25px;
+	margin: 10px 50px 10px 50px;
+	box-shadow: 5px 5px 5px #666;
+}
+.download:hover
+{
+	display: inline-block;
+	background: #ffc;
+	width: 290px;
+	height: 50px;
+	line-height: 50px;
+	vertical-align: middle;
+	text-align: center;
+	border: 2px solid #999;
+	border-radius: 25px;
+	margin: 10px 50px 10px 50px;
+	box-shadow: 5px 5px 5px #666;
+}
+.downloadicon
+{
+	height: 30px;
+	vertical-align: middle;
+}
+#git-clone
+{
+	width: 780px;
+	border: 1px solid #bbb;
+	padding: 10px;
+	font-family: monospace;
+	background: #eee;
+}
+.note
+{
+	width: 740px;
+	margin: 5px 10px 20px 10px;
+	padding: 20px;
+	background: #eee;
+	border: 1px solid #bbb;
+	box-shadow: 5px 5px 5px #666;
+	font-size: 0.8em;
+}
+.note:before
+{
+	content: "[Note] ";
+	font-weight: bold;
+}
+.people
+{
+	width: 740px;
+	margin: 5px 10px 20px 10px;
+	padding: 20px;
+	background: #eee;
+	border: 1px solid #bbb;
+	box-shadow: 5px 5px 5px #666;
+	font-size: 0.8em;
+}
+.date
+{
+	font-style: italic;
+	color: #455;
+}

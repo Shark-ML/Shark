@@ -1,0 +1,10 @@
+<map id="shark::QpConfig" name="shark::QpConfig">
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, RealVector,\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="190,5,435,61"/>
+<area shape="rect" id="node3" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int \&gt;" alt="" coords="210,86,415,127"/>
+<area shape="rect" id="node4" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int,\l KernelClassifier\&lt; InputType\l \&gt;, AbstractWeightedTrainer\l\&lt; KernelClassifier\&lt; InputType \&gt; \&gt; \&gt;" alt="" coords="180,152,445,237"/>
+<area shape="rect" id="node5" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int,\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="190,261,435,317"/>
+<area shape="rect" id="node6" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int,\l MissingFeaturesKernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="193,342,433,413"/>
+<area shape="rect" id="node7" href="$classshark_1_1_abstract_linear_svm_trainer.html" title="Super class of all linear SVM trainers. " alt="" coords="218,437,407,478"/>
+<area shape="rect" id="node8" href="$classshark_1_1_abstract_svm_trainer.html" title="Super class of all kernelized (non&#45;linear) SVM trainers. " alt="" coords="215,503,410,559"/>
+<area shape="rect" id="node9" href="$classshark_1_1_one_class_svm_trainer.html" title="Training of one&#45;class SVMs. " alt="" coords="211,583,414,625"/>
+</map>

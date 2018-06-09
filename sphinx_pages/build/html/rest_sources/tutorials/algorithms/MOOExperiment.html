@@ -1,0 +1,233 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Creating Multi-Objective Benchmarks with Shark &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="The RBM Module" href="rbm_module.html" />
+    <link rel="prev" title="Multi-Objective Covariance Matrix Adaptation Evolution Strategy" href="mocma.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+<div>
+  <a class="topless" href="mocma.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Multi-Objective Covariance Matrix Adaptation Evolution Strategy</a>
+  <a class="topless" href="rbm_module.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> The RBM Module</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/MOOExperiment.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="creating-multi-objective-benchmarks-with-shark">
+<h1>Creating Multi-Objective Benchmarks with Shark<a class="headerlink" href="#creating-multi-objective-benchmarks-with-shark" title="Permalink to this headline">¶</a></h1>
+<p>This is short tutorial on how to use Shark to develop a simple Benchmark.
+It is intended to give a starting point to develop experimental designs.
+This tutorial is based on the <a class="reference external" href="../../../../../../doxygen_pages/html/_m_o_c_m_a_experiment_8cpp.html">MOCMAExperiment.cpp</a>, which includes a
+complete implementation of this tutorial.</p>
+<p>Shark comes with a basic set of multi-objective algorithms including the reference
+implementation of the MO-CMA-ES. Moreover, Shark includes a big set of standard
+multi-objective benchmark functions. The best known are the ZDT, DTLZ, IHR and
+LZ families of functions. All benchmarks are located in “ObjectiveFunctions/Benchmarks”.</p>
+<p>In the following we will describe a standard setup to evaluate the MO-CMA-ES on
+some of the ZDT-functions. It is not an easy task to evaluate the quality
+of a solution of a multi-objective function - we have to evaluate how good the
+points approximate the optimal pareto-front. Instead of doing this directly, we
+will measure the hypervolume covered by the points with respect to a reference point.
+Optimal results are known for <a class="reference external" href="http://www.tik.ee.ethz.ch/sop/download/supplementary/testproblems/">some benchmarks</a>.
+We will repeatedly optimize the function and periodically calculate the covered hypervolume. In the end we calculate
+the mean hypervolume covered by the solution.</p>
+<p>We start with the includes we need for this example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Implementation of the MO-CMA-ES</span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Algorithms/DirectSearch/MOCMA.h&gt;</span><span class="cp"></span>
+<span class="c1">// Access to benchmark functions</span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/ObjectiveFunctions/Benchmarks/ZDT1.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/ObjectiveFunctions/Benchmarks/ZDT2.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/ObjectiveFunctions/Benchmarks/ZDT3.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/ObjectiveFunctions/Benchmarks/ZDT6.h&gt;</span><span class="cp"></span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">shark</span><span class="p">;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">shark</span><span class="o">::</span><span class="n">benchmarks</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The first question is how to measure the hypervolume. This is easy as shark comes with an algorithm for it.
+We only have to tell it how to extract the points from the solution object of the MO-CMA and choose a reference point.
+We will use the same reference as the one used for the analytic results for better comparison:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">Solution</span><span class="o">&gt;</span>
+<span class="kt">double</span> <span class="n">hypervolume</span><span class="p">(</span> <span class="n">Solution</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">solution</span><span class="p">){</span>
+        <span class="c1">// the reference point (11,11).</span>
+        <span class="n">RealVector</span> <span class="n">referencePoint</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">11</span><span class="p">);</span>
+        <span class="c1">//instance of the hypervolume calculator</span>
+        <span class="n">HypervolumeCalculator</span> <span class="n">hypervolume</span><span class="p">;</span>
+        <span class="k">auto</span> <span class="n">toPoints</span> <span class="o">=</span> <span class="p">[](</span><span class="k">typename</span> <span class="n">Solution</span><span class="o">::</span><span class="n">const_reference</span> <span class="n">point</span><span class="p">){</span><span class="k">return</span> <span class="n">point</span><span class="p">.</span><span class="n">value</span><span class="p">;};</span>
+        <span class="k">return</span> <span class="nf">hypervolume</span><span class="p">(</span><span class="n">boost</span><span class="o">::</span><span class="n">adaptors</span><span class="o">::</span><span class="n">transform</span><span class="p">(</span><span class="n">solution</span><span class="p">,</span><span class="n">toPoints</span><span class="p">),</span><span class="n">referencePoint</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Next we set the experimental parameters:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">frontSize</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">//number of points that approximate the front</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numDimensions</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">//dimensions of the objective functions</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numTrials</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span> <span class="c1">// how often the optimization is repeated</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">recordingInterval</span> <span class="o">=</span> <span class="mi">20</span><span class="p">;</span> <span class="c1">//we want to record after some multiple of this</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">numIterations</span> <span class="o">=</span> <span class="mi">20</span><span class="o">*</span><span class="n">recordingInterval</span><span class="p">;</span> <span class="c1">//number of iterations to perform</span>
+</pre></div>
+</div>
+<p>and create a vector of test functions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">//assortment of test functions</span>
+<span class="k">typedef</span> <span class="n">boost</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">MultiObjectiveFunction</span><span class="o">&gt;</span> <span class="n">Function</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">Function</span> <span class="o">&gt;</span> <span class="n">functions</span><span class="p">;</span>
+<span class="n">functions</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="k">new</span> <span class="n">ZDT1</span><span class="p">(</span><span class="n">numDimensions</span><span class="p">)));</span>
+<span class="n">functions</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="k">new</span> <span class="n">ZDT2</span><span class="p">(</span><span class="n">numDimensions</span><span class="p">)));</span>
+<span class="n">functions</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="k">new</span> <span class="n">ZDT3</span><span class="p">(</span><span class="n">numDimensions</span><span class="p">)));</span>
+<span class="n">functions</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">Function</span><span class="p">(</span><span class="k">new</span> <span class="n">ZDT6</span><span class="p">(</span><span class="n">numDimensions</span><span class="p">)));</span>
+</pre></div>
+</div>
+<p>The next block describes the experiment itself. Every function is optimized seperately. At the beginning of a trial,
+the MO-CMA is created and initialized, which will create an initial solution.
+The hypervolume of this solution is calculated before starting the optimization process which runs
+for the desired amount of iterations. The hypervolume values are accumulated in the matrix <cite>meanVolumes</cite>. After the optimization is finished,
+the accumulated sums are divided by the number of trials to get the mean:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealMatrix</span> <span class="nf">meanVolumes</span><span class="p">(</span><span class="n">functions</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">numIterations</span><span class="o">/</span><span class="n">recordingInterval</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.0</span><span class="p">);</span>
+<span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">f</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">f</span> <span class="o">!=</span> <span class="n">functions</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">f</span><span class="p">){</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">trial</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">trial</span> <span class="o">!=</span> <span class="n">numTrials</span><span class="p">;</span> <span class="o">++</span><span class="n">trial</span><span class="p">){</span>
+                <span class="c1">//print progress</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\r</span><span class="s">&quot;</span> <span class="o">&lt;&lt;</span><span class="n">functions</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">()</span> <span class="o">&lt;&lt;</span><span class="s">&quot;: &quot;</span><span class="o">&lt;&lt;</span><span class="n">trial</span><span class="o">&lt;&lt;</span><span class="s">&quot;/&quot;</span><span class="o">&lt;&lt;</span><span class="n">numTrials</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">flush</span><span class="p">;</span>
+                <span class="c1">//create and initialize the optimizer</span>
+                <span class="n">MOCMA</span> <span class="n">mocma</span><span class="p">;</span>
+                <span class="n">mocma</span><span class="p">.</span><span class="n">mu</span><span class="p">()</span> <span class="o">=</span> <span class="n">frontSize</span><span class="p">;</span>
+                <span class="n">functions</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">init</span><span class="p">();</span>
+                <span class="n">mocma</span><span class="p">.</span><span class="n">init</span><span class="p">(</span> <span class="o">*</span><span class="n">functions</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="p">);</span>
+
+                <span class="c1">//record and hypervolume of initial solution</span>
+                <span class="n">meanVolumes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">+=</span> <span class="n">hypervolume</span><span class="p">(</span><span class="n">mocma</span><span class="p">.</span><span class="n">solution</span><span class="p">());</span>
+
+                <span class="c1">//optimize</span>
+                <span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">numIterations</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">){</span>
+                        <span class="n">mocma</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="o">*</span><span class="n">functions</span><span class="p">[</span><span class="n">f</span><span class="p">]);</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="n">recordingInterval</span> <span class="o">==</span> <span class="mi">0</span><span class="p">){</span>
+                                <span class="n">meanVolumes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">i</span> <span class="o">/</span> <span class="n">recordingInterval</span><span class="p">)</span> <span class="o">+=</span> <span class="n">hypervolume</span><span class="p">(</span><span class="n">mocma</span><span class="p">.</span><span class="n">solution</span><span class="p">());</span>
+                        <span class="p">}</span>
+                <span class="p">}</span>
+        <span class="p">}</span>
+<span class="p">}</span>
+<span class="n">meanVolumes</span> <span class="o">/=</span> <span class="n">numTrials</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>And we finally print the solution table together with a small legend:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\r</span><span class="s"># Iteration &quot;</span><span class="p">;</span>
+<span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">f</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">f</span> <span class="o">!=</span> <span class="n">functions</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">functions</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">name</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="p">.</span><span class="n">precision</span><span class="p">(</span> <span class="mi">7</span> <span class="p">);</span>
+<span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">meanVolumes</span><span class="p">.</span><span class="n">size2</span><span class="p">();</span><span class="o">++</span><span class="n">i</span><span class="p">){</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span> <span class="n">i</span><span class="o">*</span><span class="n">recordingInterval</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="p">;</span>
+        <span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">f</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">f</span> <span class="o">!=</span> <span class="n">functions</span><span class="p">.</span><span class="n">size</span><span class="p">();</span> <span class="o">++</span><span class="n">f</span><span class="p">){</span>
+                <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">meanVolumes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="n">i</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>We can plot this with a simple gnuplot script which results in:</p>
+<a class="reference internal image-reference" href="../../../_images/MOOExperiment.svg"><div align="center" class="align-center"><img alt="../../../_images/MOOExperiment.svg" height="500px" src="../../../_images/MOOExperiment.svg" width="700px" /></div>
+</a>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

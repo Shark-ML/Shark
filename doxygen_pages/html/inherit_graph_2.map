@@ -1,0 +1,6 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$classshark_1_1_abstract_budget_maintenance_strategy.html" title="This is the abstract interface for any budget maintenance strategy. " alt="" coords="5,71,255,112"/>
+<area shape="rect" id="node2" href="$classshark_1_1_merge_budget_maintenance_strategy.html" title="Budget maintenance strategy that merges two vectors. " alt="" coords="310,5,545,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_project_budget_maintenance_strategy.html" title="Budget maintenance strategy that projects a vector. " alt="" coords="307,71,547,112"/>
+<area shape="rect" id="node4" href="$classshark_1_1_remove_budget_maintenance_strategy.html" title="Budget maintenance strategy that removes a vector. " alt="" coords="303,136,552,177"/>
+</map>

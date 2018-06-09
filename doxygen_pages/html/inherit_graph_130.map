@@ -1,0 +1,321 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_svm_trainer.html" title="Super class of all kernelized (non&#45;linear) SVM trainers. " alt="" coords="727,8608,922,8664"/>
+<area shape="rect" id="node3" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="57,6384,195,6411"/>
+<area shape="rect" id="node4" href="$classshark_1_1_abstract_clustering.html" title="shark::AbstractClustering\l\&lt; RealVector \&gt;" alt="" coords="369,9006,556,9047"/>
+<area shape="rect" id="node6" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; blas::vector\&lt; T, Device\l \&gt;, blas::vector\&lt; T, Device \&gt; \&gt;" alt="" coords="349,3912,576,3968"/>
+<area shape="rect" id="node9" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; LabelType, LabelType \&gt;" alt="" coords="365,4138,560,4179"/>
+<area shape="rect" id="node12" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; LabelType, OutputType \&gt;" alt="" coords="361,2598,564,2639"/>
+<area shape="rect" id="node17" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; RealVector, RealVector \&gt;" alt="" coords="361,4350,564,4391"/>
+<area shape="rect" id="node22" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; SearchPointType, SearchPoint\lType \&gt;" alt="" coords="347,3992,578,4048"/>
+<area shape="rect" id="node24" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; Sequence, Sequence \&gt;" alt="" coords="369,4073,556,4114"/>
+<area shape="rect" id="node27" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; unsigned int, blas\l::vector\&lt; Float \&gt; \&gt;" alt="" coords="387,4204,539,4260"/>
+<area shape="rect" id="node30" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; unsigned int, OutputType \&gt;" alt="" coords="355,4285,571,4326"/>
+<area shape="rect" id="node34" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; unsigned int, RealVector \&gt;" alt="" coords="357,4415,568,4457"/>
+<area shape="rect" id="node38" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; unsigned int, unsigned int \&gt;" alt="" coords="353,4481,573,4522"/>
+<area shape="rect" id="node41" href="$classshark_1_1_abstract_cost.html" title="shark::AbstractCost\l\&lt; VectorType, VectorType \&gt;" alt="" coords="359,4546,567,4587"/>
+<area shape="rect" id="node47" href="$classshark_1_1_abstract_metric.html" title="shark::AbstractMetric\l\&lt; InputType \&gt;" alt="" coords="383,10191,543,10233"/>
+<area shape="rect" id="node60" href="$classshark_1_1_abstract_metric.html" title="shark::AbstractMetric\l\&lt; MultiTaskSample\&lt; InputType\lT \&gt; \&gt;" alt="" coords="348,8925,577,8981"/>
+<area shape="rect" id="node64" href="$classshark_1_1_abstract_metric.html" title="shark::AbstractMetric\l\&lt; std::size_t \&gt;" alt="" coords="383,10257,543,10298"/>
+<area shape="rect" id="node68" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; detail::BaseNearestNeighbor\l\&lt; InputType, unsigned int\l \&gt; ::InputType, unsigned int,\l detail::BaseNearestNeighbor\l\&lt; InputType, unsigned int \&gt; ::\lParameterVectorType \&gt;" alt="" coords="351,4612,575,4727"/>
+<area shape="rect" id="node71" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; InputT, OutputT \&gt;" alt="" coords="383,4882,542,4923"/>
+<area shape="rect" id="node73" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; InputT, RealVector \&gt;" alt="" coords="377,4751,549,4793"/>
+<area shape="rect" id="node76" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; InputT, unsigned int \&gt;" alt="" coords="372,4817,553,4858"/>
+<area shape="rect" id="node81" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; InputType, RealVector \&gt;" alt="" coords="365,6122,561,6163"/>
+<area shape="rect" id="node86" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; InputType, unsigned\l int, VectorType \&gt;" alt="" coords="378,5961,547,6017"/>
+<area shape="rect" id="node88" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; KernelExpansion\&lt; InputType\l \&gt; ::InputType, unsigned int,\l KernelExpansion\&lt; InputType\l \&gt; ::ParameterVectorType \&gt;" alt="" coords="349,5,576,91"/>
+<area shape="rect" id="node91" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; LinearModel\&lt; VectorType\l \&gt; ::InputType, unsigned\l int, LinearModel\&lt; VectorType\l \&gt; ::ParameterVectorType \&gt;" alt="" coords="353,3803,572,3888"/>
+<area shape="rect" id="node94" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; Model::InputType, unsigned\l int, Model::ParameterVectorType \&gt;" alt="" coords="335,1125,590,1181"/>
+<area shape="rect" id="node96" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; RealVector, LabelType \&gt;" alt="" coords="363,4947,562,4989"/>
+<area shape="rect" id="node98" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; RealVector, RealVector \&gt;" alt="" coords="361,5137,564,5178"/>
+<area shape="rect" id="node114" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; VectorType, VectorType \&gt;" alt="" coords="359,5633,567,5674"/>
+<area shape="rect" id="node116" href="$classshark_1_1_abstract_model.html" title="shark::AbstractModel\l\&lt; VectorType, VectorType,\l VectorType \&gt;" alt="" coords="364,6041,561,6097"/>
+<area shape="rect" id="node123" href="$classshark_1_1_abstract_objective_function.html" title="shark::AbstractObjective\lFunction\&lt; RealVector,\l double \&gt;" alt="" coords="371,1205,554,1261"/>
+<area shape="rect" id="node151" href="$classshark_1_1_abstract_objective_function.html" title="shark::AbstractObjective\lFunction\&lt; SearchPointType,\l double \&gt;" alt="" coords="360,2203,565,2259"/>
+<area shape="rect" id="node156" href="$classshark_1_1_abstract_objective_function.html" title="shark::AbstractObjective\lFunction\&lt; SearchPointType,\l ResultT \&gt;" alt="" coords="360,2341,565,2397"/>
+<area shape="rect" id="node158" href="$classshark_1_1_abstract_optimizer.html" title="shark::AbstractOptimizer\l\&lt; PointType, double, SingleObjective\lResultSet\&lt; PointType \&gt; \&gt;" alt="" coords="331,7281,595,7337"/>
+<area shape="rect" id="node160" href="$classshark_1_1_abstract_optimizer.html" title="shark::AbstractOptimizer\l\&lt; PointTypeT, RealVector,\l std::vector\&lt; ResultSet\&lt;\l PointTypeT, RealVector \&gt; \&gt; \&gt;" alt="" coords="351,7362,574,7433"/>
+<area shape="rect" id="node162" href="$classshark_1_1_abstract_optimizer.html" title="shark::AbstractOptimizer\l\&lt; RealVector, double, SingleObjective\lResultSet\&lt; RealVector \&gt; \&gt;" alt="" coords="327,6588,598,6644"/>
+<area shape="rect" id="node175" href="$classshark_1_1_abstract_optimizer.html" title="shark::AbstractOptimizer\l\&lt; RealVector, RealVector,\l std::vector\&lt; ResultSet\&lt;\l RealVector, RealVector \&gt; \&gt; \&gt;" alt="" coords="352,6669,573,6739"/>
+<area shape="rect" id="node185" href="$classshark_1_1_abstract_optimizer.html" title="shark::AbstractOptimizer\l\&lt; SearchPointType, double,\l SingleObjectiveResultSet\l\&lt; SearchPointType \&gt; \&gt;" alt="" coords="361,6763,564,6834"/>
+<area shape="rect" id="node194" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; KernelClassifier\&lt; InputType \&gt; \&gt;" alt="" coords="337,8362,588,8403"/>
+<area shape="rect" id="node201" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; KernelClassifier\&lt; InputType\l \&gt;, unsigned int \&gt;" alt="" coords="353,6508,573,6564"/>
+<area shape="rect" id="node205" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; KernelExpansion\&lt; InputType\l \&gt;, RealVector \&gt;" alt="" coords="349,7604,576,7660"/>
+<area shape="rect" id="node206" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; KernelExpansion\&lt; InputType\l \&gt;, unsigned int \&gt;" alt="" coords="349,7684,576,7740"/>
+<area shape="rect" id="node207" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearClassifier\&lt; InputType\l \&gt;, unsigned int \&gt;" alt="" coords="353,7457,572,7513"/>
+<area shape="rect" id="node214" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearClassifier\&lt;\&gt;,\l unsigned int \&gt;" alt="" coords="379,8151,546,8207"/>
+<area shape="rect" id="node217" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearModel\&lt; InputVectorType \&gt; \&gt;" alt="" coords="329,8231,597,8273"/>
+<area shape="rect" id="node219" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearModel\&lt;\&gt; \&gt;" alt="" coords="379,8297,546,8338"/>
+<area shape="rect" id="node221" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearModel\&lt;\&gt;, unsigned int \&gt;" alt="" coords="342,6377,583,6418"/>
+<area shape="rect" id="node223" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; MissingFeaturesKernelExpansion\l\&lt; InputType \&gt;, unsigned int \&gt;" alt="" coords="337,6989,588,7045"/>
+<area shape="rect" id="node230" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="shark::AbstractUnsupervised\lTrainer\&lt; KernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="358,7815,567,7871"/>
+<area shape="rect" id="node232" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="shark::AbstractUnsupervised\lTrainer\&lt; LinearModel\&lt; RealVector \&gt; \&gt;" alt="" coords="323,6442,602,6483"/>
+<area shape="rect" id="node235" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="shark::AbstractUnsupervised\lTrainer\&lt; LinearModel\&lt;\&gt; \&gt;" alt="" coords="358,6923,567,6965"/>
+<area shape="rect" id="node237" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="shark::AbstractUnsupervised\lTrainer\&lt; Normalizer\&lt; DataType \&gt; \&gt;" alt="" coords="331,7070,594,7111"/>
+<area shape="rect" id="node240" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="shark::AbstractUnsupervised\lTrainer\&lt; ScaledKernel\&lt; InputType \&gt; \&gt;" alt="" coords="323,7135,602,7177"/>
+<area shape="rect" id="node242" href="$classshark_1_1_abstract_clustering.html" title="Base class for clustering. " alt="" coords="369,9697,556,9738"/>
+<area shape="rect" id="node244" href="$classshark_1_1_abstract_cost.html" title="Cost function interface. " alt="" coords="385,2477,540,2518"/>
+<area shape="rect" id="node246" href="$classshark_1_1_abstract_metric.html" title="Base&#45;class for metrics. " alt="" coords="383,9071,543,9113"/>
+<area shape="rect" id="node248" href="$classshark_1_1_abstract_model.html" title="Base class for all Models. " alt="" coords="359,8428,566,8484"/>
+<area shape="rect" id="node249" href="$classshark_1_1_abstract_objective_function.html" title="Super class of all objective functions for optimization and learning. " alt="" coords="348,5202,577,5243"/>
+<area shape="rect" id="node284" href="$classshark_1_1_abstract_optimizer.html" title="An optimizer that optimizes general objective functions. " alt="" coords="353,7201,573,7257"/>
+<area shape="rect" id="node285" href="$classshark_1_1_abstract_trainer.html" title="Superclass of supervised learning algorithms. " alt="" coords="375,7538,550,7579"/>
+<area shape="rect" id="node298" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="Superclass of unsupervised learning algorithms. " alt="" coords="358,7895,567,7937"/>
+<area shape="rect" id="node300" href="$classshark_1_1_c_svm_derivative.html" title="This class provides two main member functions for computing the derivative of a C&#45;SVM hypothesis w..." alt="" coords="364,6858,561,6899"/>
+<area shape="rect" id="node301" href="$classshark_1_1_label_order.html" title="This will normalize the labels of a given dataset to 0..N&#45;1. " alt="" coords="394,5581,531,5608"/>
+<area shape="rect" id="node5" href="$classshark_1_1_centroids.html" title="Clusters defined by centroids. " alt="" coords="761,9013,889,9040"/>
+<area shape="rect" id="node7" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; blas::vector\&lt; T, Device\l \&gt;, blas::vector\&lt; T, Device \&gt; \&gt;" alt="" coords="711,2765,938,2821"/>
+<area shape="rect" id="node8" href="$classshark_1_1_cross_entropy_3_01blas_1_1vector_3_01_t_00_01_device_01_4_00_01blas_1_1vector_3_01_t_00_01_device_01_4_01_4.html" title="shark::CrossEntropy\l\&lt; blas::vector\&lt; T, Device\l \&gt;, blas::vector\&lt; T, Device \&gt; \&gt;" alt="" coords="1038,2671,1265,2727"/>
+<area shape="rect" id="node10" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; LabelType, LabelType \&gt;" alt="" coords="727,2991,922,3033"/>
+<area shape="rect" id="node11" href="$classshark_1_1_zero_one_loss.html" title="0&#45;1&#45;loss for classification. " alt="" coords="1050,2882,1253,2923"/>
+<area shape="rect" id="node13" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; LabelType, OutputType \&gt;" alt="" coords="723,2487,926,2529"/>
+<area shape="rect" id="node15" href="$classshark_1_1_negative_a_u_c.html" title="Negative area under the curve. " alt="" coords="723,2634,926,2675"/>
+<area shape="rect" id="node16" href="$classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html" title="Negative Wilcoxon&#45;Mann&#45;Whitney statistic. " alt="" coords="715,2553,935,2609"/>
+<area shape="rect" id="node14" href="$classshark_1_1_squared_loss.html" title="squared loss for regression and classification " alt="" coords="1050,2487,1253,2529"/>
+<area shape="rect" id="node18" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; RealVector, RealVector \&gt;" alt="" coords="723,3203,926,3245"/>
+<area shape="rect" id="node19" href="$classshark_1_1_epsilon_hinge_loss.html" title="Hinge&#45;loss for large margin regression. " alt="" coords="1061,3211,1241,3237"/>
+<area shape="rect" id="node20" href="$classshark_1_1_huber_loss.html" title="Huber&#45;loss for for robust regression. " alt="" coords="1084,3261,1219,3288"/>
+<area shape="rect" id="node21" href="$classshark_1_1_squared_epsilon_hinge_loss.html" title="Hinge&#45;loss for large margin regression using th squared two&#45;norm. " alt="" coords="1035,3160,1268,3187"/>
+<area shape="rect" id="node23" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; SearchPointType, SearchPoint\lType \&gt;" alt="" coords="709,2845,940,2901"/>
+<area shape="rect" id="node25" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; Sequence, Sequence \&gt;" alt="" coords="731,2926,918,2967"/>
+<area shape="rect" id="node26" href="$classshark_1_1_squared_loss_3_01_sequence_00_01_sequence_01_4.html" title="shark::SquaredLoss\l\&lt; Sequence, Sequence \&gt;" alt="" coords="1058,2817,1245,2858"/>
+<area shape="rect" id="node28" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; unsigned int, blas\l::vector\&lt; Float \&gt; \&gt;" alt="" coords="749,3057,901,3113"/>
+<area shape="rect" id="node29" href="$classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html" title="0&#45;1&#45;loss for classification. " alt="" coords="1075,2948,1227,3004"/>
+<area shape="rect" id="node31" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; unsigned int, OutputType \&gt;" alt="" coords="717,3138,933,3179"/>
+<area shape="rect" id="node32" href="$classshark_1_1_cross_entropy_3_01unsigned_01int_00_01_output_type_01_4.html" title="shark::CrossEntropy\l\&lt; unsigned int, OutputType \&gt;" alt="" coords="1043,3029,1259,3070"/>
+<area shape="rect" id="node33" href="$classshark_1_1_squared_loss_3_01_output_type_00_01unsigned_01int_01_4.html" title="shark::SquaredLoss\l\&lt; OutputType, unsigned int \&gt;" alt="" coords="1043,3094,1259,3135"/>
+<area shape="rect" id="node35" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; unsigned int, RealVector \&gt;" alt="" coords="719,3269,930,3310"/>
+<area shape="rect" id="node36" href="$classshark_1_1_hinge_loss.html" title="Hinge&#45;loss for large margin classification. " alt="" coords="1085,3363,1218,3389"/>
+<area shape="rect" id="node37" href="$classshark_1_1_squared_hinge_loss.html" title="Squared Hinge&#45;loss for large margin classification. " alt="" coords="1058,3312,1245,3339"/>
+<area shape="rect" id="node39" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; unsigned int, unsigned int \&gt;" alt="" coords="715,3334,935,3375"/>
+<area shape="rect" id="node40" href="$classshark_1_1_discrete_loss.html" title="flexible loss for classification " alt="" coords="1077,3413,1226,3440"/>
+<area shape="rect" id="node42" href="$classshark_1_1_abstract_loss.html" title="shark::AbstractLoss\l\&lt; VectorType, VectorType \&gt;" alt="" coords="721,3399,929,3441"/>
+<area shape="rect" id="node43" href="$classshark_1_1_absolute_loss.html" title="absolute loss " alt="" coords="1075,3465,1227,3506"/>
+<area shape="rect" id="node46" href="$classshark_1_1_point_set_kernel.html" title="Normalized version of a kernel function. " alt="" coords="1070,11629,1233,11670"/>
+<area shape="rect" id="node48" href="$classshark_1_1_abstract_kernel_function.html" title="shark::AbstractKernelFunction\l\&lt; InputType \&gt;" alt="" coords="716,11315,933,11357"/>
+<area shape="rect" id="node49" href="$classshark_1_1_a_r_d_kernel_unconstrained.html" title="Automatic relevance detection kernel for unconstrained parameter optimization. " alt="" coords="1036,11185,1267,11226"/>
+<area shape="rect" id="node50" href="$classshark_1_1_gaussian_rbf_kernel.html" title="Gaussian radial basis function kernel. " alt="" coords="1056,11250,1247,11291"/>
+<area shape="rect" id="node51" href="$classshark_1_1_linear_kernel.html" title="Linear Kernel, parameter free. " alt="" coords="1077,11315,1225,11357"/>
+<area shape="rect" id="node52" href="$classshark_1_1_model_kernel.html" title="Kernel function that uses a Model as transformation function for another kernel. " alt="" coords="1078,11381,1225,11422"/>
+<area shape="rect" id="node53" href="$classshark_1_1_monomial_kernel.html" title="Monomial kernel. Calculates . " alt="" coords="1065,11446,1237,11487"/>
+<area shape="rect" id="node54" href="$classshark_1_1_normalized_kernel.html" title="Normalized version of a kernel function. " alt="" coords="1060,11511,1243,11553"/>
+<area shape="rect" id="node55" href="$classshark_1_1_polynomial_kernel.html" title="Polynomial kernel. " alt="" coords="1061,10923,1242,10965"/>
+<area shape="rect" id="node56" href="$classshark_1_1_product_kernel.html" title="Product of kernel functions. " alt="" coords="1073,10989,1230,11030"/>
+<area shape="rect" id="node57" href="$classshark_1_1_scaled_kernel.html" title="Scaled version of a kernel function. " alt="" coords="1076,11054,1227,11095"/>
+<area shape="rect" id="node58" href="$classshark_1_1_weighted_sum_kernel.html" title="Weighted sum of kernel functions. " alt="" coords="1052,11119,1251,11161"/>
+<area shape="rect" id="node59" href="$classshark_1_1_mkl_kernel.html" title="Weighted sum of kernel functions. " alt="" coords="1332,10589,1559,10616"/>
+<area shape="rect" id="node61" href="$classshark_1_1_abstract_kernel_function.html" title="shark::AbstractKernelFunction\l\&lt; MultiTaskSample\&lt; InputTypeT \&gt; \&gt;" alt="" coords="691,8939,958,8981"/>
+<area shape="rect" id="node62" href="$classshark_1_1_product_kernel.html" title="shark::ProductKernel\l\&lt; MultiTaskSample\&lt; InputType\lT \&gt; \&gt;" alt="" coords="1037,9803,1266,9859"/>
+<area shape="rect" id="node63" href="$classshark_1_1_multi_task_kernel.html" title="Special kernel function for multi&#45;task and transfer learning. " alt="" coords="1360,9898,1531,9939"/>
+<area shape="rect" id="node65" href="$classshark_1_1_abstract_kernel_function.html" title="shark::AbstractKernelFunction\l\&lt; std::size_t \&gt;" alt="" coords="716,11426,933,11467"/>
+<area shape="rect" id="node66" href="$classshark_1_1_discrete_kernel.html" title="Kernel on a finite, discrete space. " alt="" coords="1070,11577,1233,11604"/>
+<area shape="rect" id="node67" href="$classshark_1_1_gaussian_task_kernel.html" title="Special &quot;Gaussian&#45;like&quot; kernel function on tasks. " alt="" coords="1346,11570,1545,11611"/>
+<area shape="rect" id="node69" href="$classshark_1_1_classifier.html" title="shark::Classifier\&lt;\l detail::BaseNearestNeighbor\l\&lt; InputType, unsigned int \&gt; \&gt;" alt="" coords="715,3465,935,3521"/>
+<area shape="rect" id="node70" href="$classshark_1_1_nearest_neighbor_model_3_01_input_type_00_01unsigned_01int_01_4.html" title="shark::NearestNeighborModel\l\&lt; InputType, unsigned int \&gt;" alt="" coords="1044,3530,1259,3571"/>
+<area shape="rect" id="node72" href="$classshark_1_1_clustering_model.html" title="Abstract model with associated clustering object. " alt="" coords="739,3677,910,3718"/>
+<area shape="rect" id="node74" href="$classshark_1_1_clustering_model.html" title="shark::ClusteringModel\l\&lt; InputT, RealVector \&gt;" alt="" coords="739,3546,911,3587"/>
+<area shape="rect" id="node75" href="$classshark_1_1_soft_clustering_model.html" title="Model for &quot;soft&quot; clustering. " alt="" coords="1053,3595,1250,3637"/>
+<area shape="rect" id="node77" href="$classshark_1_1_clustering_model.html" title="shark::ClusteringModel\l\&lt; InputT, unsigned int \&gt;" alt="" coords="734,3611,915,3653"/>
+<area shape="rect" id="node78" href="$classshark_1_1_hard_clustering_model.html" title="Model for &quot;hard&quot; clustering. " alt="" coords="1050,3661,1253,3702"/>
+<area shape="rect" id="node80" href="$classshark_1_1_linear_model.html" title="Linear Prediction with optional activation function. " alt="" coords="701,6037,948,6078"/>
+<area shape="rect" id="node84" href="$classshark_1_1_kernel_expansion.html" title="Linear model in a kernel feature space. " alt="" coords="737,6690,912,6731"/>
+<area shape="rect" id="node83" href="$classshark_1_1_nearest_neighbor_model.html" title="NearestNeighbor model for classification and regression. " alt="" coords="1044,6379,1259,6421"/>
+<area shape="rect" id="node85" href="$classshark_1_1_missing_features_kernel_expansion.html" title="Kernel expansion with missing features support For a choice of kernel, see Kernels. " alt="" coords="1045,6445,1258,6486"/>
+<area shape="rect" id="node87" href="$classshark_1_1_one_versus_one_classifier.html" title="One&#45;versus&#45;one Classifier. " alt="" coords="713,6102,936,6143"/>
+<area shape="rect" id="node89" href="$classshark_1_1_classifier.html" title="shark::Classifier\&lt;\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="702,27,947,69"/>
+<area shape="rect" id="node90" href="$structshark_1_1_kernel_classifier.html" title="Linear classifier in a kernel feature space. " alt="" coords="1067,27,1236,69"/>
+<area shape="rect" id="node92" href="$classshark_1_1_classifier.html" title="shark::Classifier\&lt;\l LinearModel\&lt; VectorType \&gt; \&gt;" alt="" coords="713,2699,937,2741"/>
+<area shape="rect" id="node93" href="$classshark_1_1_linear_classifier.html" title="Basic linear classifier. " alt="" coords="1068,2605,1235,2646"/>
+<area shape="rect" id="node95" href="$classshark_1_1_classifier.html" title="Conversion of real&#45;valued or vector valued outputs to class labels. " alt="" coords="755,217,894,258"/>
+<area shape="rect" id="node97" href="$classshark_1_1_c_a_r_tree.html" title="Classification and Regression Tree. " alt="" coords="715,3743,934,3769"/>
+<area shape="rect" id="node99" href="$classshark_1_1_c_m_a_c_map.html" title="The CMACMap class represents a linear combination of piecewise constant functions. " alt="" coords="759,3925,890,3952"/>
+<area shape="rect" id="node100" href="$classshark_1_1_r_b_f_layer.html" title="Implements a layer of radial basis functions in a neural network. " alt="" coords="761,3976,888,4003"/>
+<area shape="rect" id="node101" href="$classshark_1_1_r_b_m.html" title="stub for the RBM class. at the moment it is just a holder of the parameter set and the Energy..." alt="" coords="720,3859,929,3901"/>
+<area shape="rect" id="node106" href="$classshark_1_1_ensemble.html" title="shark::Ensemble\&lt; CARTree\l\&lt; LabelType \&gt; \&gt;" alt="" coords="1345,3794,1546,3835"/>
+<area shape="rect" id="node107" href="$classshark_1_1_r_f_classifier.html" title="Random Forest Classifier. " alt="" coords="1607,3794,1749,3835"/>
+<area shape="rect" id="node111" href="$classshark_1_1_ensemble.html" title="Represents en weighted ensemble of models. " alt="" coords="1335,8838,1555,8879"/>
+<area shape="rect" id="node113" href="$classshark_1_1_linear_model.html" title="shark::LinearModel\l\&lt; VectorType \&gt;" alt="" coords="752,8754,897,8795"/>
+<area shape="rect" id="node115" href="$classshark_1_1_normalizer.html" title="&quot;Diagonal&quot; linear model for data normalization. " alt="" coords="750,5971,899,6013"/>
+<area shape="rect" id="node117" href="$classshark_1_1_concatenated_model.html" title="ConcatenatedModel concatenates two models such that the output of the first model is input to the sec..." alt="" coords="727,6298,922,6339"/>
+<area shape="rect" id="node118" href="$classshark_1_1_conv2_d_model.html" title="Convolutional Model for 2D image data. " alt="" coords="697,6363,952,6405"/>
+<area shape="rect" id="node119" href="$classshark_1_1_dropout_layer.html" title="Implements Dropout layer semantics. " alt="" coords="747,6429,902,6470"/>
+<area shape="rect" id="node120" href="$classshark_1_1_neuron_layer.html" title="Neuron activation layer. " alt="" coords="718,6494,931,6535"/>
+<area shape="rect" id="node121" href="$classshark_1_1_pooling_layer.html" title="Performs Pooling operations for a given input image. " alt="" coords="749,6167,900,6209"/>
+<area shape="rect" id="node122" href="$classshark_1_1_resize_layer.html" title="Resizes an input image to a given size. " alt="" coords="752,6233,897,6274"/>
+<area shape="rect" id="node124" href="$structshark_1_1benchmarks_1_1_ackley.html" title="Convex quadratic benchmark function with single dominant axis. " alt="" coords="747,1883,902,1925"/>
+<area shape="rect" id="node125" href="$structshark_1_1benchmarks_1_1_cigar.html" title="Convex quadratic benchmark function with single dominant axis. " alt="" coords="747,1949,902,1990"/>
+<area shape="rect" id="node126" href="$classshark_1_1benchmarks_1_1_cigar_discus.html" title="Convex quadratic benchmark function. " alt="" coords="747,2014,902,2055"/>
+<area shape="rect" id="node127" href="$structshark_1_1benchmarks_1_1_constrained_sphere.html" title="Constrained Sphere function. " alt="" coords="747,282,902,323"/>
+<area shape="rect" id="node128" href="$structshark_1_1benchmarks_1_1_diff_powers.html" title="shark::benchmarks::\lDiffPowers" alt="" coords="747,347,902,389"/>
+<area shape="rect" id="node129" href="$structshark_1_1benchmarks_1_1_discus.html" title="Convex quadratic benchmark function. " alt="" coords="747,413,902,454"/>
+<area shape="rect" id="node130" href="$structshark_1_1benchmarks_1_1_ellipsoid.html" title="Convex quadratic benchmark function. " alt="" coords="747,478,902,519"/>
+<area shape="rect" id="node131" href="$structshark_1_1benchmarks_1_1_himmelblau.html" title="Multi&#45;modal two&#45;dimensional continuous Himmelblau benchmark function. " alt="" coords="747,543,902,585"/>
+<area shape="rect" id="node132" href="$classshark_1_1benchmarks_1_1_markov_pole.html" title="shark::benchmarks::\lMarkovPole\&lt; HiddenNeuron,\l OutputNeuron \&gt;" alt="" coords="719,609,930,665"/>
+<area shape="rect" id="node133" href="$classshark_1_1benchmarks_1_1_non_markov_pole.html" title="Objective function for single and double non&#45;Markov poles. " alt="" coords="747,690,902,731"/>
+<area shape="rect" id="node134" href="$structshark_1_1benchmarks_1_1_rosenbrock.html" title="Generalized Rosenbrock benchmark function. " alt="" coords="747,755,902,797"/>
+<area shape="rect" id="node135" href="$structshark_1_1benchmarks_1_1_rotated_objective_function.html" title="Rotates an objective function using a randomly initialized rotation. " alt="" coords="729,821,920,862"/>
+<area shape="rect" id="node136" href="$structshark_1_1benchmarks_1_1_schwefel.html" title="Convex benchmark function. " alt="" coords="747,886,902,927"/>
+<area shape="rect" id="node137" href="$structshark_1_1benchmarks_1_1_sphere.html" title="Convex quadratic benchmark function. " alt="" coords="747,951,902,993"/>
+<area shape="rect" id="node138" href="$classshark_1_1_contrastive_divergence.html" title="Implements k&#45;step Contrastive Divergence described by Hinton et al. (2006). " alt="" coords="717,1017,932,1058"/>
+<area shape="rect" id="node139" href="$classshark_1_1_cross_validation_error.html" title="Cross&#45;validation error for selection of hyper&#45;parameters. " alt="" coords="717,1082,932,1123"/>
+<area shape="rect" id="node140" href="$classshark_1_1_exact_gradient.html" title="shark::ExactGradient\l\&lt; RBMType \&gt;" alt="" coords="745,1147,904,1189"/>
+<area shape="rect" id="node141" href="$classshark_1_1_kernel_target_alignment.html" title="Kernel Target Alignment &#45; a measure of alignment of a kernel Gram matrix with labels. " alt="" coords="716,1213,933,1254"/>
+<area shape="rect" id="node142" href="$classshark_1_1_loo_error.html" title="Leave&#45;one&#45;out error objective function. " alt="" coords="721,1278,928,1319"/>
+<area shape="rect" id="node143" href="$classshark_1_1_loo_error_c_svm.html" title="Leave&#45;one&#45;out error, specifically optimized for C&#45;SVMs. " alt="" coords="726,1343,923,1385"/>
+<area shape="rect" id="node144" href="$structshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4_1_1_merging_problem_function.html" title="shark::MergeBudgetMaintenance\lStrategy\&lt; RealVector \&gt;::MergingProblem\lFunction" alt="" coords="679,1409,971,1465"/>
+<area shape="rect" id="node145" href="$classshark_1_1_multi_chain_approximator.html" title="Approximates the gradient by taking samples from an ensemble of Markov chains running in parallel..." alt="" coords="713,1490,937,1531"/>
+<area shape="rect" id="node146" href="$classshark_1_1_negative_gaussian_process_evidence.html" title="Evidence for model selection of a regularization network/Gaussian process. " alt="" coords="700,1556,949,1612"/>
+<area shape="rect" id="node147" href="$classshark_1_1_negative_log_likelihood.html" title="Computes the negative log likelihood of a dataset under a model. " alt="" coords="717,1636,932,1663"/>
+<area shape="rect" id="node148" href="$classshark_1_1_radius_margin_quotient.html" title="radius margin quotions for binary SVMs " alt="" coords="719,1687,930,1729"/>
+<area shape="rect" id="node149" href="$classshark_1_1_single_chain_approximator.html" title="Approximates the gradient by taking samples from a single Markov chain. " alt="" coords="709,1753,941,1794"/>
+<area shape="rect" id="node150" href="$classshark_1_1_svm_logistic_interpretation.html" title="Maximum&#45;likelihood model selection score for binary support vector machines. " alt="" coords="707,1818,942,1859"/>
+<area shape="rect" id="node152" href="$classshark_1_1_error_function.html" title="Objective function for supervised learning. " alt="" coords="744,2145,905,2186"/>
+<area shape="rect" id="node153" href="$classshark_1_1_one_norm_regularizer.html" title="One&#45;norm of the input as an objective function. " alt="" coords="723,2210,926,2251"/>
+<area shape="rect" id="node154" href="$classshark_1_1_two_norm_regularizer.html" title="Two&#45;norm of the input as an objective function. " alt="" coords="723,2275,926,2317"/>
+<area shape="rect" id="node155" href="$classshark_1_1_variational_autoencoder_error.html" title="Computes the variational autoencoder error function. " alt="" coords="715,2079,934,2121"/>
+<area shape="rect" id="node157" href="$classshark_1_1_combined_objective_function.html" title="Linear combination of objective functions. " alt="" coords="722,2341,927,2397"/>
+<area shape="rect" id="node159" href="$classshark_1_1_abstract_single_objective_optimizer.html" title="Base class for all single objective optimizer. " alt="" coords="713,7579,936,7621"/>
+<area shape="rect" id="node161" href="$classshark_1_1_abstract_multi_objective_optimizer.html" title="base class for abstract multi&#45;objective optimizers for arbitrary search spaces. " alt="" coords="717,7645,932,7686"/>
+<area shape="rect" id="node163" href="$classshark_1_1_abstract_single_objective_optimizer.html" title="shark::AbstractSingleObjective\lOptimizer\&lt; RealVector \&gt;" alt="" coords="713,7135,936,7177"/>
+<area shape="rect" id="node164" href="$classshark_1_1_c_m_a.html" title="Implements the CMA&#45;ES. " alt="" coords="1104,6728,1199,6755"/>
+<area shape="rect" id="node165" href="$classshark_1_1_c_m_s_a.html" title="Implements the CMSA. " alt="" coords="1100,6779,1203,6805"/>
+<area shape="rect" id="node166" href="$classshark_1_1_cross_entropy_method.html" title="Implements the Cross Entropy Method. " alt="" coords="1051,6829,1251,6856"/>
+<area shape="rect" id="node167" href="$classshark_1_1_elitist_c_m_a.html" title="Implements the elitist CMA&#45;ES. " alt="" coords="1085,6880,1217,6907"/>
+<area shape="rect" id="node168" href="$classshark_1_1_grid_search.html" title="Optimize by trying out a grid of configurations. " alt="" coords="1083,6931,1220,6957"/>
+<area shape="rect" id="node169" href="$classshark_1_1_l_m_c_m_a.html" title="Implements a Limited&#45;Memory&#45;CMA. " alt="" coords="1095,6981,1208,7008"/>
+<area shape="rect" id="node170" href="$classshark_1_1_nested_grid_search.html" title="Nested grid search. " alt="" coords="1060,7032,1243,7059"/>
+<area shape="rect" id="node171" href="$classshark_1_1_point_search.html" title="Optimize by trying out predefined configurations. " alt="" coords="1080,7083,1223,7109"/>
+<area shape="rect" id="node172" href="$classshark_1_1_simplex_downhill.html" title="Simplex Downhill Method. " alt="" coords="1063,6576,1239,6603"/>
+<area shape="rect" id="node173" href="$classshark_1_1_trust_region_newton.html" title="Simple Trust&#45;Region method based on the full Hessian matrix. " alt="" coords="1054,6627,1249,6653"/>
+<area shape="rect" id="node174" href="$classshark_1_1_v_d_c_m_a.html" title="shark::VDCMA" alt="" coords="1094,6677,1209,6704"/>
+<area shape="rect" id="node176" href="$classshark_1_1_abstract_multi_objective_optimizer.html" title="shark::AbstractMultiObjective\lOptimizer\&lt; RealVector \&gt;" alt="" coords="717,7201,932,7242"/>
+<area shape="rect" id="node177" href="$classshark_1_1_indicator_based_real_coded_n_s_g_a_i_i.html" title="shark::IndicatorBasedReal\lCodedNSGAII\&lt; NSGA3Indicator \&gt;" alt="" coords="1031,7482,1271,7523"/>
+<area shape="rect" id="node179" href="$classshark_1_1_indicator_based_m_o_c_m_a.html" title="Implements the generational MO&#45;CMA&#45;ES. " alt="" coords="1045,7286,1258,7327"/>
+<area shape="rect" id="node180" href="$classshark_1_1_indicator_based_real_coded_n_s_g_a_i_i.html" title="Implements the NSGA&#45;II. " alt="" coords="1054,7351,1249,7393"/>
+<area shape="rect" id="node181" href="$classshark_1_1_indicator_based_steady_state_m_o_c_m_a.html" title="Implements the &#45;MO&#45;CMA&#45;ES. " alt="" coords="1047,7417,1255,7458"/>
+<area shape="rect" id="node182" href="$classshark_1_1_m_o_e_a_d.html" title="Implements the MOEA/D algorithm. " alt="" coords="1094,7133,1209,7160"/>
+<area shape="rect" id="node183" href="$classshark_1_1_r_v_e_a.html" title="Implements the RVEA algorithm. " alt="" coords="1101,7184,1202,7211"/>
+<area shape="rect" id="node184" href="$classshark_1_1_s_m_s_e_m_o_a.html" title="Implements the SMS&#45;EMOA. " alt="" coords="1086,7235,1217,7261"/>
+<area shape="rect" id="node178" href="$classshark_1_1_real_coded_n_s_g_a_i_i_i.html" title="Implements the NSGA&#45;III. " alt="" coords="1353,7489,1538,7516"/>
+<area shape="rect" id="node186" href="$classshark_1_1_abstract_single_objective_optimizer.html" title="shark::AbstractSingleObjective\lOptimizer\&lt; SearchPointType \&gt;" alt="" coords="712,7266,937,7307"/>
+<area shape="rect" id="node187" href="$classshark_1_1_abstract_line_search_optimizer.html" title="Basis class for line search methods. " alt="" coords="1039,7613,1264,7654"/>
+<area shape="rect" id="node191" href="$classshark_1_1_adam.html" title="Adaptive Moment Estimation Algorithm (ADAM) " alt="" coords="1053,7547,1249,7589"/>
+<area shape="rect" id="node192" href="$classshark_1_1_rprop.html" title="This class offers methods for the usage of the Resilient&#45;Backpropagation&#45;algorithm with/out weight&#45;ba..." alt="" coords="1053,7678,1249,7719"/>
+<area shape="rect" id="node193" href="$classshark_1_1_steepest_descent.html" title="Standard steepest descent. " alt="" coords="1063,7743,1239,7785"/>
+<area shape="rect" id="node188" href="$classshark_1_1_b_f_g_s.html" title="Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization. " alt="" coords="1349,7554,1541,7595"/>
+<area shape="rect" id="node189" href="$classshark_1_1_c_g.html" title="Conjugate&#45;gradient method for unconstrained optimization. " alt="" coords="1333,7620,1557,7647"/>
+<area shape="rect" id="node190" href="$classshark_1_1_l_b_f_g_s.html" title="Limited&#45;Memory Broyden, Fletcher, Goldfarb, Shannon algorithm. " alt="" coords="1346,7671,1545,7713"/>
+<area shape="rect" id="node195" href="$classshark_1_1_kernel_budgeted_s_g_d_trainer.html" title="Budgeted stochastic gradient descent training for kernel&#45;based models. " alt="" coords="703,10199,947,10241"/>
+<area shape="rect" id="node196" href="$classshark_1_1_kernel_s_g_d_trainer.html" title="Generic stochastic gradient descent training for kernel&#45;based models. " alt="" coords="726,10687,923,10729"/>
+<area shape="rect" id="node198" href="$classshark_1_1_abstract_weighted_trainer.html" title="shark::AbstractWeightedTrainer\l\&lt; KernelClassifier\&lt; InputType \&gt; \&gt;" alt="" coords="699,8411,950,8453"/>
+<area shape="rect" id="node199" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int,\l KernelClassifier\&lt; InputType\l \&gt;, AbstractWeightedTrainer\l\&lt; KernelClassifier\&lt; InputType \&gt; \&gt; \&gt;" alt="" coords="1019,8389,1284,8475"/>
+<area shape="rect" id="node200" href="$classshark_1_1_c_svm_trainer.html" title="Training of C&#45;SVMs for binary classification. " alt="" coords="1347,8411,1544,8453"/>
+<area shape="rect" id="node202" href="$classshark_1_1_abstract_weighted_trainer.html" title="shark::AbstractWeightedTrainer\l\&lt; KernelClassifier\&lt; InputType\l \&gt;, unsigned int \&gt;" alt="" coords="711,7055,939,7111"/>
+<area shape="rect" id="node204" href="$classshark_1_1_perceptron.html" title="Perceptron online learning algorithm. " alt="" coords="751,6989,898,7030"/>
+<area shape="rect" id="node203" href="$classshark_1_1_kernel_mean_classifier.html" title="Kernelized mean&#45;classifier. " alt="" coords="1049,6510,1253,6551"/>
+<area shape="rect" id="node208" href="$classshark_1_1_abstract_linear_svm_trainer.html" title="Super class of all linear SVM trainers. " alt="" coords="730,7775,919,7817"/>
+<area shape="rect" id="node209" href="$classshark_1_1_linear_c_svm_trainer.html" title="shark::LinearCSvmTrainer\l\&lt; InputType \&gt;" alt="" coords="1056,7809,1247,7850"/>
+<area shape="rect" id="node210" href="$classshark_1_1_squared_hinge_linear_c_svm_trainer.html" title="shark::SquaredHingeLinear\lCSvmTrainer\&lt; InputType \&gt;" alt="" coords="1051,7874,1252,7915"/>
+<area shape="rect" id="node212" href="$classshark_1_1_abstract_weighted_trainer.html" title="shark::AbstractWeightedTrainer\l\&lt; LinearClassifier\&lt; InputVectorType \&gt; \&gt;" alt="" coords="679,8477,970,8518"/>
+<area shape="rect" id="node213" href="$classshark_1_1_logistic_regression.html" title="Trainer for Logistic regression. " alt="" coords="1057,10153,1245,10194"/>
+<area shape="rect" id="node215" href="$classshark_1_1_abstract_weighted_trainer.html" title="shark::AbstractWeightedTrainer\l\&lt; LinearClassifier\&lt;\&gt;, unsigned int \&gt;" alt="" coords="693,8542,956,8583"/>
+<area shape="rect" id="node216" href="$classshark_1_1_l_d_a.html" title="Linear Discriminant Analysis (LDA) " alt="" coords="1105,10436,1197,10463"/>
+<area shape="rect" id="node218" href="$classshark_1_1_lasso_regression.html" title="LASSO Regression. " alt="" coords="737,8689,912,8730"/>
+<area shape="rect" id="node220" href="$classshark_1_1_linear_regression.html" title="Linear Regression. " alt="" coords="735,10083,914,10109"/>
+<area shape="rect" id="node222" href="$classshark_1_1_fisher_l_d_a.html" title="Fisher&#39;s Linear Discriminant Analysis for data compression. " alt="" coords="759,6821,890,6848"/>
+<area shape="rect" id="node225" href="$classshark_1_1_abstract_weighted_trainer.html" title="shark::AbstractWeightedTrainer\l\&lt; RFClassifier\&lt; RealVector \&gt; \&gt;" alt="" coords="709,6559,940,6601"/>
+<area shape="rect" id="node226" href="$classshark_1_1_r_f_trainer_3_01_real_vector_01_4.html" title="shark::RFTrainer\&lt; RealVector \&gt;" alt="" coords="1037,1275,1266,1301"/>
+<area shape="rect" id="node228" href="$classshark_1_1_abstract_weighted_trainer.html" title="shark::AbstractWeightedTrainer\l\&lt; RFClassifier\&lt; unsigned int \&gt; \&gt;" alt="" coords="705,6755,944,6797"/>
+<area shape="rect" id="node229" href="$classshark_1_1_r_f_trainer_3_01unsigned_01int_01_4.html" title="shark::RFTrainer\&lt; unsigned\l int \&gt;" alt="" coords="1050,2751,1253,2793"/>
+<area shape="rect" id="node231" href="$classshark_1_1_one_class_svm_trainer.html" title="Training of one&#45;class SVMs. " alt="" coords="723,8281,926,8322"/>
+<area shape="rect" id="node233" href="$classshark_1_1_normalize_components_whitening.html" title="Train a linear model to whiten the data. " alt="" coords="717,6923,932,6965"/>
+<area shape="rect" id="node234" href="$classshark_1_1_normalize_components_z_c_a.html" title="Train a linear model to whiten the data. " alt="" coords="703,6872,946,6899"/>
+<area shape="rect" id="node236" href="$classshark_1_1_p_c_a.html" title="Principal Component Analysis. " alt="" coords="779,7332,871,7359"/>
+<area shape="rect" id="node238" href="$classshark_1_1_normalize_components_unit_interval.html" title="Train a model to normalize the components of a dataset to fit into the unit inverval. " alt="" coords="717,7449,932,7490"/>
+<area shape="rect" id="node239" href="$classshark_1_1_normalize_components_unit_variance.html" title="Train a linear model to normalize the components of a dataset to unit variance, and optionally to zer..." alt="" coords="717,7383,932,7425"/>
+<area shape="rect" id="node241" href="$classshark_1_1_normalize_kernel_unit_variance.html" title="Determine the scaling factor of a ScaledKernel so that it has unit variance in feature space one on a..." alt="" coords="723,7514,926,7555"/>
+<area shape="rect" id="node243" href="$classshark_1_1_hierarchical_clustering.html" title="Clusters defined by a binary space partitioning tree. " alt="" coords="719,9697,930,9738"/>
+<area shape="rect" id="node245" href="$classshark_1_1_abstract_loss.html" title="Loss function interface. " alt="" coords="747,2422,902,2463"/>
+<area shape="rect" id="node247" href="$classshark_1_1_abstract_kernel_function.html" title="Base class of all Kernel functions. " alt="" coords="716,9071,933,9113"/>
+<area shape="rect" id="node250" href="$structshark_1_1benchmarks_1_1_c_i_g_t_a_b1.html" title="Multi&#45;objective optimization benchmark function CIGTAB 1. " alt="" coords="747,4679,902,4721"/>
+<area shape="rect" id="node251" href="$structshark_1_1benchmarks_1_1_c_i_g_t_a_b2.html" title="Multi&#45;objective optimization benchmark function CIGTAB 2. " alt="" coords="747,4745,902,4786"/>
+<area shape="rect" id="node252" href="$structshark_1_1benchmarks_1_1_d_t_l_z1.html" title="Implements the benchmark function DTLZ1. " alt="" coords="747,4810,902,4851"/>
+<area shape="rect" id="node253" href="$structshark_1_1benchmarks_1_1_d_t_l_z2.html" title="Implements the benchmark function DTLZ2. " alt="" coords="747,4875,902,4917"/>
+<area shape="rect" id="node254" href="$structshark_1_1benchmarks_1_1_d_t_l_z3.html" title="Implements the benchmark function DTLZ3. " alt="" coords="747,4941,902,4982"/>
+<area shape="rect" id="node255" href="$structshark_1_1benchmarks_1_1_d_t_l_z4.html" title="Implements the benchmark function DTLZ4. " alt="" coords="747,5006,902,5047"/>
+<area shape="rect" id="node256" href="$structshark_1_1benchmarks_1_1_d_t_l_z5.html" title="Implements the benchmark function DTLZ5. " alt="" coords="747,5071,902,5113"/>
+<area shape="rect" id="node257" href="$structshark_1_1benchmarks_1_1_d_t_l_z6.html" title="Implements the benchmark function DTLZ6. " alt="" coords="747,5137,902,5178"/>
+<area shape="rect" id="node258" href="$structshark_1_1benchmarks_1_1_d_t_l_z7.html" title="Implements the benchmark function DTLZ7. " alt="" coords="747,5202,902,5243"/>
+<area shape="rect" id="node259" href="$structshark_1_1benchmarks_1_1_e_l_l_i1.html" title="Multi&#45;objective optimization benchmark function ELLI1. " alt="" coords="747,5267,902,5309"/>
+<area shape="rect" id="node260" href="$structshark_1_1benchmarks_1_1_e_l_l_i2.html" title="Multi&#45;objective optimization benchmark function ELLI2. " alt="" coords="747,5333,902,5374"/>
+<area shape="rect" id="node261" href="$structshark_1_1benchmarks_1_1_fonseca.html" title="Bi&#45;objective real&#45;valued benchmark function proposed by Fonseca and Flemming. " alt="" coords="747,5398,902,5439"/>
+<area shape="rect" id="node262" href="$structshark_1_1benchmarks_1_1_g_s_p.html" title="Real&#45;valued benchmark function with two objectives. " alt="" coords="735,5464,915,5491"/>
+<area shape="rect" id="node263" href="$structshark_1_1benchmarks_1_1_i_h_r1.html" title="Multi&#45;objective optimization benchmark function IHR1. " alt="" coords="732,5515,917,5541"/>
+<area shape="rect" id="node264" href="$structshark_1_1benchmarks_1_1_i_h_r2.html" title="Multi&#45;objective optimization benchmark function IHR 2. " alt="" coords="732,5565,917,5592"/>
+<area shape="rect" id="node265" href="$structshark_1_1benchmarks_1_1_i_h_r3.html" title="Multi&#45;objective optimization benchmark function IHR3. " alt="" coords="732,5616,917,5643"/>
+<area shape="rect" id="node266" href="$structshark_1_1benchmarks_1_1_i_h_r4.html" title="Multi&#45;objective optimization benchmark function IHR 4. " alt="" coords="732,5667,917,5693"/>
+<area shape="rect" id="node267" href="$structshark_1_1benchmarks_1_1_i_h_r6.html" title="Multi&#45;objective optimization benchmark function IHR 6. " alt="" coords="732,5717,917,5744"/>
+<area shape="rect" id="node268" href="$structshark_1_1benchmarks_1_1_l_z1.html" title="Multi&#45;objective optimization benchmark function LZ1. " alt="" coords="735,5768,914,5795"/>
+<area shape="rect" id="node269" href="$structshark_1_1benchmarks_1_1_l_z2.html" title="Multi&#45;objective optimization benchmark function LZ2. " alt="" coords="735,5819,914,5845"/>
+<area shape="rect" id="node270" href="$structshark_1_1benchmarks_1_1_l_z3.html" title="Multi&#45;objective optimization benchmark function LZ3. " alt="" coords="735,5869,914,5896"/>
+<area shape="rect" id="node271" href="$structshark_1_1benchmarks_1_1_l_z4.html" title="Multi&#45;objective optimization benchmark function LZ4. " alt="" coords="735,5920,914,5947"/>
+<area shape="rect" id="node272" href="$structshark_1_1benchmarks_1_1_l_z5.html" title="Multi&#45;objective optimization benchmark function LZ5. " alt="" coords="735,4027,914,4053"/>
+<area shape="rect" id="node273" href="$structshark_1_1benchmarks_1_1_l_z6.html" title="Multi&#45;objective optimization benchmark function LZ6. " alt="" coords="735,4077,914,4104"/>
+<area shape="rect" id="node274" href="$structshark_1_1benchmarks_1_1_l_z7.html" title="Multi&#45;objective optimization benchmark function LZ7. " alt="" coords="735,4128,914,4155"/>
+<area shape="rect" id="node275" href="$structshark_1_1benchmarks_1_1_l_z8.html" title="Multi&#45;objective optimization benchmark function LZ8. " alt="" coords="735,4179,914,4205"/>
+<area shape="rect" id="node276" href="$structshark_1_1benchmarks_1_1_l_z9.html" title="Multi&#45;objective optimization benchmark function LZ9. " alt="" coords="735,4229,914,4256"/>
+<area shape="rect" id="node277" href="$classshark_1_1benchmarks_1_1_multi_objective_benchmark.html" title="Creates a multi&#45;objective Benchmark from a set of given single objective functions. " alt="" coords="729,4280,920,4336"/>
+<area shape="rect" id="node278" href="$structshark_1_1benchmarks_1_1_z_d_t1.html" title="Multi&#45;objective optimization benchmark function ZDT1. " alt="" coords="730,4360,919,4387"/>
+<area shape="rect" id="node279" href="$structshark_1_1benchmarks_1_1_z_d_t2.html" title="Multi&#45;objective optimization benchmark function ZDT2. " alt="" coords="730,4411,919,4437"/>
+<area shape="rect" id="node280" href="$structshark_1_1benchmarks_1_1_z_d_t3.html" title="Multi&#45;objective optimization benchmark function ZDT3. " alt="" coords="730,4461,919,4488"/>
+<area shape="rect" id="node281" href="$structshark_1_1benchmarks_1_1_z_d_t4.html" title="Multi&#45;objective optimization benchmark function ZDT4. " alt="" coords="730,4512,919,4539"/>
+<area shape="rect" id="node282" href="$structshark_1_1benchmarks_1_1_z_d_t6.html" title="Multi&#45;objective optimization benchmark function ZDT6. " alt="" coords="730,4563,919,4589"/>
+<area shape="rect" id="node283" href="$classshark_1_1_evaluation_archive.html" title="Objective function wrapper storing all function evaluations. " alt="" coords="733,4614,917,4655"/>
+<area shape="rect" id="node286" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, RealVector,\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="702,7907,947,7963"/>
+<area shape="rect" id="node289" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int \&gt;" alt="" coords="722,7987,927,8029"/>
+<area shape="rect" id="node291" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int,\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="702,8053,947,8109"/>
+<area shape="rect" id="node293" href="$classshark_1_1_abstract_svm_trainer.html" title="shark::AbstractSvmTrainer\l\&lt; InputType, unsigned int,\l MissingFeaturesKernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="705,8134,945,8205"/>
+<area shape="rect" id="node295" href="$classshark_1_1_abstract_weighted_trainer.html" title="Superclass of weighted supervised learning algorithms. " alt="" coords="711,7841,939,7882"/>
+<area shape="rect" id="node297" href="$classshark_1_1_optimization_trainer.html" title="Wrapper for training schemes based on (iterative) optimization. " alt="" coords="727,7710,923,7751"/>
+<area shape="rect" id="node287" href="$classshark_1_1_epsilon_svm_trainer.html" title="Training of Epsilon&#45;SVMs for regression. " alt="" coords="1053,8005,1250,8046"/>
+<area shape="rect" id="node288" href="$classshark_1_1_regularization_network_trainer.html" title="Training of a regularization network. " alt="" coords="1044,7939,1259,7981"/>
+<area shape="rect" id="node290" href="$classshark_1_1_squared_hinge_c_svm_trainer.html" title="shark::SquaredHingeCSvmTrainer\l\&lt; InputType, CacheType \&gt;" alt="" coords="1031,8135,1272,8177"/>
+<area shape="rect" id="node292" href="$classshark_1_1_ranking_svm_trainer.html" title="Training of an SVM for ranking. " alt="" coords="1053,8201,1250,8242"/>
+<area shape="rect" id="node294" href="$classshark_1_1_missing_feature_svm_trainer.html" title="Trainer for binary SVMs natively supporting missing features. " alt="" coords="1030,8266,1273,8307"/>
+<area shape="rect" id="node296" href="$classshark_1_1_linear_s_a_g_trainer.html" title="Stochastic Average Gradient Method for training of linear models,. " alt="" coords="1055,8070,1247,8111"/>
+<area shape="rect" id="node299" href="$classshark_1_1_abstract_weighted_unsupervised_trainer.html" title="Superclass of weighted unsupervised learning algorithms. " alt="" coords="689,8346,960,8387"/>
+<area shape="rect" id="node302" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters. " alt="" coords="37,6009,215,6050"/>
+<area shape="rect" id="node305" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; detail::BaseNearestNeighbor\l\&lt; InputType, unsigned int \&gt;\l ::ParameterVectorType \&gt;" alt="" coords="14,4634,238,4705"/>
+<area shape="rect" id="node306" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; KernelExpansion\&lt; InputType\l \&gt; ::ParameterVectorType \&gt;" alt="" coords="13,20,239,76"/>
+<area shape="rect" id="node307" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; LinearModel\&lt; VectorType\l \&gt; ::ParameterVectorType \&gt;" alt="" coords="23,3817,229,3873"/>
+<area shape="rect" id="node308" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; Model::ParameterVectorType \&gt;" alt="" coords="5,1133,247,1174"/>
+<area shape="rect" id="node309" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; ParameterVectorType \&gt;" alt="" coords="29,8435,223,8477"/>
+<area shape="rect" id="node310" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; RealVector \&gt;" alt="" coords="37,4882,215,4923"/>
+<area shape="rect" id="node314" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="27,10656,225,10683"/>
+<area shape="rect" id="node315" href="$classshark_1_1_binary_layer.html" title="Layer of binary units taking values in {0,1}. " alt="" coords="391,10453,535,10480"/>
+<area shape="rect" id="node316" href="$classshark_1_1_bipolar_layer.html" title="Layer of bipolar units taking values in {&#45;1,1}. " alt="" coords="389,10504,537,10531"/>
+<area shape="rect" id="node317" href="$classshark_1_1_gaussian_layer.html" title="A layer of Gaussian neurons. " alt="" coords="381,10403,544,10429"/>
+<area shape="rect" id="node318" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="53,7903,199,7929"/>
+<area shape="rect" id="node323" href="$classshark_1_1_data.html" title="shark::Data\&lt; InputT \&gt;" alt="" coords="379,9973,547,10000"/>
+<area shape="rect" id="node325" href="$classshark_1_1_data.html" title="shark::Data\&lt; InputType \&gt;" alt="" coords="367,10024,559,10051"/>
+<area shape="rect" id="node327" href="$classshark_1_1_data.html" title="shark::Data\&lt; LabelT \&gt;" alt="" coords="377,9595,548,9621"/>
+<area shape="rect" id="node328" href="$classshark_1_1_data.html" title="shark::Data\&lt; LabelType \&gt;" alt="" coords="365,9645,560,9672"/>
+<area shape="rect" id="node329" href="$classshark_1_1_data.html" title="shark::Data\&lt; RealVector \&gt;" alt="" coords="363,10075,562,10101"/>
+<area shape="rect" id="node331" href="$classshark_1_1_data.html" title="shark::Data\&lt; SearchPoint\lType \&gt;" alt="" coords="368,10126,557,10167"/>
+<area shape="rect" id="node333" href="$classshark_1_1_data.html" title="shark::Data\&lt; shark\l::MultiTaskSample \&gt;" alt="" coords="384,9333,541,9374"/>
+<area shape="rect" id="node334" href="$classshark_1_1_data.html" title="shark::Data\&lt; unsigned\l int \&gt;" alt="" coords="377,9398,548,9439"/>
+<area shape="rect" id="node335" href="$classshark_1_1_labeled_data.html" title="shark::LabeledData\l\&lt; InputType, LabelType \&gt;" alt="" coords="367,9463,559,9505"/>
+<area shape="rect" id="node336" href="$classshark_1_1_labeled_data.html" title="shark::LabeledData\l\&lt; InputType, unsigned int \&gt;" alt="" coords="360,9529,565,9570"/>
+<area shape="rect" id="node337" href="$classshark_1_1_data.html" title="Data container. " alt="" coords="383,9843,542,9869"/>
+<area shape="rect" id="node338" href="$classshark_1_1_labeled_data.html" title="Data set for supervised learning. " alt="" coords="389,8509,537,8550"/>
+<area shape="rect" id="node339" href="$classshark_1_1_line_search.html" title="Wrapper for the linesearch class of functions in the linear algebra library. " alt="" coords="387,8750,538,8791"/>
+<area shape="rect" id="node340" href="$structshark_1_1_multi_task_sample.html" title="Aggregation of input data and task index. " alt="" coords="373,9137,552,9178"/>
+<area shape="rect" id="node341" href="$classshark_1_1_typed_flags.html" title="Flexible and extensible mechanisms for holding flags. " alt="" coords="387,9202,538,9243"/>
+<area shape="rect" id="node342" href="$classshark_1_1_typed_flags.html" title="shark::TypedFlags\&lt;\l Feature \&gt;" alt="" coords="387,9267,538,9309"/>
+<area shape="rect" id="node320" href="$classshark_1_1_weighted_labeled_data.html" title="Weighted data set for supervised learning. " alt="" coords="719,9770,930,9811"/>
+<area shape="rect" id="node322" href="$classshark_1_1_weighted_unlabeled_data.html" title="Weighted data set for unsupervised learning. " alt="" coords="727,9886,922,9927"/>
+<area shape="rect" id="node324" href="$classshark_1_1_unlabeled_data.html" title="Data set for unsupervised learning. " alt="" coords="743,9951,906,9993"/>
+<area shape="rect" id="node326" href="$classshark_1_1_unlabeled_data.html" title="shark::UnlabeledData\l\&lt; InputType \&gt;" alt="" coords="743,10017,906,10058"/>
+<area shape="rect" id="node330" href="$classshark_1_1_unlabeled_data.html" title="shark::UnlabeledData\l\&lt; RealVector \&gt;" alt="" coords="743,10134,906,10175"/>
+<area shape="rect" id="node332" href="$classshark_1_1_unlabeled_data.html" title="shark::UnlabeledData\l\&lt; SearchPointType \&gt;" alt="" coords="743,10265,906,10306"/>
+<area shape="rect" id="node344" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers. " alt="" coords="399,7764,526,7791"/>
+</map>

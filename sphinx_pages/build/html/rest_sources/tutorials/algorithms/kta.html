@@ -1,0 +1,249 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Kernel Target Alignment &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Kernelized Budgeted Stochastic Gradient Descent" href="kernelBudgetedSGD.html" />
+    <link rel="prev" title="Linear Support Vector Machines" href="linear-svm.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Kernel Target Alignment</a><ul>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="linear-svm.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Linear Support Vector Machines</a>
+  <a class="topless" href="kernelBudgetedSGD.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Kernelized Budgeted Stochastic Gradient Descent</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/kta.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="kernel-target-alignment">
+<h1>Kernel Target Alignment<a class="headerlink" href="#kernel-target-alignment" title="Permalink to this headline">¶</a></h1>
+<p>Just about every kernel of practical interest (maybe up to the linear
+kernel) actually forms a family of kernels with a number of parameters.
+Such parameters generally need problem specific tuning. One way of
+achieving this is by optimization of an objective function that measures
+the suitability of the kernel for the task. Here we focus on
+classification tasks.</p>
+<p>Kernel target alignment (KTA) and related measures such as kernel
+polarization define such quality scores. They are relatively cheap to
+compute since they do not involve machine training. This also means that
+they cannot tune too specifically to a single classifier, but rather to
+the task of classifying the given specific type of data with any method.</p>
+<p>The general idea of kernel target alignment is that a data embedding
+that nicely clusters classes in feature space is beneficial for any type
+of classifier. The perfect embedding thought for by kernel target
+alignment is to map all points of the same class to the same point and
+all classes to different points. This means that within-class distances
+in feature space are zero and between-class distances are positive. Let
+<span class="math notranslate">\(k(x, x')\)</span> denote a kernel function with corresponding feature map
+<span class="math notranslate">\(\phi\)</span>, then this is equivalent to</p>
+<div class="math notranslate">
+\[\begin{split}\|\phi(x) - \phi(x')\|^2 = k(x, x) - 2 k(x, x') + k(x', x') = \begin{cases}
+        0 &amp; \text{ for } y = y' \\
+        c &amp; \text{ for } y \not= y' \\
+\end{cases}\end{split}\]</div>
+<p>where c &gt; 0 is any constant.</p>
+<p>Actually realizing a feature mapping with this exact property in practice
+most probably means heavy over-fitting. Still, within a parametric family
+of kernels aiming in this direction usually is a good idea. This preference
+is expressed by kernel target alignment objective function</p>
+<div class="math notranslate">
+\[\frac{\langle K, Y \rangle}{\sqrt{\langle K, K \rangle}}\]</div>
+<p><span class="math notranslate">\(K_{ij} = k(x_i, x_j)\)</span> is the kernel Gram matrix of the inputs.
+where the entries <span class="math notranslate">\(Y_{ij}\)</span> of matrix Y are one if <span class="math notranslate">\(y_i = y_j\)</span>
+and <span class="math notranslate">\(-1/(d-1)\)</span> otherwise, where d denotes the number of classes.
+It is the Gram matrix of an “ideal” kernel mapping each class to a single
+point, with these points forming the vertices of a symmetric simplex.
+<span class="math notranslate">\(\langle A, B \rangle = \sum_{i,j} A_{ij} B_{ij}\)</span> is the standard
+inner product on matrices, interpreted as vectors. This is the original
+KTA objective function proposed in <a class="reference internal" href="#csk2001" id="id1">[CSK2001]</a>.</p>
+<p>This objective minimizes within-class spread of the data, normalized by
+overall spread. However, the objective is not translation invariant.
+This flaw was corrected in <a class="reference internal" href="#cmr2010" id="id2">[CMR2010]</a> where it was proposed to center
+the data in feature space before computing the above formula. The
+resulting objective function is implemented in Shark as
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_kernel_target_alignment.html">KernelTargetAlignment</a>. It is a real-valued objective function,
+interpreted as a function of the parameters of a kernel function object.
+The negative KTA is implemented since by convention Shark optimizers
+solves minimization problems. Any optimization strategy can be used to
+adjust the kernel parameters.</p>
+<p>As an example we adjustment of the bandwidth parameter of a Gaussian
+RBF kernel.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;shark/Data/DataDistribution.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Kernels/GaussianRbfKernel.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/ObjectiveFunctions/KernelTargetAlignment.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Algorithms/GradientDescent/Rprop.h&gt;</span><span class="cp"></span>
+
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">shark</span><span class="p">;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+        <span class="c1">// generate dataset</span>
+        <span class="n">Chessboard</span> <span class="n">problem</span><span class="p">;</span>          <span class="c1">// artificial benchmark problem</span>
+        <span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">data</span> <span class="o">=</span> <span class="n">problem</span><span class="p">.</span><span class="n">generateDataset</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+
+        <span class="c1">// define the family of kernel functions</span>
+        <span class="kt">double</span> <span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>          <span class="c1">// initial guess of the parameter value</span>
+        <span class="n">GaussianRbfKernel</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="n">kernel</span><span class="p">(</span><span class="n">gamma</span><span class="p">);</span>
+
+        <span class="c1">// set up kernel target alignment as a function of the kernel parameters</span>
+        <span class="c1">// on the given data</span>
+        <span class="n">KernelTargetAlignment</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="n">kta</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">);</span>
+
+        <span class="c1">// optimize parameters for best alignment</span>
+        <span class="n">Rprop</span><span class="o">&lt;&gt;</span> <span class="n">rprop</span><span class="p">;</span>
+        <span class="n">rprop</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="n">kta</span><span class="p">);</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;initial parameter: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel</span><span class="p">.</span><span class="n">gamma</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">50</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="n">rprop</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">kta</span><span class="p">);</span>
+                <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;parameter after step &quot;</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel</span><span class="p">.</span><span class="n">gamma</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;final parameter: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">kernel</span><span class="p">.</span><span class="n">gamma</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The example first constructs a toy data set and a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_gaussian_rbf_kernel.html">GaussianRbfKernel</a>
+instance with bandwidth parameter <span class="math notranslate">\(\gamma\)</span>. The parameter is set to
+the initial guess of 0.5. Then the KTA objective function is constructed,
+and the kernel object as well as the data is made know to it. The program
+runs 50 iterations of the gradient-based <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_rprop.html">Rprop</a> optimizer to
+tune the parameter.</p>
+<p>Running the program may take a few seconds. Notice that the derivative of
+the <span class="math notranslate">\(1000 \times 1000\)</span> kernel matrix w.r.t. the kernel parameter
+needs to be computed in every iteration. The complexity of this process
+grows quadratically with the data set size. For large data it is rather
+safe to sub-sample the data in order to reduce the complexity. As an
+experiment the data set size in the above example can be reduced to, say,
+150, which should give a similar result.</p>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="csk2001" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[CSK2001]</a></td><td>N. Cristianini, J. Shawe-Taylor, and J. Kandola.
+On Kernel Target Alignment.
+In Proceedings of Neural Information Processing Systems (NIPS), 2001.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="cmr2010" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[CMR2010]</a></td><td>C. Cortes, M. Mohri, and A. Rostamizadeh.
+Two-Stage Learning Kernel Algorithms.
+In Proceedings of the 27th International Conference on Machine Learning (ICML), 2010.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

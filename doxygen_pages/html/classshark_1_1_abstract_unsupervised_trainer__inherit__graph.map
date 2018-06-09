@@ -1,0 +1,5 @@
+<map id="shark::AbstractUnsupervisedTrainer&lt; Model &gt;" name="shark::AbstractUnsupervisedTrainer&lt; Model &gt;">
+<area shape="rect" id="node4" href="$classshark_1_1_abstract_weighted_unsupervised_trainer.html" title="Superclass of weighted unsupervised learning algorithms. " alt="" coords="21,169,292,211"/>
+<area shape="rect" id="node2" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="5,5,143,32"/>
+<area shape="rect" id="node3" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="167,5,314,32"/>
+</map>

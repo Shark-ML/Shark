@@ -1,0 +1,62 @@
+/* this css style is derived from the mollio templates
+* available at http://mollio.org/. Mollio is triple-licensed
+* under CC-BY, GPL, and CPL.
+*/
+
+#shark_old {margin:0;}
+body #shark_old {
+    padding: 0 0 0px;
+    color: #333;
+    font: 68% arial,tahoma,verdana,sans-serif
+}
+#shark_old ul {margin: 0 0 1.0em}
+#shark_old ul {margin: .3em 0 1.5em 0;list-style-type:square;}
+	#shark_old ul.related {margin-top: -1em}
+#shark_old ol {margin: .5em .5em 1.5em}
+#shark_old ol li {margin-left: 1.4em;padding-left: 0;background: none; list-style-type: decimal}
+#shark_old li {line-height: 1.4em;}
+#shark_old li.doc {background-position: 3px -500px}
+#shark_old ul.nomarker li {background:none;padding-left:0}
+img #shark_old {border:none}
+/* LAYOUT - HEADER */
+#shark_old #header {background: url("sphinx_sprites_aqua.png") repeat-x 0 100%;margin: 0 0 0;padding: 2px 0 6px}
+	/* MT: site name props !COLOR1:SITE NAME */
+	#shark_old #header #site-name {text-align:left; font: 285% arial;letter-spacing: +0.0em;margin:10px 0 8px 40px;padding:0px 0;color:#D2D2D2;border:none}
+	#shark_old #header #site-name a, #shark_old #header #site-name a:hover, #shark_old #header #site-name a:active, #shark_old #header #site-name a:visited{color:#D2D2D2}
+	/* NAV - top horizontal nav */
+	#shark_old #nav, #shark_old #nav ul {padding: 0;margin: 0;list-style: none}
+	/* MT: height means height of the overall title box */
+	#shark_old #nav {font-weight:bold;height:2.75em;font: bold 96% arial;margin: 0 0 0 40px}
+	/* !COLOR2:COLUMN-HEADER-BG 		!COLOR3+4:SHADOWS-BOTTOM-AND-RIGHT*/
+	#shark_old #nav li {position:relative;background: #999;float: left;width: 10em;display:block;margin: 0;border-bottom: 3px solid #666;border-right: 3px solid #252525;padding:0}
+	/* MT: size of the menu column headers !COLOR5: COLUMN-HEADER-MENU-FONTS */
+	#shark_old #nav a, #shark_old #nav a:link, #shark_old #nav a:visited, #shark_old #nav a:hover, #shark_old #nav a:active {font-size:130%; text-decoration:none;cursor:pointer;color:#fff;display: block;padding: 6px 10px 4px}
+	/* MT: !COLOR6: mouse-over-column-headers */
+	#shark_old #nav a:hover {color:#FFC500}
+	/* MT: font sizes _inside_ roll-out boxes here !COLOR7: left margin of roll-out */
+	#shark_old #nav li ul {margin-top:6px;padding-bottom:6px;border-left: 1px solid #00606D;background: url("sphinx_sprites_aqua_box_bg.png") no-repeat 100% 100%;width:19em;font-size:85%;letter-spacing: +0.1em; text-align:left;margin-top:3px;position: absolute;font-weight:bold;left: -999em}
+	#shark_old #nav li:hover ul, #shark_old #nav li.sfhover ul {left: 0;z-index:99999}
+	/* !COLOR8+9: between-item-horizontal-lines-top-and-bottom  */
+	#shark_old #nav li li {background:none;float:none;border:none;border: 1px solid #999;border-top:1px solid #fff;border-right:none;border-left:none;padding-left:0}
+	#shark_old #nav li li.first {border-top:none}
+	#shark_old #nav li li.last {border-bottom:none}
+	/* !COLOR10: fonts in collapsible menu. MT: CHANGED THE 2ND TO LAST PX FROM 10 TO 8 TO MAKE RED HOVER LIST ITEMS NARROWER */
+	#shark_old #nav li li a, #shark_old #nav li li a:link, #shark_old #nav li li a:visited, #shark_old #nav li li a:hover {color:#D2D2D2;padding: 5px 10px 5px;width:12.89em}
+	/* !COLOR11+12: mouse over fonts and BG in collapsible menu */
+	#shark_old #nav li li a:hover {color:#FFC500;}
+	/* !COLOR13+14: active tab (current location) and shadow*/
+	#shark_old #nav li.active {background: #D37900;border-bottom: 3px solid #D37900}
+	#shark_old #nav li.active a {color:#FFC500}
+	#shark_old #nav li.active a:hover {color:#FFC500}
+	/* hide from IE mac \*/
+	#shark_old #nav li {width:auto}
+	/* end hiding from IE5 mac */
+/* POWERED BY - Shark logo in this case */
+#shark_old #poweredby {
+    width:120px;
+    position:absolute;
+    top:10px;
+    right:0
+}
+/* LAYOUT - main body of page */
+#shark_old #wrap {min-width:450px;margin: 0 auto;position:relative}

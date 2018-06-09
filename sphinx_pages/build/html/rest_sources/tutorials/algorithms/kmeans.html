@@ -1,0 +1,255 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>K-Means Clustering &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="LASSO Regression" href="LASSO.html" />
+    <link rel="prev" title="Nearest Neighbor Classification" href="nearestNeighbor.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">K-Means Clustering</a><ul>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#k-means-clustering-in-shark">K-means Clustering in Shark</a></li>
+<li><a class="reference internal" href="#full-example-program">Full example program</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="nearestNeighbor.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Nearest Neighbor Classification</a>
+  <a class="topless" href="LASSO.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> LASSO Regression</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/kmeans.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="k-means-clustering">
+<h1>K-Means Clustering<a class="headerlink" href="#k-means-clustering" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>The goal of clustering or segmentation is to assign data points (e.g.,
+records in a database) to groups or clusters. Similar points should be
+in the same cluster, dissimilar points should be in different
+clusters. In hard clustering each data point belongs exactly to one
+group, while in soft clustering a data point can belong to more than
+one group. The arguably most fundamental segmentation algorithm is
+k-means clustering, an iterative algorithm in which the number of
+clusters has to be specified a priori (for details see, e.g.,
+<a class="reference internal" href="#bishop2006" id="id1">[Bishop2006]</a> or <a class="reference internal" href="#dmln" id="id2">[DMLN]</a>).</p>
+</div>
+<div class="section" id="k-means-clustering-in-shark">
+<h2>K-means Clustering in Shark<a class="headerlink" href="#k-means-clustering-in-shark" title="Permalink to this headline">¶</a></h2>
+<p>IN the following, we look at hard clustering using
+the k-means algorithm.</p>
+<div class="section" id="sample-clustering-problem-old-faithful">
+<h3>Sample clustering problem: Old Faithful<a class="headerlink" href="#sample-clustering-problem-old-faithful" title="Permalink to this headline">¶</a></h3>
+<p>For this tutorial we need to include the following files:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;shark/Data/Csv.h&gt; //load the csv file</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h&gt; //normalize</span><span class="cp"></span>
+
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Algorithms/KMeans.h&gt; //k-means algorithm</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;shark/Models/Clustering/HardClusteringModel.h&gt;//model performing hard clustering of points</span><span class="cp"></span>
+</pre></div>
+</div>
+<p>First, we load some sample data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">importCSV</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sc">&#39; &#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Inspired by  <a class="reference internal" href="#bishop2006" id="id3">[Bishop2006]</a>,
+we consider the Old Faithful data set
+containing observations from the  Old Faithful geyser in Yellowstone
+National Park, Wyoming, USA:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="../../../_images/oldFaithful.jpg"><img alt="Old Faithful geyser" src="../../../_images/oldFaithful.jpg" style="width: 400px;" /></a>
+</div>
+<p>An entry in the data set
+contains a measurement of the waiting time until the
+next eruption of the geyser and the duration of the eruption.
+The data looks like this:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="../../../_images/oldFaithfulData.png"><img alt="Old Faithful  data" src="../../../_images/oldFaithfulData.png" style="width: 550px;" /></a>
+</div>
+<p>It is advisable to normalize the data before clustering,
+see the <a class="reference internal" href="../concepts/data/normalization.html"><span class="doc">Normalization of Input Data</span></a> tutorial:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Normalizer</span><span class="o">&lt;&gt;</span> <span class="n">normalizer</span><span class="p">;</span>
+<span class="n">NormalizeComponentsUnitVariance</span><span class="o">&lt;&gt;</span> <span class="n">normalizingTrainer</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span><span class="c1">//zero mean</span>
+<span class="n">normalizingTrainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">normalizer</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">normalizer</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="computing-the-cluster-centers">
+<h3>Computing the cluster centers<a class="headerlink" href="#computing-the-cluster-centers" title="Permalink to this headline">¶</a></h3>
+<p>Now k-means clustering works like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Centroids</span> <span class="n">centroids</span><span class="p">;</span>
+<span class="kt">size_t</span> <span class="n">iterations</span> <span class="o">=</span> <span class="n">kMeans</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">centroids</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The cluster centers are stored in the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_centroids.html">Centroids</a> class.  The
+number <code class="docutils literal notranslate"><span class="pre">2</span></code> here specifies the number k of clusters.  The cluster
+centers are updated by the algorithm in an iterative manner.  The
+function <a class="reference external" href="../../../../../../doxygen_pages/html/group__clustering.html#ga18f3e34980a5e92ad240649988ac314c">kMeans()</a> returns the number of iterations performed by
+the algorithm.  An optional parameter can set an upper bound on the
+number of iterations.</p>
+<p>In general, the result of the clustering  depends on the
+initial centroids in the first iteration of the algorithm.
+If the centroids are not initialized before they are passed to <a class="reference external" href="../../../../../../doxygen_pages/html/group__clustering.html#ga18f3e34980a5e92ad240649988ac314c">kMeans()</a>, they are
+initialized with the first k data points.</p>
+<p>The class/cluster centers (centroids) can be assessed as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="k">const</span><span class="o">&amp;</span> <span class="n">c</span> <span class="o">=</span> <span class="n">centroids</span><span class="p">.</span><span class="n">centroids</span><span class="p">();</span>
+<span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">c</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="clustering">
+<h3>Clustering<a class="headerlink" href="#clustering" title="Permalink to this headline">¶</a></h3>
+<p>The centroids can now be used to cluster the data.
+We do a hard clustering by:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">HardClusteringModel</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span> <span class="n">model</span><span class="p">(</span><span class="o">&amp;</span><span class="n">centroids</span><span class="p">);</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="o">&gt;</span> <span class="n">clusters</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The points in the clusters can, for example, be assessed as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">elements</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">clusters</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="n">c1</span> <span class="o">&lt;&lt;</span> <span class="n">data</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="n">i</span><span class="p">)(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">data</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="n">i</span><span class="p">)(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+        <span class="k">else</span>
+                <span class="n">c2</span> <span class="o">&lt;&lt;</span> <span class="n">data</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="n">i</span><span class="p">)(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">data</span><span class="p">.</span><span class="n">element</span><span class="p">(</span><span class="n">i</span><span class="p">)(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The result of the clustering looks like this (the blue crosses
+indicate the class centers):</p>
+<div class="figure">
+<a class="reference internal image-reference" href="../../../_images/clustering.png"><img alt="plot of sample faces" src="../../../_images/clustering.png" style="width: 550px;" /></a>
+</div>
+</div>
+</div>
+<div class="section" id="full-example-program">
+<h2>Full example program<a class="headerlink" href="#full-example-program" title="Permalink to this headline">¶</a></h2>
+<p>The full example program is
+<a class="reference external" href="../../../../../../doxygen_pages/html/_k_means_tutorial_8cpp.html">KMeansTutorial.cpp</a>.</p>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="bishop2006" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[Bishop2006]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> C.M. Bishop. Pattern Recognition and Machine Learning. Springer-Verlag 2006.</td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="dmln" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[DMLN]</a></td><td>C. Igel.
+Data Mining: Lecture Notes, chapter 4, 2011</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

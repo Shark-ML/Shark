@@ -1,0 +1,409 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Objective Functions &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Stopping Criteria" href="stopping_criteria.html" />
+    <link rel="prev" title="Optimizers" href="optimizers.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../../index.html">
+          <img class="logo" src="../../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Objective Functions</a><ul>
+<li><a class="reference internal" href="#list-of-classes">List of Classes</a></li>
+<li><a class="reference internal" href="#the-base-class-abstractobjectivefunction-searchpointtype-resultt">The base class ‘AbstractObjectiveFunction &lt;SearchPointType, ResultT&gt;’</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="optimizers.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Optimizers</a>
+  <a class="topless" href="stopping_criteria.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Stopping Criteria</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/library_design/objective_functions.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="objective-functions">
+<h1>Objective Functions<a class="headerlink" href="#objective-functions" title="Permalink to this headline">¶</a></h1>
+<p>An objective function formalizes an optimization problem for which a
+(somehow) optimal solution is to be found, for example using
+<a class="reference internal" href="optimizers.html"><span class="doc">Optimizers</span></a>. Given an input point within its admissible search
+space, an objective function returns a (possibly noisy) objective
+value and, optionally, its derivative. The input is typically a
+vector of real numbers, but the interface allows for more general
+cases as well. For single objective optimization the return value is a
+real number and the goal is to minimize it. For multi-objective
+optimization, the output is a vector holding the objective function
+value for each of the multiple goals.</p>
+<p>Besides returning a corresponding value for a search point, objective functions
+in Shark also manage their own search space. In detail, they provide a method
+indicating if a given point is feasible, and possibly also a method which can
+provide the feasible point closest to an infeasible one.</p>
+<div class="section" id="list-of-classes">
+<h2>List of Classes<a class="headerlink" href="#list-of-classes" title="Permalink to this headline">¶</a></h2>
+<p>The list of objective functions is available in the <a class="reference external" href="../../../../../../../doxygen_pages/html/group__objfunctions.html">class documentation</a>.</p>
+</div>
+<div class="section" id="the-base-class-abstractobjectivefunction-searchpointtype-resultt">
+<h2>The base class ‘AbstractObjectiveFunction &lt;SearchPointType, ResultT&gt;’<a class="headerlink" href="#the-base-class-abstractobjectivefunction-searchpointtype-resultt" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="template-arguments-and-public-types">
+<h3>Template arguments and public types<a class="headerlink" href="#template-arguments-and-public-types" title="Permalink to this headline">¶</a></h3>
+<p>The base class <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_abstract_objective_function.html">AbstractObjectiveFunction</a> has two template arguments.
+The first is the SarchPointType, which defines the admissible type of inputs.
+<code class="docutils literal notranslate"><span class="pre">ResultT</span></code> defines the return type of the objective
+function, which for single-objective functions is <code class="docutils literal notranslate"><span class="pre">double</span></code>, and <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>
+for multi-objective functions. Thus, a typical single objective function has as
+type signature <code class="docutils literal notranslate"><span class="pre">AbstractObjectiveFunction&lt;</span> <span class="pre">RealVector,</span> <span class="pre">double</span> <span class="pre">&gt;</span></code> and
+a multi objective function <code class="docutils literal notranslate"><span class="pre">AbstractObjectiveFunction&lt;</span> <span class="pre">RealVector,</span> <span class="pre">RealVector</span> <span class="pre">&gt;</span></code>.
+The following two typedefs are used throughout hark to make the distinction clear:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="29%" />
+<col width="71%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Typedef</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">SingleObjectiveFunction</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">SearchPointType</span></code> is <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>, <code class="docutils literal notranslate"><span class="pre">ResultType</span></code> is <code class="docutils literal notranslate"><span class="pre">double</span></code></td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">MultiObjectiveFunction</span></code></td>
+<td><code class="docutils literal notranslate"><span class="pre">SearchPointType</span></code> is <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>, <code class="docutils literal notranslate"><span class="pre">ResultType</span></code> is <code class="docutils literal notranslate"><span class="pre">RealVector</span></code></td>
+</tr>
+</tbody>
+</table>
+<p>Based on the search space type, the following types are inferred and made public
+as typedefs:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="25%" />
+<col width="75%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Types</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>SearchPointType</td>
+<td>Type of an input point</td>
+</tr>
+<tr class="row-odd"><td>FirstOrderDerivative</td>
+<td>Type of the derivative with respect to the point</td>
+</tr>
+<tr class="row-even"><td>SecondOrderDerivative</td>
+<td>Type of the object storing the first and second order derivative</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="flags">
+<h3>Flags<a class="headerlink" href="#flags" title="Permalink to this headline">¶</a></h3>
+<p>Objective functions have a set of flags which indicate their capabilities
+and constraints. Accessor functions ease querying these flags:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="48%" />
+<col width="52%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Flag, accessor function</th>
+<th class="head">If set to true …</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">HAS_VALUE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasValue</span></code></td>
+<td>The objective function can calculate its own function
+value. Since this attribute is common to most objective
+functions, this flag is set by default. See comment below.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">HAS_FIRST_DERIVATIVE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasFirstDerivative</span></code></td>
+<td>The first derivative can be computed.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">HAS_SECOND_DERIVATIVE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasSecondDerivative</span></code></td>
+<td>The second derivative can be computed.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">IS_CONSTRAINED_FEATURE</span></code>, <code class="docutils literal notranslate"><span class="pre">isConstrained</span></code></td>
+<td>The input space is constrained, and the function must offer a method
+<code class="docutils literal notranslate"><span class="pre">isFeasible</span></code> for checking whether a point is feasible.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">HAS_CONSTRAINT_HANDLER</span></code>, <code class="docutils literal notranslate"><span class="pre">hasConstraintHandler</span></code></td>
+<td>Indicates that the constraints are governed by a handler.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">CAN_PROPOSE_STARTING_POINT</span></code>, <code class="docutils literal notranslate"><span class="pre">canProposeStartingPoint</span></code></td>
+<td>The objective function can propose a feasible starting
+point from which the optimizer can start the optimization.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">CAN_PROVIDE_CLOSEST_FEASIBLE</span></code>, <code class="docutils literal notranslate"><span class="pre">canProvideClosestFeasible</span></code></td>
+<td>A constrained function can provide a function
+<code class="docutils literal notranslate"><span class="pre">closestFeasible</span></code> which returns the closest feasible
+point given an infeasible one.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">IS_THREAD_SAFE</span></code>, <code class="docutils literal notranslate"><span class="pre">isThreadSafe</span></code></td>
+<td>This flag indicates that eval and evalDerivative can be
+called in parallel by the optimizer for different points.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">IS_NOISY</span></code>, <code class="docutils literal notranslate"><span class="pre">isNoisy</span></code></td>
+<td>This flag indicates that the function is noisy and several
+calls to eval or evalDerivative will lead to different results</td>
+</tr>
+</tbody>
+</table>
+<p>The flag <code class="docutils literal notranslate"><span class="pre">HAS_VALUE</span></code> might seem strange at first. However, there
+exist scenarios where we want to implement the gradient of an
+objective function without a corresponding function itself.  For some
+optimizers, the gradient information is enough to find a better
+point. If the flag is not set, calling <code class="docutils literal notranslate"><span class="pre">eval</span></code> is not allowed, and
+other functions return meaningless values like <code class="docutils literal notranslate"><span class="pre">qnan</span></code>.
+The flag <code class="docutils literal notranslate"><span class="pre">HAS_CONSTRAINT_HANDLER</span></code> indicates that
+constraints are represented by a secondary object. This object can be quried
+and might offer more spcial information about the constraints. for example
+it might indicate that it reprsents box constraints -
+in this case the exact shape of the box can be queried and an algorithm
+might choose a specific strategy based on this information.</p>
+</div>
+<div class="section" id="interface">
+<h3>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h3>
+<p>Using an objective function is easy, as can be seen in the following
+short list of functions:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="51%" />
+<col width="49%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">init()</span></code></td>
+<td>Needs to be called before using it with an optimizer. This sets
+internal variables, e.g. the evaluation counter to 0. For
+Benchmark function it picks for example a random rotation or
+translation.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">getConstraintHandler()</span></code></td>
+<td>Returns the constraint handler of the function, if it has one.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">announceConstraintHandler(ConstraintHandler*)</span></code></td>
+<td>Protected function which is called from a derived class to indicate
+the presence of the handler. Sets up all flags of the objective
+function automatically.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">isFeasible(SearchPointType)</span></code></td>
+<td>Returns true if a search point is feasible</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">closestFeasible(SearchPointType&amp;)</span></code></td>
+<td>Selects the feasible point closest to an infeasible one</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">SearchPointType</span> <span class="pre">proposeStartingPoint()</span></code></td>
+<td>Returns an initial (possibly random) guess for a solution.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ResultType</span> <span class="pre">eval(SearchPointType)</span></code></td>
+<td>Evaluates the function on a given point</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">ResultType</span> <span class="pre">operator()(SearchPointType)</span></code></td>
+<td>Convenience operator calling <code class="docutils literal notranslate"><span class="pre">eval</span></code></td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">ResultType</span> <span class="pre">evalDerivative(SearchPointType,</span> <span class="pre">FirstOrderDerivative)</span></code></td>
+<td>Evaluates the function as well as the first derivative</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">ResultType</span> <span class="pre">evalDerivative(SearchPointType,</span> <span class="pre">SecondOrderDerivative)</span></code></td>
+<td>Evaluates the function as well as the first and second
+derivative</td>
+</tr>
+</tbody>
+</table>
+<p>The function <code class="docutils literal notranslate"><span class="pre">init</span></code> allows objective functions to have random
+components in their setup. For example, certain benchmark functions
+can feature random rotation matrices or optimal points.  It is also
+useful because it allows for easy, centralized configuration and
+allows the objective function to update its internal data structures
+before optimization.  This function needs to be called before calling any
+<code class="docutils literal notranslate"><span class="pre">init</span></code> function of the optimizer.</p>
+<p>If the search space is a vector space, additional functions are added which
+return or set the dimensionality of the objective function:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">std::size_t</span> <span class="pre">numberOfVariables()</span></code></td>
+<td>Returns the required dimensionality of the input point</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">hasScalableDimensionality()</span></code></td>
+<td>Returns true when the input space of the function can be scaled.
+This is useful for Benchmarking</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">setNumberOfVariables(</span> <span class="pre">std::size_t</span> <span class="pre">)</span></code></td>
+<td>Sets the dimensionality of the input points if the function is scaleable.</td>
+</tr>
+</tbody>
+</table>
+<p>MultiObjectiveFunctions offer the same mechanism for the number of objectives</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">std::size_t</span> <span class="pre">numberOfObjectivees()</span></code></td>
+<td>Returns the dimensionality of a result vector</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">hasScalableObjectives()</span></code></td>
+<td>Returns true if the number of objectives can be changed,
+for example for Benchmarking.</td>
+</tr>
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">setNumberOfVariables(</span> <span class="pre">std::size_t</span> <span class="pre">)</span></code></td>
+<td>Sets the number of objectives if it is scalable.</td>
+</tr>
+</tbody>
+</table>
+<p>Besides this, objective functions also have a name
+which can be used for automatic generation of output messages
+and store the number of times <code class="docutils literal notranslate"><span class="pre">eval</span></code> was
+called. The last feature is needed when benchmarking optimizers:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Method</th>
+<th class="head">Description</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">std::string</span> <span class="pre">name()</span></code></td>
+<td>Returns the name of the function.</td>
+</tr>
+<tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">std::size_t</span> <span class="pre">evaluationCounter()</span></code></td>
+<td>Returns the number of function evaluations since the last call to init.</td>
+</tr>
+</tbody>
+</table>
+<p>In summary, an objective functions has a very simple life
+cycle. First, it is created and configured. After that, <code class="docutils literal notranslate"><span class="pre">init</span></code> is
+called. Then the function can be evaluated using the different forms
+of <code class="docutils literal notranslate"><span class="pre">eval</span></code> or <code class="docutils literal notranslate"><span class="pre">evalDerivative</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

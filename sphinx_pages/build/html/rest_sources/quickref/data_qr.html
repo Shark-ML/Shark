@@ -1,0 +1,501 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Shark Data Containers Quick Reference &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Remora Linear Algebra" href="remora.html" />
+    <link rel="prev" title="Overview over Shark Quick Reference Sheets" href="quickref.html" />
+    <link rel="stylesheet" href="../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../installation.html">Installation</a>
+                    </li>
+                    <li  class="first" >
+                        <a href="../tutorials/tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="active" >
+                        <a href="../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="quickref.html">Quick references</a></li>
+                            <li><a href="../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../index.html">
+          <img class="logo" src="../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Shark Data Containers Quick Reference</a><ul>
+<li><a class="reference internal" href="#related-tutorials">Related tutorials</a></li>
+<li><a class="reference internal" href="#relevant-types">Relevant Types</a></li>
+<li><a class="reference internal" href="#container-view-creation">Container / View Creation</a></li>
+<li><a class="reference internal" href="#batch-access">Batch Access</a></li>
+<li><a class="reference internal" href="#element-access">Element Access</a></li>
+<li><a class="reference internal" href="#id1">Batch Access</a></li>
+<li><a class="reference internal" href="#further-methods">Further Methods</a></li>
+<li><a class="reference internal" href="#sizes-and-dimensions">Sizes and Dimensions</a></li>
+<li><a class="reference internal" href="#subset-creation-and-folds-for-cross-validation">Subset Creation and Folds for Cross-validation</a></li>
+<li><a class="reference internal" href="#import-export">Import / Export</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="quickref.html" title="previous chapter">
+	  <img class="navicon" src="../../_static/icon_backward.png" alt="prev"/> Overview over Shark Quick Reference Sheets</a>
+  <a class="topless" href="remora.html" title="next chapter">
+	  <img class="navicon" src="../../_static/icon_forward.png" alt="next"/> Remora Linear Algebra</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../_sources/rest_sources/quickref/data_qr.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="shark-data-containers-quick-reference">
+<h1>Shark Data Containers Quick Reference<a class="headerlink" href="#shark-data-containers-quick-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="related-tutorials">
+<h2>Related tutorials<a class="headerlink" href="#related-tutorials" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="../tutorials/concepts/data/datasets.html"><span class="doc">Data Containers</span></a>,
+<a class="reference internal" href="../tutorials/concepts/data/labels.html"><span class="doc">Label Formats</span></a>,
+<a class="reference internal" href="../tutorials/concepts/data/import_data.html"><span class="doc">Importing Data</span></a>,
+<a class="reference internal" href="../tutorials/concepts/data/dataset_subsets.html"><span class="doc">Creating and Using Subsets of Data</span></a>,
+<a class="reference internal" href="../tutorials/concepts/data/normalization.html"><span class="doc">Normalization of Input Data</span></a>.</p>
+</div>
+<div class="section" id="relevant-types">
+<h2>Relevant Types<a class="headerlink" href="#relevant-types" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a>,
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_unlabeled_data.html">UnlabeledData</a>,
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a> (also the typedefs ClassificationDataset, CompressedClassificationDataset, RegressionDataset),
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_data_view.html">DataView</a>,
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a>,
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_data_distribution.html">DataDistribution</a>,
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_labeled_data_distribution.html">LabeledDataDistribution</a>,
+<a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_c_v_folds.html">CVFolds</a>.</p>
+</div>
+<div class="section" id="container-view-creation">
+<h2>Container / View Creation<a class="headerlink" href="#container-view-creation" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>Data&lt;T&gt;()</td>
+<td>create empty data container</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>Data&lt;T&gt;(data)</td>
+<td>create shallow copy with content sharing</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>Data&lt;T&gt;(N)</td>
+<td>create new data container with N batches</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>Data&lt;T&gt;(N, elem)</td>
+<td>create new data container with N elements, with blueprint elem</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>UnlabeledData&lt;T&gt;()</td>
+<td>create empty data container</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>UnlabeledData&lt;T&gt;(data)</td>
+<td>create shallow copy with content sharing</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>UnlabeledData&lt;T&gt;(N)</td>
+<td>create new data container with N batches</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>UnlabeledData&lt;T&gt;(N, elem)</td>
+<td>create new data container with N elements, with blueprint elem</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>LabeledData&lt;I,L&gt;()</td>
+<td>create empty data container</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>LabeledData&lt;I,L&gt;(input, labels)</td>
+<td>create shallow copy with content sharing</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>LabeledData&lt;I,L&gt;(N)</td>
+<td>create new data container with N batches</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>LabeledData&lt;I,L&gt;(N, elem)</td>
+<td>create new data container with N elements, with blueprint elem</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>DataView&lt;DatasetType&gt;(data)</td>
+<td>create view of data for fast random access to elements</td>
+<td><code class="docutils literal notranslate"><span class="pre">DataView.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga3f154c6b0f5d514902764e5195858382">createDataFromRange()</a></td>
+<td>create from begin+end iterators, e.g., from std::vector</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga0e4ef7276207a92fdb2b3dd8dddd16f7">createLabeledDataFromRange()</a></td>
+<td>create from two ranges for inputs and labels</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/namespaceshark.html#a355b8f97b201dc2bc2a1de00699e29da">toDataset()</a></td>
+<td>create data container from view</td>
+<td><code class="docutils literal notranslate"><span class="pre">DataView.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="batch-access">
+<h2>Batch Access<a class="headerlink" href="#batch-access" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>data.empty()</td>
+<td>true iff data.numberOfBatches() == 0</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>data.numberOfBatches()</td>
+<td>number of batches in the container</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>data.batch(i)</td>
+<td>(reference to) the i-th batch</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>data.batches()</td>
+<td>stl-compliant access to batches as a range</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="element-access">
+<h2>Element Access<a class="headerlink" href="#element-access" title="Permalink to this headline">¶</a></h2>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Random access to elements is a linear time operation!
+Never iterate over elements by index. Consider employing
+a <code class="docutils literal notranslate"><span class="pre">DataView</span></code> for random access.</p>
+</div>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>data.numberOfElements()</td>
+<td>number of elements in the container</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>data.element(i)</td>
+<td>(proxy to) the i-th elements</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>data.elements()</td>
+<td>stl-compliant access to (proxies to) elements as a range</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="id1">
+<h2>Batch Access<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td>data.empty()</td>
+<td>true iff data.numberOfBatches() == 0</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>data.numberOfBatches()</td>
+<td>number of batches in the container</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>data.batch(i)</td>
+<td>(reference to) the i-th batch</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>data.batches()</td>
+<td>stl-compliant access to batches as a range</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="further-methods">
+<h2>Further Methods<a class="headerlink" href="#further-methods" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga6ebadf6a21a6e4d9e11e39ffc9b34dbb">LabeledData::inputShape()</a></td>
+<td>Shape of the input vectors</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga87911411c135042520d99311eca01bb3">LabeledData::labelShape()</a></td>
+<td>Shape of the label vectors</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga19c455da0f0b99f7c7fccedc70c36073">Data::shape()</a></td>
+<td>Shape of the data vectors</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>swap()</td>
+<td>swap container contents (constant time)</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>makeIndependent()</td>
+<td>make sure data is not shared with other containers</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>shuffle()</td>
+<td>randomly reorder elements (not only batches)</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>append(data)</td>
+<td>concatenate containers</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td>LabeledData::inputs()</td>
+<td>underlying container of inputs</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td>LabeledData::labels()</td>
+<td>underlying container of labels</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="sizes-and-dimensions">
+<h2>Sizes and Dimensions<a class="headerlink" href="#sizes-and-dimensions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga1fee3b5830ae11a78109e8c0265c6569">numberOfClasses()</a></td>
+<td>number of classes (maximal class label + 1)</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga466107d68255e05a01d3429f44303019">classSizes()</a></td>
+<td>vector of class sizes</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">dataDimension()</a></td>
+<td>dimension of vectors in the data set</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#gae537f0e90beb970397cd7bb9250984e2">inputDimension()</a></td>
+<td>dimension of input vectors in the data set</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga3006553139477e356ee75cd85c190d7c">labelDimension()</a></td>
+<td>dimension of label vectors in the data set</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="subset-creation-and-folds-for-cross-validation">
+<h2>Subset Creation and Folds for Cross-validation<a class="headerlink" href="#subset-creation-and-folds-for-cross-validation" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="53%" />
+<col width="17%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#gaa6e44d5e4f847777153927436e61752f">splitAtElement()</a></td>
+<td>split data into front and back part (often training and test)</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/namespaceshark.html#ab2c303f393f6806e6c4137cb9c07373a">subset()</a></td>
+<td>create indexed subset from <a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_data_view.html">DataView</a></td>
+<td><code class="docutils literal notranslate"><span class="pre">DataView.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga0eada139f068af2ad3db909fcd3b0c5d">createCVIID()</a></td>
+<td>create folds by i.i.d. assignment of element to folds</td>
+<td><code class="docutils literal notranslate"><span class="pre">CVDatasetTools.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga0602cd9cda0576626b7ee52a02c74b16">createCVSameSize()</a></td>
+<td>create folds of roughly equal size</td>
+<td><code class="docutils literal notranslate"><span class="pre">CVDatasetTools.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga23fd3fc1709de01fc10c34e7b899f158">createCVSameSizeBalanced()</a></td>
+<td>create folds of roughly equal size, stratifying classes</td>
+<td><code class="docutils literal notranslate"><span class="pre">CVDatasetTools.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga368cc6de2b8f5f1f4886be640e71be03">createCVIndexed()</a></td>
+<td>create folds explicitly by index</td>
+<td><code class="docutils literal notranslate"><span class="pre">CVDatasetTools.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#gaa1b20be8992f9352762b7d69f221a704">createCVFullyIndexed()</a></td>
+<td>create folds explicitly by index with reordering</td>
+<td><code class="docutils literal notranslate"><span class="pre">CVDatasetTools.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#gaabc1f57dc805faf96d59ab1ff6d4a171">Data::splice()</a></td>
+<td>split data at batch boundaries (contrary of append)</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#gaa2d2689f5da9dbd4eac362d3c03ebcaf">indexedSubset()</a></td>
+<td>obtain subset of batches from indices</td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga79d1f687c8fb9477a2ff8f56368c7b89">selectFeatures()</a></td>
+<td>filter out a subset of features from <a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a></td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga0595073d4306bc923aec27e51f453f94">selectInputFeatures()</a></td>
+<td>filter out a subset of features from <a class="reference external" href="../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a></td>
+<td><code class="docutils literal notranslate"><span class="pre">Dataset.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="import-export">
+<h2>Import / Export<a class="headerlink" href="#import-export" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%" />
+<col width="55%" />
+<col width="15%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga97446d6c453723686391c8896ac27352">importCSV()</a></td>
+<td>import from comma separated values (CSV) file</td>
+<td><code class="docutils literal notranslate"><span class="pre">Csv.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga494a668d4b5ac3ba9d2eb9d1edb43cf7">exportCSV()</a></td>
+<td>export to comma separated values (CSV) file</td>
+<td><code class="docutils literal notranslate"><span class="pre">Csv.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga05146914cce29f558409be3d941da4ea">importSparseData()</a></td>
+<td>import from sparse vector (libSVM) format</td>
+<td><code class="docutils literal notranslate"><span class="pre">SparseData.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/group__shark__globals.html#ga682120386f2b7999fcb3853cd2948bf5">exportSparseData()</a></td>
+<td>export to sparse vector (libSVM) format</td>
+<td><code class="docutils literal notranslate"><span class="pre">SparseData.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/namespaceshark.html#af7e778b6ccef8791188a47920d233224">importHDF5()</a></td>
+<td>import from HDF5 file used by mldata.org</td>
+<td><code class="docutils literal notranslate"><span class="pre">HDF5.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/namespaceshark.html#a45ff5a792e6e1552e25bafc527a49825">importPGM()</a></td>
+<td>import single PGM image</td>
+<td><code class="docutils literal notranslate"><span class="pre">Pgm.h</span></code></td>
+</tr>
+<tr class="row-odd"><td><a class="reference external" href="../../../../../doxygen_pages/html/namespaceshark.html#ab96fa7c3a2939a73db2108bb6c41686a">importPGMSet()</a></td>
+<td>import set of PGM images</td>
+<td><code class="docutils literal notranslate"><span class="pre">Pgm.h</span></code></td>
+</tr>
+<tr class="row-even"><td><a class="reference external" href="../../../../../doxygen_pages/html/namespaceshark.html#a3dd3d34b531f41052cad2eb70198a092">exportPGM()</a></td>
+<td>export single PGM image</td>
+<td><code class="docutils literal notranslate"><span class="pre">Pgm.h</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>

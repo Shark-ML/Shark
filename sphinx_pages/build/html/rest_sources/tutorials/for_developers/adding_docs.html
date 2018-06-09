@@ -1,0 +1,213 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Adding Examples, Tests and Documentation &#8212; Shark 3.0a documentation</title>
+    <script type="text/x-mathjax-config">
+        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
+        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
+    </script>
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_deriv.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="shortcut icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Overview over Shark Quick Reference Sheets" href="../../quickref/quickref.html" />
+    <link rel="prev" title="Coding Convention" href="codingconvention.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script type="text/javascript">
+       window.MathJax || document.write('<script src="../../../index/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
+       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+    </script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+        <p class="logo"><a href="../../../index.html">
+          <img class="logo" src="../../../_static/SharkLogo.png" alt="Logo"/></a></p>
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Adding Examples, Tests and Documentation</a><ul>
+<li><a class="reference internal" href="#how-to-add-examples-and-unit-tests">How to Add Examples and Unit Tests</a></li>
+<li><a class="reference internal" href="#using-doxygen-in-sphinx">Using doxygen in Sphinx</a></li>
+<li><a class="reference internal" href="#inserting-example-code-in-tutorials">Inserting example code in tutorials</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuration-of-sphinx">Configuration of Sphinx</a><ul>
+<li><a class="reference internal" href="#config-of-documentation">Config of Documentation</a></li>
+<li><a class="reference internal" href="#sphinx-and-doxygen-html-header-injection">Sphinx and Doxygen html header injection</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="codingconvention.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Coding Convention</a>
+  <a class="topless" href="../../quickref/quickref.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Overview over Shark Quick Reference Sheets</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/for_developers/adding_docs.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="adding-examples-tests-and-documentation">
+<h1>Adding Examples, Tests and Documentation<a class="headerlink" href="#adding-examples-tests-and-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="how-to-add-examples-and-unit-tests">
+<h2>How to Add Examples and Unit Tests<a class="headerlink" href="#how-to-add-examples-and-unit-tests" title="Permalink to this headline">¶</a></h2>
+<dl class="docutils">
+<dt>How to add a unit test to the existing setup?</dt>
+<dd>Under the assumption of your test implementation residing in Shark/Test/mytest.cpp, add a line reading
+<code class="docutils literal notranslate"><span class="pre">SHARK_ADD_TEST(</span> <span class="pre">mytest.cpp</span> <span class="pre">mytest</span> <span class="pre">)</span></code> to the file Shark/Test/CMakeLists.txt.</dd>
+<dt>How to add a new example to the existing setup?</dt>
+<dd>Under the assumption of your example implementation residing in Shark/examples/myexamples.cpp, add a line reading
+<code class="docutils literal notranslate"><span class="pre">SHARK_ADD_EXAMPLE(</span> <span class="pre">myexample.cpp</span> <span class="pre">myexample</span> <span class="pre">)</span></code> to the file Shark/examples/CMakeLists.txt.</dd>
+</dl>
+</div>
+<div class="section" id="using-doxygen-in-sphinx">
+<h2>Using doxygen in Sphinx<a class="headerlink" href="#using-doxygen-in-sphinx" title="Permalink to this headline">¶</a></h2>
+<p>To insert a docu to some ENTITY, which could be a classname, function name, group name or file name, just insert
+<code class="docutils literal notranslate"><span class="pre">:doxy:`Entity`</span></code> or <code class="docutils literal notranslate"><span class="pre">:doxy:`My</span> <span class="pre">link</span> <span class="pre">text&lt;Entity&gt;`</span></code> into the file</p>
+</div>
+<div class="section" id="inserting-example-code-in-tutorials">
+<h2>Inserting example code in tutorials<a class="headerlink" href="#inserting-example-code-in-tutorials" title="Permalink to this headline">¶</a></h2>
+<p>To insert example code, we use our own hackish solution using <code class="docutils literal notranslate"><span class="pre">tut2rst</span></code>.  example files are not written as <code class="docutils literal notranslate"><span class="pre">.cpp</span></code>,
+but have the ending <code class="docutils literal notranslate"><span class="pre">.tpp</span></code>. Tutorial files are ending with <code class="docutils literal notranslate"><span class="pre">.tut</span></code> instead of <code class="docutils literal notranslate"><span class="pre">.rst</span></code>. Both file formats are automatically converted to
+their <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> and <code class="docutils literal notranslate"><span class="pre">.rst</span></code> counterpart during compilation. Adding a new tutorial or example file
+requires re-running cmake to update the list of files that are converted.</p>
+<p>When you write an example in <code class="docutils literal notranslate"><span class="pre">Shark/examples/folder/my_Example.tpp</span></code> you can mark sections to be included using:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">some</span> <span class="n">code</span>
+<span class="c1">//###begin&lt;section_name&gt;</span>
+<span class="n">code</span>
+<span class="c1">//###end&lt;section_name&gt;</span>
+<span class="n">some</span> <span class="n">more</span> <span class="n">code</span>
+<span class="c1">//###begin&lt;other_section_name&gt;</span>
+<span class="n">code</span>
+<span class="c1">//###end&lt;other_section_name&gt;</span>
+</pre></div>
+</div>
+<p>These section markers are removed when the <code class="docutils literal notranslate"><span class="pre">.cpp</span></code> file is created during build.
+Section names are allowed to overlap and a section can appear several times. in this case, the section code from different sections is
+pasted in order in the tutorial. To add the section <code class="docutils literal notranslate"><span class="pre">section_name</span></code> to your tutorial, use</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>..sharkcode&lt;folder/my_Example.tpp, section_name&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="configuration-of-sphinx">
+<h1>Configuration of Sphinx<a class="headerlink" href="#configuration-of-sphinx" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="config-of-documentation">
+<h2>Config of Documentation<a class="headerlink" href="#config-of-documentation" title="Permalink to this headline">¶</a></h2>
+<p>The general appearance of the Sphinx pages is governed by a
+“Sphinx theme” and potentially additional CSS stylings and
+other files needed for styling. Both are located in
+<code class="docutils literal notranslate"><span class="pre">doc/sphinx_pages/ini_custom_themes</span></code>. The file <code class="docutils literal notranslate"><span class="pre">theme.conf</span></code>
+is the Sphinx theme and derived from the <code class="docutils literal notranslate"><span class="pre">sphinxdoc</span></code> theme
+with minor adaptations. The file static/mt_sphinx_deriv.css_t
+is the stylefile, which still holds some Sphinx directives
+which will be replaced to create the truly static
+<code class="docutils literal notranslate"><span class="pre">mt_sphinx_deriv.css</span></code> for the html pages.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">doc/sphinx_pages/templates</span></code> you can find the Sphinx/Jinja2
+templates which are used to steer the page layout in addition
+to the theme-based styling.</p>
+<p>The folder <code class="docutils literal notranslate"><span class="pre">doc/sphinx_pages/static</span></code> holds additional images,
+icons, and sprites needed by the templates.</p>
+<p>For doxygen, the header and footer layout is goverened by the
+files in <code class="docutils literal notranslate"><span class="pre">doc/doxygen_pages/templates</span></code>, and the CSS styling
+in <code class="docutils literal notranslate"><span class="pre">doc/doxygen_pages/css</span></code>.</p>
+</div>
+<div class="section" id="sphinx-and-doxygen-html-header-injection">
+<h2>Sphinx and Doxygen html header injection<a class="headerlink" href="#sphinx-and-doxygen-html-header-injection" title="Permalink to this headline">¶</a></h2>
+<p>The Shark homepage injects a css menu header (based on
+<a class="reference external" href="http://www.mollio.org">the mollio templates</a>) into
+the documentation generated by both Sphinx and by Doxygen.
+If you change the menu layout, remember to change it
+<strong>synchronously</strong> in two locations:
+<code class="docutils literal notranslate"><span class="pre">&lt;SHARK_SRC_DIR&gt;/doc/sphinx_pages/templates/layout.html</span></code>
+for all Sphinx pages and
+<code class="docutils literal notranslate"><span class="pre">&lt;SHARK_SRC_DIR&gt;/doc/doxygen_pages/templates/header.html</span></code>
+for all Doxygen pages.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 09/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+    </div>
+  </body>
+</html>
