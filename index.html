@@ -73,6 +73,14 @@
 	&nbsp;
 	<a href="#section-getting-started" onclick="smoothScroll('section-getting-started'); return false;"><span class="menu">Quick&nbsp;Start</span></a>
 	&nbsp;
+<!--
+	<a href="#section-about" onclick="smoothScroll('section-about'); return false;"><span class="menu">About</span></a>
+	&nbsp;
+	<a href="#section-why-shark" onclick="smoothScroll('section-why-shark'); return false;"><span class="menu">Why&nbsp;Shark?</span></a>
+	&nbsp;
+	<a href="#section-features" onclick="smoothScroll('section-features'); return false;"><span class="menu">Features</span></a>
+	&nbsp;
+-->
 	<a href="sphinx_pages/build/html/rest_sources/tutorials/tutorials.html"><span class="menu">Documentation</span></a>
 	&nbsp;
 	<a href="#section-credit" onclick="smoothScroll('section-credit'); return false;"><span class="menu">Credits</span></a>
@@ -179,7 +187,9 @@ This is C++, so we start with includes.
 Let's load some data for learning.
 </p>
 <div class="code">ClassificationDataset traindata;
-downloadSparseData(traindata, <span class="string">"http://shark-ml.org/quickstart-train"</span>);</div>
+downloadCsvData(traindata,
+                <span class="string">"http://shark-ml.org/data/quickstart-train.csv"</span>,
+                LAST_COLUMN);</div>
 <p>
 The next step is to create a predictive model. Here we use a simple linear classifier.
 </p>
@@ -196,7 +206,9 @@ Congrats! We have a readily trained classifier.
 Let's try it out by applying it to new data.
 </p>
 <div class="code">ClassificationDataset testdata;
-downloadSparseData(testdata, <span class="string">"http://shark-ml.org/quickstart-test"</span>);
+downloadCsvData(testdata,
+                <span class="string">"http://shark-ml.org/data/quickstart-test.csv"</span>,
+                LAST_COLUMN);
 ZeroOneLoss&lt;&gt; loss;
 <span class="keyword">double</span> error = loss(testdata.labels(), classifier(testdata.inputs()));</div>
 <p>
