@@ -187,7 +187,9 @@ This is C++, so we start with includes.
 Let's load some data for learning.
 </p>
 <div class="code">ClassificationDataset traindata;
-downloadSparseData(traindata, <span class="string">"http://shark-ml.org/quickstart-train"</span>);</div>
+downloadCsvData(traindata,
+                <span class="string">"http://shark-ml.org/data/quickstart-train.csv"</span>,
+                LAST_COLUMN);</div>
 <p>
 The next step is to create a predictive model. Here we use a simple linear classifier.
 </p>
@@ -204,7 +206,9 @@ Congrats! We have a readily trained classifier.
 Let's try it out by applying it to new data.
 </p>
 <div class="code">ClassificationDataset testdata;
-downloadSparseData(testdata, <span class="string">"http://shark-ml.org/quickstart-test"</span>);
+downloadCsvData(testdata,
+                <span class="string">"http://shark-ml.org/data/quickstart-test.csv"</span>,
+                LAST_COLUMN);
 ZeroOneLoss&lt;&gt; loss;
 <span class="keyword">double</span> error = loss(testdata.labels(), classifier(testdata.inputs()));</div>
 <p>
