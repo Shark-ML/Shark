@@ -215,6 +215,7 @@ public:
 	/// \brief calculates the weighted sum of derivatives w.r.t the parameters.
 	///
 	/// \param  pattern       the patterns to evaluate
+    /// \param outputs        the target outputs
 	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
 	/// \param  state intermediate results stored by eval to speed up calculations of the derivatives
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
@@ -231,6 +232,7 @@ public:
 	///\brief calculates the weighted sum of derivatives w.r.t the inputs
 	///
 	/// \param  pattern       the patterns to evaluate
+    /// \param outputs        the target outputs
 	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param  derivative    the calculated derivative for every pattern
@@ -248,9 +250,10 @@ public:
 	///
 	/// Sometimes, both derivatives are needed at the same time. But sometimes, when calculating the
 	/// weighted parameter derivative, the input derivative can be calculated for free. This is for example true for
-	/// the feed-forward neural networks. However, there exists the obvious default implementation to just calculate
+	/// the feed-forward neural networks. However, there exists the obvious default implementation that just calculates
 	/// the derivatives one after another.
 	/// \param patterns       the patterns to evaluate
+    /// \param outputs        the target outputs
 	/// \param coefficients  the coefficients which are used to calculate the weighted sum
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param parameterDerivative  the calculated parameter derivative as sum over all derivates of all patterns
