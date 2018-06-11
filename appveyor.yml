@@ -11,7 +11,7 @@ environment:
       msvc_name: msvc-14.0
       BOOST_ROOT: C:\Libraries\boost_1_67_0
     - cmake_generator_vs_name: "Visual Studio 15"
-      msvc_name: msvc-14.0
+      msvc_name: msvc-15.0
       BOOST_ROOT: C:\Libraries\boost_1_67_0
 
 branches:
