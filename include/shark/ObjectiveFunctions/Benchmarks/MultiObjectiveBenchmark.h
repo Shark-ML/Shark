@@ -60,7 +60,7 @@ namespace detail{
 ///
 /// A random rotation and translation is applied to each benchmark function, thus
 /// MultiObjectiveBenchmark<Sphere,Sphere> forms a non-degenerate front.
-/// the ith objective can be queried via the get<i> member function.
+/// the k-th objective can be queried via the get<k> member function.
 ///
 /// The generated translations are approximately sampled from the unit ball and starting points are also drawn
 /// by the same distribution around a random optimum (assuming the optimum is at (0,0) of the untranslated function
