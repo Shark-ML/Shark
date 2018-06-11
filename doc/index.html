@@ -73,14 +73,6 @@
 	&nbsp;
 	<a href="#section-getting-started" onclick="smoothScroll('section-getting-started'); return false;"><span class="menu">Quick&nbsp;Start</span></a>
 	&nbsp;
-<!--
-	<a href="#section-about" onclick="smoothScroll('section-about'); return false;"><span class="menu">About</span></a>
-	&nbsp;
-	<a href="#section-why-shark" onclick="smoothScroll('section-why-shark'); return false;"><span class="menu">Why&nbsp;Shark?</span></a>
-	&nbsp;
-	<a href="#section-features" onclick="smoothScroll('section-features'); return false;"><span class="menu">Features</span></a>
-	&nbsp;
--->
 	<a href="sphinx_pages/build/html/rest_sources/tutorials/tutorials.html"><span class="menu">Documentation</span></a>
 	&nbsp;
 	<a href="#section-credit" onclick="smoothScroll('section-credit'); return false;"><span class="menu">Credits</span></a>
@@ -188,8 +180,10 @@ Let's load some data for learning.
 </p>
 <div class="code">ClassificationDataset traindata;
 downloadCsvData(traindata,
-                <span class="string">"http://shark-ml.org/data/quickstart-train.csv"</span>,
-                LAST_COLUMN);</div>
+                <span class="string">"www.shark-ml.org/data/quickstart-train.csv"</span>,
+                LAST_COLUMN,
+                <span class="string">' '</span>);
+</div>
 <p>
 The next step is to create a predictive model. Here we use a simple linear classifier.
 </p>
@@ -207,8 +201,9 @@ Let's try it out by applying it to new data.
 </p>
 <div class="code">ClassificationDataset testdata;
 downloadCsvData(testdata,
-                <span class="string">"http://shark-ml.org/data/quickstart-test.csv"</span>,
-                LAST_COLUMN);
+                <span class="string">"www.shark-ml.org/data/quickstart-test.csv"</span>,
+                LAST_COLUMN,
+                <span class="string">' '</span>);
 ZeroOneLoss&lt;&gt; loss;
 <span class="keyword">double</span> error = loss(testdata.labels(), classifier(testdata.inputs()));</div>
 <p>
@@ -241,43 +236,6 @@ Shark offers numerous algorithms from various machine learning and computational
 Shark comes with a lot of powerful algorithms that are to our best knowledge not implemented in any other library, for example in the domains of model selection and training of binary and multi-class SVMs, or evolutionary single- and multi-objective optimization.
 </p>
 </div></div>
-
-<!-- selected features -->
-<!--
-<div class="section-white"><div class="section-content">
-<a name="section-features"></a>
-<h2>Selected features</h2>
-<p>
-Shark currently supports:
-<ul>
-	<li>Supervised learning
-	<ul>
-		<li>Linear discriminant analysis (LDA), Fisher-LDA</li>
-		<li>Linear regression</li>
-		<li>Support vector machines (SVMs) for one-class, binary and true multi-category classification as well as regression; includes fast variants for linear kernels.</li>
-		<li>Feed-forward and recurrent multi-layer artificial neural networks</li>
-		<li>Radial basis function networks</li>
-		<li>Regularization networks as well as Gaussian processes for regression</li>
-		<li>Iterative nearest neighbor classification and regression</li>
-		<li>Decision trees and random forests</li>
-	</ul></li>
-	<li>Unsupervised learning
-	<ul>
-		<li>Principal component analysis</li>
-		<li>Restricted Boltzmann machines (including many state-of-the-art learning algorithms)</li>
-		<li>Hierarchical clustering</li>
-		<li>Data structures for efficient distance-based clustering</li>
-	</ul></li>
-	<li>Evolutionary algorithms
-	<ul>
-		<li>Single-objective optimization (e.g., CMA-ES)</li>
-		<li>Multi-objective optimization (in particular, highly efficient algorithms for computing as well as approximating the contributing hypervolume)</li>
-	</ul></li>
-	<li>Basic linear algebra and optimization algorithms</li>
-</ul>
-</p>
-</div></div>
--->
 
 <!-- credits and copyright -->
 <div class="section-colored"><div class="section-content">
