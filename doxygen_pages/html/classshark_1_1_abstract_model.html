@@ -91,9 +91,9 @@
 <div id="dynsection-0-content" class="dyncontent" style="display:none;">
 <div class="center"><img src="classshark_1_1_abstract_model__inherit__graph.png" border="0" usemap="#shark_1_1_abstract_model_3_01_input_type_t_00_01_output_type_t_00_01_parameter_vector_type_01_4_inherit__map" alt="Inheritance graph"/></div>
 <map name="shark_1_1_abstract_model_3_01_input_type_t_00_01_output_type_t_00_01_parameter_vector_type_01_4_inherit__map" id="shark_1_1_abstract_model_3_01_input_type_t_00_01_output_type_t_00_01_parameter_vector_type_01_4_inherit__map">
-<area shape="rect" id="node2" href="classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; ParameterVectorType \&gt;" alt="" coords="5,5,200,47"/>
-<area shape="rect" id="node3" href="classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="34,71,171,98"/>
-<area shape="rect" id="node4" href="classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="29,122,176,149"/>
+<area shape="rect" id="node2" href="classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\l\&lt; ParameterVectorType \&gt;" alt="" coords="5,5,196,47"/>
+<area shape="rect" id="node3" href="classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="32,71,169,98"/>
+<area shape="rect" id="node4" href="classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="27,122,174,149"/>
 </map>
 <center><span class="legend">[<a href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -1049,9 +1049,10 @@ template&lt;class InputTypeT, class OutputTypeT, class ParameterVectorType = Rea
 </div><div class="memdoc">
 
 <p>calculates weighted input and parameter derivative at the same time </p>
-<p>Sometimes, both derivatives are needed at the same time. But sometimes, when calculating the weighted parameter derivative, the input derivative can be calculated for free. This is for example true for the feed-forward neural networks. However, there exists the obvious default implementation to just calculate the derivatives one after another. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Sometimes, both derivatives are needed at the same time. But sometimes, when calculating the weighted parameter derivative, the input derivative can be calculated for free. This is for example true for the feed-forward neural networks. However, there exists the obvious default implementation that just calculates the derivatives one after another. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">patterns</td><td>the patterns to evaluate </td></tr>
+    <tr><td class="paramname">outputs</td><td>the target outputs </td></tr>
     <tr><td class="paramname">coefficients</td><td>the coefficients which are used to calculate the weighted sum </td></tr>
     <tr><td class="paramname">state</td><td>intermediate results stored by eval to sped up calculations of the derivatives </td></tr>
     <tr><td class="paramname">parameterDerivative</td><td>the calculated parameter derivative as sum over all derivates of all patterns </td></tr>
@@ -1060,7 +1061,7 @@ template&lt;class InputTypeT, class OutputTypeT, class ParameterVectorType = Rea
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="_abstract_model_8h_source.html#l00258">258</a> of file <a class="el" href="_abstract_model_8h_source.html">AbstractModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_abstract_model_8h_source.html#l00261">261</a> of file <a class="el" href="_abstract_model_8h_source.html">AbstractModel.h</a>.</p>
 
 </div>
 </div>
@@ -1122,6 +1123,7 @@ template&lt;class InputTypeT, class OutputTypeT, class ParameterVectorType = Rea
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pattern</td><td>the patterns to evaluate </td></tr>
+    <tr><td class="paramname">outputs</td><td>the target outputs </td></tr>
     <tr><td class="paramname">coefficients</td><td>the coefficients which are used to calculate the weighted sum for every pattern </td></tr>
     <tr><td class="paramname">state</td><td>intermediate results stored by eval to sped up calculations of the derivatives </td></tr>
     <tr><td class="paramname">derivative</td><td>the calculated derivative for every pattern </td></tr>
@@ -1131,7 +1133,7 @@ template&lt;class InputTypeT, class OutputTypeT, class ParameterVectorType = Rea
 
 <p>Reimplemented in <a class="el" href="classshark_1_1_neuron_layer.html#a704f5a3c5c80639fff93fc55ef1a474d">shark::NeuronLayer&lt; NeuronType, VectorType &gt;</a>, <a class="el" href="classshark_1_1_conv2_d_model.html#a58ea7c864d76478c172a7e7799ad816d">shark::Conv2DModel&lt; VectorType, ActivationFunction &gt;</a>, <a class="el" href="classshark_1_1_resize_layer.html#ac7e74232d7382fa6040bb3c3b86a30d9">shark::ResizeLayer&lt; VectorType &gt;</a>, <a class="el" href="classshark_1_1_pooling_layer.html#a32d46299f9d8e89f241518efa2cdfd0f">shark::PoolingLayer&lt; VectorType &gt;</a>, and <a class="el" href="classshark_1_1_dropout_layer.html#a3c09852df31dd53eca754ded34fe5531">shark::DropoutLayer&lt; VectorType &gt;</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_abstract_model_8h_source.html#l00237">237</a> of file <a class="el" href="_abstract_model_8h_source.html">AbstractModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_abstract_model_8h_source.html#l00239">239</a> of file <a class="el" href="_abstract_model_8h_source.html">AbstractModel.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="classshark_1_1_abstract_model.html#adb4966b597013417b5e9957c84485c8c">shark::AbstractModel&lt; InputT, unsigned int &gt;::weightedDerivatives()</a>.</p>
 
@@ -1195,6 +1197,7 @@ template&lt;class InputTypeT, class OutputTypeT, class ParameterVectorType = Rea
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">pattern</td><td>the patterns to evaluate </td></tr>
+    <tr><td class="paramname">outputs</td><td>the target outputs </td></tr>
     <tr><td class="paramname">coefficients</td><td>the coefficients which are used to calculate the weighted sum for every pattern </td></tr>
     <tr><td class="paramname">state</td><td>intermediate results stored by eval to speed up calculations of the derivatives </td></tr>
     <tr><td class="paramname">derivative</td><td>the calculated derivative as sum over all derivates of all patterns </td></tr>
@@ -1204,7 +1207,7 @@ template&lt;class InputTypeT, class OutputTypeT, class ParameterVectorType = Rea
 
 <p>Reimplemented in <a class="el" href="classshark_1_1_neuron_layer.html#a77fafddfd9c5068f8fa543d43741757b">shark::NeuronLayer&lt; NeuronType, VectorType &gt;</a>, <a class="el" href="classshark_1_1_conv2_d_model.html#a7e08e22875a1316ee70df6fb857900c6">shark::Conv2DModel&lt; VectorType, ActivationFunction &gt;</a>, <a class="el" href="classshark_1_1_resize_layer.html#aaafcc82e666ef955a86f1ddd4510f81f">shark::ResizeLayer&lt; VectorType &gt;</a>, <a class="el" href="classshark_1_1_pooling_layer.html#a7b7eceac5d8d6c11fa787670b448b5ef">shark::PoolingLayer&lt; VectorType &gt;</a>, <a class="el" href="classshark_1_1_dropout_layer.html#a463d90503846768a7bd111881f178f6c">shark::DropoutLayer&lt; VectorType &gt;</a>, and <a class="el" href="classshark_1_1_r_b_f_layer.html#ae157c4443c817e640e439081a380c1c9">shark::RBFLayer</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="_abstract_model_8h_source.html#l00221">221</a> of file <a class="el" href="_abstract_model_8h_source.html">AbstractModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="_abstract_model_8h_source.html#l00222">222</a> of file <a class="el" href="_abstract_model_8h_source.html">AbstractModel.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="classshark_1_1_abstract_model.html#adb4966b597013417b5e9957c84485c8c">shark::AbstractModel&lt; InputT, unsigned int &gt;::weightedDerivatives()</a>.</p>
 

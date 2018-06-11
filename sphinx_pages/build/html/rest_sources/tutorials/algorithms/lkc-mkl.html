@@ -129,27 +129,27 @@ SVMs have become fashionable; see for example <a class="reference internal" href
 That line of research has at its core the idea of using, instead of one
 single kernel, a (convex) linear combination of base kernels as a compound
 kernel within an SVM.</p>
-<p>In more detail: if <span class="math notranslate">\(k_1\)</span> and <span class="math notranslate">\(k_2\)</span> are positive definite kernel
+<p>In more detail: if <span class="math notranslate nohighlight">\(k_1\)</span> and <span class="math notranslate nohighlight">\(k_2\)</span> are positive definite kernel
 functions, then</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k = a \cdot k_1 + b \cdot k_2\]</div>
-<p>is again a positive definite kernel for <span class="math notranslate">\(a \geq 0\)</span> and <span class="math notranslate">\(b \geq 0\)</span>
-(and <span class="math notranslate">\(k \neq 0\)</span>). Most of the MKL literature is based on linear kernel
+<p>is again a positive definite kernel for <span class="math notranslate nohighlight">\(a \geq 0\)</span> and <span class="math notranslate nohighlight">\(b \geq 0\)</span>
+(and <span class="math notranslate nohighlight">\(k \neq 0\)</span>). Most of the MKL literature is based on linear kernel
 combinations (LKCs) of the general form</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}k = \sum_i \theta_i k_i \; , \\
 \theta_i \geq 0\end{split}\]</div>
 <p>Multiple Kernel Learning then refers to learning the positive, real-valued weight vector
-<span class="math notranslate">\(\theta\)</span>. Often, an additional constraint is enforced on the kernel weights, for
-example <span class="math notranslate">\(\|\theta\|^2 \leq 1\)</span>. It should be noted that the process of learning the
+<span class="math notranslate nohighlight">\(\theta\)</span>. Often, an additional constraint is enforced on the kernel weights, for
+example <span class="math notranslate nohighlight">\(\|\theta\|^2 \leq 1\)</span>. It should be noted that the process of learning the
 kernel weights (and possibly including training the SVM at the same time) is referred to
 as MKL, but merely employing an LKC is not. The most prominent school of MKL algorithms
 share the following characteristics:</p>
 <ul class="simple">
-<li>The kernel weights <span class="math notranslate">\(\theta\)</span> are optimized together with the SVM weight vector
-<span class="math notranslate">\(\alpha\)</span> (or <span class="math notranslate">\(w\)</span> ) in one single, joint optimization problem. See
+<li>The kernel weights <span class="math notranslate nohighlight">\(\theta\)</span> are optimized together with the SVM weight vector
+<span class="math notranslate nohighlight">\(\alpha\)</span> (or <span class="math notranslate nohighlight">\(w\)</span> ) in one single, joint optimization problem. See
 <a class="reference internal" href="#kloft2011" id="id2">[Kloft2011]</a> or <a class="reference internal" href="#gonen2011" id="id3">[Gonen2011]</a>.</li>
-<li>The sub-kernels <span class="math notranslate">\(k_i\)</span> are usually regarded as (pseudo-)parameterless. In other
+<li>The sub-kernels <span class="math notranslate nohighlight">\(k_i\)</span> are usually regarded as (pseudo-)parameterless. In other
 words, if the sub-kernels do have parameters, these are fixed to one particular value
 and not optimized.</li>
 </ul>
@@ -168,16 +168,16 @@ it is instructive to recall the two (different) main motivations for using LKCs 
 learning task:</p>
 <ul class="simple">
 <li>In the first scenario, each kernel operates on the exact same set of features.
-That is, the input to each sub-kernel <span class="math notranslate">\(k_i\)</span> is the same as the one to the
-“mother” kernel <span class="math notranslate">\(k\)</span>. The sub-kernels may then either stem from different
+That is, the input to each sub-kernel <span class="math notranslate nohighlight">\(k_i\)</span> is the same as the one to the
+“mother” kernel <span class="math notranslate nohighlight">\(k\)</span>. The sub-kernels may then either stem from different
 kernel function families, or basically be the same mathematical function but
 with different parameters. The most popular scenario or argument made for such
 a setting is that this way, each sub-kernel can be viewed as a candidate kernel
 for solving the problem at hand. Instead of selecting the kernel family type and/or
 the sub-kernels’ parameters in a traditional grid-search (or other hyperparameter
 optimization) setting, MKL algorithms can “choose” their favorite kernel themselves,
-and thus the best sub-kernel parameter, by increasing the weights <span class="math notranslate">\(\theta_i\)</span>
-for all sub-kernels <span class="math notranslate">\(k_i\)</span> which have a meaningful sub-kernel parameter. This
+and thus the best sub-kernel parameter, by increasing the weights <span class="math notranslate nohighlight">\(\theta_i\)</span>
+for all sub-kernels <span class="math notranslate nohighlight">\(k_i\)</span> which have a meaningful sub-kernel parameter. This
 is sometimes seen by MKL proponents as eliminating or circumventing the SVM model
 selection problem. We will refer to this first scenario as the MKL kernel selection
 scenario.</li>
@@ -232,14 +232,14 @@ input vector. The MklKernel allows the sub-kernels to be completely heterogenous
 <div class="section" id="the-weightedsumkernel">
 <h3>The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a><a class="headerlink" href="#the-weightedsumkernel" title="Permalink to this headline">¶</a></h3>
 <p>The <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_weighted_sum_kernel.html">WeightedSumKernel</a> class implements a kernel</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x,z) = \frac{\sum_i \theta_i k_i(x,z)}{\sum_i \theta_i} \;\]</div>
 <p>with the first kernel weight always fixed to one (eliminating one redundant
 degree of freedom). The denominator serves to normalize the kernel by the
 sum of the sub-kernel weights. Note that internally, <strong>the kernel weights
 are computed as exponentials of the externally visible parameters</strong>. To be
 clear: in other words, when you set a parameter vector, it will only affect
-the <span class="math notranslate">\(N-1\)</span> last kernel weights (the first one being fixed to one [or
+the <span class="math notranslate nohighlight">\(N-1\)</span> last kernel weights (the first one being fixed to one [or
 zero, in parameter space]), and the weights will be the exponentials
 of what you passed as parameter vector. The latter is done to support
 unconstrained optimization (no matter what parameters you set, you always
@@ -265,7 +265,7 @@ sub-kernel’s sub-parameters are part of the overall parameter vector:</p>
 </pre></div>
 </div>
 <p>By default, the sub-kernels contribution to the overall parameter vector is turned
-<strong>off</strong>. That is, the only parameters initially visible are the <span class="math notranslate">\(N-1\)</span> last
+<strong>off</strong>. That is, the only parameters initially visible are the <span class="math notranslate nohighlight">\(N-1\)</span> last
 kernel weights (the first one being fixed to one [or zero, in parameter space]).
 Lines of code say it best:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// examine initial state</span>
@@ -351,7 +351,7 @@ kernel1.eval(x1,x2): 0.677265
 </pre></div>
 </div>
 <p>The kernel evaluations yield exactly what we would expect:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}\frac{( 1.0*\exp(-0.1*16) + 1.0*\exp(-0.01*16) ) }{ ( 1.0 + 1.0 )} = 0.527020 \\
 \frac{( 1.0*\exp(-0.1*16) + e*\exp(-0.01*16) ) }{ ( 1.0 + e )} = 0.677265 \; .\end{split}\]</div>
 <p>The above should also make clear how the sub-kernels’ sub-parameters are “seen”
@@ -365,9 +365,9 @@ integration scenario”. Before, in the “kernel selection scenario”, each
 sub-kernel operated on the entire, full feature vector. In the “information
 integration scenario”, each sub-kernel only operates on a continuous sub-set
 of the feature vector:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x,z) = \frac{ \sum_i \theta_i k_i(x_{b_{i}-e_{i}},z_{b_{i}-e_{i}}) } { \sum_i \theta_i } \, .\]</div>
-<p>The index range <span class="math notranslate">\(b_{i}-e_{i}\)</span> denotes the <span class="math notranslate">\(i\)</span>-th continuous
+<p>The index range <span class="math notranslate nohighlight">\(b_{i}-e_{i}\)</span> denotes the <span class="math notranslate nohighlight">\(i\)</span>-th continuous
 sub-range (inclusive beginning to exclusive end) of the overall feature vector.
 Naturally, we need to pass these index pairs to the SubrangeKernel for each
 sub-kernel. This is done during construction. First, we set up the sub-kernels
@@ -546,7 +546,7 @@ on different feature ranges. Setting up the kernels and indices…:</p>
 </pre></div>
 </div>
 <p>We would now expect as outcome of the kernel computations:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}\frac{( 1.0*\exp(-0.1*16) + 1.0*\exp(-0.01*0) )}{( 1.0 + 1.0 )} = 0.600948 \\
 \frac{( 1.0*\exp(-0.1*16) + e*\exp(-0.01*0) )} {( 1.0 + e )} = 0.785357\end{split}\]</div>
 <p>Both values are exactly what we get from the code output:</p>
@@ -582,15 +582,15 @@ kernel3.eval(x1,x2): 0.785357
 <p>The third class is the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_mkl_kernel.html">MklKernel</a>. It is similar to the WeightedSumKernel
 and the SubrangeKernel, except that it adds up kernels operating on possibly
 completely different inputs:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x,z) = \frac{ \sum_i \theta_i k_i(x_i,z_i) } { \sum_i \theta_i } \, .\]</div>
-<p>That is, <span class="math notranslate">\(x_i\)</span> and <span class="math notranslate">\(x_j\)</span> (and hence <span class="math notranslate">\(k_i\)</span> and <span class="math notranslate">\(k_j\)</span>)
+<p>That is, <span class="math notranslate nohighlight">\(x_i\)</span> and <span class="math notranslate nohighlight">\(x_j\)</span> (and hence <span class="math notranslate nohighlight">\(k_i\)</span> and <span class="math notranslate nohighlight">\(k_j\)</span>)
 are allowed to have very different structure (rather than merely being different
 subranges of the same input vector). The MklKernel thus allows for the most
 diverse information integration settings. This flexibility comes at a small
 price of added usage code complexity.</p>
 <p>First, there is the question what data type the aggregated tuple of sub-inputs
-<span class="math notranslate">\(x=(x_0,x_1,...)\)</span> should have. Shark currently supports binding macros for
+<span class="math notranslate nohighlight">\(x=(x_0,x_1,...)\)</span> should have. Shark currently supports binding macros for
 arbitrary structures to boost::fusion. For most purposes, it is easiest to declare a
 struct as a composite data type and then adapt it for boost::fusion, like so:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">HeterogeneousInputStruct</span><span class="p">{</span>
@@ -690,7 +690,7 @@ change two parameters:</p>
 </pre></div>
 </div>
 <p>We would expect the kernel evaluations to yield:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}\frac{( 1.0*\exp(-0.1*1.0) + 1.0*0.6 + 1.0*(-0.5*1.0) )} {( 1.0 + 1.0 + 1.0 )} = 0.334946 \\
 \frac{( 1.0*\exp(-0.2*1.0) + e*0.6 + 1.0*(-0.5*1.0) )} {( 1.0 + e + 1.0   )} = 0.413222\end{split}\]</div>
 <p>Both values are exactly what we get from the code’s output:</p>
@@ -712,9 +712,9 @@ mkl_kernel.eval( dataset.element(0), dataset.element(1) ): 0.413222
 </div>
 <div class="section" id="mkl-kernel-normalization">
 <h3>MKL Kernel Normalization<a class="headerlink" href="#mkl-kernel-normalization" title="Permalink to this headline">¶</a></h3>
-<p>Since many MKL formulations penalize the (<span class="math notranslate">\(l_p\)</span>-) norm of the kernel weights,
+<p>Since many MKL formulations penalize the (<span class="math notranslate nohighlight">\(l_p\)</span>-) norm of the kernel weights,
 the optimization objective could always be improved by substituting the base kernels
-for a common multiple of themselves. For this reason, the (<span class="math notranslate">\(l_p\)</span>-) norm is
+for a common multiple of themselves. For this reason, the (<span class="math notranslate nohighlight">\(l_p\)</span>-) norm is
 usually constrained to a certain value or value range. Similarly, rescaling of
 individual kernels (as opposed to changing their associated kernel weight) can
 influence the solution found by MKL algorithms. Canonical MKL formulations hence rely
@@ -822,7 +822,7 @@ its according .tpp file).</p>
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[Kloft2011]</td><td><em>(<a class="fn-backref" href="#id2">1</a>, <a class="fn-backref" href="#id5">2</a>)</em> <ol class="last upperalpha simple" start="13">
-<li>Kloft, U. Brefeld, S. Sonnenburg, A. Zien: <span class="math notranslate">\(l_p\)</span>-Norm Multiple Kernel Learning. Journal of Machine Learning Research 12, 2011.</li>
+<li>Kloft, U. Brefeld, S. Sonnenburg, A. Zien: <span class="math notranslate nohighlight">\(l_p\)</span>-Norm Multiple Kernel Learning. Journal of Machine Learning Research 12, 2011.</li>
 </ol>
 </td></tr>
 </tbody>
@@ -847,8 +847,8 @@ its according .tpp file).</p>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

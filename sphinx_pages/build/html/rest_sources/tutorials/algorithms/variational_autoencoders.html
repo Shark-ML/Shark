@@ -108,8 +108,8 @@
 <p>Variational autoencoders are an extension to normal autoencoders.
 They have an underlying generative model which is trained using an lower bound of the
 maximum likelihood objective function.
-The optimisation problem for input data <span class="math notranslate">\(\vec{x}_1,\dots,\vec{x}_N\)</span> is stated as:</p>
-<div class="math notranslate">
+The optimisation problem for input data <span class="math notranslate nohighlight">\(\vec{x}_1,\dots,\vec{x}_N\)</span> is stated as:</p>
+<div class="math notranslate nohighlight">
 \[\min_{\theta} \frac 1 N \sum_{i=1}^N E_{q(\vec z \| \vec x_i)}\left\{(\vec x_i - f(\vec z))^2\right\} + \lambda \cdot KL( q(\vec z \| \vec x_i)|| \mathcal{N}(0,I)) \enspace .\]</div>
 <p>The encoder is represented by a distribution <code class="docutils literal notranslate"><span class="pre">q</span></code>, that is learning a normal distribution from which we sample hidden states <code class="docutils literal notranslate"><span class="pre">z</span></code>.
 The decoder then performs the reconstruction <code class="docutils literal notranslate"><span class="pre">f(z)</span></code> and the squared loss between original point and reconstruction is computed. Without
@@ -196,8 +196,8 @@ of regularization, lambda:</p>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

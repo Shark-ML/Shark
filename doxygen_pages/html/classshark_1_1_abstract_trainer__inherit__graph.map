@@ -1,10 +1,10 @@
 <map id="shark::AbstractTrainer&lt; Model, LabelTypeT &gt;" name="shark::AbstractTrainer&lt; Model, LabelTypeT &gt;">
-<area shape="rect" id="node4" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, RealVector,\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="433,5,678,61"/>
-<area shape="rect" id="node5" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, unsigned int \&gt;" alt="" coords="453,86,658,127"/>
-<area shape="rect" id="node6" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, unsigned\l int, KernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="471,151,640,222"/>
-<area shape="rect" id="node7" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, unsigned\l int, MissingFeaturesKernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="423,246,688,317"/>
-<area shape="rect" id="node8" href="$classshark_1_1_abstract_weighted_trainer.html" title="Superclass of weighted supervised learning algorithms. " alt="" coords="441,341,669,382"/>
-<area shape="rect" id="node9" href="$classshark_1_1_optimization_trainer.html" title="Wrapper for training schemes based on (iterative) optimization. " alt="" coords="457,406,653,447"/>
+<area shape="rect" id="node4" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, RealVector,\l KernelExpansion\&lt; InputType \&gt; \&gt;" alt="" coords="430,5,673,61"/>
+<area shape="rect" id="node5" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, unsigned int \&gt;" alt="" coords="450,86,653,127"/>
+<area shape="rect" id="node6" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, unsigned\l int, KernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="468,151,635,222"/>
+<area shape="rect" id="node7" href="$classshark_1_1_abstract_svm_trainer.html" title="AbstractSvmTrainer\l\&lt; InputType, unsigned\l int, MissingFeaturesKernelExpansion\l\&lt; InputType \&gt; \&gt;" alt="" coords="420,246,683,317"/>
+<area shape="rect" id="node8" href="$classshark_1_1_abstract_weighted_trainer.html" title="Superclass of weighted supervised learning algorithms. " alt="" coords="439,341,664,382"/>
+<area shape="rect" id="node9" href="$classshark_1_1_optimization_trainer.html" title="Wrapper for training schemes based on (iterative) optimization. " alt="" coords="454,406,649,447"/>
 <area shape="rect" id="node2" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name. " alt="" coords="10,196,147,223"/>
 <area shape="rect" id="node3" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality. " alt="" coords="5,247,152,273"/>
 </map>

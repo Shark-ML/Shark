@@ -122,13 +122,13 @@ of the matrix to form a batch.</p>
 <p>A typical example for an algorithm which hugely benefits
 from this new grouping is a linear model without offset. For single vectors x, the
 evaluation of such a linear model would simply be written as</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[f(x)=Ax \enspace .\]</div>
 <p>Here, the computation is a matrix-vector product. Let now X be the matrix holding a
 batch of n vectors, for all of which we want to compute the response of the linear
 model. Then, when the data are stored in batches and our model can operate directly
 on batches, the batch algorithm can be written as</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[f(X)=AX^T \enspace .\]</div>
 <p>Such a transition to aggregate data structures can yield a speedup of at least
 a factor of two when ATLAS is enabled as linear algebra backend, and potentially even
@@ -374,8 +374,8 @@ as stacking vectors into matrices, are already covered by the Shark library itse
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

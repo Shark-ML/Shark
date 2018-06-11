@@ -1,4 +1,4 @@
 <map id="shark::LinearRegression" name="shark::LinearRegression">
-<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearModel\&lt;\&gt; \&gt;" alt="" coords="5,5,172,47"/>
-<area shape="rect" id="node3" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="196,13,395,39"/>
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; LinearModel\&lt;\&gt; \&gt;" alt="" coords="5,5,169,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="193,13,392,39"/>
 </map>

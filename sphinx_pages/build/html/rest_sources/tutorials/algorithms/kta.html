@@ -122,9 +122,9 @@ of classifier. The perfect embedding thought for by kernel target
 alignment is to map all points of the same class to the same point and
 all classes to different points. This means that within-class distances
 in feature space are zero and between-class distances are positive. Let
-<span class="math notranslate">\(k(x, x')\)</span> denote a kernel function with corresponding feature map
-<span class="math notranslate">\(\phi\)</span>, then this is equivalent to</p>
-<div class="math notranslate">
+<span class="math notranslate nohighlight">\(k(x, x')\)</span> denote a kernel function with corresponding feature map
+<span class="math notranslate nohighlight">\(\phi\)</span>, then this is equivalent to</p>
+<div class="math notranslate nohighlight">
 \[\begin{split}\|\phi(x) - \phi(x')\|^2 = k(x, x) - 2 k(x, x') + k(x', x') = \begin{cases}
         0 &amp; \text{ for } y = y' \\
         c &amp; \text{ for } y \not= y' \\
@@ -134,14 +134,14 @@ in feature space are zero and between-class distances are positive. Let
 most probably means heavy over-fitting. Still, within a parametric family
 of kernels aiming in this direction usually is a good idea. This preference
 is expressed by kernel target alignment objective function</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\frac{\langle K, Y \rangle}{\sqrt{\langle K, K \rangle}}\]</div>
-<p><span class="math notranslate">\(K_{ij} = k(x_i, x_j)\)</span> is the kernel Gram matrix of the inputs.
-where the entries <span class="math notranslate">\(Y_{ij}\)</span> of matrix Y are one if <span class="math notranslate">\(y_i = y_j\)</span>
-and <span class="math notranslate">\(-1/(d-1)\)</span> otherwise, where d denotes the number of classes.
+<p><span class="math notranslate nohighlight">\(K_{ij} = k(x_i, x_j)\)</span> is the kernel Gram matrix of the inputs.
+where the entries <span class="math notranslate nohighlight">\(Y_{ij}\)</span> of matrix Y are one if <span class="math notranslate nohighlight">\(y_i = y_j\)</span>
+and <span class="math notranslate nohighlight">\(-1/(d-1)\)</span> otherwise, where d denotes the number of classes.
 It is the Gram matrix of an “ideal” kernel mapping each class to a single
 point, with these points forming the vertices of a symmetric simplex.
-<span class="math notranslate">\(\langle A, B \rangle = \sum_{i,j} A_{ij} B_{ij}\)</span> is the standard
+<span class="math notranslate nohighlight">\(\langle A, B \rangle = \sum_{i,j} A_{ij} B_{ij}\)</span> is the standard
 inner product on matrices, interpreted as vectors. This is the original
 KTA objective function proposed in <a class="reference internal" href="#csk2001" id="id1">[CSK2001]</a>.</p>
 <p>This objective minimizes within-class spread of the data, normalized by
@@ -192,13 +192,13 @@ RBF kernel.</p>
 </pre></div>
 </div>
 <p>The example first constructs a toy data set and a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_gaussian_rbf_kernel.html">GaussianRbfKernel</a>
-instance with bandwidth parameter <span class="math notranslate">\(\gamma\)</span>. The parameter is set to
+instance with bandwidth parameter <span class="math notranslate nohighlight">\(\gamma\)</span>. The parameter is set to
 the initial guess of 0.5. Then the KTA objective function is constructed,
 and the kernel object as well as the data is made know to it. The program
 runs 50 iterations of the gradient-based <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_rprop.html">Rprop</a> optimizer to
 tune the parameter.</p>
 <p>Running the program may take a few seconds. Notice that the derivative of
-the <span class="math notranslate">\(1000 \times 1000\)</span> kernel matrix w.r.t. the kernel parameter
+the <span class="math notranslate nohighlight">\(1000 \times 1000\)</span> kernel matrix w.r.t. the kernel parameter
 needs to be computed in every iteration. The complexity of this process
 grows quadratically with the data set size. For large data it is rather
 safe to sub-sample the data in order to reduce the complexity. As an
@@ -242,8 +242,8 @@ In Proceedings of the 27th International Conference on Machine Learning (ICML), 
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

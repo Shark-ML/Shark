@@ -119,35 +119,35 @@ C-SVM.</p>
 <div class="section" id="theoretical-background">
 <h2>Theoretical background<a class="headerlink" href="#theoretical-background" title="Permalink to this headline">¶</a></h2>
 <p>The general supervised learning problem can be stated as follows.
-Given sample data <span class="math notranslate">\(S=\{(x_i,y_i)\,|\,1 \leq i \leq \ell\}\)</span> drawn from an
-unknown distribution <span class="math notranslate">\(p\)</span> over <span class="math notranslate">\(X \times Y\)</span>, the goal of binary
-classification is to infer a hypothesis <span class="math notranslate">\(h:X \to Y\)</span> that minimizes the
+Given sample data <span class="math notranslate nohighlight">\(S=\{(x_i,y_i)\,|\,1 \leq i \leq \ell\}\)</span> drawn from an
+unknown distribution <span class="math notranslate nohighlight">\(p\)</span> over <span class="math notranslate nohighlight">\(X \times Y\)</span>, the goal of binary
+classification is to infer a hypothesis <span class="math notranslate nohighlight">\(h:X \to Y\)</span> that minimizes the
 expected risk</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[R_p(h)= \int\limits_{X \times Y} L_{0-1}(y,h(x)) \, \text{d}
 p(x,y) ,\]</div>
-<p>where <span class="math notranslate">\(L_{0-1}(y,z)\)</span> is 0
-if <span class="math notranslate">\(y=z\)</span> and 1 otherwise.</p>
+<p>where <span class="math notranslate nohighlight">\(L_{0-1}(y,z)\)</span> is 0
+if <span class="math notranslate nohighlight">\(y=z\)</span> and 1 otherwise.</p>
 <p>Support vector machines (SVMs, <a class="reference internal" href="#cortesvapnik1995" id="id2">[CortesVapnik1995]</a>) transfer the input
 data to a feature space and perform linear classification in that space.
-For a positive semi-definite kernel function <span class="math notranslate">\(k:X \times X \to\mathbb{R}\)</span>, consider the feature space
-<span class="math notranslate">\(\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}\)</span> and
-function class <span class="math notranslate">\(\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}\)</span>. The decision boundary induced by the sign of a
-function <span class="math notranslate">\(f \in \mathcal H_k^b\)</span> is an affine hyperplane in <span class="math notranslate">\(\mathcal H_k\)</span>.
+For a positive semi-definite kernel function <span class="math notranslate nohighlight">\(k:X \times X \to\mathbb{R}\)</span>, consider the feature space
+<span class="math notranslate nohighlight">\(\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}\)</span> and
+function class <span class="math notranslate nohighlight">\(\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}\)</span>. The decision boundary induced by the sign of a
+function <span class="math notranslate nohighlight">\(f \in \mathcal H_k^b\)</span> is an affine hyperplane in <span class="math notranslate nohighlight">\(\mathcal H_k\)</span>.
 1-Norm Soft Margin C-SVMs find a solution to</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\underset{f \in\mathcal H_k^b}{\text{minimize}}  \frac{1}{2} \|f\|_2^2 + C \sum_{i=1}^\ell L_{\text{hinge}}(y_i, f(x_i))\]</div>
 <p>with loss function
-<span class="math notranslate">\(L_{\text{hinge}}(y,f(x))=\max\{0, 1-(2y-1)f(x)\}\)</span> for
-<span class="math notranslate">\(Y=\{0,1\}\)</span>.
-The parameter <span class="math notranslate">\(C &gt;= 0\)</span>
+<span class="math notranslate nohighlight">\(L_{\text{hinge}}(y,f(x))=\max\{0, 1-(2y-1)f(x)\}\)</span> for
+<span class="math notranslate nohighlight">\(Y=\{0,1\}\)</span>.
+The parameter <span class="math notranslate nohighlight">\(C &gt;= 0\)</span>
 controls the trade-off between reducing the empirical loss
-<span class="math notranslate">\(L_{\text{hinge}}\)</span> and the complexity of the hypothesis <span class="math notranslate">\(\|.\|_2\)</span>
-measured by its norm (neglecting the bias parameter <span class="math notranslate">\(b\)</span>).</p>
+<span class="math notranslate nohighlight">\(L_{\text{hinge}}\)</span> and the complexity of the hypothesis <span class="math notranslate nohighlight">\(\|.\|_2\)</span>
+measured by its norm (neglecting the bias parameter <span class="math notranslate nohighlight">\(b\)</span>).</p>
 <p>Here we have adopted the Shark library convention of choosing
-<span class="math notranslate">\(Y=\{0,1\}\)</span> instead of <span class="math notranslate">\(Y=\{-1,1\}\)</span>. The latter is the
-common choice in the SVM literature. This explains the <span class="math notranslate">\(2y-1\)</span>
-instead of a simple <span class="math notranslate">\(y\)</span> in the hinge loss definition.</p>
+<span class="math notranslate nohighlight">\(Y=\{0,1\}\)</span> instead of <span class="math notranslate nohighlight">\(Y=\{-1,1\}\)</span>. The latter is the
+common choice in the SVM literature. This explains the <span class="math notranslate nohighlight">\(2y-1\)</span>
+instead of a simple <span class="math notranslate nohighlight">\(y\)</span> in the hinge loss definition.</p>
 </div>
 <div class="section" id="support-vector-machines-in-shark">
 <h2>Support Vector Machines in Shark<a class="headerlink" href="#support-vector-machines-in-shark" title="Permalink to this headline">¶</a></h2>
@@ -177,7 +177,7 @@ problem shipped with the Shark library:</p>
 <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_c_svm_trainer.html">CSvmTrainer</a>.</p>
 <p>To define our model, we have to choose a kernel function.  Here we
 consider the standard Gaussian/RBF kernel</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x,z) = \exp(\gamma\|x-z\|^2)\]</div>
 <p>by writing:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span> <span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>         <span class="c1">// kernel bandwidth parameter</span>
@@ -195,8 +195,8 @@ a linear classifier in feature space:</p>
 <p>A <cite>KernelClassifier</cite> can be understood as an <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_classifier.html">Classifier</a> which converts the output
 of a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_kernel_expansion.html">KernelExpansion</a> to a class label by choosing the index of the maximum output.
 The <cite>KernelExpansion</cite> specifies a model from
-<span class="math notranslate">\(\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}\)</span> or
-<span class="math notranslate">\(\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}\)</span>
+<span class="math notranslate nohighlight">\(\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}\)</span> or
+<span class="math notranslate nohighlight">\(\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}\)</span>
 depending on whether a bias is used or not.</p>
 <p>Training the machine is done by:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span> <span class="n">C</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">;</span>          <span class="c1">// regularization parameter</span>
@@ -259,7 +259,7 @@ one-class, etc.).</p>
 <div class="section" id="evaluating-the-model">
 <h3>Evaluating the model<a class="headerlink" href="#evaluating-the-model" title="Permalink to this headline">¶</a></h3>
 <p>After training the model, we can evaluate it.  As a performance
-measure, we consider the standard 0-1 loss <span class="math notranslate">\(L_{0-1}(y,z)\)</span>
+measure, we consider the standard 0-1 loss <span class="math notranslate nohighlight">\(L_{0-1}(y,z)\)</span>
 which we apply to training and test data:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">loss</span><span class="p">;</span> <span class="c1">// 0-1 loss</span>
 <span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">output</span> <span class="o">=</span> <span class="n">kc</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span> <span class="c1">// evaluate on training set</span>
@@ -322,8 +322,8 @@ Networks. Machine Learning, 20, 1995.</td></tr>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

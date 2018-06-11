@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$structshark_1_1_result_set.html" title="shark::ResultSet\&lt; Search\lPointTypeT, double \&gt;" alt="" coords="5,5,192,47"/>
-<area shape="rect" id="node2" href="$structshark_1_1_single_objective_result_set.html" title="Result set for single objective algorithm. " alt="" coords="240,5,449,47"/>
-<area shape="rect" id="node3" href="$structshark_1_1_validated_single_objective_result_set.html" title="Result set for validated points. " alt="" coords="497,5,728,47"/>
+<area shape="rect" id="node2" href="$structshark_1_1_single_objective_result_set.html" title="Result set for single objective algorithm. " alt="" coords="240,5,448,47"/>
+<area shape="rect" id="node3" href="$structshark_1_1_validated_single_objective_result_set.html" title="Result set for validated points. " alt="" coords="496,5,725,47"/>
 </map>

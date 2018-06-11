@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node2" href="$classshark_1_1_indexed_iterator.html" title="creates an Indexed Iterator, an Iterator which also carries index information using index() ..." alt="" coords="259,5,426,47"/>
-<area shape="rect" id="node3" href="$classshark_1_1_indexing_iterator.html" title="shark::IndexingIterator\l\&lt; Container \&gt;" alt="" coords="257,71,428,112"/>
-<area shape="rect" id="node4" href="$classshark_1_1_proxy_iterator.html" title="Creates an iterator which reinterpretes an object as a range. " alt="" coords="252,137,433,193"/>
+<area shape="rect" id="node2" href="$classshark_1_1_indexed_iterator.html" title="creates an Indexed Iterator, an Iterator which also carries index information using index() ..." alt="" coords="254,5,421,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_indexing_iterator.html" title="shark::IndexingIterator\l\&lt; Container \&gt;" alt="" coords="252,71,423,112"/>
+<area shape="rect" id="node4" href="$classshark_1_1_proxy_iterator.html" title="Creates an iterator which reinterpretes an object as a range. " alt="" coords="248,137,427,193"/>
 </map>

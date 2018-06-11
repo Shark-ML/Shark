@@ -121,8 +121,8 @@ Thus, we want to compare
 Shark to other, well known libraries and show timings in setups which are as similar as possible.</p>
 <p>For now we compare Shark only with <a class="reference external" href="http://scikit-learn.org">SciKit-Learn</a> which often relies
 on well known and optimized C-code (libLinear and LibSVM for example) as well as cython and ATLAS for the heavy lifting.</p>
-<p>We decided to compare a subset of algorithms with practical relevance in daily work’:
-Random Forrest, Nearest-Neighbours, Linear Regression, Linear- and Kernel-CSVM and Logistic Regression.
+<p>We decided to compare a subset of algorithms with high practical relevance in daily work:
+Random Forrst, Nearest-Neighbours, Linear Regression, Linear- and Kernel-CSVM and Logistic Regression.
 This subset gives a good comparison of the quality of a wide range of implemented algorithms, from tree methods
 to Quadratic Programming. In cases where this makes a difference, we also compare dense and sparse inputs.</p>
 <p>The implementations can be found in the Examples/Benchmark directory.</p>
@@ -141,7 +141,7 @@ to Quadratic Programming. In cases where this makes a difference, we also compar
 <div class="figure">
 <a class="reference internal image-reference" href="../_images/BenchmarkKernelCSvm.png"><img alt="Benchmark results of training CSVM" src="../_images/BenchmarkKernelCSvm.png" style="width: 640.0px; height: 480.0px;" /></a>
 </div>
-<p>We used a gaussian Rbf Kernel with gamma=1 on the cod-rna dataset.
+<p>We used a radial Gaussian kernel with gamma=1 on the cod-rna dataset.
 We solve to an accuracy of 0.001 and vary C between 0.01 to 1 while fixing the kernel cache to 256MB.</p>
 <p>The large difference are caused by the fact that Shark uses blockwise parallel evaluations of the kernel, while
 libSVM as used by Scikit-Learn does not.</p>
@@ -153,7 +153,7 @@ libSVM as used by Scikit-Learn does not.</p>
 </div>
 <p>We used the rcv1.binary dataset.
 We solve to an accuracy of 0.001 and vary C between 1 and 100000. We do not use a bias in these experiments.</p>
-<p>The differences are not caused by an implementation differene but by algorithmic improvements over LibLinear,
+<p>The differences are not caused by an implementation difference but by algorithmic improvements over LibLinear,
 which require much less iterations to reach a desired accuracy.</p>
 </div>
 <div class="section" id="logistic-regression">
@@ -165,7 +165,7 @@ which require much less iterations to reach a desired accuracy.</p>
 as well as an SAG optimizer on the even-vs odd MNIST and rcv1.binary datasets. In our experiments
 we chose alpha=0.1.
 The SAG optimizer is a good example where Shark has to be slower than a specialized implementation. Shark
-needs to spend additional function evaluations to adapt the learning rate while Scikit-Learn can chose
+needs to spend additional function evaluations to adapt the learning rate while Scikit-Learn can choose
 a good one from the start as it knows which loss functions to expect. Also note that in the LBFGS case the Shark implementation
 uses the abstract optimizer and objective function framework instead of a specialized solver.</p>
 </div>
@@ -180,9 +180,9 @@ to compare the brute-force algorithm on high dimensional data. We use k=10 neare
 <div class="section" id="others">
 <h2>Others<a class="headerlink" href="#others" title="Permalink to this headline">¶</a></h2>
 <div class="figure">
-<a class="reference internal image-reference" href="../_images/BenchmarkGeneral.png"><img alt="Benchmark results of linear regression and random forrest" src="../_images/BenchmarkGeneral.png" style="width: 640.0px; height: 480.0px;" /></a>
+<a class="reference internal image-reference" href="../_images/BenchmarkGeneral.png"><img alt="Benchmark results of linear regression and random forest" src="../_images/BenchmarkGeneral.png" style="width: 640.0px; height: 480.0px;" /></a>
 </div>
-<p>Finally, we compare random forrests on cod-rna, and logistic and ridge-regression on BlogFeedback.</p>
+<p>Finally, we compare random forests on cod-rna, and logistic and ridge-regression on BlogFeedback.</p>
 </div>
 </div>
 
@@ -203,8 +203,8 @@ to compare the brute-force algorithm on high dimensional data. We use k=10 neare
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

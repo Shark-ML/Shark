@@ -1,4 +1,4 @@
 <map id="shark::AbstractNearestNeighbors&lt; InputType, LabelType &gt;" name="shark::AbstractNearestNeighbors&lt; InputType, LabelType &gt;">
 <area shape="rect" id="node2" href="$classshark_1_1_simple_nearest_neighbors.html" title="Brute force optimized nearest neighbor implementation. " alt="" coords="291,5,519,47"/>
-<area shape="rect" id="node3" href="$classshark_1_1_tree_nearest_neighbors.html" title="Nearest Neighbors implementation using binary trees. " alt="" coords="299,71,511,112"/>
+<area shape="rect" id="node3" href="$classshark_1_1_tree_nearest_neighbors.html" title="Nearest Neighbors implementation using binary trees. " alt="" coords="299,71,510,112"/>
 </map>

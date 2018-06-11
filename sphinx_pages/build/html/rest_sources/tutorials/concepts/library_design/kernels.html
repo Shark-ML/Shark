@@ -112,23 +112,23 @@
 reproducing kernel Hilbert spaces <a class="reference internal" href="#aronszajn1950" id="id1">[Aronszajn1950]</a>. They underlie
 the “kernel trick” <a class="reference internal" href="#scholkopf2002" id="id2">[Schölkopf2002]</a>, which is used, for instance, in non-linear
 support vector machines (SVMs).</p>
-<p>Given some set <span class="math notranslate">\(\mathcal X\)</span>, a positive semi-definite kernel
-<span class="math notranslate">\(k:\mathcal X\times\mathcal X\to\mathbb R\)</span>
+<p>Given some set <span class="math notranslate nohighlight">\(\mathcal X\)</span>, a positive semi-definite kernel
+<span class="math notranslate nohighlight">\(k:\mathcal X\times\mathcal X\to\mathbb R\)</span>
 is a symmetric function for which</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\sum_{i=1}^N\sum_{j=1}^N a_i a_j k(x_i, x_j) \ge 0\]</div>
-<p>for all <span class="math notranslate">\(N\)</span>, all
-<span class="math notranslate">\(x_1,...,x_N\in\mathcal X\)</span>, and all
-<span class="math notranslate">\(a_1,...,a_N\in\mathbb R\)</span>.</p>
-<p>A kernel <span class="math notranslate">\(k\)</span> on <span class="math notranslate">\(\mathcal X\)</span> corresponds to a scalar
-product in a dot product space <span class="math notranslate">\(\mathcal H\)</span>, the so called
+<p>for all <span class="math notranslate nohighlight">\(N\)</span>, all
+<span class="math notranslate nohighlight">\(x_1,...,x_N\in\mathcal X\)</span>, and all
+<span class="math notranslate nohighlight">\(a_1,...,a_N\in\mathbb R\)</span>.</p>
+<p>A kernel <span class="math notranslate nohighlight">\(k\)</span> on <span class="math notranslate nohighlight">\(\mathcal X\)</span> corresponds to a scalar
+product in a dot product space <span class="math notranslate nohighlight">\(\mathcal H\)</span>, the so called
 feature space:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x,y) = \langle \phi(x),\phi(y) \rangle_{\mathcal H}\]</div>
-<p>where <span class="math notranslate">\(x\)</span> and <span class="math notranslate">\(y\)</span> are elements of <span class="math notranslate">\(\mathcal X\)</span> ,
-<span class="math notranslate">\(\phi\)</span> is a map from <span class="math notranslate">\(\mathcal X\)</span> to <span class="math notranslate">\(\mathcal H\)</span>, and
-<span class="math notranslate">\(\langle \cdot, \cdot \rangle_{\mathcal H}\)</span> is the scalar product in
-<span class="math notranslate">\(\mathcal H\)</span>.
+<p>where <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> are elements of <span class="math notranslate nohighlight">\(\mathcal X\)</span> ,
+<span class="math notranslate nohighlight">\(\phi\)</span> is a map from <span class="math notranslate nohighlight">\(\mathcal X\)</span> to <span class="math notranslate nohighlight">\(\mathcal H\)</span>, and
+<span class="math notranslate nohighlight">\(\langle \cdot, \cdot \rangle_{\mathcal H}\)</span> is the scalar product in
+<span class="math notranslate nohighlight">\(\mathcal H\)</span>.
 For details we refer to <a class="reference internal" href="#aronszajn1950" id="id3">[Aronszajn1950]</a> and <a class="reference internal" href="#mercer1909" id="id4">[Mercer1909]</a>.</p>
 <div class="section" id="list-of-classes">
 <h2>List of Classes<a class="headerlink" href="#list-of-classes" title="Permalink to this headline">¶</a></h2>
@@ -140,10 +140,10 @@ Functions for optimizing kernel functions are given <a class="reference external
 <p>Many machine learning algorithms can be written in a way that the only
 operations involving input elements are scalar products between those
 elements.  A common strategy in machine learning is to map the input
-data into a feature space <span class="math notranslate">\(\mathcal H\)</span> and to do the learning in
-this feature space.  If the only operations in <span class="math notranslate">\(\mathcal H\)</span> are
+data into a feature space <span class="math notranslate nohighlight">\(\mathcal H\)</span> and to do the learning in
+this feature space.  If the only operations in <span class="math notranslate nohighlight">\(\mathcal H\)</span> are
 scalar products, these can be replaced by kernel function evaluations
-rendering explicit computations of the mapping <span class="math notranslate">\(\phi\)</span> to feature
+rendering explicit computations of the mapping <span class="math notranslate nohighlight">\(\phi\)</span> to feature
 space unnecessary. This has some advantages:</p>
 <ul class="simple">
 <li>Typically, the kernel can be computed more
@@ -158,12 +158,12 @@ products.  The choice of the kernel function is crucial for the
 performance of the machine learning algorithm.</p>
 <p>The generic distance between to points mapped to a kernel-induced
 feature space is given by</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[d(x,y) = \sqrt{\langle \phi(x)-\phi(y), \phi(x)-\phi(y) \rangle_{\mathcal H}}
 =\sqrt{k(x,x) - 2k(x,y) + k(y,y)}\]</div>
-<p>where <span class="math notranslate">\(d\)</span> is the distance between the points <span class="math notranslate">\(x\)</span> and <span class="math notranslate">\(y\)</span>. We call
-a kernel normalized, if <span class="math notranslate">\(k(x,x)=1\)</span> for all <span class="math notranslate">\(x\)</span>. In this case calculating
-the distance reduces to <span class="math notranslate">\(d(x,y) =\sqrt{2 - 2k(x,y)}\)</span>.</p>
+<p>where <span class="math notranslate nohighlight">\(d\)</span> is the distance between the points <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>. We call
+a kernel normalized, if <span class="math notranslate nohighlight">\(k(x,x)=1\)</span> for all <span class="math notranslate nohighlight">\(x\)</span>. In this case calculating
+the distance reduces to <span class="math notranslate nohighlight">\(d(x,y) =\sqrt{2 - 2k(x,y)}\)</span>.</p>
 </div>
 <div class="section" id="the-base-class-abstractkernelfunction-inputtypet">
 <span id="label-for-kernels-in-shark"></span><h2>The base class ‘AbstractKernelFunction&lt;InputTypeT&gt;’<a class="headerlink" href="#the-base-class-abstractkernelfunction-inputtypet" title="Permalink to this headline">¶</a></h2>
@@ -171,18 +171,18 @@ the distance reduces to <span class="math notranslate">\(d(x,y) =\sqrt{2 - 2k(x,
 functions’ base class is the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_abstract_kernel_function.html">AbstractKernelFunction</a>. A linear
 combination of kernels is represented in Shark as a
 <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_kernel_expansion.html">KernelExpansion</a></p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\sum_{i=1}^N \alpha_i k(x_i, . ) + b\]</div>
-<p>with <span class="math notranslate">\(x_1,...,x_N\in\mathcal X\)</span>,
-<span class="math notranslate">\(\alpha_1,...,\alpha_N\in\mathbb R\)</span>, and optional bias/offset
-parameter <span class="math notranslate">\(b\in\mathbb R\)</span>.</p>
+<p>with <span class="math notranslate nohighlight">\(x_1,...,x_N\in\mathcal X\)</span>,
+<span class="math notranslate nohighlight">\(\alpha_1,...,\alpha_N\in\mathbb R\)</span>, and optional bias/offset
+parameter <span class="math notranslate nohighlight">\(b\in\mathbb R\)</span>.</p>
 <p>Many kernel-based algorithms need to repeatedly evaluate the kernel on
-some training data points <span class="math notranslate">\(x_1,\dots,x_N\)</span> or they operate on the
-kernel (Gram) matrix <span class="math notranslate">\(K\)</span> with entries <span class="math notranslate">\(K_{ij}=k(x_i,x_j)\)</span>
-directly. To save computation time, the matrix <span class="math notranslate">\(K\)</span> would be
+some training data points <span class="math notranslate nohighlight">\(x_1,\dots,x_N\)</span> or they operate on the
+kernel (Gram) matrix <span class="math notranslate nohighlight">\(K\)</span> with entries <span class="math notranslate nohighlight">\(K_{ij}=k(x_i,x_j)\)</span>
+directly. To save computation time, the matrix <span class="math notranslate nohighlight">\(K\)</span> would be
 stored in memory.  Depending on the hardware, even training sets with
 a few hundred thousand can make this prohibitive. Therefore, often only
-parts of <span class="math notranslate">\(K\)</span> are calculated at a time, most often matrix rows
+parts of <span class="math notranslate nohighlight">\(K\)</span> are calculated at a time, most often matrix rows
 or blocks. In Shark, the classes <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_kernel_matrix.html">KernelMatrix</a> and
 <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_cached_matrix.html">CachedMatrix</a> as well as some derived and sibling classes
 encapsulate kernel Gram matrices.</p>
@@ -258,10 +258,10 @@ which indicate the traits and capabilities of the kernel:</p>
 This is no restriction, since kernel functions are symmetric</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">IS_NORMALIZED</span></code>, <code class="docutils literal notranslate"><span class="pre">isNormalized</span></code></td>
-<td>For all <span class="math notranslate">\(x\)</span> it holds  <span class="math notranslate">\(k(x,x)=1\)</span></td>
+<td>For all <span class="math notranslate nohighlight">\(x\)</span> it holds  <span class="math notranslate nohighlight">\(k(x,x)=1\)</span></td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">SUPPORTS_VARIABLE_INPUT_SIZE</span></code>, <code class="docutils literal notranslate"><span class="pre">supportsVariableInputSize</span></code></td>
-<td>Between different calls to <span class="math notranslate">\(k(x,y)\)</span> the number of dimensions of the kernel is
+<td>Between different calls to <span class="math notranslate nohighlight">\(k(x,y)\)</span> the number of dimensions of the kernel is
 allowed to vary; this is needed for kernel evaluation of inputs with missing features</td>
 </tr>
 </tbody>
@@ -302,11 +302,11 @@ and <code class="docutils literal notranslate"><span class="pre">B</span></code>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>double eval(I x, I z)</td>
-<td>Calculates <span class="math notranslate">\(k(x,z)\)</span></td>
+<td>Calculates <span class="math notranslate nohighlight">\(k(x,z)\)</span></td>
 </tr>
 <tr class="row-odd"><td>void eval(B X, B Z, RealMatrix&amp; K)</td>
-<td>Calculates <span class="math notranslate">\(K_{ij}=k(x_i,z_j)\)</span> for all elements
-<span class="math notranslate">\(x_i\)</span> of X and <span class="math notranslate">\(z_j\)</span> of Z</td>
+<td>Calculates <span class="math notranslate nohighlight">\(K_{ij}=k(x_i,z_j)\)</span> for all elements
+<span class="math notranslate nohighlight">\(x_i\)</span> of X and <span class="math notranslate nohighlight">\(z_j\)</span> of Z</td>
 </tr>
 <tr class="row-even"><td>void eval(B X, B Z, RealMatrix&amp; K, State&amp; )</td>
 <td>Calls eval(X,Z,K) while storing intermediate results
@@ -327,7 +327,7 @@ unnecessary copy operations.</p>
 </div>
 <div class="section" id="distances">
 <h3>Distances<a class="headerlink" href="#distances" title="Permalink to this headline">¶</a></h3>
-<p>As outlined before, kernels can also be used to compute distances between points in <span class="math notranslate">\(\mathcal H\)</span>:</p>
+<p>As outlined before, kernels can also be used to compute distances between points in <span class="math notranslate nohighlight">\(\mathcal H\)</span>:</p>
 <table border="1" class="docutils">
 <colgroup>
 <col width="42%" />
@@ -356,7 +356,7 @@ points in Z.</td>
 <h3>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this headline">¶</a></h3>
 <p>Some Kernels are differentiable with respect to their parameters. This can for example
 be exploited in gradient-based optimization of these parameters, which in turn amounts
-to a computationally efficient way of finding a suitable space <span class="math notranslate">\(\mathcal H\)</span> in which
+to a computationally efficient way of finding a suitable space <span class="math notranslate nohighlight">\(\mathcal H\)</span> in which
 to solve a given learning problem. Further, if the input space is differentiable as well,
 even the derivative with respect to the inputs can be computed.</p>
 <p>The derivatives are weighted as outlined in <a class="reference internal" href="../optimization/conventions_derivatives.html"><span class="doc">Shark Conventions for Derivatives</span></a>.
@@ -487,8 +487,8 @@ In Philosophical Transactions of the Royal Society of London, 1909.</td></tr>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

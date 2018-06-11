@@ -1,4 +1,4 @@
 <map id="shark::AbstractWeightedTrainer&lt; Model, LabelTypeT &gt;" name="shark::AbstractWeightedTrainer&lt; Model, LabelTypeT &gt;">
-<area shape="rect" id="node3" href="$classshark_1_1_linear_s_a_g_trainer.html" title="Stochastic Average Gradient Method for training of linear models,. " alt="" coords="21,184,217,240"/>
-<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="Superclass of supervised learning algorithms. " alt="" coords="32,5,207,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_linear_s_a_g_trainer.html" title="Stochastic Average Gradient Method for training of linear models,. " alt="" coords="21,184,215,240"/>
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="Superclass of supervised learning algorithms. " alt="" coords="32,5,204,47"/>
 </map>

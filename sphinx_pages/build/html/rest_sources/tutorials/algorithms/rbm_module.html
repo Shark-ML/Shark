@@ -128,20 +128,20 @@ variables of one layer are independent of each other given the states of the var
 </div>
 <p>As for any Markov random field with a strictly positive probability distribution
 the joint distribution of an RBM is given by a Gibbs distribution</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[p(\vec v,\vec h)={e^{- \frac{1}{T} E(\vec v, \vec h)}}/{Z},\]</div>
-<p>where <span class="math notranslate">\(\vec v\)</span> and <span class="math notranslate">\(\vec h\)</span> are the vectors of the states of the
+<p>where <span class="math notranslate nohighlight">\(\vec v\)</span> and <span class="math notranslate nohighlight">\(\vec h\)</span> are the vectors of the states of the
 visible and the hidden variables respectively,
 <em>T</em> is a constant called temperature (it is usually set to 1)
 and <em>Z</em> is a normalization constant called the partition function:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[Z=\sum_{ \vec v, \vec h}e^{- \frac{1}{T} E(\vec v,\vec h)}\]</div>
 <p>Based on
 Welling at al. <a class="reference internal" href="#wellingetal2005" id="id1">[WellingEtAl2005]</a>, we define a generalized form of the
 energy function as</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[E(\vec v,\vec h)=  f_h(\vec h) + f_v(\vec v) + \sum_{k,l} \phi_{hk}(\vec h) W_{k,l} \phi_{vl}(\vec v).\]</div>
-<p>The terms <span class="math notranslate">\(f_h(\vec h)\)</span> and  <span class="math notranslate">\(f_v(\vec v)\)</span> are
+<p>The terms <span class="math notranslate nohighlight">\(f_h(\vec h)\)</span> and  <span class="math notranslate nohighlight">\(f_v(\vec v)\)</span> are
 associated to either only the hidden or the visible neurons and
 the third term models the interaction between visible and hidden variables.
 Note that the energy function given here differs from the one
@@ -152,10 +152,10 @@ allow to introduce dependancies between the variables of one layer - and thus to
 a model that does not correspond to an RBM.
 If f_h (or analogously f_v) however is a sum of terms each depending only on the value
 of one neuron we obtain the energy function of an RBM.</p>
-<p>In the standard case of an binary RBM <a class="reference internal" href="#smolensky1986" id="id3">[Smolensky1986]</a> <a class="reference internal" href="#hinton2007" id="id4">[Hinton2007]</a> we have <span class="math notranslate">\(f_h(\vec h) = \vec h^T  \vec c\)</span>
-and <span class="math notranslate">\(f_v(\vec v) = \vec v^T \vec b\)</span>, where <span class="math notranslate">\(\vec c\)</span> and <span class="math notranslate">\(\vec b\)</span>
+<p>In the standard case of an binary RBM <a class="reference internal" href="#smolensky1986" id="id3">[Smolensky1986]</a> <a class="reference internal" href="#hinton2007" id="id4">[Hinton2007]</a> we have <span class="math notranslate nohighlight">\(f_h(\vec h) = \vec h^T  \vec c\)</span>
+and <span class="math notranslate nohighlight">\(f_v(\vec v) = \vec v^T \vec b\)</span>, where <span class="math notranslate nohighlight">\(\vec c\)</span> and <span class="math notranslate nohighlight">\(\vec b\)</span>
 are the vectors of the bias parameters for the hidden and the visible neurons respectively.
-Furthermore, the interaction term simplifies to <span class="math notranslate">\(\vec h^T W \vec v\)</span>, where <span class="math notranslate">\(W\)</span>
+Furthermore, the interaction term simplifies to <span class="math notranslate nohighlight">\(\vec h^T W \vec v\)</span>, where <span class="math notranslate nohighlight">\(W\)</span>
 is the matrix of the connection weights between hidden and visible variables, so we have just
 one single ‘phi-function’ for each layer that is the identity function.</p>
 <p>The parameterization of the RBM depends on the chosen energy function and thus can vary.
@@ -368,8 +368,8 @@ University Press, 2002.</td></tr>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

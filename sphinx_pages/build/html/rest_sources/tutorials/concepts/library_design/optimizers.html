@@ -110,8 +110,8 @@
 <h1>Optimizers<a class="headerlink" href="#optimizers" title="Permalink to this headline">¶</a></h1>
 <p>Each optimizer in Shark is an iterative algorithm which tries to find a local
 minimum of an objective function. For single objective optimization, we would like
-to find the global optimum of the objective function <span class="math notranslate">\(f\)</span> :</p>
-<div class="math notranslate">
+to find the global optimum of the objective function <span class="math notranslate nohighlight">\(f\)</span> :</p>
+<div class="math notranslate nohighlight">
 \[x^* = \arg \min_x f(x)\]</div>
 <p>However, if the function has more than one local optimum, we can usually only
 find one of them. That is, re-starts may be required.</p>
@@ -125,9 +125,9 @@ A solution is Pareto optimal if it cannot be improved in one objective
 without getting worse in another one.</p>
 <p>Optimizers try to find this solution in a stepwise fashion.  Let us
 consider single-objective optimization for now.  Given a solution
-<span class="math notranslate">\(x(t)\)</span> at time step <span class="math notranslate">\(t\)</span> with objective value
-<span class="math notranslate">\(f(x(t))\)</span>, the optimizer looks for a new point <span class="math notranslate">\(x(t+1)\)</span>
-such that <span class="math notranslate">\(f(x(t+1))&lt;f(x(t))\)</span>.  Two important types of optimizers can
+<span class="math notranslate nohighlight">\(x(t)\)</span> at time step <span class="math notranslate nohighlight">\(t\)</span> with objective value
+<span class="math notranslate nohighlight">\(f(x(t))\)</span>, the optimizer looks for a new point <span class="math notranslate nohighlight">\(x(t+1)\)</span>
+such that <span class="math notranslate nohighlight">\(f(x(t+1))&lt;f(x(t))\)</span>.  Two important types of optimizers can
 be distinguished.  The first, gradient-based algorithms use the
 gradient of the objective function. The other approach is
 direct/derivative-free search, which traverses the search space
@@ -142,7 +142,7 @@ bottom of this tutorial <a class="reference internal" href="#label-for-list-of-s
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">Shark always assumes minimization tasks. This is no restriction as
-<span class="math notranslate">\(\arg \max_x f(x) = \arg \min_x -f(x)\)</span>.</p>
+<span class="math notranslate nohighlight">\(\arg \max_x f(x) = \arg \min_x -f(x)\)</span>.</p>
 </div>
 <div class="section" id="list-of-classes">
 <h2>List of Classes<a class="headerlink" href="#list-of-classes" title="Permalink to this headline">¶</a></h2>
@@ -360,8 +360,8 @@ starting point during initialization.</p>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

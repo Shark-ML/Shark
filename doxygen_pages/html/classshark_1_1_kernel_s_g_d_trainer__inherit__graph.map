@@ -1,4 +1,4 @@
 <map id="shark::KernelSGDTrainer&lt; InputType, CacheType &gt;" name="shark::KernelSGDTrainer&lt; InputType, CacheType &gt;">
-<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; KernelClassifier\&lt; InputType \&gt; \&gt;" alt="" coords="5,5,256,47"/>
-<area shape="rect" id="node3" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="281,13,479,39"/>
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_trainer.html" title="shark::AbstractTrainer\l\&lt; KernelClassifier\&lt; InputType \&gt; \&gt;" alt="" coords="5,5,252,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="276,13,475,39"/>
 </map>

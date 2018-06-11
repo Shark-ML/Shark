@@ -2,7 +2,7 @@
 <tagfile>
   <compound kind="file">
     <name>Datasets.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Data/</path>
+    <path>/home/oswin/Shark/build/examples/Data/</path>
     <filename>_datasets_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -17,7 +17,7 @@
   </compound>
   <compound kind="file">
     <name>Import.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Data/</path>
+    <path>/home/oswin/Shark/build/examples/Data/</path>
     <filename>_import_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_data_distribution_8h" name="DataDistribution.h" local="no" imported="no">shark/Data/DataDistribution.h</includes>
@@ -34,7 +34,7 @@
   </compound>
   <compound kind="file">
     <name>Normalization.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Data/</path>
+    <path>/home/oswin/Shark/build/examples/Data/</path>
     <filename>_normalization_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_normalizer_8h" name="Normalizer.h" local="no" imported="no">shark/Models/Normalizer.h</includes>
@@ -51,7 +51,7 @@
   </compound>
   <compound kind="file">
     <name>Subsets.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Data/</path>
+    <path>/home/oswin/Shark/build/examples/Data/</path>
     <filename>_subsets_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_c_v_dataset_tools_8h" name="CVDatasetTools.h" local="no" imported="no">shark/Data/CVDatasetTools.h</includes>
@@ -66,7 +66,7 @@
   </compound>
   <compound kind="file">
     <name>MOCMAApproximated.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/MOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/MOO/</path>
     <filename>_m_o_c_m_a_approximated_8cpp</filename>
     <includes id="_m_o_c_m_a_8h" name="MOCMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/MOCMA.h</includes>
     <includes id="_benchmarks_8h" name="Benchmarks.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Benchmarks.h</includes>
@@ -80,7 +80,7 @@
   </compound>
   <compound kind="file">
     <name>MOCMAExperiment.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/MOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/MOO/</path>
     <filename>_m_o_c_m_a_experiment_8cpp</filename>
     <includes id="_m_o_c_m_a_8h" name="MOCMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/MOCMA.h</includes>
     <includes id="_z_d_t1_8h" name="ZDT1.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/ZDT1.h</includes>
@@ -104,7 +104,7 @@
   </compound>
   <compound kind="file">
     <name>MOCMASimple.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/MOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/MOO/</path>
     <filename>_m_o_c_m_a_simple_8cpp</filename>
     <includes id="_m_o_c_m_a_8h" name="MOCMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/MOCMA.h</includes>
     <includes id="_benchmarks_8h" name="Benchmarks.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Benchmarks.h</includes>
@@ -118,7 +118,7 @@
   </compound>
   <compound kind="file">
     <name>AckleyES.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_ackley_e_s_8cpp</filename>
     <includes id="_individual_8h" name="Individual.h" local="no" imported="no">shark/Algorithms/DirectSearch/Individual.h</includes>
     <includes id="_uniform_crossover_8h" name="UniformCrossover.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Recombination/UniformCrossover.h</includes>
@@ -150,7 +150,7 @@
   </compound>
   <compound kind="file">
     <name>Archive.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_archive_8cpp</filename>
     <includes id="_c_m_a_8h" name="CMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/CMA.h</includes>
     <includes id="_benchmarks_8h" name="Benchmarks.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Benchmarks.h</includes>
@@ -165,7 +165,7 @@
   </compound>
   <compound kind="file">
     <name>CMAExperiment.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_c_m_a_experiment_8cpp</filename>
     <includes id="_c_m_a_8h" name="CMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/CMA.h</includes>
     <includes id="_rosenbrock_8h" name="Rosenbrock.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Rosenbrock.h</includes>
@@ -182,7 +182,7 @@
   </compound>
   <compound kind="file">
     <name>CMAPlot.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_c_m_a_plot_8cpp</filename>
     <includes id="_c_m_a_8h" name="CMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/CMA.h</includes>
     <includes id="_benchmarks_8h" name="Benchmarks.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Benchmarks.h</includes>
@@ -196,7 +196,7 @@
   </compound>
   <compound kind="file">
     <name>CMASimple.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_c_m_a_simple_8cpp</filename>
     <includes id="_c_m_a_8h" name="CMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/CMA.h</includes>
     <includes id="_benchmarks_8h" name="Benchmarks.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Benchmarks.h</includes>
@@ -210,7 +210,7 @@
   </compound>
   <compound kind="file">
     <name>ElitistCMASimple.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_elitist_c_m_a_simple_8cpp</filename>
     <includes id="_elitist_c_m_a_8h" name="ElitistCMA.h" local="no" imported="no">shark/Algorithms/DirectSearch/ElitistCMA.h</includes>
     <includes id="_sphere_8h" name="Sphere.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Sphere.h</includes>
@@ -224,7 +224,7 @@
   </compound>
   <compound kind="file">
     <name>TSP.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/EA/SOO/</path>
+    <path>/home/oswin/Shark/build/examples/EA/SOO/</path>
     <filename>_t_s_p_8cpp</filename>
     <includes id="_partially_mapped_crossover_8h" name="PartiallyMappedCrossover.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Recombination/PartiallyMappedCrossover.h</includes>
     <includes id="_roulette_wheel_selection_8h" name="RouletteWheelSelection.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h</includes>
@@ -304,7 +304,7 @@
   </compound>
   <compound kind="file">
     <name>Statistics.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Statistics/</path>
+    <path>/home/oswin/Shark/build/examples/Statistics/</path>
     <filename>_statistics_8cpp</filename>
     <includes id="_statistics_2_statistics_8h" name="Statistics.h" local="no" imported="no">shark/Statistics/Statistics.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -318,7 +318,7 @@
   </compound>
   <compound kind="file">
     <name>CSvmGridSearchTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_c_svm_grid_search_tutorial_8cpp</filename>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -337,7 +337,7 @@
   </compound>
   <compound kind="file">
     <name>CSvmLinear.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_c_svm_linear_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -360,7 +360,7 @@
   </compound>
   <compound kind="file">
     <name>CSvmMaxLikelihoodMS.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_c_svm_max_likelihood_m_s_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_c_v_dataset_tools_8h" name="CVDatasetTools.h" local="no" imported="no">shark/Data/CVDatasetTools.h</includes>
@@ -411,7 +411,7 @@
   </compound>
   <compound kind="file">
     <name>CSvmTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_c_svm_tutorial_8cpp</filename>
     <includes id="_c_svm_trainer_8h" name="CSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/CSvmTrainer.h</includes>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
@@ -427,7 +427,7 @@
   </compound>
   <compound kind="file">
     <name>CVFolds.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_c_v_folds_8cpp</filename>
     <includes id="_c_v_dataset_tools_8h" name="CVDatasetTools.h" local="no" imported="no">shark/Data/CVDatasetTools.h</includes>
     <includes id="_data_distribution_8h" name="DataDistribution.h" local="no" imported="no">shark/Data/DataDistribution.h</includes>
@@ -454,7 +454,7 @@
   </compound>
   <compound kind="file">
     <name>DeepNetworkTrainingRBM.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_deep_network_training_r_b_m_8cpp</filename>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
     <includes id="_concatenated_model_8h" name="ConcatenatedModel.h" local="no" imported="no">shark/Models/ConcatenatedModel.h</includes>
@@ -490,7 +490,7 @@
   </compound>
   <compound kind="file">
     <name>FFNNBasicTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_f_f_n_n_basic_tutorial_8cpp</filename>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
     <includes id="_concatenated_model_8h" name="ConcatenatedModel.h" local="no" imported="no">shark/Models/ConcatenatedModel.h</includes>
@@ -509,7 +509,7 @@
   </compound>
   <compound kind="file">
     <name>KernelBudgetedSGDTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_kernel_budgeted_s_g_d_tutorial_8cpp</filename>
     <includes id="_kernel_budgeted_s_g_d_trainer_8h" name="KernelBudgetedSGDTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/Budgeted/KernelBudgetedSGDTrainer.h</includes>
     <includes id="_merge_budget_maintenance_strategy_8h" name="MergeBudgetMaintenanceStrategy.h" local="no" imported="no">shark/Algorithms/Trainers/Budgeted/MergeBudgetMaintenanceStrategy.h</includes>
@@ -527,7 +527,7 @@
   </compound>
   <compound kind="file">
     <name>KernelLogisticRegression.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_kernel_logistic_regression_8cpp</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -548,7 +548,7 @@
   </compound>
   <compound kind="file">
     <name>KernelRegression.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_kernel_regression_8cpp</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -568,7 +568,7 @@
   </compound>
   <compound kind="file">
     <name>KernelSelection.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_kernel_selection_8cpp</filename>
     <includes id="_data_distribution_8h" name="DataDistribution.h" local="no" imported="no">shark/Data/DataDistribution.h</includes>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
@@ -584,7 +584,7 @@
   </compound>
   <compound kind="file">
     <name>KNNCrossValidationTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_k_n_n_cross_validation_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_nearest_neighbor_model_8h" name="NearestNeighborModel.h" local="no" imported="no">shark/Models/NearestNeighborModel.h</includes>
@@ -602,7 +602,7 @@
   </compound>
   <compound kind="file">
     <name>KNNTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_k_n_n_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_nearest_neighbor_model_8h" name="NearestNeighborModel.h" local="no" imported="no">shark/Models/NearestNeighborModel.h</includes>
@@ -620,7 +620,7 @@
   </compound>
   <compound kind="file">
     <name>KTA-tutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_k_t_a-tutorial_8cpp</filename>
     <includes id="_data_distribution_8h" name="DataDistribution.h" local="no" imported="no">shark/Data/DataDistribution.h</includes>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
@@ -636,7 +636,7 @@
   </compound>
   <compound kind="file">
     <name>LassoRegression.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_lasso_regression_8cpp</filename>
     <includes id="_data_distribution_8h" name="DataDistribution.h" local="no" imported="no">shark/Data/DataDistribution.h</includes>
     <includes id="_squared_loss_8h" name="SquaredLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/SquaredLoss.h</includes>
@@ -651,7 +651,7 @@
   </compound>
   <compound kind="file">
     <name>LDATutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_l_d_a_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -666,7 +666,7 @@
   </compound>
   <compound kind="file">
     <name>linearRegressionTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>linear_regression_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_squared_loss_8h" name="SquaredLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/SquaredLoss.h</includes>
@@ -681,7 +681,7 @@
   </compound>
   <compound kind="file">
     <name>McSvm.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_mc_svm_8cpp</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -700,7 +700,7 @@
   </compound>
   <compound kind="file">
     <name>McSvmLinear.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_mc_svm_linear_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_c_svm_trainer_8h" name="CSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/CSvmTrainer.h</includes>
@@ -737,7 +737,7 @@
   </compound>
   <compound kind="file">
     <name>MklKernelTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_mkl_kernel_tutorial_8cpp</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -760,7 +760,7 @@
   </compound>
   <compound kind="file">
     <name>MNISTForExperts.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_m_n_i_s_t_for_experts_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
@@ -781,7 +781,7 @@
   </compound>
   <compound kind="file">
     <name>MultiTaskSvm.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_multi_task_svm_8cpp</filename>
     <includes id="_c_svm_trainer_8h" name="CSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/CSvmTrainer.h</includes>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
@@ -805,7 +805,7 @@
   </compound>
   <compound kind="file">
     <name>OneVersusOne.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_one_versus_one_8cpp</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <includes id="_data_distribution_8h" name="DataDistribution.h" local="no" imported="no">shark/Data/DataDistribution.h</includes>
@@ -823,7 +823,7 @@
   </compound>
   <compound kind="file">
     <name>quickstartTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>quickstart_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_l_d_a_8h" name="LDA.h" local="no" imported="no">shark/Algorithms/Trainers/LDA.h</includes>
@@ -838,7 +838,7 @@
   </compound>
   <compound kind="file">
     <name>regressionTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>regression_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_c_g_8h" name="CG.h" local="no" imported="no">shark/Algorithms/GradientDescent/CG.h</includes>
@@ -862,7 +862,7 @@
   </compound>
   <compound kind="file">
     <name>RFTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_r_f_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_r_f_trainer_8h" name="RFTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/RFTrainer.h</includes>
@@ -877,7 +877,7 @@
   </compound>
   <compound kind="file">
     <name>StoppingCriteria.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_stopping_criteria_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
@@ -907,7 +907,7 @@
   </compound>
   <compound kind="file">
     <name>SubrangeKernelTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Supervised/</path>
+    <path>/home/oswin/Shark/build/examples/Supervised/</path>
     <filename>_subrange_kernel_tutorial_8cpp</filename>
     <includes id="_normalize_kernel_unit_variance_8h" name="NormalizeKernelUnitVariance.h" local="no" imported="no">shark/Algorithms/Trainers/NormalizeKernelUnitVariance.h</includes>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
@@ -927,7 +927,7 @@
   </compound>
   <compound kind="file">
     <name>AutoEncoderTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_auto_encoder_tutorial_8cpp</filename>
     <includes id="_pgm_8h" name="Pgm.h" local="no" imported="no">shark/Data/Pgm.h</includes>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
@@ -947,7 +947,7 @@
   </compound>
   <compound kind="file">
     <name>BinaryRBM.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_binary_r_b_m_8cpp</filename>
     <includes id="_binary_r_b_m_8h" name="BinaryRBM.h" local="no" imported="no">shark/Unsupervised/RBM/BinaryRBM.h</includes>
     <includes id="_steepest_descent_8h" name="SteepestDescent.h" local="no" imported="no">shark/Algorithms/GradientDescent/SteepestDescent.h</includes>
@@ -963,7 +963,7 @@
   </compound>
   <compound kind="file">
     <name>HierarchicalClustering.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_hierarchical_clustering_8cpp</filename>
     <includes id="_l_c_tree_8h" name="LCTree.h" local="no" imported="no">shark/Models/Trees/LCTree.h</includes>
     <includes id="_hierarchical_clustering_8h" name="HierarchicalClustering.h" local="no" imported="no">shark/Models/Clustering/HierarchicalClustering.h</includes>
@@ -978,7 +978,7 @@
   </compound>
   <compound kind="file">
     <name>KMeansTutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_k_means_tutorial_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_normalize_components_unit_variance_8h" name="NormalizeComponentsUnitVariance.h" local="no" imported="no">shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h</includes>
@@ -994,7 +994,7 @@
   </compound>
   <compound kind="file">
     <name>OneClassSvm.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_one_class_svm_8cpp</filename>
     <includes id="_one_class_svm_trainer_8h" name="OneClassSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/OneClassSvmTrainer.h</includes>
     <includes id="_gaussian_rbf_kernel_8h" name="GaussianRbfKernel.h" local="no" imported="no">shark/Models/Kernels/GaussianRbfKernel.h</includes>
@@ -1009,7 +1009,7 @@
   </compound>
   <compound kind="file">
     <name>PCA.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_p_c_a_8cpp</filename>
     <includes id="_p_c_a_8h" name="PCA.h" local="no" imported="no">shark/Algorithms/Trainers/PCA.h</includes>
     <includes id="_multi_variate_normal_distribution_8h" name="MultiVariateNormalDistribution.h" local="no" imported="no">shark/Statistics/Distributions/MultiVariateNormalDistribution.h</includes>
@@ -1044,7 +1044,7 @@
   </compound>
   <compound kind="file">
     <name>PCATutorial.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_p_c_a_tutorial_8cpp</filename>
     <includes id="_p_c_a_8h" name="PCA.h" local="no" imported="no">shark/Algorithms/Trainers/PCA.h</includes>
     <includes id="_pgm_8h" name="Pgm.h" local="no" imported="no">shark/Data/Pgm.h</includes>
@@ -1058,7 +1058,7 @@
   </compound>
   <compound kind="file">
     <name>VariationalAutoencoder.cpp</name>
-    <path>/home/ulfi/Shark/build/examples/Unsupervised/</path>
+    <path>/home/oswin/Shark/build/examples/Unsupervised/</path>
     <filename>_variational_autoencoder_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_pgm_8h" name="Pgm.h" local="no" imported="no">shark/Data/Pgm.h</includes>
@@ -1077,7 +1077,7 @@
   </compound>
   <compound kind="file">
     <name>conv2d.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/BLAS/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/BLAS/</path>
     <filename>conv2d_8cpp</filename>
     <includes id="conv2d_8hpp" name="conv2d.hpp" local="no" imported="no">shark/LinAlg/BLAS/kernels/conv2d.hpp</includes>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
@@ -1105,7 +1105,7 @@
   </compound>
   <compound kind="file">
     <name>gemm.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/BLAS/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/BLAS/</path>
     <filename>gemm_8cpp</filename>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
     <member kind="define">
@@ -1132,7 +1132,7 @@
   </compound>
   <compound kind="file">
     <name>potrf.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/BLAS/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/BLAS/</path>
     <filename>potrf_8cpp</filename>
     <includes id="potrf_8hpp" name="potrf.hpp" local="no" imported="no">shark/LinAlg/BLAS/kernels/potrf.hpp</includes>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
@@ -1153,7 +1153,7 @@
   </compound>
   <compound kind="file">
     <name>syrk.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/BLAS/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/BLAS/</path>
     <filename>syrk_8cpp</filename>
     <includes id="syrk_8hpp" name="syrk.hpp" local="no" imported="no">shark/LinAlg/BLAS/kernels/syrk.hpp</includes>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
@@ -1174,7 +1174,7 @@
   </compound>
   <compound kind="file">
     <name>trmm.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/BLAS/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/BLAS/</path>
     <filename>trmm_8cpp</filename>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
     <member kind="function">
@@ -1193,97 +1193,8 @@
     </member>
   </compound>
   <compound kind="file">
-    <name>CMakeCXXCompilerId.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/build/CMakeFiles/3.9.2/CompilerIdCXX/</path>
-    <filename>_c_make_c_x_x_compiler_id_8cpp</filename>
-    <member kind="define">
-      <type>#define</type>
-      <name>COMPILER_ID</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a81dee0709ded976b2e0319239f72d174</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="define">
-      <type>#define</type>
-      <name>STRINGIFY_HELPER</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a2ae9b72bb13abaabfcf2ee0ba7d3fa1d</anchor>
-      <arglist>(X)</arglist>
-    </member>
-    <member kind="define">
-      <type>#define</type>
-      <name>STRINGIFY</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a43e1cad902b6477bec893cb6430bd6c8</anchor>
-      <arglist>(X)</arglist>
-    </member>
-    <member kind="define">
-      <type>#define</type>
-      <name>PLATFORM_ID</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>adbc5372f40838899018fadbc89bd588b</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="define">
-      <type>#define</type>
-      <name>ARCHITECTURE_ID</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>aba35d0d200deaeb06aee95ca297acb28</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="define">
-      <type>#define</type>
-      <name>DEC</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>ad1280362da42492bbc11aa78cbf776ad</anchor>
-      <arglist>(n)</arglist>
-    </member>
-    <member kind="define">
-      <type>#define</type>
-      <name>HEX</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a46d5d95daa1bef867bd0179594310ed5</anchor>
-      <arglist>(n)</arglist>
-    </member>
-    <member kind="function">
-      <type>int</type>
-      <name>main</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a0ddf1224851353fc92bfbff6f499fa97</anchor>
-      <arglist>(int argc, char *argv[])</arglist>
-    </member>
-    <member kind="variable">
-      <type>char const  *</type>
-      <name>info_compiler</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a4b0efeb7a5d59313986b3a0390f050f6</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="variable">
-      <type>char const  *</type>
-      <name>info_platform</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a2321403dee54ee23f0c2fa849c60f7d4</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="variable">
-      <type>char const  *</type>
-      <name>info_arch</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a59647e99d304ed33b15cb284c27ed391</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="variable">
-      <type>const char *</type>
-      <name>info_language_dialect_default</name>
-      <anchorfile>_c_make_c_x_x_compiler_id_8cpp.html</anchorfile>
-      <anchor>a1ce162bad2fe6966ac8b33cc19e120b8</anchor>
-      <arglist></arglist>
-    </member>
-  </compound>
-  <compound kind="file">
     <name>hypervolume_algorithms.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>hypervolume__algorithms_8cpp</filename>
     <includes id="_hypervolume_calculator_m_d_w_f_g_8h" name="HypervolumeCalculatorMDWFG.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculatorMDWFG.h</includes>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
@@ -1305,7 +1216,7 @@
   </compound>
   <compound kind="file">
     <name>kernel_csvm.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>kernel__csvm_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -1322,7 +1233,7 @@
   </compound>
   <compound kind="file">
     <name>linear_csvm.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>linear__csvm_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -1338,7 +1249,7 @@
   </compound>
   <compound kind="file">
     <name>linear_regression.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>linear__regression_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_linear_regression_8h" name="LinearRegression.h" local="no" imported="no">shark/Algorithms/Trainers/LinearRegression.h</includes>
@@ -1354,7 +1265,7 @@
   </compound>
   <compound kind="file">
     <name>logistic_regression_LBFGS.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>logistic__regression___l_b_f_g_s_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_cross_entropy_8h" name="CrossEntropy.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/CrossEntropy.h</includes>
@@ -1373,7 +1284,7 @@
   </compound>
   <compound kind="file">
     <name>logistic_regression_SAG.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>logistic__regression___s_a_g_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_cross_entropy_8h" name="CrossEntropy.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/CrossEntropy.h</includes>
@@ -1396,7 +1307,7 @@
   </compound>
   <compound kind="file">
     <name>nearest_neighbours.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>nearest__neighbours_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -1415,7 +1326,7 @@
   </compound>
   <compound kind="file">
     <name>random_forrest.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>random__forrest_8cpp</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -1433,7 +1344,7 @@
   </compound>
   <compound kind="file">
     <name>ridge_regression.cpp</name>
-    <path>/home/ulfi/Shark/examples/Benchmark/shark/</path>
+    <path>/home/oswin/Shark/examples/Benchmark/shark/</path>
     <filename>ridge__regression_8cpp</filename>
     <includes id="_csv_8h" name="Csv.h" local="no" imported="no">shark/Data/Csv.h</includes>
     <includes id="_linear_regression_8h" name="LinearRegression.h" local="no" imported="no">shark/Algorithms/Trainers/LinearRegression.h</includes>
@@ -1449,7 +1360,7 @@
   </compound>
   <compound kind="file">
     <name>HelloWorld.cpp</name>
-    <path>/home/ulfi/Shark/examples/ExampleProject/</path>
+    <path>/home/oswin/Shark/examples/ExampleProject/</path>
     <filename>_hello_world_8cpp</filename>
     <member kind="function">
       <type>int</type>
@@ -1461,7 +1372,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractMultiObjectiveOptimizer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_abstract_multi_objective_optimizer_8h</filename>
     <includes id="_abstract_optimizer_8h" name="AbstractOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractOptimizer.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -1470,7 +1381,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractOptimizer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_abstract_optimizer_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <class kind="class">shark::AbstractOptimizer</class>
@@ -1478,7 +1389,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractSingleObjectiveOptimizer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_abstract_single_objective_optimizer_8h</filename>
     <includes id="_abstract_optimizer_8h" name="AbstractOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractOptimizer.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -1487,7 +1398,7 @@
   </compound>
   <compound kind="file">
     <name>ApproximateKernelExpansion.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_approximate_kernel_expansion_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -1503,7 +1414,7 @@
   </compound>
   <compound kind="file">
     <name>CMA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_c_m_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
@@ -1514,7 +1425,7 @@
   </compound>
   <compound kind="file">
     <name>Chromosome.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/CMA/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/CMA/</path>
     <filename>_chromosome_8h</filename>
     <includes id="_multi_variate_normal_distribution_8h" name="MultiVariateNormalDistribution.h" local="no" imported="no">shark/Statistics/Distributions/MultiVariateNormalDistribution.h</includes>
     <class kind="struct">shark::CMAChromosome</class>
@@ -1522,7 +1433,7 @@
   </compound>
   <compound kind="file">
     <name>CMAIndividual.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/CMA/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/CMA/</path>
     <filename>_c_m_a_individual_8h</filename>
     <includes id="_individual_8h" name="Individual.h" local="no" imported="no">shark/Algorithms/DirectSearch/Individual.h</includes>
     <includes id="_chromosome_8h" name="Chromosome.h" local="no" imported="no">shark/Algorithms/DirectSearch/CMA/Chromosome.h</includes>
@@ -1532,7 +1443,7 @@
   </compound>
   <compound kind="file">
     <name>CMSA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_c_m_s_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
@@ -1543,7 +1454,7 @@
   </compound>
   <compound kind="file">
     <name>CrossEntropyMethod.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_cross_entropy_method_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
@@ -1557,7 +1468,7 @@
   </compound>
   <compound kind="file">
     <name>ElitistCMA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_elitist_c_m_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
@@ -1568,12 +1479,12 @@
   </compound>
   <compound kind="file">
     <name>Grid.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_grid_8h</filename>
   </compound>
   <compound kind="file">
     <name>GridSearch.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_grid_search_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -1584,7 +1495,7 @@
   </compound>
   <compound kind="file">
     <name>Individual.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_individual_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="class">shark::Individual</class>
@@ -1622,7 +1533,7 @@
   </compound>
   <compound kind="file">
     <name>LMCMA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_l_m_c_m_a_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <includes id="_multi_variate_normal_distribution_8h" name="MultiVariateNormalDistribution.h" local="no" imported="no">shark/Statistics/Distributions/MultiVariateNormalDistribution.h</includes>
@@ -1635,7 +1546,7 @@
   </compound>
   <compound kind="file">
     <name>MOCMA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_m_o_c_m_a_8h</filename>
     <includes id="_hypervolume_indicator_8h" name="HypervolumeIndicator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h</includes>
     <includes id="_additive_epsilon_indicator_8h" name="AdditiveEpsilonIndicator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h</includes>
@@ -1662,7 +1573,7 @@
   </compound>
   <compound kind="file">
     <name>MOEAD.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_m_o_e_a_d_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_multi_objective_optimizer_8h" name="AbstractMultiObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractMultiObjectiveOptimizer.h</includes>
@@ -1675,7 +1586,7 @@
   </compound>
   <compound kind="file">
     <name>DCNonDominatedSort.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
     <filename>_d_c_non_dominated_sort_8h</filename>
     <includes id="_pareto_dominance_8h" name="ParetoDominance.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -1691,7 +1602,7 @@
   </compound>
   <compound kind="file">
     <name>FastNonDominatedSort.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
     <filename>_fast_non_dominated_sort_8h</filename>
     <includes id="_pareto_dominance_8h" name="ParetoDominance.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h</includes>
     <namespace>shark</namespace>
@@ -1705,7 +1616,7 @@
   </compound>
   <compound kind="file">
     <name>NonDominatedSort.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
     <filename>_non_dominated_sort_8h</filename>
     <includes id="_fast_non_dominated_sort_8h" name="FastNonDominatedSort.h" local="yes" imported="no">FastNonDominatedSort.h</includes>
     <includes id="_d_c_non_dominated_sort_8h" name="DCNonDominatedSort.h" local="yes" imported="no">DCNonDominatedSort.h</includes>
@@ -1727,7 +1638,7 @@
   </compound>
   <compound kind="file">
     <name>ParetoDominance.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Domination/</path>
     <filename>_pareto_dominance_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <namespace>shark</namespace>
@@ -1772,7 +1683,7 @@
   </compound>
   <compound kind="file">
     <name>PenalizingEvaluator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Evaluation/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Evaluation/</path>
     <filename>_penalizing_evaluator_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::PenalizingEvaluator</class>
@@ -1780,7 +1691,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeApproximator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_approximator_8h</filename>
     <includes id="_pareto_dominance_8h" name="ParetoDominance.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h</includes>
     <includes id="_multi_nomial_distribution_8h" name="MultiNomialDistribution.h" local="no" imported="no">shark/Statistics/Distributions/MultiNomialDistribution.h</includes>
@@ -1790,7 +1701,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeCalculator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_calculator_8h</filename>
     <includes id="_hypervolume_calculator2_d_8h" name="HypervolumeCalculator2D.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator2D.h</includes>
     <includes id="_hypervolume_calculator3_d_8h" name="HypervolumeCalculator3D.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator3D.h</includes>
@@ -1802,7 +1713,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeCalculator2D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_calculator2_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -1811,7 +1722,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeCalculator3D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_calculator3_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::HypervolumeCalculator3D</class>
@@ -1819,7 +1730,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeCalculatorMDHOY.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_calculator_m_d_h_o_y_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::HypervolumeCalculatorMDHOY</class>
@@ -1827,7 +1738,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeCalculatorMDWFG.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_calculator_m_d_w_f_g_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_non_dominated_sort_8h" name="NonDominatedSort.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Domination/NonDominatedSort.h</includes>
@@ -1836,7 +1747,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeContribution.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_contribution_8h</filename>
     <includes id="_hypervolume_contribution2_d_8h" name="HypervolumeContribution2D.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution2D.h</includes>
     <includes id="_hypervolume_contribution3_d_8h" name="HypervolumeContribution3D.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution3D.h</includes>
@@ -1847,7 +1758,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeContribution2D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_contribution2_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -1856,7 +1767,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeContribution3D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_contribution3_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -1865,7 +1776,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeContributionApproximator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_contribution_approximator_8h</filename>
     <includes id="_pareto_dominance_8h" name="ParetoDominance.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h</includes>
     <includes id="_hypervolume_calculator_8h" name="HypervolumeCalculator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h</includes>
@@ -1875,7 +1786,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeContributionMD.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_contribution_m_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -1887,7 +1798,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeSubsetSelection2D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Hypervolume/</path>
     <filename>_hypervolume_subset_selection2_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::HypervolumeSubsetSelection2D</class>
@@ -1895,7 +1806,7 @@
   </compound>
   <compound kind="file">
     <name>AdditiveEpsilonIndicator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
     <filename>_additive_epsilon_indicator_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::AdditiveEpsilonIndicator</class>
@@ -1903,7 +1814,7 @@
   </compound>
   <compound kind="file">
     <name>CrowdingDistance.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
     <filename>_crowding_distance_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::CrowdingDistance</class>
@@ -1911,7 +1822,7 @@
   </compound>
   <compound kind="file">
     <name>HypervolumeIndicator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
     <filename>_hypervolume_indicator_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <includes id="_open_m_p_8h" name="OpenMP.h" local="no" imported="no">shark/Core/OpenMP.h</includes>
@@ -1921,7 +1832,7 @@
   </compound>
   <compound kind="file">
     <name>NSGA3Indicator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Indicators/</path>
     <filename>_n_s_g_a3_indicator_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -1931,7 +1842,7 @@
   </compound>
   <compound kind="file">
     <name>Lattice.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
     <filename>_lattice_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_metrics_8h" name="Metrics.h" local="no" imported="no">shark/LinAlg/Metrics.h</includes>
@@ -1996,7 +1907,7 @@
   </compound>
   <compound kind="file">
     <name>BitflipMutator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Mutation/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Mutation/</path>
     <filename>_bitflip_mutator_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <class kind="struct">shark::BitflipMutator</class>
@@ -2004,7 +1915,7 @@
   </compound>
   <compound kind="file">
     <name>PolynomialMutation.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Mutation/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Mutation/</path>
     <filename>_polynomial_mutation_8h</filename>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -2014,7 +1925,7 @@
   </compound>
   <compound kind="file">
     <name>PopulationBasedStepSizeAdaptation.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
     <filename>_population_based_step_size_adaptation_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="class">shark::PopulationBasedStepSizeAdaptation</class>
@@ -2022,7 +1933,7 @@
   </compound>
   <compound kind="file">
     <name>OnePointCrossover.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
     <filename>_one_point_crossover_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <class kind="struct">shark::OnePointCrossover</class>
@@ -2030,7 +1941,7 @@
   </compound>
   <compound kind="file">
     <name>PartiallyMappedCrossover.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
     <filename>_partially_mapped_crossover_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -2039,7 +1950,7 @@
   </compound>
   <compound kind="file">
     <name>SimulatedBinaryCrossover.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
     <filename>_simulated_binary_crossover_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -2048,7 +1959,7 @@
   </compound>
   <compound kind="file">
     <name>UniformCrossover.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Recombination/</path>
     <filename>_uniform_crossover_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <class kind="class">shark::UniformCrossover</class>
@@ -2056,7 +1967,7 @@
   </compound>
   <compound kind="file">
     <name>ReferenceVectorAdaptation.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
     <filename>_reference_vector_adaptation_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_individual_8h" name="Individual.h" local="no" imported="no">shark/Algorithms/DirectSearch/Individual.h</includes>
@@ -2065,7 +1976,7 @@
   </compound>
   <compound kind="file">
     <name>Tchebycheff.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Scalarizers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Scalarizers/</path>
     <filename>_tchebycheff_8h</filename>
     <namespace>shark</namespace>
     <member kind="function">
@@ -2078,7 +1989,7 @@
   </compound>
   <compound kind="file">
     <name>ElitistSelection.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_elitist_selection_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::ElitistSelection</class>
@@ -2086,7 +1997,7 @@
   </compound>
   <compound kind="file">
     <name>EPTournamentSelection.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_e_p_tournament_selection_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -2095,7 +2006,7 @@
   </compound>
   <compound kind="file">
     <name>IndicatorBasedSelection.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_indicator_based_selection_8h</filename>
     <includes id="_non_dominated_sort_8h" name="NonDominatedSort.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Domination/NonDominatedSort.h</includes>
     <class kind="struct">shark::IndicatorBasedSelection</class>
@@ -2103,7 +2014,7 @@
   </compound>
   <compound kind="file">
     <name>LinearRanking.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_linear_ranking_8h</filename>
     <includes id="_roulette_wheel_selection_8h" name="RouletteWheelSelection.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h</includes>
     <class kind="struct">shark::LinearRankingSelection</class>
@@ -2111,7 +2022,7 @@
   </compound>
   <compound kind="file">
     <name>ReferenceVectorGuidedSelection.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_reference_vector_guided_selection_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_individual_8h" name="Individual.h" local="no" imported="no">shark/Algorithms/DirectSearch/Individual.h</includes>
@@ -2120,7 +2031,7 @@
   </compound>
   <compound kind="file">
     <name>RouletteWheelSelection.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_roulette_wheel_selection_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -2129,7 +2040,7 @@
   </compound>
   <compound kind="file">
     <name>TournamentSelection.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_tournament_selection_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -2138,7 +2049,7 @@
   </compound>
   <compound kind="file">
     <name>UniformRanking.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/Selection/</path>
     <filename>_uniform_ranking_8h</filename>
     <includes id="_roulette_wheel_selection_8h" name="RouletteWheelSelection.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Selection/RouletteWheelSelection.h</includes>
     <class kind="struct">shark::UniformRankingSelection</class>
@@ -2146,7 +2057,7 @@
   </compound>
   <compound kind="file">
     <name>TwoPointStepSizeAdaptation.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/Operators/</path>
     <filename>_two_point_step_size_adaptation_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="class">shark::TwoPointStepSizeAdaptation</class>
@@ -2154,7 +2065,7 @@
   </compound>
   <compound kind="file">
     <name>RealCodedNSGAII.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_real_coded_n_s_g_a_i_i_8h</filename>
     <includes id="_abstract_multi_objective_optimizer_8h" name="AbstractMultiObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractMultiObjectiveOptimizer.h</includes>
     <includes id="_individual_8h" name="Individual.h" local="no" imported="no">shark/Algorithms/DirectSearch/Individual.h</includes>
@@ -2193,7 +2104,7 @@
   </compound>
   <compound kind="file">
     <name>RealCodedNSGAIII.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_real_coded_n_s_g_a_i_i_i_8h</filename>
     <includes id="_n_s_g_a3_indicator_8h" name="NSGA3Indicator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Indicators/NSGA3Indicator.h</includes>
     <includes id="_real_coded_n_s_g_a_i_i_8h" name="RealCodedNSGAII.h" local="no" imported="no">shark/Algorithms/DirectSearch/RealCodedNSGAII.h</includes>
@@ -2202,7 +2113,7 @@
   </compound>
   <compound kind="file">
     <name>RVEA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_r_v_e_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_multi_objective_optimizer_8h" name="AbstractMultiObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractMultiObjectiveOptimizer.h</includes>
@@ -2224,7 +2135,7 @@
   </compound>
   <compound kind="file">
     <name>SimplexDownhill.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_simplex_downhill_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <class kind="class">shark::SimplexDownhill</class>
@@ -2232,7 +2143,7 @@
   </compound>
   <compound kind="file">
     <name>SMS-EMOA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_s_m_s-_e_m_o_a_8h</filename>
     <includes id="_individual_8h" name="Individual.h" local="no" imported="no">shark/Algorithms/DirectSearch/Individual.h</includes>
     <includes id="_hypervolume_indicator_8h" name="HypervolumeIndicator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h</includes>
@@ -2247,7 +2158,7 @@
   </compound>
   <compound kind="file">
     <name>SteadyStateMOCMA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_steady_state_m_o_c_m_a_8h</filename>
     <includes id="_hypervolume_indicator_8h" name="HypervolumeIndicator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h</includes>
     <includes id="_additive_epsilon_indicator_8h" name="AdditiveEpsilonIndicator.h" local="no" imported="no">shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h</includes>
@@ -2274,7 +2185,7 @@
   </compound>
   <compound kind="file">
     <name>VDCMA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/DirectSearch/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/DirectSearch/</path>
     <filename>_v_d_c_m_a_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <includes id="_multi_variate_normal_distribution_8h" name="MultiVariateNormalDistribution.h" local="no" imported="no">shark/Statistics/Distributions/MultiVariateNormalDistribution.h</includes>
@@ -2286,7 +2197,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractLineSearchOptimizer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_abstract_line_search_optimizer_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <includes id="_line_search_8h" name="LineSearch.h" local="no" imported="no">shark/Algorithms/GradientDescent/LineSearch.h</includes>
@@ -2295,7 +2206,7 @@
   </compound>
   <compound kind="file">
     <name>Adam.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_adam_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <class kind="class">shark::Adam</class>
@@ -2303,7 +2214,7 @@
   </compound>
   <compound kind="file">
     <name>BFGS.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_b_f_g_s_8h</filename>
     <includes id="_abstract_line_search_optimizer_8h" name="AbstractLineSearchOptimizer.h" local="no" imported="no">shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h</includes>
     <class kind="class">shark::BFGS</class>
@@ -2311,7 +2222,7 @@
   </compound>
   <compound kind="file">
     <name>CG.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_c_g_8h</filename>
     <includes id="_abstract_line_search_optimizer_8h" name="AbstractLineSearchOptimizer.h" local="no" imported="no">shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h</includes>
     <class kind="class">shark::CG</class>
@@ -2319,7 +2230,7 @@
   </compound>
   <compound kind="file">
     <name>LBFGS.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_l_b_f_g_s_8h</filename>
     <includes id="_abstract_line_search_optimizer_8h" name="AbstractLineSearchOptimizer.h" local="no" imported="no">shark/Algorithms/GradientDescent/AbstractLineSearchOptimizer.h</includes>
     <class kind="class">shark::LBFGS</class>
@@ -2327,7 +2238,7 @@
   </compound>
   <compound kind="file">
     <name>LineSearch.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_line_search_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
@@ -2347,7 +2258,7 @@
   </compound>
   <compound kind="file">
     <name>Rprop.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_rprop_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <class kind="class">shark::Rprop</class>
@@ -2355,7 +2266,7 @@
   </compound>
   <compound kind="file">
     <name>SteepestDescent.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_steepest_descent_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <class kind="class">shark::SteepestDescent</class>
@@ -2363,7 +2274,7 @@
   </compound>
   <compound kind="file">
     <name>TrustRegionNewton.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/GradientDescent/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/GradientDescent/</path>
     <filename>_trust_region_newton_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
@@ -2372,7 +2283,7 @@
   </compound>
   <compound kind="file">
     <name>JaakkolaHeuristic.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_jaakkola_heuristic_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_proxy_reference_traits_8h" name="ProxyReferenceTraits.h" local="no" imported="no">shark/Core/Traits/ProxyReferenceTraits.h</includes>
@@ -2381,7 +2292,7 @@
   </compound>
   <compound kind="file">
     <name>KMeans.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_k_means_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2414,7 +2325,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractNearestNeighbors.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/NearestNeighbors/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/NearestNeighbors/</path>
     <filename>_abstract_nearest_neighbors_8h</filename>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2423,7 +2334,7 @@
   </compound>
   <compound kind="file">
     <name>SimpleNearestNeighbors.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/NearestNeighbors/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/NearestNeighbors/</path>
     <filename>_simple_nearest_neighbors_8h</filename>
     <includes id="_abstract_nearest_neighbors_8h" name="AbstractNearestNeighbors.h" local="no" imported="no">shark/Algorithms/NearestNeighbors/AbstractNearestNeighbors.h</includes>
     <includes id="_abstract_metric_8h" name="AbstractMetric.h" local="no" imported="no">shark/Models/Kernels/AbstractMetric.h</includes>
@@ -2433,7 +2344,7 @@
   </compound>
   <compound kind="file">
     <name>TreeNearestNeighbors.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/NearestNeighbors/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/NearestNeighbors/</path>
     <filename>_tree_nearest_neighbors_8h</filename>
     <includes id="_binary_tree_8h" name="BinaryTree.h" local="no" imported="no">shark/Models/Trees/BinaryTree.h</includes>
     <includes id="_abstract_nearest_neighbors_8h" name="AbstractNearestNeighbors.h" local="no" imported="no">shark/Algorithms/NearestNeighbors/AbstractNearestNeighbors.h</includes>
@@ -2444,7 +2355,7 @@
   </compound>
   <compound kind="file">
     <name>Pegasos.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/</path>
     <filename>_pegasos_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2455,14 +2366,14 @@
   </compound>
   <compound kind="file">
     <name>BoxBasedShrinkingStrategy.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_box_based_shrinking_strategy_8h</filename>
     <class kind="struct">shark::BoxBasedShrinkingStrategy</class>
     <namespace>shark</namespace>
   </compound>
   <compound kind="file">
     <name>BoxConstrainedProblems.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_box_constrained_problems_8h</filename>
     <includes id="_qp_solver_8h" name="QpSolver.h" local="no" imported="no">shark/Algorithms/QP/QpSolver.h</includes>
     <includes id="_box_based_shrinking_strategy_8h" name="BoxBasedShrinkingStrategy.h" local="no" imported="no">shark/Algorithms/QP/BoxBasedShrinkingStrategy.h</includes>
@@ -2475,7 +2386,7 @@
   </compound>
   <compound kind="file">
     <name>QpBoxLinear.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_qp_box_linear_8h</filename>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
     <includes id="_quadratic_program_8h" name="QuadraticProgram.h" local="no" imported="no">shark/Algorithms/QP/QuadraticProgram.h</includes>
@@ -2487,7 +2398,7 @@
   </compound>
   <compound kind="file">
     <name>QpMcBoxDecomp.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_qp_mc_box_decomp_8h</filename>
     <includes id="_qp_solver_8h" name="QpSolver.h" local="no" imported="no">shark/Algorithms/QP/QpSolver.h</includes>
     <includes id="_qp_sparse_array_8h" name="QpSparseArray.h" local="no" imported="no">shark/Algorithms/QP/QpSparseArray.h</includes>
@@ -2502,7 +2413,7 @@
   </compound>
   <compound kind="file">
     <name>QpMcLinear.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_qp_mc_linear_8h</filename>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
     <includes id="_quadratic_program_8h" name="QuadraticProgram.h" local="no" imported="no">shark/Algorithms/QP/QuadraticProgram.h</includes>
@@ -2522,7 +2433,7 @@
   </compound>
   <compound kind="file">
     <name>QpMcSimplexDecomp.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_qp_mc_simplex_decomp_8h</filename>
     <includes id="_qp_solver_8h" name="QpSolver.h" local="no" imported="no">shark/Algorithms/QP/QpSolver.h</includes>
     <includes id="_qp_sparse_array_8h" name="QpSparseArray.h" local="no" imported="no">shark/Algorithms/QP/QpSparseArray.h</includes>
@@ -2537,7 +2448,7 @@
   </compound>
   <compound kind="file">
     <name>QpSolver.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_qp_solver_8h</filename>
     <includes id="_timer_8h" name="Timer.h" local="no" imported="no">shark/Core/Timer.h</includes>
     <includes id="_quadratic_program_8h" name="QuadraticProgram.h" local="no" imported="no">shark/Algorithms/QP/QuadraticProgram.h</includes>
@@ -2581,7 +2492,7 @@
   </compound>
   <compound kind="file">
     <name>QpSparseArray.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_qp_sparse_array_8h</filename>
     <includes id="_quadratic_program_8h" name="QuadraticProgram.h" local="no" imported="no">shark/Algorithms/QP/QuadraticProgram.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2592,7 +2503,7 @@
   </compound>
   <compound kind="file">
     <name>QuadraticProgram.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_quadratic_program_8h</filename>
     <class kind="struct">shark::QpStoppingCondition</class>
     <class kind="struct">shark::QpSolutionProperties</class>
@@ -2631,7 +2542,7 @@
   </compound>
   <compound kind="file">
     <name>SvmProblems.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/QP/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/QP/</path>
     <filename>_svm_problems_8h</filename>
     <includes id="_box_constrained_problems_8h" name="BoxConstrainedProblems.h" local="no" imported="no">shark/Algorithms/QP/BoxConstrainedProblems.h</includes>
     <class kind="struct">shark::MVPSelectionCriterion</class>
@@ -2643,14 +2554,14 @@
   </compound>
   <compound kind="file">
     <name>AbstractStoppingCriterion.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_abstract_stopping_criterion_8h</filename>
     <class kind="class">shark::AbstractStoppingCriterion</class>
     <namespace>shark</namespace>
   </compound>
   <compound kind="file">
     <name>GeneralizationLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_generalization_loss_8h</filename>
     <includes id="_abstract_stopping_criterion_8h" name="AbstractStoppingCriterion.h" local="yes" imported="no">AbstractStoppingCriterion.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -2660,7 +2571,7 @@
   </compound>
   <compound kind="file">
     <name>GeneralizationQuotient.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_generalization_quotient_8h</filename>
     <includes id="_abstract_stopping_criterion_8h" name="AbstractStoppingCriterion.h" local="yes" imported="no">AbstractStoppingCriterion.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -2670,7 +2581,7 @@
   </compound>
   <compound kind="file">
     <name>MaxIterations.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_max_iterations_8h</filename>
     <includes id="_abstract_stopping_criterion_8h" name="AbstractStoppingCriterion.h" local="yes" imported="no">AbstractStoppingCriterion.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -2680,7 +2591,7 @@
   </compound>
   <compound kind="file">
     <name>TrainingError.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_training_error_8h</filename>
     <includes id="_abstract_stopping_criterion_8h" name="AbstractStoppingCriterion.h" local="yes" imported="no">AbstractStoppingCriterion.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -2690,7 +2601,7 @@
   </compound>
   <compound kind="file">
     <name>TrainingProgress.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_training_progress_8h</filename>
     <includes id="_abstract_stopping_criterion_8h" name="AbstractStoppingCriterion.h" local="yes" imported="no">AbstractStoppingCriterion.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -2700,7 +2611,7 @@
   </compound>
   <compound kind="file">
     <name>ValidatedStoppingCriterion.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/StoppingCriteria/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/StoppingCriteria/</path>
     <filename>_validated_stopping_criterion_8h</filename>
     <includes id="_abstract_stopping_criterion_8h" name="AbstractStoppingCriterion.h" local="yes" imported="no">AbstractStoppingCriterion.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -2711,7 +2622,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractSvmTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_abstract_svm_trainer_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_kernel_expansion_8h" name="KernelExpansion.h" local="no" imported="no">shark/Models/Kernels/KernelExpansion.h</includes>
@@ -2725,7 +2636,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_abstract_trainer_8h</filename>
     <includes id="_i_nameable_8h" name="INameable.h" local="no" imported="no">shark/Core/INameable.h</includes>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
@@ -2737,7 +2648,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractWeightedTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_abstract_weighted_trainer_8h</filename>
     <includes id="_weighted_dataset_8h" name="WeightedDataset.h" local="no" imported="no">shark/Data/WeightedDataset.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -2747,7 +2658,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractBudgetMaintenanceStrategy.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
     <filename>_abstract_budget_maintenance_strategy_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -2758,7 +2669,7 @@
   </compound>
   <compound kind="file">
     <name>KernelBudgetedSGDTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
     <filename>_kernel_budgeted_s_g_d_trainer_8h</filename>
     <includes id="_abstract_budget_maintenance_strategy_8h" name="AbstractBudgetMaintenanceStrategy.h" local="no" imported="no">shark/Algorithms/Trainers/Budgeted/AbstractBudgetMaintenanceStrategy.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -2774,7 +2685,7 @@
   </compound>
   <compound kind="file">
     <name>MergeBudgetMaintenanceStrategy.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
     <filename>_merge_budget_maintenance_strategy_8h</filename>
     <includes id="_line_search_8h" name="LineSearch.h" local="no" imported="no">shark/Algorithms/GradientDescent/LineSearch.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2788,7 +2699,7 @@
   </compound>
   <compound kind="file">
     <name>ProjectBudgetMaintenanceStrategy.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
     <filename>_project_budget_maintenance_strategy_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2799,7 +2710,7 @@
   </compound>
   <compound kind="file">
     <name>RemoveBudgetMaintenanceStrategy.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/Budgeted/</path>
     <filename>_remove_budget_maintenance_strategy_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -2810,7 +2721,7 @@
   </compound>
   <compound kind="file">
     <name>CSvmTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_c_svm_trainer_8h</filename>
     <includes id="_abstract_svm_trainer_8h" name="AbstractSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractSvmTrainer.h</includes>
     <includes id="_abstract_weighted_trainer_8h" name="AbstractWeightedTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractWeightedTrainer.h</includes>
@@ -2850,7 +2761,7 @@
   </compound>
   <compound kind="file">
     <name>EpsilonSvmTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_epsilon_svm_trainer_8h</filename>
     <includes id="_abstract_svm_trainer_8h" name="AbstractSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractSvmTrainer.h</includes>
     <includes id="_svm_problems_8h" name="SvmProblems.h" local="no" imported="no">shark/Algorithms/QP/SvmProblems.h</includes>
@@ -2863,7 +2774,7 @@
   </compound>
   <compound kind="file">
     <name>FisherLDA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_fisher_l_d_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
@@ -2873,7 +2784,7 @@
   </compound>
   <compound kind="file">
     <name>KernelMeanClassifier.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_kernel_mean_classifier_8h</filename>
     <includes id="_kernel_expansion_8h" name="KernelExpansion.h" local="no" imported="no">shark/Models/Kernels/KernelExpansion.h</includes>
     <includes id="_abstract_weighted_trainer_8h" name="AbstractWeightedTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractWeightedTrainer.h</includes>
@@ -2883,7 +2794,7 @@
   </compound>
   <compound kind="file">
     <name>KernelSGDTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_kernel_s_g_d_trainer_8h</filename>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -2897,7 +2808,7 @@
   </compound>
   <compound kind="file">
     <name>LassoRegression.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_lasso_regression_8h</filename>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -2906,7 +2817,7 @@
   </compound>
   <compound kind="file">
     <name>LDA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_l_d_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -2917,7 +2828,7 @@
   </compound>
   <compound kind="file">
     <name>LinearRegression.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_linear_regression_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
@@ -2928,7 +2839,7 @@
   </compound>
   <compound kind="file">
     <name>LinearSAGTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_linear_s_a_g_trainer_8h</filename>
     <includes id="_abstract_weighted_trainer_8h" name="AbstractWeightedTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractWeightedTrainer.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -2941,7 +2852,7 @@
   </compound>
   <compound kind="file">
     <name>LogisticRegression.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_logistic_regression_8h</filename>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
     <includes id="_abstract_weighted_trainer_8h" name="AbstractWeightedTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractWeightedTrainer.h</includes>
@@ -2950,7 +2861,7 @@
   </compound>
   <compound kind="file">
     <name>MissingFeatureSvmTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_missing_feature_svm_trainer_8h</filename>
     <includes id="_abstract_svm_trainer_8h" name="AbstractSvmTrainer.h" local="yes" imported="no">shark/Algorithms/Trainers/AbstractSvmTrainer.h</includes>
     <includes id="_eval_skip_missing_features_8h" name="EvalSkipMissingFeatures.h" local="yes" imported="no">shark/Models/Kernels/EvalSkipMissingFeatures.h</includes>
@@ -2965,7 +2876,7 @@
   </compound>
   <compound kind="file">
     <name>NormalizeComponentsUnitInterval.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_normalize_components_unit_interval_8h</filename>
     <includes id="_normalizer_8h" name="Normalizer.h" local="no" imported="no">shark/Models/Normalizer.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -2974,7 +2885,7 @@
   </compound>
   <compound kind="file">
     <name>NormalizeComponentsUnitVariance.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_normalize_components_unit_variance_8h</filename>
     <includes id="_normalizer_8h" name="Normalizer.h" local="no" imported="no">shark/Models/Normalizer.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -2984,7 +2895,7 @@
   </compound>
   <compound kind="file">
     <name>NormalizeComponentsWhitening.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_normalize_components_whitening_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
@@ -2994,7 +2905,7 @@
   </compound>
   <compound kind="file">
     <name>NormalizeComponentsZCA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_normalize_components_z_c_a_8h</filename>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -3004,7 +2915,7 @@
   </compound>
   <compound kind="file">
     <name>NormalizeKernelUnitVariance.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_normalize_kernel_unit_variance_8h</filename>
     <includes id="_scaled_kernel_8h" name="ScaledKernel.h" local="no" imported="no">shark/Models/Kernels/ScaledKernel.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -3013,7 +2924,7 @@
   </compound>
   <compound kind="file">
     <name>OneClassSvmTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_one_class_svm_trainer_8h</filename>
     <includes id="_abstract_svm_trainer_8h" name="AbstractSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractSvmTrainer.h</includes>
     <includes id="_svm_problems_8h" name="SvmProblems.h" local="no" imported="no">shark/Algorithms/QP/SvmProblems.h</includes>
@@ -3025,7 +2936,7 @@
   </compound>
   <compound kind="file">
     <name>OptimizationTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_optimization_trainer_8h</filename>
     <includes id="_abstract_single_objective_optimizer_8h" name="AbstractSingleObjectiveOptimizer.h" local="no" imported="no">shark/Algorithms/AbstractSingleObjectiveOptimizer.h</includes>
     <includes id="_result_sets_8h" name="ResultSets.h" local="no" imported="no">shark/Core/ResultSets.h</includes>
@@ -3038,7 +2949,7 @@
   </compound>
   <compound kind="file">
     <name>PCA.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_p_c_a_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_linear_model_8h" name="LinearModel.h" local="no" imported="no">shark/Models/LinearModel.h</includes>
@@ -3048,7 +2959,7 @@
   </compound>
   <compound kind="file">
     <name>Perceptron.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_perceptron_8h</filename>
     <includes id="_kernel_expansion_8h" name="KernelExpansion.h" local="no" imported="no">shark/Models/Kernels/KernelExpansion.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -3057,7 +2968,7 @@
   </compound>
   <compound kind="file">
     <name>RankingSvmTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_ranking_svm_trainer_8h</filename>
     <includes id="_abstract_svm_trainer_8h" name="AbstractSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractSvmTrainer.h</includes>
     <includes id="_box_constrained_problems_8h" name="BoxConstrainedProblems.h" local="no" imported="no">shark/Algorithms/QP/BoxConstrainedProblems.h</includes>
@@ -3071,7 +2982,7 @@
   </compound>
   <compound kind="file">
     <name>RegularizationNetworkTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_regularization_network_trainer_8h</filename>
     <includes id="_abstract_svm_trainer_8h" name="AbstractSvmTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractSvmTrainer.h</includes>
     <includes id="_kernel_helpers_8h" name="KernelHelpers.h" local="no" imported="no">shark/Models/Kernels/KernelHelpers.h</includes>
@@ -3087,7 +2998,7 @@
   </compound>
   <compound kind="file">
     <name>RFTrainer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Algorithms/Trainers/</path>
+    <path>/home/oswin/Shark/include/shark/Algorithms/Trainers/</path>
     <filename>_r_f_trainer_8h</filename>
     <includes id="_abstract_weighted_trainer_8h" name="AbstractWeightedTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractWeightedTrainer.h</includes>
     <includes id="_r_f_classifier_8h" name="RFClassifier.h" local="no" imported="no">shark/Models/Trees/RFClassifier.h</includes>
@@ -3098,7 +3009,7 @@
   </compound>
   <compound kind="file">
     <name>DLLSupport.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_d_l_l_support_8h</filename>
     <member kind="define">
       <type>#define</type>
@@ -3110,7 +3021,7 @@
   </compound>
   <compound kind="file">
     <name>Exception.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_exception_8h</filename>
     <class kind="class">shark::Exception</class>
     <namespace>shark</namespace>
@@ -3152,7 +3063,7 @@
   </compound>
   <compound kind="file">
     <name>Flags.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_flags_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
@@ -3193,7 +3104,7 @@
   </compound>
   <compound kind="file">
     <name>Pooling.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/CPU/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/CPU/</path>
     <filename>_c_p_u_2_pooling_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -3217,7 +3128,7 @@
   </compound>
   <compound kind="file">
     <name>Pooling.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/OpenCL/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/OpenCL/</path>
     <filename>_open_c_l_2_pooling_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -3241,7 +3152,7 @@
   </compound>
   <compound kind="file">
     <name>Reorder.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/CPU/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/CPU/</path>
     <filename>_c_p_u_2_reorder_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_shape_8h" name="Shape.h" local="no" imported="no">shark/Core/Shape.h</includes>
@@ -3257,7 +3168,7 @@
   </compound>
   <compound kind="file">
     <name>Reorder.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/OpenCL/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/OpenCL/</path>
     <filename>_open_c_l_2_reorder_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -3274,7 +3185,7 @@
   </compound>
   <compound kind="file">
     <name>Reorder.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/</path>
     <filename>_reorder_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_c_p_u_2_reorder_8h" name="Reorder.h" local="yes" imported="no">CPU/Reorder.h</includes>
@@ -3302,7 +3213,7 @@
   </compound>
   <compound kind="file">
     <name>SplineInterpolation2D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/CPU/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/CPU/</path>
     <filename>_c_p_u_2_spline_interpolation2_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_shape_8h" name="Shape.h" local="no" imported="no">shark/Core/Shape.h</includes>
@@ -3333,7 +3244,7 @@
   </compound>
   <compound kind="file">
     <name>SplineInterpolation2D.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/OpenCL/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/OpenCL/</path>
     <filename>_open_c_l_2_spline_interpolation2_d_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_shape_8h" name="Shape.h" local="no" imported="no">shark/Core/Shape.h</includes>
@@ -3356,7 +3267,7 @@
   </compound>
   <compound kind="file">
     <name>Interpolation.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/</path>
     <filename>_interpolation_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_c_p_u_2_spline_interpolation2_d_8h" name="SplineInterpolation2D.h" local="yes" imported="no">CPU/SplineInterpolation2D.h</includes>
@@ -3393,7 +3304,7 @@
   </compound>
   <compound kind="file">
     <name>Padding.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Images/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Images/</path>
     <filename>_padding_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <namespace>shark</namespace>
@@ -3410,14 +3321,14 @@
   </compound>
   <compound kind="file">
     <name>INameable.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_i_nameable_8h</filename>
     <class kind="class">shark::INameable</class>
     <namespace>shark</namespace>
   </compound>
   <compound kind="file">
     <name>IParameterizable.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_i_parameterizable_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="class">shark::IParameterizable</class>
@@ -3425,7 +3336,7 @@
   </compound>
   <compound kind="file">
     <name>ISerializable.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_i_serializable_8h</filename>
     <class kind="class">shark::ISerializable</class>
     <class kind="struct">boost::serialization::tracking_level&lt; std::vector&lt; T &gt; &gt;</class>
@@ -3463,7 +3374,7 @@
   </compound>
   <compound kind="file">
     <name>Math.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_math_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <namespace>shark</namespace>
@@ -3547,7 +3458,7 @@
   </compound>
   <compound kind="file">
     <name>OpenMP.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_open_m_p_8h</filename>
     <member kind="define">
       <type>#define</type>
@@ -3580,7 +3491,7 @@
   </compound>
   <compound kind="file">
     <name>Random.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_random_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <namespace>shark</namespace>
@@ -3637,7 +3548,7 @@
   </compound>
   <compound kind="file">
     <name>ResultSets.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_result_sets_8h</filename>
     <class kind="struct">shark::ResultSet</class>
     <class kind="struct">shark::SingleObjectiveResultSet</class>
@@ -3667,7 +3578,7 @@
   </compound>
   <compound kind="file">
     <name>Shape.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_shape_8h</filename>
     <class kind="class">shark::Shape</class>
     <namespace>shark</namespace>
@@ -3695,7 +3606,7 @@
   </compound>
   <compound kind="file">
     <name>State.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_state_8h</filename>
     <class kind="struct">shark::State</class>
     <class kind="struct">shark::EmptyState</class>
@@ -3703,14 +3614,14 @@
   </compound>
   <compound kind="file">
     <name>Timer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/</path>
+    <path>/home/oswin/Shark/include/shark/Core/</path>
     <filename>_timer_8h</filename>
     <class kind="class">shark::Timer</class>
     <namespace>shark</namespace>
   </compound>
   <compound kind="file">
     <name>ProxyReferenceTraits.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/Traits/</path>
+    <path>/home/oswin/Shark/include/shark/Core/Traits/</path>
     <filename>_proxy_reference_traits_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="struct">shark::ConstProxyReference</class>
@@ -3718,7 +3629,7 @@
   </compound>
   <compound kind="file">
     <name>CanBeCalled.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/utility/</path>
+    <path>/home/oswin/Shark/include/shark/Core/utility/</path>
     <filename>_can_be_called_8h</filename>
     <class kind="struct">shark::CanBeCalled</class>
     <class kind="struct">shark::CanBeCalled&lt; R(T), Argument &gt;</class>
@@ -3727,7 +3638,7 @@
   </compound>
   <compound kind="file">
     <name>functional.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/utility/</path>
+    <path>/home/oswin/Shark/include/shark/Core/utility/</path>
     <filename>functional_8h</filename>
     <includes id="_iterators_8h" name="Iterators.h" local="no" imported="no">shark/Core/utility/Iterators.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -3784,7 +3695,7 @@
   </compound>
   <compound kind="file">
     <name>Iterators.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/utility/</path>
+    <path>/home/oswin/Shark/include/shark/Core/utility/</path>
     <filename>_iterators_8h</filename>
     <class kind="class">shark::IndexedIterator</class>
     <class kind="class">shark::ProxyIterator</class>
@@ -3793,7 +3704,7 @@
   </compound>
   <compound kind="file">
     <name>KeyValuePair.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/utility/</path>
+    <path>/home/oswin/Shark/include/shark/Core/utility/</path>
     <filename>_key_value_pair_8h</filename>
     <class kind="struct">shark::KeyValuePair</class>
     <namespace>shark</namespace>
@@ -3814,7 +3725,7 @@
   </compound>
   <compound kind="file">
     <name>ScopedHandle.h</name>
-    <path>/home/ulfi/Shark/include/shark/Core/utility/</path>
+    <path>/home/oswin/Shark/include/shark/Core/utility/</path>
     <filename>_scoped_handle_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="yes" imported="no">shark/Core/Exception.h</includes>
     <class kind="class">shark::ScopedHandle</class>
@@ -3822,7 +3733,7 @@
   </compound>
   <compound kind="file">
     <name>BatchInterface.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_batch_interface_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_iterators_8h" name="Iterators.h" local="no" imported="no">shark/Core/utility/Iterators.h</includes>
@@ -3908,7 +3819,7 @@
   </compound>
   <compound kind="file">
     <name>BatchInterfaceAdaptStruct.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_batch_interface_adapt_struct_8h</filename>
     <includes id="_batch_interface_8h" name="BatchInterface.h" local="no" imported="no">shark/Data/BatchInterface.h</includes>
     <namespace>shark</namespace>
@@ -4020,7 +3931,7 @@
   </compound>
   <compound kind="file">
     <name>Csv.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_csv_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -4152,7 +4063,7 @@
   </compound>
   <compound kind="file">
     <name>CVDatasetTools.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_c_v_dataset_tools_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -4253,7 +4164,7 @@
   </compound>
   <compound kind="file">
     <name>DataDistribution.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_data_distribution_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -4271,7 +4182,7 @@
   </compound>
   <compound kind="file">
     <name>Dataset.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_dataset_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <includes id="_open_m_p_8h" name="OpenMP.h" local="no" imported="no">shark/Core/OpenMP.h</includes>
@@ -4482,7 +4393,7 @@
   </compound>
   <compound kind="file">
     <name>DataView.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_data_view_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="functional_8h" name="functional.h" local="no" imported="no">shark/Core/utility/functional.h</includes>
@@ -4561,7 +4472,7 @@
   </compound>
   <compound kind="file">
     <name>DeviceSupport.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_device_support_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="device__copy_8hpp" name="device_copy.hpp" local="no" imported="no">shark/LinAlg/BLAS/device_copy.hpp</includes>
@@ -4590,7 +4501,7 @@
   </compound>
   <compound kind="file">
     <name>Download.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_download_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -4684,7 +4595,7 @@
   </compound>
   <compound kind="file">
     <name>ExportKernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_export_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -4766,7 +4677,7 @@
   </compound>
   <compound kind="file">
     <name>HDF5.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_h_d_f5_8h</filename>
     <includes id="_scoped_handle_8h" name="ScopedHandle.h" local="yes" imported="no">shark/Core/utility/ScopedHandle.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="yes" imported="no">shark/Data/Dataset.h</includes>
@@ -4803,7 +4714,7 @@
   </compound>
   <compound kind="file">
     <name>LabelOrder.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_label_order_8h</filename>
     <includes id="_i_nameable_8h" name="INameable.h" local="no" imported="no">shark/Core/INameable.h</includes>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
@@ -4813,7 +4724,7 @@
   </compound>
   <compound kind="file">
     <name>Libsvm.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_libsvm_8h</filename>
     <includes id="_sparse_data_8h" name="SparseData.h" local="no" imported="no">shark/Data/SparseData.h</includes>
     <namespace>shark</namespace>
@@ -4890,7 +4801,7 @@
   </compound>
   <compound kind="file">
     <name>Pgm.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_pgm_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -4933,7 +4844,7 @@
   </compound>
   <compound kind="file">
     <name>SparseData.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_sparse_data_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -5222,7 +5133,7 @@
   </compound>
   <compound kind="file">
     <name>Statistics.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_data_2_statistics_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <namespace>shark</namespace>
@@ -5271,7 +5182,7 @@
   </compound>
   <compound kind="file">
     <name>Statistics.h</name>
-    <path>/home/ulfi/Shark/include/shark/Statistics/</path>
+    <path>/home/oswin/Shark/include/shark/Statistics/</path>
     <filename>_statistics_2_statistics_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="class">shark::statistics::BaseStatisticsObject</class>
@@ -5310,7 +5221,7 @@
   </compound>
   <compound kind="file">
     <name>WeightedDataset.h</name>
-    <path>/home/ulfi/Shark/include/shark/Data/</path>
+    <path>/home/oswin/Shark/include/shark/Data/</path>
     <filename>_weighted_dataset_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <class kind="struct">shark::WeightedDataPair</class>
@@ -5449,7 +5360,7 @@
   </compound>
   <compound kind="file">
     <name>Base.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_base_8h</filename>
     <includes id="remora_8hpp" name="remora.hpp" local="no" imported="no">shark/LinAlg/BLAS/remora.hpp</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -5522,45 +5433,45 @@
   </compound>
   <compound kind="file">
     <name>assignment.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>assignment_8hpp</filename>
     <includes id="matrix__assign_8hpp" name="matrix_assign.hpp" local="yes" imported="no">kernels/matrix_assign.hpp</includes>
     <includes id="vector__assign_8hpp" name="vector_assign.hpp" local="yes" imported="no">kernels/vector_assign.hpp</includes>
   </compound>
   <compound kind="file">
     <name>dense.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/cpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/cpu/</path>
     <filename>cpu_2dense_8hpp</filename>
     <includes id="iterator_8hpp" name="iterator.hpp" local="yes" imported="no">iterator.hpp</includes>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">../assignment.hpp</includes>
   </compound>
   <compound kind="file">
     <name>dense.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>dense_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">expression_types.hpp</includes>
     <includes id="cpu_2dense_8hpp" name="dense.hpp" local="yes" imported="no">cpu/dense.hpp</includes>
   </compound>
   <compound kind="file">
     <name>dense.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/gpu/</path>
     <filename>gpu_2dense_8hpp</filename>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">../assignment.hpp</includes>
   </compound>
   <compound kind="file">
     <name>iterator.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/cpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/cpu/</path>
     <filename>iterator_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>sparse.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/cpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/cpu/</path>
     <filename>cpu_2sparse_8hpp</filename>
     <includes id="iterator_8hpp" name="iterator.hpp" local="yes" imported="no">iterator.hpp</includes>
   </compound>
   <compound kind="file">
     <name>sparse.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>sparse_8hpp</filename>
     <includes id="cpu_2sparse_8hpp" name="sparse.hpp" local="yes" imported="no">cpu/sparse.hpp</includes>
     <includes id="sparse__matrix_8hpp" name="sparse_matrix.hpp" local="yes" imported="no">cpu/sparse_matrix.hpp</includes>
@@ -5569,12 +5480,12 @@
   </compound>
   <compound kind="file">
     <name>sparse_matrix.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/cpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/cpu/</path>
     <filename>sparse__matrix_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>traits.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/cpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/cpu/</path>
     <filename>cpu_2traits_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../expression_types.hpp</includes>
     <includes id="iterator_8hpp" name="iterator.hpp" local="yes" imported="no">iterator.hpp</includes>
@@ -5588,12 +5499,12 @@
   </compound>
   <compound kind="file">
     <name>traits.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/gpu/</path>
     <filename>gpu_2traits_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>decompositions.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>decompositions_8hpp</filename>
     <includes id="trsm_8hpp" name="trsm.hpp" local="yes" imported="no">kernels/trsm.hpp</includes>
     <includes id="trsv_8hpp" name="trsv.hpp" local="yes" imported="no">kernels/trsv.hpp</includes>
@@ -5609,37 +5520,37 @@
   </compound>
   <compound kind="file">
     <name>device_copy.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>device__copy_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>expression_types.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>expression__types_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>copy.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/gpu/</path>
     <filename>copy_8hpp</filename>
     <includes id="dense_8hpp" name="dense.hpp" local="yes" imported="no">../dense.hpp</includes>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">../assignment.hpp</includes>
   </compound>
   <compound kind="file">
     <name>io.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>io_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>potrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/atlas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/atlas/</path>
     <filename>atlas_2potrf_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">../cblas/cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>potrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2potrf_8hpp</filename>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
     <includes id="trsm_8hpp" name="trsm.hpp" local="yes" imported="no">../trsm.hpp</includes>
@@ -5647,7 +5558,7 @@
   </compound>
   <compound kind="file">
     <name>potrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2potrf_8hpp</filename>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
     <includes id="trsm_8hpp" name="trsm.hpp" local="yes" imported="no">../trsm.hpp</includes>
@@ -5655,18 +5566,18 @@
   </compound>
   <compound kind="file">
     <name>potrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>potrf_8hpp</filename>
     <includes id="default_2potrf_8hpp" name="potrf.hpp" local="yes" imported="no">default/potrf.hpp</includes>
   </compound>
   <compound kind="file">
     <name>cblas_inc.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas__inc_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>dense_gemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2dense__gemm_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
@@ -5676,7 +5587,7 @@
   </compound>
   <compound kind="file">
     <name>dense_gemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2dense__gemm_8hpp</filename>
     <includes id="gemv_8hpp" name="gemv.hpp" local="yes" imported="no">../gemv.hpp</includes>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">../../assignment.hpp</includes>
@@ -5685,19 +5596,19 @@
   </compound>
   <compound kind="file">
     <name>gemv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2gemv_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>gemv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2gemv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>gemv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2gemv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
@@ -5706,31 +5617,31 @@
   </compound>
   <compound kind="file">
     <name>gemv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>gemv_8hpp</filename>
     <includes id="default_2gemv_8hpp" name="gemv.hpp" local="yes" imported="no">default/gemv.hpp</includes>
   </compound>
   <compound kind="file">
     <name>gemv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2gemv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>syrk.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2syrk_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>syrk.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2syrk_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>syrk.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2syrk_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
@@ -5738,49 +5649,49 @@
   </compound>
   <compound kind="file">
     <name>syrk.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2syrk_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>syrk.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>syrk_8hpp</filename>
     <includes id="default_2syrk_8hpp" name="syrk.hpp" local="yes" imported="no">default/syrk.hpp</includes>
   </compound>
   <compound kind="file">
     <name>tpmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2tpmv_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>tpmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2tpmv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>tpmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>tpmv_8hpp</filename>
     <includes id="default_2tpmv_8hpp" name="tpmv.hpp" local="yes" imported="no">default/tpmv.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2trmm_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2trmm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2trmm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
@@ -5789,32 +5700,32 @@
   </compound>
   <compound kind="file">
     <name>trmm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2trmm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="gemm_8hpp" name="gemm.hpp" local="yes" imported="no">../gemm.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>trmm_8hpp</filename>
     <includes id="default_2trmm_8hpp" name="trmm.hpp" local="yes" imported="no">default/trmm.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2trmv_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2trmv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2trmv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
@@ -5825,34 +5736,34 @@
   </compound>
   <compound kind="file">
     <name>trmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2trmv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="gemv_8hpp" name="gemv.hpp" local="yes" imported="no">../gemv.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trmv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>trmv_8hpp</filename>
     <includes id="default_2trmv_8hpp" name="trmv.hpp" local="yes" imported="no">default/trmv.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2trsm_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2trsm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2trsm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
@@ -5860,31 +5771,31 @@
   </compound>
   <compound kind="file">
     <name>trsm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2trsm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>trsm_8hpp</filename>
     <includes id="default_2trsm_8hpp" name="trsm.hpp" local="yes" imported="no">default/trsm.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/cblas/</path>
     <filename>cblas_2trsv_8hpp</filename>
     <includes id="cblas__inc_8hpp" name="cblas_inc.hpp" local="yes" imported="no">cblas_inc.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2trsv_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2trsv_8hpp</filename>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">../../assignment.hpp</includes>
     <includes id="dot_8hpp" name="dot.hpp" local="yes" imported="no">../dot.hpp</includes>
@@ -5892,45 +5803,45 @@
   </compound>
   <compound kind="file">
     <name>trsv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2trsv_8hpp</filename>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
     <includes id="gemv_8hpp" name="gemv.hpp" local="yes" imported="no">../gemv.hpp</includes>
   </compound>
   <compound kind="file">
     <name>trsv.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>trsv_8hpp</filename>
     <includes id="default_2trsv_8hpp" name="trsv.hpp" local="yes" imported="no">default/trsv.hpp</includes>
   </compound>
   <compound kind="file">
     <name>conv2d.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2conv2d_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>conv2d.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>conv2d_8hpp</filename>
     <includes id="default_2conv2d_8hpp" name="conv2d.hpp" local="yes" imported="no">default/conv2d.hpp</includes>
   </compound>
   <compound kind="file">
     <name>conv2d.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2conv2d_8hpp</filename>
     <includes id="simd_8hpp" name="simd.hpp" local="yes" imported="no">simd.hpp</includes>
     <includes id="gemm_8hpp" name="gemm.hpp" local="yes" imported="no">../gemm.hpp</includes>
   </compound>
   <compound kind="file">
     <name>gemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/clBlast/</path>
     <filename>cl_blast_2gemm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>gemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2gemm_8hpp</filename>
     <includes id="gemv_8hpp" name="gemv.hpp" local="yes" imported="no">../gemv.hpp</includes>
     <includes id="vector__assign_8hpp" name="vector_assign.hpp" local="yes" imported="no">../vector_assign.hpp</includes>
@@ -5939,7 +5850,7 @@
   </compound>
   <compound kind="file">
     <name>gemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>gemm_8hpp</filename>
     <includes id="default_2gemm_8hpp" name="gemm.hpp" local="yes" imported="no">default/gemm.hpp</includes>
     <includes id="default_2dense__gemm_8hpp" name="dense_gemm.hpp" local="yes" imported="no">default/dense_gemm.hpp</includes>
@@ -5947,49 +5858,49 @@
   </compound>
   <compound kind="file">
     <name>gemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2gemm_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>dot.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2dot_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>dot.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>dot_8hpp</filename>
     <includes id="default_2dot_8hpp" name="dot.hpp" local="yes" imported="no">default/dot.hpp</includes>
   </compound>
   <compound kind="file">
     <name>dot.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2dot_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>fold_rows.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2fold__rows_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>fold_rows.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>fold__rows_8hpp</filename>
     <includes id="default_2fold__rows_8hpp" name="fold_rows.hpp" local="yes" imported="no">default/fold_rows.hpp</includes>
   </compound>
   <compound kind="file">
     <name>fold_rows.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2fold__rows_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>getrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2getrf_8hpp</filename>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
     <includes id="trsm_8hpp" name="trsm.hpp" local="yes" imported="no">../trsm.hpp</includes>
@@ -5998,56 +5909,56 @@
   </compound>
   <compound kind="file">
     <name>getrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>getrf_8hpp</filename>
     <includes id="default_2getrf_8hpp" name="getrf.hpp" local="yes" imported="no">default/getrf.hpp</includes>
   </compound>
   <compound kind="file">
     <name>matrix_assign.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2matrix__assign_8hpp</filename>
     <includes id="vector__assign_8hpp" name="vector_assign.hpp" local="yes" imported="no">../vector_assign.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">../../proxy_expressions.hpp</includes>
   </compound>
   <compound kind="file">
     <name>matrix_assign.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2matrix__assign_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>matrix_assign.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>matrix__assign_8hpp</filename>
     <includes id="default_2matrix__assign_8hpp" name="matrix_assign.hpp" local="yes" imported="no">default/matrix_assign.hpp</includes>
   </compound>
   <compound kind="file">
     <name>matrix_fold.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2matrix__fold_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>matrix_fold.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2matrix__fold_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>matrix_fold.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>matrix__fold_8hpp</filename>
     <includes id="default_2matrix__fold_8hpp" name="matrix_fold.hpp" local="yes" imported="no">default/matrix_fold.hpp</includes>
   </compound>
   <compound kind="file">
     <name>mgemm.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>mgemm_8hpp</filename>
     <includes id="simd_8hpp" name="simd.hpp" local="yes" imported="no">simd.hpp</includes>
   </compound>
   <compound kind="file">
     <name>pstrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2pstrf_8hpp</filename>
     <includes id="gemm_8hpp" name="gemm.hpp" local="yes" imported="no">../gemm.hpp</includes>
     <includes id="gemv_8hpp" name="gemv.hpp" local="yes" imported="no">../gemv.hpp</includes>
@@ -6056,36 +5967,36 @@
   </compound>
   <compound kind="file">
     <name>pstrf.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>pstrf_8hpp</filename>
     <includes id="default_2pstrf_8hpp" name="pstrf.hpp" local="yes" imported="no">default/pstrf.hpp</includes>
   </compound>
   <compound kind="file">
     <name>random.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>kernels_2default_2random_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>random.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>kernels_2gpu_2random_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>random.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>kernels_2random_8hpp</filename>
     <includes id="kernels_2default_2random_8hpp" name="random.hpp" local="yes" imported="no">default/random.hpp</includes>
   </compound>
   <compound kind="file">
     <name>random.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>random_8hpp</filename>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">assignment.hpp</includes>
     <includes id="kernels_2random_8hpp" name="random.hpp" local="yes" imported="no">kernels/random.hpp</includes>
   </compound>
   <compound kind="file">
     <name>simd.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>simd_8hpp</filename>
     <member kind="define">
       <type>#define</type>
@@ -6097,12 +6008,12 @@
   </compound>
   <compound kind="file">
     <name>syev.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2syev_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>syev.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/lapack/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/lapack/</path>
     <filename>lapack_2syev_8hpp</filename>
     <includes id="fortran_8hpp" name="fortran.hpp" local="yes" imported="no">fortran.hpp</includes>
     <member kind="define">
@@ -6122,70 +6033,70 @@
   </compound>
   <compound kind="file">
     <name>syev.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>syev_8hpp</filename>
     <includes id="default_2syev_8hpp" name="syev.hpp" local="yes" imported="no">default/syev.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_assign.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2vector__assign_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>vector_assign.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2vector__assign_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_assign.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>vector__assign_8hpp</filename>
     <includes id="default_2vector__assign_8hpp" name="vector_assign.hpp" local="yes" imported="no">default/vector_assign.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_fold.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2vector__fold_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_fold.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2vector__fold_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_fold.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>vector__fold_8hpp</filename>
     <includes id="default_2vector__fold_8hpp" name="vector_fold.hpp" local="yes" imported="no">default/vector_fold.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_max.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/default/</path>
     <filename>default_2vector__max_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>vector_max.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/gpu/</path>
     <filename>gpu_2vector__max_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">../../expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_max.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/</path>
     <filename>vector__max_8hpp</filename>
     <includes id="default_2vector__max_8hpp" name="vector_max.hpp" local="yes" imported="no">default/vector_max.hpp</includes>
   </compound>
   <compound kind="file">
     <name>fortran.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/kernels/lapack/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/kernels/lapack/</path>
     <filename>fortran_8hpp</filename>
   </compound>
   <compound kind="file">
     <name>matrix_expression.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>matrix__expression_8hpp</filename>
     <includes id="matrix__fold_8hpp" name="matrix_fold.hpp" local="yes" imported="no">kernels/matrix_fold.hpp</includes>
     <includes id="proxy__expressions_8hpp" name="proxy_expressions.hpp" local="yes" imported="no">proxy_expressions.hpp</includes>
@@ -6228,19 +6139,19 @@
   </compound>
   <compound kind="file">
     <name>permutation.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>permutation_8hpp</filename>
     <includes id="dense_8hpp" name="dense.hpp" local="yes" imported="no">dense.hpp</includes>
   </compound>
   <compound kind="file">
     <name>proxy_expressions.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>proxy__expressions_8hpp</filename>
     <includes id="expression__types_8hpp" name="expression_types.hpp" local="yes" imported="no">expression_types.hpp</includes>
   </compound>
   <compound kind="file">
     <name>remora.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>remora_8hpp</filename>
     <includes id="vector__expression_8hpp" name="vector_expression.hpp" local="yes" imported="no">vector_expression.hpp</includes>
     <includes id="matrix__expression_8hpp" name="matrix_expression.hpp" local="yes" imported="no">matrix_expression.hpp</includes>
@@ -6254,19 +6165,19 @@
   </compound>
   <compound kind="file">
     <name>solve.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>solve_8hpp</filename>
     <includes id="decompositions_8hpp" name="decompositions.hpp" local="yes" imported="no">decompositions.hpp</includes>
   </compound>
   <compound kind="file">
     <name>triangular_matrix.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>triangular__matrix_8hpp</filename>
     <includes id="assignment_8hpp" name="assignment.hpp" local="yes" imported="no">assignment.hpp</includes>
   </compound>
   <compound kind="file">
     <name>vector_expression.hpp</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/BLAS/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/BLAS/</path>
     <filename>vector__expression_8hpp</filename>
     <includes id="dot_8hpp" name="dot.hpp" local="yes" imported="no">kernels/dot.hpp</includes>
     <includes id="vector__fold_8hpp" name="vector_fold.hpp" local="yes" imported="no">kernels/vector_fold.hpp</includes>
@@ -6302,7 +6213,7 @@
   </compound>
   <compound kind="file">
     <name>BlockMatrix2x2.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_block_matrix2x2_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6311,7 +6222,7 @@
   </compound>
   <compound kind="file">
     <name>CachedMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_cached_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6321,7 +6232,7 @@
   </compound>
   <compound kind="file">
     <name>DifferenceKernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_difference_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -6331,7 +6242,7 @@
   </compound>
   <compound kind="file">
     <name>ExampleModifiedKernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_example_modified_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6340,7 +6251,7 @@
   </compound>
   <compound kind="file">
     <name>GaussianKernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_gaussian_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6349,7 +6260,7 @@
   </compound>
   <compound kind="file">
     <name>KernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6359,7 +6270,7 @@
   </compound>
   <compound kind="file">
     <name>LRUCache.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_l_r_u_cache_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <class kind="class">shark::LRUCache</class>
@@ -6367,14 +6278,14 @@
   </compound>
   <compound kind="file">
     <name>Metrics.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_metrics_8h</filename>
     <includes id="remora_8hpp" name="remora.hpp" local="no" imported="no">shark/LinAlg/BLAS/remora.hpp</includes>
     <includes id="_math_8h" name="Math.h" local="no" imported="no">shark/Core/Math.h</includes>
   </compound>
   <compound kind="file">
     <name>ModifiedKernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_modified_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6383,7 +6294,7 @@
   </compound>
   <compound kind="file">
     <name>PartlyPrecomputedMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_partly_precomputed_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6392,7 +6303,7 @@
   </compound>
   <compound kind="file">
     <name>PrecomputedMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_precomputed_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6401,7 +6312,7 @@
   </compound>
   <compound kind="file">
     <name>RegularizedKernelMatrix.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>_regularized_kernel_matrix_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6410,7 +6321,7 @@
   </compound>
   <compound kind="file">
     <name>rotations.h</name>
-    <path>/home/ulfi/Shark/include/shark/LinAlg/</path>
+    <path>/home/oswin/Shark/include/shark/LinAlg/</path>
     <filename>rotations_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -6503,7 +6414,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_abstract_model_8h</filename>
     <includes id="_flags_8h" name="Flags.h" local="no" imported="no">shark/Core/Flags.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -6545,7 +6456,7 @@
   </compound>
   <compound kind="file">
     <name>Classifier.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_classifier_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <class kind="class">shark::Classifier</class>
@@ -6553,7 +6464,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractClustering.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Clustering/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Clustering/</path>
     <filename>_abstract_clustering_8h</filename>
     <includes id="_batch_interface_8h" name="BatchInterface.h" local="no" imported="no">shark/Data/BatchInterface.h</includes>
     <includes id="_flags_8h" name="Flags.h" local="no" imported="no">shark/Core/Flags.h</includes>
@@ -6566,7 +6477,7 @@
   </compound>
   <compound kind="file">
     <name>Centroids.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Clustering/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Clustering/</path>
     <filename>_centroids_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_clustering_8h" name="AbstractClustering.h" local="no" imported="no">shark/Models/Clustering/AbstractClustering.h</includes>
@@ -6576,7 +6487,7 @@
   </compound>
   <compound kind="file">
     <name>ClusteringModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Clustering/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Clustering/</path>
     <filename>_clustering_model_8h</filename>
     <includes id="_abstract_clustering_8h" name="AbstractClustering.h" local="no" imported="no">shark/Models/Clustering/AbstractClustering.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -6585,7 +6496,7 @@
   </compound>
   <compound kind="file">
     <name>HardClusteringModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Clustering/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Clustering/</path>
     <filename>_hard_clustering_model_8h</filename>
     <includes id="_clustering_model_8h" name="ClusteringModel.h" local="no" imported="no">shark/Models/Clustering/ClusteringModel.h</includes>
     <class kind="class">shark::HardClusteringModel</class>
@@ -6593,7 +6504,7 @@
   </compound>
   <compound kind="file">
     <name>HierarchicalClustering.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Clustering/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Clustering/</path>
     <filename>_hierarchical_clustering_8h</filename>
     <includes id="_abstract_clustering_8h" name="AbstractClustering.h" local="no" imported="no">shark/Models/Clustering/AbstractClustering.h</includes>
     <includes id="_binary_tree_8h" name="BinaryTree.h" local="no" imported="no">shark/Models/Trees/BinaryTree.h</includes>
@@ -6602,7 +6513,7 @@
   </compound>
   <compound kind="file">
     <name>SoftClusteringModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Clustering/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Clustering/</path>
     <filename>_soft_clustering_model_8h</filename>
     <includes id="_clustering_model_8h" name="ClusteringModel.h" local="no" imported="no">shark/Models/Clustering/ClusteringModel.h</includes>
     <class kind="class">shark::SoftClusteringModel</class>
@@ -6610,7 +6521,7 @@
   </compound>
   <compound kind="file">
     <name>CMAC.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_c_m_a_c_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -6620,7 +6531,7 @@
   </compound>
   <compound kind="file">
     <name>ConcatenatedModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_concatenated_model_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <class kind="class">shark::ConcatenatedModel</class>
@@ -6642,7 +6553,7 @@
   </compound>
   <compound kind="file">
     <name>ConvolutionalModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_convolutional_model_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_neuron_layers_8h" name="NeuronLayers.h" local="no" imported="no">shark/Models/NeuronLayers.h</includes>
@@ -6654,7 +6565,7 @@
   </compound>
   <compound kind="file">
     <name>DropoutLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_dropout_layer_8h</filename>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6664,7 +6575,7 @@
   </compound>
   <compound kind="file">
     <name>Ensemble.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_ensemble_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_classifier_8h" name="Classifier.h" local="no" imported="no">shark/Models/Classifier.h</includes>
@@ -6673,7 +6584,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractKernelFunction.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_abstract_kernel_function_8h</filename>
     <includes id="_abstract_metric_8h" name="AbstractMetric.h" local="no" imported="no">shark/Models/Kernels/AbstractMetric.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6691,7 +6602,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractMetric.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_abstract_metric_8h</filename>
     <includes id="_batch_interface_8h" name="BatchInterface.h" local="no" imported="no">shark/Data/BatchInterface.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -6703,7 +6614,7 @@
   </compound>
   <compound kind="file">
     <name>ArdKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_ard_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::ARDKernelUnconstrained</class>
@@ -6725,7 +6636,7 @@
   </compound>
   <compound kind="file">
     <name>CSvmDerivative.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_c_svm_derivative_8h</filename>
     <includes id="_i_nameable_8h" name="INameable.h" local="no" imported="no">shark/Core/INameable.h</includes>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
@@ -6736,7 +6647,7 @@
   </compound>
   <compound kind="file">
     <name>DiscreteKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_discrete_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6745,7 +6656,7 @@
   </compound>
   <compound kind="file">
     <name>EvalSkipMissingFeatures.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_eval_skip_missing_features_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="yes" imported="no">shark/Core/Exception.h</includes>
     <includes id="_base_8h" name="Base.h" local="yes" imported="no">shark/LinAlg/Base.h</includes>
@@ -6771,7 +6682,7 @@
   </compound>
   <compound kind="file">
     <name>GaussianRbfKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_gaussian_rbf_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::GaussianRbfKernel</class>
@@ -6793,7 +6704,7 @@
   </compound>
   <compound kind="file">
     <name>KernelExpansion.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_kernel_expansion_8h</filename>
     <includes id="_classifier_8h" name="Classifier.h" local="no" imported="no">shark/Models/Classifier.h</includes>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
@@ -6805,7 +6716,7 @@
   </compound>
   <compound kind="file">
     <name>KernelHelpers.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_kernel_helpers_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -6849,7 +6760,7 @@
   </compound>
   <compound kind="file">
     <name>LinearKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_linear_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::LinearKernel</class>
@@ -6871,7 +6782,7 @@
   </compound>
   <compound kind="file">
     <name>MissingFeaturesKernelExpansion.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_missing_features_kernel_expansion_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -6882,7 +6793,7 @@
   </compound>
   <compound kind="file">
     <name>MklKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_mkl_kernel_8h</filename>
     <includes id="_weighted_sum_kernel_8h" name="WeightedSumKernel.h" local="no" imported="no">shark/Models/Kernels/WeightedSumKernel.h</includes>
     <class kind="class">shark::MklKernel</class>
@@ -6890,7 +6801,7 @@
   </compound>
   <compound kind="file">
     <name>ModelKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_model_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -6914,7 +6825,7 @@
   </compound>
   <compound kind="file">
     <name>MonomialKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_monomial_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::MonomialKernel</class>
@@ -6936,7 +6847,7 @@
   </compound>
   <compound kind="file">
     <name>MultiTaskKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_multi_task_kernel_8h</filename>
     <includes id="_discrete_kernel_8h" name="DiscreteKernel.h" local="no" imported="no">shark/Models/Kernels/DiscreteKernel.h</includes>
     <includes id="_product_kernel_8h" name="ProductKernel.h" local="no" imported="no">shark/Models/Kernels/ProductKernel.h</includes>
@@ -6948,7 +6859,7 @@
   </compound>
   <compound kind="file">
     <name>NormalizedKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_normalized_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::NormalizedKernel</class>
@@ -6970,7 +6881,7 @@
   </compound>
   <compound kind="file">
     <name>PointSetKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_point_set_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::PointSetKernel</class>
@@ -6978,7 +6889,7 @@
   </compound>
   <compound kind="file">
     <name>PolynomialKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_polynomial_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::PolynomialKernel</class>
@@ -7000,7 +6911,7 @@
   </compound>
   <compound kind="file">
     <name>ProductKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_product_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::ProductKernel</class>
@@ -7008,7 +6919,7 @@
   </compound>
   <compound kind="file">
     <name>ScaledKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_scaled_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::ScaledKernel</class>
@@ -7030,7 +6941,7 @@
   </compound>
   <compound kind="file">
     <name>SubrangeKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_subrange_kernel_8h</filename>
     <includes id="_weighted_sum_kernel_8h" name="WeightedSumKernel.h" local="no" imported="no">shark/Models/Kernels/WeightedSumKernel.h</includes>
     <class kind="class">shark::SubrangeKernel</class>
@@ -7052,7 +6963,7 @@
   </compound>
   <compound kind="file">
     <name>WeightedSumKernel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Kernels/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Kernels/</path>
     <filename>_weighted_sum_kernel_8h</filename>
     <includes id="_abstract_kernel_function_8h" name="AbstractKernelFunction.h" local="no" imported="no">shark/Models/Kernels/AbstractKernelFunction.h</includes>
     <class kind="class">shark::WeightedSumKernel</class>
@@ -7075,7 +6986,7 @@
   </compound>
   <compound kind="file">
     <name>LinearModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_linear_model_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_neuron_layers_8h" name="NeuronLayers.h" local="no" imported="no">shark/Models/NeuronLayers.h</includes>
@@ -7086,7 +6997,7 @@
   </compound>
   <compound kind="file">
     <name>NearestNeighborModel.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_nearest_neighbor_model_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_classifier_8h" name="Classifier.h" local="no" imported="no">shark/Models/Classifier.h</includes>
@@ -7097,7 +7008,7 @@
   </compound>
   <compound kind="file">
     <name>NeuronLayers.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_neuron_layers_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -7114,7 +7025,7 @@
   </compound>
   <compound kind="file">
     <name>Normalizer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_normalizer_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7123,7 +7034,7 @@
   </compound>
   <compound kind="file">
     <name>OneVersusOneClassifier.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_one_versus_one_classifier_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <class kind="class">shark::OneVersusOneClassifier</class>
@@ -7131,7 +7042,7 @@
   </compound>
   <compound kind="file">
     <name>PoolingLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_pooling_layer_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -7150,7 +7061,7 @@
   </compound>
   <compound kind="file">
     <name>RBFLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_r_b_f_layer_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -7159,7 +7070,7 @@
   </compound>
   <compound kind="file">
     <name>ResizeLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/</path>
+    <path>/home/oswin/Shark/include/shark/Models/</path>
     <filename>_resize_layer_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_interpolation_8h" name="Interpolation.h" local="no" imported="no">shark/Core/Images/Interpolation.h</includes>
@@ -7169,7 +7080,7 @@
   </compound>
   <compound kind="file">
     <name>BinaryTree.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Trees/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Trees/</path>
     <filename>_binary_tree_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <includes id="functional_8h" name="functional.h" local="no" imported="no">shark/Core/utility/functional.h</includes>
@@ -7181,7 +7092,7 @@
   </compound>
   <compound kind="file">
     <name>CARTree.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Trees/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Trees/</path>
     <filename>_c_a_r_tree_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -7191,7 +7102,7 @@
   </compound>
   <compound kind="file">
     <name>KDTree.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Trees/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Trees/</path>
     <filename>_k_d_tree_8h</filename>
     <includes id="_binary_tree_8h" name="BinaryTree.h" local="no" imported="no">shark/Models/Trees/BinaryTree.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -7202,7 +7113,7 @@
   </compound>
   <compound kind="file">
     <name>KHCTree.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Trees/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Trees/</path>
     <filename>_k_h_c_tree_8h</filename>
     <includes id="_binary_tree_8h" name="BinaryTree.h" local="no" imported="no">shark/Models/Trees/BinaryTree.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7211,7 +7122,7 @@
   </compound>
   <compound kind="file">
     <name>LCTree.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Trees/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Trees/</path>
     <filename>_l_c_tree_8h</filename>
     <includes id="_binary_tree_8h" name="BinaryTree.h" local="no" imported="no">shark/Models/Trees/BinaryTree.h</includes>
     <includes id="_data_view_8h" name="DataView.h" local="no" imported="no">shark/Data/DataView.h</includes>
@@ -7221,7 +7132,7 @@
   </compound>
   <compound kind="file">
     <name>RFClassifier.h</name>
-    <path>/home/ulfi/Shark/include/shark/Models/Trees/</path>
+    <path>/home/oswin/Shark/include/shark/Models/Trees/</path>
     <filename>_r_f_classifier_8h</filename>
     <includes id="_c_a_r_tree_8h" name="CARTree.h" local="no" imported="no">shark/Models/Trees/CARTree.h</includes>
     <includes id="_ensemble_8h" name="Ensemble.h" local="no" imported="no">shark/Models/Ensemble.h</includes>
@@ -7233,7 +7144,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractConstraintHandler.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_abstract_constraint_handler_8h</filename>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
     <includes id="_flags_8h" name="Flags.h" local="no" imported="no">shark/Core/Flags.h</includes>
@@ -7243,7 +7154,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractCost.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_abstract_cost_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_i_nameable_8h" name="INameable.h" local="no" imported="no">shark/Core/INameable.h</includes>
@@ -7254,7 +7165,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractObjectiveFunction.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_abstract_objective_function_8h</filename>
     <includes id="_i_nameable_8h" name="INameable.h" local="no" imported="no">shark/Core/INameable.h</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -7281,7 +7192,7 @@
   </compound>
   <compound kind="file">
     <name>Ackley.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_ackley_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7291,7 +7202,7 @@
   </compound>
   <compound kind="file">
     <name>Benchmarks.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_benchmarks_8h</filename>
     <includes id="_z_d_t6_8h" name="ZDT6.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/ZDT6.h</includes>
     <includes id="_z_d_t4_8h" name="ZDT4.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/ZDT4.h</includes>
@@ -7337,7 +7248,7 @@
   </compound>
   <compound kind="file">
     <name>Cigar.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_cigar_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7347,7 +7258,7 @@
   </compound>
   <compound kind="file">
     <name>CigarDiscus.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_cigar_discus_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7357,7 +7268,7 @@
   </compound>
   <compound kind="file">
     <name>CIGTAB1.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_c_i_g_t_a_b1_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7368,7 +7279,7 @@
   </compound>
   <compound kind="file">
     <name>CIGTAB2.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_c_i_g_t_a_b2_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7379,7 +7290,7 @@
   </compound>
   <compound kind="file">
     <name>ConstrainedSphere.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_constrained_sphere_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7389,7 +7300,7 @@
   </compound>
   <compound kind="file">
     <name>DiffPowers.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_diff_powers_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7399,7 +7310,7 @@
   </compound>
   <compound kind="file">
     <name>Discus.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_discus_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7409,7 +7320,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ1.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z1_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7419,7 +7330,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ2.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z2_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7429,7 +7340,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ3.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z3_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7439,7 +7350,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ4.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z4_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7449,7 +7360,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ5.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z5_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7459,7 +7370,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ6.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z6_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7469,7 +7380,7 @@
   </compound>
   <compound kind="file">
     <name>DTLZ7.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_d_t_l_z7_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7479,7 +7390,7 @@
   </compound>
   <compound kind="file">
     <name>ELLI1.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_e_l_l_i1_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7491,7 +7402,7 @@
   </compound>
   <compound kind="file">
     <name>ELLI2.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_e_l_l_i2_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7503,7 +7414,7 @@
   </compound>
   <compound kind="file">
     <name>Ellipsoid.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_ellipsoid_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7513,7 +7424,7 @@
   </compound>
   <compound kind="file">
     <name>Fonseca.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_fonseca_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7524,7 +7435,7 @@
   </compound>
   <compound kind="file">
     <name>GSP.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_g_s_p_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7535,7 +7446,7 @@
   </compound>
   <compound kind="file">
     <name>Himmelblau.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_himmelblau_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7545,7 +7456,7 @@
   </compound>
   <compound kind="file">
     <name>Hypervolumes.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_hypervolumes_8h</filename>
     <includes id="_benchmarks_8h" name="Benchmarks.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/Benchmarks.h</includes>
     <namespace>shark</namespace>
@@ -7560,7 +7471,7 @@
   </compound>
   <compound kind="file">
     <name>IHR1.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_i_h_r1_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7571,7 +7482,7 @@
   </compound>
   <compound kind="file">
     <name>IHR2.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_i_h_r2_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7582,7 +7493,7 @@
   </compound>
   <compound kind="file">
     <name>IHR3.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_i_h_r3_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7593,7 +7504,7 @@
   </compound>
   <compound kind="file">
     <name>IHR4.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_i_h_r4_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7604,7 +7515,7 @@
   </compound>
   <compound kind="file">
     <name>IHR6.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_i_h_r6_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7615,7 +7526,7 @@
   </compound>
   <compound kind="file">
     <name>LZ1.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z1_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7625,7 +7536,7 @@
   </compound>
   <compound kind="file">
     <name>LZ2.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z2_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7635,7 +7546,7 @@
   </compound>
   <compound kind="file">
     <name>LZ3.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z3_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7645,7 +7556,7 @@
   </compound>
   <compound kind="file">
     <name>LZ4.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z4_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7655,7 +7566,7 @@
   </compound>
   <compound kind="file">
     <name>LZ5.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z5_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7665,7 +7576,7 @@
   </compound>
   <compound kind="file">
     <name>LZ6.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z6_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7675,7 +7586,7 @@
   </compound>
   <compound kind="file">
     <name>LZ7.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z7_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7685,7 +7596,7 @@
   </compound>
   <compound kind="file">
     <name>LZ8.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z8_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7695,7 +7606,7 @@
   </compound>
   <compound kind="file">
     <name>LZ9.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_l_z9_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7705,7 +7616,7 @@
   </compound>
   <compound kind="file">
     <name>MarkovPole.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_markov_pole_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7717,7 +7628,7 @@
   </compound>
   <compound kind="file">
     <name>MultiObjectiveBenchmark.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_multi_objective_benchmark_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_rotated_error_function_8h" name="RotatedErrorFunction.h" local="no" imported="no">shark/ObjectiveFunctions/Benchmarks/RotatedErrorFunction.h</includes>
@@ -7730,7 +7641,7 @@
   </compound>
   <compound kind="file">
     <name>NonMarkovPole.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_non_markov_pole_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7742,7 +7653,7 @@
   </compound>
   <compound kind="file">
     <name>DoublePole.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/PoleSimulators/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/PoleSimulators/</path>
     <filename>_double_pole_8h</filename>
     <includes id="_math_8h" name="Math.h" local="no" imported="no">math.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7751,7 +7662,7 @@
   </compound>
   <compound kind="file">
     <name>SinglePole.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/PoleSimulators/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/PoleSimulators/</path>
     <filename>_single_pole_8h</filename>
     <includes id="_math_8h" name="Math.h" local="no" imported="no">math.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7760,7 +7671,7 @@
   </compound>
   <compound kind="file">
     <name>Rosenbrock.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_rosenbrock_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7770,7 +7681,7 @@
   </compound>
   <compound kind="file">
     <name>RotatedErrorFunction.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_rotated_error_function_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="rotations_8h" name="rotations.h" local="no" imported="no">shark/LinAlg/rotations.h</includes>
@@ -7780,7 +7691,7 @@
   </compound>
   <compound kind="file">
     <name>Schwefel.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_schwefel_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7790,7 +7701,7 @@
   </compound>
   <compound kind="file">
     <name>Sphere.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_sphere_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7800,7 +7711,7 @@
   </compound>
   <compound kind="file">
     <name>ZDT1.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_z_d_t1_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7810,7 +7721,7 @@
   </compound>
   <compound kind="file">
     <name>ZDT2.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_z_d_t2_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7820,7 +7731,7 @@
   </compound>
   <compound kind="file">
     <name>ZDT3.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_z_d_t3_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7830,7 +7741,7 @@
   </compound>
   <compound kind="file">
     <name>ZDT4.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_z_d_t4_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7840,7 +7751,7 @@
   </compound>
   <compound kind="file">
     <name>ZDT6.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Benchmarks/</path>
     <filename>_z_d_t6_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_box_constraint_handler_8h" name="BoxConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/BoxConstraintHandler.h</includes>
@@ -7850,7 +7761,7 @@
   </compound>
   <compound kind="file">
     <name>BoxConstraintHandler.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_box_constraint_handler_8h</filename>
     <includes id="_abstract_constraint_handler_8h" name="AbstractConstraintHandler.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractConstraintHandler.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -7859,7 +7770,7 @@
   </compound>
   <compound kind="file">
     <name>CombinedObjectiveFunction.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_combined_objective_function_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <class kind="class">shark::CombinedObjectiveFunction</class>
@@ -7867,7 +7778,7 @@
   </compound>
   <compound kind="file">
     <name>CrossValidationError.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_cross_validation_error_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_abstract_trainer_8h" name="AbstractTrainer.h" local="no" imported="no">shark/Algorithms/Trainers/AbstractTrainer.h</includes>
@@ -7879,7 +7790,7 @@
   </compound>
   <compound kind="file">
     <name>ErrorFunction.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_error_function_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
@@ -7891,7 +7802,7 @@
   </compound>
   <compound kind="file">
     <name>EvaluationArchive.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_evaluation_archive_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <class kind="class">shark::EvaluationArchive</class>
@@ -7900,7 +7811,7 @@
   </compound>
   <compound kind="file">
     <name>KernelTargetAlignment.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_kernel_target_alignment_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -7911,7 +7822,7 @@
   </compound>
   <compound kind="file">
     <name>LooError.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_loo_error_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -7923,7 +7834,7 @@
   </compound>
   <compound kind="file">
     <name>LooErrorCSvm.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_loo_error_c_svm_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_zero_one_loss_8h" name="ZeroOneLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/ZeroOneLoss.h</includes>
@@ -7937,7 +7848,7 @@
   </compound>
   <compound kind="file">
     <name>AbsoluteLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_absolute_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::AbsoluteLoss</class>
@@ -7945,7 +7856,7 @@
   </compound>
   <compound kind="file">
     <name>AbstractLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_abstract_loss_8h</filename>
     <includes id="_abstract_cost_8h" name="AbstractCost.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractCost.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -7955,7 +7866,7 @@
   </compound>
   <compound kind="file">
     <name>CrossEntropy.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_cross_entropy_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::CrossEntropy</class>
@@ -7965,7 +7876,7 @@
   </compound>
   <compound kind="file">
     <name>DiscreteLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_discrete_loss_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
@@ -7974,7 +7885,7 @@
   </compound>
   <compound kind="file">
     <name>EpsilonHingeLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_epsilon_hinge_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::EpsilonHingeLoss</class>
@@ -7982,7 +7893,7 @@
   </compound>
   <compound kind="file">
     <name>HingeLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_hinge_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::HingeLoss</class>
@@ -7990,7 +7901,7 @@
   </compound>
   <compound kind="file">
     <name>HuberLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_huber_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::HuberLoss</class>
@@ -7998,7 +7909,7 @@
   </compound>
   <compound kind="file">
     <name>SquaredEpsilonHingeLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_squared_epsilon_hinge_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::SquaredEpsilonHingeLoss</class>
@@ -8006,7 +7917,7 @@
   </compound>
   <compound kind="file">
     <name>SquaredHingeLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_squared_hinge_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::SquaredHingeLoss</class>
@@ -8014,7 +7925,7 @@
   </compound>
   <compound kind="file">
     <name>SquaredLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_squared_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::SquaredLoss</class>
@@ -8024,7 +7935,7 @@
   </compound>
   <compound kind="file">
     <name>ZeroOneLoss.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/Loss/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/Loss/</path>
     <filename>_zero_one_loss_8h</filename>
     <includes id="_abstract_loss_8h" name="AbstractLoss.h" local="no" imported="no">shark/ObjectiveFunctions/Loss/AbstractLoss.h</includes>
     <class kind="class">shark::ZeroOneLoss</class>
@@ -8033,7 +7944,7 @@
   </compound>
   <compound kind="file">
     <name>NegativeAUC.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_negative_a_u_c_8h</filename>
     <includes id="_abstract_cost_8h" name="AbstractCost.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractCost.h</includes>
     <includes id="_key_value_pair_8h" name="KeyValuePair.h" local="no" imported="no">shark/Core/utility/KeyValuePair.h</includes>
@@ -8043,7 +7954,7 @@
   </compound>
   <compound kind="file">
     <name>NegativeGaussianProcessEvidence.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_negative_gaussian_process_evidence_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_kernel_helpers_8h" name="KernelHelpers.h" local="no" imported="no">shark/Models/Kernels/KernelHelpers.h</includes>
@@ -8053,7 +7964,7 @@
   </compound>
   <compound kind="file">
     <name>NegativeLogLikelihood.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_negative_log_likelihood_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
@@ -8063,7 +7974,7 @@
   </compound>
   <compound kind="file">
     <name>RadiusMarginQuotient.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_radius_margin_quotient_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_svm_problems_8h" name="SvmProblems.h" local="no" imported="no">shark/Algorithms/QP/SvmProblems.h</includes>
@@ -8076,7 +7987,7 @@
   </compound>
   <compound kind="file">
     <name>Regularizer.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_regularizer_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <class kind="class">shark::OneNormRegularizer</class>
@@ -8085,7 +7996,7 @@
   </compound>
   <compound kind="file">
     <name>SvmLogisticInterpretation.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_svm_logistic_interpretation_8h</filename>
     <includes id="_c_v_dataset_tools_8h" name="CVDatasetTools.h" local="no" imported="no">shark/Data/CVDatasetTools.h</includes>
     <includes id="_c_svm_derivative_8h" name="CSvmDerivative.h" local="no" imported="no">shark/Models/Kernels/CSvmDerivative.h</includes>
@@ -8099,7 +8010,7 @@
   </compound>
   <compound kind="file">
     <name>VariationalAutoencoderError.h</name>
-    <path>/home/ulfi/Shark/include/shark/ObjectiveFunctions/</path>
+    <path>/home/oswin/Shark/include/shark/ObjectiveFunctions/</path>
     <filename>_variational_autoencoder_error_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
@@ -8109,7 +8020,7 @@
   </compound>
   <compound kind="file">
     <name>MultiNomialDistribution.h</name>
-    <path>/home/ulfi/Shark/include/shark/Statistics/Distributions/</path>
+    <path>/home/oswin/Shark/include/shark/Statistics/Distributions/</path>
     <filename>_multi_nomial_distribution_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -8118,7 +8029,7 @@
   </compound>
   <compound kind="file">
     <name>MultiVariateNormalDistribution.h</name>
-    <path>/home/ulfi/Shark/include/shark/Statistics/Distributions/</path>
+    <path>/home/oswin/Shark/include/shark/Statistics/Distributions/</path>
     <filename>_multi_variate_normal_distribution_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -8128,7 +8039,7 @@
   </compound>
   <compound kind="file">
     <name>ROC.h</name>
-    <path>/home/ulfi/Shark/include/shark/Statistics/</path>
+    <path>/home/oswin/Shark/include/shark/Statistics/</path>
     <filename>_r_o_c_8h</filename>
     <includes id="_d_l_l_support_8h" name="DLLSupport.h" local="no" imported="no">shark/Core/DLLSupport.h</includes>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
@@ -8138,7 +8049,7 @@
   </compound>
   <compound kind="file">
     <name>analytics.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>analytics_8h</filename>
     <includes id="_r_b_m_8h" name="RBM.h" local="no" imported="no">shark/Unsupervised/RBM/RBM.h</includes>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
@@ -8239,7 +8150,7 @@
   </compound>
   <compound kind="file">
     <name>BinaryRBM.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>_binary_r_b_m_8h</filename>
     <includes id="_r_b_m_8h" name="RBM.h" local="no" imported="no">shark/Unsupervised/RBM/RBM.h</includes>
     <includes id="_energy_8h" name="Energy.h" local="no" imported="no">shark/Unsupervised/RBM/Energy.h</includes>
@@ -8304,7 +8215,7 @@
   </compound>
   <compound kind="file">
     <name>BipolarRBM.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>_bipolar_r_b_m_8h</filename>
     <includes id="_r_b_m_8h" name="RBM.h" local="no" imported="no">shark/Unsupervised/RBM/RBM.h</includes>
     <includes id="_energy_8h" name="Energy.h" local="no" imported="no">shark/Unsupervised/RBM/Energy.h</includes>
@@ -8369,7 +8280,7 @@
   </compound>
   <compound kind="file">
     <name>Energy.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>_energy_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_batch_interface_8h" name="BatchInterface.h" local="no" imported="no">shark/Data/BatchInterface.h</includes>
@@ -8378,7 +8289,7 @@
   </compound>
   <compound kind="file">
     <name>GaussianBinaryRBM.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>_gaussian_binary_r_b_m_8h</filename>
     <includes id="_r_b_m_8h" name="RBM.h" local="no" imported="no">shark/Unsupervised/RBM/RBM.h</includes>
     <includes id="_energy_8h" name="Energy.h" local="no" imported="no">shark/Unsupervised/RBM/Energy.h</includes>
@@ -8444,7 +8355,7 @@
   </compound>
   <compound kind="file">
     <name>ContrastiveDivergence.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
     <filename>_contrastive_divergence_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_energy_8h" name="Energy.h" local="no" imported="no">shark/Unsupervised/RBM/Energy.h</includes>
@@ -8453,7 +8364,7 @@
   </compound>
   <compound kind="file">
     <name>ExactGradient.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
     <filename>_exact_gradient_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <includes id="_gibbs_operator_8h" name="GibbsOperator.h" local="no" imported="no">shark/Unsupervised/RBM/Sampling/GibbsOperator.h</includes>
@@ -8463,7 +8374,7 @@
   </compound>
   <compound kind="file">
     <name>MultiChainApproximator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
     <filename>_multi_chain_approximator_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <class kind="class">shark::MultiChainApproximator</class>
@@ -8471,7 +8382,7 @@
   </compound>
   <compound kind="file">
     <name>SingleChainApproximator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/GradientApproximations/</path>
     <filename>_single_chain_approximator_8h</filename>
     <includes id="_abstract_objective_function_8h" name="AbstractObjectiveFunction.h" local="no" imported="no">shark/ObjectiveFunctions/AbstractObjectiveFunction.h</includes>
     <class kind="class">shark::SingleChainApproximator</class>
@@ -8479,7 +8390,7 @@
   </compound>
   <compound kind="file">
     <name>BinaryLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Neuronlayers/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Neuronlayers/</path>
     <filename>_binary_layer_8h</filename>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -8493,7 +8404,7 @@
   </compound>
   <compound kind="file">
     <name>BipolarLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Neuronlayers/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Neuronlayers/</path>
     <filename>_bipolar_layer_8h</filename>
     <includes id="_i_serializable_8h" name="ISerializable.h" local="no" imported="no">shark/Core/ISerializable.h</includes>
     <includes id="_i_parameterizable_8h" name="IParameterizable.h" local="no" imported="no">shark/Core/IParameterizable.h</includes>
@@ -8507,7 +8418,7 @@
   </compound>
   <compound kind="file">
     <name>GaussianLayer.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Neuronlayers/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Neuronlayers/</path>
     <filename>_gaussian_layer_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <includes id="_real_space_8h" name="RealSpace.h" local="no" imported="no">shark/Unsupervised/RBM/StateSpaces/RealSpace.h</includes>
@@ -8522,7 +8433,7 @@
   </compound>
   <compound kind="file">
     <name>BarsAndStripes.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Problems/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Problems/</path>
     <filename>_bars_and_stripes_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -8531,7 +8442,7 @@
   </compound>
   <compound kind="file">
     <name>DistantModes.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Problems/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Problems/</path>
     <filename>_distant_modes_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -8542,7 +8453,7 @@
   </compound>
   <compound kind="file">
     <name>MNIST.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Problems/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Problems/</path>
     <filename>_m_n_i_s_t_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -8552,7 +8463,7 @@
   </compound>
   <compound kind="file">
     <name>Shifter.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Problems/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Problems/</path>
     <filename>_shifter_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
@@ -8561,7 +8472,7 @@
   </compound>
   <compound kind="file">
     <name>RBM.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>_r_b_m_8h</filename>
     <includes id="_abstract_model_8h" name="AbstractModel.h" local="no" imported="no">shark/Models/AbstractModel.h</includes>
     <includes id="_energy_8h" name="Energy.h" local="no" imported="no">shark/Unsupervised/RBM/Energy.h</includes>
@@ -8570,7 +8481,7 @@
   </compound>
   <compound kind="file">
     <name>EnergyStoringTemperedMarkovChain.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
     <filename>_energy_storing_tempered_markov_chain_8h</filename>
     <includes id="_tempered_markov_chain_8h" name="TemperedMarkovChain.h" local="no" imported="no">shark/Unsupervised/RBM/Sampling/TemperedMarkovChain.h</includes>
     <class kind="class">shark::EnergyStoringTemperedMarkovChain</class>
@@ -8578,7 +8489,7 @@
   </compound>
   <compound kind="file">
     <name>GibbsOperator.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
     <filename>_gibbs_operator_8h</filename>
     <includes id="_base_8h" name="Base.h" local="no" imported="no">shark/LinAlg/Base.h</includes>
     <class kind="class">shark::GibbsOperator</class>
@@ -8586,7 +8497,7 @@
   </compound>
   <compound kind="file">
     <name>MarkovChain.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
     <filename>_markov_chain_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -8596,7 +8507,7 @@
   </compound>
   <compound kind="file">
     <name>TemperedMarkovChain.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/Sampling/</path>
     <filename>_tempered_markov_chain_8h</filename>
     <includes id="_dataset_8h" name="Dataset.h" local="no" imported="no">shark/Data/Dataset.h</includes>
     <includes id="_random_8h" name="Random.h" local="no" imported="no">shark/Core/Random.h</includes>
@@ -8606,7 +8517,7 @@
   </compound>
   <compound kind="file">
     <name>RealSpace.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/StateSpaces/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/StateSpaces/</path>
     <filename>_real_space_8h</filename>
     <includes id="_tags_8h" name="Tags.h" local="no" imported="no">shark/Unsupervised/RBM/Tags.h</includes>
     <class kind="struct">shark::RealSpace</class>
@@ -8614,7 +8525,7 @@
   </compound>
   <compound kind="file">
     <name>TwoStateSpace.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/StateSpaces/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/StateSpaces/</path>
     <filename>_two_state_space_8h</filename>
     <includes id="_tags_8h" name="Tags.h" local="no" imported="no">shark/Unsupervised/RBM/Tags.h</includes>
     <includes id="_exception_8h" name="Exception.h" local="no" imported="no">shark/Core/Exception.h</includes>
@@ -8637,7 +8548,7 @@
   </compound>
   <compound kind="file">
     <name>Tags.h</name>
-    <path>/home/ulfi/Shark/include/shark/Unsupervised/RBM/</path>
+    <path>/home/oswin/Shark/include/shark/Unsupervised/RBM/</path>
     <filename>_tags_8h</filename>
     <includes id="_flags_8h" name="Flags.h" local="no" imported="no">shark/Core/Flags.h</includes>
     <class kind="struct">shark::tags::DiscreteSpace</class>

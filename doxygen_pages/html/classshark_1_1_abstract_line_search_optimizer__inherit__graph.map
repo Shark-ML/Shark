@@ -1,6 +1,6 @@
 <map id="shark::AbstractLineSearchOptimizer&lt; SearchPointType &gt;" name="shark::AbstractLineSearchOptimizer&lt; SearchPointType &gt;">
-<area shape="rect" id="node3" href="$classshark_1_1_b_f_g_s.html" title="Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization. " alt="" coords="568,5,760,47"/>
-<area shape="rect" id="node4" href="$classshark_1_1_c_g.html" title="Conjugate&#45;gradient method for unconstrained optimization. " alt="" coords="552,71,776,98"/>
-<area shape="rect" id="node5" href="$classshark_1_1_l_b_f_g_s.html" title="Limited&#45;Memory Broyden, Fletcher, Goldfarb, Shannon algorithm. " alt="" coords="565,123,763,164"/>
-<area shape="rect" id="node2" href="$classshark_1_1_abstract_single_objective_optimizer.html" title="shark::AbstractSingleObjective\lOptimizer\&lt; SearchPointType \&gt;" alt="" coords="5,64,231,105"/>
+<area shape="rect" id="node3" href="$classshark_1_1_b_f_g_s.html" title="Broyden, Fletcher, Goldfarb, Shannon algorithm for unconstraint optimization. " alt="" coords="562,5,754,47"/>
+<area shape="rect" id="node4" href="$classshark_1_1_c_g.html" title="Conjugate&#45;gradient method for unconstrained optimization. " alt="" coords="547,71,769,98"/>
+<area shape="rect" id="node5" href="$classshark_1_1_l_b_f_g_s.html" title="Limited&#45;Memory Broyden, Fletcher, Goldfarb, Shannon algorithm. " alt="" coords="559,123,757,164"/>
+<area shape="rect" id="node2" href="$classshark_1_1_abstract_single_objective_optimizer.html" title="shark::AbstractSingleObjective\lOptimizer\&lt; SearchPointType \&gt;" alt="" coords="5,64,228,105"/>
 </map>

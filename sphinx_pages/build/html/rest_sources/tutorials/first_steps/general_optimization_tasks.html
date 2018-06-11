@@ -187,14 +187,14 @@ the dataset for the correct values:</p>
 <p>The first argument is the dimensionality, of the data points and the second parameter
 that of the outputs.</p>
 <p>An affine linear model is a model of the form</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[f(x) = Ax+b\]</div>
-<p>where <span class="math notranslate">\(x\)</span> is the input, and the matrix <span class="math notranslate">\(A\)</span> and vector
-<span class="math notranslate">\(b\)</span> are constant. Thus, the parameters of the model are the
-entries of <span class="math notranslate">\(A\)</span> and <span class="math notranslate">\(b\)</span>. Since we only have one output
+<p>where <span class="math notranslate nohighlight">\(x\)</span> is the input, and the matrix <span class="math notranslate nohighlight">\(A\)</span> and vector
+<span class="math notranslate nohighlight">\(b\)</span> are constant. Thus, the parameters of the model are the
+entries of <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(b\)</span>. Since we only have one output
 dimension and one input dimension, this means that our model has two
-parameters in total. In the general case, it has <span class="math notranslate">\(n*m+m\)</span>
-parameters where <span class="math notranslate">\(n\)</span> is the input dimension and <span class="math notranslate">\(m\)</span> the
+parameters in total. In the general case, it has <span class="math notranslate nohighlight">\(n*m+m\)</span>
+parameters where <span class="math notranslate nohighlight">\(n\)</span> is the input dimension and <span class="math notranslate nohighlight">\(m\)</span> the
 output dimension of the model.</p>
 </div>
 <div class="section" id="setting-up-the-objective-function">
@@ -203,9 +203,9 @@ output dimension of the model.</p>
 To assess the performance, it applies a loss function to each data point. For linear regression,
 we want to use the mean squared error, so we use the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_squared_loss.html">SquaredLoss</a> class.
 This loss function computes the squared difference</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[L(f(x), y) = (f(x) - y)^2\]</div>
-<p>between the model output <span class="math notranslate">\(f(x)\)</span> and the training label <span class="math notranslate">\(y\)</span>.
+<p>between the model output <span class="math notranslate nohighlight">\(f(x)\)</span> and the training label <span class="math notranslate nohighlight">\(y\)</span>.
 We combine dataset, model and loss function using an <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_error_function.html">ErrorFunction</a>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">SquaredLoss</span><span class="o">&lt;&gt;</span> <span class="n">loss</span><span class="p">;</span>
 <span class="n">ErrorFunction</span><span class="o">&lt;&gt;</span> <span class="n">errorFunction</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">model</span><span class="p">,</span><span class="o">&amp;</span><span class="n">loss</span><span class="p">);</span>
@@ -294,8 +294,8 @@ test error: 0.151367
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

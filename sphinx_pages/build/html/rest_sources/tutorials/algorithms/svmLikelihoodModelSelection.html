@@ -114,7 +114,7 @@ selection.</p>
 <div class="section" id="motivation">
 <h2>Motivation<a class="headerlink" href="#motivation" title="Permalink to this headline">¶</a></h2>
 <p>The previous tutorial explained that the performance of an SVM classifier depends
-on the choice of regularization parameter <span class="math notranslate">\(C\)</span> and the kernel parameters.
+on the choice of regularization parameter <span class="math notranslate nohighlight">\(C\)</span> and the kernel parameters.
 We also presented the most common method to find SVM hyperparameters: grid search
 on the cross-validation error. This is suited for kernels with only one or two
 parameters, because a two- or three-dimensional SVM hyperparameter search space
@@ -139,24 +139,24 @@ For theoretical details and background, please consult the original article.</p>
 <p>Assume we have a higher- or high-dimensional kernel, for example an “Automatic
 Relevance Detection” (ARD) kernel, which has one parameter for each input
 dimension:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x, z) = \exp( - \sum_i \gamma_i (x_i - z_i)^2 )\]</div>
 <p>Such a kernel can be useful when the individual features correlate much
 differently with the labels, hence calling for individual bandwidths
-<span class="math notranslate">\(\gamma_i\)</span> per feature. (From another angle, learning the ARD kernel
+<span class="math notranslate nohighlight">\(\gamma_i\)</span> per feature. (From another angle, learning the ARD kernel
 bandwidths corresponds to learning a linear transformation of the input space.)</p>
 <p>In <a class="reference internal" href="#glasmachersigel2010" id="id2">[GlasmachersIgel2010]</a>, a toy problem is introduced which well lends itself
 to an ARD kernel and the optimization of its parameters. It creates a binary
-classification dataset of dimension <span class="math notranslate">\(2d\)</span> in the following way: first, fix
-a positive or negative label <span class="math notranslate">\(y\)</span>, i.e., <span class="math notranslate">\(1\)</span> or <span class="math notranslate">\(0\)</span>, respectively.
-Then, fill the first <span class="math notranslate">\(d\)</span> dimensions by</p>
-<div class="math notranslate">
+classification dataset of dimension <span class="math notranslate nohighlight">\(2d\)</span> in the following way: first, fix
+a positive or negative label <span class="math notranslate nohighlight">\(y\)</span>, i.e., <span class="math notranslate nohighlight">\(1\)</span> or <span class="math notranslate nohighlight">\(0\)</span>, respectively.
+Then, fill the first <span class="math notranslate nohighlight">\(d\)</span> dimensions by</p>
+<div class="math notranslate nohighlight">
 \[y - 0.5 + \mathcal N(0.0,1.0) \enspace .\]</div>
-<p>That is, produce Gaussian distributed noise around <span class="math notranslate">\(+0.5\)</span> for positive label
-and <span class="math notranslate">\(-0.5\)</span> for negative label. The second <span class="math notranslate">\(d\)</span> dimensions are simply filled
-with only Gaussian noise <span class="math notranslate">\(\sim \mathcal N(0.0,1.0)\)</span>. Overall, there will be
-<span class="math notranslate">\(d\)</span> dimensions which are correlated with the labels and hence informative, and
-<span class="math notranslate">\(d\)</span> dimensions which are not correlated with the labels and uninformative.</p>
+<p>That is, produce Gaussian distributed noise around <span class="math notranslate nohighlight">\(+0.5\)</span> for positive label
+and <span class="math notranslate nohighlight">\(-0.5\)</span> for negative label. The second <span class="math notranslate nohighlight">\(d\)</span> dimensions are simply filled
+with only Gaussian noise <span class="math notranslate nohighlight">\(\sim \mathcal N(0.0,1.0)\)</span>. Overall, there will be
+<span class="math notranslate nohighlight">\(d\)</span> dimensions which are correlated with the labels and hence informative, and
+<span class="math notranslate nohighlight">\(d\)</span> dimensions which are not correlated with the labels and uninformative.</p>
 <p>By design, this toy problem is well tailored to an ARD kernel. The ARD kernel
 weights corresponding to the uninformative dimensions would best be optimized out
 to be zero, since these dimensions on average hold no information relevant to the
@@ -199,7 +199,7 @@ our complete list of includes and namespaces becomes:</p>
 </div>
 <div class="section" id="creating-the-toy-problem">
 <h3>Creating the toy problem<a class="headerlink" href="#creating-the-toy-problem" title="Permalink to this headline">¶</a></h3>
-<p>First, define the basic dimensionalities, here using <span class="math notranslate">\(d=5\)</span>:</p>
+<p>First, define the basic dimensionalities, here using <span class="math notranslate nohighlight">\(d=5\)</span>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// define the basic dimensionality of the problem</span>
 <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">useful_dim</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
 <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">noise_dim</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
@@ -257,7 +257,7 @@ function for model selection:</p>
 </div>
 <p>The first line specifies that in this case, we want to allow for unconstrained optimization
 of the regularization parameter (i.e., we do not want to bother with the possibility of the
-optimizer accidentally driving <span class="math notranslate">\(C\)</span> into the negative half-space). However, <code class="docutils literal notranslate"><span class="pre">true</span></code>
+optimizer accidentally driving <span class="math notranslate nohighlight">\(C\)</span> into the negative half-space). However, <code class="docutils literal notranslate"><span class="pre">true</span></code>
 is also the default, so we could have omitted it had we not passed a custom stopping
 criterion. The second line sets up a <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_qp_stopping_condition.html">QpStoppingCondition</a> with a very conservative
 (= small) stopping criterion value. This gets used by all SVMs that the
@@ -283,7 +283,7 @@ arguments the CVFolds object, kernel, log-encoding information, and the stopping
 <div class="section" id="the-optimization-process">
 <h3>The optimization process<a class="headerlink" href="#the-optimization-process" title="Permalink to this headline">¶</a></h3>
 <p>Now we only need to set a starting point for the optimization process, and we choose
-<span class="math notranslate">\(C=1\)</span> and <span class="math notranslate">\(\gamma_i = 0.5/(2d)\)</span> as motivated in the paper:</p>
+<span class="math notranslate nohighlight">\(C=1\)</span> and <span class="math notranslate nohighlight">\(\gamma_i = 0.5/(2d)\)</span> as motivated in the paper:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up a starting point for the optimization process</span>
 <span class="n">RealVector</span> <span class="nf">start</span><span class="p">(</span> <span class="n">total_dim</span><span class="o">+</span><span class="mi">1</span> <span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span> <span class="n">log_enc_c</span> <span class="p">)</span> <span class="n">start</span><span class="p">(</span> <span class="n">total_dim</span> <span class="p">)</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span> <span class="k">else</span> <span class="nf">start</span><span class="p">(</span> <span class="n">total_dim</span> <span class="p">)</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span> <span class="c1">//start at C = 1.0</span>
@@ -291,7 +291,7 @@ arguments the CVFolds object, kernel, log-encoding information, and the stopping
     <span class="n">start</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">/</span> <span class="n">total_dim</span><span class="p">;</span>
 </pre></div>
 </div>
-<p>(Note that by convention, the CSvmTrainer stores the regularization parameter <span class="math notranslate">\(C\)</span>
+<p>(Note that by convention, the CSvmTrainer stores the regularization parameter <span class="math notranslate nohighlight">\(C\)</span>
 last in the parameter vector, and the SvmLogisticInterpretation honors this convention.)</p>
 <p>One single evaluation of the objective function at this current point looks like this:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// for illustration purposes, we also evalute the model selection criterion a single time at the starting point</span>
@@ -532,8 +532,8 @@ Analysis and Machine Intelligence, 2010.</td></tr>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

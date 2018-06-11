@@ -1,5 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" title="STL class. " alt="" coords="5,13,120,39"/>
 <area shape="rect" id="node2" href="$classshark_1_1_exception.html" title="Top&#45;level exception class of the shark library. " alt="" coords="168,13,299,39"/>
-<area shape="rect" id="node3" href="$classshark_1_1_typed_feature_not_available_exception.html" title="Exception indicating the attempt to use a feature which is not supported. " alt="" coords="347,5,585,47"/>
+<area shape="rect" id="node3" href="$classshark_1_1_typed_feature_not_available_exception.html" title="Exception indicating the attempt to use a feature which is not supported. " alt="" coords="347,5,581,47"/>
 </map>

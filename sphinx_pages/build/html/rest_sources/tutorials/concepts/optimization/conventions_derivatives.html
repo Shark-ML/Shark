@@ -127,11 +127,11 @@ rationale will be explained in the following.</p>
 <h2>An Example: The Derivative of the Error<a class="headerlink" href="#an-example-the-derivative-of-the-error" title="Permalink to this headline">¶</a></h2>
 <p>Let’s consider a simple example, namely the derivative of a squared
 error term</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[E = \frac 1 N \sum_{i=1}^N L(f_w(x_i), t_i)\]</div>
-<p>w.r.t. a parameter <span class="math notranslate">\(w_i\)</span> of a parametric family <span class="math notranslate">\(f_w(x)\)</span>
-of models, evaluated with the squared loss <span class="math notranslate">\(L(y, t) = (y-t)^2\)</span>:</p>
-<div class="math notranslate">
+<p>w.r.t. a parameter <span class="math notranslate nohighlight">\(w_i\)</span> of a parametric family <span class="math notranslate nohighlight">\(f_w(x)\)</span>
+of models, evaluated with the squared loss <span class="math notranslate nohighlight">\(L(y, t) = (y-t)^2\)</span>:</p>
+<div class="math notranslate nohighlight">
 \[ \begin{align}\begin{aligned}\frac{\partial E}{\partial w_k} &amp;= \frac 1 N \sum_{i=1}^N L(f_w(x_i), t_i)\\                                &amp;= \frac 1 N \sum_{i=1}^N \frac{\partial L}{\partial y}(f_w(x_i), t_i) \frac{\partial f_w}{\partial w_k}(x_i)\\                                &amp;= \sum_{i=1}^N \frac 2 N (f_w(x_i) - t_i) \frac{\partial f_w}{\partial w}(x_i)\end{aligned}\end{align} \]</div>
 <p>The derivative involves the chain rule for the combination of model
 and loss. The term can be understood as a weighted sum of the partial
@@ -139,20 +139,20 @@ model derivatives, where the weights are the loss derivatives. Note
 how these weights do not require the model derivatives, but they do
 depend on the model’s output values. This is the general situation
 when chaining computations:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\frac{\partial f \circ g(x)}{\partial w_k} = f'(g(x)) g'(x)\]</div>
-<p>The value <span class="math notranslate">\(g(x)\)</span> is needed as the point in which the derivative
-<span class="math notranslate">\(f'\)</span> is to be evaluated, and it is used rather independent of
-the derivative <span class="math notranslate">\(g'(x)\)</span>.</p>
+<p>The value <span class="math notranslate nohighlight">\(g(x)\)</span> is needed as the point in which the derivative
+<span class="math notranslate nohighlight">\(f'\)</span> is to be evaluated, and it is used rather independent of
+the derivative <span class="math notranslate nohighlight">\(g'(x)\)</span>.</p>
 <p>In a typical error function the overall derivative is a weighted sum of
 model derivatives, evaluated in different points. The weights require
 only the model evaluations in these points, not their derivatives. This
 hints at the following order of evaluation:</p>
 <blockquote>
 <div><ul class="simple">
-<li>evaluate the model values <span class="math notranslate">\(y_i = f_w(x_i)\)</span>,</li>
-<li>evaluate the loss derivatives <span class="math notranslate">\(\frac{\partial L}{\partial y}(y_i, t_i)\)</span>,</li>
-<li>evaluate the model derivatives <span class="math notranslate">\(\frac{\partial f}{\partial w_i}(x_i)\)</span>
+<li>evaluate the model values <span class="math notranslate nohighlight">\(y_i = f_w(x_i)\)</span>,</li>
+<li>evaluate the loss derivatives <span class="math notranslate nohighlight">\(\frac{\partial L}{\partial y}(y_i, t_i)\)</span>,</li>
+<li>evaluate the model derivatives <span class="math notranslate nohighlight">\(\frac{\partial f}{\partial w_i}(x_i)\)</span>
 and compute their weighted sum.</li>
 </ul>
 </div></blockquote>
@@ -185,27 +185,27 @@ method and read by the derivative computations.</p>
 </div>
 <div class="section" id="another-example-the-derivative-of-a-concatenation-of-models">
 <h2>Another Example: The derivative of a concatenation of models<a class="headerlink" href="#another-example-the-derivative-of-a-concatenation-of-models" title="Permalink to this headline">¶</a></h2>
-<p>Let’s assume the function <span class="math notranslate">\(f_w\)</span> of the previous example would in fact
+<p>Let’s assume the function <span class="math notranslate nohighlight">\(f_w\)</span> of the previous example would in fact
 not be a single model, but two models where the output of the first model is
-the input of the second, such that with <span class="math notranslate">\(w=(u,v)\)</span> being the combined parameter
-vector of both models, we get <span class="math notranslate">\(f_w(x)=g_u(h_v(x))\)</span>.Thus the derivatives are:</p>
-<div class="math notranslate">
+the input of the second, such that with <span class="math notranslate nohighlight">\(w=(u,v)\)</span> being the combined parameter
+vector of both models, we get <span class="math notranslate nohighlight">\(f_w(x)=g_u(h_v(x))\)</span>.Thus the derivatives are:</p>
+<div class="math notranslate nohighlight">
 \[\frac{\partial E}{\partial u_k}f_w(x) =\frac{\partial g_u}{\partial u_k}(h_v(x))\]</div>
 <p>and</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\frac{\partial E}{\partial v_k}f_w(x)
 = \frac{\partial g_u}{\partial h_v(x)}(h_v(x)) \frac{\partial h_v}{\partial v_k} h_v(x)\]</div>
-<p>Please remember that the partial derivatives with respect to the arguments of <span class="math notranslate">\(g\)</span> are
-full jacobi matrices and not single values or vectors. Thus the computation of <span class="math notranslate">\(v_k\)</span>
-as stated here requires a matrix-vector product for every parameter <span class="math notranslate">\(v_k\)</span>, or a
-matrix-matrix product if the derivative is computed for all <span class="math notranslate">\(v_k\)</span> at once.
+<p>Please remember that the partial derivatives with respect to the arguments of <span class="math notranslate nohighlight">\(g\)</span> are
+full jacobi matrices and not single values or vectors. Thus the computation of <span class="math notranslate nohighlight">\(v_k\)</span>
+as stated here requires a matrix-vector product for every parameter <span class="math notranslate nohighlight">\(v_k\)</span>, or a
+matrix-matrix product if the derivative is computed for all <span class="math notranslate nohighlight">\(v_k\)</span> at once.
 But putting this into the the equation of the derivative of the error function of the
-previous example, we  get for the derivative with respect to <span class="math notranslate">\(v_k\)</span>:</p>
-<div class="math notranslate">
+previous example, we  get for the derivative with respect to <span class="math notranslate nohighlight">\(v_k\)</span>:</p>
+<div class="math notranslate nohighlight">
 \[\begin{split}\frac{\partial E}{\partial v_k}
 &amp;= \sum_{i=1}^N \frac 2 N (f_w(x_i) - t_i) \frac{\partial f_w}{\partial v_k}(x_i)\\
 &amp;= \sum_{i=1}^N \frac 2 N (f_w(x_i) - t_i) \frac{\partial g_u}{\partial h_v(x_i)}(h_v(x_i)) \frac{\partial h_v}{\partial v_k} h_v(x_i)\end{split}\]</div>
-<p>now adding braces around the derivative of the loss and the partial derivative of <span class="math notranslate">\(g_u\)</span>
+<p>now adding braces around the derivative of the loss and the partial derivative of <span class="math notranslate nohighlight">\(g_u\)</span>
 we see that this term can be computed as matrix-vector product. Thus the whole Term can be
 computed using 2N matrix-vector products instead of N matrix-matrix and matrix-vector products!
 This makes in practice a huge difference.</p>
@@ -223,18 +223,18 @@ the next processing stage these values will typically all enter the same
 cost function. Thus, the derivative is a weighted sum, with the cost
 derivatives being the weights.</p>
 <p>Now for chaining of the derivatives as in the second example, we can first
-evaluate the weighted derivative with respects to the inputs of <span class="math notranslate">\(g\)</span>,
+evaluate the weighted derivative with respects to the inputs of <span class="math notranslate nohighlight">\(g\)</span>,
 which amounts to computing the aforementioned bracing. After that the resulting
-vector can be used to calculate the weighted derivative of <span class="math notranslate">\(h\)</span> with
+vector can be used to calculate the weighted derivative of <span class="math notranslate nohighlight">\(h\)</span> with
 respect to it’s parameters. We can further optimize this scheme by
-computing both derivatives of <span class="math notranslate">\(g\)</span> at the same time using that again
+computing both derivatives of <span class="math notranslate nohighlight">\(g\)</span> at the same time using that again
 in many cases input and parameter derivative can share a lot of computations.</p>
 <p>A well known example which uses both optimizations weighted sum calculation
 and shared computation of derivatives is the back-propagation of error algorithm,
 which not only allows for a more efficient computation in terms of the complexity
 of the algorithm, but also allow for a more efficient optimization
 for RAM throughput, etc. To check that this is in fact the same algorithm, define
-<span class="math notranslate">\(g\)</span> and <span class="math notranslate">\(h\)</span> as neuron layers of a three layer neural network.</p>
+<span class="math notranslate nohighlight">\(g\)</span> and <span class="math notranslate nohighlight">\(h\)</span> as neuron layers of a three layer neural network.</p>
 <p>Thus Shark’s derivative interfaces can be understood as a generalization of
 the same computational trick. The exact weighting scheme applied slightly
 varies across the different interfaces, e.g., models versus kernels.</p>
@@ -283,8 +283,8 @@ product syntax which makes the calculation a breese.</p>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

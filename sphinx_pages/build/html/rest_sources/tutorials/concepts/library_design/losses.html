@@ -113,39 +113,39 @@
 learning tasks.</p>
 <div class="section" id="loss-functions">
 <h2>Loss functions<a class="headerlink" href="#loss-functions" title="Permalink to this headline">¶</a></h2>
-<p>Consider a model (a hypothesis) <span class="math notranslate">\(f\)</span> mapping inputs <span class="math notranslate">\(x\)</span>
-to predictions <span class="math notranslate">\(y=f(x)\in Y\)</span>.  Let <span class="math notranslate">\(t\in Y\)</span> be the true
-label of input pattern <span class="math notranslate">\(x\)</span>.  Then a <em>loss function</em>
-<span class="math notranslate">\(L:Y\times Y\to\mathbb{R}^+_0\)</span> measures the quality of the
+<p>Consider a model (a hypothesis) <span class="math notranslate nohighlight">\(f\)</span> mapping inputs <span class="math notranslate nohighlight">\(x\)</span>
+to predictions <span class="math notranslate nohighlight">\(y=f(x)\in Y\)</span>.  Let <span class="math notranslate nohighlight">\(t\in Y\)</span> be the true
+label of input pattern <span class="math notranslate nohighlight">\(x\)</span>.  Then a <em>loss function</em>
+<span class="math notranslate nohighlight">\(L:Y\times Y\to\mathbb{R}^+_0\)</span> measures the quality of the
 prediction. If the prediction is perfectly accurate, the loss function
-is zero (<span class="math notranslate">\(t=y\Rightarrow L(t, y)=0\)</span>). If not, the loss
+is zero (<span class="math notranslate nohighlight">\(t=y\Rightarrow L(t, y)=0\)</span>). If not, the loss
 function measures “how bad” the mistake is. The loss can be
 interpreted as a penalty or error measure.</p>
 <p>For a classification tast, a fundamental loss function
 is the 0-1-loss:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}L(y,t)=\begin{cases} 0 &amp; \text{if $y=t$}\\1 &amp; \text{otherwise}\end{cases}\end{split}\]</div>
 <p>For regression, the squared loss is most popular:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[L(y,t)= (y-t)^2\]</div>
 <p>Using the concept of a loss function, the goal of supervised learning
-can be described as finding a model <span class="math notranslate">\(f\)</span> minimizing the <em>risk</em>:</p>
-<div class="math notranslate">
+can be described as finding a model <span class="math notranslate nohighlight">\(f\)</span> minimizing the <em>risk</em>:</p>
+<div class="math notranslate nohighlight">
 \[\mathcal{R}(f) = \mathbb{E}\{   L(t, f(x)) \}\]</div>
-<p>Here the expectation <span class="math notranslate">\(\mathbb{E}\)</span> is over the joint distribution
+<p>Here the expectation <span class="math notranslate nohighlight">\(\mathbb{E}\)</span> is over the joint distribution
 underlying the observations of inputs and corresponding labels.</p>
 </div>
 <div class="section" id="cost-functions">
 <h2>Cost functions<a class="headerlink" href="#cost-functions" title="Permalink to this headline">¶</a></h2>
 <p>Now let us consider a collection of observations
-<span class="math notranslate">\(S=\{(x_1,t_1),(x_2,t_2),\dots,(x_N,t_N)\}\in(X\times Y)^N\)</span> and
-corresponding predictions <span class="math notranslate">\(y_1.y_2,\dots,y_N\)</span>  by a model <span class="math notranslate">\(f\)</span>.
-A <em>cost function</em> <span class="math notranslate">\(C\)</span> is a mapping assigning
+<span class="math notranslate nohighlight">\(S=\{(x_1,t_1),(x_2,t_2),\dots,(x_N,t_N)\}\in(X\times Y)^N\)</span> and
+corresponding predictions <span class="math notranslate nohighlight">\(y_1.y_2,\dots,y_N\)</span>  by a model <span class="math notranslate nohighlight">\(f\)</span>.
+A <em>cost function</em> <span class="math notranslate nohighlight">\(C\)</span> is a mapping assigning
 an overall cost value, which can be interpreted as an overall error,
-to <span class="math notranslate">\(\{(y_1,t_1),(y_2,t_2),\dots,(y_N,t_N)\}\in(Y\times Y)^N\)</span>.
+to <span class="math notranslate nohighlight">\(\{(y_1,t_1),(y_2,t_2),\dots,(y_N,t_N)\}\in(Y\times Y)^N\)</span>.
 Every loss function induces a cost function, namely the <em>empirical
 risk</em>:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\mathcal{R}_S(f) = C(\{(y_1,t_1),(y_2,t_2),\dots,(y_N,t_N)\})  = \frac 1 N \sum_{i=1}^N L(y_i,t_i)\]</div>
 <p>The cost function induced by the 0-1-loss is the average
 misclassification error and the cost function induced by the squared
@@ -162,8 +162,8 @@ functions must be based on a loss function.</p>
 <h3>Derivatives<a class="headerlink" href="#derivatives" title="Permalink to this headline">¶</a></h3>
 <p>When both the loss function and the model are differentiable, it is possible
 to calculate the derivative of the empirical risk with respect to the model
-parameters <span class="math notranslate">\(w\)</span>:</p>
-<div class="math notranslate">
+parameters <span class="math notranslate nohighlight">\(w\)</span>:</p>
+<div class="math notranslate nohighlight">
 \[\frac {\partial}{\partial w}\mathcal{R}_S(f)  = \frac 1 N \sum_{i=1}^N \frac {\partial}{\partial f(x_i)}L(f(x_i),t_i)\frac {\partial}{\partial w}f(x_i)\]</div>
 <p>This allows embarrassingly parallelizable gradient descent on the cost
 function. Please see the tutorial
@@ -190,10 +190,10 @@ label and output types:</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td>LabelType</td>
-<td>Type of a label <span class="math notranslate">\(t_i\)</span></td>
+<td>Type of a label <span class="math notranslate nohighlight">\(t_i\)</span></td>
 </tr>
 <tr class="row-odd"><td>OutputType</td>
-<td>Type of a model output <span class="math notranslate">\(z_i\)</span></td>
+<td>Type of a model output <span class="math notranslate nohighlight">\(z_i\)</span></td>
 </tr>
 <tr class="row-even"><td>BatchLabelType</td>
 <td>Batch of Labels; same as Batch&lt;LabelType&gt;::type</td>
@@ -241,8 +241,8 @@ on a complete set of data. The following functions can be used for evaluation of
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">eval(Data&lt;L&gt;</span> <span class="pre">const&amp;</span> <span class="pre">label,</span> <span class="pre">Data&lt;O&gt;</span> <span class="pre">const&amp;</span> <span class="pre">predictions)</span></code></td>
-<td>Returns the mean cost of the predictions <span class="math notranslate">\(z_i\)</span> given the label
-<span class="math notranslate">\(t_i\)</span>.</td>
+<td>Returns the mean cost of the predictions <span class="math notranslate nohighlight">\(z_i\)</span> given the label
+<span class="math notranslate nohighlight">\(t_i\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">operator()(Data&lt;L&gt;</span> <span class="pre">const&amp;</span> <span class="pre">label,</span> <span class="pre">Data&lt;O&gt;</span> <span class="pre">const&amp;</span> <span class="pre">predictions)</span></code></td>
 <td>Convenience function Returning eval(label,predictions)</td>
@@ -269,10 +269,10 @@ following much more efficient interface:</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">eval(LabelType</span> <span class="pre">const&amp;</span> <span class="pre">t,</span> <span class="pre">InputType</span> <span class="pre">const&amp;</span> <span class="pre">z)</span></code></td>
-<td>Returns the error of the prediction <span class="math notranslate">\(z\)</span> given the label <span class="math notranslate">\(t\)</span>.</td>
+<td>Returns the error of the prediction <span class="math notranslate nohighlight">\(z\)</span> given the label <span class="math notranslate nohighlight">\(t\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">eval(BatchLabelType</span> <span class="pre">const&amp;</span> <span class="pre">T,</span> <span class="pre">BatchInputType</span> <span class="pre">const&amp;</span> <span class="pre">Z)</span></code></td>
-<td>Returns the sum of errors of the predictions <span class="math notranslate">\(z_i \in Z\)</span> given the label <span class="math notranslate">\(t_i \in T\)</span>.</td>
+<td>Returns the sum of errors of the predictions <span class="math notranslate nohighlight">\(z_i \in Z\)</span> given the label <span class="math notranslate nohighlight">\(t_i \in T\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">operator()(LabelType</span> <span class="pre">const&amp;</span> <span class="pre">t,</span> <span class="pre">InputType</span> <span class="pre">const&amp;</span> <span class="pre">z)</span></code></td>
 <td>Calls eval(t,z)</td>
@@ -281,8 +281,8 @@ following much more efficient interface:</p>
 <td>Calls eval(T,Z</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">evalDerivative(BatchLabelType</span> <span class="pre">const&amp;</span> <span class="pre">T,</span> <span class="pre">BatchInputType</span> <span class="pre">const&amp;</span> <span class="pre">Z,</span> <span class="pre">BatchInputType</span> <span class="pre">const&amp;</span> <span class="pre">gradient)</span></code></td>
-<td>Returns the error of the predictions <span class="math notranslate">\(z_i\)</span> given the label <span class="math notranslate">\(t_i\)</span>
-and computes <span class="math notranslate">\(\frac {\partial}{\partial z_i}L(z_i,t_i)\)</span></td>
+<td>Returns the error of the predictions <span class="math notranslate nohighlight">\(z_i\)</span> given the label <span class="math notranslate nohighlight">\(t_i\)</span>
+and computes <span class="math notranslate nohighlight">\(\frac {\partial}{\partial z_i}L(z_i,t_i)\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -306,8 +306,8 @@ and computes <span class="math notranslate">\(\frac {\partial}{\partial z_i}L(z_
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

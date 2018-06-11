@@ -113,11 +113,11 @@
 However, the part on cross-validation and grid-search works of course
 also for other classifiers.</p>
 <p>The performance of your SVM classifier depends on the choice of the
-regularization parameter <span class="math notranslate">\(C\)</span> and the kernel parameters.
+regularization parameter <span class="math notranslate nohighlight">\(C\)</span> and the kernel parameters.
 For a standard radial Gaussian kernel</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[k(x, z) = \exp(-\gamma \|x- z\|^2) = \exp( - \|x- z\|^2 / (2\sigma^2))\]</div>
-<p>the bandwidth parameter <span class="math notranslate">\(\gamma\)</span> (or <span class="math notranslate">\(\sigma\)</span>) is the
+<p>the bandwidth parameter <span class="math notranslate nohighlight">\(\gamma\)</span> (or <span class="math notranslate nohighlight">\(\sigma\)</span>) is the
 only kernel parameter.  Adapting the “hyperparameters” is referred
 to as SVM model selection.</p>
 <p>The Shark library offers many algorithms for SVM model selection.
@@ -126,44 +126,44 @@ In this tutorial, we consider the most basic approach.</p>
 <h2>Cross-validation<a class="headerlink" href="#cross-validation" title="Permalink to this headline">¶</a></h2>
 <p>Cross-validation (CV) is a standard technique for adjusting
 hyperparameters of predictive models.  In K-fold CV, the available
-data <span class="math notranslate">\(S\)</span> is partitioned into K subsets <span class="math notranslate">\(S_1,\dots,
-S_K\)</span>. Each data point in <span class="math notranslate">\(S\)</span> is randomly assigned to one of the
-subsets such that these are of almost equal size (i.e., <span class="math notranslate">\(\lfloor
+data <span class="math notranslate nohighlight">\(S\)</span> is partitioned into K subsets <span class="math notranslate nohighlight">\(S_1,\dots,
+S_K\)</span>. Each data point in <span class="math notranslate nohighlight">\(S\)</span> is randomly assigned to one of the
+subsets such that these are of almost equal size (i.e., <span class="math notranslate nohighlight">\(\lfloor
 |S|/K\rfloor \leq |S_i|\leq \lceil |S|/K\rceil\)</span>).  Further, we define
-<span class="math notranslate">\(S_{\setminus i}=\bigcup_{j=1,\dots,K \wedge j\neq i} S_i\)</span> as
-the union of all data points except those in <span class="math notranslate">\(S_i\)</span>.  For each
-<span class="math notranslate">\(i=1,\dots,K\)</span>, an individual model is built by applying the
-algorithm to the training data <span class="math notranslate">\(S_{\setminus i}\)</span>. This model is
+<span class="math notranslate nohighlight">\(S_{\setminus i}=\bigcup_{j=1,\dots,K \wedge j\neq i} S_i\)</span> as
+the union of all data points except those in <span class="math notranslate nohighlight">\(S_i\)</span>.  For each
+<span class="math notranslate nohighlight">\(i=1,\dots,K\)</span>, an individual model is built by applying the
+algorithm to the training data <span class="math notranslate nohighlight">\(S_{\setminus i}\)</span>. This model is
 then evaluated by means of a cost function using the test data in
-<span class="math notranslate">\(S_i\)</span>. The average of the K outcomes of the model evaluations is
+<span class="math notranslate nohighlight">\(S_i\)</span>. The average of the K outcomes of the model evaluations is
 called <em>cross-validation (test) performance</em> or
 <em>cross-validation (test) error</em> and is used a predictor of the
-performance of the algorithm when applied to <span class="math notranslate">\(S\)</span>.  Typical
+performance of the algorithm when applied to <span class="math notranslate nohighlight">\(S\)</span>.  Typical
 values for K are 5 and 10 <a class="reference internal" href="#hastietibshiranifriedman-2008" id="id1">[HastieTibshiraniFriedman-2008]</a>.</p>
-<p>To choose <span class="math notranslate">\(C\)</span> and <span class="math notranslate">\(\gamma\)</span> using K-fold CV, we first split
+<p>To choose <span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(\gamma\)</span> using K-fold CV, we first split
 the available data into K subsets.  Then we compute the CV error using
 this split error for the SVM classifiers using different values for
-<span class="math notranslate">\(C\)</span> and <span class="math notranslate">\(\gamma\)</span>.  Finally, we pick the <span class="math notranslate">\(C\)</span> and
-<span class="math notranslate">\(\gamma\)</span> with the lowest CV error and use it for training an SVM
-on the complete data set <span class="math notranslate">\(S\)</span>.</p>
+<span class="math notranslate nohighlight">\(C\)</span> and <span class="math notranslate nohighlight">\(\gamma\)</span>.  Finally, we pick the <span class="math notranslate nohighlight">\(C\)</span> and
+<span class="math notranslate nohighlight">\(\gamma\)</span> with the lowest CV error and use it for training an SVM
+on the complete data set <span class="math notranslate nohighlight">\(S\)</span>.</p>
 </div>
 <div class="section" id="jaakkola-s-heuristic">
 <h2>Jaakkola’s heuristic<a class="headerlink" href="#jaakkola-s-heuristic" title="Permalink to this headline">¶</a></h2>
 <p>Jaakkola’s heuristic <a class="reference internal" href="#jaakkoladiekhaushaussler1999" id="id2">[JaakkolaDiekhausHaussler1999]</a> provides a reasonable initial guess for the
-bandwidth parameter <span class="math notranslate">\(\gamma\)</span> or <span class="math notranslate">\(\sigma\)</span> of a Gaussian
+bandwidth parameter <span class="math notranslate nohighlight">\(\gamma\)</span> or <span class="math notranslate nohighlight">\(\sigma\)</span> of a Gaussian
 kernel.</p>
-<p>To estimate a good value for <span class="math notranslate">\(\sigma\)</span>, consider all pairs
+<p>To estimate a good value for <span class="math notranslate nohighlight">\(\sigma\)</span>, consider all pairs
 consisting of an training input vector from the positive class and a
 training input vector from the negative class.  Compute the difference
 in input space between all pairs.  The median of these distances can
-be used as a measure of scale and therefore as a guess for <span class="math notranslate">\(\sigma\)</span>.
+be used as a measure of scale and therefore as a guess for <span class="math notranslate nohighlight">\(\sigma\)</span>.
 More formally, compute</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[G=\{  \|x_i - x_j\|\,|\, (x_i, y_i), (x_j,y_j)\in S \wedge y_i\neq y_j\}\]</div>
-<p>based on your training data <span class="math notranslate">\(S\)</span>.
-Then set  <span class="math notranslate">\(\sigma_{\text{Jaakkola}}\)</span> equal to the median of the values
-in <span class="math notranslate">\(G\)</span>:</p>
-<div class="math notranslate">
+<p>based on your training data <span class="math notranslate nohighlight">\(S\)</span>.
+Then set  <span class="math notranslate nohighlight">\(\sigma_{\text{Jaakkola}}\)</span> equal to the median of the values
+in <span class="math notranslate nohighlight">\(G\)</span>:</p>
+<div class="math notranslate nohighlight">
 \[\sigma_{\text{Jaakkola}} = \operatorname{median}(G)\]</div>
 </div>
 <div class="section" id="svm-model-selection-in-shark">
@@ -190,12 +190,12 @@ respectively.</p>
 </div>
 <p>The Boolean flags set to true in the constructors of
 <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_gaussian_rbf_kernel.html">GaussianRbfKernel</a> and <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_c_svm_trainer.html">CSvmTrainer</a> indicate that the
-kernel parameter <span class="math notranslate">\(\gamma\)</span> and the regularization parameter
-<span class="math notranslate">\(C\)</span>, which “belongs” to the trainer, are <em>internally</em> encoded as
-<span class="math notranslate">\(\ln \gamma\)</span> and <span class="math notranslate">\(\ln C\)</span>.  Because both parameters have to
+kernel parameter <span class="math notranslate nohighlight">\(\gamma\)</span> and the regularization parameter
+<span class="math notranslate nohighlight">\(C\)</span>, which “belongs” to the trainer, are <em>internally</em> encoded as
+<span class="math notranslate nohighlight">\(\ln \gamma\)</span> and <span class="math notranslate nohighlight">\(\ln C\)</span>.  Because both parameters have to
 be positive, this encoding allows for unconstraint optimization (e.g.,
 if the model parameter encoding the kernel width is set to -1, we have
-<span class="math notranslate">\(\gamma =1/e\)</span>).  This encoding affects the interface between
+<span class="math notranslate nohighlight">\(\gamma =1/e\)</span>).  This encoding affects the interface between
 model, objective function, and optimizer, but <em>not</em> functions such as
 <code class="docutils literal notranslate"><span class="pre">setGamma</span></code>, <code class="docutils literal notranslate"><span class="pre">setSigma</span></code> or <code class="docutils literal notranslate"><span class="pre">setC</span></code>. These behave always the same
 regardless of the internal encoding.</p>
@@ -209,12 +209,12 @@ cross-validation error. First let us define the folds we need</p>
 <span class="n">CVFolds</span><span class="o">&lt;</span><span class="n">ClassificationDataset</span><span class="o">&gt;</span> <span class="n">folds</span> <span class="o">=</span> <span class="n">createCVSameSizeBalanced</span><span class="p">(</span><span class="n">dataTrain</span><span class="p">,</span> <span class="n">K</span><span class="p">);</span>
 </pre></div>
 </div>
-<p>The first line sets the number of folds <span class="math notranslate">\(K\)</span> to 5. Then we define the
+<p>The first line sets the number of folds <span class="math notranslate nohighlight">\(K\)</span> to 5. Then we define the
 basic error measure underlying the cross-validation error, here the
 standard 0-1 loss. Note that we do classification here, so we need
 to use unsigned int as the template parameter for the 0-1 loss.
 After that we split the available training data
-into <span class="math notranslate">\(K\)</span> folds using the function <a class="reference external" href="../../../../../../doxygen_pages/html/group__shark__globals.html#ga23fd3fc1709de01fc10c34e7b899f158">createCVSameSizeBalanced()</a> from
+into <span class="math notranslate nohighlight">\(K\)</span> folds using the function <a class="reference external" href="../../../../../../doxygen_pages/html/group__shark__globals.html#ga23fd3fc1709de01fc10c34e7b899f158">createCVSameSizeBalanced()</a> from
 <code class="docutils literal notranslate"><span class="pre">Data/CVDatasetTools.h</span></code>.</p>
 <p>Then we need to instantiate <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_cross_validation_error.html">CrossValidationError</a>:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CrossValidationError</span><span class="o">&lt;</span><span class="n">KernelClassifier</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">cvError</span><span class="p">(</span>
@@ -240,7 +240,7 @@ occurs twice as a parameter.</p>
 </div>
 <div class="section" id="id4">
 <h3>Jaakkola’s heuristic<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
-<p>To find a good starting point for <span class="math notranslate">\(\gamma\)</span>, we apply Jaakkola’s heuristic</p>
+<p>To find a good starting point for <span class="math notranslate nohighlight">\(\gamma\)</span>, we apply Jaakkola’s heuristic</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">JaakkolaHeuristic</span> <span class="nf">ja</span><span class="p">(</span><span class="n">dataTrain</span><span class="p">);</span>
 <span class="kt">double</span> <span class="n">ljg</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="n">ja</span><span class="p">.</span><span class="n">gamma</span><span class="p">());</span>
 </pre></div>
@@ -252,12 +252,12 @@ occurs twice as a parameter.</p>
 <p>We have two hyperparameters.
 To adapt them using grid-search, we have to define a two-dimensional
 grid. Let us consider 9 grid points for
-<span class="math notranslate">\(\ln \gamma\)</span> and 11 for <span class="math notranslate">\(\ln C\)</span>.
+<span class="math notranslate nohighlight">\(\ln \gamma\)</span> and 11 for <span class="math notranslate nohighlight">\(\ln C\)</span>.
 Let</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\ln \gamma\in\{\ln\gamma_{\text{Jaakkola}}-4, \ln\gamma_{\text{Jaakkola}}-3,\dots,\ln\gamma_{\text{Jaakkola}},\dots,\ln\gamma_{\text{Jaakkola}}+4\}\]</div>
 <p>and</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\ln C\in\{0,1,\dots,10\} .\]</div>
 <p>and define the grid accordingly:</p>
 <div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">GridSearch</span> <span class="n">grid</span><span class="p">;</span>
@@ -329,8 +329,8 @@ J. Friedman.  <a class="reference external" href="http://www-stat.stanford.edu/~
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

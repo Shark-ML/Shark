@@ -111,17 +111,17 @@ in Shark and notably a list of all those implemented.</p>
 <p>A stopping criterion determines when optimization processes carried
 out by <a class="reference internal" href="optimizers.html"><span class="doc">Optimizers</span></a> should halt. Deciding when to stop is rather
 difficult.  Typically, we would like to stop when the improvement
-between two optimization steps is small, i.e., <span class="math notranslate">\(|E(t+1)-E(t)|&lt;
-\epsilon\)</span> for an objective function <span class="math notranslate">\(E\)</span>, for example an error
+between two optimization steps is small, i.e., <span class="math notranslate nohighlight">\(|E(t+1)-E(t)|&lt;
+\epsilon\)</span> for an objective function <span class="math notranslate nohighlight">\(E\)</span>, for example an error
 function computed on some training data, and some criterion for
-“smallness” <span class="math notranslate">\(\epsilon\)</span>. However, there is no guarantee that a
+“smallness” <span class="math notranslate nohighlight">\(\epsilon\)</span>. However, there is no guarantee that a
 solution obtained this way really is close to any local optimum – it
 could as well be just a saddle point or an area with small gradient.</p>
 <p>When the optimization is employed for learning, an important aspect of
 stopping a trial is early-stopping for regularization (i.e., avoiding
 overfitting to the training set). A class of stopping heuristics
 therefore monitors the development of the error on a hold-out part of the data
-set – the validation error <span class="math notranslate">\(V(t)\)</span>. The idea is that learning
+set – the validation error <span class="math notranslate nohighlight">\(V(t)\)</span>. The idea is that learning
 should be stopped as soon as the validation error is not improving any
 more, assuming that from then on overfitting takes over. Even this
 error measurement is not perfect, since the validation error often
@@ -207,17 +207,17 @@ code again if they all really adhere to the Prechelt paper, i.e., .</p>
 <td>Stops after a fixed number of Iterations.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_training_error.html">TrainingError</a></td>
-<td>Stops when the training error seems to converge, i.e., <span class="math notranslate">\(E(t-T)-E(t)&lt; \epsilon\)</span>.</td>
+<td>Stops when the training error seems to converge, i.e., <span class="math notranslate nohighlight">\(E(t-T)-E(t)&lt; \epsilon\)</span>.</td>
 </tr>
 <tr class="row-even"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_training_progress.html">TrainingProgress</a></td>
 <td>Tracks the progress of the training error over a period of time, i.e.,
-<span class="math notranslate">\(\text{mean}\{E(t),\dots, E(t-T)\}/ \min_t E(t)&lt; \epsilon\)</span>.</td>
+<span class="math notranslate nohighlight">\(\text{mean}\{E(t),\dots, E(t-T)\}/ \min_t E(t)&lt; \epsilon\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_validated_stopping_criterion.html">ValidatedStoppingCriterion</a></td>
 <td>Evaluates the validation error and hands the validated result to another criterion.</td>
 </tr>
 <tr class="row-even"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_generalization_loss.html">GeneralizationLoss</a></td>
-<td>Calculates the quotient <span class="math notranslate">\(V(t)/\min_t E(t)-1\)</span> as a relative measure of the gap
+<td>Calculates the quotient <span class="math notranslate nohighlight">\(V(t)/\min_t E(t)-1\)</span> as a relative measure of the gap
 between training and validation error.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_generalization_quotient.html">GeneralizationQuotient</a></td>
@@ -245,8 +245,8 @@ between training and validation error.</td>
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

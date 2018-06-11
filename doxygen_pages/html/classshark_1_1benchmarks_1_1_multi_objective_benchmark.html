@@ -247,9 +247,9 @@ class shark::benchmarks::MultiObjectiveBenchmark&lt; Objectives &gt;</h3>
 
 <p>Creates a multi-objective Benchmark from a set of given single objective functions. </p>
 <p>A variadic template is used to generate a set of benchmarks. eg MultiObjectiveBenchmark&lt;Sphere,Ellispoid,Rosenbrock&gt; sets up a three-objective Benchmark.</p>
-<p>A random rotation and translation is applied to each benchmark function, thus MultiObjectiveBenchmark&lt;Sphere,Sphere&gt; forms a non-degenerate front. the ith objective can be queried via the get<em> member function.</em></p>
-<p><em>The generated translations are approximately sampled from the unit ball and starting points are also drawn by the same distribution around a random optimum (assuming the optimum is at (0,0) of the untranslated function</em></p>
-<p><em>Note that all objectives must have scalable dimensionality </em></p>
+<p>A random rotation and translation is applied to each benchmark function, thus MultiObjectiveBenchmark&lt;Sphere,Sphere&gt; forms a non-degenerate front. the k-th objective can be queried via the get&lt;k&gt; member function.</p>
+<p>The generated translations are approximately sampled from the unit ball and starting points are also drawn by the same distribution around a random optimum (assuming the optimum is at (0,0) of the untranslated function</p>
+<p>Note that all objectives must have scalable dimensionality </p>
 
 <p class="definition">Definition at line <a class="el" href="_multi_objective_benchmark_8h_source.html#l00071">71</a> of file <a class="el" href="_multi_objective_benchmark_8h_source.html">MultiObjectiveBenchmark.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>

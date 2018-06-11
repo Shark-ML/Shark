@@ -220,10 +220,10 @@ Orientation describes the storage scheme. Can either be
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">subrange(x,i,j)</span></code></td>
-<td>Returns a sub-vector of x with the elements <span class="math notranslate">\(x_i,\dots,x_{j-1}\)</span>.</td>
+<td>Returns a sub-vector of x with the elements <span class="math notranslate nohighlight">\(x_i,\dots,x_{j-1}\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">subrange(A,i,j,k,l)</span></code></td>
-<td>Returns a sub-matrix of A with elements indicated by <span class="math notranslate">\(i,\dots,j-1\)</span> and <span class="math notranslate">\(k,\dots,l-1\)</span>.</td>
+<td>Returns a sub-matrix of A with elements indicated by <span class="math notranslate nohighlight">\(i,\dots,j-1\)</span> and <span class="math notranslate nohighlight">\(k,\dots,l-1\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">trans(A)</span></code></td>
 <td>Returns a proxy for the transpose of A.</td>
@@ -235,10 +235,10 @@ Orientation describes the storage scheme. Can either be
 <td>Returns the k-th column of A as a vector-proxy.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">rows(A,k,l)</span></code></td>
-<td>Returns the rows <span class="math notranslate">\(k,\dots,l-1\)</span> of A as a matrix-proxy.</td>
+<td>Returns the rows <span class="math notranslate nohighlight">\(k,\dots,l-1\)</span> of A as a matrix-proxy.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">columns(A,k,l)</span></code></td>
-<td>Returns the columns <span class="math notranslate">\(k,\dots,l-1\)</span> of A as a matrix-proxy.</td>
+<td>Returns the columns <span class="math notranslate nohighlight">\(k,\dots,l-1\)</span> of A as a matrix-proxy.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">diag(A)</span></code></td>
 <td>Returns a vector-proxy to the matrix diagonal</td>
@@ -295,10 +295,10 @@ See the section of Arithmetic operations for further details.</td>
 <h2>Arithmetic Operations and Expressions<a class="headerlink" href="#arithmetic-operations-and-expressions" title="Permalink to this headline">¶</a></h2>
 <p>This section lists arithmetic operations on vectors and matrices.</p>
 <p>Element-wise operations transform a matrix or a vector by applying
-a function to each entry of the matrix: <span class="math notranslate">\(f(A)_{i,j} =f(A_{i,j})\)</span>.
+a function to each entry of the matrix: <span class="math notranslate nohighlight">\(f(A)_{i,j} =f(A_{i,j})\)</span>.
 For binary element-wise functions, both arguments are required to have
 the same dimensionality and the function is applied to each pair
-with corresponding index, i.e., <span class="math notranslate">\(f(A,B)_{i,j} = f(A_{i,j},B_{i,j})\)</span>.
+with corresponding index, i.e., <span class="math notranslate nohighlight">\(f(A,B)_{i,j} = f(A_{i,j},B_{i,j})\)</span>.
 It is checked in debug mode that both arguments have the same size.
 The operations are the same for vectors and matrices and
 we only present the matrix versions in the following table:</p>
@@ -314,48 +314,48 @@ we only present the matrix versions in the following table:</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">t*B,</span> <span class="pre">B*t</span></code></td>
-<td>scalar multiplication: <span class="math notranslate">\(t \cdot A_{ij}\)</span> and <span class="math notranslate">\(A_{ij}\cdot t\)</span>.</td>
+<td>scalar multiplication: <span class="math notranslate nohighlight">\(t \cdot A_{ij}\)</span> and <span class="math notranslate nohighlight">\(A_{ij}\cdot t\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">B/t</span></code></td>
-<td>scalar division: <span class="math notranslate">\(A_{ij}/t\)</span>.</td>
+<td>scalar division: <span class="math notranslate nohighlight">\(A_{ij}/t\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">A+B,</span> <span class="pre">A+t,</span> <span class="pre">A-B,</span> <span class="pre">A-y</span></code></td>
-<td>element-wise addition or subtraction: <span class="math notranslate">\(A_{ij}+B_{ij}\)</span> or <span class="math notranslate">\(A_{ij}+t\)</span>.</td>
+<td>element-wise addition or subtraction: <span class="math notranslate nohighlight">\(A_{ij}+B_{ij}\)</span> or <span class="math notranslate nohighlight">\(A_{ij}+t\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">min(A,B),</span> <span class="pre">min(A,t),...</span></code></td>
-<td>element-wise min/max <span class="math notranslate">\(min(A_{ij},B_{ij})\)</span> <span class="math notranslate">\(min(A_{ij},t)\)</span>.</td>
+<td>element-wise min/max <span class="math notranslate nohighlight">\(min(A_{ij},B_{ij})\)</span> <span class="math notranslate nohighlight">\(min(A_{ij},t)\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">A*B,</span> <span class="pre">element_prod(A,B)</span></code></td>
 <td>element-wise multiplication or Hadamard product:
-<span class="math notranslate">\(A_{ij} \cdot B_{ij}\)</span>.</td>
+<span class="math notranslate nohighlight">\(A_{ij} \cdot B_{ij}\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">A/B,</span> <span class="pre">element_div(A,B),</span> <span class="pre">A/t</span></code></td>
-<td>element-wise division: <span class="math notranslate">\(A_{ij} \cdot B_{ij}\)</span>.</td>
+<td>element-wise division: <span class="math notranslate nohighlight">\(A_{ij} \cdot B_{ij}\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">safe_div(A,B,t)</span></code></td>
 <td>element-wise division with check for division by zero.
-If <span class="math notranslate">\(B_{ij} = 0\)</span> then the result is t.</td>
+If <span class="math notranslate nohighlight">\(B_{ij} = 0\)</span> then the result is t.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">-A</span></code></td>
-<td>negation: <span class="math notranslate">\(-A_{ij}\)</span>.</td>
+<td>negation: <span class="math notranslate nohighlight">\(-A_{ij}\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">exp(A),</span> <span class="pre">log(A),abs(A)...</span></code></td>
 <td>math functions applied to each entry of the matrix,
-e.g., <span class="math notranslate">\(exp(A_{ij})\)</span>. Supported are:
+e.g., <span class="math notranslate nohighlight">\(exp(A_{ij})\)</span>. Supported are:
 exp,log,abs, tanh and sqrt.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">pow(A,t)</span></code></td>
-<td>applies the pow function to each entry of A: <span class="math notranslate">\(pow(A_{ij},t)\)</span></td>
+<td>applies the pow function to each entry of A: <span class="math notranslate nohighlight">\(pow(A_{ij},t)\)</span></td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">sqr(A)</span></code></td>
 <td>squares each entry of A, equivalent to A*A.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">sigmoid(A)</span></code></td>
-<td>Applies the sigmoid function <span class="math notranslate">\(f(x)=\frac{1}{1+e^{-x}}\)</span>
+<td>Applies the sigmoid function <span class="math notranslate nohighlight">\(f(x)=\frac{1}{1+e^{-x}}\)</span>
 to each entry of A.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">softPlus(A)</span></code></td>
-<td>Applies the softplus function <span class="math notranslate">\(f(x)=log(1+e^{x})\)</span>
+<td>Applies the softplus function <span class="math notranslate nohighlight">\(f(x)=log(1+e^{x})\)</span>
 to each entry of A.</td>
 </tr>
 </tbody>
@@ -374,15 +374,15 @@ in linear algebra. For matrix-vector operations we use the following syntax:</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">A%B,</span> <span class="pre">prod(A,B)</span></code></td>
-<td>Matrix-matrix product. If A is a <span class="math notranslate">\(m \times k\)</span> and B a <span class="math notranslate">\(k \times n\)</span> matrix
-then the result is a <span class="math notranslate">\(m \times n\)</span> matrix.</td>
+<td>Matrix-matrix product. If A is a <span class="math notranslate nohighlight">\(m \times k\)</span> and B a <span class="math notranslate nohighlight">\(k \times n\)</span> matrix
+then the result is a <span class="math notranslate nohighlight">\(m \times n\)</span> matrix.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">%</span> <span class="pre">A,</span> <span class="pre">A</span> <span class="pre">%</span> <span class="pre">x,</span> <span class="pre">prod(A,x),</span> <span class="pre">prod(x,A)</span></code></td>
-<td>Matrix-Vector product <span class="math notranslate">\(Ax\)</span> and <span class="math notranslate">\(xA\)</span>.</td>
+<td>Matrix-Vector product <span class="math notranslate nohighlight">\(Ax\)</span> and <span class="math notranslate nohighlight">\(xA\)</span>.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">triangular_prod&lt;Type&gt;(A,x)</span></code></td>
 <td>Interpretes the matrix A as triangular matrix
-and calculates <span class="math notranslate">\(Ax\)</span>.
+and calculates <span class="math notranslate nohighlight">\(Ax\)</span>.
 Type specifies the part of A that
 is going to be treated as triangular.
 Type can be lower, upper, unit_lower, and unit_upper. The
@@ -390,16 +390,16 @@ unit-variants represent a matrix with unit diagonal.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">triangular_prod&lt;Type&gt;(A,B)</span></code></td>
 <td>Interpretes the matrix A as triangular matrix
-and calculates <span class="math notranslate">\(AB\)</span>.
+and calculates <span class="math notranslate nohighlight">\(AB\)</span>.
 Type specifies the part of A that
 is treated as triangular.
 Type is the same as above.</td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">inner_prod(x,y)</span></code></td>
-<td>inner or scalar product, yielding a scalar: <span class="math notranslate">\(\sum_i x_i y_i\)</span>.</td>
+<td>inner or scalar product, yielding a scalar: <span class="math notranslate nohighlight">\(\sum_i x_i y_i\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">outer_prod(x,y)</span></code></td>
-<td>outer product, yielding a matrix C with <span class="math notranslate">\(C_{ij}=x_i y_j\)</span>.</td>
+<td>outer product, yielding a matrix C with <span class="math notranslate nohighlight">\(C_{ij}=x_i y_j\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -407,7 +407,7 @@ Type is the same as above.</td>
 <h3>Block Matrix Operations<a class="headerlink" href="#block-matrix-operations" title="Permalink to this headline">¶</a></h3>
 <p>These matrix operation create larger matrices from smaller ones using operators <code class="docutils literal notranslate"><span class="pre">&amp;</span></code> and <code class="docutils literal notranslate"><span class="pre">|</span></code>.
 Consider matrices A, B, C and D, from which we’d like to create</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}C=
         \left[
                 \begin{array}{c|c}
@@ -467,10 +467,10 @@ row or column matching A.
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">sum(v)</span></code></td>
-<td>Sum of entries of A: <span class="math notranslate">\(\sum_{ij} A_{ij}\)</span></td>
+<td>Sum of entries of A: <span class="math notranslate nohighlight">\(\sum_{ij} A_{ij}\)</span></td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">max(v),</span> <span class="pre">min(v)</span></code></td>
-<td>Maximum/Minimum entry of v: <span class="math notranslate">\(\max_{ij} A_{ij}\)</span></td>
+<td>Maximum/Minimum entry of v: <span class="math notranslate nohighlight">\(\max_{ij} A_{ij}\)</span></td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">norm_1(v),</span> <span class="pre">norm_2(v),</span> <span class="pre">norm_inf(v)</span></code></td>
 <td>p-norm of v</td>
@@ -517,13 +517,13 @@ to perform vector operations on all points at the same time:</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">sum(A)</span></code></td>
-<td>Sum of elements of A: <span class="math notranslate">\(\sum_{ij} A_{ij}\)</span></td>
+<td>Sum of elements of A: <span class="math notranslate nohighlight">\(\sum_{ij} A_{ij}\)</span></td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">max(A),</span> <span class="pre">min(A)</span></code></td>
-<td>Maximum/Minimum element of A: <span class="math notranslate">\(\max_{ij} A_{ij}\)</span></td>
+<td>Maximum/Minimum element of A: <span class="math notranslate nohighlight">\(\max_{ij} A_{ij}\)</span></td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">trace(A)</span></code></td>
-<td>Sum of diagonal entries of A: <span class="math notranslate">\(a_j = \sum_{i} A_{ii}\)</span></td>
+<td>Sum of diagonal entries of A: <span class="math notranslate nohighlight">\(a_j = \sum_{i} A_{ii}\)</span></td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">norm_1(A),</span> <span class="pre">norm_inf(A),</span> <span class="pre">norm_2(A)</span></code></td>
 <td>p-norm of A</td>
@@ -532,7 +532,7 @@ to perform vector operations on all points at the same time:</p>
 <td>squared 2-norm of A</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">norm_frobenius(A)</span></code></td>
-<td>Frobenius norm of A <span class="math notranslate">\(\sum_{ij} A_{ij}A_{ij}\)</span></td>
+<td>Frobenius norm of A <span class="math notranslate nohighlight">\(\sum_{ij} A_{ij}A_{ij}\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -552,10 +552,10 @@ to perform vector operations on all points at the same time:</p>
 </thead>
 <tbody valign="top">
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">repeat(x,m)</span></code></td>
-<td>matrix with m rows that are copies of x <span class="math notranslate">\(C_{ij}=x_j\)</span>.</td>
+<td>matrix with m rows that are copies of x <span class="math notranslate nohighlight">\(C_{ij}=x_j\)</span>.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">repeat(t,m,n)</span></code></td>
-<td>Matrix with m rows and n columns with <span class="math notranslate">\(C_{ij}=t\)</span>.</td>
+<td>Matrix with m rows and n columns with <span class="math notranslate nohighlight">\(C_{ij}=t\)</span>.</td>
 </tr>
 </tbody>
 </table>
@@ -564,7 +564,7 @@ to perform vector operations on all points at the same time:</p>
 <h3>Solving Systems of Linear Equations and Matrix Inverses<a class="headerlink" href="#solving-systems-of-linear-equations-and-matrix-inverses" title="Permalink to this headline">¶</a></h3>
 <p>The library comes with a set of operations for solving linear equations and inverting matrices.
 A system of linear equations can have the forms</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\begin{split}Ax=b \\
 xA=b \\
 AX=B \\
@@ -598,14 +598,14 @@ by Type and the side of A given by the Side parameter
 <td>Computes the explicit inverse of A with the shape given by Type.</td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">inv(A,type)</span> <span class="pre">%</span> <span class="pre">b</span></code></td>
-<td>Computes <span class="math notranslate">\(A^{-1}b\)</span>.
+<td>Computes <span class="math notranslate nohighlight">\(A^{-1}b\)</span>.
 Equivalent to <code class="docutils literal notranslate"><span class="pre">solve(A,</span> <span class="pre">b,</span> <span class="pre">Type,</span> <span class="pre">left)</span></code></td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">b</span> <span class="pre">%</span> <span class="pre">inv(A,type)</span></code></td>
 <td>Equivalent to <code class="docutils literal notranslate"><span class="pre">solve(A,</span> <span class="pre">b,</span> <span class="pre">Type,</span> <span class="pre">right)</span></code></td>
 </tr>
 <tr class="row-odd"><td><code class="docutils literal notranslate"><span class="pre">inv(A,type)</span> <span class="pre">%</span> <span class="pre">B</span></code></td>
-<td>Computes <span class="math notranslate">\(A^{-1}B\)</span>.
+<td>Computes <span class="math notranslate nohighlight">\(A^{-1}B\)</span>.
 Equivalent to <code class="docutils literal notranslate"><span class="pre">solve(A,</span> <span class="pre">B,</span> <span class="pre">Type,</span> <span class="pre">left)</span></code></td>
 </tr>
 <tr class="row-even"><td><code class="docutils literal notranslate"><span class="pre">B</span> <span class="pre">%</span> <span class="pre">inv(A,type)</span></code></td>
@@ -692,8 +692,8 @@ the solution that minimizes :math:<code class="docutils literal notranslate"><sp
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

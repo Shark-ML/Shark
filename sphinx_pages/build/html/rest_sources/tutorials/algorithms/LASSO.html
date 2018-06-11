@@ -116,15 +116,15 @@ For the basics on linear regression we refer to the
 <a class="reference internal" href="linearRegression.html"><span class="doc">Linear Regression</span></a> tutorial.</p>
 <p>In contrast to plain linear regression or ridge regression LASSO
 solves a 1-norm regularized problem. For training data</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[S=\{(x_1, y_1), \dots, (x_l, y_l)\} ,\]</div>
 <p>with vector valued inputs <em>x</em> and real valued labels <em>y</em> the following
 optimization problem is solved:</p>
-<div class="math notranslate">
+<div class="math notranslate nohighlight">
 \[\min_w \,\, \lambda \|w\|_1 + \sum_i \|y_i - \langle w, x_i \rangle\|_2^2\]</div>
 <p>The decisive property of LASSO regression is that the one-norm term
 enforces sparseness of the solution. In particular for rather large
-values of <span class="math notranslate">\(\lambda\)</span> the solution <em>w</em> has only few non-zero
+values of <span class="math notranslate nohighlight">\(\lambda\)</span> the solution <em>w</em> has only few non-zero
 components. This allows regression to be meaningful even if the
 feature dimension greatly exceeds the number of data points, since the
 method reduces the linear predictor to few variables. Therefore the
@@ -193,8 +193,8 @@ In Proceedings of the fifth Asian Conference on Machine Learning (ACML), 2013.</
             </a>
         </div>
             &copy; The Shark developer team.
-           Created on 09/06/2018
-           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.2
+           Created on 11/06/2018
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.7.3
     </div>
   </body>
 </html>

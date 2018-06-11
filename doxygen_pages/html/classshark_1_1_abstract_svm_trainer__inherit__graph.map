@@ -1,4 +1,4 @@
 <map id="shark::AbstractSvmTrainer&lt; InputType, LabelType, Model, Trainer &gt;" name="shark::AbstractSvmTrainer&lt; InputType, LabelType, Model, Trainer &gt;">
-<area shape="rect" id="node3" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers. " alt="" coords="97,5,224,32"/>
-<area shape="rect" id="node4" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="248,5,447,32"/>
+<area shape="rect" id="node3" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers. " alt="" coords="96,5,221,32"/>
+<area shape="rect" id="node4" href="$classshark_1_1_i_parameterizable.html" title="shark::IParameterizable\&lt;\&gt;" alt="" coords="246,5,445,32"/>
 </map>
