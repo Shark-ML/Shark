@@ -100,7 +100,7 @@ public:
 	typedef typename base_type::ModelType ModelType;
 	typedef typename base_type::InputType InputType;
 	typedef typename base_type::DatasetType DatasetType;
-	typedef WeightedUnlabeledData<InputType> WeightedDatasetType;
+	typedef WeightedData<InputType> WeightedDatasetType;
 
 	/// \brief Excecutes the algorithm and trains a model on the given weighted data.
 	virtual void train(ModelType& model, WeightedDatasetType const& dataset) = 0;

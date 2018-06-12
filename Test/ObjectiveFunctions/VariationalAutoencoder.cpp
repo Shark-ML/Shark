@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_NoLoss )
 		input[i](0) = random::gauss(random::globalRng, 0,4);
 		input[i](1) = random::uni(random::globalRng, 0, 9);
 	}
-	UnlabeledData<RealVector> dataset = createUnlabeledDataFromRange(input,trainExamples);
+	Data<RealVector> dataset = createDataFromRange(input,trainExamples);
 	
 	ZeroLoss loss;
 	LinearModel<> encoder(2,4,false);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_Full )
 		input[i](0) = random::gauss(random::globalRng, 0,4);
 		input[i](1) = random::uni(random::globalRng, 0, 9);
 	}
-	UnlabeledData<RealVector> dataset = createUnlabeledDataFromRange(input,trainExamples);
+	Data<RealVector> dataset = createDataFromRange(input,trainExamples);
 	
 	SquaredLoss<> loss;
 	LinearModel<> encoder(2,4,false);

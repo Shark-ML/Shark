@@ -46,7 +46,7 @@ NormalizeComponentsWhitening::NormalizeComponentsWhitening(double targetVariance
 std::string NormalizeComponentsWhitening::name() const
 { return "NormalizeComponentsWhitening"; }
 
-void NormalizeComponentsWhitening::train(ModelType& model, UnlabeledData<RealVector> const& input){
+void NormalizeComponentsWhitening::train(ModelType& model, Data<RealVector> const& input){
 	std::size_t dc = dataDimension(input);
 	SHARK_RUNTIME_CHECK(input.numberOfElements() >= dc + 1, "Input needs to contain more points than there are input dimensions");
 	SHARK_RUNTIME_CHECK(m_targetVariance > 0.0, "Target variance must be positive");

@@ -108,7 +108,7 @@ class AbstractUnsupervisedTrainer : public INameable, public ISerializable
 public:
 	typedef Model ModelType;
 	typedef typename Model::InputType InputType;
-	typedef UnlabeledData<InputType> DatasetType;
+	typedef Data<InputType> DatasetType;
 	/// Core of the Trainer interface
 	virtual void train(ModelType& model, DatasetType const& inputset) = 0;
 };

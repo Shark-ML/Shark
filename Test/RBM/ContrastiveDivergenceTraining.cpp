@@ -19,9 +19,9 @@ BOOST_AUTO_TEST_SUITE (RBM_ContrastiveDivergenceTraining)
 BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 {
 	BarsAndStripes problem;
-	UnlabeledData<RealVector> data = problem.data();
+	Data<RealVector> data = problem.data();
 	BarsAndStripes problem2(8);//small batches  to catch errors with batching and minibatches
-	UnlabeledData<RealVector> dataBatched = problem2.data();
+	Data<RealVector> dataBatched = problem2.data();
 	std::size_t inputs = data.numberOfElements();
 	
 	BinaryRBM rbm(random::globalRng);
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergenceTraining_Bars ){
 	unsigned int updateStep = 2000;
 	
 	BarsAndStripes problem(9);
-	UnlabeledData<RealVector> data = problem.data();
+	Data<RealVector> data = problem.data();
 	
 	BinaryRBM rbm(random::globalRng);
 	rbm.setStructure(16,8);

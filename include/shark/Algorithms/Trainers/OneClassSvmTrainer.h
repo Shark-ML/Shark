@@ -142,7 +142,7 @@ public:
 	size_t numberOfParameters() const
 	{ return (m_kernel->numberOfParameters() + 1); }
 
-	void train(KernelExpansion<InputType>& svm, UnlabeledData<InputType> const& inputset)
+	void train(KernelExpansion<InputType>& svm, Data<InputType> const& inputset)
 	{
 		SHARK_RUNTIME_CHECK(m_nu > 0.0 && m_nu< 1.0, "invalid setting of the parameter nu (must be 0 < nu < 1)");
 		svm.setStructure(m_kernel,inputset,true);
@@ -163,7 +163,7 @@ protected:
 	std::size_t m_cacheSize;
 
 	template<class MatrixType>
-	void trainSVM(KernelExpansion<InputType>& svm, UnlabeledData<InputType> const& inputset){
+	void trainSVM(KernelExpansion<InputType>& svm, Data<InputType> const& inputset){
 		typedef BoxedSVMProblem<MatrixType> SVMProblemType;
 		typedef SvmShrinkingProblem<SVMProblemType> ProblemType;
 		

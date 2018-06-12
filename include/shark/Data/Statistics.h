@@ -65,11 +65,6 @@ void meanvar
 template<class VectorType>
 VectorType mean(Data<VectorType> const& data);
 
-template<class VectorType>
-VectorType mean(UnlabeledData<VectorType> const& data){
-	return mean(static_cast<Data<VectorType> const&>(data));
-}
-
 //! Calculates the variance vector of the input vectors
 template<class VectorType>
 VectorType variance(Data<VectorType> const& data);

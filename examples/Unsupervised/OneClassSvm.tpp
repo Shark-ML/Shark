@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 
 	// generate artificial benchmark data
 	Gaussians problem;
-	UnlabeledData<RealVector> data = problem.generateDataset(ell);
+	Data<RealVector> data = problem.generateDataset(ell);
 
 	// define the learner
 	OneClassSvmTrainer<RealVector> trainer(&kernel, nu);
@@ -95,8 +95,8 @@ int main(int argc, char** argv)
 	}
 
 	// mark the samples
-	UnlabeledData<RealVector>::const_element_range elements = data.elements();
-	for (UnlabeledData<RealVector>::const_element_range::const_iterator it = elements.begin(); it != elements.end(); ++it)
+	Data<RealVector>::const_element_range elements = data.elements();
+	for (Data<RealVector>::const_element_range::const_iterator it = elements.begin(); it != elements.end(); ++it)
 	{
 		RealVector v = *it;
 		int x = (int)std::floor(34.5 * v(0) / 5.0 + 34.5 + 0.5);

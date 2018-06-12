@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( Energy_NegLogLikelihood )
 				dataVec[j](k)=random::coinToss(random::globalRng,0.5);
 			}
 		}
-		UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
+		Data<RealVector> data = createDataFromRange(dataVec,25);
 
 		//now calculate the test
 		long double logPartition = logPartitionFunction(rbm);

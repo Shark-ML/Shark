@@ -78,7 +78,7 @@ double logPartitionFunction(RBMType const& rbm, double beta = 1.0) {
 template<class RBMType>
 double negativeLogLikelihoodFromLogPartition(
 	RBMType const&rbm, 
-	UnlabeledData<RealVector> const& inputs, 
+	Data<RealVector> const& inputs, 
 	double logPartition, 
 	double beta = 1.0
 ) {
@@ -101,7 +101,7 @@ double negativeLogLikelihoodFromLogPartition(
 template<class RBMType>
 double negativeLogLikelihood(
 	RBMType const& rbm, 
-	UnlabeledData<RealVector> const& inputs, 
+	Data<RealVector> const& inputs, 
 	double beta = 1.0
 ) {
 	double const logPartition = logPartitionFunction(rbm,beta);

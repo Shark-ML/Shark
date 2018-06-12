@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
-	UnlabeledData<int> set =  createDataFromRange(inputs,10);
+	Data<int> set =  createDataFromRange(inputs,10);
 	
 	//define subset
 	std::vector<std::size_t> subsetIndices1;
@@ -96,8 +96,8 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	for (int i=0;i!=100;++i) {
 		inputs.push_back(100+i);
 	}
-	UnlabeledData<int> set0 = createDataFromRange(inputs,10);
-	UnlabeledData<int> const& set = set0;
+	Data<int> set0 = createDataFromRange(inputs,10);
+	Data<int> const& set = set0;
 	
 	//define subset
 	std::vector<std::size_t> subsetIndices1;

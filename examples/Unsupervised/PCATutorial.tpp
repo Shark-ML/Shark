@@ -57,7 +57,7 @@ int main(){
 	// read image data
 	//###begin<import>
 	const char *facedirectory = "Cambridge_FaceDB"; //< set this to the directory containing the face database
-	UnlabeledData<RealVector> images;
+	Data<RealVector> images;
 	//###end<import>
 	cout << "Read images ... " << flush;
 	try {

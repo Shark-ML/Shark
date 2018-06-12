@@ -57,7 +57,7 @@ public:
 	/// \brief From INameable: return the class name.
 	SHARK_EXPORT_SYMBOL std::string name() const;
 
-	SHARK_EXPORT_SYMBOL void train(ModelType& model, UnlabeledData<RealVector> const& input);
+	SHARK_EXPORT_SYMBOL void train(ModelType& model, Data<RealVector> const& input);
 
 private:
 	double m_targetVariance;

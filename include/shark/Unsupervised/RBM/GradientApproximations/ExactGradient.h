@@ -54,7 +54,7 @@ public:
 	std::string name() const
 	{ return "ExactGradient"; }
 
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 	}
 
@@ -203,7 +203,7 @@ private:
 		}
 	}
 
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 
 	mutable double m_logPartition; //the partition function of the model distribution
 };	

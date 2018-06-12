@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
 	KernelExpansion<RealVector> ke;
 
 	Gaussians problem;
-	UnlabeledData<RealVector> data = problem.generateDataset(ell);
+	Data<RealVector> data = problem.generateDataset(ell);
 
 	OneClassSvmTrainer<RealVector> trainer(&kernel, nu);
 	trainer.sparsify() = false;

@@ -56,7 +56,7 @@ namespace shark{
 class NegativeLogLikelihood : public AbstractObjectiveFunction< RealVector, double >
 {
 public:
-	typedef UnlabeledData<RealVector> DatasetType;
+	typedef Data<RealVector> DatasetType;
 
 	NegativeLogLikelihood(
 		DatasetType const& data,
@@ -162,7 +162,7 @@ public:
 
 private:
 	AbstractModel<RealVector,RealVector>* mep_model;
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 };
 
 }

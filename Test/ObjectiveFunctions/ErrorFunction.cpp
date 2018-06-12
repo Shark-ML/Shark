@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 	{
 		Wave problem;
 		RegressionDataset data = problem.generateDataset(50,50);
-		UnlabeledData<double> weights(1);
+		Data<double> weights(1);
 		weights.batch(0).resize(50);
 		
 		unweightedData.batch(0).input.resize(100,1);

@@ -181,7 +181,7 @@ public:
 	std::string name() const
 	{ return "TestGradientVH"; }
 
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;	
 	}
 
@@ -225,7 +225,7 @@ public:
 	}
 private:
 	BinaryRBM* mpe_rbm;
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 };
 
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 			dataVec[j](k)=random::coinToss(random::globalRng, 0.5);
 		}
 	}
-	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
+	Data<RealVector> data = createDataFromRange(dataVec,25);
 	
 	TestGradientVH gradient(&rbm);
 	gradient.setData(data);
@@ -260,7 +260,7 @@ public:
 	std::string name() const
 	{ return "TestGradientHV"; }
 
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;	
 	}
 
@@ -307,7 +307,7 @@ public:
 	}
 private:
 	BinaryRBM* mpe_rbm;
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 };
 
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 			dataVec[j](k)=random::coinToss(random::globalRng, 0.5);
 		}
 	}
-	UnlabeledData<RealVector> data = createDataFromRange(dataVec,25);
+	Data<RealVector> data = createDataFromRange(dataVec,25);
 	
 	TestGradientHV gradient(&rbm);
 	gradient.setData(data);

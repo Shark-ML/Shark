@@ -65,7 +65,7 @@ public:
 	/// \brief Sets the training batch.
 	///
 	/// @param data the batch of training data
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 	}
 	
@@ -181,7 +181,7 @@ public:
 	}
 
 private:	
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 	RBM* mpe_rbm;
 	Operator m_operator;
 	unsigned int m_k;

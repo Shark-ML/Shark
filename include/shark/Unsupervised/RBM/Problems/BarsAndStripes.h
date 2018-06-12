@@ -35,7 +35,7 @@ namespace shark{
 ///Generates the Bars-And-Stripes problem. In this problem, a 4x4 image has either rows or columns of the same value.
 class BarsAndStripes{
 private:
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 public:
 	BarsAndStripes(std::size_t batchSize = 32, bool bipolar = false){
 		std::vector<RealVector> data(32,RealVector(16));
@@ -58,7 +58,7 @@ public:
 		m_data = createDataFromRange(data,batchSize);
 	}
 	///Returns all input pattern of the BarsAndStripes problem
-	UnlabeledData<RealVector> data() const{
+	Data<RealVector> data() const{
 		return m_data;
 	};
 

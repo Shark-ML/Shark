@@ -81,7 +81,7 @@ public:
 	/// another).
 	///
 	/// \param  labels   label set to which the balanced loss should be adapted
-	SHARK_EXPORT_SYMBOL void defineBalancedCost(UnlabeledData<unsigned int> const& labels);
+	SHARK_EXPORT_SYMBOL void defineBalancedCost(Data<unsigned int> const& labels);
 
 protected:
 	/// cost matrix

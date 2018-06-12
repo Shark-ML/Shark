@@ -37,7 +37,7 @@ namespace shark{
 ///Shifter problem
 class Shifter{
 private:
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 public:
 	Shifter(){
 		std::vector<RealVector> data(768,RealVector(19));
@@ -76,7 +76,7 @@ public:
 	}
 	
 	///returns the generated dataset
-	UnlabeledData<RealVector> data() const{
+	Data<RealVector> data() const{
 		return m_data;
 	};
 	///returns the dimensionality of the data

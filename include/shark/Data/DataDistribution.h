@@ -76,7 +76,7 @@ public:
 	///
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
-	UnlabeledData<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const {
+	Data<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const {
 		std::vector<InputType> data(size);
 
 		// draw the samples
@@ -84,13 +84,13 @@ public:
 			draw(data[i]);
 		}
 		//create dataset
-		return createUnlabeledDataFromRange(data,maximumBatchSize);
+		return createDataFromRange(data,maximumBatchSize);
 	}
 	
 	/// \brief Generates a data set with samples from from the distribution.
 	///
 	/// @param size the number of samples in the dataset
-	UnlabeledData<InputType> generateDataset(std::size_t size) const {
+	Data<InputType> generateDataset(std::size_t size) const {
 		return generateDataset(size,Data<InputType>::DefaultBatchSize );
 	}
 };

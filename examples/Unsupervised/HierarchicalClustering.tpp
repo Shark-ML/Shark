@@ -52,8 +52,8 @@ int main(int argc, char** argv)
 	for (std::size_t i=0; i<testSize; i++) 
 		te_d[i](0) = random::uni(random::globalRng,0.0, 100.0);
 		
-	UnlabeledData<RealVector> training = createDataFromRange(tr_d);
-	UnlabeledData<RealVector> test = createDataFromRange(te_d);
+	Data<RealVector> training = createDataFromRange(tr_d);
+	Data<RealVector> test = createDataFromRange(te_d);
 
 	// construct a hierarchical clustering with at most 3 points per cluster
 	LCTree<RealVector> tree(training, TreeConstruction(0, 3));
