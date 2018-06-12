@@ -352,6 +352,14 @@ public:
 		*this = dataCopy;
 	}
 
+	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
+	void shuffle(){
+		std::vector<std::size_t> indices(this->numberOfElements());
+		std::iota(indices.begin(),indices.end(),0);
+		std::shuffle(indices.begin(),indices.end(), random::globalRng);
+		this->reorderElements(indices);
+	}
+
 	// SUBSETS
 
 	///\brief Fill in the subset defined by the list of indices as well as its complement.
@@ -389,99 +397,11 @@ std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 }
 /** @} */
 
-/// \brief Data set for unsupervised learning.
-///
-/// The UnlabeledData class is basically a standard Data container
-/// with the special interpretation of its data point being
-/// "inputs" to a learning algorithm.
-template <class InputT>
-class UnlabeledData : public Data<InputT>
-{
-public:
-	typedef InputT element_type;
-	typedef Data<element_type> base_type;
-	typedef element_type InputType;
-	typedef detail::SharedContainer<InputT> InputContainer;
-
-protected:
-	using base_type::m_data;
-public:
-
-	///\brief Constructor.
-	UnlabeledData()
-	{ }
-
-	///\brief Construction from data.
-	UnlabeledData(Data<InputT> const& points)
-	: base_type(points)
-	{ }
-
-	///\brief Construction with size and a single element
-	///
-	/// Optionally the desired batch Size can be set
-	///
-	///@param size the new size of the container
-	///@param element the blueprint element from which to create the Container
-	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	UnlabeledData(std::size_t size, element_type const& element, std::size_t batchSize = base_type::DefaultBatchSize)
-	: base_type(size,element,batchSize)
-	{ }
-
-	///\brief Create an empty set with just the correct number of batches.
-	///
-	/// The user must initialize the dataset after that by himself.
-	UnlabeledData(std::size_t numBatches)
-	: base_type(numBatches)
-	{ }
-
-	///\brief Construct a dataset with different batch sizes. it is a copy of the other dataset
-	UnlabeledData(UnlabeledData const& container, std::vector<std::size_t> batchSizes)
-		:base_type(container,batchSizes){}
-
-	/// \brief we allow assignment from Data.
-	UnlabeledData operator=(Data<InputT> const& data){
-		static_cast<Data<InputT>& >(*this) = data;
-		return *this;
-	}
-
-	///\brief Access to the base_type class as "inputs".
-	///
-	/// Added for consistency with the LabeledData::labels() method.
-	UnlabeledData& inputs(){
-		return *this;
-	}
-
-	///\brief Access to the base_type class as "inputs".
-	///
-	/// Added for consistency with the LabeledData::labels() method.
-	UnlabeledData const& inputs() const{
-		return *this;
-	}
-
-	///\brief Splits the container in two independent parts. The left part remains in the container, the right is stored as return type
-	///
-	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
-	///this to work.
-	UnlabeledData splice(std::size_t batch){
-		UnlabeledData right;
-		right.m_data = m_data.splice(m_data.begin()+batch);
-		right.m_shape = this->m_shape;
-		return right;
-	}
-
-	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	void shuffle(){
-		std::vector<std::size_t> indices(this->numberOfElements());
-		std::iota(indices.begin(),indices.end(),0);
-		std::shuffle(indices.begin(),indices.end(), random::globalRng);
-		this->reorderElements(indices);
-	}
-};
 
 ///
 /// \brief Data set for supervised learning.
 ///
-/// The LabeledData class extends UnlabeledData for the
+/// The LabeledData class extends Data for the
 /// representation of inputs. In addition it holds and
 /// provides access to the corresponding labels.
 ///
@@ -497,7 +417,7 @@ class LabeledData : public ISerializable
 public:
 	typedef InputT InputType;
 	typedef LabelT LabelType;
-	typedef UnlabeledData<InputT> InputContainer;
+	typedef Data<InputT> InputContainer;
 	typedef Data<LabelT> LabelContainer;
 	typedef typename InputContainer::IndexSet IndexSet;
 
@@ -851,12 +771,6 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
 	return data;
 }
 
-/// \brief creates a data object from a range of elements
-template<class Range>
-UnlabeledData<typename boost::range_value<Range>::type>
-createUnlabeledDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
-	return createDataFromRange(inputs,maximumBatchSize);
-}
 /// \brief creates a labeled data object from two ranges, representing inputs and labels
 template<class Range1, class Range2>
 LabeledData<

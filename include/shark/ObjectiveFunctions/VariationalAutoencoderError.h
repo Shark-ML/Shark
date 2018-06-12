@@ -67,7 +67,7 @@ private:
 	typedef typename SearchPointType::value_type value_type;
 	typedef blas::matrix<value_type, blas::row_major, device_type> MatrixType;
 public:
-	typedef UnlabeledData<SearchPointType> DatasetType;
+	typedef Data<SearchPointType> DatasetType;
 	typedef AbstractModel<SearchPointType,SearchPointType, SearchPointType> ModelType;
 
 	VariationalAutoencoderError(
@@ -177,7 +177,7 @@ private:
 	ModelType* mep_decoder;
 	ModelType* mep_encoder;
 	AbstractLoss<SearchPointType, SearchPointType>* mep_loss;
-	UnlabeledData<SearchPointType> m_data;
+	Data<SearchPointType> m_data;
 	double m_lambda;
 };
 

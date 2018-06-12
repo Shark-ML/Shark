@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE( ParallelTemperingTraining_Bars ){
 	double learningRate = 0.1;
 	
 	BarsAndStripes problem(8);
-	UnlabeledData<RealVector> data = problem.data();
+	Data<RealVector> data = problem.data();
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
 		BinaryRBM rbm(random::globalRng);

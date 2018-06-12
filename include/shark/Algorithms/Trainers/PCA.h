@@ -88,7 +88,7 @@ public:
 	/// The parameter defines whether the model should also
 	/// whiten the data.
 	/// The eigendecomposition of the data is stored inthe PCA object.
-	PCA(UnlabeledData<RealVector> const& inputs, bool whitening = false) 
+	PCA(Data<RealVector> const& inputs, bool whitening = false) 
 	: m_whitening(whitening){
 		m_algorithm = AUTO;
 		setData(inputs);
@@ -110,7 +110,7 @@ public:
 	/// represented. The model returned is the one given by the
 	/// econder() function (i.e., mapping from the original input
 	/// space to the PCA coordinate system).
-	void train(LinearModel<>& model, UnlabeledData<RealVector> const& inputs) {
+	void train(LinearModel<>& model, Data<RealVector> const& inputs) {
 		std::size_t m = model.outputShape().numElements(); ///< reduced dimensionality
 		setData(inputs);   // compute PCs
 		encoder(model, m); // define the model 
@@ -120,7 +120,7 @@ public:
 	//! Sets the input data and performs the PCA. This is a
 	//! computationally costly operation. The eigendecomposition
 	//! of the data is stored inthe PCA object.
-	SHARK_EXPORT_SYMBOL void setData(UnlabeledData<RealVector> const& inputs);
+	SHARK_EXPORT_SYMBOL void setData(Data<RealVector> const& inputs);
 
 	//! Returns a model mapping the original data to the
 	//! m-dimensional PCA coordinate system.

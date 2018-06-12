@@ -75,7 +75,7 @@ public:
 		return m_mean;
 	}
 
-	void train( ScaledKernel<InputType>& kernel, UnlabeledData<InputType> const& input )
+	void train( ScaledKernel<InputType>& kernel, Data<InputType> const& input )
 	{
 		SHARK_RUNTIME_CHECK(input.numberOfElements() >= 2, "Input needs to contain at least two points");
 		AbstractKernelFunction< InputType > const& k = *kernel.base(); //get direct access to the kernel we want to use.		
@@ -91,7 +91,7 @@ public:
 		m_mean = 0.0;
 		m_matrixTrace = 0.0;
 		for(std::size_t i = 0; i != input.numberOfBatches(); ++i){
-			typename UnlabeledData<InputType>::const_batch_reference batch = input.batch(i);
+			typename Data<InputType>::const_batch_reference batch = input.batch(i);
 			//off diagonal entries
 			for(std::size_t j = 0; j < i; ++j){
 				RealMatrix matrixBlock = k(batch, input.batch(j));

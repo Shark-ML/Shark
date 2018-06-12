@@ -21,7 +21,7 @@ struct Fixture {
 	}
 	RealMatrix covariance;
 	RealVector offset;
-	UnlabeledData<RealVector> data;
+	Data<RealVector> data;
 };
 
 BOOST_FIXTURE_TEST_SUITE (ObjectiveFunctions_NegativeLogLikelihood, Fixture)

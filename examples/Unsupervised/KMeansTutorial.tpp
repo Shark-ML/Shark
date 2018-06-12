@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	// read data
-	UnlabeledData<RealVector> data;
+	Data<RealVector> data;
 	try {
 	//###begin<import>
 		importCSV(data, argv[1], ' ');

@@ -41,21 +41,21 @@ BOOST_AUTO_TEST_CASE( Bootstrap_LabeledData ){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Bootstrap_UnlabeledData ){
+BOOST_AUTO_TEST_CASE( Bootstrap_Data ){
 	//create a toy dataset
 	std::vector<unsigned int> inputs;
 
 	for(unsigned int i=0;i != 20;++i){
 		inputs.push_back(i);
 	}
-	UnlabeledData<unsigned int> set=createDataFromRange(inputs,8);
+	Data<unsigned int> set=createDataFromRange(inputs,8);
 	
 	//create Bootstrap subsets and create a running sum of the weights to check
 	// that every point is chosen equally.
 	RealVector weightSums(20,0.0);
 	std::size_t iterations = 10000;
 	for(std::size_t iteration = 0; iteration != iterations; ++iteration){
-		WeightedUnlabeledData<unsigned int> bootstrapSet = bootstrap(set);
+		WeightedData<unsigned int> bootstrapSet = bootstrap(set);
 		BOOST_REQUIRE_EQUAL(bootstrapSet.numberOfElements(),20);
 		double setWeightSum = 0.0;
 		for(std::size_t i = 0; i != 20; ++i){

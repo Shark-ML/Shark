@@ -389,7 +389,7 @@ int main(int argc, char** argv)
             v(j) = random::uni(random::globalRng, -1,1);
         input[i] = v;
     }
-    UnlabeledData<RealVector> rand_data = createDataFromRange( input );
+    Data<RealVector> rand_data = createDataFromRange( input );
     //###end<normalization_data_setup>
 
 

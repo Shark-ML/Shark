@@ -90,7 +90,7 @@ public:
 		return m_chain;
 	}
 	
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 		m_chain.initializeChain(m_data);
 	}
@@ -158,7 +158,7 @@ public:
 private:
 	RBM* mpe_rbm;
 	mutable MarkovChainType m_chain; 
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 
 	unsigned int m_k;
 	unsigned int m_samples;

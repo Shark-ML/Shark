@@ -49,7 +49,7 @@ using namespace shark;
 int main()
 {
 	// data container
-	UnlabeledData<RealVector> data;
+	Data<RealVector> data;
 
 //###begin<training1>
 	// create and train data normalizer
@@ -61,7 +61,7 @@ int main()
 
 //###begin<transform1>
 	// transform data
-	UnlabeledData<RealVector> normalizedData = transform(data, normalizer);
+	Data<RealVector> normalizedData = transform(data, normalizer);
 //###end<transform1>
 
 //###begin<training2>
@@ -73,6 +73,6 @@ int main()
 
 //###begin<transform2>
 	// transform data
-	UnlabeledData<RealVector> whitenedData = transform(data, whitener);
+	Data<RealVector> whitenedData = transform(data, whitener);
 //###end<transform2>
 }

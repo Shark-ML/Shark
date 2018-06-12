@@ -24,7 +24,7 @@ double principalComponents[3][3] =
 std::size_t numberOfExamples = 30000;
 
 ///The test distribution is just a multivariate Gaussian.
-UnlabeledData<RealVector> createData()
+Data<RealVector> createData()
 {
 	RealVector mean(3);
 	mean(0) = 1;
@@ -61,8 +61,8 @@ UnlabeledData<RealVector> createData()
 int main(){
 
 	// We first create our problem. Since the PCA is a unsupervised Method,
-	// We use UnlabeledData instead of Datas. 
-	UnlabeledData<RealVector> data = createData();
+	// We use Data instead of Datas. 
+	Data<RealVector> data = createData();
 
 	// With the definition of the model, we declare, how many
 	// principal components we want.  If we want all, we set

@@ -19,7 +19,7 @@ int main(){
 	//we first create the problem. in this tutorial, we use BarsAndStripes
 	//###begin<problem>
 	BarsAndStripes problem;
-	UnlabeledData<RealVector> data = problem.data();
+	Data<RealVector> data = problem.data();
 	//###end<problem>
 	
 	//some constants needed for training

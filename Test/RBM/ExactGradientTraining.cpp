@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE( ExactGradientTraining_Bars ){
 	unsigned int updateStep = 100;
 	
 	BarsAndStripes problem;
-	UnlabeledData<RealVector> data = problem.data();
+	Data<RealVector> data = problem.data();
 	
 	
 	

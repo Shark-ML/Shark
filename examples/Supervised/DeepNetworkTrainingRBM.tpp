@@ -48,7 +48,7 @@ LabeledData<RealVector,unsigned int> createProblem(){
 
 //training of an RBM
 BinaryRBM trainRBM(
-	UnlabeledData<RealVector> const& data,//the data to train with
+	Data<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
 	std::size_t iterations, //number of iterations to optimize
 	double regularisation,//strength of the regularisation
@@ -113,7 +113,7 @@ int main()
 	
 	//compute the mapping onto features of the first hidden layer
 	rbm1.evaluationType(true,true);//we compute the direction visible->hidden and want the features and no samples
-	UnlabeledData<RealVector> intermediateData=rbm1(data.inputs());
+	Data<RealVector> intermediateData=rbm1(data.inputs());
 	
 	//train the next layer
 	std::cout<<"pre-training second layer"<<std::endl;

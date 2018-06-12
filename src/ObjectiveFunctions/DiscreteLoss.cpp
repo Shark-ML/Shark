@@ -66,7 +66,7 @@ void DiscreteLoss::defineCostMatrix(RealMatrix const& cost){
 	m_cost = cost;
 }
 
-void DiscreteLoss::defineBalancedCost(UnlabeledData<unsigned int> const& labels){
+void DiscreteLoss::defineBalancedCost(Data<unsigned int> const& labels){
 	std::size_t classes = numberOfClasses(labels);
 	std::size_t ic = labels.numberOfElements();
 	

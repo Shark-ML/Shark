@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	}
 	
 	// 1.1 test element access and thus createDataFromRange
-	UnlabeledData<int> set = createDataFromRange(inputs,5);//20 batches
+	Data<int> set = createDataFromRange(inputs,5);//20 batches
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(), 100u);
 	BOOST_CHECK_EQUAL(set.shape(), Shape({}));
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(), 20u);
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	
 	// 2. create indexed partitions
 	{
-		UnlabeledData<int> subset = set.indexedSubset(indizes[0]);
+		Data<int> subset = set.indexedSubset(indizes[0]);
 		BOOST_REQUIRE_EQUAL(subset.numberOfBatches(), indizes[0].size());
 
 		for (size_t i=0; i!=subset.numberOfBatches(); ++i) {
@@ -92,9 +92,9 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 
 	// 2.1 now with complement
 	{
-		UnlabeledData<int> subset = set.indexedSubset(indizes[0]);
-		UnlabeledData<int> subset2;
-		UnlabeledData<int> complement;
+		Data<int> subset = set.indexedSubset(indizes[0]);
+		Data<int> subset2;
+		Data<int> complement;
 		set.indexedSubset(indizes[0], subset2, complement);
 		testSetEquality(subset, subset2);
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE( Set_Repartition )
 	batchSizes[5]=12;
 	batchSizes[6]=25;
 	batchSizes[7]=8;
-	UnlabeledData<int> set = createDataFromRange(inputs,10);
+	Data<int> set = createDataFromRange(inputs,10);
 	set.repartition(batchSizes);
 	
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),8u);
@@ -167,9 +167,9 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 	//split before and after every batch
 	std::size_t index = 0;
 	for(std::size_t i = 0; i <= batchSizes.size();++i){
-		UnlabeledData<int> set= createDataFromRange(inputs,10);
+		Data<int> set= createDataFromRange(inputs,10);
 		set.repartition(batchSizes);
-		UnlabeledData<int> split = splitAtElement(set,index);
+		Data<int> split = splitAtElement(set,index);
 		
 		BOOST_REQUIRE_EQUAL(set.numberOfBatches(),i);
 		BOOST_REQUIRE_EQUAL(split.numberOfBatches(),8-i);
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE( Data_ColumnAccess )
 		r(1) = 5;
 		inputs.push_back(r);
 	}
-	UnlabeledData<RealVector> set = createDataFromRange(inputs);
+	Data<RealVector> set = createDataFromRange(inputs);
 	RealVector c0 = getColumn(set, 0);
 	setColumn(set, 0, c0);
 
@@ -304,9 +304,9 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	
 	
 	//split in the middle of a batch
-	UnlabeledData<int> set= createDataFromRange(inputs,10);
+	Data<int> set= createDataFromRange(inputs,10);
 	set.repartition(batchSizes);
-	UnlabeledData<int> split = splitAtElement(set,53);
+	Data<int> split = splitAtElement(set,53);
 	
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),5u);
 	BOOST_REQUIRE_EQUAL(split.numberOfBatches(),4u);
@@ -422,8 +422,8 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 
 // 	// 2.2 range version
 // 	std::cout << "range...";
-// 	UnlabeledData<int> rangeSubset, rangeSubset2;
-// 	UnlabeledData<int> rangeComplement;
+// 	Data<int> rangeSubset, rangeSubset2;
+// 	Data<int> rangeComplement;
 // 	set.rangeSubset(4, rangeSubset, rangeComplement);
 // 	set.rangeSubset(4, rangeSubset2);
 // 	BOOST_REQUIRE_EQUAL(rangeSubset.size(), 4);
@@ -439,15 +439,15 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 // 	// 2.3 random set
 // 	std::cout << "random...";
 // 	// just acheck for compile errors and sanity
-// 	UnlabeledData<int> randomSubset;
-// 	UnlabeledData<int> randomComplement;
+// 	Data<int> randomSubset;
+// 	Data<int> randomComplement;
 // 	set.randomSubset(12, randomSubset, randomComplement);
 // 	BOOST_REQUIRE_EQUAL(randomSubset.size(), 12);
 // 	BOOST_REQUIRE_EQUAL(randomComplement.size(), 8);
 // 
 // 	// 2.4 subsets from subsets
 // 	std::cout << "subsubset...";
-// 	UnlabeledData<int> subsubset;
+// 	Data<int> subsubset;
 // 	subset.rangeSubset(5, subsubset);
 // 	BOOST_REQUIRE_EQUAL(subsubset.size(), 5);
 // 	for(size_t i=0; i!=subsubset.size(); ++i) {
@@ -457,7 +457,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 // 	// 2.5 packing sets and checking equality
 // 	//2.5.1 equality
 // 	std::cout<<"equal1...";
-// 	UnlabeledData<int> subset3 = subset2;
+// 	Data<int> subset3 = subset2;
 // 	BOOST_CHECK_EQUAL(subset3 == subset2,true);
 // 	BOOST_CHECK_EQUAL(subset3 != subset2,false);
 // 	//2.5.2 pack
@@ -475,14 +475,14 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 // 	set.createNamedSubset("Dataset_test", indizes[0]);
 // 	BOOST_REQUIRE_EQUAL(set.hasNamedSubset("Dataset_test"), true);
 // 
-// 	UnlabeledData<int> namedSet;
+// 	Data<int> namedSet;
 // 	set.namedSubset("Dataset_test", namedSet);
 // 	testSetEquality(namedSet, subset);
 // 	BOOST_REQUIRE_EQUAL(namedSet.hasNamedSubset("Dataset_test"), false);
 // 
 // 	// 3.1 now with complement
 // 	std::cout << "subset complement...";
-// 	UnlabeledData<int> namedComplement;
+// 	Data<int> namedComplement;
 // 	set.namedSubset("Dataset_test", namedSet, namedComplement);
 // 	testSetEquality(namedSet, subset);
 // 	testSetEquality(namedComplement, complement);
@@ -494,7 +494,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 // 	set.createNamedSubset("Dataset_test2",randomSubset);
 // 	BOOST_REQUIRE_EQUAL(set.hasNamedSubset("Dataset_test2"),true);
 // 
-// 	UnlabeledData<int> namedSet2;
+// 	Data<int> namedSet2;
 // 	set.namedSubset("Dataset_test2",namedSet2);
 // 	testSetEquality(namedSet2,randomSubset);
 // 
@@ -502,10 +502,10 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 // 	// 4. copy constructor, default constructor and equality
 // 	// a bit late, but...
 // 	std::cout << "copy...";
-// 	UnlabeledData<int> copy(set);
+// 	Data<int> copy(set);
 // 	testSetEquality(copy, set);
 // 	BOOST_REQUIRE_EQUAL(copy.hasNamedSubset("Dataset_test"), true);
-// 	UnlabeledData<int> defaultSet;
+// 	Data<int> defaultSet;
 // 	BOOST_REQUIRE_EQUAL(defaultSet.size(), 0);
 // 	copy = defaultSet;
 // 	BOOST_REQUIRE_EQUAL(copy.size(), 0);
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 
 	//~ // 2.4 subsets from subsets
 	//~ std::cout << "subsubset...";
-	//~ UnlabeledData<int> subsubset;
+	//~ Data<int> subsubset;
 	//~ subset.rangeSubset(5, subsubset);
 	//~ BOOST_REQUIRE_EQUAL(subsubset.size(), 5);
 	//~ for(size_t i=0; i!=subsubset.size(); ++i) {
@@ -523,7 +523,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 	//~ // 2.5 packing sets and checking equality
 	//~ //2.5.1 equality
 	//~ std::cout<<"equal1...";
-	//~ UnlabeledData<int> subset3 = subset2;
+	//~ Data<int> subset3 = subset2;
 	//~ BOOST_CHECK_EQUAL(subset3 == subset2,true);
 	//~ BOOST_CHECK_EQUAL(subset3 != subset2,false);
 	//~ //2.5.2 pack
@@ -541,14 +541,14 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 	//~ set.createNamedSubset("Dataset_test", indizes[0]);
 	//~ BOOST_REQUIRE_EQUAL(set.hasNamedSubset("Dataset_test"), true);
 
-	//~ UnlabeledData<int> namedSet;
+	//~ Data<int> namedSet;
 	//~ set.namedSubset("Dataset_test", namedSet);
 	//~ testSetEquality(namedSet, subset);
 	//~ BOOST_REQUIRE_EQUAL(namedSet.hasNamedSubset("Dataset_test"), false);
 
 	//~ // 3.1 now with complement
 	//~ std::cout << "subset complement...";
-	//~ UnlabeledData<int> namedComplement;
+	//~ Data<int> namedComplement;
 	//~ set.namedSubset("Dataset_test", namedSet, namedComplement);
 	//~ testSetEquality(namedSet, subset);
 	//~ testSetEquality(namedComplement, complement);
@@ -560,7 +560,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 	//~ set.createNamedSubset("Dataset_test2",randomSubset);
 	//~ BOOST_REQUIRE_EQUAL(set.hasNamedSubset("Dataset_test2"),true);
 
-	//~ UnlabeledData<int> namedSet2;
+	//~ Data<int> namedSet2;
 	//~ set.namedSubset("Dataset_test2",namedSet2);
 	//~ testSetEquality(namedSet2,randomSubset);
 	
@@ -598,10 +598,10 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 	//~ // 5. copy constructor, default constructor and equality
 	//~ // a bit late, but...
 	//~ std::cout << "copy...";
-	//~ UnlabeledData<int> copy(set);
+	//~ Data<int> copy(set);
 	//~ testSetEquality(copy, set);
 	//~ BOOST_REQUIRE_EQUAL(copy.hasNamedSubset("Dataset_test"), true);
-	//~ UnlabeledData<int> defaultSet;
+	//~ Data<int> defaultSet;
 	//~ BOOST_REQUIRE_EQUAL(defaultSet.size(), 0);
 	//~ copy = defaultSet;
 	//~ BOOST_REQUIRE_EQUAL(copy.size(), 0);
@@ -636,7 +636,7 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 	}
 	// 1.1 test creating sets
 	std::cout<<"sets...";
-	UnlabeledData<int> inputSet=set.inputs();
+	Data<int> inputSet=set.inputs();
 	Data<int> labelSet=set.labels();
 	for(size_t i=0;i!=set.size();++i){
 		BOOST_CHECK_EQUAL(inputSet(i),set.input(i));

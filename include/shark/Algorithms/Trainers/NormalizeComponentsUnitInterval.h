@@ -81,7 +81,7 @@ public:
 	std::string name() const
 	{ return "NormalizeComponentsUnitInterval"; }
 
-	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input){
+	void train(Normalizer<DataType>& model, Data<DataType> const& input){
 		std:: size_t ic = input.numberOfElements();
 		SHARK_RUNTIME_CHECK(ic >= 2, "Input needs to consist of at least two points");
 		std::size_t dc = dataDimension(input);

@@ -35,7 +35,7 @@ int main()
 	std::size_t num_dims = 9;
 	std::size_t num_points = 200;
 	UniformPoints problem(num_dims);
-	UnlabeledData<RealVector> data = problem.generateDataset(num_points);
+	Data<RealVector> data = problem.generateDataset(num_points);
 	
 	DenseRbfKernel   	  basekernel1(0.1);
 	DenseLinearKernel      basekernel2;

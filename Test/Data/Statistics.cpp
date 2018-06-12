@@ -9,8 +9,8 @@ using namespace shark;
 const std::size_t Dimensions=4;
 struct StatisticsFixture
 {
-	UnlabeledData<RealVector> inputData;
-	UnlabeledData<RealVector> inputDataSmallBatch;
+	Data<RealVector> inputData;
+	Data<RealVector> inputDataSmallBatch;
 	StatisticsFixture()
 	{
 		//values of the input matrix

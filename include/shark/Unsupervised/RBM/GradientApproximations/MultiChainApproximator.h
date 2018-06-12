@@ -92,7 +92,7 @@ public:
 		return m_numBatches;
 	}
 	
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 		
 		//construct a gradient object to get the information about which values of the samples are needed
@@ -163,7 +163,7 @@ private:
 	RBM* mpe_rbm;
 	mutable MarkovChainType m_chainOperator;
 	mutable std::vector<typename MarkovChainType::SampleBatch> m_chains;
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 
 	unsigned int m_k;
 	std::size_t m_samples;
