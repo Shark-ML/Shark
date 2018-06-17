@@ -205,6 +205,13 @@ public:
 		return m_numEvaluations;
 	}
 
+	bool isUsingActiveUpdates() const {
+		return m_useActiveUpdates;
+	}
+
+	void useActiveUpsates(bool useActiveUpdates) {
+		m_useActiveUpdates = useActiveUpdates;
+	}
 
 protected:
 	/// \brief The type of individual used for the CMA
@@ -231,6 +238,7 @@ private:
 
 	bool m_userSetMu; /// <The user set a value via setMu, do not overwrite with default
 	bool m_userSetLambda; /// <The user set a value via setMu, do not overwrite with default
+	bool m_useActiveUpdates; /// <Indicates if active updates should be applied
 	double m_initSigma; ///< use provided initial value of sigma<=0 =>algorithm chooses
 
 	RecombinationType m_recombinationType; ///< Stores the recombination type.
