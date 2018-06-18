@@ -72,16 +72,16 @@ class MklKernel
 , public WeightedSumKernel<InputType>
 {
 private:
-    typedef detail::MklKernelBase<InputType> base_type1;
-    typedef WeightedSumKernel<InputType> base_type2;
+	typedef detail::MklKernelBase<InputType> base_type1;
+	typedef WeightedSumKernel<InputType> base_type2;
 public:
 
-    template<class KernelTuple>
-    MklKernel(KernelTuple const& kernels):base_type1(kernels),base_type2(base_type1::makeKernelVector()){}
+	template<class KernelTuple>
+	MklKernel(KernelTuple const& kernels):base_type1(kernels),base_type2(base_type1::makeKernelVector()){}
 
-    /// \brief From INameable: return the class name.
-    std::string name() const
-    { return "MklKernel"; }
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "MklKernel"; }
 };
 
 }

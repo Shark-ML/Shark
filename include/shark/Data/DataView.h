@@ -206,6 +206,14 @@ public:
 	std::size_t positionInBatch(std::size_t position) const {
 		return m_indices[position].positionInBatch;
 	}
+	
+	
+	/// \brief exchanges elements i and j in the Dataview.
+	///
+	/// This does not change the order in the underlying dataset.
+	void swapElements(std::size_t i, std::size_t j){
+		std::swap(m_indices[i], m_indices[j]);
+	}
 
 	std::size_t size() const{
 		return m_indices.size();
@@ -314,10 +322,16 @@ typename DataView<T>::dataset_type
 toDataset(DataView<T> const& view, std::size_t batchSize = DataView<T>::dataset_type::DefaultBatchSize){
 	if(view.size() == 0)
 		return typename DataView<T>::dataset_type();
-	//O.K. todo: this is slow for sparse elements, use subBatch or something similar.
-	std::size_t elements = view.size();
-	typename DataView<T>::dataset_type dataset(elements,view[0],batchSize);
-	std::copy(view.begin(),view.end(),dataset.elements().begin());
+	
+	auto batchSizes = detail::optimalBatchSizes(view.size(), batchSize);
+	typename DataView<T>::dataset_type dataset(batchSizes.size());
+	
+	std::size_t batchStart = 0;
+	for(std::size_t i = 0; i != batchSizes.size(); ++i){
+		std::size_t batchEnd = batchStart + batchSizes[i];
+		dataset.batch(i) = createBatch<typename DataView<T>::value_type>(view.begin()+batchStart, view.begin()+batchEnd);
+		batchStart = batchEnd;
+	}
 	return dataset;
 }
 
