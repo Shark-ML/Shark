@@ -41,11 +41,11 @@
 namespace shark {
 
 
-/// \brief Normalized version of a kernel function
+/// \brief Kernel over two sets of Points.
 ///
-/// For a positive definite kernel k, the normalized kernel
-/// \f[ \tilde k(x, y) := \frac{k(x, y)}{\sqrt{k(x, x) \cdot k(y, y)}} \f]
-/// is again a positive definite kernel function.
+/// For a positive definite kernel k and sets of points X=x_1,...,x_n and Y=y_1,...,y_m
+/// the point set kernel is defined as
+/// \f[ \tilde k(X, Y) := \frac{1}{m n} \sum_i \sum_j k(x_i, y_j)\f]
 /// \ingroup kernels
 template<class InputType=RealVector>
 class PointSetKernel : public AbstractKernelFunction<typename Batch<InputType>::type >
@@ -99,11 +99,10 @@ public:
 	///evaluates \f$ k(x,y) \f$
 	///
 	/// calculates
-	/// \f[ \tilde k(x, y) := \frac{k(x, y)}{\sqrt{k(x, x) \cdot k(y, y)}} \f]
+	/// \f[ \tilde k(X, Y) := \frac{1}{m n} \sum_i \sum_j k(x_i, y_j)\f]
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
-        RealMatrix response = (*m_base)(x1,x2);
-        
-        return sum(response)/(response.size1() * response.size2());
+		RealMatrix response = (*m_base)(x1,x2);
+		return sum(response)/(response.size1() * response.size2());
 	}
 	
 	
@@ -112,15 +111,15 @@ public:
 		
 		std::size_t sizeX1 = batchSize(batchX1);
 		std::size_t sizeX2 = batchSize(batchX2);
-        s.resize(sizeX1,sizeX2,m_base);
+		s.resize(sizeX1,sizeX2,m_base);
 		result.resize(sizeX1,sizeX2);
-        RealMatrix response;
-        for(std::size_t i = 0; i != sizeX1; ++i){
-            for(std::size_t j = 0; j != sizeX2; ++j){
-                m_base->eval(getBatchElement(batchX1,i),getBatchElement(batchX2,j),response,*s.state[i*sizeX2+j]);
-                result(i,j) = sum(response)/(response.size1() * response.size2());
-            }
-        }
+		RealMatrix response;
+		for(std::size_t i = 0; i != sizeX1; ++i){
+			for(std::size_t j = 0; j != sizeX2; ++j){
+				m_base->eval(getBatchElement(batchX1,i),getBatchElement(batchX2,j),response,*s.state[i*sizeX2+j]);
+				result(i,j) = sum(response)/(response.size1() * response.size2());
+			}
+		}
 	}
     
     void eval(ConstBatchInputReference const& batchX1, ConstBatchInputReference const& batchX2, RealMatrix& result) const{
@@ -128,13 +127,13 @@ public:
 		std::size_t sizeX2 = batchSize(batchX2);
 		result.resize(sizeX1,sizeX2);
         
-        RealMatrix response;
-        for(std::size_t i = 0; i != sizeX1; ++i){
-            for(std::size_t j = 0; j != sizeX2; ++j){
-                m_base->eval(getBatchElement(batchX1,i),getBatchElement(batchX2,j),response);
-                result(i,j) = sum(response)/(response.size1() * response.size2());
-            }
-        }
+		RealMatrix response;
+		for(std::size_t i = 0; i != sizeX1; ++i){
+			for(std::size_t j = 0; j != sizeX2; ++j){
+				m_base->eval(getBatchElement(batchX1,i),getBatchElement(batchX2,j),response);
+				result(i,j) = sum(response)/(response.size1() * response.size2());
+			}
+		}
 	}
 
 	void weightedParameterDerivative(
@@ -149,18 +148,18 @@ public:
 		std::size_t sizeX1 = batchSize(batchX1);
 		std::size_t sizeX2 = batchSize(batchX2);
 		
-        for(std::size_t i = 0; i != sizeX1; ++i){
-            for(std::size_t j = 0; j != sizeX2; ++j){
-                auto x1 = getBatchElement(batchX1,i);
-                auto x2 = getBatchElement(batchX2,j);
-                std::size_t size1 = batchSize(x1);
-                std::size_t size2 = batchSize(x2);
-                RealMatrix setCoeff(size1,size2, coefficients(i,j)/(size1 * size2));
-                RealVector grad;
-                m_base->weightedParameterDerivative(x1,x2,setCoeff,*s.state[i*sizeX2+j],grad);
-                noalias(gradient) += grad;
-            }
-        }
+		for(std::size_t i = 0; i != sizeX1; ++i){
+			for(std::size_t j = 0; j != sizeX2; ++j){
+				auto x1 = getBatchElement(batchX1,i);
+				auto x2 = getBatchElement(batchX2,j);
+				std::size_t size1 = batchSize(x1);
+				std::size_t size2 = batchSize(x2);
+				RealMatrix setCoeff(size1,size2, coefficients(i,j)/(size1 * size2));
+				RealVector grad;
+				m_base->weightedParameterDerivative(x1,x2,setCoeff,*s.state[i*sizeX2+j],grad);
+				noalias(gradient) += grad;
+			}
+		}
 	}
 
 protected:

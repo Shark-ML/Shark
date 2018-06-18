@@ -105,8 +105,7 @@ public:
 	/// \brief Evaluates the kernel function.
 	///
 	/// The function returns the stored similarity value.
-	double eval(ConstInputReference x1, ConstInputReference x2)const
-	{
+	double eval(ConstInputReference x1, ConstInputReference x2)const{
 		return m_matrix(x1, x2);
 	}
 	
