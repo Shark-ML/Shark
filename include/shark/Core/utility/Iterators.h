@@ -109,60 +109,6 @@ private:
 	std::size_t m_index;
 };
 
-/// \brief Creates an iterator which reinterpretes an object as a range
-///
-/// The second template argument represents the elements by the proxy reference type. it must offer
-/// a constructor Reference(sequence,i) which constructs a reference to the i-th proxy-element
-template<class Sequence, class ValueType, class Reference>
-class ProxyIterator: public SHARK_ITERATOR_FACADE<
-	ProxyIterator<Sequence,ValueType,Reference>,
-	ValueType,
-	//boost::random_access_traversal_tag,
-	std::random_access_iterator_tag,//keep VC quiet.
-	Reference
->{
-public:
-	ProxyIterator() : m_position(0) {}
-
-	ProxyIterator(Sequence& seq, std::size_t position)
-	: m_sequence(&seq),m_position(position) {}
-
-	template<class S, class V, class R>
-	ProxyIterator(ProxyIterator<S,V,R> const& other)
-	: m_sequence(other.m_sequence),m_position(other.m_position) {}
-
-private:
-	friend class SHARK_ITERATOR_CORE_ACCESS;
-	template <class,class,class> friend class ProxyIterator;
-
-	void increment() {
-		++m_position;
-	}
-	void decrement() {
-		--m_position;
-	}
-
-	void advance(std::ptrdiff_t n){
-		m_position += n;
-	}
-
-	template<class Iter>
-	std::ptrdiff_t distance_to(const Iter& other) const{
-		return (std::ptrdiff_t)other.m_position - (std::ptrdiff_t)m_position;
-	}
-
-	template<class Iter>
-	bool equal(Iter const& other) const{
-		return (m_position == other.m_position);
-	}
-	Reference dereference() const {
-		return Reference(*m_sequence,m_position);
-	}
-
-	Sequence* m_sequence;
-	std::size_t m_position;
-};
-
 template<class Container>
 class IndexingIterator: public SHARK_ITERATOR_FACADE<
 	IndexingIterator<Container>,

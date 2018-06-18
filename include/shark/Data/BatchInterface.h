@@ -57,12 +57,6 @@ struct SimpleBatch{
 	/// \brief The type of the elements stored in the batch 
 	typedef typename type::value_type value_type;
 	
-	/// \brief the iterator type of the object
-	typedef typename type::iterator iterator;
-	/// \brief the const_iterator type of the object
-	typedef typename type::const_iterator const_iterator;
-	
-	
 	///\brief creates a batch able to store elements of the structure of input (e.g. same dimensionality)
 	static type createBatch(value_type const& input, std::size_t size = 1){
 		return type(size,input);
@@ -83,13 +77,6 @@ struct SimpleBatch{
 		batch.resize(batchSize);
 	}
 	
-	//~ ///\brief Swaps the ith element in the first batch with the jth element in the second batch
-	//~ template<class T, class U>
-	//~ static void swap(T& batchi, U& batchj, std::size_t i, std::size_t j){
-		//~ using std::swap;
-		//~ swap(batchi[i],batchj[j]);
-	//~ }
-	
 	template<class T>
 	static std::size_t size(T const& batch){return batch.size();}
 	
@@ -100,22 +87,6 @@ struct SimpleBatch{
 	template<class T>
 	static typename T::const_reference get(T const& batch, std::size_t i){
 		return batch[i];
-	}
-	template<class T>
-	static typename T::iterator begin(T& batch){
-		return batch.begin();
-	}
-	template<class T>
-	static typename T::const_iterator begin(T const& batch){
-		return batch.begin();
-	}
-	template<class T>
-	static typename T::iterator end(T& batch){
-		return batch.end();
-	}
-	template<class T>
-	static typename T::const_iterator end(T const& batch){
-		return batch.end();
 	}
 };
 
@@ -153,16 +124,6 @@ public:
 	}
 };
 
-//~ template<class M>
-//~ void swap(MatrixRowReference<M> ref1, MatrixRowReference<M> ref2){
-	//~ swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
-//~ }
-
-//~ template<class M1, class M2>
-//~ void swap(MatrixRowReference<M1> ref1, MatrixRowReference<M2> ref2){
-	//~ swap_rows(ref1.expression().expression(),ref1.index(),ref2.expression().expression(),ref2.index());
-//~ }
-
 template<class Matrix>
 struct VectorBatch{
 	/// \brief Type of a batch of elements.
@@ -177,12 +138,6 @@ struct VectorBatch{
 	/// \brief Type of a single immutable element.
 	typedef detail::MatrixRowReference<const Matrix> const_reference;
 	
-	
-	/// \brief the iterator type of the object
-	typedef ProxyIterator<Matrix, value_type, reference > iterator;
-	/// \brief the const_iterator type of the object
-	typedef ProxyIterator<const Matrix, value_type, const_reference > const_iterator;
-	
 	///\brief creates a batch with input as size blueprint
 	template<class Element>
 	static type createBatch(Element const& input, std::size_t size = 1){
@@ -190,9 +145,12 @@ struct VectorBatch{
 	}
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Iterator>
-	static type createBatchFromRange(Iterator const& pos, Iterator const& end){
-		type batch(end - pos,pos->size());
-		std::copy(pos,end,begin(batch));
+	static type createBatchFromRange(Iterator const& start, Iterator const& end){
+		type batch(end - start,start->size());
+		Iterator pos = start;
+		for(std::size_t i = 0; i != batch.size1(); ++i, ++pos){
+			noalias(row(batch,i)) = *pos;
+		}
 		return batch;
 	}
 	
@@ -207,20 +165,6 @@ struct VectorBatch{
 	}
 	static const_reference get( Matrix const& batch, std::size_t i){
 		return const_reference(batch,i);
-	}
-	
-	static iterator begin(Matrix& batch){
-		return iterator(batch,0);
-	}
-	static const_iterator begin(Matrix const& batch){
-		return const_iterator(batch,0);
-	}
-	
-	static iterator end(Matrix& batch){
-		return iterator(batch,batch.size1());
-	}
-	static const_iterator end(Matrix const& batch){
-		return const_iterator(batch,batch.size1());
 	}
 };
 
@@ -262,12 +206,6 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	/// \brief Type of a single immutable element.
 	typedef detail::MatrixRowReference<const type> const_reference;
 	
-	
-	/// \brief the iterator type of the object
-	typedef ProxyIterator<type, value_type, reference > iterator;
-	/// \brief the const_iterator type of the object
-	typedef ProxyIterator<const type, value_type, const_reference > const_iterator;
-	
 	///\brief creates a batch with input as size blueprint
 	template<class Element>
 	static type createBatch(Element const& input, std::size_t size = 1){
@@ -292,7 +230,6 @@ struct Batch<shark::blas::compressed_vector<T> >{
 				row_start = batch.set_element(row_start, elem_pos.index(), *elem_pos);
 			}
 		}
-		//~ std::copy(start,end,begin(batch));
 		return batch;
 	}
 	
@@ -307,20 +244,6 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	}
 	static const_reference get( type const& batch, std::size_t i){
 		return const_reference(batch,i);
-	}
-	
-	static iterator begin(type& batch){
-		return iterator(batch,0);
-	}
-	static const_iterator begin(type const& batch){
-		return const_iterator(batch,0);
-	}
-	
-	static iterator end(type& batch){
-		return iterator(batch,batch.size1());
-	}
-	static const_iterator end(type const& batch){
-		return const_iterator(batch,batch.size1());
 	}
 };
 
@@ -368,6 +291,10 @@ struct batch_to_reference{
 	typedef typename BatchTraits<T>::type::reference type;
 };
 template<class T>
+struct batch_to_reference<T const>{
+	typedef typename BatchTraits<T>::type::const_reference type;
+};
+template<class T>
 struct batch_to_reference<T&>{
 	typedef typename BatchTraits<T>::type::reference type;
 };
@@ -397,7 +324,6 @@ struct element_to_batch<detail::MatrixRowReference<M const> >{
 	typedef typename Batch<typename detail::MatrixRowReference<M>::Vector>::type const& type;
 };
 }
-
 
 ///\brief creates a batch from a range of inputs
 template<class T, class Range>
@@ -431,26 +357,58 @@ std::size_t batchSize(BatchT const& batch){
 	return BatchTraits<BatchT>::type::size(batch);
 }
 
-template<class BatchT>
-auto batchBegin(BatchT& batch)->decltype(BatchTraits<BatchT>::type::begin(batch)){
-	return BatchTraits<BatchT>::type::begin(batch);
-}
+template<class Sequence>
+class BatchIterator: public SHARK_ITERATOR_FACADE<
+	BatchIterator<Sequence>,
+	typename detail::batch_to_element<Sequence>::type,
+	//boost::random_access_traversal_tag,
+	std::random_access_iterator_tag,//keep VC quiet.
+	typename detail::batch_to_reference<Sequence>::type
+>{
+private:
+	
+	typedef typename detail::batch_to_reference<Sequence>::type Reference;
+public:
+	BatchIterator() : m_position(0) {}
 
-template<class BatchT>
-auto batchBegin(BatchT const& batch)->decltype(BatchTraits<BatchT>::type::begin(batch)){
-	return BatchTraits<BatchT>::type::begin(batch);
-}
+	BatchIterator(Sequence& seq, std::size_t position)
+	: m_sequence(&seq),m_position(position) {}
 
-template<class BatchT>
-auto batchEnd(BatchT& batch)->decltype(BatchTraits<BatchT>::type::end(batch)){
-	return BatchTraits<BatchT>::type::end(batch);
-}
+	template<class S>
+	BatchIterator(BatchIterator<S> const& other)
+	: m_sequence(other.m_sequence),m_position(other.m_position) {}
 
-template<class BatchT>
-auto batchEnd(BatchT const& batch)->decltype(BatchTraits<BatchT>::type::end(batch)){
-	return BatchTraits<BatchT>::type::end(batch);
-}
+private:
+	friend class SHARK_ITERATOR_CORE_ACCESS;
+	template <class> friend class BatchIterator;
 
+	void increment() {
+		++m_position;
+	}
+	void decrement() {
+		--m_position;
+	}
+
+	void advance(std::ptrdiff_t n){
+		m_position += n;
+	}
+
+	template<class Iter>
+	std::ptrdiff_t distance_to(const Iter& other) const{
+		return (std::ptrdiff_t)other.m_position - (std::ptrdiff_t)m_position;
+	}
+
+	template<class Iter>
+	bool equal(Iter const& other) const{
+		return (m_position == other.m_position);
+	}
+	Reference dereference() const {
+		return getBatchElement(*m_sequence, m_position);
+	}
+
+	Sequence* m_sequence;
+	std::size_t m_position;
+};
 
 }
 #endif

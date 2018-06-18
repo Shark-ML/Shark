@@ -316,8 +316,12 @@ public:
 
 		auto leftSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),leftElements));
 		auto rightSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),rightElements));
-		std::copy(BatchTraits::begin(source),BatchTraits::begin(source)+leftElements,BatchTraits::begin(*leftSplit));
-		std::copy(BatchTraits::begin(source)+leftElements,BatchTraits::end(source),BatchTraits::begin(*rightSplit));
+		for(std::size_t i = 0; i != leftElements; ++i){
+			getBatchElement(*leftSplit,i) = getBatchElement(source,i);
+		}
+		for(std::size_t i = 0; i != rightElements; ++i){
+			getBatchElement(*rightSplit,i) = getBatchElement(source,i + leftElements);
+		}
 		*(position.base())=rightSplit;//override old batch
 		m_data.insert(position.base(),leftSplit);
 
@@ -566,10 +570,6 @@ public:
 		
 	std::size_t index()const{
 		return m_positionInSequence;
-	}
-	
-	auto getInnerIterator()const ->decltype (batchBegin(m_container->batch(m_batchPosition))){
-		return batchBegin(m_container->batch(m_batchPosition)) + m_elementPosition;
 	}
 
 private:

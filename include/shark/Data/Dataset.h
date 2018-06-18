@@ -871,11 +871,14 @@ transform(Data<T> const& data, Functor f){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(batches);
-	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
-		result.batch(i)= createBatch<ResultType>(
-			boost::make_transform_iterator(batchBegin(data.batch(i)), f),
-			boost::make_transform_iterator(batchEnd(data.batch(i)), f)
+	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
+		typedef BatchIterator<typename Batch<T>::type const> Iterator;
+		
+		result.batch(i) = createBatch<ResultType>(
+			boost::make_transform_iterator(Iterator(data.batch(i),0), f),
+			boost::make_transform_iterator(Iterator(data.batch(i), batchSize(data.batch(i))), f)
 		);
+	}
 	result.shape() = detail::InferShape<Data<ResultType> >::infer(result);
 	return result;
 }

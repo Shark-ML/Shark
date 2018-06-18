@@ -269,22 +269,6 @@ struct const_reference: public detail::FusionFacade<FusionConstRef>{\
 	}\
 };
 
-///\brief creates default typedefs for iterator or const_iterator types of Batches
-#define SHARK_CREATE_BATCH_ITERATORS()\
-typedef ProxyIterator<type, value_type, reference > iterator;\
-typedef ProxyIterator<const type, value_type, const_reference > const_iterator;\
-iterator begin(){\
-	return iterator(*this,0);\
-}\
-const_iterator begin()const{\
-	return const_iterator(*this,0);\
-}\
-iterator end(){\
-	return iterator(*this,size());\
-}\
-const_iterator end()const{\
-	return const_iterator(*this,size());\
-}\
 ///\brief This macro can be used to specialize a structure type easily to a batch type.
 ///
 ///Assume, that your input Data looks like:
@@ -321,7 +305,6 @@ public:\
 		typedef NAME value_type;\
 		\
 		SHARK_CREATE_BATCH_REFERENCES_TPL(ATTRIBUTES)\
-		SHARK_CREATE_BATCH_ITERATORS()\
 		\
 		type(){}\
 		type(std::size_t size1, std::size_t size2){\
@@ -338,10 +321,10 @@ public:\
 			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));\
 		}\
 		reference operator[](std::size_t i){\
-			return *(begin()+i);\
+			return reference(*this,i);\
 		}\
 		const_reference operator[](std::size_t i)const{\
-			return *(begin()+i);\
+			return const_reference(*this,i);\
 		}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version)\
@@ -352,8 +335,6 @@ public:\
 	typedef NAME value_type;\
 	typedef typename type::reference reference;\
 	typedef typename type::const_reference const_reference;\
-	typedef typename type::iterator iterator;\
-	typedef typename type::const_iterator const_iterator;\
 	\
 	static type createBatch(value_type const& input, std::size_t size = 1){\
 		type batch;\
@@ -383,24 +364,7 @@ public:\
 	template<class T>\
 	static const_reference get(T const& batch, std::size_t i){\
 		return batch[i];\
-	}\
-	template<class T>\
-	static typename T::iterator begin(T& batch){\
-		return batch.begin();\
-	}\
-	template<class T>\
-	static const_iterator begin(T const& batch){\
-		return batch.begin();\
-	}\
-	template<class T>\
-	static typename T::iterator end(T& batch){\
-		return batch.end();\
-	}\
-	template<class T>\
-	static const_iterator end(T const& batch){\
-		return batch.end();\
 	}
-
 
 ///\brief This macro can be used to specialize a structure type easily to a batch type.
 ///
@@ -437,7 +401,6 @@ public:\
 		typedef NAME value_type;\
 		\
 		SHARK_CREATE_BATCH_REFERENCES(ATTRIBUTES)\
-		SHARK_CREATE_BATCH_ITERATORS()\
 		\
 		type(){}\
 		type(std::size_t size1, std::size_t size2){\
@@ -447,10 +410,10 @@ public:\
 			boost::fusion::for_each(fusionize(*this), detail::resize(batchSize,elementSize));\
 		}\
 		reference operator[](std::size_t i){\
-			return *(begin()+i);\
+			return reference(*this,i);\
 		}\
 		const_reference operator[](std::size_t i)const{\
-			return *(begin()+i);\
+			return const_reference(*this,i);\
 		}\
 		friend void swap(type& op1, type& op2){\
 			boost::fusion::swap(fusionize(op1),fusionize(op2));\
@@ -467,8 +430,6 @@ public:\
 	typedef NAME value_type;\
 	typedef type::reference reference;\
 	typedef type::const_reference const_reference;\
-	typedef type::iterator iterator;\
-	typedef type::const_iterator const_iterator;\
 	\
 	static type createBatch(value_type const& input, std::size_t size = 1){\
 		type batch;\
@@ -498,22 +459,6 @@ public:\
 	template<class T>\
 	static const_reference get(T const& batch, std::size_t i){\
 		return batch[i];\
-	}\
-	template<class T>\
-	static typename T::iterator begin(T& batch){\
-		return batch.begin();\
-	}\
-	template<class T>\
-	static const_iterator begin(T const& batch){\
-		return batch.begin();\
-	}\
-	template<class T>\
-	static typename T::iterator end(T& batch){\
-		return batch.end();\
-	}\
-	template<class T>\
-	static const_iterator end(T const& batch){\
-		return batch.end();\
 	}
 
 #endif

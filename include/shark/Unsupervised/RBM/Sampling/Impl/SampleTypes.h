@@ -110,7 +110,6 @@ public:
 		typedef detail::MarkovChainSample<Hidden,Visible> value_type;
 	
 		SHARK_CREATE_BATCH_REFERENCES_TPL((Hidden, hidden)(Visible, visible)(double, energy))
-		SHARK_CREATE_BATCH_ITERATORS()
 		
 		type(){}
 		type(std::size_t batchSize, std::size_t numVisible, std::size_t numHidden){
@@ -127,10 +126,10 @@ public:
 		}
 		
 		reference operator[](std::size_t i){
-			return *(begin()+i);
+			return reference(*this,i);
 		}
 		const_reference operator[](std::size_t i)const{
-			return *(begin()+i);
+			return const_reference(*this,i);
 		}
 		
 		template<class Archive>
@@ -142,8 +141,6 @@ public:
 	typedef detail::MarkovChainSample<Hidden,Visible> value_type;
 	typedef typename type::reference reference;
 	typedef typename type::const_reference const_reference;
-	typedef typename type::iterator iterator;
-	typedef typename type::const_iterator const_iterator;
 
 	static type createBatch(value_type const& input, std::size_t size = 1){
 		return type(size,batchSize(FusionType::visible),batchSize(FusionType::hidden));
@@ -159,22 +156,6 @@ public:
 	template<class T>
 	static const_reference get(T const& batch, std::size_t i){
 		return batch[i];
-	}
-	template<class T>
-	static typename T::iterator begin(T& batch){
-		return batch.begin();
-	}
-	template<class T>
-	static const_iterator begin(T const& batch){
-		return batch.begin();
-	}
-	template<class T>
-	static typename T::iterator end(T& batch){
-		return batch.end();
-	}
-	template<class T>
-	static const_iterator end(T const& batch){
-		return batch.end();
 	}
 };
 }
