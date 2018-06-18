@@ -54,6 +54,7 @@
 #include <shark/Core/Random.h>
 #include <shark/Core/Shape.h>
 #include "Impl/Dataset.inl"
+#include "Impl/InputLabelPair.h"
 
 namespace shark {
 
@@ -131,7 +132,7 @@ protected:
 	typedef detail::SharedContainer<Type> Container;
 
 	Container m_data;///< data
-	Shape m_shape;///< shape of a datapoint
+	typename ShapeType<Type>::type m_shape;///< shape of a datapoint
 public:
 	/// \brief Defines the default batch size of the Container.
 	///
@@ -214,12 +215,12 @@ public:
 	
 	
 	///\brief Returns the shape of the elements in the dataset.
-	Shape const& shape() const{
+	typename ShapeType<Type>::type const& shape() const{
 		return m_shape;
 	}
 	
 	///\brief Returns the shape of the elements in the dataset.
-	Shape& shape(){
+	typename ShapeType<Type>::type& shape(){
 		return m_shape;
 	}
 
@@ -573,22 +574,27 @@ public:
 	}
 	
 	///\brief Returns the Shape of the inputs.
-	Shape const& inputShape() const{
+	typename ShapeType<InputType>::type const& inputShape() const{
 		return m_data.shape();
 	}
 	
 	///\brief Returns the Shape of the inputs.
-	Shape& inputShape(){
+	typename ShapeType<InputType>::type& inputShape(){
 		return m_data.shape();
 	}
 	
 	///\brief Returns the Shape of the labels.
-	Shape const& labelShape() const{
+	typename ShapeType<LabelType>::type const& labelShape() const{
 		return m_label.shape();
 	}
 	
 	///\brief Returns the Shape of the labels.
-	Shape& labelShape(){
+	typename ShapeType<LabelType>::type& labelShape(){
+		return m_label.shape();
+	}
+	
+	///\brief Returns the Shape of the elements
+	typename ShapeType<element_type>::type const& shape(){
 		return m_label.shape();
 	}
 
