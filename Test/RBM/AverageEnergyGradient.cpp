@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 		}
 	}
 	
-	BinaryGibbsOperator::HiddenSampleBatch hiddenBatch(10,4);
-	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
+	BinaryGibbsOperator::HiddenSample hiddenBatch(10,4);
+	BinaryGibbsOperator::VisibleSample visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
 	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 		}
 	}
 	
-	BinaryGibbsOperator::HiddenSampleBatch hiddenBatch(10,4);
-	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
+	BinaryGibbsOperator::HiddenSample hiddenBatch(10,4);
+	BinaryGibbsOperator::VisibleSample visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
 	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
@@ -95,8 +95,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 	}
 	double logWeightSum=std::log(sum(weights));
 	
-	BinaryGibbsOperator::HiddenSampleBatch hiddenBatch(10,4);
-	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
+	BinaryGibbsOperator::HiddenSample hiddenBatch(10,4);
+	BinaryGibbsOperator::VisibleSample visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
 	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
@@ -142,8 +142,8 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 	}
 	double logWeightSum=std::log(sum(weights));
 	
-	BinaryGibbsOperator::HiddenSampleBatch hiddenBatch(10,4);
-	BinaryGibbsOperator::VisibleSampleBatch visibleBatch(10,4);
+	BinaryGibbsOperator::HiddenSample hiddenBatch(10,4);
+	BinaryGibbsOperator::VisibleSample visibleBatch(10,4);
 	
 	BinaryGibbsOperator gibbs(&rbm);
 	detail::AverageEnergyGradient<BinaryRBM> grad(&rbm);
@@ -214,8 +214,8 @@ public:
 		//calculate the expectation of the energy gradient with respect to the data
 		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
 			std::size_t currentBatchSize=m_data.batch(i).size1();
-			GibbsOperator<BinaryRBM>::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
-			GibbsOperator<BinaryRBM>::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
+			GibbsOperator<BinaryRBM>::HiddenSample hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
+			GibbsOperator<BinaryRBM>::VisibleSample visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 		
 			sampler.createSample(hiddenSamples,visibleSamples,m_data.batch(i));
 			gradient.addVH(hiddenSamples, visibleSamples);
@@ -295,8 +295,8 @@ public:
 		//calculate the expectation of the energy gradient with respect to the data
 		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
 			std::size_t currentBatchSize=m_data.batch(i).size1();
-			GibbsOperator<BinaryRBM>::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
-			GibbsOperator<BinaryRBM>::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
+			GibbsOperator<BinaryRBM>::HiddenSample hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
+			GibbsOperator<BinaryRBM>::VisibleSample visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 		
 			hiddenSamples.state = m_data.batch(i);
 			sampler.precomputeVisible(hiddenSamples,visibleSamples,blas::repeat(1.0,10));

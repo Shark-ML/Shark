@@ -55,12 +55,6 @@ public:
 	///\brief A batch of samples containing hidden and visible samples as well as the energies.
 	typedef typename TemperedMarkovChain<Operator>::SampleBatch SampleBatch;
 	
-	///\brief Mutable reference to an element of the batch.
-	typedef typename SampleBatch::reference reference;
-	
-	///\brief Immutable reference to an element of the batch.
-	typedef typename SampleBatch::const_reference const_reference;
-	
 private:
 	
 	TemperedMarkovChain<Operator> m_chain;
@@ -114,11 +108,7 @@ public:
 	RealVector const& beta()const{
 		return m_chain.beta();
 	}
-	
-	///\brief Returns the current state of the chain for beta = 1.
-	const_reference sample()const{
-		return m_chain.sample();
-	}
+
 	///\brief Returns the current state of the chain for all beta values.
 	SampleBatch const& samples()const{
 		return m_chain.samples();

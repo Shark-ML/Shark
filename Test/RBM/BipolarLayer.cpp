@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE (RBM_BipolarLayer)
 
 BOOST_AUTO_TEST_CASE( BipolarLayer_SufficientStatistics){
 	BipolarLayer layer;
-	BipolarLayer::StatisticsBatch statistics(10,3);
+	BipolarLayer::SufficientStatistics statistics(10,3);
 	layer.resize(3);
 	RealMatrix input(10,3);
 	RealMatrix testInput(10,3);
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( BipolarLayer_Parameters){
 
 BOOST_AUTO_TEST_CASE( BipolarLayer_Sample){
 	BipolarLayer layer;
-	BipolarLayer::StatisticsBatch statistics(10,5);
+	BipolarLayer::SufficientStatistics statistics(10,5);
 	layer.resize(5);
 	random::globalRng.seed(42);
 	

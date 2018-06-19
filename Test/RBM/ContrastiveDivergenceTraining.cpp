@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		//define the distribution for every input pattern
 		RealMatrix hiddenInput(inputs,4);
 		
-		BinaryLayer::StatisticsBatch hiddenStatistics(inputs,4);
+		BinaryLayer::SufficientStatistics hiddenStatistics(inputs,4);
 		energy.inputHidden(hiddenInput,data.batch(0));
 		rbm.hiddenNeurons().sufficientStatistics(hiddenInput,hiddenStatistics, blas::repeat(1.0,inputs));
 		
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		
 		//get p(v_i=1|h) for all h
 		RealMatrix visibleInput(numHiddenStates,16);
-		BinaryLayer::StatisticsBatch visibleStatistics(numHiddenStates,16);
+		BinaryLayer::SufficientStatistics visibleStatistics(numHiddenStates,16);
 		energy.inputVisible(visibleInput,hiddenStates);
 		rbm.visibleNeurons().sufficientStatistics(visibleInput,visibleStatistics, blas::repeat(1.0,numHiddenStates));
 		
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		//the step beforehand ;)
 		RealMatrix v(1,16);
 		RealMatrix hInput(1,4);
-		BinaryLayer::StatisticsBatch hstat(1,4);
+		BinaryLayer::SufficientStatistics hstat(1,4);
 		
 		for(std::size_t i = 0; i != inputs; ++i){
 			row(v,0) = data.element(i);

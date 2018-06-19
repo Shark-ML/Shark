@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( GaussianLayer_Parameters){
 
 BOOST_AUTO_TEST_CASE( GaussianLayer_Sample){
 	GaussianLayer layer;
-	GaussianLayer::StatisticsBatch statistics(3,5);
+	GaussianLayer::SufficientStatistics statistics(3,5);
 	layer.resize(5);
 	random::globalRng.seed(42);
 	

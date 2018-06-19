@@ -73,7 +73,7 @@ private:
 	///@param outputs batch of (expected) states of hidden units
 	void evalForward(BatchInputType const& state,BatchOutputType& output)const{
 		std::size_t batchSize=state.size1();
-		typename HiddenType::StatisticsBatch statisticsBatch(batchSize,numberOfHN());
+		typename HiddenType::SufficientStatistics statisticsBatch(batchSize,numberOfHN());
 		RealMatrix inputBatch(batchSize,numberOfHN());
 		output.resize(state.size1(),numberOfHN());
 		
@@ -94,7 +94,7 @@ private:
 	///@param outputs batch of (expected) states of visible units
 	void evalBackward(BatchInputType const& state,BatchOutputType& output)const{
 		std::size_t batchSize = state.size1();
-		typename VisibleType::StatisticsBatch statisticsBatch(batchSize,numberOfVN());
+		typename VisibleType::SufficientStatistics statisticsBatch(batchSize,numberOfVN());
 		RealMatrix inputBatch(batchSize,numberOfVN());
 		output.resize(batchSize,numberOfVN());
 		
