@@ -53,10 +53,6 @@ class GibbsOperator{
 public:
 	typedef RBMType RBM;
 
-	///The operator holds a 'sample' of the visible and hidden neurons.
-	///Such a sample does not only contain the states of the neurons but all other information
-	///needed to approximate the gradient
-
 	///\brief the type of a concrete sample.
 	typedef detail::GibbsSample<
 		typename RBMType::HiddenType::SufficientStatistics
@@ -65,18 +61,6 @@ public:
 	typedef detail::GibbsSample<
 		typename RBMType::VisibleType::SufficientStatistics
 	> VisibleSample; 
-
-	///\brief Represents the state of a batch of hidden samples and additional information required by the gradient.
-	///
-	///Aside from the hidden state, this structure can also hold the actual values 
-	///of the input, the phi-function and the sufficient statistics
-	typedef typename Batch<HiddenSample>::type HiddenSampleBatch;
-
-	///\brief Represents the state of the visible units and additional information required by the gradient.
-	///
-	///Aside from the visible state, this structure can also hold the actual values 
-	///of the hidden input, the phi-function and the sufficient statistics
-	typedef typename Batch<VisibleSample>::type VisibleSampleBatch;
 
 	///\brief Constructs the Operator using an allready defined Distribution to sample from. 
 	GibbsOperator(RBM* rbm, double alphaVisible = 0,double alphaHidden = 0)
@@ -98,7 +82,7 @@ public:
 	/// @param visibleBatch the batch of visible samples to be created
 	/// @param beta the vector of inverse temperatures
 	template<class BetaVector>
-	void precomputeHidden(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
+	void precomputeHidden(HiddenSample& hiddenBatch, VisibleSample& visibleBatch, BetaVector const& beta)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
 		mpe_rbm->energy().inputHidden(hiddenBatch.input, visibleBatch.state);
 		//calculate the sufficient statistics of the hidden units
@@ -111,7 +95,7 @@ public:
 	///This function calculates the conditional probability distribution p(v|h) with inverse temperature beta for a whole batch of inputs.
 	///Be aware that a change of temperature may occur between sampleHidden and precomputeVisible.
 	template<class BetaVector>
-	void precomputeVisible(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, BetaVector const& beta)const{
+	void precomputeVisible(HiddenSample& hiddenBatch, VisibleSample& visibleBatch, BetaVector const& beta)const{
 		SIZE_CHECK(visibleBatch.size()==hiddenBatch.size());
 		mpe_rbm->energy().inputVisible(visibleBatch.input, hiddenBatch.state);
 		//calculate the sufficient statistics of the visible units for every element of the batch
@@ -120,16 +104,16 @@ public:
 	}
 
 	///\brief Samples a new batch of states of the hidden units using their precomputed statistics.
-	void sampleHidden(HiddenSampleBatch& sampleBatch)const{
+	void sampleHidden(HiddenSample& Sample)const{
 		//sample state of the hidden neurons, input and statistics was allready computed by precompute
-		mpe_rbm->hiddenNeurons().sample(sampleBatch.statistics, sampleBatch.state, m_alphaHidden, mpe_rbm->rng());
+		mpe_rbm->hiddenNeurons().sample(Sample.statistics, Sample.state, m_alphaHidden, mpe_rbm->rng());
 	}
 
 
 	///\brief Samples a new batch of states of the visible units using their precomputed statistics.
-	void sampleVisible(VisibleSampleBatch& sampleBatch)const{
+	void sampleVisible(VisibleSample& Sample)const{
 		//sample state of the visible neurons, input and statistics was allready computed by precompute
-		mpe_rbm->visibleNeurons().sample(sampleBatch.statistics, sampleBatch.state, m_alphaVisible, mpe_rbm->rng());
+		mpe_rbm->visibleNeurons().sample(Sample.statistics, Sample.state, m_alphaVisible, mpe_rbm->rng());
 	}
 	
 	/// \brief Applies the Gibbs operator a number of times to a given sample.
@@ -137,7 +121,7 @@ public:
 	/// Performs one complete step for a sample by sampling first the hidden, than the visible and computing the probability of a hidden given the visible unit
 	/// That is, Given a State (v,h), computes p(v|h),draws v and then computes p(h|v) and draws h . this is repeated several times
 	template<class BetaVector>
-	void stepVH(HiddenSampleBatch& hiddenBatch, VisibleSampleBatch& visibleBatch, std::size_t numberOfSteps, BetaVector const& beta){
+	void stepVH(HiddenSample& hiddenBatch, VisibleSample& visibleBatch, std::size_t numberOfSteps, BetaVector const& beta){
 		for(unsigned int i=0; i != numberOfSteps; i++){
 			precomputeVisible(hiddenBatch,visibleBatch,beta);
 			sampleVisible(visibleBatch);
@@ -154,7 +138,7 @@ public:
 	/// @param states the states of the visible neurons in the sample
 	/// @param beta the vector of inverse temperatures
 	template<class States, class BetaVector>
-	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states, BetaVector const& beta)const{
+	void createSample(HiddenSample& hiddenBatch,VisibleSample& visibleBatch, States const& states, BetaVector const& beta)const{
 		SIZE_CHECK(batchSize(states)==visibleBatch.size());
 		SIZE_CHECK(hiddenBatch.size()==visibleBatch.size());
 		visibleBatch.state = states;
@@ -170,7 +154,7 @@ public:
 	/// @param visibleBatch the batch of visible samples to be created
 	/// @param states the states of the visible neurons in the sample
 	template<class States>
-	void createSample(HiddenSampleBatch& hiddenBatch,VisibleSampleBatch& visibleBatch, States const& states)const{
+	void createSample(HiddenSample& hiddenBatch,VisibleSample& visibleBatch, States const& states)const{
 		createSample(hiddenBatch,visibleBatch,states, blas::repeat(1.0,states.size1()));
 	}
 	
@@ -179,7 +163,7 @@ public:
 	///@param hiddenBatch the batch of samples of the hidden neurons 
 	///@param visibleBatch the batch of samples of the visible neurons (holding also the precomputed input of the visibles)
 	///@return the value of the energy function 
-	RealVector calculateEnergy(HiddenSampleBatch const& hiddenBatch, VisibleSampleBatch const& visibleBatch)const{
+	RealVector calculateEnergy(HiddenSample const& hiddenBatch, VisibleSample const& visibleBatch)const{
 		return mpe_rbm->energy().energyFromHiddenInput(
 			hiddenBatch.input, 
 			hiddenBatch.state, 

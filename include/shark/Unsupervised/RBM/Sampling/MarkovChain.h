@@ -52,16 +52,10 @@ public:
 	///\brief The type of the RBM the operator is working with.
 	typedef typename Operator::RBM RBM;
 	///\brief A batch of samples containing hidden and visible samples as well as the energies.
-	typedef typename Batch<detail::MarkovChainSample<HiddenSample,VisibleSample> >::type SampleBatch;
-	
-	///\brief Mutable reference to an element of the batch.
-	typedef typename SampleBatch::reference reference;
-	
-	///\brief Immutable reference to an element of the batch.
-	typedef typename SampleBatch::const_reference const_reference;
+	typedef detail::MarkovChainSample<HiddenSample,VisibleSample> Sample;
 private:
 	///\brief The batch of samples containing the state of the visible and the hidden units. 
-	SampleBatch m_samples;   
+	Sample m_samples;   
 	///\brief The transition operator.
 	Operator m_operator; 
 public:
@@ -74,7 +68,7 @@ public:
 	void setBatchSize(std::size_t batchSize){
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
 		std::size_t hiddens=m_operator.rbm()->numberOfHN();
-		m_samples=SampleBatch(batchSize,visibles,hiddens);
+		m_samples = Sample(batchSize,hiddens,visibles);
 	}
 	std::size_t batchSize(){
 		return m_samples.size();
@@ -107,18 +101,13 @@ public:
 		m_operator.stepVH(m_samples.hidden,m_samples.visible,numberOfSteps,blas::repeat(1.0,batchSize()));
 	}
 	
-	/// \brief Returns the current sample of the Markov chain. 
-	const_reference sample()const{
-		return const_reference(m_samples,0);
-	}
-	
 	/// \brief Returns the current batch of samples of the Markov chain. 
-	SampleBatch const& samples()const{
+	Sample const& samples()const{
 		return m_samples;
 	}
 	
 	/// \brief Returns the current batch of samples of the Markov chain. 
-	SampleBatch& samples(){
+	Sample& samples(){
 		return m_samples;
 	}
 	
