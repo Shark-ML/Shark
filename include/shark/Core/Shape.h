@@ -138,16 +138,5 @@ std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os, Shape const
 }
 
 
-/// \brief Returns the shape type of a given input
-///
-/// For most types, especially vector types, this is just Shape. For more complex types, this is not sufficient.
-/// For example given tuples of inputs, like pairs of inputs and labels, a single shape can not cover the structure 
-/// of both input and label at the same time. In this case, we use std::array<Shape,2>. Types are allowed to also
-/// use very different things here.
-template<class T>
-struct ShapeType{
-	typedef Shape type;
-};
-
 }
 #endif

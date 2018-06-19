@@ -71,6 +71,7 @@ struct CreateBatch{
 private:
 	std::size_t m_size;
 };
+
 struct resize{
 	resize(std::size_t size1, std::size_t size2):m_size1(size1),m_size2(size2){};
 	template<class T>
@@ -301,6 +302,7 @@ struct const_reference: public detail::FusionFacade<FusionConstRef>{\
 private:\
 	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(type,ATTRIBUTES))\
 public:\
+	typedef std::array<Shape, boost::fusion::result_of::size< FusionType >::type::value > shape_type;\
 	struct type: public detail::FusionFacade<FusionType>{\
 		typedef NAME value_type;\
 		\
@@ -397,6 +399,7 @@ public:\
 private:\
 	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, SHARK_TRANSFORM_BATCH_ATTRIBUTES(type,ATTRIBUTES))\
 public:\
+	typedef std::array<Shape, boost::fusion::result_of::size< FusionType >::type::value > shape_type;\
 	struct type: public detail::FusionFacade<FusionType>{\
 		typedef NAME value_type;\
 		\

@@ -72,11 +72,6 @@ struct InputLabelPair{
 	}
 };
 
-template<class I, class L>
-struct ShapeType<InputLabelPair<I,L > >{
-	typedef InputLabelPair<Shape,Shape> type;
-};
-
 ///\brief Input label pair of batches
 template<class Batch1Type,class Batch2Type>
 struct InputLabelBatch{
@@ -168,7 +163,20 @@ template<class InputType, class LabelType>
 struct Batch<InputLabelPair<InputType, LabelType> >
 : public detail::SimpleBatch<
 	InputLabelBatch<typename detail::element_to_batch<InputType>::type, typename detail::element_to_batch<LabelType>::type>
->{};
+>{
+	typedef InputLabelPair<Shape, Shape> shape_type;
+	typedef InputLabelBatch<
+		typename detail::element_to_batch<InputType>::type,
+		typename detail::element_to_batch<LabelType>::type
+	> type;
+	/// \brief Creates a batch with enough dimensions to store a vector of a specified shape
+	static type createBatchFromShape(shape_type const& shape, std::size_t size = 1){
+		return type(
+			Batch<InputType>::createBatchFromShape(shape.input,size),
+			Batch<LabelType>::createBatchFromShape(shape.label,size)
+		);
+	}
+};
 
 template<class InputBatchType, class LabelBatchType>
 struct BatchTraits<InputLabelBatch<InputBatchType, LabelBatchType> >{
