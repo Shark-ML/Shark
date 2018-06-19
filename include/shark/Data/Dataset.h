@@ -132,7 +132,7 @@ protected:
 	typedef detail::SharedContainer<Type> Container;
 
 	Container m_data;///< data
-	typename ShapeType<Type>::type m_shape;///< shape of a datapoint
+	typename Batch<Type>::shape_type m_shape;///< shape of a datapoint
 public:
 	/// \brief Defines the default batch size of the Container.
 	///
@@ -215,12 +215,12 @@ public:
 	
 	
 	///\brief Returns the shape of the elements in the dataset.
-	typename ShapeType<Type>::type const& shape() const{
+	typename Batch<Type>::shape_type const& shape() const{
 		return m_shape;
 	}
 	
 	///\brief Returns the shape of the elements in the dataset.
-	typename ShapeType<Type>::type& shape(){
+	typename Batch<Type>::shape_type& shape(){
 		return m_shape;
 	}
 
@@ -574,27 +574,27 @@ public:
 	}
 	
 	///\brief Returns the Shape of the inputs.
-	typename ShapeType<InputType>::type const& inputShape() const{
+	typename Batch<InputType>::shape_type const& inputShape() const{
 		return m_data.shape();
 	}
 	
 	///\brief Returns the Shape of the inputs.
-	typename ShapeType<InputType>::type& inputShape(){
+	typename Batch<InputType>::shape_type& inputShape(){
 		return m_data.shape();
 	}
 	
 	///\brief Returns the Shape of the labels.
-	typename ShapeType<LabelType>::type const& labelShape() const{
+	typename Batch<LabelType>::shape_type const& labelShape() const{
 		return m_label.shape();
 	}
 	
 	///\brief Returns the Shape of the labels.
-	typename ShapeType<LabelType>::type& labelShape(){
+	typename Batch<LabelType>::shape_type& labelShape(){
 		return m_label.shape();
 	}
 	
 	///\brief Returns the Shape of the elements
-	typename ShapeType<element_type>::type const& shape(){
+	typename Batch<element_type>::shape_type const& shape(){
 		return m_label.shape();
 	}
 
@@ -722,6 +722,11 @@ namespace detail{
 template<class T>
 struct InferShape{
 	static Shape infer(T const&){return {};}
+};
+
+template<class T>
+struct InferShape<Data<T> >{
+	static typename Batch<T>::shape_type infer(Data<T> const&){return {};}
 };
 
 template<class T>

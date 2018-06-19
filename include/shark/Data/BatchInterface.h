@@ -34,6 +34,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/utility/Iterators.h>
+#include <shark/Core/Shape.h>
 
 #include <boost/utility/enable_if.hpp>
 #include <boost/mpl/if.hpp>
@@ -57,6 +58,9 @@ struct SimpleBatch{
 	/// \brief The type of the elements stored in the batch 
 	typedef typename type::value_type value_type;
 	
+	/// \brief the type of shape describing the elements
+	typedef Shape shape_type;
+	
 	///\brief creates a batch able to store elements of the structure of input (e.g. same dimensionality)
 	static type createBatch(value_type const& input, std::size_t size = 1){
 		return type(size,input);
@@ -70,6 +74,10 @@ struct SimpleBatch{
 		c=*begin;
 		std::copy(begin,end,batch.begin());
 		return batch;
+	}
+	
+	static type createBatchFromShape(Shape const&, std::size_t size = 1){
+		return type(size);
 	}
 	
 	template<class T>
@@ -138,6 +146,9 @@ struct VectorBatch{
 	/// \brief Type of a single immutable element.
 	typedef detail::MatrixRowReference<const Matrix> const_reference;
 	
+	/// \brief the type of shape describing the elements
+	typedef Shape shape_type;
+	
 	///\brief creates a batch with input as size blueprint
 	template<class Element>
 	static type createBatch(Element const& input, std::size_t size = 1){
@@ -154,6 +165,10 @@ struct VectorBatch{
 		return batch;
 	}
 	
+	/// \brief Creates a batch with enough dimensions to store a vector of a specified shape
+	static type createBatchFromShape(Shape const& shape, std::size_t size = 1){
+		return type(size,shape.numElements());
+	}
 	
 	static void resize(Matrix& batch, std::size_t batchSize, std::size_t elements){
 		ensure_size(batch,batchSize,elements);
@@ -206,6 +221,9 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	/// \brief Type of a single immutable element.
 	typedef detail::MatrixRowReference<const type> const_reference;
 	
+	/// \brief the type of shape describing the elements
+	typedef Shape shape_type;
+	
 	///\brief creates a batch with input as size blueprint
 	template<class Element>
 	static type createBatch(Element const& input, std::size_t size = 1){
@@ -231,6 +249,11 @@ struct Batch<shark::blas::compressed_vector<T> >{
 			}
 		}
 		return batch;
+	}
+	
+	/// \brief Creates a batch with enough dimensions to store a vector of a specified shape
+	static type createBatchFromShape(Shape const& shape, std::size_t size = 1){
+		return type(size,shape.numElements());
 	}
 	
 	
