@@ -134,6 +134,8 @@ protected:
 	Container m_data;///< data
 	typename Batch<Type>::shape_type m_shape;///< shape of a datapoint
 public:
+	typedef Type element_type;
+	typedef typename Batch<Type>::shape_type shape_type;
 	/// \brief Defines the default batch size of the Container.
 	///
 	/// Zero means: unlimited
@@ -143,7 +145,6 @@ public:
 	typedef batch_type& batch_reference;
 	typedef batch_type const& const_batch_reference;
 
-	typedef Type element_type;
 	typedef typename Batch<element_type>::reference element_reference;
 	typedef typename Batch<element_type>::const_reference const_element_reference;
 
@@ -215,12 +216,12 @@ public:
 	
 	
 	///\brief Returns the shape of the elements in the dataset.
-	typename Batch<Type>::shape_type const& shape() const{
+	shape_type const& shape() const{
 		return m_shape;
 	}
 	
 	///\brief Returns the shape of the elements in the dataset.
-	typename Batch<Type>::shape_type& shape(){
+	shape_type& shape(){
 		return m_shape;
 	}
 
@@ -254,16 +255,20 @@ public:
 	explicit Data(std::size_t numBatches) : m_data( numBatches )
 	{ }
 
-	///\brief Construction with size and a single element
+	///\brief Constructs a set holding a specific number of elements of a given shape.
 	///
 	/// Optionally the desired batch Size can be set
 	///
-	///@param size the new size of the container
-	///@param element the blueprint element from which to create the Container
+	///@param numElements number of data points stored in the dataset
+	///@param shape The shape of the elements to create
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	explicit Data(std::size_t size, element_type const& element, std::size_t batchSize = DefaultBatchSize)
-	: m_data(size,element,batchSize)
-	{ }
+	explicit Data(std::size_t numElements, shape_type const& shape, std::size_t batchSize = DefaultBatchSize)
+	: m_data( detail::numberOfBatches(numElements, batchSize)), m_shape(shape){
+		auto batches = detail::optimalBatchSizes(numElements, batchSize);
+		for(std::size_t i = 0; i != batches.size(); ++i){
+			m_data.batch(i) = Batch<Type>::createBatchFromShape(shape, batches[i]);
+		}
+	}
 
 	// MISC
 
@@ -431,6 +436,7 @@ public:
 	> batch_type;
 
 	typedef InputLabelPair<InputType,LabelType> element_type;
+	typedef typename Batch<element_type>::shape_type shape_type;
 
 	// TYPEDEFS FOR REFERENCES
 	typedef InputLabelBatch<
@@ -532,16 +538,17 @@ public:
 	: m_data(numBatches),m_label(numBatches)
 	{}
 
+	///\brief Constructs a set holding a specific number of elements of a given shape.
 	///
-	/// Optionally the desired batch Size can be set
+	/// to create a dataset with 100 dimensional inputs and 8 classes, write
+	/// LabeledData<RealVector, unsigned int> data(numPoints,{{100}.{8}})
+	/// Optionally the desired batch size can be set.
 	///
-	///@param size the new size of the container
-	///@param element the blueprint element from which to create the Container
+	///@param numElements number of data points stored in the dataset
+	///@param shape The shape of the datapoints
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	LabeledData(std::size_t size, element_type const& element, std::size_t batchSize = DefaultBatchSize)
-	: m_data(size,element.input,batchSize),
-	  m_label(size,element.label,batchSize)
-	{}
+	explicit LabeledData(std::size_t numElements, shape_type const& shape, std::size_t batchSize = DefaultBatchSize)
+	: m_data(numElements, shape.input, batchSize), m_label(numElements, shape.label, batchSize){}
 
 	///\brief Construction from data.
 	///
@@ -551,11 +558,9 @@ public:
 	: m_data(inputs), m_label(labels)
 	{
 		SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
-#ifndef DNDEBUG
 		for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
-			SIZE_CHECK(Batch<InputType>::size(inputs.batch(i))==Batch<LabelType>::size(labels.batch(i)));
+			SHARK_RUNTIME_CHECK(batchSize(inputs.batch(i)) == batchSize(labels.batch(i)), "batch sizes of inputs and labels must agree");
 		}
-#endif
 	}
 	// ELEMENT ACCESS
 	element_reference element(std::size_t i){
@@ -594,8 +599,8 @@ public:
 	}
 	
 	///\brief Returns the Shape of the elements
-	typename Batch<element_type>::shape_type const& shape(){
-		return m_label.shape();
+	shape_type shape() const{
+		return {inputShape(), labelShape()};
 	}
 
 	// MISC

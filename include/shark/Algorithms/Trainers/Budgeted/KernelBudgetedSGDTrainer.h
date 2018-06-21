@@ -257,7 +257,7 @@ public:
 
 		// create a preinitialized budget.
 		// this is used to initialize the kernelexpansion, we will work with.
-		LabeledData<InputType, unsigned int> preinitializedBudgetVectors(m_budgetSize, dataset.element(0));
+		LabeledData<InputType, unsigned int> preinitializedBudgetVectors(m_budgetSize, dataset.shape());
 
 		// preinit the vectors first
 		// we still preinit even for no preinit, as we need the vectors in the

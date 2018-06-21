@@ -45,7 +45,7 @@ using namespace std;
 BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_AUC)
 
 BOOST_AUTO_TEST_CASE( AUC_EVAL ) {
-	Data<RealVector> prediction(10,RealVector(1));
+	Data<RealVector> prediction(10,1);
 	Data<unsigned int> label(10,0);
 
 	double values[10] = { .9, 8, .7, .6, .55, .54, .53, .52, .51, .505 };

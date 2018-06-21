@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	
 	
 	MultiVariateNormalDistribution dist(covariance);
-	Data<RealVector> sampleSet(Samples,RealVector(Dimensions));
-	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
+	Data<RealVector> sampleSet(Samples, Dimensions);
+	Data<RealVector> normalSampleSet(Samples, Dimensions);
 	
 	for(std::size_t i = 0; i != Samples; ++i){
 		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	
 	
 	MultiVariateNormalDistributionCholesky dist(covariance);
-	Data<RealVector> sampleSet(Samples,RealVector(Dimensions));
-	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
+	Data<RealVector> sampleSet(Samples, Dimensions);
+	Data<RealVector> normalSampleSet(Samples, Dimensions);
 	
 	for(std::size_t i = 0; i != Samples; ++i){
 		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);

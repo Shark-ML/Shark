@@ -244,7 +244,7 @@ int main() {
     //###begin<main_run_hundred_trials>
     // run several trials without output, and average the results
     unsigned int num_trials = 100;
-    Data<RealVector> many_results(num_trials,RealVector(total_dim+3));//each row is one run of resulting hyperparameters
+    Data<RealVector> many_results(num_trials, {total_dim+3});//each row is one run of resulting hyperparameters
     for ( unsigned int i=0; i<num_trials; i++ ) {
         many_results.element(i) = run_one_trial(false);
         std::cout << "." << std::flush;

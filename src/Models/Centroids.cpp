@@ -44,7 +44,7 @@ Centroids::Centroids(){
 
 
 Centroids::Centroids(std::size_t centroids, std::size_t dim)
-: m_centroids(centroids, RealVector(dim, 0.0)){
+: m_centroids(centroids, dim){
 	this->m_features |= HAS_SOFT_MEMBERSHIP;
 }
 
