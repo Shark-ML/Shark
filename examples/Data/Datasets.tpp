@@ -98,12 +98,12 @@ int main()
 }
 {
 //###begin<construct-size>
-	Data<RealVector> data(1000, RealVector(5));
+	Data<RealVector> data(1000, {5});
 //###end<construct-size>
 }
 {
 //###begin<construct-size-2>
-	Data<RealVector> data(1000, RealVector(5), 100);
+	Data<RealVector> data(1000, {5}, 100);
 //###end<construct-size-2>
 }
 {

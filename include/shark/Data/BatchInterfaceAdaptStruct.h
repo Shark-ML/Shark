@@ -72,17 +72,6 @@ private:
 	std::size_t m_size;
 };
 
-struct resize{
-	resize(std::size_t size1, std::size_t size2):m_size1(size1),m_size2(size2){};
-	template<class T>
-	void operator()(T& batch)const{
-		BatchTraits<T>::type::resize(batch,m_size1,m_size2);
-	}
-private:
-	std::size_t m_size1;
-	std::size_t m_size2;
-};
-
 ///calls getBatchElement(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
 struct MakeRef{
 	template<class> struct result;
@@ -293,7 +282,6 @@ struct const_reference: public detail::FusionFacade<FusionConstRef>{\
 ///
 ///SHARK_CREATE_BATCH_INTERFACE( DataType,DataVars)
 ///};
-///As any other batch model th result also offers iterators over the range of elements.
 ///In this case also boost::fusion support is added to the sequence. e.g. it is
 ///handled similar to any other tuple type (RealMatrix,RealVector). This is useful for MKL or Transfer
 ///kernels
@@ -309,12 +297,6 @@ public:\
 		SHARK_CREATE_BATCH_REFERENCES_TPL(ATTRIBUTES)\
 		\
 		type(){}\
-		type(std::size_t size1, std::size_t size2){\
-			resize(size1,size2);\
-		}\
-		void resize(std::size_t batchSize, std::size_t elementSize){\
-			boost::fusion::for_each(fusionize(*this), detail::resize(batchSize,elementSize));\
-		}\
 		\
 		friend void swap(type& op1, type& op2){\
 			boost::fusion::swap(fusionize(op1),fusionize(op2));\
@@ -352,9 +334,6 @@ public:\
 			getBatchElement(batch,i) = *pos;\
 		}\
 		return batch;\
-	}\
-	static void resize(type& batch, std::size_t batchSize, std::size_t elements){\
-		batch.resize(batchSize,elements);\
 	}\
 	template<class T>\
 	static std::size_t size(T const& batch){return batch.size();}\
@@ -406,12 +385,6 @@ public:\
 		SHARK_CREATE_BATCH_REFERENCES(ATTRIBUTES)\
 		\
 		type(){}\
-		type(std::size_t size1, std::size_t size2){\
-			resize(size1,size2);\
-		}\
-		void resize(std::size_t batchSize, std::size_t elementSize){\
-			boost::fusion::for_each(fusionize(*this), detail::resize(batchSize,elementSize));\
-		}\
 		reference operator[](std::size_t i){\
 			return reference(*this,i);\
 		}\
@@ -448,9 +421,6 @@ public:\
 			getBatchElement(batch,i) = *pos;\
 		}\
 		return batch;\
-	}\
-	static void resize(type& batch, std::size_t batchSize, std::size_t elements){\
-		batch.resize(batchSize,elements);\
 	}\
 	template<class T>\
 	static std::size_t size(T const& batch){return batch.size();}\

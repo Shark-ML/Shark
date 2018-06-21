@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 		BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
 		BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
 	}
-	catch(std::runtime_error err)
+	catch(std::runtime_error& err)
 	{
 		if(std::string(err.what()) == "[download] can not connect to url"){
 			std::cout << "cannot reach mldata.org server; skipping data download test" << std::endl;
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_MLData)
 		BOOST_CHECK_EQUAL(inputDimension(dataset), 4);
 		BOOST_CHECK_EQUAL(numberOfClasses(dataset), 3);
 	}
-	catch(std::runtime_error err){
+	catch(std::runtime_error& err){
 		if(std::string(err.what()) == "[download] can not connect to url"){
 			std::cout << "cannot reach mldata.org server; skipping data download test" << std::endl;
 			return;

@@ -33,6 +33,7 @@
 #define SHARK_DATA_BATCHINTERFACE_H
 
 #include <shark/LinAlg/Base.h>
+#include <shark/Core/Shape.h>
 #include <shark/Core/utility/Iterators.h>
 #include <shark/Core/Shape.h>
 
@@ -54,7 +55,6 @@ struct SimpleBatch{
 	/// \brief Type of a single immutable element.
 	typedef typename type::const_reference const_reference;
 	
-	
 	/// \brief The type of the elements stored in the batch 
 	typedef typename type::value_type value_type;
 	
@@ -65,24 +65,20 @@ struct SimpleBatch{
 	static type createBatch(value_type const& input, std::size_t size = 1){
 		return type(size,input);
 	}
-	
+
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Iterator>
 	static type createBatchFromRange(Iterator const& begin, Iterator const& end){
-		type batch = createBatch(*begin,end-begin);
-		typename type::reference c=batch[0];
-		c=*begin;
-		std::copy(begin,end,batch.begin());
+		type batch(end-begin);
+		auto pos = begin;
+		for(std::size_t i = 0; i != batch.size(); ++i, ++pos){
+			batch[i] = *pos;
+		}
 		return batch;
 	}
 	
 	static type createBatchFromShape(Shape const&, std::size_t size = 1){
 		return type(size);
-	}
-	
-	template<class T>
-	static void resize(T& batch, std::size_t batchSize, std::size_t elements){
-		batch.resize(batchSize);
 	}
 	
 	template<class T>
@@ -170,10 +166,6 @@ struct VectorBatch{
 		return type(size,shape.numElements());
 	}
 	
-	static void resize(Matrix& batch, std::size_t batchSize, std::size_t elements){
-		ensure_size(batch,batchSize,elements);
-	}
-	
 	static std::size_t size(Matrix const& batch){return batch.size1();}
 	static reference get( Matrix& batch, std::size_t i){
 		return reference(batch,i);
@@ -193,8 +185,6 @@ struct VectorBatch{
 /// the return value will be a linear algebra compatible vector, like RealVector.
 /// If it is not, for example a string, the return value will be a std::vector<T>. 
 template<class T>
-//see detail above for implementations, we just choose the correct implementations based on
-//whether T is arithmetic or not
 struct Batch
 :public std::conditional<
 	std::is_arithmetic<T>::value,
@@ -202,9 +192,10 @@ struct Batch
 	detail::SimpleBatch<std::vector<T> >
 >::type{};
 
-/// \brief specialization for vectors which should be matrices in batch mode!
+/// \brief Specialization for vectors which should be matrices in batch mode!
 template<class T, class Device>
 struct Batch<blas::vector<T, Device> >: public detail::VectorBatch<blas::matrix<T, blas::row_major, Device> >{};
+
 
 /// \brief specialization for ublas compressed vectors which are compressed matrices in batch mode!
 template<class T>
@@ -215,12 +206,12 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	/// \brief The type of the elements stored in the batch 
 	typedef shark::blas::compressed_vector<T> value_type;
 	
-	
 	/// \brief Type of a single element.
 	typedef detail::MatrixRowReference<type> reference;
 	/// \brief Type of a single immutable element.
 	typedef detail::MatrixRowReference<const type> const_reference;
 	
+
 	/// \brief the type of shape describing the elements
 	typedef Shape shape_type;
 	
@@ -229,6 +220,7 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	static type createBatch(Element const& input, std::size_t size = 1){
 		return type(size,input.size());
 	}
+
 	///\brief creates a batch storing the elements referenced by the provided range
 	template<class Iterator>
 	static type createBatchFromRange(Iterator const& start, Iterator const& end){
@@ -255,12 +247,7 @@ struct Batch<shark::blas::compressed_vector<T> >{
 	static type createBatchFromShape(Shape const& shape, std::size_t size = 1){
 		return type(size,shape.numElements());
 	}
-	
-	
-	static void resize(type& batch, std::size_t batchSize, std::size_t elements){
-		ensure_size(batch,batchSize,elements);
-	}
-	
+
 	static std::size_t size(type const& batch){return batch.size1();}
 	static reference get( type& batch, std::size_t i){
 		return reference(batch,i);
@@ -300,12 +287,10 @@ struct batch_to_element{
 };
 template<class T>
 struct batch_to_element<T&>{
-	//~ typedef typename BatchTraits<T>::type::reference type;
 	typedef typename BatchTraits<T>::type::value_type type;
 };
 template<class T>
 struct batch_to_element<T const&>{
-	//~ typedef typename BatchTraits<T>::type::const_reference type;
 	typedef typename BatchTraits<T>::type::value_type type;
 };
 

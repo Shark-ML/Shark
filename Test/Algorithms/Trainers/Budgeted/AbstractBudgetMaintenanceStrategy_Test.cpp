@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)
     
     // create a budget with some fake entries
     size_t m_budgetSize = 16;
-    LabeledData<InputType, unsigned int> preinitializedBudgetVectors (m_budgetSize, dataset.element (0));
+    LabeledData<InputType, unsigned int> preinitializedBudgetVectors (m_budgetSize, dataset.shape());
     
     // initialize kernel expansion 
     KernelClassifier<RealVector> classifier;

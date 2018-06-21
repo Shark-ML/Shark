@@ -108,8 +108,6 @@ public:
 		decltype(getBatchElement(std::declval<typename std::add_const<DataBatchType>::type&>(),0)),
 		decltype(getBatchElement(std::declval<typename std::add_const<WeightBatchType>::type&>(),0))
 	> const_reference;
-	typedef IndexingIterator<WeightedDataBatch> iterator;
-	typedef IndexingIterator<WeightedDataBatch const> const_iterator;
 
 	template<class D, class W>
 	WeightedDataBatch(
@@ -131,20 +129,6 @@ public:
 
 	std::size_t size()const{
 		return DataBatchTraits::size(data);
-	}
-	
-	iterator begin(){
-		return iterator(*this,0);
-	}
-	const_iterator begin()const{
-		return const_iterator(*this,0);
-	}
-
-	iterator end(){
-		return iterator(*this,size());
-	}
-	const_iterator end()const{
-		return const_iterator(*this,size());
 	}
 
 	reference operator[](std::size_t i){

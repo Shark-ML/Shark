@@ -97,19 +97,12 @@ public:
 		decltype(getBatchElement(std::declval<typename std::add_const<Batch1Type>::type&>(),0)),
 		decltype(getBatchElement(std::declval<typename std::add_const<Batch2Type>::type&>(),0))
 	> const_reference;
-	typedef IndexingIterator<InputLabelBatch> iterator;
-	typedef IndexingIterator<InputLabelBatch const> const_iterator;
 
 	template<class I, class L>
 	InputLabelBatch(
 		I&& input,
 		L&& label
 	):input(input),label(label){}
-	
-	template<class Pair>
-	InputLabelBatch(
-		std::size_t size,Pair const& p
-	):input(Batch1Traits::createBatch(p.input,size)),label(Batch2Traits::createBatch(p.label,size)){}
 	
 	template<class I, class L>
 	InputLabelBatch& operator=(InputLabelBatch<I,L> const& batch){
@@ -118,25 +111,9 @@ public:
 		return *this;
 	}
 
-
 	std::size_t size()const{
 		return Batch1Traits::size(input);
 	}
-	
-	iterator begin(){
-		return iterator(*this,0);
-	}
-	const_iterator begin()const{
-		return const_iterator(*this,0);
-	}
-
-	iterator end(){
-		return iterator(*this,size());
-	}
-	const_iterator end()const{
-		return const_iterator(*this,size());
-	}
-
 	reference operator[](std::size_t i){
 		return reference(getBatchElement(input,i),getBatchElement(label,i));
 	}
@@ -175,6 +152,21 @@ struct Batch<InputLabelPair<InputType, LabelType> >
 			Batch<InputType>::createBatchFromShape(shape.input,size),
 			Batch<LabelType>::createBatchFromShape(shape.label,size)
 		);
+	}
+	
+	///\brief creates a batch storing the elements referenced by the provided range
+	template<class Iterator>
+	static type createBatchFromRange(Iterator const& begin, Iterator const& end){
+		std::size_t size = end - begin;
+		type batch(
+			Batch<InputType>::createBatch(begin->input,size),
+			Batch<LabelType>::createBatch(begin->label,size)
+		);
+		auto pos = begin;
+		for(std::size_t i = 0; i != size; ++i, ++pos){
+			batch[i] = *pos;
+		}
+		return batch;
 	}
 };
 
