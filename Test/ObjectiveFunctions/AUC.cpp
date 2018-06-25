@@ -46,14 +46,14 @@ BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_AUC)
 
 BOOST_AUTO_TEST_CASE( AUC_EVAL ) {
 	Data<RealVector> prediction(10,1);
-	Data<unsigned int> label(10,0);
+	Data<unsigned int> label(10,2);
 
 	double values[10] = { .9, 8, .7, .6, .55, .54, .53, .52, .51, .505 };
 	unsigned int labels[10] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 0};
 	
 	for(std::size_t i=0; i<10; i++) {
-		prediction.element(i)(0)= values[i];
-		label.element(i) = labels[i];
+		prediction.elements()[i](0) = values[i];
+		label.elements()[i] = labels[i];
 	}
 
 	//AUC<double, unsigned int> auc;

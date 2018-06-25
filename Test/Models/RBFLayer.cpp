@@ -4,7 +4,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include "derivativeTestHelper.h"
-
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <sstream>
 
 
@@ -217,11 +217,8 @@ BOOST_AUTO_TEST_CASE( RBFLayer_SERIALIZE )
 
 	BOOST_REQUIRE_EQUAL(modelDeserialized.inputShape(),model.inputShape());
 	BOOST_REQUIRE_EQUAL(modelDeserialized.outputShape(),model.outputShape());
-	for (size_t i=0; i < 1000; i++)
-	{
-		RealVector output = modelDeserialized(dataset.element(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
-	}
+	SquaredLoss<RealVector> loss;
+	BOOST_CHECK_SMALL(loss(dataset.labels(),modelDeserialized(dataset.inputs())),1.e-10);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

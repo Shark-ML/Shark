@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	DataView<Data<int> > view(set);
 	BOOST_CHECK_EQUAL(view.size(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(view[i],set.element(i));
+		BOOST_CHECK_EQUAL(view[i],set.elements()[i]);
 		BOOST_CHECK_EQUAL(view.index(i), i);
 	}
 	
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	DataView<Data<int> > subview1=subset(view,subsetIndices1);
 	BOOST_CHECK_EQUAL(subview1.size(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(subview1[i],set.element(subsetIndices1[i]));
+		BOOST_CHECK_EQUAL(subview1[i],set.elements()[subsetIndices1[i]]);
 		BOOST_CHECK_EQUAL(subview1.index(i), subsetIndices1[i]);
 	}
 	
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	DataView<Data<int> > subview2=subset(subview1,subsetIndices2);
 	BOOST_CHECK_EQUAL(subview2.size(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(subview2[i],set.element(realSubsetIndices2[i]));
+		BOOST_CHECK_EQUAL(subview2[i],set.elements()[realSubsetIndices2[i]]);
 		BOOST_CHECK_EQUAL(subview2.index(i), realSubsetIndices2[i]);
 	}
 	
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	BOOST_CHECK_EQUAL(setCopy.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(setCopy.numberOfElements(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(setCopy.element(i),set.element(i));
+		BOOST_CHECK_EQUAL(setCopy.elements()[i],set.elements()[i]);
 	}
 	for(std::size_t i = 0; i != 5; ++i){
 		BOOST_CHECK_EQUAL(setCopy.batch(i).size(),20u);
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	BOOST_CHECK_EQUAL(copy1.numberOfBatches(),6u);
 	BOOST_CHECK_EQUAL(copy1.numberOfElements(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(copy1.element(i),set.element(subsetIndices1[i]));
+		BOOST_CHECK_EQUAL(copy1.elements()[i],set.elements()[subsetIndices1[i]]);
 	}
 	for(std::size_t i = 0; i != 6; ++i){
 		BOOST_CHECK_EQUAL(copy1.batch(i).size(),5u);
@@ -81,14 +81,14 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Test )
 	BOOST_CHECK_EQUAL(copy2.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(copy2.numberOfElements(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(copy2.element(i),set.element(realSubsetIndices2[i]));
+		BOOST_CHECK_EQUAL(copy2.elements()[i],set.elements()[realSubsetIndices2[i]]);
 	}
 	for(std::size_t i = 0; i != 5;++i){
 		BOOST_CHECK_EQUAL(copy2.batch(i).size(),2u);
 	}
 }
 
-//Same again, just throwing in some consts...
+//Same again, just throwing in some consts..
 BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 {
 	//define initial dataset
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	DataView<Data<int> const > view(set);
 	BOOST_CHECK_EQUAL(view.size(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(view[i],set.element(i));
+		BOOST_CHECK_EQUAL(view[i],set.elements()[i]);
 		BOOST_CHECK_EQUAL(view.index(i), i);
 	}
 	
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	DataView<Data<int> const> subview1=subset(view,subsetIndices1);
 	BOOST_CHECK_EQUAL(subview1.size(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(subview1[i],set.element(subsetIndices1[i]));
+		BOOST_CHECK_EQUAL(subview1[i],set.elements()[subsetIndices1[i]]);
 		BOOST_CHECK_EQUAL(subview1.index(i), subsetIndices1[i]);
 	}
 	
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	DataView<Data<int> const> subview2=subset(subview1,subsetIndices2);
 	BOOST_CHECK_EQUAL(subview2.size(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(subview2[i],set.element(realSubsetIndices2[i]));
+		BOOST_CHECK_EQUAL(subview2[i],set.elements()[realSubsetIndices2[i]]);
 		BOOST_CHECK_EQUAL(subview2.index(i), realSubsetIndices2[i]);
 	}
 	
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	BOOST_CHECK_EQUAL(setCopy.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(setCopy.numberOfElements(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(setCopy.element(i),set.element(i));
+		BOOST_CHECK_EQUAL(setCopy.elements()[i],set.elements()[i]);
 	}
 	for(std::size_t i = 0; i != 5; ++i){
 		BOOST_CHECK_EQUAL(setCopy.batch(i).size(),20u);
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	BOOST_CHECK_EQUAL(copy1.numberOfBatches(),6u);
 	BOOST_CHECK_EQUAL(copy1.numberOfElements(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(copy1.element(i),set.element(subsetIndices1[i]));
+		BOOST_CHECK_EQUAL(copy1.elements()[i],set.elements()[subsetIndices1[i]]);
 	}
 	for(std::size_t i = 0; i != 6; ++i){
 		BOOST_CHECK_EQUAL(copy1.batch(i).size(),5u);
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( DataView_Data_Const_Test )
 	BOOST_CHECK_EQUAL(copy2.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(copy2.numberOfElements(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(copy2.element(i),set.element(realSubsetIndices2[i]));
+		BOOST_CHECK_EQUAL(copy2.elements()[i],set.elements()[realSubsetIndices2[i]]);
 	}
 	for(std::size_t i = 0; i != 5;++i){
 		BOOST_CHECK_EQUAL(copy2.batch(i).size(),2u);
@@ -202,8 +202,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	DataView<LabeledData<int,unsigned int> > view(set);
 	BOOST_CHECK_EQUAL(view.size(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(view[i].input,set.element(i).input);
-		BOOST_CHECK_EQUAL(view[i].label,set.element(i).label);
+		BOOST_CHECK_EQUAL(view[i].input,set.elements()[i].input);
+		BOOST_CHECK_EQUAL(view[i].label,set.elements()[i].label);
 		BOOST_CHECK_EQUAL(view.index(i), i);
 	}
 	
@@ -211,8 +211,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	DataView<LabeledData<int,unsigned int> > subview1=subset(view,subsetIndices1);
 	BOOST_CHECK_EQUAL(subview1.size(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(subview1[i].input,set.element(subsetIndices1[i]).input);
-		BOOST_CHECK_EQUAL(subview1[i].label,set.element(subsetIndices1[i]).label);
+		BOOST_CHECK_EQUAL(subview1[i].input,set.elements()[subsetIndices1[i]].input);
+		BOOST_CHECK_EQUAL(subview1[i].label,set.elements()[subsetIndices1[i]].label);
 		BOOST_CHECK_EQUAL(subview1.index(i), subsetIndices1[i]);
 	}
 	
@@ -220,8 +220,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	DataView<LabeledData<int,unsigned int> > subview2=subset(subview1,subsetIndices2);
 	BOOST_CHECK_EQUAL(subview2.size(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(subview2[i].input,set.element(realSubsetIndices2[i]).input);
-		BOOST_CHECK_EQUAL(subview2[i].label,set.element(realSubsetIndices2[i]).label);
+		BOOST_CHECK_EQUAL(subview2[i].input,set.elements()[realSubsetIndices2[i]].input);
+		BOOST_CHECK_EQUAL(subview2[i].label,set.elements()[realSubsetIndices2[i]].label);
 		BOOST_CHECK_EQUAL(subview2.index(i), realSubsetIndices2[i]);
 	}
 	
@@ -230,8 +230,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	BOOST_CHECK_EQUAL(setCopy.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(setCopy.numberOfElements(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(setCopy.element(i).input,set.element(i).input);
-		BOOST_CHECK_EQUAL(setCopy.element(i).label,set.element(i).label);
+		BOOST_CHECK_EQUAL(setCopy.elements()[i].input,set.elements()[i].input);
+		BOOST_CHECK_EQUAL(setCopy.elements()[i].label,set.elements()[i].label);
 	}
 	for(std::size_t i = 0; i != 5; ++i){
 		BOOST_CHECK_EQUAL(setCopy.batch(i).size(),20u);
@@ -241,8 +241,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	BOOST_CHECK_EQUAL(copy1.numberOfBatches(),6u);
 	BOOST_CHECK_EQUAL(copy1.numberOfElements(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(copy1.element(i).input,set.element(subsetIndices1[i]).input);
-		BOOST_CHECK_EQUAL(copy1.element(i).label,set.element(subsetIndices1[i]).label);
+		BOOST_CHECK_EQUAL(copy1.elements()[i].input,set.elements()[subsetIndices1[i]].input);
+		BOOST_CHECK_EQUAL(copy1.elements()[i].label,set.elements()[subsetIndices1[i]].label);
 	}
 	for(std::size_t i = 0; i != 6; ++i){
 		BOOST_CHECK_EQUAL(copy1.batch(i).size(),5u);
@@ -252,8 +252,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Test )
 	BOOST_CHECK_EQUAL(copy2.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(copy2.numberOfElements(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(copy2.element(i).input,set.element(realSubsetIndices2[i]).input);
-		BOOST_CHECK_EQUAL(copy2.element(i).label,set.element(realSubsetIndices2[i]).label);
+		BOOST_CHECK_EQUAL(copy2.elements()[i].input,set.elements()[realSubsetIndices2[i]].input);
+		BOOST_CHECK_EQUAL(copy2.elements()[i].label,set.elements()[realSubsetIndices2[i]].label);
 	}
 	for(std::size_t i = 0; i != 5;++i){
 		BOOST_CHECK_EQUAL(copy2.batch(i).size(),2u);
@@ -294,8 +294,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	DataView<LabeledData<int,unsigned int> const > view(set);
 	BOOST_CHECK_EQUAL(view.size(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(view[i].input,set.element(i).input);
-		BOOST_CHECK_EQUAL(view[i].label,set.element(i).label);
+		BOOST_CHECK_EQUAL(view[i].input,set.elements()[i].input);
+		BOOST_CHECK_EQUAL(view[i].label,set.elements()[i].label);
 		BOOST_CHECK_EQUAL(view.index(i), i);
 	}
 	
@@ -303,8 +303,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	DataView<LabeledData<int,unsigned int> const > subview1=subset(view,subsetIndices1);
 	BOOST_CHECK_EQUAL(subview1.size(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(subview1[i].input,set.element(subsetIndices1[i]).input);
-		BOOST_CHECK_EQUAL(subview1[i].label,set.element(subsetIndices1[i]).label);
+		BOOST_CHECK_EQUAL(subview1[i].input,set.elements()[subsetIndices1[i]].input);
+		BOOST_CHECK_EQUAL(subview1[i].label,set.elements()[subsetIndices1[i]].label);
 		BOOST_CHECK_EQUAL(subview1.index(i), subsetIndices1[i]);
 	}
 	
@@ -312,8 +312,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	DataView<LabeledData<int,unsigned int> const > subview2=subset(subview1,subsetIndices2);
 	BOOST_CHECK_EQUAL(subview2.size(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(subview2[i].input,set.element(realSubsetIndices2[i]).input);
-		BOOST_CHECK_EQUAL(subview2[i].label,set.element(realSubsetIndices2[i]).label);
+		BOOST_CHECK_EQUAL(subview2[i].input,set.elements()[realSubsetIndices2[i]].input);
+		BOOST_CHECK_EQUAL(subview2[i].label,set.elements()[realSubsetIndices2[i]].label);
 		BOOST_CHECK_EQUAL(subview2.index(i), realSubsetIndices2[i]);
 	}
 	
@@ -322,8 +322,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	BOOST_CHECK_EQUAL(setCopy.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(setCopy.numberOfElements(),100u);
 	for(std::size_t i = 0; i != 100; ++i){
-		BOOST_CHECK_EQUAL(setCopy.element(i).input,set.element(i).input);
-		BOOST_CHECK_EQUAL(setCopy.element(i).label,set.element(i).label);
+		BOOST_CHECK_EQUAL(setCopy.elements()[i].input,set.elements()[i].input);
+		BOOST_CHECK_EQUAL(setCopy.elements()[i].label,set.elements()[i].label);
 	}
 	for(std::size_t i = 0; i != 5; ++i){
 		BOOST_CHECK_EQUAL(setCopy.batch(i).size(),20u);
@@ -333,8 +333,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	BOOST_CHECK_EQUAL(copy1.numberOfBatches(),6u);
 	BOOST_CHECK_EQUAL(copy1.numberOfElements(),30u);
 	for(std::size_t i = 0; i != 30; ++i){
-		BOOST_CHECK_EQUAL(copy1.element(i).input,set.element(subsetIndices1[i]).input);
-		BOOST_CHECK_EQUAL(copy1.element(i).label,set.element(subsetIndices1[i]).label);
+		BOOST_CHECK_EQUAL(copy1.elements()[i].input,set.elements()[subsetIndices1[i]].input);
+		BOOST_CHECK_EQUAL(copy1.elements()[i].label,set.elements()[subsetIndices1[i]].label);
 	}
 	for(std::size_t i = 0; i != 6; ++i){
 		BOOST_CHECK_EQUAL(copy1.batch(i).size(),5u);
@@ -344,8 +344,8 @@ BOOST_AUTO_TEST_CASE( DataView_Dataset_Const_Test )
 	BOOST_CHECK_EQUAL(copy2.numberOfBatches(),5u);
 	BOOST_CHECK_EQUAL(copy2.numberOfElements(),10u);
 	for(std::size_t i = 0; i != 10; ++i){
-		BOOST_CHECK_EQUAL(copy2.element(i).input,set.element(realSubsetIndices2[i]).input);
-		BOOST_CHECK_EQUAL(copy2.element(i).label,set.element(realSubsetIndices2[i]).label);
+		BOOST_CHECK_EQUAL(copy2.elements()[i].input,set.elements()[realSubsetIndices2[i]].input);
+		BOOST_CHECK_EQUAL(copy2.elements()[i].label,set.elements()[realSubsetIndices2[i]].label);
 	}
 	for(std::size_t i = 0; i != 5;++i){
 		BOOST_CHECK_EQUAL(copy2.batch(i).size(),2u);

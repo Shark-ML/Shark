@@ -275,13 +275,6 @@ public:
 	BaseWeightedDataset()
 	{}
 
-	///\brief Create an empty set with just the correct number of batches.
-	///
-	/// The user must initialize the dataset after that by himself.
-	BaseWeightedDataset(std::size_t numBatches)
-	: m_data(numBatches),m_weights(numBatches)
-	{}
-
 	/// \brief Construtor using a single element as blueprint to create a dataset with a specified number of elements.
 	///
 	/// Optionally the desired batch Size can be set
@@ -311,8 +304,7 @@ public:
 	
 	///\brief Construction from data. All points get the same weight assigned
 	BaseWeightedDataset(DataContainer const& data, double weight)
-	: m_data(data), m_weights(data.numberOfBatches())
-	{
+	: m_data(data), m_weights(data.getPartitioning(), 1){
 		for(std::size_t i = 0; i != numberOfBatches(); ++i){
 			m_weights.batch(i) = Batch<WeightType>::type(batchSize(m_data.batch(i)),weight);
 		}
@@ -652,6 +644,11 @@ public:
 	/// \brief Constructs an WeightedData object for the inputs.
 	WeightedData<InputType> weightedInputs() const{
 		return WeightedData<InputType>(data().inputs(),weights());
+	}
+	
+	/// \brief Constructs an WeightedData object for the labels.
+	WeightedData<LabelType> weightedLabels() const{
+		return WeightedData<LabelType>(data().labels(),weights());
 	}
 
 	///\brief Splits the container into two independent parts. The left part remains in the container, the right is stored as return type

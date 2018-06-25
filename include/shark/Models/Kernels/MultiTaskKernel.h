@@ -237,21 +237,20 @@ protected:
 	{
 		// count number of examples for each task
 		const std::size_t tasks = numberOfTasks();
-		std::size_t elements = m_data.numberOfElements();
 		std::vector<std::size_t> ell(tasks, 0);
-		for (std::size_t i=0; i<elements; i++)
-			ell[m_data.element(i).task]++;
+		for (auto element: m_data.elements())
+			ell[element.task]++;
 
 		// compute inner products between mean elements of empirical distributions
-		for (std::size_t i=0; i<elements; i++){
-			const std::size_t task_i = m_data.element(i).task;
-			for (std::size_t j=0; j<i; j++){
-				const std::size_t task_j = m_data.element(j).task;
-				const double k = mpe_inputKernel->eval(m_data.element(i).input, m_data.element(j).input);
+		for (auto element_i: m_data.elements()){
+			const std::size_t task_i = element_i.task;
+			for (auto element_j: m_data.elements()){
+				const std::size_t task_j = element_j.task;
+				const double k = mpe_inputKernel->eval(element_i.input, element_j.input);
 				base_type::m_matrix(task_i, task_j) += k;
 				base_type::m_matrix(task_j, task_i) += k;
 			}
-			const double k = mpe_inputKernel->eval(m_data.element(i).input, m_data.element(i).input);
+			const double k = mpe_inputKernel->eval(element_i.input, element_i.input);
 			base_type::m_matrix(task_i, task_i) += k;
 		}
 		for (std::size_t i=0; i<tasks; i++){

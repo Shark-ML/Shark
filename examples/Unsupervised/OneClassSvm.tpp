@@ -48,6 +48,7 @@ using namespace std;
 class Gaussians : public DataDistribution<RealVector>
 {
 public:
+	Gaussians():DataDistribution<RealVector>(2){}
 	void draw(RealVector& point) const
 	{
 		point.resize(2);

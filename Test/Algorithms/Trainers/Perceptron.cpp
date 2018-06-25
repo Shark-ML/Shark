@@ -4,6 +4,7 @@
 
 #include <shark/Algorithms/Trainers/Perceptron.h>
 #include <shark/Models/Kernels/LinearKernel.h>
+#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 
 using namespace shark;
 
@@ -39,11 +40,8 @@ BOOST_AUTO_TEST_CASE( PERCEPTRON ){
 
 	
 	trainer.train(model, dataset);
-	for(size_t i = 0; i != 6; ++i){
-		std::cout<<input[i]<<" "<<target[i]<<" "<<model(dataset.element(i).input)<<std::endl;
-		BOOST_CHECK_EQUAL(target[i],model(input[i]));
-	}
-
+	ZeroOneLoss<unsigned int> loss;
+	BOOST_CHECK_SMALL(loss(dataset.labels(),model(dataset.inputs())),1.e-8);
 }
 
 

@@ -55,8 +55,6 @@ class QpMcLinear
 {
 public:
 	typedef LabeledData<InputT, unsigned int> DatasetType;
-	typedef typename LabeledData<InputT, unsigned int>::const_element_reference ElementType;
-	typedef typename Batch<InputT>::const_reference InputReferenceType;
 
 	enum CoordinateSelectionStrategy {UNIFORM, ACF};
 
@@ -198,7 +196,7 @@ public:
 				// active example
 				double gain = 0.0;
 				const std::size_t i = schedule[j];
-				InputReferenceType x_i = m_data[i].input;
+				auto x_i = m_data[i].input;
 				const unsigned int y_i = m_data[i].label;
 				const double q = m_xSquared(i);
 				blas::dense_vector_adaptor<double> a = row(alpha, i);
@@ -340,7 +338,8 @@ public:
 
 protected:
 	// for all c: row(w, c) += mu(c) * x
-	void add_scaled(RealMatrix& w, RealVector const& mu, InputReferenceType x)
+	template<class Vector>
+	void add_scaled(RealMatrix& w, RealVector const& mu, Vector const& x)
 	{
 		for (std::size_t c=0; c<m_classes; c++) noalias(row(w, c)) += mu(c) * x;
 	}

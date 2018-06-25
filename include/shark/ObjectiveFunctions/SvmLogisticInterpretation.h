@@ -35,10 +35,9 @@
 #include <shark/Data/CVDatasetTools.h>
 #include <shark/Models/Kernels/CSvmDerivative.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
+#include <shark/Algorithms/Trainers/LogisticRegression.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/ObjectiveFunctions/ErrorFunction.h>
 #include <shark/ObjectiveFunctions/Loss/CrossEntropy.h>
-#include <shark/Algorithms/GradientDescent/BFGS.h>
 
 namespace shark {
 
@@ -133,7 +132,7 @@ public:
 		double C_reg = (m_svmCIsUnconstrained ? std::exp(parameters(m_nkp)) : parameters(m_nkp));   //set up regularization parameter
 		mep_kernel->setParameterVector(subrange(parameters, 0, m_nkp));   //set up kernel parameters
 		// Stores the stacked CV predictions for every fold.
-		ClassificationDataset validation_dataset;
+		ClassificationDataset validation_scores;
 		// for each fold, train an svm and get predictions on the validation data
 		for (std::size_t i=0; i<m_numFolds; i++) {
 			// init SVM
@@ -148,15 +147,17 @@ public:
 			csvm_trainer.train(svm, m_folds.training(i));
 			
 			//append validation predictions
-			validation_dataset.append(transformInputs(m_folds.validation(i),svm.decisionFunction()));
+			validation_scores.append(transformInputs(m_folds.validation(i),svm.decisionFunction()));
 		}
 
 		// Fit a logistic regression to the prediction
-		LinearModel<> logistic_model = fitLogistic(validation_dataset);
+		LogisticRegression<RealVector> logistic_trainer(0.0,0.0,true);
+		LinearClassifier<RealVector> logistic_model;
+		logistic_trainer.train(logistic_model, validation_scores);
 		
 		//to evaluate, we use cross entropy loss on the fitted model 
 		CrossEntropy<unsigned int, RealVector> logistic_loss;
-		return logistic_loss(validation_dataset.labels(),logistic_model(validation_dataset.inputs()));
+		return logistic_loss(validation_scores.labels(),logistic_model.decisionFunction()(validation_scores.inputs()));
 	}
 
 	//! the derivative of the error() function above w.r.t. the parameters.
@@ -168,26 +169,18 @@ public:
 		// initialize, copy parameters
 		double C_reg = (m_svmCIsUnconstrained ? std::exp(parameters(m_nkp)) : parameters(m_nkp));   //set up regularization parameter
 		mep_kernel->setParameterVector(subrange(parameters, 0, m_nkp));   //set up kernel parameters
-		// these two will be filled in order corresp. to all CV validation partitions stacked
-		// behind one another, and then used to create datasets with
-		std::vector< unsigned int > tmp_helper_labels(m_numSamples);
-		std::vector< RealVector > tmp_helper_preds(m_numSamples);
+		
+		//holds the pairs of scores and real labels for all validation folds
+		//this is going to be the dataset over which a logistic regression is fitted
+		ClassificationDataset validation_scores;
 
 		unsigned int next_label = 0; //helper index counter to monitor the next position to be filled in the above vectors
 		// init variables especially for derivative
 		RealMatrix all_validation_predict_derivs(m_numSamples, m_nhp);   //will hold derivatives of all output scores w.r.t. all hyperparameters
-		RealVector der; //temporary helper for derivative calls
-
+		
 		// for each fold, train an svm and get predictions on the validation data
 		for (std::size_t i=0; i<m_numFolds; i++) {
-			// get current train/validation partitions as well as corresponding labels
-			ClassificationDataset cur_train_data = m_folds.training(i);
-			ClassificationDataset cur_valid_data = m_folds.validation(i);
-			std::size_t cur_vsize = cur_valid_data.numberOfElements();
-			Data< unsigned int > cur_vlabels = cur_valid_data.labels(); //validation labels of this fold
-			Data< RealVector > cur_vinputs = cur_valid_data.inputs(); //validation inputs of this fold
-			Data< RealVector > cur_vscores; //will hold SVM output scores for current validation partition
-			// init SVM
+			// train svm using the training part of the folg
 			KernelClassifier<InputType> svm;   //the SVM
 			CSvmTrainer<InputType, double> csvm_trainer(mep_kernel, C_reg, true, m_svmCIsUnconstrained);   //the trainer
 			csvm_trainer.sparsify() = false;
@@ -195,17 +188,18 @@ public:
 			if (mep_svmStoppingCondition != NULL) {
 				csvm_trainer.stoppingCondition() = *mep_svmStoppingCondition;
 			}
-			// train SVM on current fold
-			csvm_trainer.train(svm, cur_train_data);
+			csvm_trainer.train(svm, m_folds.training(i));
+			
+			// copy the predictions and corresponding labels to the dataset-wide storage
+			validation_scores.append(transformInputs(m_folds.validation(i),svm.decisionFunction()));
+			
+			//compute the derivative for each element in the validation dataset
 			CSvmDerivative<InputType> svm_deriv(&svm, &csvm_trainer);
-			cur_vscores = svm.decisionFunction()(cur_valid_data.inputs());   //will result in a dataset of RealVector as output
-			// copy the scores and corresponding labels to the dataset-wide storage
-			for (std::size_t j=0; j<cur_vsize; j++) {
-				// copy label and prediction score
-				tmp_helper_labels[next_label] = cur_vlabels.element(j);
-				tmp_helper_preds[next_label] = cur_vscores.element(j);
+			RealVector der; //temporary helper for derivative calls
+			LabeledData<InputType, unsigned int> validation = m_folds.validation(i);
+			for (auto const& element: validation.elements()){
 				// get and store the derivative of the score w.r.t. the hyperparameters
-				svm_deriv.modelCSvmParameterDerivative(cur_vinputs.element(j), der);
+				svm_deriv.modelCSvmParameterDerivative(element.input, der);
 				noalias(row(all_validation_predict_derivs, next_label)) = der;   //fast assignment of the derivative to the correct matrix row
 				++next_label;
 			}
@@ -213,8 +207,9 @@ public:
 		
 		// now we got it all: the predictions across the validation folds, plus the correct corresponding
 		// labels. so we go ahead and fit a logistic regression
-		ClassificationDataset validation_dataset= createLabeledDataFromRange(tmp_helper_preds, tmp_helper_labels);
-		LinearModel<> logistic_model = fitLogistic(validation_dataset);
+		LogisticRegression<RealVector> logistic_trainer(0.0,0.0,true);
+		LinearClassifier<RealVector> logistic_model;
+		logistic_trainer.train(logistic_model, validation_scores);
 		
 		// to evaluate, we use cross entropy loss on the fitted model  and compute 
 		// the derivative wrt the svm model parameters.
@@ -222,34 +217,17 @@ public:
 		derivative.clear();
 		double error = 0;
 		std::size_t start = 0;
-		for(auto const& batch: validation_dataset.batches()){
+		for(auto const& batch: validation_scores.batches()){
 			std::size_t end = start+batch.size();
 			CrossEntropy<unsigned int, RealVector> logistic_loss;
 			RealMatrix lossGradient;
-			error += logistic_loss.evalDerivative(batch.label,logistic_model(batch.input),lossGradient);
+			error += logistic_loss.evalDerivative(batch.label,logistic_model.decisionFunction()(batch.input),lossGradient);
 			noalias(derivative) += column(lossGradient,0) % rows(all_validation_predict_derivs,start,end);
 			start = end;
 		}
 		derivative *= logistic_model.parameterVector()(0);
 		derivative /= m_numSamples;
 		return error / m_numSamples;
-	}
-private:
-	LinearModel<> fitLogistic(ClassificationDataset const& data)const{
-		LinearModel<> logistic_model;
-		logistic_model.setStructure(1,1, true);//1 input, 1 output, bias = 2 parameters
-		CrossEntropy<unsigned int, RealVector> logistic_loss;
-		ErrorFunction<> error(data, &logistic_model, & logistic_loss);
-		BFGS<> optimizer;
-		optimizer.init(error);
-		//this converges after very few iterations (typically 20 function evaluations)
-		while(norm_2(optimizer.derivative())> 1.e-8){
-			double lastValue = optimizer.solution().value;
-			optimizer.step(error);
-			if(lastValue == optimizer.solution().value) break;//we are done due to numerical precision
-		}
-		logistic_model.setParameterVector(optimizer.solution().point);
-		return logistic_model;
 	}
 };
 

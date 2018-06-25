@@ -19,6 +19,7 @@ using namespace shark;
 class Problem : public LabeledDataDistribution<RealVector,unsigned int>
 {
 public:
+	Problem():LabeledDataDistribution<RealVector,unsigned int>({5,2}){}
 	void draw(RealVector& input,unsigned int& label) const{
 		input.resize(5);
 		label = random::coinToss(random::globalRng,0.5)*2+1;
@@ -133,7 +134,7 @@ BOOST_AUTO_TEST_CASE( QP_ModifiedKernelMatrix ) {
 	RealMatrix matrix = kernelMatrix;
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j != size; ++j){
-			if(data.element(i).label == data.element(j).label)
+			if(data.elements()[i].label == data.elements()[j].label)
 				matrix(i,j) *= sameClass;
 			else
 				matrix(i,j) *= diffClass;

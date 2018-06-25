@@ -48,6 +48,9 @@ using namespace shark;
 class YourDistribution : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
+	//generated data points have two inputs and two classes
+	YourDistribution():LabeledDataDistribution<RealVector, unsigned int>({2,2}){}
+
 	void draw(RealVector& input, unsigned int& label) const
 	{
 		input.resize(2);

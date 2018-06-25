@@ -15,8 +15,8 @@ void testEqualCollections(const T& set,const U& vec){
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(),vec.size());
 	for(size_t i=0;i!=set.numberOfElements();++i){
 		bool found = false;
-		for(std::size_t j = 0; j != set.numberOfElements(); ++j)
-			if(set.element(j)==vec[i])
+		for(auto const& element: set.elements())
+			if(element==vec[i])
 				found = true;
 		BOOST_CHECK_EQUAL( found,true );
 	}
@@ -117,9 +117,9 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSize )
 		LabeledData<double,double> validation = folds.validation(i);
 		BOOST_REQUIRE_EQUAL(partition.numberOfElements(),trainSize[i]);
 		BOOST_REQUIRE_EQUAL(validation.numberOfElements(),numExamples-trainSize[i]);
-		for(size_t j=0;j!=validation.numberOfElements();++j){
-			validationInputs.push_back(validation.element(j).input);
-			validationLabels.push_back(validation.element(j).label);
+		for(auto const& element: validation.elements()){
+			validationInputs.push_back(element.input);
+			validationLabels.push_back(element.label);
 		}
 	}
 	std::sort(validationInputs.begin(),validationInputs.end());
@@ -160,9 +160,9 @@ BOOST_AUTO_TEST_CASE( CVDatasetTools_CreateSameSizeBalancedUnsigned )
 		ClassificationDataset validation = folds.validation(i);
 		BOOST_REQUIRE_EQUAL(partition.numberOfElements(),trainSize[i]);
 		size_t zeroCount=0;
-		for(size_t j=0;j!=validation.numberOfElements();++j){
-			validationInputs.push_back(validation.element(j).input(0));
-			zeroCount+= !validation.element(j).label;
+		for(auto const& element: validation.elements()){
+			validationInputs.push_back(element.input(0));
+			zeroCount+= !element.label;
 		}
 		BOOST_CHECK_EQUAL(zeroCount,zeroSize[i]);
 	}

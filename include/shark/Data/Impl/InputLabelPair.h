@@ -141,7 +141,7 @@ struct Batch<InputLabelPair<InputType, LabelType> >
 : public detail::SimpleBatch<
 	InputLabelBatch<typename detail::element_to_batch<InputType>::type, typename detail::element_to_batch<LabelType>::type>
 >{
-	typedef InputLabelPair<Shape, Shape> shape_type;
+	typedef InputLabelPair<typename Batch<InputType>::shape_type, typename Batch<LabelType>::shape_type> shape_type;
 	typedef InputLabelBatch<
 		typename detail::element_to_batch<InputType>::type,
 		typename detail::element_to_batch<LabelType>::type
@@ -168,6 +168,23 @@ struct Batch<InputLabelPair<InputType, LabelType> >
 		}
 		return batch;
 	}
+	
+	/// \brief Returns a feasible shape for the given range of elements
+	template<class Iterator>
+	static shape_type inferShape(Iterator const& start, Iterator const& end);
+	//~ {
+		//~ typedef typename Iterator::const_reference ref_type;
+		//~ auto getInput = [](ref_type x){return x.input;};
+		//~ auto getLabel = [](ref_type x){return x.label;};
+		//~ auto inputStart = boost::make_transform_iterator(start,getInput);
+		//~ auto inputEnd = boost::make_transform_iterator(end,getInput);
+		//~ auto labelStart = boost::make_transform_iterator(start,getLabel);
+		//~ auto labelEnd = boost::make_transform_iterator(end,getLabel);
+		//~ return shape_type(
+			//~ Batch<Input>::inferShape(inputStart, inputEnd),
+			//~ Batch<Label>::inferShape(labelStart, labelEnd),
+		//~ );
+	//~ }
 };
 
 template<class InputBatchType, class LabelBatchType>

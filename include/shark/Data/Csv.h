@@ -237,51 +237,6 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	std::size_t maximumBatchSize = Data<unsigned int>::DefaultBatchSize
 );
 
-/// \brief Import "csv" from string consisting only of a single  int per row
-///
-/// \param  data               Container storing the loaded data
-/// \param  contents    The read in csv-file
-/// \param  separator          Optional separator between entries, typically a comma, spaces ar automatically ignored
-/// \param  comment            Trailing characters indicating comment line. By default it is "#"
-/// \param  maximumBatchSize   Size of batches in the dataset
-SHARK_EXPORT_SYMBOL void csvStringToData(
-	Data<int> &data,
-	std::string const& contents,
-	char separator = ',',
-	char comment = '#',
-	std::size_t maximumBatchSize = Data<int>::DefaultBatchSize
-);
-
-/// \brief Import "csv" from string consisting only of a single double per row
-///
-/// \param  data               Container storing the loaded data
-/// \param  contents    The read in csv-file
-/// \param  separator          Optional separator between entries, typically a comma, spaces ar automatically ignored
-/// \param  comment            Trailing characters indicating comment line. By default it is "#"
-/// \param  maximumBatchSize   Size of batches in the dataset
-SHARK_EXPORT_SYMBOL void csvStringToData(
-	Data<float> &data,
-	std::string const& contents,
-	char separator = ',',
-	char comment = '#',
-	std::size_t maximumBatchSize = Data<double>::DefaultBatchSize
-);
-
-/// \brief Import "csv" from string consisting only of a single double per row
-///
-/// \param  data               Container storing the loaded data
-/// \param  contents    The read in csv-file
-/// \param  separator          Optional separator between entries, typically a comma, spaces ar automatically ignored
-/// \param  comment            Trailing characters indicating comment line. By default it is "#"
-/// \param  maximumBatchSize   Size of batches in the dataset
-SHARK_EXPORT_SYMBOL void csvStringToData(
-	Data<double> &data,
-	std::string const& contents,
-	char separator = ',',
-	char comment = '#',
-	std::size_t maximumBatchSize = Data<double>::DefaultBatchSize
-);
-
 /// \brief Import labeled data from a character-separated value file.
 ///
 /// \param  dataset    Container storing the loaded data

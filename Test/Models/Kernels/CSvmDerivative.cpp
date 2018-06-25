@@ -535,7 +535,6 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 	ClassificationDataset d2;
 	csvStringToData(d1,data1,LAST_COLUMN,0);
 	csvStringToData(d2,data2,LAST_COLUMN,0);
-	std::size_t NUM_DATA_POINTS = 9;
 
 	// set up different values of C and gamma
 	std::vector< double > Cs;
@@ -579,18 +578,18 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
-			for ( unsigned int j=0; j<NUM_DATA_POINTS; j++ ) {
-				diff = cmp_svm(d1.element(j).input)(0) - svm(d1.element(j).input)(0);
+			for ( auto const& element: d1.elements()){
+				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
-				svm_deriv.modelCSvmParameterDerivative(d1.element(j).input, computed_derivative);
+				svm_deriv.modelCSvmParameterDerivative(element.input, computed_derivative);
 				BOOST_CHECK_EQUAL( computed_derivative.size(), 2 );
 				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
 			// quiz points: use other partition
-			for ( unsigned int j=0; j<NUM_DATA_POINTS; j++ ) {
-				diff = cmp_svm(d2.element(j).input)(0) - svm(d2.element(j).input)(0);
+			for ( auto const& element: d2.elements()){
+				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
-				svm_deriv.modelCSvmParameterDerivative(d2.element(j).input, computed_derivative);
+				svm_deriv.modelCSvmParameterDerivative(element.input, computed_derivative);
 				BOOST_CHECK_EQUAL( computed_derivative.size(), 2 );
 				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
@@ -625,7 +624,6 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 	ClassificationDataset d2;
 	csvStringToData(d1,data1,LAST_COLUMN,0);
 	csvStringToData(d2,data2,LAST_COLUMN,0);
-	std::size_t NUM_DATA_POINTS = 9;
 
 	// set up different values of C and gamma
 	std::vector< double > Cs;
@@ -669,18 +667,18 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 			RealVector cmp_param = cmp_svm.parameterVector();
 
 			// first test derivatives of dataset-points themselves
-			for ( unsigned int j=0; j<NUM_DATA_POINTS; j++ ) {
-				diff = cmp_svm(d2.element(j).input)(0) - svm(d2.element(j).input)(0);
+			for ( auto const& element: d2.elements()){
+				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
-				svm_deriv.modelCSvmParameterDerivative(d2.element(j).input, computed_derivative);
+				svm_deriv.modelCSvmParameterDerivative(element.input, computed_derivative);
 				BOOST_CHECK_EQUAL( computed_derivative.size(), 2 );
 				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
 			// quiz points: use other partition
-			for ( unsigned int j=0; j<NUM_DATA_POINTS; j++ ) {
-				diff = cmp_svm(d1.element(j).input)(0) - svm(d1.element(j).input)(0);
+			for ( auto const& element: d1.elements()){
+				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
-				svm_deriv.modelCSvmParameterDerivative(d1.element(j).input, computed_derivative);
+				svm_deriv.modelCSvmParameterDerivative(element.input, computed_derivative);
 				BOOST_CHECK_EQUAL( computed_derivative.size(), 2 );
 				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}

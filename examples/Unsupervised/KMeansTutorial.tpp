@@ -98,15 +98,13 @@ int main(int argc, char **argv) {
 	// write results to files
 	ofstream c1("cl1.csv");
 	ofstream c2("cl2.csv");
-	ofstream cc("clc.csv");
 	//###begin<print_cluster_assignment>
-	for(std::size_t i=0; i != elements; i++) {
-		if(clusters.element(i)) 
-			c1 << data.element(i)(0) << " " << data.element(i)(1) << endl;
+	LabeledData<RealVector, unsigned int> assignment(data, clusters);
+	for(auto const& element: assignment.elements()) {
+		if(element.label) 
+			c1 << element.input(0) << " " << element.input(1) << endl;
 		else 
-			c2 << data.element(i)(0) << " " << data.element(i)(1) << endl;
+			c2 << element.input(0) << " " << element.input(1) << endl;
 	}
 	//###end<print_cluster_assignment>
-	cc << c.element(0)(0) << " " << c.element(0)(1) << endl;
-	cc << c.element(1)(0) << " " << c.element(1)(1) << endl;
 }

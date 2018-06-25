@@ -335,6 +335,9 @@ public:\
 		}\
 		return batch;\
 	}\
+	static type createBatchFromShape(shape_type const& shape, std::size_t size = 1){\
+		throw SHARKEXCEPTION("NOT IMPLEMENTED");\
+	}\
 	template<class T>\
 	static std::size_t size(T const& batch){return batch.size();}\
 	\

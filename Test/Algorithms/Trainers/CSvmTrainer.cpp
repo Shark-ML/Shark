@@ -285,8 +285,8 @@ void checkSVMSolutionsEqual(
 	
 	for(std::size_t i = 0; i != dataset.numberOfElements(); ++i){
 		BOOST_CHECK_CLOSE(
-			decision1.element(i)(0),
-			decision2.element(i)(0),
+			decision1.elements()[i](0),
+			decision2.elements()[i](0),
 			epsilon
 		);
 	}
@@ -316,13 +316,11 @@ BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
 	for(std::size_t trial = 0; trial != Trials; ++trial){
 		//generate weighted and unweighted dataset
 		WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,0.0);
-		ClassificationDataset unweightedDataset(1);
-		unweightedDataset.batch(0).input.resize(DatasetSize,inputDimension(dataset));
-		unweightedDataset.batch(0).label.resize(DatasetSize);
+		ClassificationDataset unweightedDataset(DatasetSize,dataset.shape(),DatasetSize);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
 			std::size_t index = random::discrete(random::globalRng,0,29);
-			weightedDataset.element(index).weight +=1.0;
-			unweightedDataset.element(i) = dataset.element(index);
+			weightedDataset.elements()[index].weight +=1.0;
+			unweightedDataset.elements()[i] = dataset.elements()[index];
 		}
 		
 		trainer.train(svmUnweighted, unweightedDataset);

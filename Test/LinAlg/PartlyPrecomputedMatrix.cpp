@@ -146,9 +146,9 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 
 		for(size_t r = 0; r < unionJackData.numberOfElements(); r++)
 		{
-			for(size_t c = 0; c < unionJackData.element(r).size(); c++)
+			for(size_t c = 0; c < unionJackData.elements()[r].size(); c++)
 			{
-				if(verbose) std::cout << " " << unionJackData.element(r)[c];
+				if(verbose) std::cout << " " << unionJackData.elements()[r][c];
 			}
 			if(verbose) std::cout << std::endl;
 		}

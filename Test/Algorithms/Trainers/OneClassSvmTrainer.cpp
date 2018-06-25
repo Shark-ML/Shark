@@ -47,6 +47,7 @@ using namespace shark;
 class Gaussians : public DataDistribution<RealVector>
 {
 public:
+	Gaussians():DataDistribution<RealVector>(2){}
 	void draw(RealVector& point) const
 	{
 		point.resize(2);
@@ -82,11 +83,10 @@ BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
 	// check deviation of fraction of negatives from nu
 	std::size_t pos = 0;
 	std::size_t neg = 0;
-	for (std::size_t i=0; i<ell; i++)
+	for (auto const& element:output.elements())
 	{
-		double f = output.element(i)(0);
-		if (f > 0.0) pos++;
-		else if (f < 0.0) neg++;
+		if (element(0)> 0.0) pos++;
+		else if (element(0) < 0.0) neg++;
 	}
 
 	double p = (double)pos / (double)ell;

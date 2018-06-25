@@ -134,9 +134,8 @@ public:
 				// for the element index and the unpermuted alpha for the svm
 				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
 				svm.offset(0) = computeBias(problem);
-				std::size_t elementIndex = i;//svmProblem.permutation[i];
-				unsigned int target = mep_dataset->element(elementIndex).label;
-				mistakes += loss(target, svm(mep_dataset->element(elementIndex).input));
+				auto const& element = mep_dataset->elements()[i];
+				mistakes += loss(element.label, svm(element.input));
 				
 				problem.activateVariable(i);
 			}
@@ -173,9 +172,8 @@ public:
 				// with shrinking and we thus need to get the initial permutation 
 				// for the element index and the unpermuted alpha for the svm
 				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-				std::size_t elementIndex = i;//svmProblem.permutation[i];
-				unsigned int target = mep_dataset->element(elementIndex).label;
-				mistakes += loss(target, svm(mep_dataset->element(elementIndex).input));
+				auto const& element = mep_dataset->elements()[i];
+				mistakes += loss(element.label, svm(element.input));
 
 				problem.activateVariable(i);
 			}

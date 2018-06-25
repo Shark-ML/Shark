@@ -31,6 +31,7 @@
 #define SHARK_UNSUPERVISED_RBM_SAMPLING_MARKOVCHAIN_H
 
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/Core/Random.h>
 #include <shark/Unsupervised/RBM/Tags.h>
 #include "Impl/SampleTypes.h"
@@ -78,12 +79,7 @@ public:
 	///
 	/// @param dataSet the data set
 	void initializeChain(Data<RealVector> const& dataSet){
-		std::size_t visibles=m_operator.rbm()->numberOfVN();
-		RealMatrix sampleData(m_samples.size(),visibles);
-		
-		for(std::size_t i = 0; i != m_samples.size(); ++i){
-			noalias(row(sampleData,i)) = dataSet.element(random::discrete(m_operator.rbm()->rng(),std::size_t(0),dataSet.numberOfElements()-1));
-		}
+		RealMatrix sampleData = randomSubBatch(toView(dataSet),batchSize());
 		initializeChain(sampleData);
 	}
 	

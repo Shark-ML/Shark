@@ -52,11 +52,11 @@ class TestProblem : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
 	TestProblem(size_t informative, size_t nnz, size_t dim)
-	: m_informative(informative)
+	: LabeledDataDistribution<RealVector, RealVector>({m_dim, 1})
+	, m_informative(informative)
 	, m_nnz(nnz)
 	, m_dim(dim)
 	{ }
-
 
 	void draw(RealVector& input, RealVector& label) const
 	{

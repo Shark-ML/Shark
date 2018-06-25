@@ -54,10 +54,6 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(), 100u);
 	BOOST_CHECK_EQUAL(set.shape(), Shape({}));
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(), 20u);
-	for (size_t i=0; i!=100; ++i) {
-		BOOST_CHECK_EQUAL(inputs[i], set.element(i));
-	}
-	//also test iterator access
 	BOOST_CHECK_EQUAL_COLLECTIONS(
 		set.elements().begin(),set.elements().end(),
 		inputs.begin(),inputs.end()
@@ -86,27 +82,6 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 				batch.begin(),batch.end(),
 				inputs.begin()+indizes[0][i]*5,
 				inputs.begin()+(indizes[0][i]+1)*5
-			);
-		}
-	}
-
-	// 2.1 now with complement
-	{
-		Data<int> subset = set.indexedSubset(indizes[0]);
-		Data<int> subset2;
-		Data<int> complement;
-		set.indexedSubset(indizes[0], subset2, complement);
-		testSetEquality(subset, subset2);
-
-		BOOST_REQUIRE_EQUAL(complement.numberOfBatches(), indizes[1].size());
-
-		for (size_t i=0; i!=subset.numberOfBatches(); ++i) {
-			IntVector batch=complement.batch(i);
-			BOOST_REQUIRE_EQUAL(batch.size(),5);
-			BOOST_CHECK_EQUAL_COLLECTIONS(
-				batch.begin(),batch.end(),
-				inputs.begin()+indizes[1][i]*5,
-				inputs.begin()+(indizes[1][i]+1)*5
 			);
 		}
 	}
@@ -220,25 +195,28 @@ BOOST_AUTO_TEST_CASE( Set_Merge_Test )
 	}
 
 	for(std::size_t i = 0; i != 120;++i){
-		BOOST_CHECK_EQUAL(set1.element(i),i);
+		BOOST_CHECK_EQUAL(set1.elements()[i],i);
 	}
 }
 
 BOOST_AUTO_TEST_CASE( Data_ColumnAccess )
 {
 	std::vector<RealVector> inputs;
+	RealVector test(50);
 	for (size_t i=0;i!=50;++i) {
 		RealVector r(2);
 		r(0) = i / 2.0;
 		r(1) = 5;
 		inputs.push_back(r);
+		test(i) = 0.1*i;
 	}
 	Data<RealVector> set = createDataFromRange(inputs);
 	RealVector c0 = getColumn(set, 0);
-	setColumn(set, 0, c0);
+	setColumn(set, 0, test);
 
 	for(std::size_t i = 0; i != 50; ++i){
-		BOOST_CHECK_EQUAL(set.element(i)(0), set.element(i)(0));
+		BOOST_CHECK_EQUAL(set.elements()[i](0), test(i));
+		BOOST_CHECK_EQUAL(c0(i), inputs[i](0));
 	}
 }
 
@@ -277,8 +255,8 @@ BOOST_AUTO_TEST_CASE( LabledData_Merge_Test )
 	}
 
 	for(std::size_t i = 0; i != 120;++i){
-		BOOST_CHECK_EQUAL(set1.element(i).input,i);
-		BOOST_CHECK_EQUAL(set1.element(i).label,2*i);
+		BOOST_CHECK_EQUAL(set1.elements()[i].input,i);
+		BOOST_CHECK_EQUAL(set1.elements()[i].label,2*i);
 	}
 }
 
@@ -353,10 +331,10 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	//check that all labels match the elements and that all elements are still there
 	std::vector<unsigned int> resultInputs(101,0);
 	for(std::size_t i = 0; i != 101; ++i){
-		std::size_t k = data.element(i).input(0)-100;
-		BOOST_CHECK_EQUAL(data.element(i).input(1),k+200);
-		BOOST_CHECK_EQUAL(data.element(i).input(2),k+300);
-		BOOST_CHECK_EQUAL(data.element(i).label,k%3);
+		std::size_t k = data.elements()[i].input(0)-100;
+		BOOST_CHECK_EQUAL(data.elements()[i].input(1),k+200);
+		BOOST_CHECK_EQUAL(data.elements()[i].input(2),k+300);
+		BOOST_CHECK_EQUAL(data.elements()[i].label,k%3);
 		resultInputs[k] = (unsigned int)k;
 	}
 	//in the end all elements should be set
@@ -379,25 +357,24 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	
 	//check order of the labels of the elements
 	for(std::size_t i = 0; i != 34; ++i){
-		BOOST_CHECK_EQUAL(data.element(i).label, 0);
+		BOOST_CHECK_EQUAL(data.elements()[i].label, 0);
 	}
 	for(std::size_t i = 34; i != 68; ++i){
-		BOOST_CHECK_EQUAL(data.element(i).label, 1);
+		BOOST_CHECK_EQUAL(data.elements()[i].label, 1);
 	}
 	for(std::size_t i = 68; i != 101; ++i){
-		BOOST_CHECK_EQUAL(data.element(i).label, 2);
+		BOOST_CHECK_EQUAL(data.elements()[i].label, 2);
 	}
 }
 
 BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 {
-	unsigned int labels[] ={0,0,1,1,1,2,2,3,4,4,4};
-	unsigned int sizes[] ={21,39,31,17,57};
-	LabeledData<UIntVector,unsigned int> data(11);
+	std::vector<unsigned int> labels ={0,0,1,1,1,2,2,3,4,4,4};
+	std::vector<std::size_t> batch_sizes={10,11,12,13,14,15,16,17,18,19,20};
+	std::vector<std::size_t> sizes={21,39,31,17,57};
+	LabeledData<UIntVector,unsigned int> data(batch_sizes,{1,5});
 	for(std::size_t i = 0; i != 11; ++i){
-		data.batch(i).input.resize(i+10,1);
-		data.batch(i).label.resize(i+10);
-		for(std::size_t j = 0; j != i+10; ++j){
+		for(std::size_t j = 0; j != batch_sizes[i]; ++j){
 			data.batch(i).input(j,0) = (unsigned int)j;
 			data.batch(i).label(j) = labels[i];
 		}

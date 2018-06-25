@@ -78,9 +78,7 @@ public:
     ,  m_labels(data.numberOfElements())
     , m_modifierEq(modifierEq)
     , m_modifierNe(modifierNe){
-        for(std::size_t i = 0; i != m_labels.size(); ++i){
-            m_labels[i] = data.element(i).label;
-        }
+	m_labels =createBatch<unsigned int>(data.labels().elements());
     }
 
     /// return a single matrix entry
@@ -145,7 +143,7 @@ public:
 protected:
     /// Kernel matrix which computes the basic entries.
     Matrix m_matrix;
-    std::vector<unsigned int> m_labels;
+    UIntVector m_labels;
 
     /// modifier in case the labels are equal
     QpFloatType m_modifierEq;
