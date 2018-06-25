@@ -86,11 +86,13 @@ public:
 		SHARK_RUNTIME_CHECK(ic >= 2, "Input needs to consist of at least two points");
 		std::size_t dc = dataDimension(input);
 
-		RealVector min = input.element(0);
-		RealVector max = input.element(0);
-		for(std::size_t i=1; i != ic; i++){
+		auto elements = input.elements();
+		
+		RealVector min = elements[0];
+		RealVector max = elements[0];
+		for(auto const& element: elements){
 			for(std::size_t d = 0; d != dc; d++){
-				double x = input.element(i)(d);
+				double x = element(d);
 				min(d) = std::min(min(d), x);
 				max(d) = std::max(max(d), x);
 			}

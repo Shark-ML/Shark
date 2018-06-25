@@ -14,11 +14,12 @@ typedef MultiTaskSample<RealVector> InputType;
 
 
 // Multi-task problem with up to three tasks.
-class MultiTaskProblem : public LabeledDataDistribution<InputType, unsigned int>
-{
+class MultiTaskProblem : public LabeledDataDistribution<InputType, unsigned int>{
 public:
 	MultiTaskProblem()
-	{
+	:LabeledDataDistribution<InputType, unsigned int>(
+		{std::array<Shape, 2>({Shape(2),Shape(3)}) ,2}
+	){
 		m_task[0] = true;
 		m_task[1] = true;
 		m_task[2] = true;
@@ -69,11 +70,8 @@ int main(int argc, char** argv)
 	LabeledData<InputType, unsigned int> test = problem.generateDataset(ell_test);
 
 	// merge all inputs into a single data object
-	Data<InputType> data(ell_train + ell_test);
-	for (size_t i=0; i<ell_train; i++) 
-		data.element(i) = training.inputs().element(i);
-	for (size_t i=0; i<ell_test; i++) 
-		data.element(ell_train + i) = test.inputs().element(i);
+	Data<InputType> data = training.inputs();
+	data.append(test.inputs());
 
 	// create kernel objects
 	GaussianRbfKernel<RealVector> inputKernel(gamma);   // Gaussian kernel on inputs

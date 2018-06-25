@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(LabelOrder_General)
 	// now map distort every, reversing is enough. make sure we have label 0 in it
 	// to test if we can handle that too
 	for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
-		dataset.labels().element(i) = (unsigned int)(2 * (dataset.numberOfElements() - 1) - 2 * i);
+		dataset.labels().elements()[i] = (unsigned int)(2 * (datasetSize - 1) - 2 * i);
 
 	// create a copy we can compare with later on
 	LabeledData<RealVector, unsigned int> datasetCopy = dataset;
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(LabelOrder_General)
 
 	// check the order
 	for(std::size_t i = 0; i < internalOrder.size(); ++i)
-		BOOST_REQUIRE_EQUAL(internalOrder[i], (unsigned int)(2 * (dataset.numberOfElements() - 1) - 2 * i));
+		BOOST_REQUIRE_EQUAL(internalOrder[i], (unsigned int)(2 * (datasetSize - 1) - 2 * i));
 
 
 	// finally map the labels back on the copy
@@ -81,13 +81,13 @@ BOOST_AUTO_TEST_CASE(LabelOrder_General)
 
 	// make sure we did not loose anything
 	for(std::size_t i = 0; i < internalOrder.size(); ++i)
-		BOOST_REQUIRE_EQUAL(dataset.labels().element(i), datasetCopy.labels().element(i));
+		BOOST_REQUIRE_EQUAL(dataset.labels().elements()[i], datasetCopy.labels().elements()[i]);
 
 	// now check for some error cases:
 	// create labels that are out of range and call the restore function
 	LabeledData<RealVector, unsigned int> datasetBroken = dataset;
 	for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
-		dataset.labels().element(i) = (unsigned int)(internalOrder.size() + i);
+		dataset.labels().elements()[i] = (unsigned int)(internalOrder.size() + i);
 
 	try
 	{

@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Regression ) {
 	Data<RealVector> prediction = model(dataset.inputs());
 	for (int i = 0; i<6; ++i)
 	{
-		BOOST_CHECK_SMALL(prediction.element(i)(0) - 4.0 * (i/2 - 1), 1e-14);
+		BOOST_CHECK_SMALL(prediction.elements()[i](0) - 4.0 * (i/2 - 1), 1e-14);
 	}
 }
 
@@ -128,8 +128,8 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple ) {
 	Data<RealVector> soft_prediction=model.decisionFunction()(dataset.inputs());
 	for (size_t i = 0; i<6; ++i)
 	{
-		BOOST_CHECK_EQUAL(prediction.element(i),target[i]);
-		BOOST_CHECK_CLOSE(soft_prediction.element(i)(target[i]), 2.0/3.0, 1e-12);
+		BOOST_CHECK_EQUAL(prediction.elements()[i],target[i]);
+		BOOST_CHECK_CLOSE(soft_prediction.elements()[i](target[i]), 2.0/3.0, 1e-12);
 	}
 }
 
@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple_Brute_Force )
 		{
 			unsigned int label = model(input[i]);
 			BOOST_REQUIRE_EQUAL(target[i], label);
-			BOOST_REQUIRE_EQUAL(target[i], labels.element(i));
+			BOOST_REQUIRE_EQUAL(target[i], labels.elements()[i]);
 		}
 		
 		Data<unsigned int> testLabels = model(testDataset.inputs());
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple_Brute_Force )
 			
 			unsigned int label = model(testInput[i]);
 			BOOST_CHECK_EQUAL(bruteforceLabel, label);
-			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.element(i));
+			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.elements()[i]);
 		}
 	}
 	
@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple_Brute_Force )
 			RealVector prob = model.decisionFunction()(testInput[i]);
 			BOOST_CHECK_EQUAL(bruteforceLabel, label);
 			BOOST_CHECK_CLOSE(prob(bruteforceLabel), std::max(res/3.0, 1.0 - res/3.0), 1.e-10);
-			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.element(i));
+			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.elements()[i]);
 		}
 	
 	}
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KDTree_Brute_Force) 
 		{
 			unsigned int label = model(input[i]);
 			BOOST_REQUIRE_EQUAL(target[i], label);
-			BOOST_REQUIRE_EQUAL(target[i], labels.element(i));
+			BOOST_REQUIRE_EQUAL(target[i], labels.elements()[i]);
 		}
 		
 		//test using the brute force algorithm, whether the test points
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KDTree_Brute_Force) 
 			
 			unsigned int label = model(testInput[i]);
 			BOOST_CHECK_EQUAL(bruteforceLabel, label);
-			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.element(i));
+			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.elements()[i]);
 		}
 	}
 	
@@ -350,7 +350,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KDTree_Brute_Force) 
 			unsigned int bruteforceLabel = res > 1;
 			unsigned int label = model(testInput[i]);
 			BOOST_CHECK_EQUAL(bruteforceLabel, label);
-			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.element(i));
+			BOOST_CHECK_EQUAL(bruteforceLabel, testLabels.elements()[i]);
 		}
 	}
 }

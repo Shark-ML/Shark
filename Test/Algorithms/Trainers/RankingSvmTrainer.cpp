@@ -72,11 +72,11 @@ BOOST_AUTO_TEST_CASE( RANKINGSVM_TRAINER_SIMPLE_TEST )
 
 		// check the predictions
 		Data<RealVector> output = svm(dataset.inputs());
-		BOOST_CHECK_SMALL(output.element(0)(0) - 0.0, 1e-6);
-		BOOST_CHECK_SMALL(output.element(1)(0) - 1.0, 1e-6);
-		BOOST_CHECK_SMALL(output.element(2)(0) + 1.0, 1e-6);
-		BOOST_CHECK_SMALL(output.element(3)(0) + 1.0, 1e-6);
-		BOOST_CHECK_SMALL(output.element(4)(0) - 2.0, 1e-6);
+		BOOST_CHECK_SMALL(output.elements()[0](0) - 0.0, 1e-6);
+		BOOST_CHECK_SMALL(output.elements()[1](0) - 1.0, 1e-6);
+		BOOST_CHECK_SMALL(output.elements()[2](0) + 1.0, 1e-6);
+		BOOST_CHECK_SMALL(output.elements()[3](0) + 1.0, 1e-6);
+		BOOST_CHECK_SMALL(output.elements()[4](0) - 2.0, 1e-6);
 	}
 }
 

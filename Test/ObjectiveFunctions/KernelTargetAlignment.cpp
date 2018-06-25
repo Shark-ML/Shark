@@ -79,7 +79,7 @@ public:
 		for(std::size_t i = 0; i != numInputs; ++i){
 			for(std::size_t j = 0; j != numInputs; ++j){
 				Y(i,j) = 1;
-				if(data.element(i).label != data.element(j).label)
+				if(data.elements()[i].label != data.elements()[j].label)
 					Y(i,j) = -1;
 				y(i)+=Y(i,j);
 			}
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_Non_Centered)
 	double YY = sum(Y * Y);
 	double truth = -YK/std::sqrt(KK)/std::sqrt(YY);
 	
-	//linear Kernel doesn't have any parameters...
+	//linear Kernel doesn't have any parameters..
 	RealVector input;
 	
 	KernelTargetAlignment<> kta(data,&kernel,false);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_Non_Centered_Gaus
 	double YY = sum(Y * Y);
 	double truth = -YK/std::sqrt(KK)/std::sqrt(YY);
 	
-	//linear Kernel doesn't have any parameters...
+	//linear Kernel doesn't have any parameters..
 	RealVector input;
 	KernelTargetAlignment<> kta(data,&kernel,false);
 	double eval = kta.eval(kernel.parameterVector());
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear_Cente
 	KernelTargetAlignment<> ktaNonCentered(dataCentered,&kernel,false);
 	
 	
-	//linear Kernel doesn't have any parameters...
+	//linear Kernel doesn't have any parameters..
 	RealVector input;
 	
 	double evalCentered = ktaCentered.eval(input);
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_Linear )
 	double KK = sum(element_prod(K,K));
 	double result = -KY/std::sqrt(KK)/numInputs;
 	
-	//linear Kernel doesn't have any parameters...
+	//linear Kernel doesn't have any parameters..
 	RealVector input;
 	double eval = kta.eval(input);
 	BOOST_CHECK_CLOSE(eval,result,1.e-9);
@@ -199,7 +199,7 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_KernelTargetAlignment_eval_GaussKernel 
 	double KK = sum(element_prod(K,K));
 	double result = -KY/std::sqrt(KK)/numInputs;
 	
-	//linear Kernel doesn't have any parameters...
+	//linear Kernel doesn't have any parameters..
 	double eval = kta.eval(kernel.parameterVector());
 	BOOST_CHECK_CLOSE(eval,result,1.e-9);
 	

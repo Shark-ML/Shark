@@ -105,14 +105,14 @@ int main(){
 	//###end<model_reconstruction>
 	cout << "Reconstructing face " << sampleImage << " ... " << flush;
 	boost::format fmterTrue("face%d.pgm");
-	exportPGM((fmterTrue % sampleImage).str().c_str(), images.element(sampleImage), x, y);
+	exportPGM((fmterTrue % sampleImage).str().c_str(), images.elements()[sampleImage], x, y);
 	//###begin<model_decoder>
 	LinearModel<> dec;
 	pca.decoder(dec, m);
 	//###end<model_decoder>
 	//###begin<model_reconstruction>
 	boost::format fmterRec("facesReconstruction%d-%d.pgm");
-	exportPGM((fmterRec % sampleImage % m).str().c_str(), dec(encodedImages.element(sampleImage)), x, y);
+	exportPGM((fmterRec % sampleImage % m).str().c_str(), dec(encodedImages.elements()[sampleImage]), x, y);
 	//###end<model_reconstruction>
 	cout << "done." << endl;
 }

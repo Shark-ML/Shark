@@ -39,6 +39,7 @@
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataDistribution.h>
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 
 
 using namespace shark;
@@ -50,7 +51,6 @@ BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 {
 	const std::size_t ell = 200;
 	const double lambda = 1e-6;
-	const double threshold = 1e-8;
 
 	Wave prob(0.0, 5.0);
 	RegressionDataset training = prob.generateDataset(ell);
@@ -60,17 +60,11 @@ BOOST_AUTO_TEST_CASE( REGULARIZATION_NETWORK_TEST )
 	RegularizationNetworkTrainer<RealVector> trainer(&kernel, lambda);
 	trainer.train(svm, training);
 
-	Data<RealVector> output;
-	output = svm(training.inputs());
+	Data<RealVector> output= svm(training.inputs());
 
-	RealVector alpha = svm.parameterVector();
-	for (std::size_t i=0; i<training.numberOfElements(); i++)
-	{
-		double y = training.labels().element(i)(0);
-		double f = output.element(i)(0);
-		double xi = (f - y) * (f - y);
-		BOOST_CHECK_SMALL(xi, threshold);
-	}
+	SquaredLoss<RealVector> loss;
+	BOOST_CHECK_SMALL(loss(training.labels(),output), 1e-6);
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

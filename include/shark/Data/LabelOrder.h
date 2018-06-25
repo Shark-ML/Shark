@@ -86,10 +86,7 @@ public:
 		// determine the min and max labels of the given dataset
 		unsigned int minLabel = std::numeric_limits<unsigned int>::max();
 		unsigned int maxLabel = 0;
-		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
-		{
-			unsigned int label = dataset.labels().element(i);
-
+		for(unsigned int label: dataset.labels().elements()){
 			if(label < minLabel)
 				minLabel = label;
 			if(label > maxLabel)
@@ -105,10 +102,8 @@ public:
 
 		// and insert all labels we encounter
 		unsigned int currentPosition = 0;
-		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
-		{
+		for(unsigned int label: dataset.labels().elements()){
 			// is it a new label?
-			unsigned int label = dataset.labels().element(i);
 			if(foundLabels[label - minLabel] == maxval)
 			{
 				foundLabels[label - minLabel] = currentPosition;
@@ -118,10 +113,8 @@ public:
 		}
 
 		// now map every label
-		for(std::size_t i = 0; i < dataset.numberOfElements(); i++)
-		{
-			unsigned int label = dataset.labels().element(i);
-			dataset.labels().element(i) = foundLabels[label - minLabel];
+		for(unsigned int& label: dataset.labels().elements()){
+			label = foundLabels[label - minLabel];
 		}
 	}
 
@@ -137,16 +130,12 @@ public:
 	void restoreOriginalLabels(LabeledData<RealVector, unsigned int> &dataset)
 	{
 		// now map every label
-		for(std::size_t i = 0; i < dataset.numberOfElements(); ++i)
-		{
-			unsigned int label = dataset.labels().element(i);
-
+		for(unsigned int& label: dataset.labels().elements()){
 			// check if the reordering fit the data
 			SHARK_RUNTIME_CHECK(label < m_labelOrder.size(),"Dataset labels does not fit to the stored ordering!");
 
 			// relabel
 			label = m_labelOrder[label];
-			dataset.labels().element(i) = label;
 		}
 	}
 

@@ -8,7 +8,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include "derivativeTestHelper.h"
-
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 #include <sstream>
 
 
@@ -185,11 +185,9 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 	BOOST_CHECK_SMALL(norm_2(cmacDeserialized.parameterVector() - testParameters),1.e-50);
 	BOOST_REQUIRE_EQUAL(cmacDeserialized.inputShape(),cmac.inputShape());
 	BOOST_REQUIRE_EQUAL(cmacDeserialized.outputShape(),cmac.outputShape());
-	for (size_t i=0; i<1000; i++)
-	{
-		RealVector output = cmacDeserialized(dataset.element(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-50);
-	}
+	
+	SquaredLoss<RealVector> loss;
+	BOOST_CHECK_SMALL(loss(dataset.labels(),cmacDeserialized(dataset.inputs())),1.e-10);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

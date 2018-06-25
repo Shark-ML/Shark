@@ -195,15 +195,17 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 	
 	RealMatrix image((height+1)*gridY,(width+1)*gridX,minimum);
 	
-	for(std::size_t filter = 0; filter != numFilters; ++filter){
+	std::size_t filter = 0;
+	for(auto element: filters.elements()){
 		//get grid position from filter
 		std::size_t i = filter/gridX;
 		std::size_t j = filter%gridX;
 		std::size_t startY = (height+1)*i;
 		std::size_t startX = (width+1)*j;
-		RealVector filterImage =filters.element(filter);
+		RealVector filterImage = element;
 		//copy images
 		noalias(subrange(image,startY,startY+height,startX,startX+width)) = to_matrix(filterImage,height,width);
+		++filter;
 	}
 	exportPGM(
 		(basename+".pgm").c_str(), 

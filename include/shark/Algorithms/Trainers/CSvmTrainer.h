@@ -13,6 +13,7 @@
 #include <shark/LinAlg/PrecomputedMatrix.h>
 #include <shark/LinAlg/RegularizedKernelMatrix.h>
 #include <shark/Models/Kernels/GaussianRbfKernel.h>
+#include <shark/Data/DataView.h>
 
 //for MCSVMs!
 #include <shark/Algorithms/QP/QpMcSimplexDecomp.h>
@@ -235,17 +236,16 @@ public:
 		// write the solution into the model
 		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
 		
-		for (std::size_t i=0; i<ell; i++)
-		{
-			unsigned int y = dataset.element(i).label;
-			for (std::size_t c=0; c<classes; c++)
-			{
+		std::size_t i = 0;
+		for(auto y: dataset.labels().elements()){
+			for (std::size_t c=0; c<classes; c++){
 				double sum = 0.0;
 				std::size_t r = alpha.size2() * y;
 				for (std::size_t p=0; p != alpha.size2(); p++, r++)
 					sum += nu(r, c) * alpha(i, p);
 				svm.decisionFunction().alpha(i,c) = sum;
 			}
+			++i;
 		}
 		
 		if (this->m_trainOffset) 
@@ -619,7 +619,7 @@ private:
 		{
 			PrecomputedMatrix<Matrix> matrix(&km);
 			GeneralQuadraticProblem<PrecomputedMatrix<Matrix> > svmProblem(
-				matrix,dataset.labels(),dataset.weights(),base_type::m_regularizers
+				matrix, dataset.weightedLabels(),base_type::m_regularizers
 			);
 			optimize(svm,svmProblem,dataset.data());
 		}
@@ -627,7 +627,7 @@ private:
 		{
 			CachedMatrix<Matrix> matrix(&km);
 			GeneralQuadraticProblem<CachedMatrix<Matrix> > svmProblem(
-				matrix,dataset.labels(),dataset.weights(),base_type::m_regularizers
+				matrix, dataset.weightedLabels() ,base_type::m_regularizers
 			);
 			optimize(svm,svmProblem,dataset.data());
 		}
@@ -747,15 +747,19 @@ private:
 		//state for eval and evalDerivative of the kernel
 		boost::shared_ptr<State> kernelState = base_type::m_kernel->createState();
 		RealVector der(nkp ); //derivative storage helper
+		
+		
+		//fast access to single elements
+		auto elements = toView(dataset);
 		//todo: O.K.: here kernel single input derivative would be usefull
 		//also it can be usefull to use here real batch processing and use batches of size 1 for lower /upper
 		//and instead of singleInput whole batches.
 		//what we do is, that we use the batched input versions with batches of size one.
-		typename Batch<InputType>::type singleInput = Batch<InputType>::createBatch( dataset.element(0).input, 1 );
-		typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatch( dataset.element(lower_i).input, 1 );
-		typename Batch<InputType>::type upperInput = Batch<InputType>::createBatch( dataset.element(upper_i).input, 1 );
-		getBatchElement( lowerInput, 0 ) = dataset.element(lower_i).input; //copy the current input into the batch
-		getBatchElement( upperInput, 0 ) = dataset.element(upper_i).input; //copy the current input into the batch
+		typename Batch<InputType>::type singleInput = Batch<InputType>::createBatchFromShape( dataset.shape().input, 1 );
+		typename Batch<InputType>::type lowerInput = Batch<InputType>::createBatchFromShape( dataset.shape().input, 1 );
+		typename Batch<InputType>::type upperInput = Batch<InputType>::createBatchFromShape( dataset.shape().input, 1 );
+		getBatchElement( lowerInput, 0 ) = elements[lower_i].input; //copy the current input into the batch
+		getBatchElement( upperInput, 0 ) = elements[upper_i].input; //copy the current input into the batch
 		RealMatrix one(1,1,1); //weight of input
 		RealMatrix result(1,1); //stores the result of the call
 
@@ -763,7 +767,7 @@ private:
 			double cur_alpha = problem.alpha(problem.permutation(i));
 			if ( cur_alpha != 0 ) {
 				int cur_label = ( cur_alpha>0.0 ? 1 : -1 );
-				getBatchElement( singleInput, 0 ) = dataset.element(i).input; //copy the current input into the batch
+				getBatchElement( singleInput, 0 ) = elements[i].input; //copy the current input into the batch
 				// treat contributions of largest gradient at lower bound
 				base_type::m_kernel->eval( lowerInput, singleInput, result, *kernelState );
 				dlower_dC += cur_label * result(0,0);
@@ -974,8 +978,10 @@ public:
 		
 		RealVector diagonalModifier(dataset.numberOfElements(),0.5/base_type::m_regularizers(0));
 		if(base_type::m_regularizers.size() != 1){
-			for(std::size_t i = 0; i != diagonalModifier.size();++i){
-				diagonalModifier(i) = 0.5/base_type::m_regularizers(dataset.element(i).label);
+			std::size_t i = 0;
+			for(unsigned int label:dataset.labels().elements()){
+				diagonalModifier(i) = 0.5/base_type::m_regularizers(label);
+				++i;
 			}
 		}
 		

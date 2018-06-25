@@ -38,6 +38,7 @@
 #define SHARK_DATA_DATADISTRIBUTION_H
 
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/Core/Random.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <utility>
@@ -57,6 +58,11 @@ template <class InputType>
 class DataDistribution
 {
 public:
+	typedef Data<InputType> DatasetType;
+	typedef typename DatasetType::shape_type shape_type;
+
+	DataDistribution(shape_type const& shape):m_shape(shape){}
+
 	/// \brief Virtual destructor.
 	virtual ~DataDistribution() { }
 
@@ -64,12 +70,10 @@ public:
 	///
 	/// @param input the generated input
 	virtual void draw(InputType& input) const = 0;
-
-	// \brief Interface for std::generate.
-	InputType operator() () {
-		InputType ret;
-		draw(ret);
-		return ret;
+	
+	/// \brief Returns the shape of the dataset.
+	shape_type const& shape() const{
+		return m_shape;
 	}
 	
 	/// \brief Generates a data set with samples from from the distribution.
@@ -77,14 +81,15 @@ public:
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
 	Data<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const {
-		std::vector<InputType> data(size);
+		DatasetType data(size, shape(), maximumBatchSize);
 
 		// draw the samples
-		for (std::size_t i = 0; i < size; ++i){
-			draw(data[i]);
+		InputType input;
+		for(auto&& element: data.elements()){
+			draw(input);
+			element = input;
 		}
-		//create dataset
-		return createDataFromRange(data,maximumBatchSize);
+		return data;
 	}
 	
 	/// \brief Generates a data set with samples from from the distribution.
@@ -93,6 +98,8 @@ public:
 	Data<InputType> generateDataset(std::size_t size) const {
 		return generateDataset(size,Data<InputType>::DefaultBatchSize );
 	}
+private:
+	shape_type m_shape;
 };
 
 
@@ -108,35 +115,35 @@ template <class InputType, class LabelType>
 class LabeledDataDistribution
 {
 public:
-	/// \brief Virtual destructor.
-	virtual ~LabeledDataDistribution() { }
+	typedef LabeledData<InputType, LabelType> DatasetType;
+	typedef typename DatasetType::shape_type shape_type;
+
+	LabeledDataDistribution(shape_type const& shape):m_shape(shape){}
 
 	/// \brief Generates a single pair of input and label.
 	/// @param input the generated input
 	/// @param label the generated label
 	virtual void draw(InputType& input, LabelType& label) const = 0;
-
-	// \Brief Interface for std::generate.
-	std::pair<InputType,LabelType> operator() () {
-		std::pair<InputType,LabelType> ret;
-		draw(ret.first,ret.second);
-		return ret;
+	
+	/// \brief Returns the shape of the dataset.
+	shape_type const& shape() const{
+		return m_shape;
 	}
 	
 	/// \brief Generates a dataset with samples from from the distribution.
 	///
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
-	LabeledData<InputType, LabelType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const{
-		std::vector<InputType> inputs(size);
-		std::vector<LabelType> labels(size);
+	DatasetType generateDataset(std::size_t size,std::size_t maximumBatchSize) const{
+		DatasetType data(size, shape(), maximumBatchSize);
 
 		// draw the samples
-		for (std::size_t i = 0; i < size; ++i){
-			draw(inputs[i], labels[i]);
+		InputLabelPair<InputType,LabelType> pair;
+		for(auto&& element: data.elements()){
+			draw(pair.input,pair.label);
+			element = pair;
 		}
-		//create dataset
-		return createLabeledDataFromRange(inputs,labels,maximumBatchSize);
+		return data;
 	}
 	
 	/// \brief Generates a data set with samples from from the distribution.
@@ -145,6 +152,8 @@ public:
 	LabeledData<InputType, LabelType> generateDataset(std::size_t size) const {
 		return generateDataset(size,LabeledData<InputType, LabelType>::DefaultBatchSize );
 	}
+private:
+	shape_type m_shape;
 };
 
 
@@ -155,7 +164,7 @@ class Chessboard : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	Chessboard(unsigned int size = 4, double noiselevel = 0.0)
-	{
+	:LabeledDataDistribution<RealVector, unsigned int>({2,2}){
 		m_size = size;
 		m_noiselevel = noiselevel;
 	}
@@ -186,11 +195,11 @@ protected:
 class Wave : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
-	Wave(double stddev = 0.1, double range = 5.0){
+	Wave(double stddev = 0.1, double range = 5.0)
+	: LabeledDataDistribution<RealVector, RealVector>({1,1}){
 		m_stddev = stddev;
 		m_range = range;
 	}
-
 
 	void draw(RealVector& input, RealVector& label)const{
 		input.resize(1);
@@ -218,11 +227,12 @@ class PamiToy : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	PamiToy(unsigned int size_useful = 5, unsigned int size_noise = 5, double noise_position = 0.0, double noise_variance = 1.0 )
-	: m_size( size_useful+size_noise ),
-	  m_sizeUseful( size_useful ),
-	  m_sizeNoise( size_noise ),
-	  m_noisePos( noise_position) ,
-	  m_noiseVar( noise_variance )
+	: LabeledDataDistribution<RealVector, unsigned int>({size_useful+size_noise,2})
+	, m_size( size_useful+size_noise )
+	, m_sizeUseful( size_useful )
+	, m_sizeNoise( size_noise )
+	, m_noisePos( noise_position)
+	, m_noiseVar( noise_variance )
 	{ }
 
 	void draw(RealVector& input, unsigned int& label)const{
@@ -254,14 +264,15 @@ class CircleInSquare : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
 	CircleInSquare( unsigned int dimensions = 2, double noiselevel = 0.0, bool class_prob_equal = false )
-	: m_dimensions( dimensions ),
-	  m_noiselevel( noiselevel ),
-	  m_lowerLimit( -1 ),
-	  m_upperLimit( 1 ),
-	  m_centerpoint( 0 ),
-	  m_inner_radius2( 0.5*0.5 ),
-	  m_outer_radius2( 0.5*0.5 ),
-	  m_equal_class_prob( class_prob_equal )
+	: LabeledDataDistribution<RealVector, unsigned int>({2, 2})
+	, m_dimensions( dimensions )
+	, m_noiselevel( noiselevel )
+	, m_lowerLimit( -1 )
+	, m_upperLimit( 1 )
+	, m_centerpoint( 0 )
+	, m_inner_radius2( 0.5*0.5 )
+	, m_outer_radius2( 0.5*0.5 )
+	, m_equal_class_prob( class_prob_equal )
 	{ }
 	
 	/// allow for arbitrary box limits
@@ -343,12 +354,12 @@ class DiagonalWithCircle : public LabeledDataDistribution<RealVector, unsigned i
 {
 public:
 	DiagonalWithCircle( double radius = 1.0, double noise = 0.0 )
-	: m_radius2( radius*radius ),
-	  m_noiselevel( noise )
+	: LabeledDataDistribution<RealVector, unsigned int>({2, 2})
+	, m_radius2( radius*radius )
+	, m_noiselevel( noise )
 	{ }
 	
-	void draw(RealVector& input, unsigned int& label)const
-	{
+	void draw(RealVector& input, unsigned int& label)const{
 		input.resize( 2 );
 		double x,y;
 		x = random::uni(random::globalRng, 0, 4 ); //zero is left
@@ -380,13 +391,16 @@ class NormalDistributedPoints:public DataDistribution<RealVector>
 {
 public:
 	/// \brief Generates a simple distribution with 
-	NormalDistributedPoints(std::size_t dim): m_offset(dim,0){
+	NormalDistributedPoints(std::size_t dim)
+	: DataDistribution<RealVector>(dim)
+	, m_offset(dim,0){
 		RealMatrix covariance(dim,dim,0);
 		diag(covariance) = blas::repeat(1.0,dim);
 		m_dist.setCovarianceMatrix(covariance);
 	}
 	NormalDistributedPoints(RealMatrix const& covariance, RealVector const& offset)
-	:m_dist(covariance), m_offset(offset){
+	: DataDistribution<RealVector>(offset.size())
+	, m_dist(covariance), m_offset(offset){
 		SIZE_CHECK(offset.size() == covariance.size1());
 	}
 	void draw(RealVector& input) const{
@@ -394,6 +408,7 @@ public:
 		noalias(input) = m_offset;
 		noalias(input) += m_dist(random::globalRng).first;
 	}
+	
 private:
 	MultiVariateNormalDistributionCholesky m_dist;
 	RealVector m_offset;
@@ -406,17 +421,17 @@ public:
 		Data<RealVector> images, 
 		std::size_t imageWidth, std::size_t imageHeight,
 		std::size_t patchWidth, std::size_t patchHeight
-	):m_images(images)
+	):DataDistribution<RealVector>({m_patchWidth, m_patchHeight})
+	, m_images(images)
 	, m_imageWidth(imageWidth)
 	, m_imageHeight(imageHeight)
 	, m_patchWidth(patchWidth)
-	, m_patchHeight(patchHeight)
-	,m_numImages(m_images.numberOfElements()){}
+	, m_patchHeight(patchHeight){}
 		
 	void draw(RealVector& input) const{
 		//sample image
-		std::size_t imageNum = random::discrete(random::globalRng, std::size_t(0),m_numImages-1);
-		Data<RealVector>::const_element_reference image = m_images.element(imageNum);
+		std::size_t imageNum = random::discrete(random::globalRng, std::size_t(0),m_images.size()-1);
+		auto image = m_images[imageNum];
 		//draw the upper left corner of the image
 		std::size_t m_startX = random::discrete(random::globalRng, std::size_t(0),m_imageWidth-m_patchWidth);
 		std::size_t m_startY = random::discrete(random::globalRng, std::size_t(0),m_imageHeight-m_patchHeight);
@@ -433,12 +448,11 @@ public:
 		}
 	}
 private:
-	Data<RealVector> m_images;
+	DataView<Data<RealVector> > m_images;
 	std::size_t m_imageWidth;
 	std::size_t m_imageHeight;
 	std::size_t m_patchWidth;
 	std::size_t m_patchHeight;
-	std::size_t m_numImages;
 };
 
 }

@@ -37,6 +37,7 @@
 
 #include <shark/Models/Kernels/KernelExpansion.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
+#include <shark/Data/DataView.h>
 
 namespace shark{
 
@@ -62,23 +63,20 @@ public:
 		KernelExpansion<InputType>& model= classifier.decisionFunction();
 		model.setStructure(mpe_kernel,dataset.inputs(),false,1);
 		model.alpha().clear();
-
-		bool err;
-		std::size_t iter = 0;
-		do {
-			err = false;
+		auto elements = toView(dataset);
+		for(std::size_t iter = 0; iter < m_maxTimesPattern * patterns; ++iter){
+			bool err = false;
 			for (std::size_t i = 0; i != patterns; i++){
-				double result = model(dataset.element(i).input)(0);
+				double result = model(dataset.elements()[i].input)(0);
 				//perceptron learning rule with modified target from -1;1
-				double label = dataset.element(i).label*2.0-1;
+				double label = elements[i].label*2.0-1;
 				if ( result * label  <= 0.0){
 					model.alpha(i,0) += label;
 					err = true;
 				}
 			}
-			if (iter > m_maxTimesPattern * patterns) break;	// probably non-separable data
-			iter++;
-		} while (err);
+			if(!err) break; // we are done
+		}
 	}
 private:
 	AbstractKernelFunction<InputType>* mpe_kernel;

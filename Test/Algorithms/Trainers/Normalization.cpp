@@ -24,9 +24,9 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_VARIANCE )
 	Normalizer<> map;
 	normalizer.train(map, set);
 	Data<RealVector> transformedSet = map(set);
-	double error = std::abs(-std::sqrt(1.5) - transformedSet.element(0)(0)) 
-				+ std::abs(transformedSet.element(1)(0)) 
-				+ std::abs(sqrt(1.5) - transformedSet.element(2)(0));
+	double error = std::abs(-std::sqrt(1.5) - transformedSet.elements()[0](0)) 
+				+ std::abs(transformedSet.elements()[1](0)) 
+				+ std::abs(sqrt(1.5) - transformedSet.elements()[2](0));
 	BOOST_CHECK_SMALL(error, 1e-10);
 }
 
@@ -42,9 +42,9 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_INTERVAL )
 	Normalizer<> map;
 	normalizer.train(map, set);
 	Data<RealVector> transformedSet = map(set);
-	BOOST_CHECK_SMALL(transformedSet.element(0)(0),1.e-10);
-	BOOST_CHECK_SMALL(0.5 - transformedSet.element(1)(0),1.e-10);
-	BOOST_CHECK_SMALL(1.0 - transformedSet.element(2)(0),1.e-10);
+	BOOST_CHECK_SMALL(transformedSet.elements()[0](0),1.e-10);
+	BOOST_CHECK_SMALL(0.5 - transformedSet.elements()[1](0),1.e-10);
+	BOOST_CHECK_SMALL(1.0 - transformedSet.elements()[2](0),1.e-10);
 }
 
 BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)

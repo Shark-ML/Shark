@@ -134,19 +134,6 @@ void complement(
 	std::copy(resultSet.begin(),pos,comp.begin());
 }
 
-/// compute the index set for the range [0, ..., size[
-template<class T>
-void range(size_t size, T& indices){
-	indices.resize(size);
-	for (size_t i=0; i<size; i++) indices[i] = i;
-}
-/// compute the index set for the range [start, ..., size+start[
-template<class T>
-void range(size_t size,size_t start, T& indices){
-	indices.resize(size);
-	for (size_t i=0; i<size; i++) indices[i] = start+i;
-}
-
 /// \brief Shared memory container class with slicing
 template <class Type>
 class SharedContainer : public ISerializable
@@ -499,12 +486,14 @@ template<class Dataset>
 class DataElementIterator: 
 public SHARK_ITERATOR_FACADE< 
 	DataElementIterator<Dataset>, 
-	typename Dataset::element_type, 
+	typename detail::batch_to_element<typename Dataset::batch_type>::type, 
 	std::random_access_iterator_tag, 
-	typename boost::mpl::if_<
-		std::is_const<Dataset>,
-		typename Dataset::const_element_reference,
-		typename Dataset::element_reference
+	typename detail::batch_to_reference<
+		typename std::conditional<
+			std::is_const<Dataset>::value,
+			typename Dataset::batch_type const,
+			typename Dataset::batch_type
+		>::type
 	>::type
 >{
 private:
@@ -513,10 +502,12 @@ private:
 	std::size_t m_elementPosition;
 	std::size_t m_positionInSequence;
 public:
-	typedef typename boost::mpl::if_<
-		std::is_const<Dataset>,
-		typename Dataset::const_element_reference,
-		typename Dataset::element_reference
+	typedef typename detail::batch_to_reference<
+		typename std::conditional<
+			std::is_const<Dataset>::value,
+			typename Dataset::batch_type const,
+			typename Dataset::batch_type
+		>::type
 	>::type reference;
 
 	DataElementIterator()
@@ -550,6 +541,17 @@ public:
 	std::size_t index()const{
 		return m_positionInSequence;
 	}
+	
+	//this is needed, because operator[] provided by boost::iterator_facade is broken.
+	//the bug:
+	//if reference is T const& and T is a POD like unsigned int,
+	// operator[] would return T and not T const&. 
+	//however, we use boost::range<Iterator> which
+	// implements operator[] by returning a reference. this laves
+	// dangling references
+	reference operator[](std::ptrdiff_t n) const{
+		return *(*this+n);
+	}		
 
 private:
 	friend class SHARK_ITERATOR_CORE_ACCESS;

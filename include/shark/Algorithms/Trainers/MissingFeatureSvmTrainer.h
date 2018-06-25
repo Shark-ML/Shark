@@ -147,7 +147,7 @@ private:
 				scalingCoefficients(i) = svm.computeNorm(
 					alpha,
 					scalingCoefficients,
-					dataset.element(i).input)
+					dataset.elements()[i].input)
 					/ classifierNorm;
 			}
 			
@@ -196,7 +196,7 @@ private:
 				scalingCoefficients(i) = svm.computeNorm(
 					unpermutedAlpha,
 					scalingCoefficients,
-					dataset.element(i).input
+					dataset.elements()[i].input
 				)/ classifierNorm;
 			}
 			

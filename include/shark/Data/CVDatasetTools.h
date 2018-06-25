@@ -163,10 +163,10 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 	//calculate the size of the batches for every validation part
 	std::vector<std::size_t> partitionStart;
 	std::vector<std::size_t> batchSizes;
-	std::size_t numBatches = batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
+	batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
 
 
-	LabeledData<I,L> newSet(numBatches);//set of empty batches
+	LabeledData<I,L> newSet(batchSizes, set.shape());//set of empty batches
 	DataView<LabeledData<I,L> > setView(set);//fast access to single elements of the original set
 	std::vector<std::size_t> validationSetStart = partitionStart;//current index for the batch of every fold
 	//partition classes into the validation subsets of newSet
@@ -365,7 +365,7 @@ CVFolds<LabeledData<I,L> > createCVBatch (
 template<class I,class L>
 CVFolds<LabeledData<I,L> > createCVIndexed(
 	LabeledData<I,L> &set,
-    std::size_t numberOfPartitions,
+	std::size_t numberOfPartitions,
 	std::vector<std::size_t> indices,
 	std::size_t batchSize=Data<I>::DefaultBatchSize
 ) {
@@ -382,10 +382,10 @@ CVFolds<LabeledData<I,L> > createCVIndexed(
 	//calculate the size of batches for every validation part and their total number
 	std::vector<std::size_t> partitionStart;
 	std::vector<std::size_t> batchSizes;
-	std::size_t numBatches = detail::batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
+	detail::batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
 
 	//construct a new set with the correct batch format from the old set
-	LabeledData<I,L> newSet(numBatches);
+	LabeledData<I,L> newSet(batchSizes, set.shape());
 	DataView<LabeledData<I,L> > setView(set); //fast access to single elements of the original set
 	std::vector<std::size_t> validationSetStart = partitionStart; //current index for the batch of every partition
 	std::vector<std::vector<std::size_t> > batchElements(numberOfPartitions);

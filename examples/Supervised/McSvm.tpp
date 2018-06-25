@@ -19,8 +19,8 @@ using namespace shark;
 class Problem : public LabeledDataDistribution<RealVector, unsigned int>
 {
 public:
-	void draw(RealVector& input, unsigned int& label)const
-	{
+	Problem() : LabeledDataDistribution<RealVector, unsigned int>({1,5}){}
+	void draw(RealVector& input, unsigned int& label)const{
 		label = random::discrete(random::globalRng, 0, 4);
 		input.resize(1);
 		input(0) = random::gauss(random::globalRng) + 3.0 * label;

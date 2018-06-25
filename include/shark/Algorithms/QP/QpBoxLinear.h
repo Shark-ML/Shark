@@ -68,7 +68,6 @@ class QpBoxLinear
 {
 public:
 	typedef LabeledData<InputT, unsigned int> DatasetType;
-	typedef typename LabeledData<InputT, unsigned int>::const_element_reference ElementType;
 
 	///
 	/// \brief Constructor

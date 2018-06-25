@@ -145,9 +145,6 @@ public:
 	typedef batch_type& batch_reference;
 	typedef batch_type const& const_batch_reference;
 
-	typedef typename Batch<element_type>::reference element_reference;
-	typedef typename Batch<element_type>::const_reference const_element_reference;
-
 	typedef std::vector<std::size_t> IndexSet;
 
 	/// \brief Two containers compare equal if they share the same data.
@@ -230,14 +227,6 @@ public:
 		return m_data.empty();
 	}
 
-	// ELEMENT ACCESS
-	element_reference element(std::size_t i){
-		return *(detail::DataElementIterator<Data<Type> >(this,0,0,0)+i);
-	}
-	const_element_reference element(std::size_t i) const{
-		return *(detail::DataElementIterator<Data<Type> const>(this,0,0,0)+i);
-	}
-
 	// BATCH ACCESS
 	batch_reference batch(std::size_t i){
 		return *(m_data.begin()+i);
@@ -251,10 +240,6 @@ public:
 	///\brief Constructor which constructs an empty set
 	Data(){ }
 
-	///\brief Construct a dataset with empty batches.
-	explicit Data(std::size_t numBatches) : m_data( numBatches )
-	{ }
-
 	///\brief Constructs a set holding a specific number of elements of a given shape.
 	///
 	/// Optionally the desired batch Size can be set
@@ -267,6 +252,19 @@ public:
 		auto batches = detail::optimalBatchSizes(numElements, batchSize);
 		for(std::size_t i = 0; i != batches.size(); ++i){
 			m_data.batch(i) = Batch<Type>::createBatchFromShape(shape, batches[i]);
+		}
+	}
+	
+	///\brief Constructs a set with a given shape and a chosen partitioning
+	///
+	/// For each element in partitioning, a batch is created with the given size
+	///
+	///@param partitioning batch sizes of the dataset
+	///@param shape The shape of the elements to create
+	explicit Data(std::vector<std::size_t> const& partitioning, shape_type const& shape)
+	: m_data( partitioning.size()), m_shape(shape){
+		for(std::size_t i = 0; i != numberOfBatches(); ++i){
+			m_data.batch(i) = Batch<Type>::createBatchFromShape(shape, partitioning[i]);
 		}
 	}
 
@@ -288,7 +286,6 @@ public:
 
 
 	// METHODS TO ALTER BATCH STRUCTURE
-
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
 		m_data.splitBatch(m_data.begin()+batch,elementIndex);
 	}
@@ -341,8 +338,7 @@ public:
 	/// during construction.
 	template<class Range>
 	void reorderElements(Range const& indices){
-		Data dataCopy(numberOfBatches());
-		dataCopy.shape() = shape();
+		Data dataCopy(getPartitioning(), m_shape);
 		
 		std::vector<Type> batch_elements;
 		auto indexPos = indices.begin();
@@ -367,15 +363,6 @@ public:
 	}
 
 	// SUBSETS
-
-	///\brief Fill in the subset defined by the list of indices as well as its complement.
-	void indexedSubset(IndexSet const& indices, Data& subset, Data& complement) const{
-		IndexSet comp;
-		detail::complement(indices,m_data.size(),comp);
-		subset.m_data=Container(m_data,indices);
-		complement.m_data=Container(m_data,comp);
-	}
-	
 	Data indexedSubset(IndexSet const& indices) const{
 		Data subset;
 		subset.m_data = Container(m_data,indices);
@@ -447,9 +434,6 @@ public:
 		typename Batch<InputType>::type const&,
 		typename Batch<LabelType>::type const&
 	> const_batch_reference;
-	
-	typedef typename batch_reference::reference element_reference;
-	typedef typename const_batch_reference::const_reference const_element_reference;
 
 	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> > > element_range;
 	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> const> > const_element_range;
@@ -531,13 +515,6 @@ public:
 	LabeledData()
 	{}
 
-	///\brief Create an empty set with just the correct number of batches.
-	///
-	/// The user must initialize the dataset after that by himself.
-	LabeledData(std::size_t numBatches)
-	: m_data(numBatches),m_label(numBatches)
-	{}
-
 	///\brief Constructs a set holding a specific number of elements of a given shape.
 	///
 	/// to create a dataset with 100 dimensional inputs and 8 classes, write
@@ -549,25 +526,26 @@ public:
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
 	explicit LabeledData(std::size_t numElements, shape_type const& shape, std::size_t batchSize = DefaultBatchSize)
 	: m_data(numElements, shape.input, batchSize), m_label(numElements, shape.label, batchSize){}
+	
+	///\brief Constructs a set with a given shape and a chosen partitioning
+	///
+	/// For each element in partitioning, a batch is created with the given size
+	///
+	///@param partitioning batch sizes of the dataset
+	///@param shape The shape of the elements to create
+	explicit LabeledData(std::vector<std::size_t> const& partitioning, shape_type const& shape)
+	: m_data( partitioning, shape.input), m_label(partitioning,shape.label){}
 
 	///\brief Construction from data.
 	///
 	/// Beware that when calling this constructor the organization of batches must be equal in both
 	/// containers. This Constructor will not split the data!
 	LabeledData(Data<InputType> const& inputs, Data<LabelType> const& labels)
-	: m_data(inputs), m_label(labels)
-	{
+	: m_data(inputs), m_label(labels){
 		SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
 		for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
 			SHARK_RUNTIME_CHECK(batchSize(inputs.batch(i)) == batchSize(labels.batch(i)), "batch sizes of inputs and labels must agree");
 		}
-	}
-	// ELEMENT ACCESS
-	element_reference element(std::size_t i){
-		return *(detail::DataElementIterator<LabeledData<InputType,LabelType> >(this,0,0,0)+i);
-	}
-	const_element_reference element(std::size_t i) const{
-		return *(detail::DataElementIterator<LabeledData<InputType,LabelType> const>(this,0,0,0)+i);
 	}
 
 	// BATCH ACCESS
@@ -737,14 +715,14 @@ struct InferShape<Data<T> >{
 template<class T>
 struct InferShape<Data<blas::vector<T> > >{
 	static Shape infer(Data<blas::vector<T> > const& f){
-		return {f.element(0).size()};
+		return {f.batch(0).size2()};
 	}
 };
 
 template<class T>
 struct InferShape<Data<blas::compressed_vector<T> > >{
 	static Shape infer(Data<blas::compressed_vector<T> > const& f){
-		return {f.element(0).size()};
+		return {f.batch(0).size2()};
 	}
 };
 
@@ -759,51 +737,36 @@ struct InferShape<Data<blas::compressed_vector<T> > >{
 template<class Range>
 Data<typename Range::value_type>
 createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
-	typedef typename Range::value_type Input;
+	typedef typename Range::value_type value_type;
 
 	if (maximumBatchSize == 0)
-		maximumBatchSize = Data<Input>::DefaultBatchSize;
-
-	std::size_t numPoints = inputs.size();
-	//first determine the optimal number of batches as well as batch size
-	std::size_t batches = numPoints / maximumBatchSize;
-	if(numPoints > batches*maximumBatchSize)
-		++batches;
-	std::size_t optimalBatchSize=numPoints/batches;
-	std::size_t remainder = numPoints-batches*optimalBatchSize;
-	Data<Input> data(batches);
+		maximumBatchSize = Data<value_type>::DefaultBatchSize;
+	auto shape = Batch<value_type>::inferShape(inputs.begin(), inputs.end());
+	Data<value_type> data(inputs.size(), shape, maximumBatchSize);
 
 	//now create the batches taking the remainder into account
 	auto start= inputs.begin();
-	for(std::size_t i = 0; i != batches; ++i){
-		std::size_t size = (i<remainder)?optimalBatchSize+1:optimalBatchSize;
-		auto end = start+size;
-		data.batch(i) = createBatch<Input>(
-			boost::make_iterator_range(start,end)
-		);
-		start = end;
+	for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
+		std::size_t size = batchSize(data.batch(i));
+		data.batch(i) = createBatch<value_type>(start,start+size);
+		start = start+size;
 	}
-	data.shape() = detail::InferShape<Data<Input> >::infer(data);
 	return data;
 }
 
 /// \brief creates a labeled data object from two ranges, representing inputs and labels
-template<class Range1, class Range2>
+template<class RangeI, class RangeL>
 LabeledData<
-	typename boost::range_value<Range1>::type,
-	typename boost::range_value<Range2>::type
-
-> createLabeledDataFromRange(Range1 const& inputs, Range2 const& labels, std::size_t maximumBatchSize = 0){
+	typename RangeI::value_type,
+	typename RangeL::value_type
+> createLabeledDataFromRange(RangeI const& inputs, RangeL const& labels, std::size_t maximumBatchSize = 0){
 	SHARK_RUNTIME_CHECK(inputs.size() == labels.size(),"Number of inputs and number of labels must agree");
-	typedef typename boost::range_value<Range1>::type Input;
-	typedef typename boost::range_value<Range2>::type Label;
-
-	if (maximumBatchSize == 0)
-		maximumBatchSize = LabeledData<Input,Label>::DefaultBatchSize;
+	typedef typename RangeI::value_type Input;
+	typedef typename RangeL::value_type Label;
 
 	return LabeledData<Input,Label>(
-		createDataFromRange(inputs,maximumBatchSize),
-		createDataFromRange(labels,maximumBatchSize)
+		createDataFromRange(inputs, maximumBatchSize),
+		createDataFromRange(labels, maximumBatchSize)
 	);
 }
 
@@ -843,7 +806,7 @@ inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 template <class InputType>
 std::size_t dataDimension(Data<InputType> const& dataset){
 	SHARK_ASSERT(dataset.numberOfElements() > 0);
-	return dataset.element(0).size();
+	return dataset.shape().numElements();
 }
 
 ///\brief  Return the input dimensionality of a labeled dataset.
@@ -880,7 +843,7 @@ typename boost::lazy_disable_if<
 transform(Data<T> const& data, Functor f){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
-	Data<ResultType> result(batches);
+	Data<ResultType> result(data.getPartitioning(), typename Data<ResultType>::shape_type());//TODO HACK!!!!
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
 		typedef BatchIterator<typename Batch<T>::type const> Iterator;
 		
@@ -904,14 +867,9 @@ typename boost::lazy_enable_if<
 transform(Data<T> const& data, Functor const& f){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
-	Data<ResultType> result(batches);
+	Data<ResultType> result(data.getPartitioning(), f.outputShape());
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
 		result.batch(i)= f(data.batch(i));
-	Shape shape = detail::InferShape<Functor>::infer(f);
-	if(shape == Shape()){
-		shape = detail::InferShape<Data<ResultType> >::infer(result);
-	}
-	result.shape() = shape;
 	return result;
 }
 

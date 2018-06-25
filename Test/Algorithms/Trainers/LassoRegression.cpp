@@ -16,8 +16,8 @@ BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_LassoRegression)
 class TestProblem : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
-	void draw(RealVector& input, RealVector& label) const
-	{
+	TestProblem(): LabeledDataDistribution<RealVector, RealVector>({10,1}){}
+	void draw(RealVector& input, RealVector& label) const{
 		input.resize(10);
 		label.resize(1);
 		double g = random::gauss(random::globalRng);

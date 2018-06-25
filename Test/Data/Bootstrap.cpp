@@ -28,10 +28,10 @@ BOOST_AUTO_TEST_CASE( Bootstrap_LabeledData ){
 		BOOST_REQUIRE_EQUAL(bootstrapSet.numberOfElements(),20);
 		double setWeightSum = 0.0;
 		for(std::size_t i = 0; i != 20; ++i){
-			BOOST_CHECK_EQUAL(bootstrapSet.element(i).data.input,set.element(i).input);
-			BOOST_CHECK_EQUAL(bootstrapSet.element(i).data.label,set.element(i).label);
-			weightSums[i] += bootstrapSet.element(i).weight;
-			setWeightSum += bootstrapSet.element(i).weight;
+			BOOST_CHECK_EQUAL(bootstrapSet.elements()[i].data.input,set.elements()[i].input);
+			BOOST_CHECK_EQUAL(bootstrapSet.elements()[i].data.label,set.elements()[i].label);
+			weightSums[i] += bootstrapSet.elements()[i].weight;
+			setWeightSum += bootstrapSet.elements()[i].weight;
 		}
 		BOOST_CHECK_CLOSE(setWeightSum,20,1.e-7);
 	}
@@ -59,9 +59,9 @@ BOOST_AUTO_TEST_CASE( Bootstrap_Data ){
 		BOOST_REQUIRE_EQUAL(bootstrapSet.numberOfElements(),20);
 		double setWeightSum = 0.0;
 		for(std::size_t i = 0; i != 20; ++i){
-			BOOST_CHECK_EQUAL(bootstrapSet.element(i).data,set.element(i));
-			weightSums[i] += bootstrapSet.element(i).weight;
-			setWeightSum += bootstrapSet.element(i).weight;
+			BOOST_CHECK_EQUAL(bootstrapSet.elements()[i].data,set.elements()[i]);
+			weightSums[i] += bootstrapSet.elements()[i].weight;
+			setWeightSum += bootstrapSet.elements()[i].weight;
 		}
 		BOOST_CHECK_CLOSE(setWeightSum,20,1.e-7);
 	}

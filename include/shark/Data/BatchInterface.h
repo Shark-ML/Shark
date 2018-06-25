@@ -81,6 +81,12 @@ struct SimpleBatch{
 		return type(size);
 	}
 	
+	/// \brief Returns a feasible shape for the given range of elements
+	template<class Iterator>
+	static shape_type inferShape(Iterator const& start, Iterator const&){
+		return shape_type();
+	}
+	
 	template<class T>
 	static std::size_t size(T const& batch){return batch.size();}
 	
@@ -166,6 +172,12 @@ struct VectorBatch{
 		return type(size,shape.numElements());
 	}
 	
+	/// \brief Returns a feasible shape for the given range of elements
+	template<class Iterator>
+	static shape_type inferShape(Iterator const& start, Iterator const&){
+		return start->size();
+	}
+	
 	static std::size_t size(Matrix const& batch){return batch.size1();}
 	static reference get( Matrix& batch, std::size_t i){
 		return reference(batch,i);
@@ -241,6 +253,12 @@ struct Batch<shark::blas::compressed_vector<T> >{
 			}
 		}
 		return batch;
+	}
+	
+	/// \brief Returns a feasible shape for the given range
+	template<class Iterator>
+	static shape_type inferShape(Iterator const& start, Iterator const&){
+		return start->size();
 	}
 	
 	/// \brief Creates a batch with enough dimensions to store a vector of a specified shape
