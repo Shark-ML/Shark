@@ -86,7 +86,7 @@ public:
 		// determine the min and max labels of the given dataset
 		unsigned int minLabel = std::numeric_limits<unsigned int>::max();
 		unsigned int maxLabel = 0;
-		for(unsigned int label: dataset.labels().elements()){
+		for(unsigned int label: elements(dataset.labels())){
 			if(label < minLabel)
 				minLabel = label;
 			if(label > maxLabel)
@@ -102,7 +102,7 @@ public:
 
 		// and insert all labels we encounter
 		unsigned int currentPosition = 0;
-		for(unsigned int label: dataset.labels().elements()){
+		for(unsigned int label: elements(dataset.labels())){
 			// is it a new label?
 			if(foundLabels[label - minLabel] == maxval)
 			{
@@ -113,7 +113,7 @@ public:
 		}
 
 		// now map every label
-		for(unsigned int& label: dataset.labels().elements()){
+		for(unsigned int& label: elements(dataset.labels())){
 			label = foundLabels[label - minLabel];
 		}
 	}
@@ -130,7 +130,7 @@ public:
 	void restoreOriginalLabels(LabeledData<RealVector, unsigned int> &dataset)
 	{
 		// now map every label
-		for(unsigned int& label: dataset.labels().elements()){
+		for(unsigned int& label: elements(dataset.labels())){
 			// check if the reordering fit the data
 			SHARK_RUNTIME_CHECK(label < m_labelOrder.size(),"Dataset labels does not fit to the stored ordering!");
 

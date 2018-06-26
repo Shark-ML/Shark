@@ -96,7 +96,7 @@ public:
 			Cp = regularizers[1];
 
 		std::size_t i = 0;
-		for(auto element: labels.elements()){
+		for(auto element: elements(labels)){
 			unsigned int label = element.data;
 			double weight = element.weight;
 			permutation[i] = i;
@@ -265,7 +265,7 @@ public:
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
 
 		std::size_t i = 0;
-		for(auto label: labels.elements()){
+		for(auto label: elements(labels)){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
 			linear(i) = label? 1.0:-1.0;
@@ -294,7 +294,7 @@ public:
 
 			
 		std::size_t i = 0;
-		for(auto label: labels.elements()){
+		for(auto label: elements(labels)){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
 			linear(i) = label? 1.0:-1.0;
@@ -319,7 +319,7 @@ public:
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
 		
 		std::size_t i = 0;
-		for(auto label: labels.elements()){
+		for(auto label: elements(labels)){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
 			positive[i] = label ? 1: 0;

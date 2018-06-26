@@ -151,17 +151,15 @@ int main()
 	}
 //###end<batches-doubleloop>
 //###begin<elements-loops>
-	typedef Data<RealVector>::element_range Elements;
-
 	// 1: explicit iterator loop using the range over the elements
-	Elements elements = data.elements();
-	for (auto pos = elements.begin(); pos != elements.end(); ++pos) {
+	auto points = shark::elements(data);
+	for (auto pos = points.begin(); pos != points.end(); ++pos) {
 		std::cout << *pos << std::endl;
 	}
 
 	// 2: foreach
 	//note pass by value, the range returns proxy elements instead of references
-	for(auto element: data.elements()) {
+	for(auto element: elements(data)) {
 		std::cout << element << std::endl;
 	}
 //###end<elements-loops>

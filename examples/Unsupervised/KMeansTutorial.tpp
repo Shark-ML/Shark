@@ -62,10 +62,10 @@ int main(int argc, char **argv) {
 		cerr << "unable to read data from file " <<  argv[1] << endl;
 		exit(EXIT_FAILURE);
 	}
-	std::size_t elements = data.numberOfElements();
+	std::size_t numElements = data.numberOfElements();
 
 	// write statistics of input data
-	cout << "number of data points: " << elements << " dimensions: " << dataDimension(data) << endl;
+	cout << "number of data points: " << numElements << " dimensions: " << dataDimension(data) << endl;
 
 	// normalize data
 	//###begin<normalization>
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 	ofstream c2("cl2.csv");
 	//###begin<print_cluster_assignment>
 	LabeledData<RealVector, unsigned int> assignment(data, clusters);
-	for(auto const& element: assignment.elements()) {
+	for(auto const& element: elements(assignment)) {
 		if(element.label) 
 			c1 << element.input(0) << " " << element.input(1) << endl;
 		else 

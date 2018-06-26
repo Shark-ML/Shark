@@ -142,9 +142,9 @@ public:
 		builder.m_max_features = m_max_features? m_max_features: std::sqrt(inputDimension(dataset));
 		
 		//copy data into single batch for easier lookup
-		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(dataset.inputs().elements().begin(),dataset.inputs().elements().end());
-		auto labels_train = createBatch<LabelType>(dataset.labels().elements().begin(),dataset.labels().elements().end());
-		auto weights_train = createBatch<double>(dataset.weights().elements().begin(),dataset.weights().elements().end());
+		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(elements(dataset.inputs()));
+		auto labels_train = createBatch<LabelType>(elements(dataset.labels()));
+		auto weights_train = createBatch<double>(elements(dataset.weights()));
 
 		//Setup seeds for the rng in the different threads
 		std::vector<unsigned int> seeds(m_numTrees);
@@ -257,9 +257,9 @@ public:
 		builder.m_epsilon = m_epsilon;
 		builder.m_max_features = m_max_features? m_max_features: inputDimension(dataset)/3;
 		//copy data into single batch for easier lookup
-		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(dataset.inputs().elements().begin(),dataset.inputs().elements().end());
-		auto labels_train = createBatch<LabelType>(dataset.labels().elements().begin(),dataset.labels().elements().end());
-		auto weights_train = createBatch<double>(dataset.weights().elements().begin(),dataset.weights().elements().end());
+		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(elements(dataset.inputs()));
+		auto labels_train = createBatch<LabelType>(elements(dataset.labels()));
+		auto weights_train = createBatch<double>(elements(dataset.weights()));
 		
 		//Setup seeds for the rng in the different threads
 		std::vector<unsigned int> seeds(m_numTrees);

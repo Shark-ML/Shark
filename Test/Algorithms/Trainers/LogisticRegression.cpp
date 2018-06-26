@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone_Weighted){
 	PamiToy problem;
 	ClassificationDataset const& baseDataset = problem.generateDataset(50);
 	WeightedLabeledData<RealVector, unsigned int> dataset(baseDataset, 1.0);
-	for(double& weight: dataset.weights().elements()){
+	for(double& weight: elements(dataset.weights())){
 		weight = random::uni(random::globalRng, 0.1,2);
 	}
 	double lambda1 = 0.1;

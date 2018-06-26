@@ -101,7 +101,7 @@ public:
 		m_activeVar = m_numVariables;
 		std::size_t i = 0;
 		std::size_t v = 0;
-		for(auto y: target.elements()){
+		for(auto y: elements(target)){
 			m_examples[i].index = i;
 			m_examples[i].y = y;
 			m_examples[i].active = m_cardP;

@@ -87,7 +87,7 @@ void FisherLDA::meanAndScatter(
 	// calculate mean and scatter for every class.
 
 	// for every example in set ...
-	for(auto point: dataset.elements()){
+	for(auto point: elements(dataset)){
 		//find class
 		std::size_t c= point.label;
 

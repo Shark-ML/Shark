@@ -78,7 +78,7 @@ public:
     ,  m_labels(data.numberOfElements())
     , m_modifierEq(modifierEq)
     , m_modifierNe(modifierNe){
-	m_labels =createBatch<unsigned int>(data.labels().elements());
+	m_labels =createBatch<unsigned int>(elements(data.labels()));
     }
 
     /// return a single matrix entry

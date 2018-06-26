@@ -260,12 +260,16 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 		//generate weighted and unweighted dataset
 		WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,0.0);
 		ClassificationDataset unweightedDataset(DatasetSize, dataset.shape(), DatasetSize);
+		
+		auto dataElements = elements(dataset);
+		auto weightedElements = elements(weightedDataset);
+		auto unweightedElements = elements(unweightedDataset);
 		RealVector classWeight(classes,0);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
 			std::size_t index = random::discrete(random::globalRng,std::size_t(0),TrainExamples-1);
-			weightedDataset.elements()[index].weight +=1.0;
-			unweightedDataset.elements()[i]= dataset.elements()[index];
-			classWeight(weightedDataset.elements()[index].data.label) += 1.0/DatasetSize;
+			weightedElements[index].weight +=1.0;
+			unweightedElements[i]= dataElements[index];
+			classWeight(weightedElements[index].data.label) += 1.0/DatasetSize;
 		}
 		trainer.train(modelUnweighted, unweightedDataset);
 		trainer.train(modelWeighted, weightedDataset);

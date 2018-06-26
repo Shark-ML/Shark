@@ -66,12 +66,12 @@ int main(int argc, char** argv)
 
 	// output cluster assignments
 	std::cout << "\ntraining data:\n";
-	for (auto element: training.elements()){
+	for (auto element: elements(training)){
 		unsigned int cluster = model(element);
 		std::cout << "   point " << element(0) << "  -->  cluster " << cluster << std::endl;
 	}
 	std::cout << "\ntest data:\n";
-	for (auto element: test.elements()){
+	for (auto element: elements(test)){
 		unsigned int cluster = model(element);
 		std::cout << "   point " << element(0) << "  -->  cluster " << cluster << std::endl;
 	}

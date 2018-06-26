@@ -353,7 +353,7 @@ int main(int argc, char** argv)
     //~ cout << "mkl_kernel.isAdaptive(2): " << mkl_kernel.isAdaptive(2) << endl;
     //~ cout << "mkl_kernel.numberOfParameters(): " << mkl_kernel.numberOfParameters() << endl;
     //~ cout << "mkl_kernel.parameterVector(): " << mkl_kernel.parameterVector() << endl;
-    //~ cout << "mkl_kernel.eval( dataset.elements()[0], dataset.elements()[1] ): " << mkl_kernel.eval( dataset.elements()[0], dataset.elements()[1] ) << endl << endl;
+    //~ cout << "mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ): " << mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ) << endl << endl;
     //~ //###end<mkl_introspection_one>
 
     //~ //###begin<mkl_change_something_one>
@@ -372,7 +372,7 @@ int main(int argc, char** argv)
     //~ cout << "mkl_kernel.isAdaptive(2): " << mkl_kernel.isAdaptive(2) << endl;
     //~ cout << "mkl_kernel.numberOfParameters(): " << mkl_kernel.numberOfParameters() << endl;
     //~ cout << "mkl_kernel.parameterVector(): " << mkl_kernel.parameterVector() << endl;
-    //~ cout << "mkl_kernel.eval( dataset.elements()[0], dataset.elements()[1] ): " << mkl_kernel.eval( dataset.elements()[0], dataset.elements()[1] ) << endl << endl;
+    //~ cout << "mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ): " << mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ) << endl << endl;
     //~ //###end<mkl_introspection_two>
 
 

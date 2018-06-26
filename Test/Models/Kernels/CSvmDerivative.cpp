@@ -446,7 +446,7 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 			// first test derivatives of dataset-points themselves
 			RealMatrix inputB(1, 2);
 			RealMatrix weight(1,1);
-			for ( auto const& element: d1.elements()){
+			for ( auto const& element: elements(d1)){
 				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
 				row(inputB,0) = element.input;
@@ -456,7 +456,7 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
 			// quiz points: use other partition
-			for ( auto const& element: d2.elements()){
+			for ( auto const& element: elements(d2)){
 				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
 				row(inputB,0) = element.input;
@@ -541,7 +541,7 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 			// first test derivatives of dataset-points themselves
 			RealMatrix inputB(1, 2);
 			RealMatrix weight(1,1);
-			for ( auto const& element: d2.elements()){
+			for ( auto const& element: elements(d2)){
 				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
 				row(inputB,0) = element.input;
@@ -551,7 +551,7 @@ const char data2[] = "3.3400343591e+00 5.0794724748e-01 1\n\
 				BOOST_CHECK_SMALL( deriv - computed_derivative(0) , 5e-3 );
 			}
 			// quiz points: use other partition
-			for ( auto const& element: d1.elements()){
+			for ( auto const& element: elements(d1)){
 				diff = cmp_svm(element.input)(0) - svm(element.input)(0);
 				deriv = diff / (RbfParam_eps - RbfParams[h]);
 				row(inputB,0) = element.input;

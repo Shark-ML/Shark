@@ -72,14 +72,12 @@ namespace shark {
 /// set of, for example 100 data points, at the same time. If the type of data it stores
 /// is for example RealVector, the batches of this type are RealMatrices. This is good because most often
 /// operations on the whole matrix are faster than operations on the separate vectors.
-/// Nearly all operations of the set have to be interpreted in terms of the batch. Therefore the iterator interface will
-/// give access to the batches but not to single elements. For this separate element_iterators and const_element_iterators
-/// can be used.
+/// Nearly all operations of the set have to be interpreted in terms of the batch.
 ///\par
 ///When you need to explicitely iterate over all elements, you can use:
 ///\code
 /// Data<RealVector> data;
-/// for(auto elem: data.elements()){
+/// for(auto elem: elements(data)){
 ///     std::cout<<*pos<<" ";
 ///     auto ref=*pos;
 ///     ref*=2;
@@ -87,8 +85,7 @@ namespace shark {
 ///}
 ///\endcode
 /// \par
-/// Element wise accessing of elements is usually slower than accessing the batches. If possible, use direct batch access, or
-/// at least use the iterator interface or the for loop above to iterate over all elements. Random access to single elements is linear time, so use it wisely.
+/// Element wise accessing of elements is usually slower than accessing the batches.
 /// Of course, when you want to use batches, you need to know the actual batch type. This depends on the actual type of the input.
 /// here are the rules:
 /// if the input is an arithmetic type like int or double, the result will be a vector of this
@@ -108,21 +105,6 @@ namespace shark {
 /// When you change the structure of the data part for example by directly changing the size of the batches, the size of the labels is not
 /// enforced to change accordingly. Also when creating subsets of a set changing the parent will change it's siblings and conversely. The programmer
 /// needs to ensure structural integrity!
-/// For example this is dangerous:
-/// \code
-/// void function(Data<unsigned int>& data){
-///      Data<unsigned int> newData(...);
-///      data=newData;
-/// }
-/// \endcode
-/// When data was originally a labeledData object, and newData has a different batch structure than data, this will lead to structural inconsistencies.
-/// When function is rewritten such that newData has the same structure as data, this code is perfectly fine. The best way to get around this problem is
-/// by rewriting the code as:
-/// \code
-/// Data<unsigned int> function(){
-///      Data<unsigned int> newData(...);
-///      return newData;
-/// }
 /// \endcode
 ///\todo expand docu
 template <class Type>
@@ -156,44 +138,14 @@ public:
 	template <class InputT, class LabelT> friend class LabeledData;
 
 	// RANGES
-	typedef boost::iterator_range< detail::DataElementIterator<Data<Type> > > element_range;
-	typedef boost::iterator_range< detail::DataElementIterator<Data<Type> const> > const_element_range;
 	typedef detail::BatchRange<Data<Type> > batch_range;
 	typedef detail::BatchRange<Data<Type> const> const_batch_range;
 
-
-	///\brief Returns the range of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	const_element_range elements()const{
-		return const_element_range(
-			detail::DataElementIterator<Data<Type> const>(this,0,0,0),
-			detail::DataElementIterator<Data<Type> const>(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
-	///\brief Returns therange of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	element_range elements(){
-		return element_range(
-			detail::DataElementIterator<Data<Type> >(this,0,0,0),
-			detail::DataElementIterator<Data<Type> >(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
-
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
 		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
 		return batch_range(this);
 	}
@@ -339,7 +291,7 @@ public:
 /// Outstream of elements.
 template<class T>
 std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
-	for(auto elem:d.elements())
+	for(auto elem:elements(d))
 		stream << elem << "\n";
 	return stream;
 }
@@ -351,7 +303,7 @@ std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 /// \param data the dataset to shuffle
 template<class T>
 Data<T> shuffle(Data<T> const& data){
-	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartition());
+	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartition());
 }
 /** @} */
 
@@ -366,9 +318,6 @@ Data<T> shuffle(Data<T> const& data){
 /// LabeledData tries to mimic the underlying data as pairs of input and label data.
 /// this means that when accessing a batch by calling batch(i) or choosing one of the iterators
 /// one access the input batch by batch(i).input and the labels by batch(i).label
-///
-///this also holds true for single element access using operator(). Be aware, that direct access to an element is
-///a linear time operation. So it is not advisable to iterate over the elements, but instead iterate over the batches.
 template <class InputT, class LabelT>
 class LabeledData : public ISerializable
 {
@@ -398,44 +347,14 @@ public:
 		typename Batch<LabelType>::type const&
 	> const_batch_reference;
 
-	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> > > element_range;
-	typedef boost::iterator_range< detail::DataElementIterator<LabeledData<InputType,LabelType> const> > const_element_range;
 	typedef detail::BatchRange<LabeledData<InputType,LabelType> > batch_range;
 	typedef detail::BatchRange<LabeledData<InputType,LabelType> const> const_batch_range;
-
-
-	///\brief Returns the range of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	const_element_range elements()const{
-		return const_element_range(
-			detail::DataElementIterator<LabeledData<InputType,LabelType> const>(this,0,0,0),
-			detail::DataElementIterator<LabeledData<InputType,LabelType> const>(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
-	///\brief Returns therange of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	element_range elements(){
-		return element_range(
-			detail::DataElementIterator<LabeledData<InputType,LabelType> >(this,0,0,0),
-			detail::DataElementIterator<LabeledData<InputType,LabelType> >(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
 	
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
 		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
 		return batch_range(this);
 	}
@@ -675,7 +594,7 @@ struct InferShape<Data<blas::compressed_vector<T> > >{
 ///brief  Outstream of elements for labeled data.
 template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
-	for(auto elem: d.elements())
+	for(auto elem: elements(d))
 		stream << elem.input << " [" << elem.label <<"]"<< "\n";
 	return stream;
 }
@@ -687,7 +606,7 @@ std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
 /// \param data the dataset to shuffle
 template<class I, class L>
 LabeledData<I,L> shuffle(LabeledData<I,L> const& data){
-	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartitioning());
+	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartitioning());
 }
 
 /// \brief creates a data object from a range of elements
@@ -901,14 +820,14 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	}
 	std::vector<std::size_t> elemIndex(data.numberOfElements(), 0); 
 	std::size_t index = 0;
-	for (auto const& elem: data.elements()){
+	for (auto const& elem: elements(data)){
 		std::size_t c = elem.label;
 		elemIndex[classIndex[c] ] = index;
 		++index;
 		++classIndex[c];
 	}
 	
-	data = toDataset(subset(toView(data), elemIndex),partitioning);
+	data = toDataset(subset(elements(data), elemIndex),partitioning);
 }
 
 template<class I>

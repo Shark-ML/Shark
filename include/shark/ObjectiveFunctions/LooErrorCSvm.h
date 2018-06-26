@@ -101,7 +101,7 @@ public:
 		SVMProblemType svmProblem(matrix,mep_dataset->labels(),C);
 		std::size_t ell = km.size();
 		
-		//QpStoppingCondition stop;
+		auto samples = elements(*mep_dataset);
 
 		if (m_withOffset)
 		{
@@ -134,7 +134,7 @@ public:
 				// for the element index and the unpermuted alpha for the svm
 				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
 				svm.offset(0) = computeBias(problem);
-				auto const& element = mep_dataset->elements()[i];
+				auto const& element = samples[i];
 				mistakes += loss(element.label, svm(element.input));
 				
 				problem.activateVariable(i);
@@ -172,7 +172,7 @@ public:
 				// with shrinking and we thus need to get the initial permutation 
 				// for the element index and the unpermuted alpha for the svm
 				column(svm.alpha(),0)= problem.getUnpermutedAlpha();
-				auto const& element = mep_dataset->elements()[i];
+				auto const& element = samples[i];
 				mistakes += loss(element.label, svm(element.input));
 
 				problem.activateVariable(i);

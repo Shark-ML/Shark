@@ -79,7 +79,7 @@ public:
 		for(std::size_t i = 0; i != numInputs; ++i){
 			for(std::size_t j = 0; j != numInputs; ++j){
 				Y(i,j) = 1;
-				if(data.elements()[i].label != data.elements()[j].label)
+				if(elements(data)[i].label != elements(data)[j].label)
 					Y(i,j) = -1;
 				y(i)+=Y(i,j);
 			}

@@ -151,7 +151,7 @@ public:
 		// and create linear array of labels
 		KernelMatrixType  km(*(this->m_kernel), dataset.inputs());
 		PartlyPrecomputedMatrixType  K(&km, m_cacheSize);
-		UIntVector y = createBatch(dataset.labels().elements());
+		UIntVector y = createBatch(elements(dataset.labels()));
 		const double lambda = 0.5 / (ell * m_C);
 
 		double alphaScale = 1.0;

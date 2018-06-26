@@ -136,18 +136,19 @@ template<class T, class U, class V>
 void checkDataEquality(T* values, unsigned int* labels, LabeledData<V,U> const& loaded){
 	BOOST_REQUIRE_EQUAL(loaded.numberOfElements(),numInputs);
 	BOOST_REQUIRE_EQUAL(inputDimension(loaded),numDimensions);
+	auto points = elements(loaded);
 	for (size_t i=0; i != numInputs; ++i){
 		for (size_t j=0; j != numDimensions; ++j)
 		{
 			if( boost::math::isnan(values[i*numDimensions+j])){
-				BOOST_CHECK(boost::math::isnan(loaded.elements()[i].input(j)));
+				BOOST_CHECK(boost::math::isnan(points[i].input(j)));
 			}
 			else
 			{
-				BOOST_CHECK_EQUAL(loaded.elements()[i].input(j), values[i*numDimensions+j]);
+				BOOST_CHECK_EQUAL(points[i].input(j), values[i*numDimensions+j]);
 			}
 		}
-		BOOST_CHECK_EQUAL(loaded.elements()[i].label, labels[i]);
+		BOOST_CHECK_EQUAL(points[i].label, labels[i]);
 	}
 }
 
@@ -155,15 +156,16 @@ void checkDataEquality(double* values, Data<RealVector> const& loaded){
 	BOOST_REQUIRE_EQUAL(loaded.numberOfElements(),numInputs);
 	BOOST_REQUIRE_EQUAL(dataDimension(loaded),numDimensions+1);
 	std::size_t dims = numDimensions+1;
+	auto points = elements(loaded);
 	for (size_t i=0; i != numInputs; ++i){
 		for (size_t j=0; j != dims; ++j)
 		{
 			if( boost::math::isnan(values[i*dims+j])){
-				BOOST_CHECK(boost::math::isnan(loaded.elements()[i](j)));
+				BOOST_CHECK(boost::math::isnan(points[i](j)));
 			}
 			else
 			{
-				BOOST_CHECK_EQUAL(loaded.elements()[i](j), values[i*dims+j]);
+				BOOST_CHECK_EQUAL(points[i](j), values[i*dims+j]);
 			}
 		}
 	}
@@ -177,16 +179,16 @@ void checkDataRegression(double* values, LabeledData<RealVector,RealVector> cons
 		inputStart = labelEnd;
 		inputEnd = numDimensions+1;
 	}
-
+	auto points = elements(loaded);
 	for (size_t i=0; i != numInputs; ++i){
 		for (size_t j=0; j != numDimensions+1; ++j)
 		{
 			double element = 0;
 			if(j >= labelStart &&j < labelEnd){
-				element = loaded.elements()[i].label(j-labelStart);
+				element = points[i].label(j-labelStart);
 			}
 			if(j >= inputStart && j < inputEnd){
-				element = loaded.elements()[i].input(j-inputStart);
+				element = points[i].input(j-inputStart);
 			}
 			if( boost::math::isnan(values[i*(numDimensions+1)+j])){
 				BOOST_CHECK(boost::math::isnan(element));
@@ -235,7 +237,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import_Single_Integer)
 	std::cout << test<<std::endl;
 	
 	for(std::size_t i = 0; i != 7; ++i){
-		BOOST_CHECK_EQUAL(test.elements()[i],test_values_single_integer[i]);
+		BOOST_CHECK_EQUAL(elements(test)[i],test_values_single_integer[i]);
 	}
 }
 

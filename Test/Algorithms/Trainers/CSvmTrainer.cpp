@@ -280,15 +280,11 @@ void checkSVMSolutionsEqual(
 	Dataset const& dataset,
 	double epsilon
 ){
-	Data<RealVector> decision1 = model1.decisionFunction()(dataset.inputs());
-	Data<RealVector> decision2 = model2.decisionFunction()(dataset.inputs());
+	auto decision1 = elements(model1.decisionFunction()(dataset.inputs()));
+	auto decision2 = elements(model2.decisionFunction()(dataset.inputs()));
 	
 	for(std::size_t i = 0; i != dataset.numberOfElements(); ++i){
-		BOOST_CHECK_CLOSE(
-			decision1.elements()[i](0),
-			decision2.elements()[i](0),
-			epsilon
-		);
+		BOOST_CHECK_CLOSE(decision1[i](0), decision2[i](0), epsilon);
 	}
 }
 BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
@@ -297,6 +293,8 @@ BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
 	Chessboard problem;
 	ClassificationDataset dataset = problem.generateDataset(30);
 	GaussianRbfKernel<> kernel(1.0);
+	
+	std::cout<<dataset<<std::endl;
 	
 	
 	KernelClassifier<RealVector> svmUnweighted;
@@ -317,10 +315,14 @@ BOOST_AUTO_TEST_CASE( CSVM_WEIGHTED_TEST )
 		//generate weighted and unweighted dataset
 		WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,0.0);
 		ClassificationDataset unweightedDataset(DatasetSize,dataset.shape(),DatasetSize);
+		
+		auto dataElements = elements(dataset);
+		auto weightedElements = elements(weightedDataset);
+		auto unweightedElements = elements(unweightedDataset);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
 			std::size_t index = random::discrete(random::globalRng,0,29);
-			weightedDataset.elements()[index].weight +=1.0;
-			unweightedDataset.elements()[i] = dataset.elements()[index];
+			weightedElements[index].weight +=1.0;
+			unweightedElements[i] = dataElements[index];
 		}
 		
 		trainer.train(svmUnweighted, unweightedDataset);

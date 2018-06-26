@@ -153,20 +153,18 @@ void Centroids::initFromData(const ClassificationDataset &data, std::size_t noCl
 	std::size_t elementCount = 0; // number of centroids found so far, equal to tmp.size()
 	std::size_t classCount = 0; // number of different classes encountered so far
 
-	typedef ClassificationDataset::const_element_range Elements;
-	Elements elements = data.elements();
-	for(Elements::iterator it = elements.begin(); it != elements.end(); ++it) {
+	for(auto const& element: elements(data)) {
 		// we take the element if it has a so far unseen class
 		// or if the current number of centroids plus one
 		// element from each class that has not been
 		// encountered so far is smaller than the desired
 		// number of centroids
-		if((flag(it->label) == 0) || ((elementCount + noClasses - classCount) < noClusters)) {
-			if(flag(it->label) == 0) {
-				flag(it->label) = 1;
+		if((flag(element.label) == 0) || ((elementCount + noClasses - classCount) < noClusters)) {
+			if(flag(element.label) == 0) {
+				flag(element.label) = 1;
 				classCount++;
 			}
-                        centers.push_back(it->input);
+                        centers.push_back(element.input);
                         elementCount++;
                 }
                 if(elementCount == noClusters) break; 
@@ -175,5 +173,5 @@ void Centroids::initFromData(const ClassificationDataset &data, std::size_t noCl
 }
 
 void Centroids::initFromData(Data<RealVector> const& dataset, std::size_t noClusters) {
-	setCentroids(toDataset(randomSubset(toView(dataset),noClusters)));
+	setCentroids(toDataset(randomSubset(elements(dataset),noClusters)));
 }
