@@ -38,10 +38,16 @@
 #ifndef SHARK_DATA_DATAVIEW_H
 #define SHARK_DATA_DATAVIEW_H
 
-#include <shark/Data/Dataset.h>
 #include <shark/Core/utility/functional.h>
 #include <numeric>
+#include <shark/Data/BatchInterface.h>
 namespace shark {
+	
+	
+namespace constants{
+	const std::size_t DefaultBatchSize = 256;
+}
+
 /// \brief Constant time Element-Lookup for Datasets
 ///
 /// Datasets are fast for random lookup of batches. Since batch sizes can be arbitrary structured and
@@ -247,6 +253,7 @@ private:
 	std::vector<Index> m_indices;//stores for every element of the set it's position inside the dataset
 };
 
+
 /// \brief creates a subset of a DataView with elements indexed by indices
 ///
 /// \param view the view for which the subset is to be created
@@ -312,18 +319,33 @@ DataView<DatasetType>  toView(DatasetType& set){
 
 /// \brief Creates a new dataset from a View.
 ///
-/// When the elements of a View needs to be processed repeatedly it is often better to use
-/// the packed format of the Dataset again, since then the faster batch processing can be used
-///
 /// \param view the view from which to create the new dataset
 /// \param maximumBatchSize the size of the batches in the dataset
 template<class T>
 typename DataView<T>::dataset_type 
-toDataset(DataView<T> const& view, std::size_t maximumBatchSize = DataView<T>::dataset_type::DefaultBatchSize){
+toDataset(DataView<T> const& view, std::size_t maximumBatchSize = constants::DefaultBatchSize){
 	if(view.size() == 0)
 		return typename DataView<T>::dataset_type();
 	
 	typename DataView<T>::dataset_type dataset(view.size(), view.shape(), maximumBatchSize);
+	
+	std::size_t batchStart = 0;
+	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
+		std::size_t batchEnd = batchStart + batchSize(dataset.batch(i));
+		dataset.batch(i) = createBatch<typename DataView<T>::value_type>(view.begin()+batchStart, view.begin()+batchEnd);
+		batchStart = batchEnd;
+	}
+	return dataset;
+}
+
+/// \brief Creates a new dataset from a View.
+///
+/// \param view the view from which to create the new dataset
+/// \param batchSizes the sizes of each individual batch
+template<class T>
+typename DataView<T>::dataset_type 
+toDataset(DataView<T> const& view, std::vector<std::size_t> const& batchSizes){
+	typename DataView<T>::dataset_type dataset(batchSizes, view.shape());
 	
 	std::size_t batchStart = 0;
 	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){

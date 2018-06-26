@@ -80,7 +80,7 @@ public:
 		auto predictions = prediction.elements();
 
 		for(std::size_t i=0; i!= elements; i++) { // build list
-			LabelType t = target.elements()[i];
+			LabelType t = targets[i];
 			// negate predictions if m_invert is set
 			if(!m_invert)
 				L[i] = AUCPair(predictions[i](column), t);

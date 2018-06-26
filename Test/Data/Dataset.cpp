@@ -87,38 +87,6 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Set_Repartition )
-{
-	std::vector<int> inputs;
-
-	// fill the vectors: inputs are the number [100, ..., 199]
-	for (int i=0;i!=100;++i) {
-		inputs.push_back(100+i);
-	}
-	//generate a set and than repartition it with unevenly sized batches
-	std::vector<std::size_t> batchSizes(8);
-	batchSizes[0]=8;
-	batchSizes[1]=24;
-	batchSizes[2]=8;
-	batchSizes[3]=7;
-	batchSizes[4]=8;
-	batchSizes[5]=12;
-	batchSizes[6]=25;
-	batchSizes[7]=8;
-	Data<int> set = createDataFromRange(inputs,10);
-	set.repartition(batchSizes);
-	
-	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),8u);
-	BOOST_REQUIRE_EQUAL(set.numberOfElements(),100u);
-	for(std::size_t i = 0; i != 8; ++i){
-		BOOST_CHECK_EQUAL(set.batch(i).size(), batchSizes[i]);
-	}
-	BOOST_CHECK_EQUAL_COLLECTIONS(
-		set.elements().begin(),set.elements().end(),
-		inputs.begin(),inputs.end()
-	);
-}
-
 BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 {
 	std::vector<int> inputs;
@@ -142,8 +110,8 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 	//split before and after every batch
 	std::size_t index = 0;
 	for(std::size_t i = 0; i <= batchSizes.size();++i){
-		Data<int> set= createDataFromRange(inputs,10);
-		set.repartition(batchSizes);
+		Data<int> set = createDataFromRange(inputs,10);
+		set= toDataset(toView(set),batchSizes);
 		Data<int> split = splitAtElement(set,index);
 		
 		BOOST_REQUIRE_EQUAL(set.numberOfBatches(),i);
@@ -283,7 +251,7 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	
 	//split in the middle of a batch
 	Data<int> set= createDataFromRange(inputs,10);
-	set.repartition(batchSizes);
+	set= toDataset(toView(set),batchSizes);
 	Data<int> split = splitAtElement(set,53);
 	
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),5u);

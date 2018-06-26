@@ -204,7 +204,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	std::string const& contents,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = Data<RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import unlabeled vectors from a read-in character-separated value file.
@@ -219,7 +219,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	std::string const& contents,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = Data<RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import "csv" from string consisting only of a single unsigned int per row
@@ -234,7 +234,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	std::string const& contents,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = Data<unsigned int>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import labeled data from a character-separated value file.
@@ -251,7 +251,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	LabelPosition lp,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import labeled data from a character-separated value file.
@@ -268,7 +268,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	LabelPosition lp,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 
@@ -288,7 +288,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	std::size_t numberOfOutputs = 1,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import regression data from a read-in character-separated value file.
@@ -307,7 +307,7 @@ SHARK_EXPORT_SYMBOL void csvStringToData(
 	std::size_t numberOfOutputs = 1,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 );
 
 
@@ -326,7 +326,7 @@ void importCSV(
 	std::string fn,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = Data<T>::DefaultBatchSize,
+	std::size_t maximumBatchSize = constants::DefaultBatchSize,
 	std::size_t titleLines = 0
 ){
 	std::ifstream stream(fn.c_str());
@@ -361,7 +361,7 @@ void importCSV(
 	LabelPosition lp,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 ){
 	std::ifstream stream(fn.c_str());
 	SHARK_RUNTIME_CHECK(stream, "Stream cannot be opened for reading.");
@@ -393,7 +393,7 @@ void importCSV(
 	std::size_t numberOfOutputs = 1,
 	char separator = ',',
 	char comment = '#',
-	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize = constants::DefaultBatchSize
 ){
 	std::ifstream stream(fn.c_str());
 	SHARK_RUNTIME_CHECK(stream, "Stream cannot be opened for reading.");

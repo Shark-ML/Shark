@@ -239,14 +239,14 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 template<class I,class L>
 CVFolds<LabeledData<I,L> > createCVIID(LabeledData<I,L> &set,
         std::size_t numberOfPartitions,
-        std::size_t batchSize=Data<I>::DefaultBatchSize) {
+        std::size_t batchSize =constants::DefaultBatchSize) {
 	std::vector<std::size_t> indices(set.numberOfElements());
 	for (std::size_t i=0; i != set.numberOfElements(); i++)
 		indices[i] = random::discrete(random::globalRng, std::size_t(0), numberOfPartitions - 1);
 	return createCVIndexed(set,numberOfPartitions,indices,batchSize);
 }
 
-//! \brief Create a partition for cross validation
+//! \brief Create a partition for cross validation. A copy of the input dataset is created
 //!
 //! Every subset contains (approximately) the same
 //! number of elements. For every partition, all
@@ -258,7 +258,7 @@ CVFolds<LabeledData<I,L> > createCVIID(LabeledData<I,L> &set,
 //! \param set the input data from which to draw the partitions
 //! \param batchSize  maximum batch size
 template<class I,class L>
-CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> &set,std::size_t numberOfPartitions,std::size_t batchSize = LabeledData<I,L>::DefaultBatchSize) {
+CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> const& set,std::size_t numberOfPartitions,std::size_t batchSize = constants::DefaultBatchSize) {
 	std::size_t numInputs = set.numberOfElements();
 
 	//calculate the number of validation examples for every partition
@@ -275,11 +275,10 @@ CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> &set,std::size_t nu
 	std::vector<std::size_t> batchSizes;
 	detail::batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
 
-	set.repartition(batchSizes);
-	set.shuffle();
+	LabeledData<I,L> newSet = toDataset(randomSubset(toView(set), numInputs), batchSizes);
 
-	CVFolds<LabeledData<I,L> > folds(set,partitionStart);
-	return folds;//set;
+	CVFolds<LabeledData<I,L> > folds(newSet,partitionStart);
+	return folds;
 }
 
 
@@ -298,7 +297,7 @@ template<class I>
 CVFolds<LabeledData<I,unsigned int> > createCVSameSizeBalanced (
 	LabeledData<I,unsigned int> &set,
 	std::size_t numberOfPartitions,
-	std::size_t batchSize=Data<I>::DefaultBatchSize,
+	std::size_t batchSize = constants::DefaultBatchSize,
 	RecreationIndices * cv_indices = NULL //if not NULL: for each element, store the fold it is assigned to; this can be used to later/externally recreate the fold via createCVIndexed
 ){
 	DataView<LabeledData<I,unsigned int> > setView(set);
@@ -367,7 +366,7 @@ CVFolds<LabeledData<I,L> > createCVIndexed(
 	LabeledData<I,L> &set,
 	std::size_t numberOfPartitions,
 	std::vector<std::size_t> indices,
-	std::size_t batchSize=Data<I>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 ) {
 	std::size_t numInputs = set.numberOfElements();
 	SIZE_CHECK(indices.size() == numInputs);
@@ -428,7 +427,7 @@ CVFolds<LabeledData<I,L> > createCVFullyIndexed(
 	LabeledData<I,L> &set,
 	std::size_t numberOfPartitions,
 	RecreationIndices indices,
-	std::size_t batchSize=Data<I>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 ) {
 	std::size_t numInputs = set.numberOfElements();
 	SIZE_CHECK(indices.first.size() == numInputs);

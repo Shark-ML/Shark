@@ -51,7 +51,7 @@ int main(){
 	//###begin<load>
 	ClassificationDataset data;
 	importCSV(data, "data/diabetes.csv",LAST_COLUMN, ',');
-	data.shuffle();
+	data = shuffle(data);
 	ClassificationDataset test = splitAtElement(data,static_cast<std::size_t>(0.75*data.numberOfElements()));
 	ClassificationDataset validation = splitAtElement(data,static_cast<std::size_t>(0.66*data.numberOfElements()));
 	//###end<load>

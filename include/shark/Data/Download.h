@@ -91,7 +91,7 @@ template <class InputType, class LabelType> void downloadSparseData(
 	std::string const& url,
 	unsigned short port = 80,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 )
 {
 	std::string content = download(url, port);
@@ -108,7 +108,7 @@ template <class InputType, class LabelType> void downloadSparseData(
 template <class InputType, class LabelType> void downloadFromMLData(
 	LabeledData<InputType, LabelType>& dataset,
 	std::string const& name,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 )
 {
 	std::string filename;
@@ -139,7 +139,7 @@ template <class InputType> void downloadCsvData(
 	char separator = ',',
 	char comment = '#',
 	unsigned short port = 80,
-	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize =constants::DefaultBatchSize
 )
 {
 	std::string content = download(url, port);
@@ -165,7 +165,7 @@ template <class InputType> void downloadCsvData(
 	char separator = ',',
 	char comment = '#',
 	unsigned short port = 80,
-	std::size_t maximumBatchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t maximumBatchSize =constants::DefaultBatchSize
 )
 {
 	std::string content = download(url, port);
