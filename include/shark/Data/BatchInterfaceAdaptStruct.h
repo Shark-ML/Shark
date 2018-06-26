@@ -106,53 +106,8 @@ struct MakeConstRef{
 private:
 	std::size_t m_index;
 };
+}}
 
-template<class FusionSequence>
-struct FusionFacade: public FusionSequence{
-	FusionFacade(){}
-	template<class Sequence>
-	FusionFacade(Sequence const& sequence):FusionSequence(sequence){}
-};
-
-template<class Type>
-struct isFusionFacade{
-private:
-	struct Big{ int big[100]; };
-	template <class S>
-	static Big tester(FusionFacade<S>*);
-	template <class S>
-	static Big tester(FusionFacade<S> const*);
-	static char tester(...);
-	static Type* generator();
-
-	BOOST_STATIC_CONSTANT(std::size_t, size = sizeof(tester(generator())));
-public:
-	BOOST_STATIC_CONSTANT(bool, value =  (size!= 1));
-	typedef boost::mpl::bool_<value> type;
-};
-
-}
-
-template<class S>
-S& fusionize(detail::FusionFacade<S> & facade){
-	return static_cast<S&>(facade);
-}
-template<class S>
-S const& fusionize(detail::FusionFacade<S> const& facade){
-	return static_cast<S const&>(facade);
-}
-
-template<class S>
-typename boost::disable_if<detail::isFusionFacade<S>,S&>::type
-fusionize(S& facade){
-	return facade;
-}
-template<class S>
-typename boost::disable_if<detail::isFusionFacade<S>,S const& >::type
-fusionize(S const& facade){
-	return facade;
-}
-}
 #define SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL_IMPL(s,TYPE,ELEM)\
 	( typename Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::TYPE,BOOST_PP_TUPLE_ELEM(2, 1, ELEM))
 
@@ -180,17 +135,17 @@ private:\
 SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(reference,ATTRIBUTES))\
 SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(const_reference,ATTRIBUTES))\
 public:\
-struct reference: public detail::FusionFacade<FusionRef>{\
+struct reference: public FusionRef{\
 	template<class Batch>\
 	reference(Batch& batch, std::size_t i)\
-	:detail::FusionFacade<FusionRef>(boost::fusion::transform(fusionize(batch),detail::MakeRef(i))){}\
+	:FusionRef(boost::fusion::transform(batch.fusionize(),detail::MakeRef(i))){}\
 	template<class Other>\
 	reference& operator= (Other const& other ){\
-		fusionize(*this) = other;\
+		fusionize() = other;\
 		return *this;\
 	}\
 	reference& operator= (reference const& other ){\
-		fusionize(*this) = other;\
+		fusionize() = other;\
 		return *this;\
 	}\
 	friend void swap(reference op1, reference op2){\
@@ -198,22 +153,31 @@ struct reference: public detail::FusionFacade<FusionRef>{\
 	}\
 	operator value_type()const{\
 		value_type ret;\
-		boost::fusion::copy(fusionize(*this), ret);\
+		boost::fusion::copy(fusionize(), ret);\
 		return ret;\
 	}\
+	FusionRef& fusionize(){ return *this;}\
+	FusionRef const& fusionize() const{ return *this;}\
 };\
-struct const_reference: public detail::FusionFacade<FusionConstRef>{\
+struct const_reference: public FusionConstRef{\
 private:\
 const_reference& operator= (const_reference const& other );\
 public:\
 	template<class Batch>\
 	const_reference(Batch& batch, std::size_t i)\
-	:detail::FusionFacade<FusionConstRef>(boost::fusion::transform(fusionize(batch),detail::MakeConstRef(i))){}\
+	:FusionConstRef(boost::fusion::transform(batch.fusionize(),detail::MakeConstRef(i))){}\
+	template<class Other>\
+	const_reference& operator= (Other const& other ){\
+		fusionize() = other;\
+		return *this;\
+	}\
 	operator value_type()const{\
 		value_type ret;\
-		boost::fusion::copy(fusionize(*this), ret);\
+		boost::fusion::copy(fusionize(), ret);\
 		return ret;\
 	}\
+	FusionConstRef& fusionize(){ return *this;}\
+	FusionConstRef const& fusionize() const{ return *this;}\
 };
 
 #define SHARK_CREATE_BATCH_REFERENCES(ATTRIBUTES)\
@@ -221,42 +185,46 @@ private:\
 SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(reference,ATTRIBUTES))\
 SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(const_reference,ATTRIBUTES))\
 public:\
-struct reference: public detail::FusionFacade<FusionRef>{\
+struct reference: public FusionRef{\
 	template<class Batch>\
 	reference(Batch& batch, std::size_t i)\
-	:detail::FusionFacade<FusionRef>(boost::fusion::transform(fusionize(batch),detail::MakeRef(i))){}\
+	:FusionRef(boost::fusion::transform(batch.fusionize(),detail::MakeRef(i))){}\
 	template<class Other>\
 	reference& operator= (Other const& other ){\
-		fusionize(*this) = other;\
+		fusionize() = other;\
 		return *this;\
 	}\
 	reference& operator= (reference const& other ){\
-		fusionize(*this) = other;\
+		fusionize() = other;\
 		return *this;\
 	}\
-	friend void swap(reference& op1, reference& op2){\
+	friend void swap(reference op1, reference op2){\
 		boost::fusion::swap(op1,op2);\
 	}\
 	operator value_type()const{\
 		value_type ret;\
-		boost::fusion::copy(fusionize(*this), ret);\
+		boost::fusion::copy(fusionize(), ret);\
 		return ret;\
 	}\
+	FusionRef& fusionize(){ return *this;}\
+	FusionRef const& fusionize() const{ return *this;}\
 };\
-struct const_reference: public detail::FusionFacade<FusionConstRef>{\
+struct const_reference: public FusionConstRef{\
 	template<class Batch>\
 	const_reference(Batch& batch, std::size_t i)\
-	:detail::FusionFacade<FusionConstRef>(boost::fusion::transform(fusionize(batch),detail::MakeConstRef(i))){}\
+	:FusionConstRef(boost::fusion::transform(batch.fusionize(),detail::MakeConstRef(i))){}\
 	template<class Other>\
 	const_reference& operator= (Other const& other ){\
-		fusionize(*this) = other;\
+		fusionize() = other;\
 		return *this;\
 	}\
 	operator value_type()const{\
 		value_type ret;\
-		boost::fusion::copy(fusionize(*this), ret);\
+		boost::fusion::copy(fusionize(), ret);\
 		return ret;\
 	}\
+	FusionConstRef& fusionize(){ return *this;}\
+	FusionConstRef const& fusionize() const{ return *this;}\
 };
 
 ///\brief This macro can be used to specialize a structure type easily to a batch type.
@@ -291,38 +259,30 @@ private:\
 	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(type,ATTRIBUTES))\
 public:\
 	typedef std::array<Shape, boost::fusion::result_of::size< FusionType >::type::value > shape_type;\
-	struct type: public detail::FusionFacade<FusionType>{\
+	struct type: public FusionType{\
 		typedef NAME value_type;\
-		\
-		SHARK_CREATE_BATCH_REFERENCES_TPL(ATTRIBUTES)\
-		\
 		type(){}\
 		\
 		friend void swap(type& op1, type& op2){\
-			boost::fusion::swap(fusionize(op1),fusionize(op2));\
+			boost::fusion::swap(op1.fusionize(),op2.fusionize());\
 		}\
 		std::size_t size()const{\
-			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));\
-		}\
-		reference operator[](std::size_t i){\
-			return reference(*this,i);\
-		}\
-		const_reference operator[](std::size_t i)const{\
-			return const_reference(*this,i);\
+			return batchSize(boost::fusion::at_c<0>(fusionize()));\
 		}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version)\
 		{\
-			boost::fusion::for_each(fusionize(*this), detail::ItemSerializer<Archive>(archive));\
+			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
 		}\
+		FusionType& fusionize(){ return *this;}\
+		FusionType const& fusionize() const{ return *this;}\
 	};\
 	typedef NAME value_type;\
-	typedef typename type::reference reference;\
-	typedef typename type::const_reference const_reference;\
+	SHARK_CREATE_BATCH_REFERENCES_TPL(ATTRIBUTES)\
 	\
 	static type createBatch(value_type const& input, std::size_t size = 1){\
 		type batch;\
-		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),fusionize(batch));\
+		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),batch.fusionize());\
 		return batch;\
 	}\
 	template<class Iterator>\
@@ -341,13 +301,11 @@ public:\
 	template<class T>\
 	static std::size_t size(T const& batch){return batch.size();}\
 	\
-	template<class T>\
-	static typename T::reference get(T& batch, std::size_t i){\
-		return batch[i];\
+	static reference get(type& batch, std::size_t i){\
+		return reference(batch,i);\
 	}\
-	template<class T>\
-	static const_reference get(T const& batch, std::size_t i){\
-		return batch[i];\
+	static const_reference get(type const& batch, std::size_t i){\
+		return const_reference(batch,i);\
 	}
 
 ///\brief This macro can be used to specialize a structure type easily to a batch type.
@@ -372,7 +330,6 @@ public:\
 ///
 ///SHARK_CREATE_BATCH_INTERFACE( DataType,DataVars)
 ///};
-///As any other batch model the result also offers iterators over the range of elements.
 ///In this case also boost::fusion support is added to the sequence. e.g. it is
 ///handled similar to any other tuple type (RealMatrix,RealVector). This is useful for MKL or Transfer
 ///kernels
@@ -382,37 +339,30 @@ private:\
 	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, SHARK_TRANSFORM_BATCH_ATTRIBUTES(type,ATTRIBUTES))\
 public:\
 	typedef std::array<Shape, boost::fusion::result_of::size< FusionType >::type::value > shape_type;\
-	struct type: public detail::FusionFacade<FusionType>{\
+	struct type: public FusionType{\
 		typedef NAME value_type;\
-		\
-		SHARK_CREATE_BATCH_REFERENCES(ATTRIBUTES)\
-		\
 		type(){}\
-		reference operator[](std::size_t i){\
-			return reference(*this,i);\
-		}\
-		const_reference operator[](std::size_t i)const{\
-			return const_reference(*this,i);\
-		}\
+		\
 		friend void swap(type& op1, type& op2){\
-			boost::fusion::swap(fusionize(op1),fusionize(op2));\
+			boost::fusion::swap(op1.fusionize(),op2.fusionize());\
 		}\
 		std::size_t size()const{\
-			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));\
+			return batchSize(boost::fusion::at_c<0>(fusionize()));\
 		}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version)\
 		{\
-			boost::fusion::for_each(fusionize(*this), detail::ItemSerializer<Archive>(archive));\
+			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
 		}\
+		FusionType& fusionize(){ return *this;}\
+		FusionType const& fusionize() const{ return *this;}\
 	};\
 	typedef NAME value_type;\
-	typedef type::reference reference;\
-	typedef type::const_reference const_reference;\
+	SHARK_CREATE_BATCH_REFERENCES(ATTRIBUTES)\
 	\
 	static type createBatch(value_type const& input, std::size_t size = 1){\
 		type batch;\
-		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),fusionize(batch));\
+		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),batch.fusionize());\
 		return batch;\
 	}\
 	template<class Iterator>\
@@ -425,16 +375,13 @@ public:\
 		}\
 		return batch;\
 	}\
-	template<class T>\
-	static std::size_t size(T const& batch){return batch.size();}\
+	static std::size_t size(type const& batch){return batch.size();}\
 	\
-	template<class T>\
-	static typename T::reference get(T& batch, std::size_t i){\
-		return batch[i];\
+	static reference get(type& batch, std::size_t i){\
+		return reference(batch,i);\
 	}\
-	template<class T>\
-	static const_reference get(T const& batch, std::size_t i){\
-		return batch[i];\
+	static const_reference get(type const& batch, std::size_t i){\
+		return const_reference(batch,i);\
 	}
 
 #endif
