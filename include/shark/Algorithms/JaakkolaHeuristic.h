@@ -72,7 +72,7 @@ public:
 	template<class InputType>
 	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = true)
 	{
-		auto elements = toView(dataset);
+		auto elements = shark::elements(dataset);
 		if(!nearestFalseNeighbor) {
 			for(auto it = elements.begin(); it != elements.end(); ++it){
 				auto x = it->input;

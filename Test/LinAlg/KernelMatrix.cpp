@@ -132,9 +132,10 @@ BOOST_AUTO_TEST_CASE( QP_ModifiedKernelMatrix ) {
 	double sameClass = 2;
 	double diffClass = -0.5;
 	RealMatrix matrix = kernelMatrix;
+	auto points = elements(data);
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j != size; ++j){
-			if(data.elements()[i].label == data.elements()[j].label)
+			if(points[i].label == points[j].label)
 				matrix(i,j) *= sameClass;
 			else
 				matrix(i,j) *= diffClass;

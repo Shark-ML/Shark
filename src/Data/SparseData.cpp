@@ -71,7 +71,7 @@ template<class T>
 void copySparsePoints(Data<blas::vector<T> >& dataset, std::vector<LibSVMPoint> const& points, bool hasZero){
 	std::size_t delta = (hasZero ? 0 : 1);
 	std::size_t i = 0;
-	for(auto element: dataset.elements()){
+	for(auto element: elements(dataset)){
 		element.clear();
 
 		auto const& inputs = points[i].second;

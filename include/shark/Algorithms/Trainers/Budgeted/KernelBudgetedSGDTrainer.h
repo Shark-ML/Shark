@@ -229,7 +229,7 @@ public:
 	///
 	void train(ClassifierType &classifier, const LabeledData<InputType, unsigned int> &data)
 	{
-		auto dataset = toView(data); 
+		auto dataset = shark::elements(data); 
 		
 		std::size_t ell = dataset.size();
 		std::size_t classes = numberOfClasses(data);
@@ -307,7 +307,7 @@ public:
 		if(m_preInitializationMethod == RANDOM){
 			std::size_t j = 0;
 			budgetAlpha.clear();
-			for(unsigned int c: preinitializedBudgetVectors.labels().elements()){
+			for(unsigned int c: elements(preinitializedBudgetVectors.labels())){
 				budgetAlpha(j, c) = 1 / (1 + lambda);
 				budgetAlpha(j, (c + 1) % classes) = -1 / (1 + lambda);
 				++j;

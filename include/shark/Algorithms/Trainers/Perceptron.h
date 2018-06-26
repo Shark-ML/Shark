@@ -63,11 +63,11 @@ public:
 		KernelExpansion<InputType>& model= classifier.decisionFunction();
 		model.setStructure(mpe_kernel,dataset.inputs(),false,1);
 		model.alpha().clear();
-		auto elements = toView(dataset);
+		auto elements = shark::elements(dataset);
 		for(std::size_t iter = 0; iter < m_maxTimesPattern * patterns; ++iter){
 			bool err = false;
 			for (std::size_t i = 0; i != patterns; i++){
-				double result = model(dataset.elements()[i].input)(0);
+				double result = model(elements[i].input)(0);
 				//perceptron learning rule with modified target from -1;1
 				double label = elements[i].label*2.0-1;
 				if ( result * label  <= 0.0){

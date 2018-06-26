@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE( AUC_EVAL ) {
 	unsigned int labels[10] = {1, 1, 0, 1, 1, 1, 0, 0, 1, 0};
 	
 	for(std::size_t i=0; i<10; i++) {
-		prediction.elements()[i](0) = values[i];
-		label.elements()[i] = labels[i];
+		elements(prediction)[i](0) = values[i];
+		elements(label)[i] = labels[i];
 	}
 
 	//AUC<double, unsigned int> auc;

@@ -23,10 +23,14 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_VARIANCE )
 	NormalizeComponentsUnitVariance<> normalizer(true);
 	Normalizer<> map;
 	normalizer.train(map, set);
-	Data<RealVector> transformedSet = map(set);
-	double error = std::abs(-std::sqrt(1.5) - transformedSet.elements()[0](0)) 
-				+ std::abs(transformedSet.elements()[1](0)) 
-				+ std::abs(sqrt(1.5) - transformedSet.elements()[2](0));
+	auto points= elements(map(set));
+	std::cout<<points.dataset()<<std::endl;
+	std::cout<<points[0]<<std::endl;
+	std::cout<<points[1]<<std::endl;
+	std::cout<<points[2]<<std::endl;
+	double error = std::abs(-std::sqrt(1.5) - points[0](0)) 
+				+ std::abs(points[1](0)) 
+				+ std::abs(sqrt(1.5) - points[2](0));
 	BOOST_CHECK_SMALL(error, 1e-10);
 }
 
@@ -41,10 +45,10 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_INTERVAL )
 	NormalizeComponentsUnitInterval<> normalizer;
 	Normalizer<> map;
 	normalizer.train(map, set);
-	Data<RealVector> transformedSet = map(set);
-	BOOST_CHECK_SMALL(transformedSet.elements()[0](0),1.e-10);
-	BOOST_CHECK_SMALL(0.5 - transformedSet.elements()[1](0),1.e-10);
-	BOOST_CHECK_SMALL(1.0 - transformedSet.elements()[2](0),1.e-10);
+	auto points= elements(map(set));
+	BOOST_CHECK_SMALL(points[0](0),1.e-10);
+	BOOST_CHECK_SMALL(0.5 - points[1](0),1.e-10);
+	BOOST_CHECK_SMALL(1.0 - points[2](0),1.e-10);
 }
 
 BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)

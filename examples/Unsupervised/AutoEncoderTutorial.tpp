@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 	LabeledData<RealVector,unsigned int> data;
 	importSparseData( data, argv[1], 784 );
 	
-	for(auto&& element: data.elements()){
+	for(auto&& element: elements(data)){
 		for(std::size_t j = 0; j != 784; ++j){
 			element.input(j) = (element.input(j) > 0.5);
 		}

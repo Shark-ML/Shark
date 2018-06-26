@@ -425,7 +425,7 @@ void exportCSV(
 ) {
 	std::ofstream ofs(fn.c_str());
 	SHARK_RUNTIME_CHECK(ofs, "Stream cannot be opened for writing.");
-	detail::exportCSV(set.elements(), ofs, separator, sci, width);
+	detail::exportCSV(elements(set), ofs, separator, sci, width);
 }
 
 
@@ -448,7 +448,7 @@ void exportCSV(
 ) {
 	std::ofstream ofs(fn.c_str());
 	SHARK_RUNTIME_CHECK(ofs, "Stream cannot be opened for writing.");
-	detail::exportCSV_labeled(dataset.inputs().elements(), dataset.labels().elements(), ofs, lp, separator, sci, width);
+	detail::exportCSV_labeled(elements(dataset.inputs()), elements(dataset.labels()), ofs, lp, separator, sci, width);
 }
 
 

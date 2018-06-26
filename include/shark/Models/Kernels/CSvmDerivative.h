@@ -277,7 +277,7 @@ private:
 		typename Batch<InputType>::type bof_xi = Batch<InputType>::createBatchFromShape( m_basis.shape(), 1 );
 		typename Batch<InputType>::type bof_xj = Batch<InputType>::createBatchFromShape( m_basis.shape(), 1 );
 
-		auto elements = m_basis.elements();
+		auto elements = shark::elements(m_basis);
 
 		
 		// initialize H and dH

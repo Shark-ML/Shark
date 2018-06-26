@@ -83,8 +83,7 @@ BOOST_AUTO_TEST_CASE( ONE_CLASS_SVM_TEST )
 	// check deviation of fraction of negatives from nu
 	std::size_t pos = 0;
 	std::size_t neg = 0;
-	for (auto const& element:output.elements())
-	{
+	for (auto const& element:elements(output)){
 		if (element(0)> 0.0) pos++;
 		else if (element(0) < 0.0) neg++;
 	}

@@ -113,7 +113,7 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		RealMatrix t = createBatch<RealVector>(m_dataset.labels().elements());
+		RealMatrix t = createBatch<RealVector>(elements(m_dataset.labels()));
 
 		blas::cholesky_decomposition<RealMatrix> cholesky(M);
 		
@@ -160,7 +160,7 @@ public:
 		
 		//generate kernel matrix and label vector
 		RealMatrix M = calculateRegularizedKernelMatrix(*mep_kernel,m_dataset.inputs(),betaInv);
-		RealMatrix t = createBatch<RealVector>(m_dataset.labels().elements());
+		RealMatrix t = createBatch<RealVector>(elements(m_dataset.labels()));
 
 		//compute cholesky decomposition of M
 		blas::cholesky_decomposition<RealMatrix> cholesky(M);

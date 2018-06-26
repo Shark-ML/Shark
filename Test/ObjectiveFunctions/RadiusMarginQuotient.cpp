@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE( ObjectiveFunctions_RadiusMarginQuotient )
 	RadiusMarginQuotient<RealVector> rm(dataset, &kernel);
 
 	// check the value of the objective function
-	double radius_squared = kernel.featureDistanceSqr(dataset.elements()[0].input, dataset.elements()[3].input) / 4.0;
-	double margin_squared = kernel.featureDistanceSqr(dataset.elements()[1].input, dataset.elements()[2].input) / 4.0;
+	double radius_squared = kernel.featureDistanceSqr(elements(dataset)[0].input, elements(dataset)[3].input) / 4.0;
+	double margin_squared = kernel.featureDistanceSqr(elements(dataset)[1].input, elements(dataset)[2].input) / 4.0;
 	double should = radius_squared / margin_squared;
 	double quotient = rm.eval(parameters);
 	BOOST_CHECK_SMALL(quotient - should, 0.01);

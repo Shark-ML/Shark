@@ -79,7 +79,7 @@ public:
 	///
 	/// @param dataSet the data set
 	void initializeChain(Data<RealVector> const& dataSet){
-		RealMatrix sampleData = randomSubBatch(toView(dataSet),batchSize());
+		RealMatrix sampleData = randomSubBatch(elements(dataSet),batchSize());
 		initializeChain(sampleData);
 	}
 	

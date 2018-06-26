@@ -85,7 +85,7 @@ public:
 
 		// draw the samples
 		InputType input;
-		for(auto&& element: data.elements()){
+		for(auto&& element: elements(data)){
 			draw(input);
 			element = input;
 		}
@@ -132,7 +132,7 @@ public:
 
 		// draw the samples
 		InputLabelPair<InputType,LabelType> pair;
-		for(auto&& element: data.elements()){
+		for(auto&& element: elements(data)){
 			draw(pair.input,pair.label);
 			element = pair;
 		}

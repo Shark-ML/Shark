@@ -144,15 +144,6 @@ BOOST_AUTO_TEST_CASE(LinAlg_PartlyPrecomputedMatrix_MediumCache)
 		Data<RealVector> unionJackData = createDataFromRange(unionJack);
 		if(verbose) std::cout << ".." << std::endl;
 
-		for(size_t r = 0; r < unionJackData.numberOfElements(); r++)
-		{
-			for(size_t c = 0; c < unionJackData.elements()[r].size(); c++)
-			{
-				if(verbose) std::cout << " " << unionJackData.elements()[r][c];
-			}
-			if(verbose) std::cout << std::endl;
-		}
-
 		// compute a much bigger cachesize
 		typedef KernelMatrix<RealVector, double > KernelMatrixType;
 		size_t cacheSize = sizeof(double) * currentDimension * currentDimension / 2;

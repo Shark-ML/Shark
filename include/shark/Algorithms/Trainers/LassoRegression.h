@@ -150,9 +150,9 @@ public:
 		RealVector w(dim, 0.0);
 
 		// transpose the dataset and push it inside a single matrix
-		auto data = createBatch(dataset.inputs().elements());
+		auto data = createBatch(elements(dataset.inputs()));
 		data = trans(data);
-		auto label_mat = createBatch(dataset.labels().elements());
+		auto label_mat = createBatch(elements(dataset.labels()));
 		RealVector label = column(label_mat,0);
 
 		RealVector diag(dim);

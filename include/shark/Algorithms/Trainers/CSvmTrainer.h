@@ -218,7 +218,7 @@ public:
 		if(m_McSvmType == McSvm::ReinforcedSvm){
 			auto const& labels = dataset.labels();
 			std::size_t i=0;
-			for(unsigned int y: labels.elements()){
+			for(unsigned int y: elements(labels)){
 				linear(i, y) = classes - 1.0;   // self-margin target value of reinforced SVM loss
 				i++;
 			}
@@ -237,7 +237,7 @@ public:
 		svm.decisionFunction().setStructure(this->m_kernel,dataset.inputs(),this->m_trainOffset,classes);
 		
 		std::size_t i = 0;
-		for(auto y: dataset.labels().elements()){
+		for(auto y: elements(dataset.labels())){
 			for (std::size_t c=0; c<classes; c++){
 				double sum = 0.0;
 				std::size_t r = alpha.size2() * y;
@@ -646,7 +646,7 @@ private:
 			double C_minus = reg(0);
 			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
 			std::size_t i=0;
-			for (auto label : dataset.labels().elements()) {
+			for (auto label : elements(dataset.labels())) {
 				double a = svm.alpha()(i, 0);
 				if (label == 0) a = std::max(std::min(a, 0.0), -C_minus);
 				else            a = std::min(std::max(a, 0.0), C_plus);
@@ -668,7 +668,7 @@ private:
 			double C_minus = reg(0);
 			double C_plus = (reg.size() == 1) ? reg(0) : reg(1);
 			std::size_t i=0;
-			for (auto label : dataset.labels().elements()) {
+			for (auto label : elements(dataset.labels())) {
 				double a = svm.alpha()(i, 0);
 				if (label == 0) a = std::max(std::min(a, 0.0), -C_minus);
 				else            a = std::min(std::max(a, 0.0), C_plus);
@@ -750,7 +750,7 @@ private:
 		
 		
 		//fast access to single elements
-		auto elements = toView(dataset);
+		auto elements = shark::elements(dataset);
 		//todo: O.K.: here kernel single input derivative would be usefull
 		//also it can be usefull to use here real batch processing and use batches of size 1 for lower /upper
 		//and instead of singleInput whole batches.
@@ -979,7 +979,7 @@ public:
 		RealVector diagonalModifier(dataset.numberOfElements(),0.5/base_type::m_regularizers(0));
 		if(base_type::m_regularizers.size() != 1){
 			std::size_t i = 0;
-			for(unsigned int label:dataset.labels().elements()){
+			for(unsigned int label: elements(dataset.labels())){
 				diagonalModifier(i) = 0.5/base_type::m_regularizers(label);
 				++i;
 			}

@@ -70,10 +70,7 @@ void DiscreteLoss::defineBalancedCost(Data<unsigned int> const& labels){
 	std::size_t classes = numberOfClasses(labels);
 	std::size_t ic = labels.numberOfElements();
 	
-	std::vector<unsigned int> freq(classes);
-	for(unsigned int label: labels.elements()){
-		freq[label]++;
-	}
+	std::vector<std::size_t> freq = classSizes(labels);
 
 	m_cost.resize(classes, classes);
 	for (std::size_t i = 0; i!= classes; i++){

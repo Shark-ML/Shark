@@ -186,7 +186,7 @@ public:
 			}
 		}
 		//project basis on the support vectors
-		m_basis = toDataset(subset(toView(m_basis),svIndices));
+		m_basis = toDataset(subset(elements(m_basis),svIndices));
 		
 		//reduce alpha to it's support vector variables
 		RealMatrix a(svIndices.size(), m_alpha.size2());

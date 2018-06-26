@@ -70,7 +70,7 @@ private:
 		VectorType mean(labelDimension(data));
 		VectorType input(inputDimension(data));
 		std::size_t elem = 0;
-		for(auto const& point: data.elements()){
+		for(auto const& point: elements(data)){
 			noalias(input) = point.input;
 			mean.clear();
 			double oobWeightSum = 0;
@@ -98,7 +98,7 @@ private:
 		RealVector votes(numberOfClasses(data));
 		RealVector input(inputDimension(data));
 		std::size_t elem = 0;
-		for(auto const& point: data.elements()){
+		for(auto const& point: elements(data)){
 			noalias(input) = point.input;
 			votes.clear();
 			for(std::size_t m = 0; m != this->numberOfModels();++m){

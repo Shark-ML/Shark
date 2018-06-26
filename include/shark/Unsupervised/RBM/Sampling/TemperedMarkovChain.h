@@ -156,7 +156,7 @@ public:
 	void initializeChain(Data<RealVector> const& dataSet){
 		SHARK_RUNTIME_CHECK(m_temperedChains.size() != 0,"You did not initialize the number of temperatures bevor initializing the chain!");
 
-		RealMatrix sampleData = randomSubBatch(toView(dataSet),m_temperedChains.size());
+		RealMatrix sampleData = randomSubBatch(elements(dataSet),m_temperedChains.size());
 		initializeChain(sampleData);
 	}
 	

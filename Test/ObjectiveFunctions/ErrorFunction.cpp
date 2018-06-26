@@ -221,8 +221,8 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 		
 		for(std::size_t i = 0; i != 100; ++i){
 			std::size_t e = random::discrete(random::globalRng, 0,49);
-			unweightedData.elements()[i] = data.elements()[e];
-			weights.elements()[e] += 1.0;
+			elements(unweightedData)[i] = elements(data)[e];
+			elements(weights)[e] += 1.0;
 		}
 		weightedData = WeightedLabeledData<RealVector,RealVector>(data, weights);
 	}

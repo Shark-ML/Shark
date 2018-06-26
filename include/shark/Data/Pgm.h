@@ -196,7 +196,7 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 	RealMatrix image((height+1)*gridY,(width+1)*gridX,minimum);
 	
 	std::size_t filter = 0;
-	for(auto element: filters.elements()){
+	for(auto element: elements(filters)){
 		//get grid position from filter
 		std::size_t i = filter/gridX;
 		std::size_t j = filter%gridX;

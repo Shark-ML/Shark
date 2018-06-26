@@ -220,7 +220,7 @@ KernelExpansion<RealVector> shark::approximateKernelExpansion(
 	{
 		Centroids initialClustering;
 		kMeans(model.basis(),k,initialClustering);
-		noalias(to_matrix(parameters,k,dim)) = createBatch<RealVector>(initialClustering.centroids().elements());
+		noalias(to_matrix(parameters,k,dim)) = createBatch<RealVector>(elements(initialClustering.centroids()));
 	}
 	
 	//optimize the basis iteratively to find a basis with small residual to the optimized vector

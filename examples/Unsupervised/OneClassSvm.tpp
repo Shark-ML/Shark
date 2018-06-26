@@ -96,10 +96,7 @@ int main(int argc, char** argv)
 	}
 
 	// mark the samples
-	Data<RealVector>::const_element_range elements = data.elements();
-	for (Data<RealVector>::const_element_range::const_iterator it = elements.begin(); it != elements.end(); ++it)
-	{
-		RealVector v = *it;
+	for (auto const& v: elements(data)){
 		int x = (int)std::floor(34.5 * v(0) / 5.0 + 34.5 + 0.5);
 		int y = (int)std::floor(17.0 * v(1) / 5.0 + 17.0 + 0.5);
 		if (x >= 0 && y >= 0 && x < 70 && y < 35) output[y][x] = '*';

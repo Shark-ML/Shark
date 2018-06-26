@@ -54,8 +54,9 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(), 100u);
 	BOOST_CHECK_EQUAL(set.shape(), Shape({}));
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(), 20u);
+	auto setPoints = elements(set);
 	BOOST_CHECK_EQUAL_COLLECTIONS(
-		set.elements().begin(),set.elements().end(),
+		setPoints.begin(), setPoints.end(),
 		inputs.begin(),inputs.end()
 	);
 	
@@ -111,7 +112,7 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 	std::size_t index = 0;
 	for(std::size_t i = 0; i <= batchSizes.size();++i){
 		Data<int> set = createDataFromRange(inputs,10);
-		set= toDataset(toView(set),batchSizes);
+		set= toDataset(elements(set),batchSizes);
 		Data<int> split = splitAtElement(set,index);
 		
 		BOOST_REQUIRE_EQUAL(set.numberOfBatches(),i);
@@ -119,12 +120,14 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 		BOOST_REQUIRE_EQUAL(set.numberOfElements(),index);
 		BOOST_REQUIRE_EQUAL(split.numberOfElements(),100-index);
 		
+		auto setPoints = elements(set);
 		BOOST_CHECK_EQUAL_COLLECTIONS(
-			set.elements().begin(),set.elements().end(),
+			setPoints.begin(),setPoints.end(),
 			inputs.begin(),inputs.begin()+index
 		);
+		auto spltPoints = elements(split);
 		BOOST_CHECK_EQUAL_COLLECTIONS(
-			split.elements().begin(),split.elements().end(),
+			spltPoints.begin(),spltPoints.end(),
 			inputs.begin()+index,inputs.end()
 		);
 		
@@ -162,8 +165,9 @@ BOOST_AUTO_TEST_CASE( Set_Merge_Test )
 		}
 	}
 
+	auto points = elements(set1);
 	for(std::size_t i = 0; i != 120;++i){
-		BOOST_CHECK_EQUAL(set1.elements()[i],i);
+		BOOST_CHECK_EQUAL(points[i],i);
 	}
 }
 
@@ -182,8 +186,9 @@ BOOST_AUTO_TEST_CASE( Data_ColumnAccess )
 	RealVector c0 = getColumn(set, 0);
 	setColumn(set, 0, test);
 
+	auto points = elements(set);
 	for(std::size_t i = 0; i != 50; ++i){
-		BOOST_CHECK_EQUAL(set.elements()[i](0), test(i));
+		BOOST_CHECK_EQUAL(points[i](0), test(i));
 		BOOST_CHECK_EQUAL(c0(i), inputs[i](0));
 	}
 }
@@ -221,10 +226,10 @@ BOOST_AUTO_TEST_CASE( LabledData_Merge_Test )
 			BOOST_CHECK_EQUAL(set1.batch(i).size(),7);
 		}
 	}
-
+	auto points = elements(set1);
 	for(std::size_t i = 0; i != 120;++i){
-		BOOST_CHECK_EQUAL(set1.elements()[i].input,i);
-		BOOST_CHECK_EQUAL(set1.elements()[i].label,2*i);
+		BOOST_CHECK_EQUAL(points[i].input,i);
+		BOOST_CHECK_EQUAL(points[i].label,2*i);
 	}
 }
 
@@ -251,7 +256,7 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	
 	//split in the middle of a batch
 	Data<int> set= createDataFromRange(inputs,10);
-	set= toDataset(toView(set),batchSizes);
+	set= toDataset(elements(set),batchSizes);
 	Data<int> split = splitAtElement(set,53);
 	
 	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),5u);
@@ -259,12 +264,14 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(),53u);
 	BOOST_REQUIRE_EQUAL(split.numberOfElements(),47u);
 	
+	auto points = elements(set);
 	BOOST_CHECK_EQUAL_COLLECTIONS(
-		set.elements().begin(),set.elements().end(),
+		points.begin(),points.end(),
 		inputs.begin(),inputs.begin()+53
 	);
+	auto splitPoints = elements(split);
 	BOOST_CHECK_EQUAL_COLLECTIONS(
-		split.elements().begin(),split.elements().end(),
+		splitPoints.begin(), splitPoints.end(),
 		inputs.begin()+53,inputs.end()
 	);
 }
@@ -298,11 +305,12 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	
 	//check that all labels match the elements and that all elements are still there
 	std::vector<unsigned int> resultInputs(101,0);
+	auto points = elements(data);
 	for(std::size_t i = 0; i != 101; ++i){
-		std::size_t k = data.elements()[i].input(0)-100;
-		BOOST_CHECK_EQUAL(data.elements()[i].input(1),k+200);
-		BOOST_CHECK_EQUAL(data.elements()[i].input(2),k+300);
-		BOOST_CHECK_EQUAL(data.elements()[i].label,k%3);
+		std::size_t k = points[i].input(0)-100;
+		BOOST_CHECK_EQUAL(points[i].input(1),k+200);
+		BOOST_CHECK_EQUAL(points[i].input(2),k+300);
+		BOOST_CHECK_EQUAL(points[i].label,k%3);
 		resultInputs[k] = (unsigned int)k;
 	}
 	//in the end all elements should be set
@@ -325,13 +333,13 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	
 	//check order of the labels of the elements
 	for(std::size_t i = 0; i != 34; ++i){
-		BOOST_CHECK_EQUAL(data.elements()[i].label, 0);
+		BOOST_CHECK_EQUAL(points[i].label, 0);
 	}
 	for(std::size_t i = 34; i != 68; ++i){
-		BOOST_CHECK_EQUAL(data.elements()[i].label, 1);
+		BOOST_CHECK_EQUAL(points[i].label, 1);
 	}
 	for(std::size_t i = 68; i != 101; ++i){
-		BOOST_CHECK_EQUAL(data.elements()[i].label, 2);
+		BOOST_CHECK_EQUAL(points[i].label, 2);
 	}
 }
 

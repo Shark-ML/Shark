@@ -275,7 +275,7 @@ CVFolds<LabeledData<I,L> > createCVSameSize(LabeledData<I,L> const& set,std::siz
 	std::vector<std::size_t> batchSizes;
 	detail::batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
 
-	LabeledData<I,L> newSet = toDataset(randomSubset(toView(set), numInputs), batchSizes);
+	LabeledData<I,L> newSet = toDataset(randomSubset(elements(set), numInputs), batchSizes);
 
 	CVFolds<LabeledData<I,L> > folds(newSet,partitionStart);
 	return folds;

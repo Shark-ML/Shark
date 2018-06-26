@@ -141,11 +141,25 @@ public:
 
 	DataView(){}
 	DataView(DatasetType& dataset)
-	:m_dataset(dataset),m_indices(dataset.numberOfElements())
+	:m_dataset(dataset),m_indices(m_dataset.numberOfElements())
 	{
 		std::size_t index = 0;
-		for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-			std::size_t batchSize = Batch<value_type>::size(dataset.batch(i));
+		for(std::size_t i = 0; i != m_dataset.numberOfBatches(); ++i){
+			std::size_t batchSize = Batch<value_type>::size(m_dataset.batch(i));
+			for(std::size_t j = 0; j != batchSize; ++j,++index){
+				m_indices[index].batch = i;
+				m_indices[index].positionInBatch = j;
+				m_indices[index].datasetIndex = index;
+			}
+		}
+	}
+	
+	DataView(DatasetType&& dataset)
+	:m_dataset(std::move(dataset)),m_indices(m_dataset.numberOfElements())
+	{
+		std::size_t index = 0;
+		for(std::size_t i = 0; i != m_dataset.numberOfBatches(); ++i){
+			std::size_t batchSize = Batch<value_type>::size(m_dataset.batch(i));
 			for(std::size_t j = 0; j != batchSize; ++j,++index){
 				m_indices[index].batch = i;
 				m_indices[index].positionInBatch = j;
@@ -313,9 +327,10 @@ typename DataView<DatasetType>::batch_type randomSubBatch(
 ///
 /// \param set the dataset from which to create the view
 template<class DatasetType>
-DataView<DatasetType>  toView(DatasetType& set){
-	return DataView<DatasetType>(set);
+DataView<typename std::remove_reference<DatasetType>::type >  elements(DatasetType&& set){
+	return DataView<typename std::remove_reference<DatasetType>::type>(std::forward<DatasetType>(set));
 }
+
 
 /// \brief Creates a new dataset from a View.
 ///

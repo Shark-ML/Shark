@@ -166,6 +166,7 @@ class BaseWeightedDataset : public ISerializable
 {
 public:
 	typedef typename DataContainerT::element_type DataType;
+	typedef typename DataContainerT::shape_type shape_type;
 	typedef double WeightType;
 	typedef DataContainerT DataContainer;
 	typedef Data<WeightType> WeightContainer;
@@ -191,48 +192,15 @@ public:
 		typename DataContainer::const_batch_reference,
 		typename WeightContainer::const_batch_reference
 	> const_batch_reference;
-	
-	typedef typename Batch<element_type>::reference element_reference;
-	typedef typename Batch<element_type>::const_reference const_element_reference;
 
-	typedef boost::iterator_range< detail::DataElementIterator<BaseWeightedDataset<DataContainer> > > element_range;
-	typedef boost::iterator_range< detail::DataElementIterator<BaseWeightedDataset<DataContainer> const> > const_element_range;
 	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> > batch_range;
 	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> const> const_batch_range;
-
-
-	///\brief Returns the range of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	const_element_range elements()const{
-		return const_element_range(
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,0,0,0),
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
-	///\brief Returns therange of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	element_range elements(){
-		return element_range(
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,0,0,0),
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
 	
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
 		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
 		return batch_range(this);
 	}
@@ -267,6 +235,11 @@ public:
 	///\brief Access to weights as a separate container.
 	WeightContainer& weights(){
 		return m_weights;
+	}
+	
+	///\brief Returns the shape of the elements in the dataset.
+	shape_type const& shape() const{
+		return m_data.shape();
 	}
 
 	// CONSTRUCTORS
@@ -308,15 +281,6 @@ public:
 		for(std::size_t i = 0; i != numberOfBatches(); ++i){
 			m_weights.batch(i) = Batch<WeightType>::type(batchSize(m_data.batch(i)),weight);
 		}
-	}
-	
-	
-	// ELEMENT ACCESS
-	element_reference element(std::size_t i){
-		return *(detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,0,0,0)+i);
-	}
-	const_element_reference element(std::size_t i) const{
-		return *(detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,0,0,0)+i);
 	}
 
 	// BATCH ACCESS
@@ -477,7 +441,7 @@ public:
 ///brief  Outstream of elements for weighted data.
 template<class T>
 std::ostream &operator << (std::ostream &stream, const WeightedData<T>& d) {
-	for(auto elem: d.elements())
+	for(auto elem: elements(d))
 		stream << elem.weight << " [" << elem.data<<"]"<< "\n";
 	return stream;
 }
@@ -489,7 +453,7 @@ std::ostream &operator << (std::ostream &stream, const WeightedData<T>& d) {
 /// \param data the dataset to shuffle
 template<class T>
 WeightedData<T> shuffle(WeightedData<T> const& data){
-	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartitioning());
+	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartitioning());
 }
 
 /// \brief creates a weighted unweighted data object from two ranges, representing data and weights
@@ -644,7 +608,7 @@ public:
 ///brief  Outstream of elements for weighted labeled data.
 template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>& d) {
-	for(auto elem: d.elements())
+	for(auto elem: elements(d))
 		stream << elem.weight <<" ("<< elem.data.label << " [" << elem.data.input<<"] )"<< "\n";
 	return stream;
 }
@@ -656,7 +620,7 @@ std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>
 /// \param data the dataset to shuffle
 template<class I, class L>
 WeightedLabeledData<I,L> shuffle(WeightedLabeledData<I,L> const& data){
-	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartitioning());
+	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartitioning());
 }
 
 
@@ -723,7 +687,7 @@ double sumOfWeights(WeightedLabeledData<InputType,LabelType> const& dataset){
 template<class InputType>
 RealVector classWeight(WeightedLabeledData<InputType,unsigned int> const& dataset){
 	RealVector weights(numberOfClasses(dataset),0.0);
-	for(auto const& elem: dataset.elements()){
+	for(auto const& elem: elements(dataset)){
 		weights(elem.data.label) += elem.weight;
 	}
 	return weights;
@@ -773,9 +737,10 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 	
 	WeightedLabeledData<InputType,LabelType> bootstrapSet(dataset,0.0);
 
+	auto booststrap =  elements(bootstrapSet);
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
-		bootstrapSet.element(index).weight += 1.0;
+		booststrap[index].weight += 1.0;
 	}
 	bootstrapSet.inputShape() = dataset.inputShape();
 	bootstrapSet.labelShape() = dataset.labelShape();
@@ -801,9 +766,10 @@ WeightedData<InputType> bootstrap(
 	
 	WeightedData<InputType> bootstrapSet(dataset,0.0);
 
+	auto booststrap =  elements(bootstrapSet);
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
-		bootstrapSet.element(index).weight += 1.0;
+		booststrap[index].weight += 1.0;
 	}
 	bootstrapSet.shape() = dataset.shape();
 	return bootstrapSet;

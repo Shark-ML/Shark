@@ -56,9 +56,10 @@ int main()
 	std::cout << "    Trace                  = " << normalizer.trace() << std::endl << std::endl;
 	//check in feature space
 	double control = 0.0;
-	for (auto const& elem_i: data.elements()){
+	auto elements = shark::elements(data);
+	for (auto const& elem_i: elements){
 		control += scale.eval(elem_i, elem_i);
-		for (auto const& elem_j: data.elements()){
+		for (auto const& elem_j: elements){
 			control -= scale.eval(elem_i, elem_j) / num_points;
 		}
 	}

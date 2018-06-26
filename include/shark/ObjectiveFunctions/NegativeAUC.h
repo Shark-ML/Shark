@@ -76,8 +76,8 @@ public:
 		unsigned P = 0; // positive examples
 		unsigned N = 0; // negative examples
 		std::vector<AUCPair> L(elements); // list of predictions and labels
-		auto targets = target.elements();
-		auto predictions = prediction.elements();
+		auto targets = shark::elements(target);
+		auto predictions = shark::elements(prediction);
 
 		for(std::size_t i=0; i!= elements; i++) { // build list
 			LabelType t = targets[i];

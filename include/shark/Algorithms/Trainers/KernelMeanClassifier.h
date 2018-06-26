@@ -72,7 +72,7 @@ public:
 		
 		//todo: slow implementation without batch processing!
 		std::size_t i  = 0; 
-		for(auto const& element: dataset.elements()){
+		for(auto const& element: elements(dataset)){
 		
 			unsigned int y = element.data.label;
 			double w = element.weight;
@@ -81,7 +81,7 @@ public:
 			alpha(i,y) = w / normalization(y);
 			++i;
 			// compute values to calculate offset
-			for(auto element2: dataset.elements()){
+			for(auto element2: elements(dataset)){
 				if (element2.data.label != y) 
 					continue;
 				//todo: fast implementation should create batches of same class elements and process them!
