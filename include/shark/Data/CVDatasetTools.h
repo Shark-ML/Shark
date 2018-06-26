@@ -405,69 +405,6 @@ CVFolds<LabeledData<I,L> > createCVIndexed(
 	return CVFolds<LabeledData<I,L> >(set,partitionStart);
 }
 
-
-
-//! \brief Create a partition for cross validation from indices for both ordering and partitioning.
-//!
-//! Create a partition from indices. There is one index vector assigning an order
-//! to the samples, and another one assigning each sample to a validation partition.
-//! That is, given a dataset set, and at the i-th processing step, this function puts
-//! the order_indices[i]-th sample into the partition_indices[i]-th partition. The
-//! order_indices part of the above procedure matters if both an inner and
-//! outer partition are to be recreated: for the inner partition to be recreated, too,
-//! the outer partition must be recreated in the same order, not just partitioned into
-//! the same splits.
-//!
-//! \param set                  partitions will be subsets of this set
-//! \param numberOfPartitions   number of partitions to create
-//! \param indices              stores location index in the first and partition index in the second vector
-//! \param batchSize            maximum batch size
-template<class I,class L>
-CVFolds<LabeledData<I,L> > createCVFullyIndexed(
-	LabeledData<I,L> &set,
-	std::size_t numberOfPartitions,
-	RecreationIndices indices,
-	std::size_t batchSize = constants::DefaultBatchSize
-) {
-	std::size_t numInputs = set.numberOfElements();
-	SIZE_CHECK(indices.first.size() == numInputs);
-	SIZE_CHECK(indices.second.size() == numInputs);
-	SIZE_CHECK(numberOfPartitions == *std::max_element(indices.second.begin(),indices.second.end())+1);
-
-	//calculate the size of validation partitions
-	std::vector<std::size_t> validationSize(numberOfPartitions,0);
-	for (std::size_t input = 0; input != numInputs; input++) {
-		validationSize[indices.second[input]]++;
-	}
-
-	//calculate the size of batches for every validation part and their total number
-	std::vector<std::size_t> partitionStart;
-	std::vector<std::size_t> batchSizes;
-	std::size_t numBatches = detail::batchPartitioning(validationSize,partitionStart,batchSizes,batchSize);
-
-	//construct a new set with the correct batch format from the old set
-	LabeledData<I,L> newSet(numBatches);
-	DataView<LabeledData<I,L> > setView(set); //fast access to single elements of the original set
-	std::vector<std::size_t> validationSetStart = partitionStart; //current index for the batch of every partition
-	std::vector<std::vector<std::size_t> > batchElements(numberOfPartitions);
-	for (std::size_t input = 0; input != numInputs; input++) {
-		std::size_t partition = indices.second[input]; //the second vector's contents indicate the partition to assign each sample to.
-		batchElements[partition].push_back( indices.first[input] ); //the first vector's contents indicate from what original position to get the next sample.
-
-		//if all elements for the current batch are found, create it
-		std::size_t batchNumber = validationSetStart[partition];
-		if (batchElements[partition].size() == batchSizes[batchNumber]) {
-			newSet.batch(validationSetStart[partition]) = subBatch(setView,batchElements[partition]);
-			batchElements[partition].clear();
-			++validationSetStart[partition];
-		}
-	}
-	swap(set, newSet);
-	//now we only need to create the subset itself
-	return CVFolds<LabeledData<I,L> >(set,partitionStart);
-}
-
-
 // much more to come...
 
 /** @}*/
