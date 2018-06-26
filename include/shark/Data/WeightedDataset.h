@@ -347,11 +347,6 @@ public:
 		m_data.makeIndependent();
 	}
 
-	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	virtual void shuffle(){
-		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
-	}
-
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
 		m_data.splitBatch(batch,elementIndex);
 		m_weights.splitBatch(batch,elementIndex);
@@ -365,21 +360,10 @@ public:
 		m_data.append(other.m_data);
 		m_weights.append(other.m_weights);
 	}
-
-
-	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
-	///
-	///After the operation the container will contain batchSizes.size() batches with the i-th batch having size batchSize[i].
-	///However the sum of all batch sizes must be equal to the current number of elements
-	template<class Range>
-	void repartition(Range const& batchSizes){
-		m_data.repartition(batchSizes);
-		m_weights.repartition(batchSizes);
-	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
-	/// This method can be used together with repartition to ensure
+	/// This method can be used together to ensure
 	/// that two datasets have the same batch structure.
 	std::vector<std::size_t> getPartitioning()const{
 		return m_data.getPartitioning();
@@ -431,8 +415,6 @@ public:
 	typedef typename base_type::element_type element_type;
 	typedef DataT InputType;
 
-	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = Data<DataT>::DefaultBatchSize);
-
 	// CONSTRUCTORS
 
 	///\brief Empty data set.
@@ -445,16 +427,6 @@ public:
 	WeightedData(std::size_t numBatches)
 	: base_type(numBatches)
 	{}
-
-	/// \brief Construtor using a single element as blueprint to create a dataset with a specified number of elements.
-	///
-	/// Optionally the desired batch Size can be set
-	///
-	///@param size the new size of the container
-	///@param element the blueprint element from which to create the Container
-	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	WeightedData(std::size_t size, element_type const& element, std::size_t batchSize = DefaultBatchSize)
-	: base_type(size,element,batchSize){}
 
 	///\brief Construction from data.
 	///
@@ -510,6 +482,16 @@ std::ostream &operator << (std::ostream &stream, const WeightedData<T>& d) {
 	return stream;
 }
 
+/// \brief Returns a shuffled copy of the input data
+///
+/// The order of points is randomized and a copy of the initial data object returned.
+/// The batch sizes are the same as in the original dataset.
+/// \param data the dataset to shuffle
+template<class T>
+WeightedData<T> shuffle(WeightedData<T> const& data){
+	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartitioning());
+}
+
 /// \brief creates a weighted unweighted data object from two ranges, representing data and weights
 template<class DataRange, class WeightRange>
 typename boost::disable_if<
@@ -517,14 +499,11 @@ typename boost::disable_if<
 	WeightedData<
 		typename boost::range_value<DataRange>::type
 	> 
->::type createDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = 0){
+>::type createDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = constants::DefaultBatchSize){
 
 	SHARK_RUNTIME_CHECK(batchSize(data) == batchSize(weights),"Number of datapoints and number of weights must agree");
 
 	typedef typename boost::range_value<DataRange>::type Data;
-
-	if (batchSize == 0)
-		batchSize = WeightedData<Data>::DefaultBatchSize;
 
 	return WeightedData<Data>(
 		shark::createDataFromRange(data,batchSize),
@@ -565,8 +544,6 @@ public:
 	using base_type::data;
 	using base_type::weights;
 
-	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = (LabeledData<InputT,LabelT>::DefaultBatchSize));
-
 	// CONSTRUCTORS
 
 	///\brief Empty data set.
@@ -587,7 +564,7 @@ public:
 	///@param size the new size of the container
 	///@param element the blueprint element from which to create the Container
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	WeightedLabeledData(std::size_t size, element_type const& element, std::size_t batchSize = DefaultBatchSize)
+	WeightedLabeledData(std::size_t size, element_type const& element, std::size_t batchSize = constants::DefaultBatchSize)
 	: base_type(size,element,batchSize){}
 
 	///\brief Construction from data.
@@ -672,6 +649,17 @@ std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>
 	return stream;
 }
 
+/// \brief Returns a shuffled copy of the input data
+///
+/// The order of (input-label)-pairs is randomized and a copy of the initial data object returned.
+/// The batch sizes are the same as in the original dataset.
+/// \param data the dataset to shuffle
+template<class I, class L>
+WeightedLabeledData<I,L> shuffle(WeightedLabeledData<I,L> const& data){
+	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartitioning());
+}
+
+
 //Stuff for Dimensionality and querying of basic information
 
 inline std::size_t numberOfClasses(WeightedData<unsigned int> const& labels){
@@ -751,7 +739,7 @@ typename boost::disable_if<
 		typename boost::range_value<InputRange>::type,
 		typename boost::range_value<LabelRange>::type
 	>
->::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = 0){
+>::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = constants::DefaultBatchSize){
 
 	SHARK_RUNTIME_CHECK(batchSize(inputs) == batchSize(labels),
 	"number of inputs and number of labels must agree");
@@ -759,9 +747,6 @@ typename boost::disable_if<
 	"number of data points and number of weights must agree");
 	typedef typename boost::range_value<InputRange>::type InputType;
 	typedef typename boost::range_value<LabelRange>::type LabelType;
-
-	if (batchSize == 0)
-		batchSize = WeightedLabeledData<InputRange,LabelRange>::DefaultBatchSize;
 
 	return WeightedLabeledData<InputType,LabelType>(
 		createLabeledDataFromRange(inputs,labels,batchSize),

@@ -55,9 +55,9 @@
 #include <shark/Core/Shape.h>
 #include "Impl/Dataset.inl"
 #include "Impl/InputLabelPair.h"
+#include <shark/Data/DataView.h>
 
 namespace shark {
-
 
 ///
 /// \brief Data container.
@@ -136,10 +136,6 @@ protected:
 public:
 	typedef Type element_type;
 	typedef typename Batch<Type>::shape_type shape_type;
-	/// \brief Defines the default batch size of the Container.
-	///
-	/// Zero means: unlimited
-	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = 256);
 
 	typedef typename Container::BatchType batch_type;
 	typedef batch_type& batch_reference;
@@ -247,7 +243,7 @@ public:
 	///@param numElements number of data points stored in the dataset
 	///@param shape The shape of the elements to create
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	explicit Data(std::size_t numElements, shape_type const& shape, std::size_t batchSize = DefaultBatchSize)
+	explicit Data(std::size_t numElements, shape_type const& shape, std::size_t batchSize = constants::DefaultBatchSize)
 	: m_data( detail::numberOfBatches(numElements, batchSize)), m_shape(shape){
 		auto batches = detail::optimalBatchSizes(numElements, batchSize);
 		for(std::size_t i = 0; i != batches.size(); ++i){
@@ -312,54 +308,13 @@ public:
 	void push_back(const_batch_reference batch){
 		m_data.push_back(batch);
 	}
-
-	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
-	///
-	///After the operation the container will contain batchSizes.size() batchs with the i-th batch having size batchSize[i].
-	///However the sum of all batch sizes must be equal to the current number of elements
-	template<class Range>
-	void repartition(Range const& batchSizes){
-		m_data.repartition(batchSizes);
-	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
-	/// This method can be used together with repartition to ensure
+	/// This method can be used together with to ensure
 	/// that two datasets have the same batch structure.
 	std::vector<std::size_t> getPartitioning()const{
 		return m_data.getPartitioning();
-	}
-	
-	
-	/// \brief Reorders elements across batches
-	///
-	/// Takes a vector of indices so that the ith element is moved to index[i].
-	/// This will create a temporary copy of the dataset and thus requires a double amount of memory compared to the original dataset
-	/// during construction.
-	template<class Range>
-	void reorderElements(Range const& indices){
-		Data dataCopy(getPartitioning(), m_shape);
-		
-		std::vector<Type> batch_elements;
-		auto indexPos = indices.begin();
-		auto elemBegin = elements().begin();
-		for(std::size_t b = 0; b != numberOfBatches(); ++b){
-			std::size_t numElements = batchSize(batch(b));
-			batch_elements.clear();
-			for(std::size_t i = 0; i != numElements; ++i,++indexPos){
-				batch_elements.push_back(*(elemBegin+*indexPos));
-			}
-			dataCopy.batch(b) = createBatch<Type>(batch_elements);
-		}
-		*this = dataCopy;
-	}
-
-	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	void shuffle(){
-		std::vector<std::size_t> indices(this->numberOfElements());
-		std::iota(indices.begin(),indices.end(),0);
-		std::shuffle(indices.begin(),indices.end(), random::globalRng);
-		this->reorderElements(indices);
 	}
 
 	// SUBSETS
@@ -388,6 +343,16 @@ std::ostream &operator << (std::ostream &stream, const Data<T>& d) {
 		stream << elem << "\n";
 	return stream;
 }
+
+/// \brief Returns a shuffled copy of the input data
+///
+/// The order of points is randomized and a copy of the initial data object returned.
+/// The batch sizes are the same as in the original dataset.
+/// \param data the dataset to shuffle
+template<class T>
+Data<T> shuffle(Data<T> const& data){
+	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartition());
+}
 /** @} */
 
 
@@ -413,8 +378,6 @@ public:
 	typedef Data<InputT> InputContainer;
 	typedef Data<LabelT> LabelContainer;
 	typedef typename InputContainer::IndexSet IndexSet;
-
-	static const std::size_t DefaultBatchSize = InputContainer::DefaultBatchSize;
 
 	// TYPEDEFS FOR PAIRS
 	typedef InputLabelBatch<
@@ -524,7 +487,7 @@ public:
 	///@param numElements number of data points stored in the dataset
 	///@param shape The shape of the datapoints
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	explicit LabeledData(std::size_t numElements, shape_type const& shape, std::size_t batchSize = DefaultBatchSize)
+	explicit LabeledData(std::size_t numElements, shape_type const& shape, std::size_t batchSize = constants::DefaultBatchSize)
 	: m_data(numElements, shape.input, batchSize), m_label(numElements, shape.label, batchSize){}
 	
 	///\brief Constructs a set with a given shape and a chosen partitioning
@@ -637,20 +600,10 @@ public:
 		push_back(batch.input,batch.label);
 	}
 
-
-	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
-	///
-	///After the operation the container will contain batchSizes.size() batches with the i-th batch having size batchSize[i].
-	///However the sum of all batch sizes must be equal to the current number of elements
-	template<class Range>
-	void repartition(Range const& batchSizes){
-		m_data.repartition(batchSizes);
-		m_label.repartition(batchSizes);
-	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
-	/// This method can be used together with repartition to ensure
+	/// This method can be used to ensure
 	/// that two datasets have the same batch structure.
 	std::vector<std::size_t> getPartitioning()const{
 		return m_data.getPartitioning();
@@ -659,20 +612,6 @@ public:
 	friend void swap(LabeledData& a, LabeledData& b){
 		swap(a.m_data,b.m_data);
 		swap(a.m_label,b.m_label);
-	}
-	
-	template<class Range>
-	void reorderElements(Range const& indices){
-		m_data.reorderElements(indices);
-		m_label.reorderElements(indices);
-	}
-	
-	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	void shuffle(){
-		std::vector<std::size_t> indices(numberOfElements());
-		std::iota(indices.begin(),indices.end(),0);
-		std::shuffle(indices.begin(),indices.end(), random::globalRng);
-		reorderElements(indices);
 	}
 
 
@@ -733,14 +672,30 @@ struct InferShape<Data<blas::compressed_vector<T> > >{
  * @{
  */
 
+///brief  Outstream of elements for labeled data.
+template<class T, class U>
+std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
+	for(auto elem: d.elements())
+		stream << elem.input << " [" << elem.label <<"]"<< "\n";
+	return stream;
+}
+
+/// \brief Returns a shuffled copy of the input data
+///
+/// The order of (input-label)-pairs is randomized and a copy of the initial data object returned.
+/// The batch sizes are the same as in the original dataset.
+/// \param data the dataset to shuffle
+template<class I, class L>
+LabeledData<I,L> shuffle(LabeledData<I,L> const& data){
+	return toDataset(randomSubset(toView(data), data.numberOfElements()),data.getPartitioning());
+}
+
 /// \brief creates a data object from a range of elements
 template<class Range>
 Data<typename Range::value_type>
-createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = 0){
+createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constants::DefaultBatchSize){
 	typedef typename Range::value_type value_type;
 
-	if (maximumBatchSize == 0)
-		maximumBatchSize = Data<value_type>::DefaultBatchSize;
 	auto shape = Batch<value_type>::inferShape(inputs.begin(), inputs.end());
 	Data<value_type> data(inputs.size(), shape, maximumBatchSize);
 
@@ -770,13 +725,6 @@ LabeledData<
 	);
 }
 
-///brief  Outstream of elements for labeled data.
-template<class T, class U>
-std::ostream &operator << (std::ostream &stream, const LabeledData<T, U>& d) {
-	for(auto elem: d.elements())
-		stream << elem.input << " [" << elem.label <<"]"<< "\n";
-	return stream;
-}
 
 
 // FUNCTIONS FOR DIMENSIONALITY
@@ -941,14 +889,12 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 /// The elements are not only reordered but the batches are also resized such, that every batch
 /// only contains elements of one class. This method must be used in order to use binarySubproblem.
 template<class I>
-void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize = LabeledData<I,unsigned int>::DefaultBatchSize){
+void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize = constants::DefaultBatchSize){
 	std::vector<std::size_t > classCounts = classSizes(data);
 	std::vector<std::size_t > partitioning;//new, optimal partitioning of the data according to the batch sizes
 	std::vector<std::size_t > classStart;//at which batch the elements of the class are starting
 	detail::batchPartitioning(classCounts, classStart, partitioning, batchSize);
 
-	data.repartition(partitioning);
-	
 	std::vector<std::size_t> classIndex(classCounts.size(),0);
 	for(std::size_t i = 1; i != classIndex.size();++i){
 		classIndex[i] = classIndex[i-1] + classCounts[i-1];
@@ -961,7 +907,8 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 		++index;
 		++classIndex[c];
 	}
-	data.reorderElements(elemIndex);
+	
+	data = toDataset(subset(toView(data), elemIndex),partitioning);
 }
 
 template<class I>
@@ -1012,26 +959,28 @@ LabeledData<I,unsigned int> oneVersusRestProblem(
 	return transformLabels(data, [=](unsigned int label){return (unsigned int)(label == oneClass);});
 }
 
-template <typename RowType>
-RowType getColumn(Data<RowType> const& data, std::size_t columnID) {
+template <typename T>
+blas::vector<T> getColumn(Data<blas::vector<T> > const& data, std::size_t columnID) {
 	SHARK_ASSERT(dataDimension(data) > columnID);
-	RowType column(data.numberOfElements());
-	std::size_t rowCounter = 0;
-	for(auto element: data.elements()){
-		column(rowCounter) = element(columnID);
-		rowCounter++;
+	blas::vector<T> newColumn(data.numberOfElements());
+	std::size_t start = 0;
+	for(blas::matrix<T> const& batch: data.batches()){
+		std::size_t end = start + batch.size1();
+		noalias(subrange(newColumn,start, end)) = column(batch, columnID);
+		start = end;
 	}
-	return column;
+	return newColumn;
 }
 
-template <typename RowType>
-void setColumn(Data<RowType>& data, std::size_t columnID, RowType newColumn) {
+template <typename T>
+void setColumn(Data<blas::vector<T>>& data, std::size_t columnID, blas::vector<T> const& newColumn) {
 	SHARK_ASSERT(dataDimension(data) > columnID);
 	SHARK_ASSERT(data.numberOfElements() == newColumn.size());
-	std::size_t rowCounter = 0;
-	for(auto element: data.elements()){
-		element(columnID) = newColumn(rowCounter);
-		rowCounter++;
+	std::size_t start = 0;
+	for(blas::matrix<T>& batch: data.batches()){
+		std::size_t end = start + batch.size1();
+		noalias(column(batch, columnID)) = subrange(newColumn,start, end);
+		start = end;
 	}
 }
 

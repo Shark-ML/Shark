@@ -80,7 +80,7 @@ public:
 	///
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
-	Data<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize) const {
+	Data<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize = constants::DefaultBatchSize) const {
 		DatasetType data(size, shape(), maximumBatchSize);
 
 		// draw the samples
@@ -90,13 +90,6 @@ public:
 			element = input;
 		}
 		return data;
-	}
-	
-	/// \brief Generates a data set with samples from from the distribution.
-	///
-	/// @param size the number of samples in the dataset
-	Data<InputType> generateDataset(std::size_t size) const {
-		return generateDataset(size,Data<InputType>::DefaultBatchSize );
 	}
 private:
 	shape_type m_shape;
@@ -134,7 +127,7 @@ public:
 	///
 	/// @param size the number of samples in the dataset
 	/// @param maximumBatchSize the maximum size of a batch
-	DatasetType generateDataset(std::size_t size,std::size_t maximumBatchSize) const{
+	DatasetType generateDataset(std::size_t size,std::size_t maximumBatchSize = constants::DefaultBatchSize) const{
 		DatasetType data(size, shape(), maximumBatchSize);
 
 		// draw the samples
@@ -144,13 +137,6 @@ public:
 			element = pair;
 		}
 		return data;
-	}
-	
-	/// \brief Generates a data set with samples from from the distribution.
-	///
-	/// @param size the number of samples in the dataset
-	LabeledData<InputType, LabelType> generateDataset(std::size_t size) const {
-		return generateDataset(size,LabeledData<InputType, LabelType>::DefaultBatchSize );
 	}
 private:
 	shape_type m_shape;

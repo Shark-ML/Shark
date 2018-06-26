@@ -37,7 +37,7 @@
 
 
 #include <shark/Models/Trees/BinaryTree.h>
-#include <shark/Data/DataView.h>
+#include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Math.h>
 namespace shark {

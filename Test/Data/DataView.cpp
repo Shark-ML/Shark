@@ -3,6 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Data/DataView.h>
+#include <shark/Data/Dataset.h>
 
 using namespace shark;
 

@@ -58,6 +58,8 @@ namespace detail{
 	
 	
 inline std::size_t numberOfBatches(std::size_t numElements, std::size_t maximumBatchSize){
+	if(maximumBatchSize == 0)
+		maximumBatchSize =numElements;
 	std::size_t batches = numElements / maximumBatchSize;
 	if(numElements-batches*maximumBatchSize > 0)
 		++batches;
@@ -156,39 +158,6 @@ public:
 		m_data.resize(numBatches);
 		for(std::size_t i = 0; i != numBatches; ++i){
 			m_data[i] = boost::make_shared<BatchType>();
-		}
-	}
-
-	///\brief Create container from new data.
-	///
-	///Creates the SharedContainer and splits the incoming data into several batches
-	///
-	///@param data the data from which to create the Container
-	///@param maximumBatchSize The size of the batches. If set to 0, the size is unlimited
-	template<class Range>
-	SharedContainer(Range const& data, std::size_t maximumBatchSize){
-		SIZE_CHECK(data.size() != 0 );
-		std::size_t points = data.size();
-		if(maximumBatchSize == 0)
-			maximumBatchSize = points;
-		
-		//first determin the optimal number of batches as well as batch size
-		std::size_t batches = points / maximumBatchSize;
-		if(points > batches*maximumBatchSize)
-			++batches;
-		std::size_t optimalBatchSize=points/batches;
-		std::size_t remainder = points-batches*optimalBatchSize;
-
-		//now create the batches taking the remainder into account
-		m_data.reserve(batches);
-		std::size_t batchStart = 0;
-		for(std::size_t i = 0; i != batches; ++i){
-			std::size_t size = (i<remainder)?optimalBatchSize+1:optimalBatchSize;
-			std::size_t batchEnd = batchStart+size;//sliced is last element inclusive
-			push_back(Batch<Type>::createBatch(
-				boost::make_iterator_range(boost::begin(data)+batchStart,boost::begin(data)+batchEnd)
-			));
-			batchStart+=size;
 		}
 	}
 
@@ -322,49 +291,10 @@ public:
 		m_data.erase(position.base(),m_data.end());
 		return right;
 	}
-
-	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
-	///
-	///After the operation the container will contain batchSizes.size() batchs with the i-th batch having size batchSize[i].
-	///However the sum of all batch sizes must be equal to the current number of elements
-	template<class Range>
-	void repartition(Range const& batchSizes){
-		std::size_t sum = 0;
-		for(std::size_t i: batchSizes)
-			sum += i;
-		SIZE_CHECK(sum == numberOfElements());
-
-
-		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
-		Container newPartitioning;
-		std::size_t currentBatch = 0;
-		std::size_t currentBatchIndex = 0;
-		for(std::size_t i = 0; i != batchSizes.size(); ++i){
-			//create new batch
-			std::size_t currentBatchSize = batchSizes[i];
-			boost::shared_ptr<BatchType> newBatch = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(batch(currentBatch),0),currentBatchSize));
-			for(std::size_t j = 0; j != currentBatchSize; ++j){
-				getBatchElement(*newBatch,j)=getBatchElement(batch(currentBatch),currentBatchIndex);
-				++currentBatchIndex;
-				if(currentBatchIndex == BatchTraits::size(batch(currentBatch))){
-					m_data[currentBatch].reset();//free old memory
-					++currentBatch;
-					currentBatchIndex = 0;
-				}
-			}
-			newPartitioning.push_back(newBatch);
-		}
-		//sanity check
-		SIZE_CHECK(currentBatch == size());
-		//swap old(mpty) with new partitioning
-		swap(m_data,newPartitioning);
-
-
-	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
-	/// This method can be used together with repartition to ensure
+	/// This method can be used to ensure
 	/// that two SharedContainers have the same batch structure.
 	std::vector<std::size_t> getPartitioning()const{
 		std::vector<std::size_t> batchSizes(size());

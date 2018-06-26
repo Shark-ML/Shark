@@ -66,14 +66,14 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<FloatVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import regression data from a sparse data (libSVM) file.
@@ -86,14 +86,14 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<RealVector, RealVector>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<FloatVector, FloatVector>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import classification data from a sparse data (libSVM) file.
@@ -106,13 +106,13 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedFloatVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import regression data from a sparse data (libSVM) file.
@@ -125,13 +125,13 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedRealVector, RealVector>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedFloatVector, FloatVector>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 
@@ -145,13 +145,13 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<FloatVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import regression data from a sparse data (libSVM) file.
@@ -164,13 +164,13 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<RealVector, RealVector>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<FloatVector, FloatVector>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import classification data from a sparse data (libSVM) file.
@@ -183,13 +183,13 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedFloatVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 /// \brief Import regression data from a sparse data (libSVM) file.
@@ -202,13 +202,13 @@ SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedRealVector, RealVector>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 SHARK_EXPORT_SYMBOL void importSparseData(
 	LabeledData<CompressedFloatVector, FloatVector>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, RealVector>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 );
 
 

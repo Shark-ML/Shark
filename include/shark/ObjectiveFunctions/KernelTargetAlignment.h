@@ -238,7 +238,6 @@ private:
 		m_columnMeanY.resize(m_elements);
 		std::size_t i = 0;
 		for(auto const& batch:labels.batches()){
-			std::size_t size = batch.size();
 			for(std::size_t j = 0; j != batch.size(); ++j, ++i){
 				m_columnMeanY(i) = classMean(batch(j));
 			}

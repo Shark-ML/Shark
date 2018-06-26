@@ -216,8 +216,8 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 	Wave problem;
 	RegressionDataset unweightedData(100,problem.shape(),100);
 	{
-		RegressionDataset data = problem.generateDataset(50,50);
-		Data<double> weights(50,1,50);
+		RegressionDataset data = problem.generateDataset(50,10);
+		Data<double> weights(50,1,10);
 		
 		for(std::size_t i = 0; i != 100; ++i){
 			std::size_t e = random::discrete(random::globalRng, 0,49);
@@ -226,7 +226,6 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 		}
 		weightedData = WeightedLabeledData<RealVector,RealVector>(data, weights);
 	}
-	weightedData.repartition(std::vector<std::size_t>({10,10,10,10,10}));
 
 	LinearModel<> model;
 	model.setStructure(1,1,true);
