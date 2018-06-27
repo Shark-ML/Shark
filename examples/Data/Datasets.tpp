@@ -202,10 +202,6 @@ int main()
 	// application of the model to the data, shape is infered from the model
 	labeledData = transformInputs(labeledData, model);
 	
-	//same for for transform labels
-	LinearClassifier<> classifier;
-	labeledData = transformLabels(labeledData, cklassifier);
-	
 	// transform for data objects has a shortcut
 	data = transform(data, model);
 	data = model(data);
@@ -215,7 +211,7 @@ int main()
 	Data<RealVector> data;
 //###begin<transform-4>
 	RealVector v(3); v(0) = 1.0; v(1) = 3.0; v(2) = -0.5;
-	data = transform(data, Add(v));
+	data = transform(data, Add(v), {3});
 //###end<transform-4>
 }
 {
@@ -240,7 +236,7 @@ int main()
 //###begin<view-2b>
 	Data<unsigned int> subsetData = toDataset(subset(view, indices), maximumBatchSize);
 	std::vector<std::size_t> individualBatchSizes;
-	Data<unsigned int> subsetData = toDataset(subset(view, indices), individualBatchSizes);
+	subsetData = toDataset(subset(view, indices), individualBatchSizes);
 //###end<view-2b>
 }
 {

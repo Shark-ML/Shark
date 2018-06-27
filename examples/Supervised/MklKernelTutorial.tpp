@@ -309,71 +309,71 @@ int main(int argc, char** argv)
     cout << "kernel3.eval(x1,x2): " << kernel3.eval(x1,x2) << endl << endl;
     //###end<2_subrange_introspection_five>
 
-//~ ////////////////////////////////////////////////////////////////////////////////
-//~ ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 
-    //~ //###begin<mkl_kernel_fill_struct>
-    //~ // set dimensions for data
-    //~ std::size_t const num_samples = 2;
-    //~ std::size_t const dim_nonzeros = 2;
-    //~ std::size_t const max_elem_discr_kernel = 3;
-    //~ std::size_t const dim_sparse = 5;
-    //~ // create temporary helper container
-    //~ std::vector<HeterogeneousInputStruct> data( num_samples );
-    //~ // and fill it
-    //~ data[0].rv1.resize( dim_nonzeros ); data[0].crv3.resize( dim_sparse); //size 5
-    //~ data[1].rv1.resize( dim_nonzeros ); data[1].crv3.resize( dim_sparse); //size 5
-    //~ data[0].rv1(0) = 1.0; data[0].rv1(1) = -1.0; data[0].crv3(1) = -0.5; data[0].crv3(4) = 8.0;
-    //~ data[1].rv1(0) = 1.0; data[1].rv1(1) = -2.0; data[1].crv3(1) =  1.0; data[1].crv3(3) = 0.1;
-    //~ data[0].st2 = 1; data[1].st2 = 2;
-    //~ // and use it to create the 'real' dataset
-    //~ Data<HeterogeneousInputStruct> dataset = createDataFromRange( data, 10 );
-    //~ //###end<mkl_kernel_fill_struct>
+    //###begin<mkl_kernel_fill_struct>
+    // set dimensions for data
+    std::size_t const num_samples = 2;
+    std::size_t const dim_nonzeros = 2;
+    std::size_t const max_elem_discr_kernel = 3;
+    std::size_t const dim_sparse = 5;
+    // create temporary helper container
+    std::vector<HeterogeneousInputStruct> data( num_samples );
+    // and fill it
+    data[0].rv1.resize( dim_nonzeros ); data[0].crv3.resize( dim_sparse); //size 5
+    data[1].rv1.resize( dim_nonzeros ); data[1].crv3.resize( dim_sparse); //size 5
+    data[0].rv1(0) = 1.0; data[0].rv1(1) = -1.0; data[0].crv3(1) = -0.5; data[0].crv3(4) = 8.0;
+    data[1].rv1(0) = 1.0; data[1].rv1(1) = -2.0; data[1].crv3(1) =  1.0; data[1].crv3(3) = 0.1;
+    data[0].st2 = 1; data[1].st2 = 2;
+    // and use it to create the 'real' dataset
+    Data<HeterogeneousInputStruct> dataset = createDataFromRange( data, 10 );
+    //###end<mkl_kernel_fill_struct>
 
-//~ ////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
-    //~ //###begin<mkl_kernel_create_kernels>
-    //~ //create state matrix for the discrete kernel. necessary but not so relevant
-    //~ RealMatrix matK( max_elem_discr_kernel, max_elem_discr_kernel );
-    //~ matK(0,0) = 0.05; matK(1,1) = 1.0;  matK(2,2) = 0.5;
-    //~ matK(0,1) = matK(1,0) = 0.2; matK(0,2) = matK(2,0) = 0.4;  matK(1,2) = matK(2,1) = 0.6;
-    //~ // set up base kernels
-    //~ DenseRbfKernel baseKernelRV1(0.1);
-    //~ DiscreteKernel baseKernelST2(matK);
-    //~ DenseLinearKernel baseKernelCRV3;
-    //~ MklKernel<HeterogeneousInputStruct> mkl_kernel( boost::fusion::make_vector( &baseKernelRV1, &baseKernelST2, &baseKernelCRV3) );
-    //~ //###end<mkl_kernel_create_kernels>
+    //###begin<mkl_kernel_create_kernels>
+    //create state matrix for the discrete kernel. necessary but not so relevant
+    RealMatrix matK( max_elem_discr_kernel, max_elem_discr_kernel );
+    matK(0,0) = 0.05; matK(1,1) = 1.0;  matK(2,2) = 0.5;
+    matK(0,1) = matK(1,0) = 0.2; matK(0,2) = matK(2,0) = 0.4;  matK(1,2) = matK(2,1) = 0.6;
+    // set up base kernels
+    DenseRbfKernel baseKernelRV1(0.1);
+    DiscreteKernel baseKernelST2(matK);
+    DenseLinearKernel baseKernelCRV3;
+    MklKernel<HeterogeneousInputStruct> mkl_kernel( boost::fusion::make_vector( &baseKernelRV1, &baseKernelST2, &baseKernelCRV3) );
+    //###end<mkl_kernel_create_kernels>
 
-    //~ //###begin<mkl_introspection_one>
-    //~ // examine initial state
-    //~ std::cout << endl << " ======================= MklKernel: ======================= " << std::endl;
-    //~ cout << endl << "mkl_kernel.isAdaptive(0): " << mkl_kernel.isAdaptive(0) << endl;
-    //~ cout << "mkl_kernel.isAdaptive(1): " << mkl_kernel.isAdaptive(1) << endl;
-    //~ cout << "mkl_kernel.isAdaptive(2): " << mkl_kernel.isAdaptive(2) << endl;
-    //~ cout << "mkl_kernel.numberOfParameters(): " << mkl_kernel.numberOfParameters() << endl;
-    //~ cout << "mkl_kernel.parameterVector(): " << mkl_kernel.parameterVector() << endl;
-    //~ cout << "mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ): " << mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ) << endl << endl;
-    //~ //###end<mkl_introspection_one>
+    //###begin<mkl_introspection_one>
+    // examine initial state
+    std::cout << endl << " ======================= MklKernel: ======================= " << std::endl;
+    cout << endl << "mkl_kernel.isAdaptive(0): " << mkl_kernel.isAdaptive(0) << endl;
+    cout << "mkl_kernel.isAdaptive(1): " << mkl_kernel.isAdaptive(1) << endl;
+    cout << "mkl_kernel.isAdaptive(2): " << mkl_kernel.isAdaptive(2) << endl;
+    cout << "mkl_kernel.numberOfParameters(): " << mkl_kernel.numberOfParameters() << endl;
+    cout << "mkl_kernel.parameterVector(): " << mkl_kernel.parameterVector() << endl;
+    cout << "mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ): " << mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ) << endl << endl;
+    //###end<mkl_introspection_one>
 
-    //~ //###begin<mkl_change_something_one>
-    //~ // change something
-    //~ mkl_kernel.setAdaptiveAll(true);
-    //~ RealVector new_params_4( mkl_kernel.numberOfParameters() );
-    //~ new_params_4(0) = 1.0;
-    //~ new_params_4(2) = 0.2;
-    //~ mkl_kernel.setParameterVector( new_params_4 );
-    //~ //###end<mkl_change_something_one>
+    //###begin<mkl_change_something_one>
+    // change something
+    mkl_kernel.setAdaptiveAll(true);
+    RealVector new_params_4( mkl_kernel.numberOfParameters() );
+    new_params_4(0) = 1.0;
+    new_params_4(2) = 0.2;
+    mkl_kernel.setParameterVector( new_params_4 );
+    //###end<mkl_change_something_one>
 
-    //~ //###begin<mkl_introspection_two>
-    //~ // examine effects
-    //~ cout << "mkl_kernel.isAdaptive(0): " << mkl_kernel.isAdaptive(0) << endl;
-    //~ cout << "mkl_kernel.isAdaptive(1): " << mkl_kernel.isAdaptive(1) << endl;
-    //~ cout << "mkl_kernel.isAdaptive(2): " << mkl_kernel.isAdaptive(2) << endl;
-    //~ cout << "mkl_kernel.numberOfParameters(): " << mkl_kernel.numberOfParameters() << endl;
-    //~ cout << "mkl_kernel.parameterVector(): " << mkl_kernel.parameterVector() << endl;
-    //~ cout << "mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ): " << mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ) << endl << endl;
-    //~ //###end<mkl_introspection_two>
+    //###begin<mkl_introspection_two>
+    // examine effects
+    cout << "mkl_kernel.isAdaptive(0): " << mkl_kernel.isAdaptive(0) << endl;
+    cout << "mkl_kernel.isAdaptive(1): " << mkl_kernel.isAdaptive(1) << endl;
+    cout << "mkl_kernel.isAdaptive(2): " << mkl_kernel.isAdaptive(2) << endl;
+    cout << "mkl_kernel.numberOfParameters(): " << mkl_kernel.numberOfParameters() << endl;
+    cout << "mkl_kernel.parameterVector(): " << mkl_kernel.parameterVector() << endl;
+    cout << "mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ): " << mkl_kernel.eval( elements(dataset)[0], elements(dataset)[1] ) << endl << endl;
+    //###end<mkl_introspection_two>
 
 
 ////////////////////////////////////////////////////////////////////////////////

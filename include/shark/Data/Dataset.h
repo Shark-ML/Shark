@@ -418,6 +418,14 @@ public:
 	explicit LabeledData(std::vector<std::size_t> const& partitioning, shape_type const& shape)
 	: m_data( partitioning, shape.input), m_label(partitioning,shape.label){}
 	
+	explicit LabeledData(Data<InputT> const& data, Data<LabelT> const& label)
+	: m_data(data), m_label(label){
+		SHARK_RUNTIME_CHECK(data.numberOfBatches() == label.numberOfBatches(), "number of input batches and number of label batches must agree");
+		for(std::size_t i  = 0; i != data.numberOfBatches(); ++i){
+			SHARK_RUNTIME_CHECK(batchSize(data.batch(i)) == batchSize(label.batch(i)), "batch sizes of inputs and labels must agree");
+		}
+	}
+	
 	// BATCH ACCESS
 	batch_reference batch(std::size_t i){
 		return batch_reference(m_data.batch(i),m_label.batch(i));
@@ -526,12 +534,7 @@ public:
 
 	///\brief Fill in the subset defined by the list of indices.
 	LabeledData indexedSubset(IndexSet const& indices) const{
-		LabeledData data;
-		data.inputs().append(m_data.indexedSubset(indices));
-		data.labels().append(m_label.indexedSubset(indices));
-		data.inputShape() = inputShape();
-		data.labelShape() = labelShape();
-		return data;
+		return LabeledData(m_data.indexedSubset(indices), m_label.indexedSubset(indices));
 	}
 protected:
 	InputContainer m_data;               /// point data
@@ -633,21 +636,12 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constant
 	return data;
 }
 
-/// \brief Creates a labeled data object from two ranges, representing inputs and labels
+/// \brief Convenience Function. Creates a labeled data object from two ranges, representing inputs and labels
 ///
 /// inputs and labels must have the same numbers of batches and the batch sizes must agree.
 template<class I, class L>
 LabeledData<I, L> createLabeledData(Data<I> const& inputs, Data<L> const& labels){
-	SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
-	for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
-		SHARK_RUNTIME_CHECK(batchSize(inputs.batch(i)) == batchSize(labels.batch(i)), "batch sizes of inputs and labels must agree");
-	}
-	LabeledData<I, L> labeledData;
-	labeledData.inputs().append(inputs);
-	labeledData.labels().append(labels);
-	labeledData.inputShape() = inputs.shape();
-	labeledData.labelShape() = labels.shape();
-	return labeledData;
+	return LabeledData<I, L>(inputs,labels);
 }
 
 /// \brief creates a labeled data object from two ranges, representing inputs and labels
@@ -732,7 +726,10 @@ typename boost::lazy_disable_if<
 	CanBeCalled<Functor,typename Data<T>::batch_type>,
 	TransformedData<Functor,T>
 >::type
-transform(Data<T> const& data, Functor f, typename Data<T>::shape_type const& shape){
+transform(
+	Data<T> const& data, Functor f,
+	typename TransformedData<Functor,T>::type::shape_type const& shape
+){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(data.getPartitioning(), shape);//TODO HACK!!!!
@@ -754,12 +751,15 @@ transform(Data<T> const& data, Functor f, typename Data<T>::shape_type const& sh
 /// \param data The dataset to transform
 /// \param f the function that is applied element by element
 /// \param shape the resulting shape of the transformation
-template<class T,class Functor>
+template<class T, class Functor>
 typename boost::lazy_enable_if<
 	CanBeCalled<Functor,typename Data<T>::batch_type>,
 	TransformedData<Functor,T>
 >::type
-transform(Data<T> const& data, Functor const& f, typename Data<T>::shape_type const& shape){
+transform(
+	Data<T> const& data, Functor const& f,
+	typename TransformedData<Functor,T>::type::shape_type const& shape
+){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(data.getPartitioning(), shape);
@@ -772,8 +772,10 @@ transform(Data<T> const& data, Functor const& f, typename Data<T>::shape_type co
 /// \param data The dataset to transform
 /// \param f the function that is applied element by element
 /// \param shape the resulting shape of the transformation
-template<class I, class L, class Functor>
-auto transformInputs(LabeledData<I,L> const& data, Functor const& f, typename Data<I>::shape_type const& shape)
+template<class I, class L,  class Functor>
+auto transformInputs(
+	LabeledData<I,L> const& data, Functor const& f, 
+	typename TransformedData<Functor,I>::type::shape_type const& shape)
 ->decltype(createLabeledData(transform(data.inputs(),f, shape),data.labels())){
 	return createLabeledData(transform(data.inputs(),f, shape),data.labels());
 }
@@ -783,7 +785,9 @@ auto transformInputs(LabeledData<I,L> const& data, Functor const& f, typename Da
 /// \param f the function that is applied element by element
 /// \param shape the resulting shape of the transformation
 template<class I, class L, class Functor>
-auto transformLabels(LabeledData<I,L> const& data, Functor const& f, typename Data<L>::shape_type const& shape)
+auto transformLabels(
+	LabeledData<I,L> const& data, Functor const& f, 
+	typename TransformedData<Functor,L>::type::shape_type const& shape)
 ->decltype(createLabeledData(data.inputs(), transform(data.labels(), f, shape))){
 	return createLabeledData(data.inputs(), transform(data.labels(), f, shape));
 }

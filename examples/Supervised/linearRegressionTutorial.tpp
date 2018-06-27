@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	RegressionDataset data(inputs, labels);
+	RegressionDataset data = createLabeledData(inputs, labels);
 //###end<load_data>
 
 

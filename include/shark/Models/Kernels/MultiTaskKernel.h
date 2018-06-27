@@ -243,15 +243,15 @@ protected:
 
 		// compute inner products between mean elements of empirical distributions
 		auto elems = elements(m_data);
-		for (auto element_i: elems){
-			const std::size_t task_i = element_i.task;
-			for (auto element_j: elems){
-				const std::size_t task_j = element_j.task;
-				const double k = mpe_inputKernel->eval(element_i.input, element_j.input);
+		for (std::size_t i=0; i<elems.size(); i++){
+			const std::size_t task_i = elems[i].task;
+			for (std::size_t j=0; j<i; j++){
+				const std::size_t task_j = elems[j].task;
+				const double k = mpe_inputKernel->eval(elems[i].input, elems[j].input);
 				base_type::m_matrix(task_i, task_j) += k;
 				base_type::m_matrix(task_j, task_i) += k;
 			}
-			const double k = mpe_inputKernel->eval(element_i.input, element_i.input);
+			const double k = mpe_inputKernel->eval(elems[i].input, elems[i].input);
 			base_type::m_matrix(task_i, task_i) += k;
 		}
 		for (std::size_t i=0; i<tasks; i++){
