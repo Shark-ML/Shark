@@ -124,7 +124,7 @@ public:
 		ensure_size(result,sizeX1,sizeX2);
 		for(std::size_t i = 0; i != sizeX1; ++i)
 			for(std::size_t j = 0; j != sizeX2; ++j)
-				result(i,j)=m_matrix(i,j); 
+				result(i,j)=m_matrix(batchX1(i),batchX2(j)); 
 	}
 
 

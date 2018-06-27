@@ -61,7 +61,7 @@ int main()
 
 //###begin<transform1>
 	// transform data
-	Data<RealVector> normalizedData = data(normalizer);
+	Data<RealVector> normalizedData = normalizer(data);
 //###end<transform1>
 
 //###begin<training2>
@@ -73,6 +73,6 @@ int main()
 
 //###begin<transform2>
 	// transform data
-	Data<RealVector> whitenedData = data(whitener);
+	Data<RealVector> whitenedData = whitener(data);
 //###end<transform2>
 }

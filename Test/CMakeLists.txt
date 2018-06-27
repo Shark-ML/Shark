@@ -163,10 +163,10 @@ shark_add_test( Models/Kernels/ScaledKernel.cpp Models_ScaledKernel )
 shark_add_test( Models/Kernels/WeightedSumKernel.cpp Models_WeightedSumKernel )
 shark_add_test( Models/Kernels/ProductKernel.cpp Models_ProductKernel )
 shark_add_test( Models/Kernels/ArdKernel.cpp Models_ArdKernel )
-#~ shark_add_test( Models/Kernels/MklKernel.cpp Models_MklKernel )
+shark_add_test( Models/Kernels/MklKernel.cpp Models_MklKernel )
 shark_add_test( Models/Kernels/SubrangeKernel.cpp Models_SubrangeKernel )
 shark_add_test( Models/Kernels/DiscreteKernel.cpp Models_DiscreteKernel )
-#~ shark_add_test( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
+shark_add_test( Models/Kernels/MultiTaskKernel.cpp Models_MultiTaskKernel )
 shark_add_test( Models/Kernels/ModelKernel.cpp Models_ModelKernel )
 
 # KernelMethods

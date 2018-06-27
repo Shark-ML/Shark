@@ -45,6 +45,11 @@ struct InputLabelPair{
 		L&& label
 	):input(input),label(label){}
 	
+	InputLabelPair(
+		InputType const& input,
+		LabelType const& label
+	):input(input),label(label){}
+	
 	template<class InputT, class LabelT>
 	InputLabelPair(
 		InputLabelPair<InputT,LabelT> const& pair
