@@ -27,7 +27,7 @@ void run(LabeledData<InputType,unsigned int> const& data, double alpha, unsigned
 int main(int argc, char **argv) {
 	ClassificationDataset data_dense;
 	importSparseData(data_dense, "mnist",0,8192);
-	data_dense = transformLabels(data_dense, [](unsigned int y){ return y%2;});
+	data_dense = transformLabels(data_dense, [](unsigned int y){ return y%2;}, {2});
 	LabeledData<CompressedRealVector,unsigned int> data_sparse;
 	importSparseData(data_sparse, "rcv1_train.binary",0,8192);
 	

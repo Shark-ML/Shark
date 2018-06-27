@@ -417,19 +417,7 @@ public:
 	///@param shape The shape of the elements to create
 	explicit LabeledData(std::vector<std::size_t> const& partitioning, shape_type const& shape)
 	: m_data( partitioning, shape.input), m_label(partitioning,shape.label){}
-
-	///\brief Construction from data.
-	///
-	/// Beware that when calling this constructor the organization of batches must be equal in both
-	/// containers. This Constructor will not split the data!
-	LabeledData(Data<InputType> const& inputs, Data<LabelType> const& labels)
-	: m_data(inputs), m_label(labels){
-		SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
-		for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
-			SHARK_RUNTIME_CHECK(batchSize(inputs.batch(i)) == batchSize(labels.batch(i)), "batch sizes of inputs and labels must agree");
-		}
-	}
-
+	
 	// BATCH ACCESS
 	batch_reference batch(std::size_t i){
 		return batch_reference(m_data.batch(i),m_label.batch(i));
@@ -538,7 +526,12 @@ public:
 
 	///\brief Fill in the subset defined by the list of indices.
 	LabeledData indexedSubset(IndexSet const& indices) const{
-		return LabeledData(m_data.indexedSubset(indices),m_label.indexedSubset(indices));
+		LabeledData data;
+		data.inputs().append(m_data.indexedSubset(indices));
+		data.labels().append(m_label.indexedSubset(indices));
+		data.inputShape() = inputShape();
+		data.labelShape() = labelShape();
+		return data;
 	}
 protected:
 	InputContainer m_data;               /// point data
@@ -568,6 +561,17 @@ struct InferShape{
 template<class T>
 struct InferShape<Data<T> >{
 	static typename Batch<T>::shape_type infer(Data<T> const&){return {};}
+};
+
+template<>
+struct InferShape<Data<unsigned int > >{
+	static Shape infer(Data<unsigned int > const& labels){
+		unsigned int classes = 0;
+		for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
+			classes = std::max(classes,*std::max_element(labels.batch(i).begin(),labels.batch(i).end()));
+		}
+		return {classes+1};
+	}
 };
 
 template<class T>
@@ -615,7 +619,7 @@ Data<typename Range::value_type>
 createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constants::DefaultBatchSize){
 	typedef typename Range::value_type value_type;
 
-	auto shape = Batch<value_type>::inferShape(inputs.begin(), inputs.end());
+	typename Batch<value_type>::shape_type shape;//TODO HACK
 	Data<value_type> data(inputs.size(), shape, maximumBatchSize);
 
 	//now create the batches taking the remainder into account
@@ -625,7 +629,25 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constant
 		data.batch(i) = createBatch<value_type>(start,start+size);
 		start = start+size;
 	}
+	data.shape() = detail::InferShape<Data<value_type> >::infer(data);
 	return data;
+}
+
+/// \brief Creates a labeled data object from two ranges, representing inputs and labels
+///
+/// inputs and labels must have the same numbers of batches and the batch sizes must agree.
+template<class I, class L>
+LabeledData<I, L> createLabeledData(Data<I> const& inputs, Data<L> const& labels){
+	SHARK_RUNTIME_CHECK(inputs.numberOfElements() == labels.numberOfElements(), "number of inputs and number of labels must agree");
+	for(std::size_t i  = 0; i != inputs.numberOfBatches(); ++i){
+		SHARK_RUNTIME_CHECK(batchSize(inputs.batch(i)) == batchSize(labels.batch(i)), "batch sizes of inputs and labels must agree");
+	}
+	LabeledData<I, L> labeledData;
+	labeledData.inputs().append(inputs);
+	labeledData.labels().append(labels);
+	labeledData.inputShape() = inputs.shape();
+	labeledData.labelShape() = labels.shape();
+	return labeledData;
 }
 
 /// \brief creates a labeled data object from two ranges, representing inputs and labels
@@ -633,16 +655,15 @@ template<class RangeI, class RangeL>
 LabeledData<
 	typename RangeI::value_type,
 	typename RangeL::value_type
-> createLabeledDataFromRange(RangeI const& inputs, RangeL const& labels, std::size_t maximumBatchSize = 0){
+> createLabeledDataFromRange(RangeI const& inputs, RangeL const& labels, std::size_t maximumBatchSize = constants::DefaultBatchSize){
 	SHARK_RUNTIME_CHECK(inputs.size() == labels.size(),"Number of inputs and number of labels must agree");
-	typedef typename RangeI::value_type Input;
-	typedef typename RangeL::value_type Label;
-
-	return LabeledData<Input,Label>(
+	return createLabeledData(
 		createDataFromRange(inputs, maximumBatchSize),
 		createDataFromRange(labels, maximumBatchSize)
 	);
 }
+
+
 
 
 
@@ -702,15 +723,19 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 ///\brief Transforms a dataset using a Functor f and returns the transformed result.
 ///
 /// this version is used, when the Functor supports only element-by-element transformations
+///
+/// \param data The dataset to transform
+/// \param f the function that is applied element by element
+/// \param shape the resulting shape of the transformation
 template<class T,class Functor>
 typename boost::lazy_disable_if<
 	CanBeCalled<Functor,typename Data<T>::batch_type>,
 	TransformedData<Functor,T>
 >::type
-transform(Data<T> const& data, Functor f){
+transform(Data<T> const& data, Functor f, typename Data<T>::shape_type const& shape){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
-	Data<ResultType> result(data.getPartitioning(), typename Data<ResultType>::shape_type());//TODO HACK!!!!
+	Data<ResultType> result(data.getPartitioning(), shape);//TODO HACK!!!!
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
 		typedef BatchIterator<typename Batch<T>::type const> Iterator;
 		
@@ -719,40 +744,48 @@ transform(Data<T> const& data, Functor f){
 			boost::make_transform_iterator(Iterator(data.batch(i), batchSize(data.batch(i))), f)
 		);
 	}
-	result.shape() = detail::InferShape<Data<ResultType> >::infer(result);
 	return result;
 }
 
 ///\brief Transforms a dataset using a Functor f and returns the transformed result.
 ///
 /// this version is used, when the Functor supports batch-by-batch transformations
+///
+/// \param data The dataset to transform
+/// \param f the function that is applied element by element
+/// \param shape the resulting shape of the transformation
 template<class T,class Functor>
 typename boost::lazy_enable_if<
 	CanBeCalled<Functor,typename Data<T>::batch_type>,
 	TransformedData<Functor,T>
 >::type
-transform(Data<T> const& data, Functor const& f){
+transform(Data<T> const& data, Functor const& f, typename Data<T>::shape_type const& shape){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	int batches = (int) data.numberOfBatches();
-	Data<ResultType> result(data.getPartitioning(), f.outputShape());
+	Data<ResultType> result(data.getPartitioning(), shape);
 	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
 		result.batch(i)= f(data.batch(i));
 	return result;
 }
-
-///\brief Transforms the inputs of a dataset and return the transformed result.
-template<class I,class L, class Functor>
-LabeledData<typename detail::TransformedDataElement<Functor,I >::type, L >
-transformInputs(LabeledData<I,L> const& data, Functor const& f){
-	typedef LabeledData<typename detail::TransformedDataElement<Functor,I>::type,L > DatasetType;
-	return DatasetType(transform(data.inputs(),f),data.labels());
+///\brief Transforms the inputs of a dataset using a Functor f and returns the transformed result.
+///
+/// \param data The dataset to transform
+/// \param f the function that is applied element by element
+/// \param shape the resulting shape of the transformation
+template<class I, class L, class Functor>
+auto transformInputs(LabeledData<I,L> const& data, Functor const& f, typename Data<I>::shape_type const& shape)
+->decltype(createLabeledData(transform(data.inputs(),f, shape),data.labels())){
+	return createLabeledData(transform(data.inputs(),f, shape),data.labels());
 }
-///\brief Transforms the labels of a dataset and returns the transformed result.
-template<class I,class L, class Functor>
-LabeledData<I,typename detail::TransformedDataElement<Functor,L >::type >
-transformLabels(LabeledData<I,L> const& data, Functor const& f){
-	typedef LabeledData<I,typename detail::TransformedDataElement<Functor,L>::type > DatasetType;
-	return DatasetType(data.inputs(),transform(data.labels(),f));
+///\brief Transforms the labels of a dataset using a Functor f and returns the transformed result.
+///
+/// \param data The dataset to transform
+/// \param f the function that is applied element by element
+/// \param shape the resulting shape of the transformation
+template<class I, class L, class Functor>
+auto transformLabels(LabeledData<I,L> const& data, Functor const& f, typename Data<L>::shape_type const& shape)
+->decltype(createLabeledData(data.inputs(), transform(data.labels(), f, shape))){
+	return createLabeledData(data.inputs(), transform(data.labels(), f, shape));
 }
 
 ///\brief Creates a copy of a dataset selecting only a certain set of features.
@@ -767,12 +800,12 @@ Data<blas::vector<T> > selectFeatures(Data<blas::vector<T> > const& data,Feature
 		}
 		return output;
 	};
-	return transform(data,select);
+	return transform(data,select, {features.size()});
 }
 
-template<class T, class FeatureSet>
-LabeledData<RealVector,T> selectInputFeatures(LabeledData<RealVector,T> const& data,FeatureSet const& features){
-	return LabeledData<RealVector,T>(selectFeatures(data.inputs(),features), data.labels());
+template<class T, class L, class FeatureSet>
+LabeledData<blas::vector<T> ,L> selectInputFeatures(LabeledData<blas::vector<T> ,L> const& data,FeatureSet const& features){
+	return createLabeledData(selectFeatures(data.inputs(),features), data.labels());
 }
 
 
@@ -800,6 +833,22 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 	}
 
 	return data.splice(batchPos);
+}
+
+/// \brief Construct a binary (two-class) one-versus-rest problem from a multi-class problem.
+///
+/// \par
+/// The function returns a new LabeledData object. The input part
+/// coincides with the multi-class data, but the label part is replaced
+/// with binary labels 0 and 1. All instances of the given class
+/// (parameter oneClass) get a label of one, all others are assigned a
+/// label of zero.
+template<class I>
+LabeledData<I,unsigned int> oneVersusRestProblem(
+	LabeledData<I,unsigned int>const& data,
+	unsigned int oneClass
+){
+	return transformLabels(data, [=](unsigned int label){return (unsigned int)(label == oneClass);}, {2});
 }
 
 
@@ -830,6 +879,16 @@ void repartitionByClass(LabeledData<I,unsigned int>& data,std::size_t batchSize 
 	data = toDataset(subset(elements(data), elemIndex),partitioning);
 }
 
+/// \brief Extract a binary problem from a class-sorted dataset
+///
+/// This function is mostly interesting for one-versus-one multiclass approaches.
+/// We assume that the dataset is organized such that each batch contains only
+/// labels of the same class. It picks up all batches with the desired classes and transforms their labels to 0 and 1.
+/// This organization cna be performed via a call to repartitionByClass.
+///
+///\param data the dataset the binary problem is extracted from
+///\param zeroClass the class that is transformed to zero-labels in the binary problems
+///\param oneClass the class that is transformed to one-labels in the binary problems
 template<class I>
 LabeledData<I,unsigned int> binarySubProblem(
 	LabeledData<I,unsigned int>const& data,
@@ -837,46 +896,24 @@ LabeledData<I,unsigned int> binarySubProblem(
 	unsigned int oneClass
 ){
 	std::vector<std::size_t> indexSet;
-	std::size_t smaller = std::min(zeroClass,oneClass);
-	std::size_t bigger = std::max(zeroClass,oneClass);
-	std::size_t numBatches = data.numberOfBatches();
+	
+	bool foundZero = false;
+	bool foundOne = false;
+	for(std::size_t b = 0; b != data.numberOfBatches(); ++b){
+		unsigned int label = data.batch(b).label(0);
+		if(label == zeroClass || label == oneClass){
+			indexSet.push_back(b);
+			foundZero |= (label == zeroClass);
+			foundOne |= (label == oneClass);
+		}
+	}
+	SHARK_RUNTIME_CHECK(foundZero, "First class does not exist");
+	SHARK_RUNTIME_CHECK(foundOne, "Second class does not exist");
 
-	//find first class
-	std::size_t start= 0;
-	for(;start != numBatches && getBatchElement(data.batch(start),0).label != smaller;++start);
-	SHARK_RUNTIME_CHECK(start != numBatches, "First class does not exist");
-
-	//copy batch indices of first class
-	for(;start != numBatches && getBatchElement(data.batch(start),0).label == smaller; ++start)
-		indexSet.push_back(start);
-
-	//find second class
-
-	for(;start != numBatches && getBatchElement(data.batch(start),0).label != bigger;++start);
-	SHARK_RUNTIME_CHECK(start != numBatches, "Second class does not exist");
-
-	//copy batch indices of second class
-	for(;start != numBatches && getBatchElement(data.batch(start),0).label == bigger; ++start)
-		indexSet.push_back(start);
-
-	return transformLabels(data.indexedSubset(indexSet), [=](unsigned int label){return (unsigned int)(label == oneClass);});
+	return oneVersusRestProblem(data.indexedSubset(indexSet), oneClass);
 }
 
-/// \brief Construct a binary (two-class) one-versus-rest problem from a multi-class problem.
-///
-/// \par
-/// The function returns a new LabeledData object. The input part
-/// coincides with the multi-class data, but the label part is replaced
-/// with binary labels 0 and 1. All instances of the given class
-/// (parameter oneClass) get a label of one, all others are assigned a
-/// label of zero.
-template<class I>
-LabeledData<I,unsigned int> oneVersusRestProblem(
-	LabeledData<I,unsigned int>const& data,
-	unsigned int oneClass
-){
-	return transformLabels(data, [=](unsigned int label){return (unsigned int)(label == oneClass);});
-}
+
 
 template <typename T>
 blas::vector<T> getColumn(Data<blas::vector<T> > const& data, std::size_t columnID) {

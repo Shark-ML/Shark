@@ -57,7 +57,7 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		centroids.initFromData(dataset,k);
 	}
 	HardClusteringModel<RealVector> model(&centroids);
-	ClassificationDataset clusterMembership(dataset,model(dataset));
+	auto clusterMembership = createLabeledData(dataset,model(dataset));
 
 	// k-means loop
 	std::size_t iter = 0;
