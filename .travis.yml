@@ -39,11 +39,6 @@ matrix:
         - COMPILER=g++-4.8
         - OMP_NUM_THREADS=2
 
-    - os: linux
-      env: 
-        - COMPILER=g++-4.6
-        - OMP_NUM_THREADS=2
-
     - os: osx
       env: 
         - COMPILER=clang++
