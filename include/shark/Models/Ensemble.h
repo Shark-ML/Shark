@@ -47,8 +47,9 @@ class EnsembleImpl: public AbstractModel<
 >{
 public:
 	typedef typename std::remove_pointer<BaseModelType>::type ModelType;
+	typedef typename ModelType::InputType InputType;
 private:
-	typedef AbstractModel<typename ModelType::InputType, VectorType, typename ModelType::ParameterVectorType> Base;
+	typedef AbstractModel<InputType, VectorType, typename ModelType::ParameterVectorType> Base;
 
 	// the following functions are returning a reference to the model
 	// independent of whether a pointer to the model or the model itself 
@@ -141,8 +142,8 @@ public:
 	}
 	
 	///\brief Returns the expected shape of the input
-	Shape inputShape() const{
-		return m_models.empty() ? Shape(): model(0).inputShape();
+	typename shape_type<InputType>::type inputShape() const{
+		return m_models.empty() ? typename shape_type<InputType>::type(): model(0).inputShape();
 	}
 	///\brief Returns the shape of the output
 	Shape outputShape() const{
