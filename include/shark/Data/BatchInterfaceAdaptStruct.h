@@ -341,8 +341,8 @@ private:\
 public:\
 	struct shape_type: public FusionShapeType{\
 		shape_type(){}\
-		template<typename... Args>\
-		shape_type(Args&&... args): FusionShapeType(std::forward<Args>(args)...){}\
+		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<shape_type, Args ...>::value>::type>\
+		shape_type(Args &&... args): FusionShapeType(std::forward<Args>(args)...){}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version){\
 			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
@@ -352,7 +352,7 @@ public:\
 	};\
 	struct type: public FusionType{\
 		typedef NAME value_type;\
-		template<typename... Args>\
+		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<type, Args ...>::value>::type >\
 		type(Args&&... args):FusionType(std::forward<Args>(args)...){}\
 		\
 		friend void swap(type& op1, type& op2){\
