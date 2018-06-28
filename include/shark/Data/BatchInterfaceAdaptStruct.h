@@ -72,6 +72,12 @@ private:
 	std::size_t m_size;
 };
 
+template<typename ThisType, typename ... Args>
+struct is_variadic_constructible : public std::false_type {};
+
+template<typename ThisType, typename T>
+struct is_variadic_constructible<ThisType, T>: public std::is_base_of<ThisType, typename std::decay<T>::type>{};
+
 //I am so sorry for writing this
 //Assume we have a batch tuple type (a,b,c) with types (BA,BB,BC)
 // using an underlying single element tuple with types (A,B,C)
@@ -239,8 +245,8 @@ private:\
 public:\
 	struct shape_type: public FusionShapeType{\
 		shape_type(){}\
-		template<typename... Args>\
-		shape_type(Args&&... args): FusionShapeType(std::forward<Args>(args)...){}\
+		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<shape_type, Args ...>::value>::type>\
+		shape_type(Args &&... args): FusionShapeType(std::forward<Args>(args)...){}\
 		template<class Archive>\
 		void serialize(Archive & archive,unsigned int version){\
 			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
@@ -250,7 +256,7 @@ public:\
 	};\
 	struct type: public FusionType{\
 		typedef NAME value_type;\
-		template<typename... Args>\
+		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<type, Args ...>::value>::type >\
 		type(Args&&... args):FusionType(std::forward<Args>(args)...){}\
 		\
 		friend void swap(type& op1, type& op2){\
