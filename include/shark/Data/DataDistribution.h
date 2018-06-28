@@ -407,7 +407,7 @@ public:
 		Data<RealVector> images, 
 		std::size_t imageWidth, std::size_t imageHeight,
 		std::size_t patchWidth, std::size_t patchHeight
-	):DataDistribution<RealVector>({m_patchWidth, m_patchHeight})
+	):DataDistribution<RealVector>({patchWidth, patchHeight})
 	, m_images(images)
 	, m_imageWidth(imageWidth)
 	, m_imageHeight(imageHeight)
