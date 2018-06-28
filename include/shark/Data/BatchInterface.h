@@ -333,6 +333,11 @@ struct element_to_batch<detail::MatrixRowReference<M const> >{
 };
 }
 
+template<class T>
+struct shape_type{
+	typedef typename Batch<T>::shape_type type;
+};
+
 ///\brief creates a batch from a range of inputs
 template<class T, class Range>
 typename Batch<T>::type createBatch(Range const& range){

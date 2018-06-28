@@ -119,9 +119,9 @@ public:
 	}
 	
 	///\brief Returns the expected shape of the input.
-	virtual Shape inputShape() const = 0;
+	virtual typename shape_type<InputType>::type inputShape() const = 0;
 	///\brief Returns the shape of the output.
-	virtual Shape outputShape() const = 0;
+	virtual typename shape_type<OutputType>::type  outputShape() const = 0;
 	
 	///\brief Creates an internal state of the model.
 	///

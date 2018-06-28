@@ -108,8 +108,8 @@ public:
 		return m_alpha.size2();
 	}
 	
-	Shape inputShape() const{
-		return Shape();
+	typename shape_type<InputType>::type inputShape() const{
+		return typename shape_type<InputType>::type();
 	}
 
 	// //////////////////////////////////////////////////////////
