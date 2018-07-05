@@ -55,8 +55,6 @@
 #endif
 #include <boost/graph/adjacency_matrix.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graphml.hpp>
-#include <boost/graph/graphviz.hpp>
 #include <boost/graph/metric_tsp_approx.hpp>
 #include <boost/property_map/dynamic_property_map.hpp>
 #include <numeric>//for iota
@@ -244,15 +242,6 @@ int main( int argc, char ** argv ) {
 	if( extracted )
 		colorMap[ e ] = "red";
 	}
-
-	// Output the graph and the final path
-	std::ofstream outGraphviz( "graph.dot" );
-	boost::dynamic_properties dp;
-	dp.property( "node_id", boost::get( boost::vertex_color, g ) );
-	dp.property( "weight", boost::get( boost::edge_weight, g ) );
-	dp.property( "label", boost::get( boost::edge_weight, g ) );
-	dp.property( "color", boost::get( boost::edge_color, g ) );
-	boost::write_graphviz_dp( outGraphviz, g, dp );
 
 	// Output best solution and corresponding fitness.
 	std::cout << parents.front().searchPoint() << " -> " << parents.front().unpenalizedFitness() << std::endl;
