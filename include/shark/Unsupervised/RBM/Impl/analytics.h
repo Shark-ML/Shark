@@ -284,7 +284,7 @@ namespace detail{
 		};
 		//accumulate log partitions of the work packages
 		return threading::mapReduce(
-			boost::counting_range<std::size_t>(0,numBatches), 
+			boost::counting_range(std::size_t(0), numBatches), 
 			-std::numeric_limits<double>::infinity(), 
 			map, updateLogPartition, threading::globalThreadPool()
 		);
@@ -334,7 +334,7 @@ namespace detail{
 		};
 		//accumulate log partitions of the work packages
 		return threading::mapReduce(
-			boost::counting_range<std::size_t>(0,numBatches), 
+			boost::counting_range(std::size_t(0), numBatches), 
 			-std::numeric_limits<double>::infinity(), 
 			map, updateLogPartition, threading::globalThreadPool()
 		);

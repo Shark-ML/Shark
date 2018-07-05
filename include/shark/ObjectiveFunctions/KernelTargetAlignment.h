@@ -197,7 +197,7 @@ public:
 		};
 		
 		derivative = threading::mapAccumulate(
-			boost::counting_range<std::size_t>(0,m_data.numberOfBatches()), 
+			boost::counting_range(std::size_t(0), m_data.numberOfBatches()), 
 			RealVector(numberOfVariables(), 0.0), processBatch,
 			threading::globalThreadPool()
 		);
@@ -402,7 +402,7 @@ private:
 			return accumulator{KK,YK, std::move(k)};
 		};
 		auto acc = threading::mapAccumulate(
-			boost::counting_range<std::size_t>(0,m_data.numberOfBatches()),
+			boost::counting_range>(std::size_t(0), m_data.numberOfBatches()),
 			accumulator{0.0, 0.0, RealVector(m_elements, 0.0)},
 			processBatch,
 			threading::globalThreadPool()
