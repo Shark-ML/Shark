@@ -46,22 +46,6 @@
 
 using namespace shark;
 
-/*
-// REMOVE ME           
-            static void dumpModel(ModelType const& model) {
-                for (size_t i = 0; i < model.basis().numberOfElements(); i++) {
-                    for (size_t j = 0; j < model.alpha().size2(); j++) {
-                        std::cout << (model.alpha(i, j)) << ", " ; 
-                    }
-                    std::cout   << "   -   ";
-                    for (size_t j = 0; j < model.basis().element(j).size(); j++) {
-                        std::cout << model.basis().element(i)(j) << ", " ; 
-                    }
-                    std::cout << "\n";
-                }
-            }
-*/
-
 BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_AbstractBudgetMaintenanceStrategy_Test)
 
 BOOST_AUTO_TEST_CASE( AbstractBudgetMaintenanceStrategy_findSmallestVector)

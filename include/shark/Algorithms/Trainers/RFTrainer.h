@@ -154,19 +154,21 @@ public:
 		
 		std::vector<std::vector<std::size_t> > complements;
 
-		//Generate trees
-		SHARK_PARALLEL_FOR(int t = 0; t < m_numTrees; ++t){
+		//mutex that protects complements and model
+		std::mutex resultMutex;
+		//Generate trees in parallel
+		auto buildFunc = [&](std::size_t t){
 			random::rng_type rng(seeds[t]);
 			
 			//Setup data for this tree
 			CART::Bootstrap<blas::matrix<double, blas::column_major>, UIntVector> bootstrap(rng, data_train,labels_train, weights_train);
 			auto const& tree = builder.buildTree(rng, bootstrap);
 			
-			SHARK_CRITICAL_REGION{
-				model.addModel(tree);
-				complements.push_back(std::move(bootstrap.complement));
-			}
-		}
+			std::lock_guard<std::mutex> lock(resultMutex);
+			model.addModel(tree);
+			complements.push_back(std::move(bootstrap.complement));
+		};
+		threading::parallelND({m_numTrees}, {1}, buildFunc, threading::globalThreadPool());
 		
 		if(m_computeOOBerror)
 			model.computeOOBerror(complements, dataset.data());
@@ -269,19 +271,22 @@ public:
 		
 		std::vector<std::vector<std::size_t> > complements;
 
-		//Generate trees
-		SHARK_PARALLEL_FOR(int t = 0; t < m_numTrees; ++t){
+		//mutex that protects complements and model
+		std::mutex resultMutex;
+		//Generate trees in parallel
+		auto buildFunc = [&](std::size_t t){
 			random::rng_type rng{seeds[t]};
 			
-			//Setup data for this tree
+			//Setup data for this tree and build it
 			CART::Bootstrap<blas::matrix<double, blas::column_major>, RealMatrix> bootstrap(rng, data_train,labels_train, weights_train);
 			auto const& tree = builder.buildTree(rng, bootstrap);
 			
-			SHARK_CRITICAL_REGION{
-				model.addModel(tree);
-				complements.push_back(std::move(bootstrap.complement));
-			}
-		}
+			//write models in a  threadsafe way
+			std::lock_guard<std::mutex> lock(resultMutex);
+			model.addModel(tree);
+			complements.push_back(std::move(bootstrap.complement));
+		};
+		threading::parallelND({m_numTrees}, {1}, buildFunc, threading::globalThreadPool());
 		
 		if(m_computeOOBerror)
 			model.computeOOBerror(complements,dataset.data());

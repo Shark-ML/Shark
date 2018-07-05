@@ -34,10 +34,7 @@
 
 #include <shark/Models/AbstractModel.h>
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
-#include <shark/Core/Random.h>
-
-#include <boost/range/algorithm_ext/iota.hpp>
-#include <boost/range/algorithm/random_shuffle.hpp>
+#include <shark/Core/Threading/Algorithms.h>
 namespace shark{
 
 /// \brief Computes the negative log likelihood of a dataset under a model
@@ -84,18 +81,14 @@ public:
 		m_evaluationCounter++;
 		mep_model->setParameterVector(input);
 		
-		double error = 0;
-		double minProb = 1e-100;//numerical stability is only guaranteed for lower bounded probabilities
-		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
-			RealMatrix predictions = (*mep_model)(m_data.batch(i));
+		auto map = [this](RealMatrix const& batch){
+			double minProb = 1e-100;//numerical stability is only guaranteed for lower bounded probabilities
+			RealMatrix predictions = (*mep_model)(batch);
 			SIZE_CHECK(predictions.size2() == 1);
-			double logLikelihoodOfSamples = sum(log(max(predictions,minProb)));
-			SHARK_CRITICAL_REGION{
-				error += logLikelihoodOfSamples;
-			}
-		}
-		error/=m_data.numberOfElements();//compute mean
-		return -error;//negative log likelihood
+			return sum(log(max(predictions,minProb)));
+		};
+		double error = threading::mapAccumulate( m_data.batches(), 0.0, map, threading::globalThreadPool());
+		return -error / m_data.numberOfElements();
 	}
 	ResultType evalDerivative( 
 		SearchPointType const& input, 
@@ -104,56 +97,48 @@ public:
 		SIZE_CHECK(input.size() == numberOfVariables());
 		m_evaluationCounter++;
 		mep_model->setParameterVector(input);
-		derivative.resize(input.size());
-		derivative.clear();
 		
-		//compute partitioning on threads
-		std::size_t numBatches = m_data.numberOfBatches();
-		std::size_t numElements = m_data.numberOfElements();
-		std::size_t numThreads = std::min(SHARK_NUM_THREADS,numBatches);
-		//calculate optimal partitioning
-		std::size_t batchesPerThread = numBatches/numThreads;
-		std::size_t leftOver = numBatches - batchesPerThread*numThreads;
-		double error = 0;
-		double minProb = 1e-100;//numerical stability is only guaranteed for lower bounded probabilities
-		SHARK_PARALLEL_FOR(int ti = 0; ti < (int)numThreads; ++ti){//MSVC does not support unsigned integrals in paralll loops
-			std::size_t t = ti;
-			//~ //get start and end index of batch-range
-			std::size_t start = t*batchesPerThread+std::min(t,leftOver);
-			std::size_t end = (t+1)*batchesPerThread+std::min(t+1,leftOver);
-			
-			//calculate error and derivative of the current thread
-			FirstOrderDerivative threadDerivative(input.size(),0.0);
-			double threadError = 0;
-			boost::shared_ptr<State> state = mep_model->createState();
-			RealVector batchDerivative;
+
+		typedef std::pair<double,RealVector> result_type;
+		auto map = [this](RealMatrix const& batch){
+			double minProb = 1e-100;//numerical stability is only guaranteed for lower bounded probabilities
 			RealMatrix predictions;
-			for(std::size_t i  = start; i != end; ++i){
-				mep_model->eval(m_data.batch(i),predictions,*state);
-				SIZE_CHECK(predictions.size2() == 1);
-				threadError += sum(log(max(predictions,minProb)));
-				RealMatrix coeffs(predictions.size1(),predictions.size2(),0.0);
-				//the below handls numeric instabilities...
-				for(std::size_t j = 0; j != predictions.size1(); ++j){
-					for(std::size_t k = 0; k != predictions.size2(); ++k){
-						if(predictions(j,k) >= minProb){
-							coeffs(j,k) = 1.0/predictions(j,k);
-						}
+			boost::shared_ptr<State> state = mep_model->createState();
+			mep_model->eval(batch,predictions,*state);
+			SIZE_CHECK(predictions.size2() == 1);
+			double error = sum(log(max(predictions,minProb)));
+			
+			//compute coefficients for weighted derivative, handle numerical instabilities
+			RealMatrix coeffs(predictions.size1(),predictions.size2(),0.0);
+			for(std::size_t j = 0; j != predictions.size1(); ++j){
+				for(std::size_t k = 0; k != predictions.size2(); ++k){
+					if(predictions(j,k) >= minProb){
+						coeffs(j,k) = 1.0/predictions(j,k);
 					}
 				}
-				mep_model->weightedParameterDerivative(
-					m_data.batch(i),predictions, coeffs,*state,batchDerivative
-				);
-				threadDerivative += batchDerivative;
 			}
 			
-			//sum over all threads
-			SHARK_CRITICAL_REGION{
-				error += threadError;
-				noalias(derivative) += threadDerivative;
-			}
-		}
+			//comptue weighted derivative
+			RealVector batchDerivative;
+			mep_model->weightedParameterDerivative(
+				batch,predictions, coeffs,*state,batchDerivative
+			);
+			
+			//return results
+			return result_type(error, std::move(batchDerivative));
+		};
 		
+		//accumulate on the target variables
+		double error = 0;
+		derivative.resize(input.size());
+		derivative.clear();
+		auto apply =[&](result_type const& result){
+			error += result.first;
+			derivative += result.second;
+		};
+		threading::mapApply( m_data.batches(), map, apply, threading::globalThreadPool());
+
+		std::size_t numElements = m_data.numberOfElements();
 		error /= numElements;
 		derivative /= numElements;
 		derivative *= -1;

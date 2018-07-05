@@ -32,6 +32,7 @@
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Unsupervised/RBM/Energy.h>
+#include <shark/Core/Threading/Algorithms.h>
 
 namespace shark{
 
@@ -124,52 +125,40 @@ public:
 				batchIds[i] = i;
 			}
 			std::shuffle(batchIds.begin(),batchIds.end(),mpe_rbm->rng());
+			batchIds.erase(batchIds.begin() + batchesForTraining, batchIds.end());
 			for(std::size_t i = 0; i != batchesForTraining; ++i){
 				elements += m_data.batch(batchIds[i]).size1();
 			}
 		}
 		
-		std::size_t threads = std::min<std::size_t>(batchesForTraining,SHARK_NUM_THREADS);
-		std::size_t numBatches = batchesForTraining/threads;
-		
-		
-		SHARK_PARALLEL_FOR(int t = 0; t < (int)threads; ++t){
+		auto map = [&](std::size_t i){//maps the ith batch to its gradient
 			typename RBM::GradientType empiricalAverage(mpe_rbm);
 			typename RBM::GradientType modelAverage(mpe_rbm);
+		
+			RealMatrix const& batch = m_data.batch(i);
 			
-			std::size_t threadElements = 0;
+			//create the batches for evaluation
+			typename Operator::HiddenSample hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
+			typename Operator::VisibleSample visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
 			
-			std::size_t batchStart = t*numBatches;
-			std::size_t batchEnd = (t== (int)threads-1)? batchesForTraining : batchStart+numBatches;
-			for(std::size_t i = batchStart; i != batchEnd; ++i){
-				RealMatrix const& batch = m_data.batch(batchIds[i]);
-				threadElements += batch.size1();
-				
-				//create the batches for evaluation
-				typename Operator::HiddenSample hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
-				typename Operator::VisibleSample visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
-				
-				visibleBatch.state = batch;
-				m_operator.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));
-				m_operator.sampleHidden(hiddenBatch);
-				empiricalAverage.addVH(hiddenBatch,visibleBatch);
-				
-				for(std::size_t step = 0; step != m_k; ++step){
-					m_operator.precomputeVisible(hiddenBatch, visibleBatch,blas::repeat(1.0,batch.size1()));
-					m_operator.sampleVisible(visibleBatch);
-					m_operator.precomputeHidden(hiddenBatch, visibleBatch,blas::repeat(1.0,batch.size1()));
-					if( step != m_k-1){
-						m_operator.sampleHidden(hiddenBatch);
-					}
+			visibleBatch.state = batch;
+			m_operator.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));
+			m_operator.sampleHidden(hiddenBatch);
+			empiricalAverage.addVH(hiddenBatch,visibleBatch);
+			
+			for(std::size_t step = 0; step != m_k; ++step){
+				m_operator.precomputeVisible(hiddenBatch, visibleBatch,blas::repeat(1.0,batch.size1()));
+				m_operator.sampleVisible(visibleBatch);
+				m_operator.precomputeHidden(hiddenBatch, visibleBatch,blas::repeat(1.0,batch.size1()));
+				if( step != m_k-1){
+					m_operator.sampleHidden(hiddenBatch);
 				}
-				modelAverage.addVH(hiddenBatch,visibleBatch);
 			}
-			SHARK_CRITICAL_REGION{
-				double weight = threadElements/double(elements);
-				noalias(derivative) += weight*(modelAverage.result() - empiricalAverage.result());
-			}
-			
-		}
+			modelAverage.addVH(hiddenBatch,visibleBatch);
+			double weight = batch.size1()/double(elements);
+			return RealVector(weight*(modelAverage.result() - empiricalAverage.result()));
+		};
+		derivative = threading::mapAccumulate( batchIds, std::move(derivative), map, threading::globalThreadPool());
 		
 		if(m_regularizer){
 			FirstOrderDerivative regularizerDerivative;

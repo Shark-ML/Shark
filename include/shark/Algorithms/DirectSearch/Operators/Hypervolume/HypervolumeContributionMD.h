@@ -29,7 +29,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/utility/KeyValuePair.h>
-#include <shark/Core/OpenMP.h>
+#include <shark/Core/Threading/Algorithms.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
 #include <shark/Algorithms/DirectSearch/Operators/Domination/NonDominatedSort.h>
 
@@ -54,18 +54,18 @@ struct HypervolumeContributionMD {
 		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		HypervolumeCalculator hv;
 		std::vector<KeyValuePair<double,std::size_t> > result( points.size() );
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
+		
+		auto contribution = [&](std::size_t i){
 			auto const& point = points[i];
-			
 			//compute restricted pointset
 			std::vector<RealVector> pointset( points.begin(), points.end() );
 			pointset.erase( pointset.begin() + i );
 			restrictSet(pointset,point);
 			
 			double baseVol = std::exp(sum(log(ref-point)));
-			result[i].key = baseVol - hv(pointset,ref);
-			result[i].value = i;
-		}
+			result[i] ={baseVol - hv(pointset,ref), i};
+		};
+		threading::parallelND({points.size()}, {1}, contribution, threading::globalThreadPool());
 		std::sort(result.begin(),result.end());
 		result.erase(result.begin()+k,result.end());
 		
@@ -81,18 +81,18 @@ struct HypervolumeContributionMD {
 		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
 		HypervolumeCalculator hv;
 		std::vector<KeyValuePair<double,std::size_t> > result( points.size() );
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
+		
+		auto contribution = [&](std::size_t i){
 			auto const& point = points[i];
-			
 			//compute restricted pointset
 			std::vector<RealVector> pointset( points.begin(), points.end() );
 			pointset.erase( pointset.begin() + i );
 			restrictSet(pointset,point);
 			
 			double baseVol = std::exp(sum(log(ref-point)));
-			result[i].key = baseVol - hv(pointset,ref);
-			result[i].value = i;
-		}
+			result[i] ={baseVol - hv(pointset,ref), i};
+		};
+		threading::parallelND({points.size()}, {1}, contribution, threading::globalThreadPool());
 		std::sort(result.begin(),result.end());
 		result.erase(result.begin(),result.end()-k);
 		std::reverse(result.begin(),result.end());
@@ -121,29 +121,16 @@ struct HypervolumeContributionMD {
 				}
 			}
 		}
-		HypervolumeCalculator hv;
-		std::vector<KeyValuePair<double,std::size_t> > result;
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
-			if(std::find(minIndex.begin(),minIndex.end(),i) != minIndex.end())
-				continue;
-			
-			auto const& point = points[i];
-			
-			//compute restricted pointset
-			std::vector<RealVector> pointset( points.begin(), points.end() );
-			pointset.erase( pointset.begin() + i );
-			restrictSet(pointset,point);
-			
-			double baseVol = std::exp(sum(log(ref-point)));
-			double volume = baseVol - hv(pointset,ref);
-			SHARK_CRITICAL_REGION{
-				result.emplace_back(volume,i);
-			}
+		// compute the k smallest elements with the computed reference points.
+		// add a few points extra so that we can ensure that we can filter out the corner points
+		auto resultsAll = smallest(points, std::min(points.size(), k+minIndex.size()), ref);
+		std::vector<KeyValuePair<double,std::size_t> > pruned;
+		for( auto const& elem: resultsAll){
+			if(std::find(minIndex.begin(),minIndex.end(),elem.value) == minIndex.end())
+				pruned.push_back(elem);
+			if(pruned.size() == k) break;
 		}
-		std::sort(result.begin(),result.end());
-		result.erase(result.begin()+k,result.end());
-		
-		return result;
+		return pruned;
 	}
 	
 	/// \brief Returns the index of the points with largest contribution.
@@ -169,28 +156,16 @@ struct HypervolumeContributionMD {
 			}
 		}
 		
-		HypervolumeCalculator hv;
-		std::vector<KeyValuePair<double,std::size_t> > result;
-		SHARK_PARALLEL_FOR( int i = 0; i < static_cast< int >( points.size() ); i++ ) {
-			if(std::find(minIndex.begin(),minIndex.end(),i) != minIndex.end())
-				continue;
-			auto const& point = points[i];
-			
-			//compute restricted pointset
-			std::vector<RealVector> pointset( points.begin(), points.end() );
-			pointset.erase( pointset.begin() + i );
-			restrictSet(pointset,point);
-			
-			double baseVol = std::exp(sum(log(ref-point)));
-			double volume = baseVol - hv(pointset,ref);
-			SHARK_CRITICAL_REGION{
-				result.emplace_back(volume,i);
-			}
+		//compute the k largest elements with the computed reference points.
+		// add a few points extra so that we can ensure that we can filter out the corner points
+		auto resultsAll = largest(points, std::min(points.size(), k+minIndex.size()), ref);
+		std::vector<KeyValuePair<double,std::size_t> > pruned;
+		for( auto const& elem: resultsAll){
+			if(std::find(minIndex.begin(),minIndex.end(),elem.value) == minIndex.end())
+				pruned.push_back(elem);
+			if(pruned.size() == k) break;
 		}
-		std::sort(result.begin(),result.end());
-		result.erase(result.begin(),result.end()-k);
-		std::reverse(result.begin(),result.end());
-		return result;
+		return pruned;
 	}
 private:
 	/// \brief Restrict the points to the area covered by point and remove all points which are then dominated

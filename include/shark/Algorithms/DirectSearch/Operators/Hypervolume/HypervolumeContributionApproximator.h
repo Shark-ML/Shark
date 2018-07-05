@@ -37,6 +37,7 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Domination/ParetoDominance.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeCalculator.h>
+#include <shark/Core/Threading/Algorithms.h>
 #include <algorithm>
 #include <limits>
 #include <vector>
@@ -238,11 +239,19 @@ private:
 			
 			//check whether we spent so much time on sampling that computing the real volume is not much more expensive any more.
 			//this guarantuees convergence even in cases that two points have the same hyper volume.
-			SHARK_PARALLEL_FOR(int i = 0; i < (int)activePoints.size(); ++i){
+			//as this can take a long time, we do this in parallel for all points that need computation
+			std::vector<std::future<void> > events;
+			for(std::size_t i = 0; i < activePoints.size(); ++i){
 				if(shouldCompute(*activePoints[i])){
-					computeExactly(*activePoints[i]);
+					auto point = activePoints[i];
+					std::future<void> event = threading::globalThreadPool().execute_async(
+						[this, point]{computeExactly(*point);}
+					);
+					events.push_back(std::move(event));
 				}
 			}
+			threading::globalThreadPool().wait_for_all(events.begin(), events.end());
+			
 			
 			//sample all active points so that their individual deviations are smaller than delta
 			for( auto point: activePoints )

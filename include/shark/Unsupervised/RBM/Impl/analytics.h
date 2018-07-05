@@ -35,9 +35,9 @@
 #include <shark/Unsupervised/RBM/Sampling/GibbsOperator.h>
 #include <shark/Unsupervised/RBM/Energy.h>
 #include <shark/Algorithms/GradientDescent/Rprop.h>
-#include <shark/Core/OpenMP.h>
+#include <shark/Core/Threading/Algorithms.h>
 
-#include <boost/range/numeric.hpp>
+#include <boost/range/counting_range.hpp>
 namespace shark {
 namespace detail{
 	
@@ -184,11 +184,9 @@ namespace detail{
 		
 		//sample and store Energies batchwise
 		std::size_t batchSize  = 1024;
-		std::size_t numBatches = samples/batchSize;
-		if(numBatches*batchSize < samples)
-			++numBatches;
+		std::size_t numBatches = (samples + batchSize -1)/batchSize;
 		
-		SHARK_PARALLEL_FOR (unsigned int b = 0; b < (unsigned int)numBatches; ++b){
+		auto func=[&](std::size_t b){
 			std::size_t batchStart = b*batchSize;
 			std::size_t batchEnd = (b== numBatches-1)? samples : batchStart+batchSize;
 			std::size_t curSize = batchEnd-batchStart;
@@ -222,7 +220,8 @@ namespace detail{
 					blas::repeat(beta(i-1),curSize)
 				);
 			}
-		}
+		};
+		threading::parallelND({numBatches}, {1}, func, threading::globalThreadPool());
 	}
 	
 
@@ -234,22 +233,15 @@ namespace detail{
 	///Let's assume we have n Energies E_1,..., E_n for which we allready computed the partial partition
 	/// Z_n = exp(-E_1)+...exp(-E_n)
 	///given another Energy E we can update this Z_n to Z by
-	/// Z = Z_n+exp(-E) = exp(-E)*(Z_n*exp(E)+1)
+	/// Z = Z_n+exp(-E) = Z_n*(1+exp(-E - log Z_n))
 	/// and for the logarithmic result it holds: 
-	/// log Z = -E + log(1+exp( log(Z_n)+E))=-E +softPlus(log(Z_n)+E) 
-	/// or equivalently log Z = log(Z_n) + log(1+exp(-log(Z_n)-E)=-log(Z_n) +softPlus(-log(Z_n)-E) 
+	/// log Z = log Z_n +  log(1+exp( -log(Z_n)-E)) = log Z_n + softPlus( -E - log Z_n)
 	/// which is numerically stable to compute since softPlus(x)->x when x>>0 and softPlus(x)-> 0 when x<<0
-	///however if these edge cases arise, the result will be in this case be max(log Z, -E) since the values
-	/// are not comparable anymore on the scale of double.
-	inline double updateLogPartition(double logZn, double E){
+	inline double updateLogPartition(double logZn, double negE){
 		if(logZn == -std::numeric_limits<double>::infinity()){
-			return -E;
+			return negE;
 		}
-		double diff = logZn + E;// diff between logZn and -E
-		//~ if(diff >= maxExpInput<double>()|| diff <= minExpInput<double>()){
-			//~ return std::max(logZn, -E);
-		//~ }
-		return logZn + softPlus(-diff);
+		return logZn + softPlus(-logZn + negE);
 	}
 
 	/// \brief Estimates the partition function with factorization over the hidden variables. 
@@ -267,14 +259,12 @@ namespace detail{
 	double logPartitionFunctionImplFactHidden(const RBMType& rbm, Enumeration, double beta){
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfVN());
 		std::size_t const batchSize=4096;
+		std::size_t numBatches = (values + batchSize -1)/batchSize;
 		
-		std::size_t batchNum = values/batchSize;
-		if(values % batchSize > 0)
-			++batchNum;
 		//over all possible values of the visible neurons
-		RealVector logZ(std::min(batchNum, SHARK_NUM_THREADS),-std::numeric_limits<double>::infinity());
-		SHARK_PARALLEL_FOR(int x = 0;x <  (int)values; x+= (int)batchSize) {
-			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-static_cast<std::size_t>(x));
+		auto map=[&](std::size_t b){
+			std::size_t x = b*batchSize;
+			std::size_t currentBatchSize = std::min(batchSize,values - x);
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfVN());
 			
 			for(std::size_t elem = 0; elem != currentBatchSize;++elem){
@@ -284,16 +274,19 @@ namespace detail{
 			RealVector p =rbm.energy().logUnnormalizedProbabilityVisible(
 				stateMatrix, blas::repeat(beta,currentBatchSize)
 			);
+			
 			//accumulate changes to the log partition
-			logZ(SHARK_THREAD_NUM) = boost::accumulate(
-				-p,
-				logZ(SHARK_THREAD_NUM),updateLogPartition
-			);
-		}
-		return boost::accumulate(
-			-logZ,
-			-std::numeric_limits<double>::infinity(),
-			updateLogPartition
+			double logZ = -std::numeric_limits<double>::infinity();
+			for(double prob: p){
+				logZ = updateLogPartition(logZ, prob);
+			}
+			return logZ;
+		};
+		//accumulate log partitions of the work packages
+		return threading::mapReduce(
+			boost::counting_range<std::size_t>(0,numBatches), 
+			-std::numeric_limits<double>::infinity(), 
+			map, updateLogPartition, threading::globalThreadPool()
 		);
 	}
 	
@@ -314,14 +307,12 @@ namespace detail{
 	double logPartitionFunctionImplFactVisible(const RBMType& rbm, Enumeration, double beta){		
 		std::size_t values = Enumeration::numberOfStates(rbm.numberOfHN());
 		std::size_t const batchSize=4096;
+		std::size_t numBatches = (values + batchSize -1)/batchSize;
 		
-		std::size_t batchNum = values/batchSize;
-		if(values % batchSize > 0)
-			++batchNum;
 		//over all possible values of the visible neurons
-		RealVector logZ(std::min(batchNum, SHARK_NUM_THREADS),-std::numeric_limits<double>::infinity());
-		SHARK_PARALLEL_FOR(int x = 0;x <  (int)values; x+= (int)batchSize) {
-			std::size_t currentBatchSize=std::min<std::size_t>(batchSize,values-static_cast<std::size_t>(x));
+		auto map=[&](std::size_t b){
+			std::size_t x = b*batchSize;
+			std::size_t currentBatchSize = std::min(batchSize,values - x);
 			RealMatrix stateMatrix(currentBatchSize,rbm.numberOfHN());
 			
 			
@@ -335,15 +326,17 @@ namespace detail{
 			);
 			
 			//accumulate changes to the log partition
-			logZ(SHARK_THREAD_NUM) = boost::accumulate(
-				-p,
-				logZ(SHARK_THREAD_NUM),updateLogPartition
-			);
-		}
-		return boost::accumulate(
-			-logZ,
-			-std::numeric_limits<double>::infinity(),
-			updateLogPartition
+			double logZ = -std::numeric_limits<double>::infinity();
+			for(double prob: p){
+				logZ = updateLogPartition(logZ, prob);
+			}
+			return logZ;
+		};
+		//accumulate log partitions of the work packages
+		return threading::mapReduce(
+			boost::counting_range<std::size_t>(0,numBatches), 
+			-std::numeric_limits<double>::infinity(), 
+			map, updateLogPartition, threading::globalThreadPool()
 		);
 	}
 	

@@ -79,7 +79,7 @@ public:
 	{
 		m_accessCounter += end - start;
 
-		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++)
+		for(std::size_t j = start; j < end; j++)
 		{
 			storage[j - start] = entry(i, j);
 		}
