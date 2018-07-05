@@ -117,7 +117,7 @@ void transform(
 	Functor f,
 	ThreadPool& pool
 ){
-	threading::transform(elementsFrom, elementsTo, std::move(f), pool);//threading:: gcc 4.8bug in ADL lookup requires this
+	threading::transform(elementsFrom, static_cast<RangeTo&>(elementsTo), std::move(f), pool);//threading:: gcc 4.8bug in ADL lookup requires this
 };
 	
 
