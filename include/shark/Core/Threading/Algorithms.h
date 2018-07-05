@@ -110,14 +110,17 @@ void transform(
 	parallelND({elementsFrom.size()}, {1}, task, pool);
 };
 
-template<class Functor, class RangeFrom, class RangeTo>
+template<
+	class Functor, class RangeFrom, class RangeTo, 
+	class = typename std::enable_if<!std::is_reference<RangeTo>::Value, void>::type//gcc 4.8 bug with rvalue references requires this.
+>
 void transform(
 	RangeFrom const& elementsFrom, 
 	RangeTo&& elementsTo, 
 	Functor f,
 	ThreadPool& pool
 ){
-	threading::transform(elementsFrom, static_cast<RangeTo&>(elementsTo), std::move(f), pool);//threading:: gcc 4.8bug in ADL lookup requires this
+	threading::transform(elementsFrom, static_cast<RangeTo&>(elementsTo), std::move(f), pool);
 };
 	
 
