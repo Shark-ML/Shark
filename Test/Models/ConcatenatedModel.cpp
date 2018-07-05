@@ -6,6 +6,7 @@
 #include <shark/Models/ConcatenatedModel.h>
 #include <shark/Models/LinearModel.h>
 #include <shark/Models/NeuronLayers.h>
+#include <shark/ObjectiveFunctions/Loss/SquaredLoss.h>
 
 #include <sstream>
 
@@ -330,11 +331,10 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	BOOST_REQUIRE_EQUAL(net2.outputShape(),netTest2.outputShape());
 	BOOST_REQUIRE_EQUAL(net3.inputShape(),netTest3.inputShape());
 	BOOST_REQUIRE_EQUAL(net3.outputShape(),netTest3.outputShape());
-	for (size_t i=0; i<1000; i++)
-	{
-		RealVector output = modelDeserialized(dataset.element(i).input);
-		BOOST_CHECK_SMALL(norm_2(output -dataset.element(i).label),1.e-8);
-	}
+	
+	auto outputs = modelDeserialized(dataset.inputs());
+	SquaredLoss<RealVector> loss;
+	BOOST_CHECK_SMALL(loss(dataset.labels(),outputs), 1.e-8);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

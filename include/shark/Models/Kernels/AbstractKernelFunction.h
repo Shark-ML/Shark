@@ -122,18 +122,9 @@ public:
 	}
 
 	///////////////////////////////////////////SINGLE ELEMENT INTERFACE///////////////////////////////////////////
-	// By default, this is mapped to the batch case.
 
 	/// \brief Evaluates the kernel function.
-	virtual double eval(ConstInputReference x1, ConstInputReference x2) const{
-		RealMatrix res;
-		BatchInputType b1 = Traits::createBatch(x1,1);
-		BatchInputType b2 = Traits::createBatch(x2,1);
-		getBatchElement(b1,0) = x1;
-		getBatchElement(b2,0) = x2;
-		eval(b1, b2, res);
-		return res(0, 0);
-	}
+	virtual double eval(ConstInputReference x1, ConstInputReference x2) const = 0;
 
 	/// \brief Convenience operator which evaluates the kernel function.
 	inline double operator () (ConstInputReference x1, ConstInputReference x2) const {

@@ -137,5 +137,6 @@ std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os, Shape const
 	return os;
 }
 
+
 }
 #endif

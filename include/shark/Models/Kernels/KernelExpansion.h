@@ -108,8 +108,8 @@ public:
 		return m_alpha.size2();
 	}
 	
-	Shape inputShape() const{
-		return Shape();
+	typename shape_type<InputType>::type inputShape() const{
+		return typename shape_type<InputType>::type();
 	}
 
 	// //////////////////////////////////////////////////////////
@@ -186,7 +186,7 @@ public:
 			}
 		}
 		//project basis on the support vectors
-		m_basis = toDataset(subset(toView(m_basis),svIndices));
+		m_basis = toDataset(subset(elements(m_basis),svIndices));
 		
 		//reduce alpha to it's support vector variables
 		RealMatrix a(svIndices.size(), m_alpha.size2());

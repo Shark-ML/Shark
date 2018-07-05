@@ -93,7 +93,7 @@ public:
 	std::string name() const
 	{ return "NormalizeComponentsUnitVariance"; }
 
-	void train(Normalizer<DataType>& model, UnlabeledData<DataType> const& input)
+	void train(Normalizer<DataType>& model, Data<DataType> const& input)
 	{
 		SHARK_RUNTIME_CHECK(input.numberOfElements() >= 2, "Input needs to consist of at least two points");
 		std::size_t dc = dataDimension(input);

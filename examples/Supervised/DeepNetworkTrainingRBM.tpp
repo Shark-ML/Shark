@@ -43,12 +43,12 @@ LabeledData<RealVector,unsigned int> createProblem(){
 			label[x+k*16+160] = 0; 
 		}
 	}
-	return createLabeledDataFromRange(data,label);
+	return shuffle(createLabeledDataFromRange(data,label));
 }
 
 //training of an RBM
 BinaryRBM trainRBM(
-	UnlabeledData<RealVector> const& data,//the data to train with
+	Data<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
 	std::size_t iterations, //number of iterations to optimize
 	double regularisation,//strength of the regularisation
@@ -100,7 +100,6 @@ int main()
 	
 	//load data and split into training and test
 	LabeledData<RealVector,unsigned int> data = createProblem();
-	data.shuffle();
 	LabeledData<RealVector,unsigned int> test = splitAtElement(data,static_cast<std::size_t>(0.5*data.numberOfElements()));
 	
 //###begin<pretraining_rbm>
@@ -113,7 +112,7 @@ int main()
 	
 	//compute the mapping onto features of the first hidden layer
 	rbm1.evaluationType(true,true);//we compute the direction visible->hidden and want the features and no samples
-	UnlabeledData<RealVector> intermediateData=rbm1(data.inputs());
+	Data<RealVector> intermediateData=rbm1(data.inputs());
 	
 	//train the next layer
 	std::cout<<"pre-training second layer"<<std::endl;

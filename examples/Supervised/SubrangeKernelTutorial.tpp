@@ -13,19 +13,14 @@ using namespace shark;
 class UniformPoints : public DataDistribution<RealVector>
 {
 public:
-	UniformPoints(std::size_t dimensions){
-		m_dimensions = dimensions;
-	}
+	UniformPoints(std::size_t dimensions): DataDistribution<RealVector>(dimensions){}
 
 	void draw(RealVector& input)const{
-		input.resize(m_dimensions);
-		for ( std::size_t j=0; j<m_dimensions; j++ ) {
+		input.resize(shape().numElements());
+		for ( std::size_t j=0; j<input.size(); j++ ) {
 			input(j) = random::uni(random::globalRng, -1,1);
 		}
 	}
-
-protected:
-	std::size_t m_dimensions;
 };
 
 int main()
@@ -35,7 +30,7 @@ int main()
 	std::size_t num_dims = 9;
 	std::size_t num_points = 200;
 	UniformPoints problem(num_dims);
-	UnlabeledData<RealVector> data = problem.generateDataset(num_points);
+	Data<RealVector> data = problem.generateDataset(num_points);
 	
 	DenseRbfKernel   	  basekernel1(0.1);
 	DenseLinearKernel      basekernel2;
@@ -61,10 +56,11 @@ int main()
 	std::cout << "    Trace                  = " << normalizer.trace() << std::endl << std::endl;
 	//check in feature space
 	double control = 0.0;
-	for ( std::size_t i=0; i<num_points; i++ ) {
-		control += scale.eval(data.element(i), data.element(i));
-		for ( std::size_t j=0; j<num_points; j++ ) {
-			control -= scale.eval(data.element(i), data.element(j)) / num_points;
+	auto elements = shark::elements(data);
+	for (auto const& elem_i: elements){
+		control += scale.eval(elem_i, elem_i);
+		for (auto const& elem_j: elements){
+			control -= scale.eval(elem_i, elem_j) / num_points;
 		}
 	}
 	control /= num_points;

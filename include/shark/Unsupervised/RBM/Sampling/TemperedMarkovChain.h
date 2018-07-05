@@ -31,6 +31,7 @@
 #define SHARK_UNSUPERVISED_RBM_SAMPLING_TEMPEREDMARKOVCHAIN_H
 
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/Core/Random.h>
 #include <shark/Unsupervised/RBM/Tags.h>
 #include <vector>
@@ -58,29 +59,23 @@ public:
 	typedef typename Operator::RBM RBM;
 	
 	///\brief A batch of samples containing hidden and visible samples as well as the energies.
-	typedef typename Batch<detail::MarkovChainSample<HiddenSample,VisibleSample> >::type SampleBatch;
-	
-	///\brief Mutable reference to an element of the batch.
-	typedef typename SampleBatch::reference reference;
-	
-	///\brief Immutable reference to an element of the batch.
-	typedef typename SampleBatch::const_reference const_reference;
+	typedef detail::MarkovChainSample<HiddenSample,VisibleSample> Sample;
 	
 private:
-	SampleBatch m_temperedChains;
+	Sample m_temperedChains;
 	RealVector m_betas;
 	Operator m_operator;
 	
-	void metropolisSwap(reference low, double betaLow, reference high, double betaHigh){
+	void metropolisSwap(std::size_t i, std::size_t j){
 		RealVector const& baseRate = transitionOperator().rbm()->visibleNeurons().baseRate();
-		double betaDiff = betaLow - betaHigh;
-		double energyDiff = low.energy - high.energy; 
-		double baseRateDiff = inner_prod(low.visible.state,baseRate) -  inner_prod(high.visible.state,baseRate); 
+		double betaDiff = beta(i) - beta(j);
+		double energyDiff = m_temperedChains.energy(i) - m_temperedChains.energy(j); 
+		double baseRateDiff = inner_prod(row(m_temperedChains.visible.state,i) - row(m_temperedChains.visible.state,j),baseRate);
 		double r = betaDiff * energyDiff + betaDiff*baseRateDiff;
 		
 		double z = random::uni(m_operator.rbm()->rng(),0,1);
 		if( r >= 0 || (z > 0 && std::log(z) < r) ){
-			swap(high,low);
+			m_temperedChains.swap_rows(i,j);
 		}
 	}
 
@@ -101,7 +96,7 @@ public:
 	void setNumberOfTemperatures(std::size_t temperatures){
 		std::size_t visibles=m_operator.rbm()->numberOfVN();
 		std::size_t hiddens=m_operator.rbm()->numberOfHN();
-		m_temperedChains = SampleBatch(temperatures,visibles,hiddens);
+		m_temperedChains = Sample(temperatures,hiddens,visibles);
 		m_betas.resize(temperatures);
 	}
 	
@@ -144,17 +139,13 @@ public:
 		return m_betas;
 	}
 	
-	///\brief Returns the current state of the chain for beta = 1.
-	const_reference sample()const{
-		return const_reference(m_temperedChains,0);
-	}
 	///\brief Returns the current state of the chain for all beta values.
-	SampleBatch const& samples()const{
+	Sample const& samples()const{
 		return m_temperedChains;
 	}
 	
 	/// \brief Returns the current batch of samples of the Markov chain. 
-	SampleBatch& samples(){
+	Sample& samples(){
 		return m_temperedChains;
 	}
 
@@ -164,12 +155,8 @@ public:
 	/// @param dataSet the data set
 	void initializeChain(Data<RealVector> const& dataSet){
 		SHARK_RUNTIME_CHECK(m_temperedChains.size() != 0,"You did not initialize the number of temperatures bevor initializing the chain!");
-		std::size_t visibles = m_operator.rbm()->numberOfVN();
-		RealMatrix sampleData(m_temperedChains.size(),visibles);
-		
-		for(std::size_t i = 0; i != m_temperedChains.size(); ++i){
-			noalias(row(sampleData,i)) = dataSet.element(random::discrete(m_operator.rbm()->rng(),std::size_t(0),dataSet.numberOfElements()-1));
-		}
+
+		RealMatrix sampleData = randomSubBatch(elements(dataSet),m_temperedChains.size());
 		initializeChain(sampleData);
 	}
 	
@@ -183,8 +170,7 @@ public:
 		m_operator.createSample(m_temperedChains.hidden,m_temperedChains.visible,sampleData,m_betas);
 		
 		m_temperedChains.energy = m_operator.calculateEnergy(
-			m_temperedChains.hidden,
-			m_temperedChains.visible 
+			m_temperedChains.hidden, m_temperedChains.visible 
 		);
 	}
 	//updates the chain using the current sample
@@ -202,17 +188,11 @@ public:
 			//EVEN phase
 			std::size_t elems = m_temperedChains.size();
 			for(std::size_t i = 0; i < elems-1; i+=2){
-				metropolisSwap(
-					reference(m_temperedChains,i),m_betas(i),
-					reference(m_temperedChains,i+1),m_betas(i+1)
-				);
+				metropolisSwap(i, i+1);
 			}
 			//ODD phase
 			for(std::size_t i = 1; i < elems-1; i+=2){
-				metropolisSwap(
-					reference(m_temperedChains,i),m_betas(i),
-					reference(m_temperedChains,i+1),m_betas(i+1)
-				);
+				metropolisSwap(i, i+1);
 			}
 			m_operator.rbm()->hiddenNeurons().sufficientStatistics(
 				m_temperedChains.hidden.input,m_temperedChains.hidden.statistics, m_betas

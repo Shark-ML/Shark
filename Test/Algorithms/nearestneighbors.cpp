@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 		data[i][2] = random::gauss(random::globalRng);
 	}
 
-	UnlabeledData<RealVector> dataset = createDataFromRange(data);
+	Data<RealVector> dataset = createDataFromRange(data);
 
 	//test trees
 	KDTree<RealVector> kdtree(dataset);

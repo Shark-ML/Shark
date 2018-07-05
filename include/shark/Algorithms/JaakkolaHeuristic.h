@@ -38,6 +38,7 @@
 
 
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/Core/Traits/ProxyReferenceTraits.h>
 
 #include <boost/range/adaptor/filtered.hpp>
@@ -71,22 +72,16 @@ public:
 	template<class InputType>
 	JaakkolaHeuristic(LabeledData<InputType,unsigned int> const& dataset, bool nearestFalseNeighbor = true)
 	{
-		typedef typename LabeledData<InputType,unsigned int>::const_element_range Elements;
-		typedef typename ConstProxyReference<InputType const>::type Element;
-		Elements elements = dataset.elements();
+		auto elements = shark::elements(dataset);
 		if(!nearestFalseNeighbor) {
-			for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
-				Element x = it->input;
-				typename Elements::iterator itIn = it;
-				itIn++;
-				for (; itIn != elements.end(); itIn++) {
+			for(auto it = elements.begin(); it != elements.end(); ++it){
+				auto x = it->input;
+				for (auto itIn = it; itIn != elements.end(); itIn++) {
 					if (itIn->label == it->label) continue;
-					Element y = itIn->input;
-					double dist = distanceSqr(x,y);
+					double dist = distanceSqr(x,itIn->input);
 					m_stat.push_back(dist);
 				}
 			}
-
 		} else {
 			std::size_t classes = numberOfClasses(dataset);
 			std::size_t dim = inputDimension(dataset);
@@ -94,9 +89,8 @@ public:
 			std::fill(m_stat.begin(),m_stat.end(), std::numeric_limits<double>::max());
 			std::size_t blockStart = 0;
 			for(std::size_t c = 0; c != classes; ++c){
-				
-				typename Elements::iterator leftIt = elements.begin();
-				typename Elements::iterator end = elements.end();
+				auto leftIt = elements.begin();
+				auto end = elements.end();
 				while(leftIt != end){
 					//todo: use a filter on the iterator
 					//create the next batch containing only elements of class c as left argument to distanceSqr
@@ -104,19 +98,19 @@ public:
 					std::size_t leftElements = 0;
 					while(leftElements < 512 && leftIt != end){
 						if(leftIt->label == c){
-							row(leftBatch,leftElements) = leftIt->input;
+							noalias(row(leftBatch,leftElements)) = leftIt->input;
 							++leftElements;
 						}
 						++leftIt;
 					}
 					//now go through all elements and again create batches, this time of all elements which are not of class c
-					typename Elements::iterator rightIt = elements.begin();
+					auto rightIt = elements.begin();
 					while(rightIt != end){
 						typename Batch<InputType>::type rightBatch(512, dim);
 						std::size_t rightElements = 0;
 						while(rightElements < 512 && rightIt != end){
 							if(rightIt->label != c){
-								row(rightBatch,rightElements) = rightIt->input;
+								noalias(row(rightBatch,rightElements)) = rightIt->input;
 								++rightElements;
 							}
 							++rightIt;
@@ -131,20 +125,6 @@ public:
 					blockStart+= leftElements;
 				}
 			}
-			
-			//~ for(typename Elements::iterator it = elements.begin(); it != elements.end(); ++it){
-				//~ double minDistSqr = std::numeric_limits<double>::max();//0;
-				//~ Element x = it->input;
-				//~ for (typename Elements::iterator itIn = elements.begin(); itIn != elements.end(); itIn++) {
-					//~ if (itIn->label == it->label) continue;
-					//~ Element y = itIn->input;
-					//~ double dist = distanceSqr(x,y);
-					//~ //if( (minDistSqr == 0) || (dist < minDistSqr))  minDistSqr = dist;
-					//~ if(dist < minDistSqr)  minDistSqr = dist;
-				//~ }
-				//~ m_stat.push_back(minDistSqr);
-			//~ }
-			
 		}
 		std::sort(m_stat.begin(), m_stat.end());
 	}

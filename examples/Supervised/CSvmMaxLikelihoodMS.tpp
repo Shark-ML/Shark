@@ -10,6 +10,7 @@
 #include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
 #include <shark/ObjectiveFunctions/SvmLogisticInterpretation.h>
 #include <shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h>
+#include <shark/Statistics/Statistics.h>
 
 using namespace std;
 using namespace shark;
@@ -244,22 +245,21 @@ int main() {
     //###begin<main_run_hundred_trials>
     // run several trials without output, and average the results
     unsigned int num_trials = 100;
-    Data<RealVector> many_results(num_trials,RealVector(total_dim+3));//each row is one run of resulting hyperparameters
+    statistics::ResultTable<int> results(total_dim+3, "param");
+    results.setDimensionName(total_dim+1, "error_train");
+    results.setDimensionName(total_dim+2, "error_test");
+    Data<RealVector> many_results(num_trials, {total_dim+3});//each row is one run of resulting hyperparameters
     for ( unsigned int i=0; i<num_trials; i++ ) {
-        many_results.element(i) = run_one_trial(false);
+        results.update(0,run_one_trial(false));
         std::cout << "." << std::flush;
     }
     std::cout << "\n" << std::endl;
     //###end<main_run_hundred_trials>
 
     //###begin<main_calc_print_results>
-    RealVector overall_mean, overall_variance;
-    meanvar( many_results, overall_mean, overall_variance );
-    for ( unsigned int i=0; i<total_dim+1; i++ ) {
-        std::cout << "avg-param(" << i << ") = " << overall_mean(i) << " +- "<< overall_variance(i) << std::endl;
-    }
-    std::cout << std::endl << "avg-error-train = " << overall_mean(total_dim+1) << " +- "<< overall_variance(total_dim+1) << std::endl;
-    std::cout << "avg-error-test  = " << overall_mean(total_dim+2) << " +- "<< overall_variance(total_dim+2) << std::endl;
+    statistics::Statistics<int> stats(&results);
+    stats.addStatistic(statistics::Mean());
+    statistics::printCSV(stats);
     //###end<main_calc_print_results>
 
 //###begin<main_end>

@@ -39,6 +39,7 @@
 #include <shark/Core/Timer.h>
 #include <shark/Algorithms/QP/QuadraticProgram.h>
 #include <shark/Data/Dataset.h>
+#include <shark/Data/WeightedDataset.h>
 
 namespace shark{
 
@@ -73,8 +74,7 @@ public:
 	/// \brief constructor which initializes a C-SVM problem with weighted datapoints and different regularizers for every class
 	GeneralQuadraticProblem(
 		MatrixType& quadratic, 
-		Data<unsigned int> const& labels, 
-		Data<double> const& weights, 
+		WeightedData<unsigned int> const& labels, 
 		RealVector const& regularizers
 	): quadratic(quadratic)
 	, linear(quadratic.size())
@@ -87,7 +87,6 @@ public:
 		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
-		SIZE_CHECK(dimensions() == weights.numberOfElements());
 		SIZE_CHECK(regularizers.size() > 0);
 		SIZE_CHECK(regularizers.size() <= 2);
 		
@@ -96,14 +95,16 @@ public:
 		if(regularizers.size() == 2)
 			Cp = regularizers[1];
 
-		for(std::size_t i = 0; i!= dimensions(); ++i){
-			unsigned int label = labels.element(i);
-			double weight = weights.element(i);
+		std::size_t i = 0;
+		for(auto element: elements(labels)){
+			unsigned int label = element.data;
+			double weight = element.weight;
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
 			linear(i) = label? 1.0:-1.0;
 			boxMin(i) = label? 0.0:-Cn*weight;
 			boxMax(i) = label? Cp*weight : 0.0;
+			++i;
 		}
 	}
 
@@ -263,11 +264,13 @@ public:
 		SIZE_CHECK(dimensions() == quadratic.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
 
-		for(std::size_t i = 0; i!= dimensions(); ++i){
+		std::size_t i = 0;
+		for(auto label: elements(labels)){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
-			linear(i) = labels.element(i)? 1.0:-1.0;
+			linear(i) = label? 1.0:-1.0;
 			positive[i] = linear(i) > 0;
+			++i;
 		}
 	}
 	///\brief  Setup using kernel matrix, labels and different regularization parameters for positive and negative classes
@@ -290,11 +293,13 @@ public:
 			m_Cp = regularizers[1];
 
 			
-		for(std::size_t i = 0; i!= dimensions(); ++i){
+		std::size_t i = 0;
+		for(auto label: elements(labels)){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
-			linear(i) = labels.element(i)? 1.0:-1.0;
+			linear(i) = label? 1.0:-1.0;
 			positive[i] = linear(i) > 0;
+			++i;
 		}
 	}
 
@@ -313,10 +318,12 @@ public:
 		SIZE_CHECK(dimensions() == linear.size());
 		SIZE_CHECK(dimensions() == labels.numberOfElements());
 		
-		for(std::size_t i = 0; i!= dimensions(); ++i){
+		std::size_t i = 0;
+		for(auto label: elements(labels)){
 			permutation[i] = i;
 			diagonal(i) = quadratic.entry(i, i);
-			positive[i] = labels.element(i) ? 1: 0;
+			positive[i] = label ? 1: 0;
+			++i;
 		}
 	}
 

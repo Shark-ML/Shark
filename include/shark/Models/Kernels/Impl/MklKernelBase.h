@@ -84,15 +84,15 @@ public:
 	}
 	
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
-		return m_kernel->eval(boost::fusion::at_c<N>(fusionize(x1)),boost::fusion::at_c<N>(fusionize(x2)));
+		return m_kernel->eval(boost::fusion::at_c<N>(x1),boost::fusion::at_c<N>(x2));//no fusionize, because we assume the type is a fusion type already
 	}
 	
 	void eval(BatchInputType const& batchX1, BatchInputType const& batchX2, RealMatrix& result, State& state) const{
-		m_kernel->eval(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),result,state);
+		m_kernel->eval(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),result,state);
 	}
 	
 	void eval(BatchInputType const& batchX1, BatchInputType const& batchX2, RealMatrix& result) const{
-		m_kernel->eval(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),result);
+		m_kernel->eval(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),result);
 	}
 	
 	void weightedParameterDerivative(
@@ -102,7 +102,7 @@ public:
 		State const& state, 
 		RealVector& gradient
 	) const{
-		m_kernel->weightedParameterDerivative(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),coefficients,state,gradient);
+		m_kernel->weightedParameterDerivative(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),coefficients,state,gradient);
 	}
 	void weightedInputDerivative( 
 		BatchInputType const& batchX1, 
@@ -111,7 +111,7 @@ public:
 		State const& state, 
 		BatchInputType& gradient
 	) const{
-		m_kernel->weightedInputDerivative(boost::fusion::at_c<N>(fusionize(batchX1)),boost::fusion::at_c<N>(fusionize(batchX2)),coefficientsX2,state,boost::fusion::at_c<N>(fusionize(gradient)));
+		m_kernel->weightedInputDerivative(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),coefficientsX2,state,boost::fusion::at_c<N>(fusionize(gradient)));
 	}
 	
 	//w don't need serializing here, this is done by the implementing Kernel

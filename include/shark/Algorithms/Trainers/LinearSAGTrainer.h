@@ -219,7 +219,7 @@ private:
 			iterations = std::max(10 * ell, std::size_t(std::ceil(dim * ell)));
 		
 		//picking distribution picks proportional to weight
-		RealVector probabilities = createBatch(dataset.weights().elements());
+		RealVector probabilities = createBatch(elements(dataset.weights()));
 		probabilities /= sum(probabilities);
 		MultiNomialDistribution dist(probabilities);
 			
@@ -295,7 +295,7 @@ private:
 			iterations = std::max(10 * ell, std::size_t(std::ceil(dim * ell)));
 		
 		//picking distribution picks proportional to weight
-		RealVector probabilities = createBatch(dataset.weights().elements());
+		RealVector probabilities = createBatch(elements(dataset.weights()));
 		probabilities /= sum(probabilities);
 		MultiNomialDistribution dist(probabilities);
 			

@@ -13,7 +13,7 @@ using namespace std;
 int main(int argc, char **argv) {
 	LabeledData<RealVector,unsigned int> data;
 	importSparseData(data, "covtype");
-	data.shuffle();
+	data = shuffle(data);
 	ClassificationDataset test = splitAtElement(data,400000);
 
 	RFClassifier<unsigned int> model;

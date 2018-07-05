@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_SUITE (RBM_PCDTraining)
 BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	
 	BarsAndStripes problem;
-	UnlabeledData<RealVector> data = problem.data();
+	Data<RealVector> data = problem.data();
 	
 	random::globalRng.seed(0);
 	

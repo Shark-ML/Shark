@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 	std::size_t batchSize = 256;
 	LabeledData<RealVector,unsigned int> data;
 	importSparseData( data, argv[1], 0, batchSize );
-	data.shuffle(); //shuffle data randomly
+	data = shuffle(data); //shuffle data randomly
 	auto test = splitAtElement(data, 70 * data.numberOfElements() / 100);//split a test set
 	std::size_t numClasses = numberOfClasses(data);
 	std::size_t inputDim = inputDimension(data);

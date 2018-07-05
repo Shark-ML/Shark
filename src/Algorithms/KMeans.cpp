@@ -48,15 +48,16 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		maxIterations = std::numeric_limits<std::size_t>::max();
 	
 	// initialization
-	std::size_t ell = dataset.numberOfElements();
-	std::size_t dimension = dataDimension(dataset);
+	auto data = elements(dataset);
+	std::size_t ell = data.size();
+	std::size_t dimension = dataDimension(data);
 	
 	//if the centers are not already initialized, do it now
 	if (centroids.numberOfClusters() != k){
 		centroids.initFromData(dataset,k);
 	}
 	HardClusteringModel<RealVector> model(&centroids);
-	ClassificationDataset clusterMembership(dataset,model(dataset));
+	auto clusterMembership = createLabeledData(dataset,model(dataset));
 
 	// k-means loop
 	std::size_t iter = 0;
@@ -66,7 +67,7 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		std::vector<std::size_t> numPoints(k,0); // number of points in each cluster
 		std::vector<RealVector> newCenters(k,RealVector(dimension,0.0));
 			
-		for(auto element: clusterMembership.elements()){
+		for(auto element: elements(clusterMembership)){
 			std::size_t j = element.label;
 			noalias(newCenters[j]) += element.input;
 			numPoints[j]++;
@@ -75,7 +76,7 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 			if (numPoints[j] == 0) {
 				// empty cluster - assign random training point
 				std::size_t index = random::discrete(random::globalRng, std::size_t(0), ell-1);
-				newCenters[j] = dataset.element(index);
+				newCenters[j] = data[index];
 			}
 			else {
 				newCenters[j] /= (double)numPoints[j];
@@ -87,8 +88,8 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		// equal to the old one, in that case we stop after this iteration
 		Data<unsigned int> newClusterMembership = model(dataset);
 		equal = boost::equal(
-			newClusterMembership.elements(),
-			clusterMembership.labels().elements()
+			elements(newClusterMembership),
+			elements(clusterMembership.labels())
 		);
 		clusterMembership.labels() = newClusterMembership;
 	}
@@ -101,6 +102,6 @@ std::size_t shark::kMeans(Data<RealVector> const& data, RBFLayer& model, std::si
 	//calculate clustering
 	Centroids centroids;
 	std::size_t iter = kMeans(data,model.outputShape().numElements(),centroids,maxIterations);
-	model.centers() = createBatch<RealVector>(centroids.centroids().elements());
+	model.centers() = createBatch<RealVector>(elements(centroids.centroids()));
 	return iter;
 }

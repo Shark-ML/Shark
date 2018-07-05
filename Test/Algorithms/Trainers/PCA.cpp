@@ -52,7 +52,7 @@ double principalComponents[3][3] =
 };
 
 ///The 3D test distribution is just a multivariate Gaussian.
-UnlabeledData<RealVector> createData3D()
+Data<RealVector> createData3D()
 {
 	const unsigned numberOfExamples = 30000;
 
@@ -88,7 +88,7 @@ UnlabeledData<RealVector> createData3D()
 }
 
 ///The 2D test distribution is an even simpler Gaussian.
-UnlabeledData<RealVector> createData2D()
+Data<RealVector> createData2D()
 {
 	const unsigned numberOfExamples = 10000;
 
@@ -110,7 +110,7 @@ UnlabeledData<RealVector> createData2D()
 ///The test distribution here is the same as in createData3D, but in this case
 ///we add a lot of low variance uncorrelatd variables on top. after that w generate a very small
 ///dataset, such that the simple PCA computation does not work anymore.
-UnlabeledData<RealVector> createDataNotFullRank()
+Data<RealVector> createDataNotFullRank()
 {
 	const unsigned dimensions = 10;
 	const unsigned numberOfExamples = 5;
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 	//
 
 	// create 2D sample data
-	UnlabeledData<RealVector> data = createData2D();
+	Data<RealVector> data = createData2D();
 	Data<RealVector> encodedData, decodedData;
 	
 	// compute statistics
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE( PCA_TEST_MORE_DATA_THAN_DIMENSIONS ){
 
 BOOST_AUTO_TEST_CASE( PCA_TEST_LESS_DATA_THAN_DIMENSIONS ){
 
-	UnlabeledData<RealVector> data = createDataNotFullRank();
+	Data<RealVector> data = createDataNotFullRank();
 	Data<RealVector> encodedData, decodedData;
 	// compute statistics
 	RealVector mean, var;

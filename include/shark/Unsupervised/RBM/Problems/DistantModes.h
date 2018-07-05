@@ -44,7 +44,7 @@ namespace shark{
 ///but the closer are the modes and thus the easier the data distribution is to learn.
 class DistantModes{
 private:
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 	
 	double m_p;
 	unsigned m_dim;
@@ -96,7 +96,7 @@ public:
 	}
     
 	///returns the generated dataset
-	UnlabeledData<RealVector> data() const{
+	Data<RealVector> data() const{
 		return m_data;
 	};
 	

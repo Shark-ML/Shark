@@ -47,11 +47,9 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 
 	// compute kernel on the inputs
 	RealMatrix g(data.numberOfElements(), data.numberOfElements());
-	for (std::size_t i=0; i<data.numberOfElements(); i++)
-	{
-		for (std::size_t j=0; j<=i; j++)
-		{
-			double k = gauss(data.element(i).input, data.element(j).input);
+	for (std::size_t i=0; i<data.numberOfElements(); i++){
+		for (std::size_t j=0; j<=i; j++){
+			double k = gauss(elements(data)[i].input,elements(data)[j].input);
 			g(i, j) = g(j, i) = k;
 		}
 	}

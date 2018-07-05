@@ -41,6 +41,7 @@
 
 
 #include <shark/Data/Dataset.h>
+#include <shark/Data/DataView.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Models/Kernels/KernelHelpers.h>
 
@@ -68,91 +69,75 @@ namespace shark {
 /// the various SVM-trainers.
 ///
 template <class InputType, class CacheType>
-class KernelMatrix
-{
+class KernelMatrix{
 public:
-    typedef CacheType QpFloatType;
+	typedef CacheType QpFloatType;
 
-    /// Constructor
-    /// \param kernelfunction   kernel function defining the Gram matrix
-    /// \param data             data to evaluate the kernel function
-    KernelMatrix(AbstractKernelFunction<InputType> const& kernelfunction,
-            Data<InputType> const& data)
-    : kernel(kernelfunction)
-    , m_data(data)
-    , m_accessCounter( 0 )
-    {
-        std::size_t elements = m_data.numberOfElements();
-        x.resize(elements);
-        typename Data<InputType>::const_element_range::iterator iter=m_data.elements().begin();
-        for(std::size_t i = 0; i != elements; ++i,++iter){
-            x[i]=iter.getInnerIterator();
-        }
-    }
+	/// Constructor
+	/// \param kernelfunction   kernel function defining the Gram matrix
+	/// \param data             data to evaluate the kernel function
+	KernelMatrix(AbstractKernelFunction<InputType> const& kernelfunction,
+	    Data<InputType> const& data)
+	: kernel(kernelfunction)
+	, m_data(data)
+	, m_accessCounter( 0 ){}
 
-    /// return a single matrix entry
-    QpFloatType operator () (std::size_t i, std::size_t j) const
-    { return entry(i, j); }
+	/// return a single matrix entry
+	QpFloatType operator () (std::size_t i, std::size_t j) const
+	{ return entry(i, j); }
 
-    /// return a single matrix entry
-    QpFloatType entry(std::size_t i, std::size_t j) const
-    {
-        ++m_accessCounter;
-        return (QpFloatType)kernel.eval(*x[i], *x[j]);
-    }
-    
-    /// \brief Computes the i-th row of the kernel matrix.
-    ///
-    ///The entries start,...,end of the i-th row are computed and stored in storage.
-    ///There must be enough room for this operation preallocated.
-    void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
-        m_accessCounter += end-start;
-        
-        typename AbstractKernelFunction<InputType>::ConstInputReference xi = *x[i];
-        SHARK_PARALLEL_FOR(int j = (int)start; j < (int) end; j++)
-        {
-            storage[j-start] = QpFloatType(kernel.eval(xi, *x[j]));
-        }
-    }
-    
-    /// \brief Computes the kernel-matrix
-    template<class M>
-    void matrix(
-        blas::matrix_expression<M, blas::cpu_tag> & storage
-    ) const{
-        calculateRegularizedKernelMatrix(kernel,m_data,storage);
-    }
+	/// return a single matrix entry
+	QpFloatType entry(std::size_t i, std::size_t j) const
+	{
+		++m_accessCounter;
+		return (QpFloatType)kernel.eval(m_data[i], m_data[j]);
+	}
 
-    /// swap two variables
-    void flipColumnsAndRows(std::size_t i, std::size_t j){
-        using std::swap;
-        swap(x[i],x[j]);
-    }
+	/// \brief Computes the i-th row of the kernel matrix.
+	///
+	///The entries start,...,end of the i-th row are computed and stored in storage.
+	///There must be enough room for this operation preallocated.
+	void row(std::size_t i, std::size_t start,std::size_t end, QpFloatType* storage) const{
+		m_accessCounter += end-start;
 
-    /// return the size of the quadratic matrix
-    std::size_t size() const
-    { return x.size(); }
+		auto const& xi = m_data[i];
+		SHARK_PARALLEL_FOR(int j = (int)start; j < (int) end; j++)
+		{
+		    storage[j-start] = QpFloatType(kernel.eval(xi, m_data[j]));
+		}
+	}
 
-    /// query the kernel access counter
-    unsigned long long getAccessCount() const
-    { return m_accessCounter; }
+	/// \brief Computes the kernel-matrix
+	template<class M>
+	void matrix(blas::matrix_expression<M, blas::cpu_tag> & storage) const{
+		calculateRegularizedKernelMatrix(kernel,m_data.dataset(),storage);
+	}
 
-    /// reset the kernel access counter
-    void resetAccessCount()
-    { m_accessCounter = 0; }
+	/// swap two variables
+	void flipColumnsAndRows(std::size_t i, std::size_t j){
+		m_data.swapElements(i,j);
+	}
+
+	/// return the size of the quadratic matrix
+	std::size_t size() const
+	{ return m_data.size(); }
+
+	/// query the kernel access counter
+	unsigned long long getAccessCount() const
+	{ return m_accessCounter; }
+
+	/// reset the kernel access counter
+	void resetAccessCount()
+	{ m_accessCounter = 0; }
 
 protected:
-    /// Kernel function defining the kernel Gram matrix
-    const AbstractKernelFunction<InputType>& kernel;
+	/// Kernel function defining the kernel Gram matrix
+	const AbstractKernelFunction<InputType>& kernel;
 
-    Data<InputType> m_data;
+	DataView<Data<InputType> const> m_data;
 
-    typedef typename Batch<InputType>::const_iterator PointerType;
-    /// Array of data pointers for kernel evaluations
-    std::vector<PointerType> x;
-
-    /// counter for the kernel accesses
-    mutable unsigned long long m_accessCounter;
+	/// counter for the kernel accesses
+	mutable unsigned long long m_accessCounter;
 };
 
 }

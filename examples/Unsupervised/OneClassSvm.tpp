@@ -48,6 +48,7 @@ using namespace std;
 class Gaussians : public DataDistribution<RealVector>
 {
 public:
+	Gaussians():DataDistribution<RealVector>(2){}
 	void draw(RealVector& point) const
 	{
 		point.resize(2);
@@ -71,7 +72,7 @@ int main(int argc, char** argv)
 
 	// generate artificial benchmark data
 	Gaussians problem;
-	UnlabeledData<RealVector> data = problem.generateDataset(ell);
+	Data<RealVector> data = problem.generateDataset(ell);
 
 	// define the learner
 	OneClassSvmTrainer<RealVector> trainer(&kernel, nu);
@@ -95,10 +96,7 @@ int main(int argc, char** argv)
 	}
 
 	// mark the samples
-	UnlabeledData<RealVector>::const_element_range elements = data.elements();
-	for (UnlabeledData<RealVector>::const_element_range::const_iterator it = elements.begin(); it != elements.end(); ++it)
-	{
-		RealVector v = *it;
+	for (auto const& v: elements(data)){
 		int x = (int)std::floor(34.5 * v(0) / 5.0 + 34.5 + 0.5);
 		int y = (int)std::floor(17.0 * v(1) / 5.0 + 17.0 + 0.5);
 		if (x >= 0 && y >= 0 && x < 70 && y < 35) output[y][x] = '*';

@@ -46,7 +46,7 @@ namespace shark{
 ///as 1. Default is 127. If the threshold is 0, no binarization takes place.
 class MNIST{
 private:
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 	std::string m_filename;
 	char m_threshold;
 	std::size_t m_batchSize;
@@ -104,7 +104,7 @@ public:
 	}
 	
 	//Returns the data vector
-	UnlabeledData<RealVector> data() const {
+	Data<RealVector> data() const {
 		return m_data;
 	}	
 	

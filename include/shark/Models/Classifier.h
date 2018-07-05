@@ -98,7 +98,7 @@ public:
 	}
 	
 	///\brief Returns the expected shape of the input
-	Shape inputShape() const{
+	typename shape_type<InputType>::type inputShape() const{
 		return m_decisionFunction.inputShape();
 	}
 	///\brief Returns the shape of the output

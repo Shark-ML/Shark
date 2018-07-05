@@ -14,11 +14,10 @@ typedef MultiTaskSample<RealVector> InputType;
 
 
 // Multi-task problem with up to three tasks.
-class MultiTaskProblem : public LabeledDataDistribution<InputType, unsigned int>
-{
+class MultiTaskProblem : public LabeledDataDistribution<InputType, unsigned int>{
 public:
 	MultiTaskProblem()
-	{
+	:LabeledDataDistribution<InputType, unsigned int>({{2,3} ,2}){
 		m_task[0] = true;
 		m_task[1] = true;
 		m_task[2] = true;
@@ -35,7 +34,7 @@ public:
 	{
 		size_t taskindex = 0;
 		do {
-			taskindex = random::uni(random::globalRng, 0, 2);
+			taskindex = random::discrete(random::globalRng, 0, 2);
 		} while (! m_task[taskindex]);
 		double x1 = random::gauss(random::globalRng);
 		double x2 = 3.0 * random::gauss(random::globalRng);
@@ -69,11 +68,8 @@ int main(int argc, char** argv)
 	LabeledData<InputType, unsigned int> test = problem.generateDataset(ell_test);
 
 	// merge all inputs into a single data object
-	Data<InputType> data(ell_train + ell_test);
-	for (size_t i=0; i<ell_train; i++) 
-		data.element(i) = training.inputs().element(i);
-	for (size_t i=0; i<ell_test; i++) 
-		data.element(ell_train + i) = test.inputs().element(i);
+	Data<InputType> data = training.inputs();
+	data.append(test.inputs());
 
 	// create kernel objects
 	GaussianRbfKernel<RealVector> inputKernel(gamma);   // Gaussian kernel on inputs
@@ -92,8 +88,6 @@ int main(int argc, char** argv)
 	cout << "done." << endl;
 
 	ZeroOneLoss<unsigned int> loss;
-	Data<RealVector> output;
-
 	// evaluate training performance
 	double trainError = loss.eval(training.labels(), ke(training.inputs()));
 	cout << "training error:\t" <<  trainError << endl;

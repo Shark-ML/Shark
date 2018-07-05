@@ -43,8 +43,6 @@
 #ifndef SHARK_MODELS_CSVMDERIVATIVE_H
 #define SHARK_MODELS_CSVMDERIVATIVE_H
 
-#include <shark/Core/INameable.h>
-#include <shark/Core/ISerializable.h>
 #include <shark/Algorithms/Trainers/CSvmTrainer.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
 namespace shark {
@@ -68,9 +66,10 @@ namespace shark {
 /// \tparam CacheType While the basic cache type defaults to float in the QP algorithms, it here defaults to double, because the SVM derivative benefits a lot from higher precision.
 ///
 template< class InputType, class CacheType = double >
-class CSvmDerivative : public ISerializable, public INameable
+class CSvmDerivative
 {
 public:
+	typedef typename Batch<InputType>::type BatchInputType;
 	typedef CacheType QpFloatType;
 	typedef KernelClassifier<InputType> KeType;
 	typedef AbstractKernelFunction<InputType> KernelType;
@@ -79,12 +78,9 @@ public:
 protected:
 
 	// key external members through which main information is obtained
-	KernelExpansion<InputType>* mep_ke;  ///< pointer to the KernelExpansion which has to have been been trained by the below SvmTrainer
-	TrainerType* mep_tr; ///< pointer to the SvmTrainer with which the above KernelExpansion has to have been trained
-	KernelType* mep_k; ///< convenience pointer to the underlying kernel function
-	RealMatrix& m_alpha; ///< convenience reference to the alpha values of the KernelExpansion
-	const Data<InputType>& m_basis; ///< convenience reference to the underlying data of the KernelExpansion
-	const RealVector& m_db_dParams_from_solver; ///< convenience access to the correction term from the solver, for the rare case that there are no free SVs
+	KernelType const* mep_k; ///< convenience pointer to the underlying kernel function
+	Data<InputType> m_basis; ///< convenience reference to the underlying data of the KernelExpansion
+	RealVector m_db_dParams_from_solver; ///< convenience access to the correction term from the solver, for the rare case that there are no free SVs
 
 	// convenience copies from the CSvmTrainer and the underlying kernel function
 	double m_C; ///< the regularization parameter value with which the SvmTrainer trained the KernelExpansion
@@ -97,8 +93,10 @@ protected:
 	std::size_t m_noofBoundedSVs; ///< number of bounded SVs
 	std::vector< std::size_t > m_freeAlphaIndices; ///< indices of free SVs
 	std::vector< std::size_t > m_boundedAlphaIndices; ///< indices of bounded SVs
+	std::vector< bool > m_isFreeAlpha;/// true oif the i-th index is bounded
+	std::vector< bool > m_isBoundedAlpha;/// true oif the i-th index is free
+	
 	RealVector m_freeAlphas; 	///< free non-SV alpha values
-	RealVector m_boundedAlphas; ///< bounded non-SV alpha values
 	RealVector m_boundedLabels; ///< labels of bounded non-SVs
 
 	/// Main member and result, computed in the prepareDerivative-step:
@@ -115,72 +113,76 @@ public:
 	/// performs basic sanity checks.
 	/// \param ke pointer to the KernelExpansion which has to have been been trained by the below SvmTrainer
 	/// \param trainer pointer to the SvmTrainer with which the above KernelExpansion has to have been trained
-	CSvmDerivative( KeType* ke, TrainerType* trainer )
-	: mep_ke( &ke->decisionFunction() ),
-	  mep_tr( trainer ),
-	  mep_k( trainer->kernel() ),
-	  m_alpha( mep_ke->alpha() ),
-	  m_basis( mep_ke->basis() ),
-	  m_db_dParams_from_solver( trainer->get_db_dParams() ),
-	  m_C ( trainer->C() ),
-	  m_unconstrained( trainer->isUnconstrained() ),
-	  m_nkp( trainer->kernel()->numberOfParameters() ),
-	  m_nhp( trainer->kernel()->numberOfParameters()+1 )
-	{
-		SHARK_RUNTIME_CHECK( mep_ke->kernel() == trainer->kernel(), "[CSvmDerivative::CSvmDerivative] KernelExpansion and SvmTrainer must use the same KernelFunction.");
-		SHARK_RUNTIME_CHECK( mep_ke != NULL, "[CSvmDerivative::CSvmDerivative] KernelExpansion cannot be NULL.");
-		SHARK_RUNTIME_CHECK( mep_ke->outputShape().numElements() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
-		SHARK_RUNTIME_CHECK( mep_ke->hasOffset() == 1, "[CSvmDerivative::CSvmDerivative] only defined for SVMs with offset.");
-		SHARK_RUNTIME_CHECK( m_alpha.size2() == 1, "[CSvmDerivative::CSvmDerivative] this class is only defined for binary SVMs.");
-		prepareCSvmParameterDerivative(); //main
+	CSvmDerivative( KeType const& ke, TrainerType const& trainer )
+	: mep_k( ke.decisionFunction().kernel() )
+	, m_basis( ke.decisionFunction().basis() )
+	, m_db_dParams_from_solver( trainer.get_db_dParams() )
+	, m_C ( trainer.C() )
+	, m_unconstrained( trainer.isUnconstrained() )
+	, m_nkp( mep_k->numberOfParameters() )
+	, m_nhp( mep_k->numberOfParameters()+1 ){
+		SHARK_RUNTIME_CHECK( mep_k == trainer.kernel(), "[CSvmDerivative::CSvmDerivative] KernelExpansion and SvmTrainer must use the same KernelFunction.");
+		SHARK_RUNTIME_CHECK( ke.decisionFunction().outputShape().numElements() == 1, "[CSvmDerivative::CSvmDerivative] only defined for binary SVMs.");
+		SHARK_RUNTIME_CHECK( ke.decisionFunction().hasOffset() == 1, "[CSvmDerivative::CSvmDerivative] only defined for SVMs with offset.");
+		prepareCSvmParameterDerivative(ke.decisionFunction().alpha(), ke.decisionFunction().offset(0)); //main
 	}
-
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "CSvmDerivative"; }
-
-	inline const KeType* ke() { return mep_ke; }
-	inline const TrainerType* trainer() { return mep_tr; }
-
-	//! Computes the derivative of the model w.r.t. regularization and kernel parameters.
-	//! Be sure to call prepareCSvmParameterDerivative after SVM training and before calling this function!
-	//! \param input an example to be scored by the SVM
-	//! \param derivative a vector of derivatives of the score. The last entry is w.r.t. C.
-	void modelCSvmParameterDerivative(const InputType& input, RealVector& derivative )
-	{
-		// create temporary batch helpers
-		RealMatrix unit_weights(1,1,1.0);
-		RealMatrix bof_results(1,1);
-		typename Batch<InputType>::type bof_xi = Batch<InputType>::createBatch(input,1);
-		typename Batch<InputType>::type bof_input = Batch<InputType>::createBatch(input,1);
-		getBatchElement(bof_input, 0) = input; //fixed over entire function scope
-
-		// init helpers
-		RealVector der( m_nhp );
-		boost::shared_ptr<State> state = mep_k->createState(); //state from eval and for derivatives
+	
+	void modelCSvmParameterDerivative(BatchInputType const& inputs, RealMatrix const& coefficients, RealVector& derivative){
+		SIZE_CHECK(coefficients.size2() == 1);//we only implement this for one output
+		SIZE_CHECK(coefficients.size1() == batchSize(inputs));//wnumber of inputs and labels must agree
+		
 		derivative.resize( m_nhp );
+		auto coeffs = column(coefficients,0);
 
 		// start calculating derivative
-		noalias(derivative) = row(m_d_alphab_d_theta,m_noofFreeSVs); //without much thinking, we add db/d(\theta) to all derivatives
+		//without much thinking, we add db/d(\theta) to the derivative for each point in the batch
+		noalias(derivative) = sum(coeffs) * row(m_d_alphab_d_theta,m_noofFreeSVs); 
+		
 		// first: go through free SVs and add their contributions (the actual ones, which use the matrix d_alphab_d_theta)
-		for ( std::size_t i=0; i<m_noofFreeSVs; i++ ) {
-			getBatchElement(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]);
-			mep_k->eval( bof_input, bof_xi, bof_results, *state );
-			double ker = bof_results(0,0);
-			double cur_alpha = m_freeAlphas(i);
-			mep_k->weightedParameterDerivative( bof_input, bof_xi, unit_weights, *state, der );
-			noalias(derivative) += ker * row(m_d_alphab_d_theta,i); //for C, simply add up the individual contributions
-			noalias(subrange(derivative,0,m_nkp))+= cur_alpha*der;
-		}
-		// second: go through all bounded SVs and add their "trivial" derivative contributions
-		for ( std::size_t i=0; i<m_noofBoundedSVs; i++ ) {
-			getBatchElement(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]);
-			mep_k->eval( bof_input, bof_xi, bof_results, *state );
-			double ker = bof_results(0,0);
-			double cur_label = m_boundedLabels(i);
-			mep_k->weightedParameterDerivative( bof_input, bof_xi, unit_weights, *state, der );
-			derivative( m_nkp ) += ker * cur_label; //deriv of bounded alpha w.r.t. C is simply the label
-			noalias(subrange(derivative,0,m_nkp))+= cur_label * m_C * der;
+		std::size_t indexFree = 0;
+		std::size_t indexBounded = 0;
+		std::size_t index = 0;
+		for ( auto const& batch: m_basis.batches()){
+			std::size_t size = batchSize(batch);
+			//compute kernel matrix for batch and store state for derivative
+			RealMatrix kernelResult;
+			boost::shared_ptr<State> state = mep_k->createState(); //state from eval and for derivatives
+			mep_k->eval( batch, inputs, kernelResult, *state );
+			
+			//first update derivative of kernels
+			//setup coefficients for the kernel
+			RealMatrix kernelCoeffs(size, kernelResult.size2(),0.0);
+			std::size_t curFree = indexFree;
+			std::size_t curBounded = indexBounded;
+			for(std::size_t i = 0; i != size; ++i){
+				if(m_isFreeAlpha[index + i]){
+					noalias(row(kernelCoeffs,i) ) = m_freeAlphas(curFree) * coeffs;
+					++curFree;
+				}else if(m_isBoundedAlpha[index + i]){
+					noalias(row(kernelCoeffs,i) ) = m_boundedLabels(curBounded) * m_C * coeffs;
+					++curBounded;
+				}
+			}
+			//compute the derivative for each element in the batch and sum together using the
+			//coefficient matrix computed before
+			RealVector batchDerivative;//stores derivative of a single batch
+			mep_k->weightedParameterDerivative( batch, inputs, kernelCoeffs, *state, batchDerivative );
+			noalias(subrange(derivative,0,m_nkp)) += batchDerivative;
+			
+			//compute derivative wrt C
+			for(std::size_t i = 0; i != size; ++i){
+				double weight = inner_prod(coeffs,row(kernelResult,i));
+				if(m_isFreeAlpha[index + i]){
+					//for free alphas, simply add up the individual contributions
+					noalias(derivative) += weight * row(m_d_alphab_d_theta,indexFree);
+					++indexFree;
+				}else if(m_isBoundedAlpha[index + i]){
+					//deriv of bounded alpha w.r.t. C is simply the label
+					derivative( m_nkp ) += weight * m_boundedLabels(indexBounded);
+					++indexBounded;
+				}
+			}
+			index += size;
 		}
 		if ( m_unconstrained )
 			derivative( m_nkp ) *= m_C; //compensate for log encoding via chain rule
@@ -189,7 +191,7 @@ public:
 
 		// in some rare cases, there are no free SVs and we have to manually correct the derivatives using a correcting term from the SvmTrainer.
 		if ( m_noofFreeSVs == 0 ) {
-			noalias(derivative) += m_db_dParams_from_solver;
+			noalias(derivative) +=sum(coeffs) * m_db_dParams_from_solver;
 		}
 	}
 
@@ -207,13 +209,6 @@ public:
 		return m_d_alphab_d_theta;
 	}
 
-	/// From ISerializable, reads a network from an archive
-	virtual void read( InArchive & archive ) {
-	}
-	/// From ISerializable, writes a network to an archive
-	virtual void write( OutArchive & archive ) const {
-	}
-
 private:
 
 	///////////  DERIVATIVE OF BINARY (C-)SVM  ////////////////////
@@ -224,18 +219,23 @@ private:
 	//!  Note: we follow the alpha-encoding-conventions of Glasmacher's dissertation, where the alpha values
 	//!  are re-encoded by multiplying each with the corresponding label
 	//!
-	void prepareCSvmParameterDerivative() {
+	void prepareCSvmParameterDerivative(RealMatrix const& alpha, double offset) {
 		// init convenience size indicators
-		std::size_t numberOfAlphas = m_alpha.size1();
+		std::size_t numberOfAlphas = alpha.size1();
+		
+		m_isFreeAlpha = std::vector<bool>(numberOfAlphas, false);
+		m_isBoundedAlpha = std::vector<bool>(numberOfAlphas, false);
 
 		// first round through alphas: count free and bounded SVs
 		for ( std::size_t i=0; i<numberOfAlphas; i++ ) {
-			double cur_alpha = m_alpha(i,0); //we assume (and checked) that there is only one class
+			double cur_alpha = alpha(i,0); //we assume (and checked) that there is only one class
 			if ( cur_alpha != 0.0 ) {
 				if ( cur_alpha == m_C || cur_alpha == -m_C ) { //the svm formulation using reparametrized alphas is assumed
 					m_boundedAlphaIndices.push_back(i);
+					m_isBoundedAlpha[i] = true;
 				} else {
 					m_freeAlphaIndices.push_back(i);
+					m_isFreeAlpha[i] = true;
 				}
 			}
 		}
@@ -248,14 +248,14 @@ private:
 
 		// 2nd round through alphas: build up the RealVector of free and bounded alphas (needed for matrix-vector-products later)
 		m_freeAlphas.resize( m_noofFreeSVs+1);
-		m_boundedAlphas.resize( m_noofBoundedSVs );
+		RealVector boundedAlphas( m_noofBoundedSVs );
 		m_boundedLabels.resize( m_noofBoundedSVs );
 		for ( std::size_t i=0; i<m_noofFreeSVs; i++ )
-			m_freeAlphas(i) = m_alpha( m_freeAlphaIndices[i], 0 );
-		m_freeAlphas( m_noofFreeSVs ) = mep_ke->offset(0);
+			m_freeAlphas(i) = alpha( m_freeAlphaIndices[i], 0 );
+		m_freeAlphas( m_noofFreeSVs ) = offset;
 		for ( std::size_t i=0; i<m_noofBoundedSVs; i++ ) {
-			double cur_alpha = m_alpha( m_boundedAlphaIndices[i], 0 );
-			m_boundedAlphas(i) = cur_alpha;
+			double cur_alpha = alpha( m_boundedAlphaIndices[i], 0 );
+			boundedAlphas(i) = cur_alpha;
 			m_boundedLabels(i) = ( (cur_alpha > 0.0) ? 1.0 : -1.0 );
 		}
 		
@@ -274,17 +274,10 @@ private:
 		// create temporary batch helpers
 		RealMatrix unit_weights(1,1,1.0);
 		RealMatrix bof_results(1,1);
-		typename Batch<InputType>::type bof_xi;
-		typename Batch<InputType>::type bof_xj;
-		if ( m_noofFreeSVs != 0 ) {
-			bof_xi = Batch<InputType>::createBatch( m_basis.element(m_freeAlphaIndices[0]), 1 ); //any input works
-			bof_xj = Batch<InputType>::createBatch( m_basis.element(m_freeAlphaIndices[0]), 1 ); //any input works
-		} else if ( m_noofBoundedSVs != 0 ) {
-			bof_xi = Batch<InputType>::createBatch( m_basis.element(m_boundedAlphaIndices[0]), 1 ); //any input works
-			bof_xj = Batch<InputType>::createBatch( m_basis.element(m_boundedAlphaIndices[0]), 1 ); //any input works
-		} else {
-			throw SHARKEXCEPTION("[CSvmDerivative::prepareCSvmParameterDerivative] Something went very wrong.");
-		}
+		typename Batch<InputType>::type bof_xi = Batch<InputType>::createBatchFromShape( m_basis.shape(), 1 );
+		typename Batch<InputType>::type bof_xj = Batch<InputType>::createBatchFromShape( m_basis.shape(), 1 );
+
+		auto elements = shark::elements(m_basis);
 
 		
 		// initialize H and dH
@@ -295,10 +288,10 @@ private:
 		RealMatrix H( m_noofFreeSVs + 1, m_noofFreeSVs + 1,0.0);
 		std::vector< RealMatrix > dH( m_nkp , RealMatrix(m_noofFreeSVs+1, m_noofFreeSVs+1));
 		for ( std::size_t i=0; i<m_noofFreeSVs; i++ ) {
-			getBatchElement(bof_xi, 0) = m_basis.element(m_freeAlphaIndices[i]); //fixed over outer loop
+			getBatchElement(bof_xi, 0) = elements[m_freeAlphaIndices[i]]; //fixed over outer loop
 			// fill the off-diagonal entries..
 			for ( std::size_t j=0; j<i; j++ ) {
-				getBatchElement(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
+				getBatchElement(bof_xj, 0) = elements[m_freeAlphaIndices[j]]; //get second sample into a batch
 				mep_k->eval( bof_xi, bof_xj, bof_results, *state );
 				H( i,j ) = H( j,i ) = bof_results(0,0);
 				mep_k->weightedParameterDerivative( bof_xi, bof_xj, unit_weights, *state, der );
@@ -328,9 +321,9 @@ private:
 		RealMatrix R( m_noofFreeSVs+1, m_noofBoundedSVs );
 		std::vector< RealMatrix > dR( m_nkp, RealMatrix(m_noofFreeSVs+1, m_noofBoundedSVs));
 		for ( std::size_t i=0; i<m_noofBoundedSVs; i++ ) {
-			getBatchElement(bof_xi, 0) = m_basis.element(m_boundedAlphaIndices[i]); //fixed over outer loop
+			getBatchElement(bof_xi, 0) = elements[m_boundedAlphaIndices[i]]; //fixed over outer loop
 			for ( std::size_t j=0; j<m_noofFreeSVs; j++ ) { //this time, we (have to) do it row by row
-				getBatchElement(bof_xj, 0) = m_basis.element(m_freeAlphaIndices[j]); //get second sample into a batch
+				getBatchElement(bof_xj, 0) = elements[m_freeAlphaIndices[j]]; //get second sample into a batch
 				mep_k->eval( bof_xi, bof_xj, bof_results, *state );
 				R( j,i ) = bof_results(0,0);
 				mep_k->weightedParameterDerivative( bof_xi, bof_xj, unit_weights, *state, der );
@@ -359,7 +352,7 @@ private:
 		for ( std::size_t k=0; k<m_nkp; k++ ) {
 			RealVector sum = prod( dH[k], m_freeAlphas ); //sum = dH * \alpha_f
 			if(m_noofBoundedSVs > 0)
-				noalias(sum) += prod( dR[k], m_boundedAlphas ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
+				noalias(sum) += prod( dR[k], boundedAlphas ); // sum += dR * \alpha_r , i.e., the C*y_g is expressed as alpha_g
 			//fill the remaining columns of the derivative matrix (except the last, which is for C)
 			noalias(column(m_d_alphab_d_theta,k)) = sum;
 		}

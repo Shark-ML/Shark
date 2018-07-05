@@ -154,9 +154,10 @@ private:
 		BlockMatrixType blockkm(&km);
 		MatrixType matrix(&blockkm);
 		SVMProblemType svmProblem(matrix);
+		auto elements = shark::elements(dataset);
 		for(std::size_t i = 0; i != ic; ++i){
-			svmProblem.linear(i) = dataset.element(i).label(0) - m_epsilon;
-			svmProblem.linear(i+ic) = dataset.element(i).label(0) + m_epsilon;
+			svmProblem.linear(i) = elements[i].label(0) - m_epsilon;
+			svmProblem.linear(i+ic) = elements[i].label(0) + m_epsilon;
 			svmProblem.boxMin(i) = 0;
 			svmProblem.boxMax(i) = this->C();
 			svmProblem.boxMin(i+ic) = -this->C();

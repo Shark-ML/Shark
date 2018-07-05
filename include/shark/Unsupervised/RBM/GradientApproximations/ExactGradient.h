@@ -54,7 +54,7 @@ public:
 	std::string name() const
 	{ return "ExactGradient"; }
 
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 	}
 
@@ -94,8 +94,8 @@ public:
 		double negLogLikelihood = 0;
 		for(RealMatrix const& batch: m_data.batches()) {
 			std::size_t currentBatchSize = batch.size1();
-			typename Gibbs::HiddenSampleBatch hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
-			typename Gibbs::VisibleSampleBatch visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
+			typename Gibbs::HiddenSample hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
+			typename Gibbs::VisibleSample visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 		
 			gibbsSampler.createSample(hiddenSamples,visibleSamples,batch);
 			empiricalExpectation.addVH(hiddenSamples, visibleSamples);
@@ -158,8 +158,8 @@ private:
 			}
 			
 			//create sample from state batch
-			typename Gibbs::HiddenSampleBatch hiddenBatch(currentBatchSize,mpe_rbm->numberOfHN());
-			typename Gibbs::VisibleSampleBatch visibleBatch(currentBatchSize,mpe_rbm->numberOfVN());
+			typename Gibbs::HiddenSample hiddenBatch(currentBatchSize,mpe_rbm->numberOfHN());
+			typename Gibbs::VisibleSample visibleBatch(currentBatchSize,mpe_rbm->numberOfVN());
 			sampler.createSample(hiddenBatch,visibleBatch,stateBatch);
 			
 			//calculate probabilities and update 
@@ -190,8 +190,8 @@ private:
 			}
 			
 			//create sample from state batch
-			typename Gibbs::HiddenSampleBatch hiddenBatch(currentBatchSize,mpe_rbm->numberOfHN());
-			typename Gibbs::VisibleSampleBatch visibleBatch(currentBatchSize,mpe_rbm->numberOfVN());
+			typename Gibbs::HiddenSample hiddenBatch(currentBatchSize,mpe_rbm->numberOfHN());
+			typename Gibbs::VisibleSample visibleBatch(currentBatchSize,mpe_rbm->numberOfVN());
 			hiddenBatch.state=stateBatch;
 			sampler.precomputeVisible(hiddenBatch,visibleBatch, blas::repeat(1,currentBatchSize));
 			
@@ -203,7 +203,7 @@ private:
 		}
 	}
 
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 
 	mutable double m_logPartition; //the partition function of the model distribution
 };	

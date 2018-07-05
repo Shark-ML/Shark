@@ -73,14 +73,14 @@ void TestExportImport_classification(LabeledData<InputType, unsigned int> const&
 	BOOST_CHECK_EQUAL(dataset.numberOfElements(), dataset2.numberOfElements());
 	for (std::size_t i=0; i<dataset.numberOfElements(); i++)
 	{
-		InputType x1 = dataset.element(i).input;
-		InputType x2 = dataset2.element(i).input;
+		InputType x1 = elements(dataset)[i].input;
+		InputType x2 = elements(dataset2)[i].input;
 		BOOST_CHECK_EQUAL(x1.size(), x2.size());
 		for (std::size_t j=0; j<x1.size(); j++)
 		{
 			BOOST_CHECK_EQUAL(x1(j), x2(j));
 		}
-		BOOST_CHECK_EQUAL(dataset.element(i).label, dataset2.element(i).label);
+		BOOST_CHECK_EQUAL(elements(dataset)[i].label, elements(dataset2)[i].label);
 	}
 }
 
@@ -96,16 +96,16 @@ void TestExportImport_regression(LabeledData<InputType, RealVector> const& datas
 	BOOST_CHECK_EQUAL(dataset.numberOfElements(), dataset2.numberOfElements());
 	for (std::size_t i=0; i<dataset.numberOfElements(); i++)
 	{
-		InputType x1 = dataset.element(i).input;
-		InputType x2 = dataset2.element(i).input;
+		InputType x1 = elements(dataset)[i].input;
+		InputType x2 = elements(dataset2)[i].input;
 		BOOST_CHECK_EQUAL(x1.size(), x2.size());
 		for (std::size_t j=0; j<x1.size(); j++)
 		{
 			BOOST_CHECK_EQUAL(x1(j), x2(j));
 		}
-		BOOST_CHECK_EQUAL(dataset.element(i).label.size(), 1);
-		BOOST_CHECK_EQUAL(dataset2.element(i).label.size(), 1);
-		BOOST_CHECK_EQUAL(dataset.element(i).label(0), dataset2.element(i).label(0));
+		BOOST_CHECK_EQUAL(elements(dataset)[i].label.size(), 1);
+		BOOST_CHECK_EQUAL(elements(dataset2)[i].label.size(), 1);
+		BOOST_CHECK_EQUAL(elements(dataset)[i].label(0), elements(dataset2)[i].label(0));
 	}
 }
 
@@ -154,77 +154,77 @@ BOOST_AUTO_TEST_CASE (Set_SparseData)
 	BOOST_CHECK_EQUAL(test_ds_sreg.labelShape(), Shape({1}));
 
 	// check labels of read-in
-	BOOST_CHECK_EQUAL(0u, test_ds_bc.element(0).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_bc.element(1).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_bc.element(2).label);
-	BOOST_CHECK_EQUAL(0u, test_ds_bc.element(3).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_bc.element(4).label);
-	BOOST_CHECK_EQUAL(0u, test_ds_sbc.element(0).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_sbc.element(1).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_sbc.element(2).label);
-	BOOST_CHECK_EQUAL(0u, test_ds_sbc.element(3).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_sbc.element(4).label);
+	BOOST_CHECK_EQUAL(0u, elements(test_ds_bc)[0].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_bc)[1].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_bc)[2].label);
+	BOOST_CHECK_EQUAL(0u, elements(test_ds_bc)[3].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_bc)[4].label);
+	BOOST_CHECK_EQUAL(0u, elements(test_ds_sbc)[0].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_sbc)[1].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_sbc)[2].label);
+	BOOST_CHECK_EQUAL(0u, elements(test_ds_sbc)[3].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_sbc)[4].label);
 
-	BOOST_CHECK_EQUAL(3u, test_ds_mc.element(0).label);
-	BOOST_CHECK_EQUAL(2u, test_ds_mc.element(1).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_mc.element(2).label);
-	BOOST_CHECK_EQUAL(0u, test_ds_mc.element(3).label);
-	BOOST_CHECK_EQUAL(2u, test_ds_mc.element(4).label);
-	BOOST_CHECK_EQUAL(3u, test_ds_smc.element(0).label);
-	BOOST_CHECK_EQUAL(2u, test_ds_smc.element(1).label);
-	BOOST_CHECK_EQUAL(1u, test_ds_smc.element(2).label);
-	BOOST_CHECK_EQUAL(0u, test_ds_smc.element(3).label);
-	BOOST_CHECK_EQUAL(2u, test_ds_smc.element(4).label);
+	BOOST_CHECK_EQUAL(3u, elements(test_ds_mc)[0].label);
+	BOOST_CHECK_EQUAL(2u, elements(test_ds_mc)[1].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_mc)[2].label);
+	BOOST_CHECK_EQUAL(0u, elements(test_ds_mc)[3].label);
+	BOOST_CHECK_EQUAL(2u, elements(test_ds_mc)[4].label);
+	BOOST_CHECK_EQUAL(3u, elements(test_ds_smc)[0].label);
+	BOOST_CHECK_EQUAL(2u, elements(test_ds_smc)[1].label);
+	BOOST_CHECK_EQUAL(1u, elements(test_ds_smc)[2].label);
+	BOOST_CHECK_EQUAL(0u, elements(test_ds_smc)[3].label);
+	BOOST_CHECK_EQUAL(2u, elements(test_ds_smc)[4].label);
 
-	BOOST_CHECK_EQUAL(1, test_ds_reg.element(0).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_reg.element(1).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_reg.element(2).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_reg.element(3).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_reg.element(4).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_sreg.element(0).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_sreg.element(1).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_sreg.element(2).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_sreg.element(3).label.size());
-	BOOST_CHECK_EQUAL(1, test_ds_sreg.element(4).label.size());
-	BOOST_CHECK_EQUAL(  7.1, test_ds_reg.element(0).label(0));
-	BOOST_CHECK_EQUAL( 9.99, test_ds_reg.element(1).label(0));
-	BOOST_CHECK_EQUAL( -5.0, test_ds_reg.element(2).label(0));
-	BOOST_CHECK_EQUAL(  1.0, test_ds_reg.element(3).label(0));
-	BOOST_CHECK_EQUAL(500.0, test_ds_reg.element(4).label(0));
-	BOOST_CHECK_EQUAL(  7.1, test_ds_sreg.element(0).label(0));
-	BOOST_CHECK_EQUAL( 9.99, test_ds_sreg.element(1).label(0));
-	BOOST_CHECK_EQUAL( -5.0, test_ds_sreg.element(2).label(0));
-	BOOST_CHECK_EQUAL(  1.0, test_ds_sreg.element(3).label(0));
-	BOOST_CHECK_EQUAL(500.0, test_ds_sreg.element(4).label(0));
+	BOOST_CHECK_EQUAL(1, elements(test_ds_reg)[0].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_reg)[1].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_reg)[2].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_reg)[3].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_reg)[4].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_sreg)[0].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_sreg)[1].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_sreg)[2].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_sreg)[3].label.size());
+	BOOST_CHECK_EQUAL(1, elements(test_ds_sreg)[4].label.size());
+	BOOST_CHECK_EQUAL(  7.1, elements(test_ds_reg)[0].label(0));
+	BOOST_CHECK_EQUAL( 9.99, elements(test_ds_reg)[1].label(0));
+	BOOST_CHECK_EQUAL( -5.0, elements(test_ds_reg)[2].label(0));
+	BOOST_CHECK_EQUAL(  1.0, elements(test_ds_reg)[3].label(0));
+	BOOST_CHECK_EQUAL(500.0, elements(test_ds_reg)[4].label(0));
+	BOOST_CHECK_EQUAL(  7.1, elements(test_ds_sreg)[0].label(0));
+	BOOST_CHECK_EQUAL( 9.99, elements(test_ds_sreg)[1].label(0));
+	BOOST_CHECK_EQUAL( -5.0, elements(test_ds_sreg)[2].label(0));
+	BOOST_CHECK_EQUAL(  1.0, elements(test_ds_sreg)[3].label(0));
+	BOOST_CHECK_EQUAL(500.0, elements(test_ds_sreg)[4].label(0));
 
 	for (std::size_t i=0; i<NumLines; i++)
 	{
 		// check proper sizes of inputs of all dataset
-		BOOST_REQUIRE_EQUAL(test_ds_bc.element(i).input.size(), VectorSize);
-		BOOST_REQUIRE_EQUAL(test_ds_sbc.element(i).input.size(), VectorSize);
-		BOOST_REQUIRE_EQUAL(test_ds_mc.element(i).input.size(), VectorSize);
-		BOOST_REQUIRE_EQUAL(test_ds_smc.element(i).input.size(), VectorSize);
-		BOOST_REQUIRE_EQUAL(test_ds_reg.element(i).input.size(), VectorSize);
-		BOOST_REQUIRE_EQUAL(test_ds_sreg.element(i).input.size(), VectorSize);
+		BOOST_REQUIRE_EQUAL(elements(test_ds_bc)[i].input.size(), VectorSize);
+		BOOST_REQUIRE_EQUAL(elements(test_ds_sbc)[i].input.size(), VectorSize);
+		BOOST_REQUIRE_EQUAL(elements(test_ds_mc)[i].input.size(), VectorSize);
+		BOOST_REQUIRE_EQUAL(elements(test_ds_smc)[i].input.size(), VectorSize);
+		BOOST_REQUIRE_EQUAL(elements(test_ds_reg)[i].input.size(), VectorSize);
+		BOOST_REQUIRE_EQUAL(elements(test_ds_sreg)[i].input.size(), VectorSize);
 
 		// check that all elements have the correct values
 		for (std::size_t j=0; j<VectorSize; j++)
 		{
-			BOOST_CHECK_EQUAL(test_ds_bc.element(i).input(j), input_values[i][j]);
-			//~ BOOST_CHECK_EQUAL(test_ds_sbc.element(i).input(j), input_values[i][j]);
-			BOOST_CHECK_EQUAL(test_ds_mc.element(i).input(j), input_values[i][j]);
-			//~ BOOST_CHECK_EQUAL(test_ds_smc.element(i).input(j), input_values[i][j]);
-			BOOST_CHECK_EQUAL(test_ds_reg.element(i).input(j), input_values[i][j]);
-			//~ BOOST_CHECK_EQUAL(test_ds_sreg.element(i).input(j), input_values[i][j]);
+			BOOST_CHECK_EQUAL(elements(test_ds_bc)[i].input(j), input_values[i][j]);
+			//~ BOOST_CHECK_EQUAL(elements(test_ds_sbc)[i].input(j), input_values[i][j]);
+			BOOST_CHECK_EQUAL(elements(test_ds_mc)[i].input(j), input_values[i][j]);
+			//~ BOOST_CHECK_EQUAL(elements(test_ds_smc)[i].input(j), input_values[i][j]);
+			BOOST_CHECK_EQUAL(elements(test_ds_reg)[i].input(j), input_values[i][j]);
+			//~ BOOST_CHECK_EQUAL(elements(test_ds_sreg)[i].input(j), input_values[i][j]);
 		}
 	}
 
     // check that labels of dense and sparse datasets agree
 	for (std::size_t i=0; i<NumLines; i++)
 	{
-		BOOST_CHECK_EQUAL(test_ds_bc.element(i).label, test_ds_sbc.element(i).label);
-		BOOST_CHECK_EQUAL(test_ds_mc.element(i).label, test_ds_smc.element(i).label);
-		BOOST_CHECK_EQUAL(test_ds_reg.element(i).label(0), test_ds_sreg.element(i).label(0));
+		BOOST_CHECK_EQUAL(elements(test_ds_bc)[i].label, elements(test_ds_sbc)[i].label);
+		BOOST_CHECK_EQUAL(elements(test_ds_mc)[i].label, elements(test_ds_smc)[i].label);
+		BOOST_CHECK_EQUAL(elements(test_ds_reg)[i].label(0), elements(test_ds_sreg)[i].label(0));
 	}
 
 	// test export + import round trip

@@ -55,6 +55,16 @@ namespace detail{
  *
  * @{
  */
+	
+	
+inline std::size_t numberOfBatches(std::size_t numElements, std::size_t maximumBatchSize){
+	if(maximumBatchSize == 0)
+		maximumBatchSize =numElements;
+	std::size_t batches = numElements / maximumBatchSize;
+	if(numElements-batches*maximumBatchSize > 0)
+		++batches;
+	return batches;
+}
 
 ///\brief Computes a partitioning of a st of elements in batches.
 ///	
@@ -66,16 +76,14 @@ namespace detail{
 /// \param maximumBatchSize the maximum size of a batch
 /// \return a vector with th size of every batch
 inline std::vector<std::size_t> optimalBatchSizes(std::size_t numElements, std::size_t maximumBatchSize){
-	std::vector<std::size_t> batchSizes;
-	std::size_t batches = numElements / maximumBatchSize;
-	if(numElements-batches*maximumBatchSize > 0)
-		++batches;
+	std::size_t batches = numberOfBatches(numElements, maximumBatchSize);
+	std::vector<std::size_t> batchSizes(batches);
 	std::size_t optimalBatchSize=numElements/batches;
 	std::size_t remainder = numElements-batches*optimalBatchSize;
 
-	for(std::size_t j = 0; j != batches; ++j){
-		std::size_t size = (j<remainder)?optimalBatchSize+1:optimalBatchSize;
-		batchSizes.push_back(size);
+	for(std::size_t i = 0; i != batches; ++i){
+		std::size_t size = optimalBatchSize + (i<remainder);
+		batchSizes[i] = size;
 	}
 	return batchSizes;
 }
@@ -128,19 +136,6 @@ void complement(
 	std::copy(resultSet.begin(),pos,comp.begin());
 }
 
-/// compute the index set for the range [0, ..., size[
-template<class T>
-void range(size_t size, T& indices){
-	indices.resize(size);
-	for (size_t i=0; i<size; i++) indices[i] = i;
-}
-/// compute the index set for the range [start, ..., size+start[
-template<class T>
-void range(size_t size,size_t start, T& indices){
-	indices.resize(size);
-	for (size_t i=0; i<size; i++) indices[i] = start+i;
-}
-
 /// \brief Shared memory container class with slicing
 template <class Type>
 class SharedContainer : public ISerializable
@@ -163,48 +158,6 @@ public:
 		m_data.resize(numBatches);
 		for(std::size_t i = 0; i != numBatches; ++i){
 			m_data[i] = boost::make_shared<BatchType>();
-		}
-	}
-
-	///\brief Create an empty container of specified size with copies of an element
-	///
-	///@param size the new size of the container
-	///@param element the blueprint element from which to create the Container
-	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	SharedContainer(std::size_t size, Type const& element, std::size_t batchSize){
-		initializeBatches(size,element,batchSize);
-	}
-
-	///\brief Create container from new data.
-	///
-	///Creates the SharedContainer and splits the incoming data into several batches
-	///
-	///@param data the data from which to create the Container
-	///@param maximumBatchSize The size of the batches. If set to 0, the size is unlimited
-	template<class Range>
-	SharedContainer(Range const& data, std::size_t maximumBatchSize){
-		SIZE_CHECK(data.size() != 0 );
-		std::size_t points = data.size();
-		if(maximumBatchSize == 0)
-			maximumBatchSize = points;
-		
-		//first determin the optimal number of batches as well as batch size
-		std::size_t batches = points / maximumBatchSize;
-		if(points > batches*maximumBatchSize)
-			++batches;
-		std::size_t optimalBatchSize=points/batches;
-		std::size_t remainder = points-batches*optimalBatchSize;
-
-		//now create the batches taking the remainder into account
-		m_data.reserve(batches);
-		std::size_t batchStart = 0;
-		for(std::size_t i = 0; i != batches; ++i){
-			std::size_t size = (i<remainder)?optimalBatchSize+1:optimalBatchSize;
-			std::size_t batchEnd = batchStart+size;//sliced is last element inclusive
-			push_back(Batch<Type>::createBatch(
-				boost::make_iterator_range(boost::begin(data)+batchStart,boost::begin(data)+batchEnd)
-			));
-			batchStart+=size;
 		}
 	}
 
@@ -316,8 +269,12 @@ public:
 
 		auto leftSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),leftElements));
 		auto rightSplit = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(source,0),rightElements));
-		std::copy(BatchTraits::begin(source),BatchTraits::begin(source)+leftElements,BatchTraits::begin(*leftSplit));
-		std::copy(BatchTraits::begin(source)+leftElements,BatchTraits::end(source),BatchTraits::begin(*rightSplit));
+		for(std::size_t i = 0; i != leftElements; ++i){
+			getBatchElement(*leftSplit,i) = getBatchElement(source,i);
+		}
+		for(std::size_t i = 0; i != rightElements; ++i){
+			getBatchElement(*rightSplit,i) = getBatchElement(source,i + leftElements);
+		}
 		*(position.base())=rightSplit;//override old batch
 		m_data.insert(position.base(),leftSplit);
 
@@ -334,49 +291,10 @@ public:
 		m_data.erase(position.base(),m_data.end());
 		return right;
 	}
-
-	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
-	///
-	///After the operation the container will contain batchSizes.size() batchs with the i-th batch having size batchSize[i].
-	///However the sum of all batch sizes must be equal to the current number of elements
-	template<class Range>
-	void repartition(Range const& batchSizes){
-		std::size_t sum = 0;
-		for(std::size_t i: batchSizes)
-			sum += i;
-		SIZE_CHECK(sum == numberOfElements());
-
-
-		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
-		Container newPartitioning;
-		std::size_t currentBatch = 0;
-		std::size_t currentBatchIndex = 0;
-		for(std::size_t i = 0; i != batchSizes.size(); ++i){
-			//create new batch
-			std::size_t currentBatchSize = batchSizes[i];
-			boost::shared_ptr<BatchType> newBatch = boost::make_shared<BatchType>(BatchTraits::createBatch(getBatchElement(batch(currentBatch),0),currentBatchSize));
-			for(std::size_t j = 0; j != currentBatchSize; ++j){
-				getBatchElement(*newBatch,j)=getBatchElement(batch(currentBatch),currentBatchIndex);
-				++currentBatchIndex;
-				if(currentBatchIndex == BatchTraits::size(batch(currentBatch))){
-					m_data[currentBatch].reset();//free old memory
-					++currentBatch;
-					currentBatchIndex = 0;
-				}
-			}
-			newPartitioning.push_back(newBatch);
-		}
-		//sanity check
-		SIZE_CHECK(currentBatch == size());
-		//swap old(mpty) with new partitioning
-		swap(m_data,newPartitioning);
-
-
-	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
-	/// This method can be used together with repartition to ensure
+	/// This method can be used to ensure
 	/// that two SharedContainers have the same batch structure.
 	std::vector<std::size_t> getPartitioning()const{
 		std::vector<std::size_t> batchSizes(size());
@@ -434,24 +352,6 @@ public:
 private:
 	/// \brief Shared storage for the element batches.
 	Container m_data;
-
-	void initializeBatches(std::size_t numElements, Type const& element,std::size_t batchSize){
-		m_data.clear();
-		if(batchSize == 0|| batchSize > numElements){
-			push_back(BatchTraits::createBatch(element,numElements));
-		}
-		else
-		{
-			std::size_t batches = numElements/batchSize+(numElements%batchSize > 0);
-			m_data.reserve(batches);
-			std::size_t finalBatchSize = numElements;
-			for(std::size_t batch = 0; batch != batches-1; ++batch){
-				push_back(BatchTraits::createBatch(element,batchSize));
-				finalBatchSize-=batchSize;
-			}
-			push_back(BatchTraits::createBatch(element,finalBatchSize));
-		}
-	}
 };
 
 template<class C>
@@ -512,133 +412,6 @@ private:
 	C* m_container;
 };
 
-template<class Dataset>
-class DataElementIterator: 
-public SHARK_ITERATOR_FACADE< 
-	DataElementIterator<Dataset>, 
-	typename Dataset::element_type, 
-	std::random_access_iterator_tag, 
-	typename boost::mpl::if_<
-		std::is_const<Dataset>,
-		typename Dataset::const_element_reference,
-		typename Dataset::element_reference
-	>::type
->{
-private:
-	Dataset* m_container;
-	std::size_t m_batchPosition;
-	std::size_t m_elementPosition;
-	std::size_t m_positionInSequence;
-public:
-	typedef typename boost::mpl::if_<
-		std::is_const<Dataset>,
-		typename Dataset::const_element_reference,
-		typename Dataset::element_reference
-	>::type reference;
-
-	DataElementIterator()
-	:m_positionInSequence(0){}
-
-	DataElementIterator(
-		Dataset* container,
-		std::size_t batchPosition,
-		std::size_t elementPosition,
-		std::size_t positionInSequence
-	):m_container(container),
-	m_batchPosition(batchPosition),
-	m_elementPosition(elementPosition),
-	m_positionInSequence(positionInSequence){}
-
-	template<class D>
-	DataElementIterator(DataElementIterator<D> const& other)
-	:m_container(other.m_container),
-	m_batchPosition(other.m_batchPosition),
-	m_elementPosition(other.m_elementPosition),
-	m_positionInSequence(other.m_positionInSequence){}
-	
-	template<class D>
-	DataElementIterator operator=(DataElementIterator<D> const& other){
-		m_container = other.m_container;
-		m_batchPosition = other.m_batchPosition;
-		m_elementPosition = other.m_elementPosition;
-		m_positionInSequence = other.m_positionInSequence;
-	}
-		
-	std::size_t index()const{
-		return m_positionInSequence;
-	}
-	
-	auto getInnerIterator()const ->decltype (batchBegin(m_container->batch(m_batchPosition))){
-		return batchBegin(m_container->batch(m_batchPosition)) + m_elementPosition;
-	}
-
-private:
-	friend class SHARK_ITERATOR_CORE_ACCESS;
-	template <class> friend class DataElementIterator;
-
-	void increment() {
-		++m_positionInSequence;
-		++m_elementPosition;
-		if(m_elementPosition == batchSize(m_container->batch(m_batchPosition))){
-			++m_batchPosition;
-			m_elementPosition = 0;
-		}
-	}
-	void decrement() {
-		SIZE_CHECK(m_positionInSequence);//don't call this method when the iterator is on the first element
-		--m_positionInSequence;
-		if(m_elementPosition == 0){
-			--m_batchPosition;
-			m_elementPosition = batchSize(m_container->batch(m_batchPosition));
-		}
-		--m_elementPosition;
-	}
-	//this is not exactly O(1) as the standard wants. in fact it's O(n) in the number of inner sequences
-	//so approximately O(1) if the size of a sequence is big...
-	void advance(std::ptrdiff_t n){
-		m_positionInSequence += n;
-		n += m_elementPosition;//jump from the start of the current inner sequence
-		m_elementPosition = 0;
-		if( n == 0)
-			return;
-		if(n < 0){
-			std::size_t npos = -n;
-			--m_batchPosition;
-			--npos;
-			//jump over the outer position until we are in the correct range again
-			while (npos != 0 && npos >= batchSize(m_container->batch(m_batchPosition)) ){
-				npos -= batchSize(m_container->batch(m_batchPosition));
-				--m_batchPosition;
-			}
-			m_elementPosition = batchSize(m_container->batch(m_batchPosition)) - 1 - npos;
-		}
-		else{
-			std::size_t npos = n;
-			//jump over the outer position until we are in the correct range again
-			while (npos != 0 && npos >= batchSize(m_container->batch(m_batchPosition))){
-				npos -= batchSize(m_container->batch(m_batchPosition));
-				++m_batchPosition;
-				SHARK_RUNTIME_CHECK(m_batchPosition != m_container->numberOfBatches() || (npos == 0), "iterator went past the end");
-			}
-			m_elementPosition = npos;
-		}
-	}
-
-	template<class Iter>
-	std::ptrdiff_t distance_to(const Iter& other) const{
-		return (std::ptrdiff_t)other.m_positionInSequence - (std::ptrdiff_t)m_positionInSequence;
-	}
-
-	template<class Iter>
-	bool equal(Iter const& other) const{
-		return m_positionInSequence == other.m_positionInSequence;
-	}
-	reference dereference() const {
-		auto&& batch = m_container->batch(m_batchPosition);
-		return getBatchElement(batch,m_elementPosition);
-	}
-};
-
 /// \brief For Data<T> and functor F calculates the result of the resulting elements F(T).
 template<class Functor, class T>
 struct TransformedDataElement{
@@ -660,150 +433,6 @@ public:
 };
 /** @*/
 }
-
-
-///\brief Input-Label pair of data
-template<class InputType,class LabelType>
-struct InputLabelPair{
-	InputType input;
-	LabelType label;
-	
-	InputLabelPair(){}
-
-	template<class I, class L>
-	InputLabelPair(
-		I&& input,
-		L&& label
-	):input(input),label(label){}
-	
-	template<class InputT, class LabelT>
-	InputLabelPair(
-		InputLabelPair<InputT,LabelT> const& pair
-	):input(pair.input),label(pair.label){}
-	
-	InputLabelPair& operator=(
-		InputLabelPair const& pair
-	){
-		input = pair.input;
-		label = pair.label;
-		return *this;
-	}
-	
-	template<class InputT, class LabelT>
-	InputLabelPair& operator=(
-		InputLabelPair<InputT,LabelT> const& pair
-	){
-		input = pair.input;
-		label = pair.label;
-		return *this;
-	}
-		
-	friend bool operator<(InputLabelPair const& op1, InputLabelPair const& op2){
-		return op1.label < op2.label;
-	}
-};
-
-template<class I1, class L1, class I2, class L2>
-void swap(InputLabelPair<I1, L1>&& p1, InputLabelPair<I2, L2>&& p2){
-	using std::swap;
-	swap(p1.input,p2.input);
-	swap(p1.label,p2.label);
-}
-
-///\brief Input label pair of batches
-template<class Batch1Type,class Batch2Type>
-struct InputLabelBatch{
-private:
-	typedef typename BatchTraits<typename std::decay<Batch1Type>::type >::type Batch1Traits;
-	typedef typename BatchTraits<typename std::decay<Batch2Type>::type >::type Batch2Traits;
-public:
-	Batch1Type input;
-	Batch2Type label;
-
-	typedef InputLabelPair<
-		typename Batch1Traits::value_type,
-		typename Batch2Traits::value_type
-	> value_type;
-	//the decltype below adds correct const semantic if the template arguments are references.
-	//the behaviour is the same as mimiking the pair {getBatchElement(input,i), getBatchElement(label,i)}
-	//depending on whether input or label are const or not (which for reference types should not make any difference)
-	typedef InputLabelPair<
-		decltype(getBatchElement(std::declval<Batch1Type&>(),0)),
-		decltype(getBatchElement(std::declval<Batch2Type&>(),0))
-	> reference;
-	typedef InputLabelPair<
-		decltype(getBatchElement(std::declval<typename std::add_const<Batch1Type>::type&>(),0)),
-		decltype(getBatchElement(std::declval<typename std::add_const<Batch2Type>::type&>(),0))
-	> const_reference;
-	typedef IndexingIterator<InputLabelBatch> iterator;
-	typedef IndexingIterator<InputLabelBatch const> const_iterator;
-
-	template<class I, class L>
-	InputLabelBatch(
-		I&& input,
-		L&& label
-	):input(input),label(label){}
-	
-	template<class Pair>
-	InputLabelBatch(
-		std::size_t size,Pair const& p
-	):input(Batch1Traits::createBatch(p.input,size)),label(Batch2Traits::createBatch(p.label,size)){}
-	
-	template<class I, class L>
-	InputLabelBatch& operator=(InputLabelBatch<I,L> const& batch){
-		input = batch.input;
-		label = batch.label;
-		return *this;
-	}
-
-
-	std::size_t size()const{
-		return Batch1Traits::size(input);
-	}
-	
-	iterator begin(){
-		return iterator(*this,0);
-	}
-	const_iterator begin()const{
-		return const_iterator(*this,0);
-	}
-
-	iterator end(){
-		return iterator(*this,size());
-	}
-	const_iterator end()const{
-		return const_iterator(*this,size());
-	}
-
-	reference operator[](std::size_t i){
-		return reference(getBatchElement(input,i),getBatchElement(label,i));
-	}
-	const_reference operator[](std::size_t i)const{
-		return const_reference(getBatchElement(input,i),getBatchElement(label,i));
-	}
-};
-
-template<class I1, class L1, class I2, class L2>
-void swap(InputLabelBatch<I1, L1>& p1, InputLabelBatch<I2, L2>& p2){
-	using std::swap;
-	swap(p1.input,p2.input);
-	swap(p1.label,p2.label);
-}
-
-template<class InputType, class LabelType>
-struct Batch<InputLabelPair<InputType, LabelType> >
-: public detail::SimpleBatch<
-	InputLabelBatch<typename detail::element_to_batch<InputType>::type, typename detail::element_to_batch<LabelType>::type>
->{};
-
-template<class InputBatchType, class LabelBatchType>
-struct BatchTraits<InputLabelBatch<InputBatchType, LabelBatchType> >{
-	typedef typename detail::batch_to_element<InputBatchType>::type InputElem;
-	typedef typename detail::batch_to_element<LabelBatchType>::type LabelElem;
-	typedef Batch<InputLabelPair<InputElem,LabelElem> > type;
-};
-
-
 }
 
 #endif

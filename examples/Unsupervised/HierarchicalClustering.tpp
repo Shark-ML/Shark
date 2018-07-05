@@ -52,8 +52,8 @@ int main(int argc, char** argv)
 	for (std::size_t i=0; i<testSize; i++) 
 		te_d[i](0) = random::uni(random::globalRng,0.0, 100.0);
 		
-	UnlabeledData<RealVector> training = createDataFromRange(tr_d);
-	UnlabeledData<RealVector> test = createDataFromRange(te_d);
+	Data<RealVector> training = createDataFromRange(tr_d);
+	Data<RealVector> test = createDataFromRange(te_d);
 
 	// construct a hierarchical clustering with at most 3 points per cluster
 	LCTree<RealVector> tree(training, TreeConstruction(0, 3));
@@ -66,13 +66,13 @@ int main(int argc, char** argv)
 
 	// output cluster assignments
 	std::cout << "\ntraining data:\n";
-	for (std::size_t i = 0; i != trainingSize; i++){
-		unsigned int cluster = model(training.element(i));
-		std::cout << "   point " << training.element(i)(0) << "  -->  cluster " << cluster << std::endl;
+	for (auto element: elements(training)){
+		unsigned int cluster = model(element);
+		std::cout << "   point " << element(0) << "  -->  cluster " << cluster << std::endl;
 	}
 	std::cout << "\ntest data:\n";
-	for (std::size_t i=0; i<testSize; i++){
-		unsigned int cluster = model(test.element(i));
-		std::cout << "   point " << test.element(i)(0) << "  -->  cluster " << cluster << std::endl;
+	for (auto element: elements(test)){
+		unsigned int cluster = model(element);
+		std::cout << "   point " << element(0) << "  -->  cluster " << cluster << std::endl;
 	}
 }

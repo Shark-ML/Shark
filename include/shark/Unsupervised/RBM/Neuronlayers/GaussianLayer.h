@@ -52,10 +52,8 @@ public:
 	///the state space of this neuron is binary
 	typedef RealSpace StateSpace;
 
-	///\brief The sufficient statistics for the Guassian Layer stores the mean of the neuron and the inverse temperature
-	typedef RealVector SufficientStatistics;
-	///\brief Sufficient statistics of a batch of data.
-	typedef Batch<SufficientStatistics>::type StatisticsBatch;
+	///\brief The sufficient statistics for the Guassian Layer stores the mean of the neuron
+	typedef RealMatrix SufficientStatistics;
 	
 	/// \brief Returns the bias values of the units.
 	const RealVector& bias()const{
@@ -84,7 +82,7 @@ public:
 	/// @param statistics sufficient statistics containing the mean of the resulting Gaussian distribution
 	/// @param beta the inverse Temperature of the RBM (typically 1) for the whole batch
 	template<class Input, class BetaVector>
-	void sufficientStatistics(Input const& input, StatisticsBatch& statistics,BetaVector const& beta)const{ // \todo: auch hier noch mal namen ueberdenken
+	void sufficientStatistics(Input const& input, SufficientStatistics& statistics,BetaVector const& beta)const{ // \todo: auch hier noch mal namen ueberdenken
 		SIZE_CHECK(input.size2() == size());
 		SIZE_CHECK(statistics.size2() == size());
 		SIZE_CHECK(input.size1() == statistics.size1());
@@ -107,7 +105,7 @@ public:
 	/// @param alpha factor changing from gibbs to flip-the state sampling. 0<=alpha<=1
 	/// @param rng the random number generator used for sampling
 	template<class Matrix, class Rng>
-	void sample(StatisticsBatch const& statistics, Matrix& state, double alpha, Rng& rng) const{
+	void sample(SufficientStatistics const& statistics, Matrix& state, double alpha, Rng& rng) const{
 		SIZE_CHECK(statistics.size2() == size());
 		SIZE_CHECK(statistics.size1() == state.size1());
 		SIZE_CHECK(statistics.size2() == state.size2());
@@ -129,7 +127,7 @@ public:
 	/// @param statistics the statistics of the conditional distribution
 	/// @param state the state to check
 	template<class Matrix>
-	RealVector logProbability(StatisticsBatch const& statistics, Matrix const& state) const{
+	RealVector logProbability(SufficientStatistics const& statistics, Matrix const& state) const{
 		SIZE_CHECK(statistics.size2() == size());
 		SIZE_CHECK(statistics.size1() == state.size1());
 		SIZE_CHECK(statistics.size2() == state.size2());
@@ -158,14 +156,14 @@ public:
 	
 	/// \brief Returns the expectation of the phi-function. 
 	/// @param statistics the sufficient statistics (the mean of the distribution).
-	RealMatrix const& expectedPhiValue(StatisticsBatch const& statistics)const{ 
+	RealMatrix const& expectedPhiValue(SufficientStatistics const& statistics)const{ 
 		SIZE_CHECK(statistics.size2() == size());
 		return statistics;	
 	}
 	/// \brief Returns the mean given the state of the connected layer, i.e. in this case the mean of the Gaussian
 	/// 
 	/// @param statistics the sufficient statistics of the layer for a whole batch
-	RealMatrix const& mean(StatisticsBatch const& statistics)const{ 
+	RealMatrix const& mean(SufficientStatistics const& statistics)const{ 
 		SIZE_CHECK(statistics.size2() == size());
 		return statistics;
 	}

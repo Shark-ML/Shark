@@ -141,14 +141,15 @@ private:
 			//update s_i and w_i
 			const double classifierNorm = svm.computeNorm(alpha, scalingCoefficients);
 			SHARK_ASSERT(classifierNorm > 0.0);
-			for (std::size_t i = 0; i < scalingCoefficients.size(); ++i)
-			{
+			std::size_t index = 0;
+			for (auto const& element: elements(dataset)){
 				// Update scaling coefficients
-				scalingCoefficients(i) = svm.computeNorm(
+				scalingCoefficients(index) = svm.computeNorm(
 					alpha,
 					scalingCoefficients,
-					dataset.element(i).input)
+					element.input)
 					/ classifierNorm;
+				++index;
 			}
 			
 			//store alpha in the last iteration inside the svm
@@ -190,14 +191,15 @@ private:
 			//update s_i and w_i
 			const double classifierNorm = svm.computeNorm(unpermutedAlpha, scalingCoefficients);
 			SHARK_ASSERT(classifierNorm > 0.0);
-			for (std::size_t i = 0; i < scalingCoefficients.size(); ++i)
-			{
+			std::size_t index = 0;
+			for (auto const& element: elements(dataset)){
 				// Update scaling coefficients
-				scalingCoefficients(i) = svm.computeNorm(
+				scalingCoefficients(index) = svm.computeNorm(
 					unpermutedAlpha,
 					scalingCoefficients,
-					dataset.element(i).input
-				)/ classifierNorm;
+					element.input)
+					/ classifierNorm;
+				++index;
 			}
 			
 			

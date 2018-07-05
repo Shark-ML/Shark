@@ -65,7 +65,7 @@ public:
 	/// \brief Sets the training batch.
 	///
 	/// @param data the batch of training data
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 	}
 	
@@ -146,8 +146,8 @@ public:
 				threadElements += batch.size1();
 				
 				//create the batches for evaluation
-				typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
-				typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
+				typename Operator::HiddenSample hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());
+				typename Operator::VisibleSample visibleBatch(batch.size1(),mpe_rbm->numberOfVN());
 				
 				visibleBatch.state = batch;
 				m_operator.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));
@@ -181,7 +181,7 @@ public:
 	}
 
 private:	
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 	RBM* mpe_rbm;
 	Operator m_operator;
 	unsigned int m_k;

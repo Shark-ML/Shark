@@ -120,7 +120,7 @@ public:
 		
 		// Setup the kernel matrix
 		RealMatrix M = calculateRegularizedKernelMatrix(*(this->m_kernel),dataset.inputs(), noiseVariance());
-		RealMatrix V = createBatch<RealVector>(dataset.labels().elements());
+		RealMatrix V = createBatch<RealVector>(elements(dataset.labels()));
 		RealVector mean = sum(as_columns(V))/V.size1();
 		noalias(V) -= blas::repeat(mean,V.size1());
 

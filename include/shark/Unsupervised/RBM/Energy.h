@@ -58,13 +58,9 @@ struct Energy{
 	typedef typename RBM::HiddenType HiddenType; //< type of the hidden layer
 	typedef typename RBM::VisibleType VisibleType; //< type of the visible layer
 	
-	//typedefs for single element
-	typedef typename HiddenType::SufficientStatistics HiddenStatistics;
-	typedef typename VisibleType::SufficientStatistics VisibleStatistics;
-	
 	//batch typedefs
-	typedef typename HiddenType::StatisticsBatch HiddenStatisticsBatch;
-	typedef typename VisibleType::StatisticsBatch VisibleStatisticsBatch;
+	typedef typename HiddenType::SufficientStatistics HiddenStatisticsBatch;
+	typedef typename VisibleType::SufficientStatistics VisibleStatisticsBatch;
 
 	Energy(RBM const& rbm)
 	: m_rbm(rbm)

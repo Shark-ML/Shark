@@ -74,8 +74,8 @@ RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batc
 			threadElements += batch.size1();
 			
 			//create the batches for evaluation
-			typename Operator::HiddenSampleBatch hiddenBatch(batch.size1(),rbm.numberOfHN());
-			typename Operator::VisibleSampleBatch visibleBatch(batch.size1(),rbm.numberOfVN());
+			typename Operator::HiddenSample hiddenBatch(batch.size1(),rbm.numberOfHN());
+			typename Operator::VisibleSample visibleBatch(batch.size1(),rbm.numberOfVN());
 			
 			visibleBatch.state = batch;
 			gibbs.precomputeHidden(hiddenBatch,visibleBatch,blas::repeat(1.0,batch.size1()));

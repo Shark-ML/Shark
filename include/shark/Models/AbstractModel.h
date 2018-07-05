@@ -119,9 +119,9 @@ public:
 	}
 	
 	///\brief Returns the expected shape of the input.
-	virtual Shape inputShape() const = 0;
+	virtual typename shape_type<InputType>::type inputShape() const = 0;
 	///\brief Returns the shape of the output.
-	virtual Shape outputShape() const = 0;
+	virtual typename shape_type<OutputType>::type  outputShape() const = 0;
 	
 	///\brief Creates an internal state of the model.
 	///
@@ -189,7 +189,7 @@ public:
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
 	Data<OutputType> operator()(Data<InputType> const& patterns)const{
-		return transform(patterns,*this);
+		return transform(patterns,*this, outputShape());
 	}
 
 	/// \brief Model evaluation as an operator for a single pattern. This is a convenience function
@@ -215,7 +215,7 @@ public:
 	/// \brief calculates the weighted sum of derivatives w.r.t the parameters.
 	///
 	/// \param  pattern       the patterns to evaluate
-    /// \param outputs        the target outputs
+	/// \param outputs        the target outputs
 	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
 	/// \param  state intermediate results stored by eval to speed up calculations of the derivatives
 	/// \param  derivative    the calculated derivative as sum over all derivates of all patterns
@@ -232,7 +232,7 @@ public:
 	///\brief calculates the weighted sum of derivatives w.r.t the inputs
 	///
 	/// \param  pattern       the patterns to evaluate
-    /// \param outputs        the target outputs
+	/// \param outputs        the target outputs
 	/// \param  coefficients  the coefficients which are used to calculate the weighted sum for every pattern
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param  derivative    the calculated derivative for every pattern
@@ -278,6 +278,37 @@ public:
  * @{
  */
 
+///\brief Transforms the dataset using a model f and returns the transformed result.
+///
+/// The shape of the data returned is directly taken from the model.
+/// This function is equivalent to model(data)
+/// \param data The dataset to transform
+/// \param model the model that is applied element by element
+template<class I, class O, class P>
+Data<O> transform(Data<I> const& data, AbstractModel<I, O, P> const& model){
+	return model(data);
+}
+
+///\brief Transforms the inputs of a dataset using a model f and returns the transformed result.
+///
+/// The shape of the inputs returned is directly taken from the model.
+/// \param data The dataset to transform
+/// \param model the model that is applied element by element
+template<class I, class L, class O, class P>
+LabeledData<O,L> transformInputs(LabeledData<I,L> const& data, AbstractModel<I, O, P> const& model){
+	return transformInputs(data,model, model.outputShape());
+}
+
+///\brief Transforms the labels of a dataset using a model f and returns the transformed result.
+///
+/// The labels of the inputs returned is directly taken from the model.
+/// \param data The dataset to transform
+/// \param model the model that is applied element by element
+template<class I, class L, class O, class P>
+LabeledData<I,O> transformLabels(LabeledData<I,L> const& data, AbstractModel<L, O, P> const& model){
+	return transformLabels(data,model, model.outputShape());
+}
+
 /// \brief Initialize model parameters normally distributed.
 ///
 /// \param model: model to be initialized
@@ -305,15 +336,6 @@ void initRandomUniform(AbstractModel<InputType, OutputType, ParameterVectorType>
 }
 
 /** @}*/
-
-namespace detail{
-//Required for correct shape infering of transform
-template<class I, class O, class V>
-struct InferShape<AbstractModel<I,O,V> >{
-	static Shape infer(AbstractModel<I,O,V> const& f){return f.outputShape();}
-};
-
-}
 
 }
 

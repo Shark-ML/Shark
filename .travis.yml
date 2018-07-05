@@ -13,7 +13,6 @@ addons:
       - cmake
       - g++-4.8
       - g++-6
-      - g++-4.6
       - libboost1.55-dev
       - libboost-date-time1.55-dev
       - libboost-filesystem1.55-dev
@@ -38,11 +37,6 @@ matrix:
     - os: linux
       env: 
         - COMPILER=g++-4.8
-        - OMP_NUM_THREADS=2
-
-    - os: linux
-      env: 
-        - COMPILER=g++-4.6
         - OMP_NUM_THREADS=2
 
     - os: osx

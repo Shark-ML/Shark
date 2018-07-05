@@ -169,8 +169,9 @@ void exportKernelMatrix(
 	double min_label = -max_label;
 	bool binary = false;
 	bool regression = false;
-	for(double cur_label: dataset.labels().elements())
+	for(auto const& cur_point: points)
 	{
+		auto cur_label = cur_point.label;
 		if(cur_label > max_label)
 			max_label = cur_label;
 		if(cur_label < min_label)

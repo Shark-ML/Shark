@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear ){
 			for(std::size_t j = 0; j != 3; ++j){
 				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
 			}
-			noalias(WTrue) += outer_prod(row(expansion.alpha(),i), dataset.element(i).input);
+			noalias(WTrue) += outer_prod(row(expansion.alpha(),i), elements(dataset)[i].input);
 		}
 		//compute approximation
 		KernelExpansion<RealVector> approx=approximateKernelExpansion(random::globalRng, expansion,2);
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear_Single ){
 			for(std::size_t j = 0; j != 3; ++j){
 				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
 			}
-			noalias(WTrue) += outer_prod(row(expansion.alpha(),i), dataset.element(i).input);
+			noalias(WTrue) += outer_prod(row(expansion.alpha(),i), elements(dataset)[i].input);
 		}
 		RealMatrix C = trans(WTrue) % WTrue;
 		blas::symm_eigenvalue_decomposition<RealMatrix> eigen(C);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear_Single ){
 		
 		BOOST_REQUIRE_EQUAL(approx.alpha().size1(), 1);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size2(), 3);
-		RealVector Z = approx.basis().element(0)/norm_2(approx.basis().element(0));
+		RealVector Z = elements(approx.basis())[0]/norm_2(elements(approx.basis())[0]);
 		RealMatrix approxW = trans(approx.alpha()) % approx.basis().batch(0);
 		
 		BOOST_CHECK_SMALL(norm_inf(truthZ-Z),1.e-4);

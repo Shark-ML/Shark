@@ -71,12 +71,12 @@ template<class T>
 void copySparsePoints(Data<blas::vector<T> >& dataset, std::vector<LibSVMPoint> const& points, bool hasZero){
 	std::size_t delta = (hasZero ? 0 : 1);
 	std::size_t i = 0;
-	for(auto element: dataset.elements()){
+	for(auto element: elements(dataset)){
 		element.clear();
 
 		auto const& inputs = points[i].second;
 		for(std::size_t j = 0; j != inputs.size(); ++j)
-			element(inputs[j].first - delta) = inputs[j].second;
+			element(inputs[j].first - delta) = static_cast<T>(inputs[j].second);
 		++i;
 	}
 }
@@ -103,7 +103,7 @@ void copySparsePoints(Data<blas::compressed_vector<T> >& dataset, std::vector<Li
 			auto const& inputs = points[start+i].second;
 			auto pos = batch.major_end(i);
 			for(std::size_t j = 0; j != inputs.size(); ++j){
-				pos = batch.set_element(pos,inputs[j].first - delta,inputs[j].second);
+				pos = batch.set_element(pos,inputs[j].first - delta,static_cast<T>(inputs[j].second));
 			}
 		}
 		start += batch.size1();
@@ -133,8 +133,8 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	//check labels for conformity
 	bool binaryLabels = false;
 	int minPositiveLabel = std::numeric_limits<int>::max();
+	int maxPositiveLabel = -1;
 	{
-		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != numPoints; ++i){
 			int label = static_cast<int>(contents[i].first);
 			SHARK_RUNTIME_CHECK(label == contents[i].first, "non-integer labels are only allows for regression" );
@@ -166,21 +166,18 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	}
 
 	//copy contents into a new dataset
-	typename shark::LabeledData<T, unsigned int>::element_type blueprint(T(maxIndex + (hasZero ? 1 : 0)),0);
-	shark::LabeledData<T, unsigned int> data(numPoints,blueprint, batchSize);//create dataset with the right structure
-	copySparsePoints(data.inputs(),contents, hasZero);
-	{
-		std::size_t i = 0;
-		for(auto element: data.elements()){
-			//todo: check label
-			//we subtract minPositiveLabel to ensure that class indices starting from 0 and 1 are supported
-			int label = static_cast<int>(contents[i].first);
-			element.label = binaryLabels? 1 + (label-1)/2 : label-minPositiveLabel;
-			++i;
+	std::size_t vectorDim = maxIndex + (hasZero ? 1 : 0);
+	shark::LabeledData<T, unsigned int> data(numPoints, {vectorDim, maxPositiveLabel + 1}, batchSize);
+	std::size_t batchStart = 0;
+	for(auto& batch: data.labels().batches()){
+		for(std::size_t j = 0; j != batch.size(); ++j){
+			int label = static_cast<int>(contents[batchStart+j].first);
+			unsigned int unsignedLabel = static_cast<unsigned int>(binaryLabels? 1 + (label-1)/2 : label-minPositiveLabel);
+			batch(j) = unsignedLabel;
 		}
+		batchStart += batch.size();
 	}
-	data.inputs().shape() = {maxIndex};
-	data.labels().shape() = numberOfClasses(data);
+	copySparsePoints(data.inputs(),contents, hasZero);
 	return data;
 }
 
@@ -218,18 +215,17 @@ shark::LabeledData<T, blas::vector<typename T::value_type> > libsvm_importer_reg
 	}
 
 	//copy contents into a new dataset
-	typename shark::LabeledData<T, blas::vector<typename T::value_type>>::element_type blueprint(T(maxIndex + (hasZero ? 1 : 0)), RealVector(1));
-	shark::LabeledData<T, blas::vector<typename T::value_type>> data(numPoints, blueprint, batchSize);//create dataset with the right structure
-	copySparsePoints(data.inputs(),contents, hasZero);
-	{
-		std::size_t i = 0;
-		for(auto element: data.elements()) {
-			element.label = RealVector(1, contents[i].first);
-			++i;
+	std::size_t vectorDim = maxIndex + (hasZero ? 1 : 0);
+	shark::LabeledData<T, blas::vector<typename T::value_type> > data(numPoints, {vectorDim, 1}, batchSize);
+	std::size_t batchStart = 0;
+	for(auto& batch: data.labels().batches()){
+		//copy labels
+		for(std::size_t j = 0; j != batch.size1(); ++j){
+			batch(j,0) = contents[batchStart + j].first;
 		}
+		batchStart += batch.size1();
 	}
-	data.inputs().shape() = {maxIndex};
-	data.labels().shape() = {1};
+	copySparsePoints(data.inputs(),contents, hasZero);
 	return data;
 }
 

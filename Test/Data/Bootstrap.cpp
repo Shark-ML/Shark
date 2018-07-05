@@ -28,10 +28,10 @@ BOOST_AUTO_TEST_CASE( Bootstrap_LabeledData ){
 		BOOST_REQUIRE_EQUAL(bootstrapSet.numberOfElements(),20);
 		double setWeightSum = 0.0;
 		for(std::size_t i = 0; i != 20; ++i){
-			BOOST_CHECK_EQUAL(bootstrapSet.element(i).data.input,set.element(i).input);
-			BOOST_CHECK_EQUAL(bootstrapSet.element(i).data.label,set.element(i).label);
-			weightSums[i] += bootstrapSet.element(i).weight;
-			setWeightSum += bootstrapSet.element(i).weight;
+			BOOST_CHECK_EQUAL(elements(bootstrapSet)[i].data.input,elements(set)[i].input);
+			BOOST_CHECK_EQUAL(elements(bootstrapSet)[i].data.label,elements(set)[i].label);
+			weightSums[i] += elements(bootstrapSet)[i].weight;
+			setWeightSum += elements(bootstrapSet)[i].weight;
 		}
 		BOOST_CHECK_CLOSE(setWeightSum,20,1.e-7);
 	}
@@ -41,27 +41,27 @@ BOOST_AUTO_TEST_CASE( Bootstrap_LabeledData ){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Bootstrap_UnlabeledData ){
+BOOST_AUTO_TEST_CASE( Bootstrap_Data ){
 	//create a toy dataset
 	std::vector<unsigned int> inputs;
 
 	for(unsigned int i=0;i != 20;++i){
 		inputs.push_back(i);
 	}
-	UnlabeledData<unsigned int> set=createDataFromRange(inputs,8);
+	Data<unsigned int> set=createDataFromRange(inputs,8);
 	
 	//create Bootstrap subsets and create a running sum of the weights to check
 	// that every point is chosen equally.
 	RealVector weightSums(20,0.0);
 	std::size_t iterations = 10000;
 	for(std::size_t iteration = 0; iteration != iterations; ++iteration){
-		WeightedUnlabeledData<unsigned int> bootstrapSet = bootstrap(set);
+		WeightedData<unsigned int> bootstrapSet = bootstrap(set);
 		BOOST_REQUIRE_EQUAL(bootstrapSet.numberOfElements(),20);
 		double setWeightSum = 0.0;
 		for(std::size_t i = 0; i != 20; ++i){
-			BOOST_CHECK_EQUAL(bootstrapSet.element(i).data,set.element(i));
-			weightSums[i] += bootstrapSet.element(i).weight;
-			setWeightSum += bootstrapSet.element(i).weight;
+			BOOST_CHECK_EQUAL(elements(bootstrapSet)[i].data,elements(set)[i]);
+			weightSums[i] += elements(bootstrapSet)[i].weight;
+			setWeightSum += elements(bootstrapSet)[i].weight;
 		}
 		BOOST_CHECK_CLOSE(setWeightSum,20,1.e-7);
 	}

@@ -92,7 +92,7 @@ public:
 		return m_numBatches;
 	}
 	
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 		
 		//construct a gradient object to get the information about which values of the samples are needed
@@ -112,11 +112,11 @@ public:
 		
 		//swap every sample batch from the vector into the operator, initialize it and shift it back out.
 		for(std::size_t i = 0; i != batches;++i){
-			swap(m_chains[i],m_chainOperator.samples());
+			std::swap(m_chains[i],m_chainOperator.samples());
 			std::size_t currentBatchSize = std::min(m_samples-i*m_batchSize, m_batchSize);
 			m_chainOperator.setBatchSize(currentBatchSize);
 			m_chainOperator.initializeChain(m_data);
-			swap(m_chains[i],m_chainOperator.samples());
+			std::swap(m_chains[i],m_chainOperator.samples());
 		}
 	}
 	
@@ -142,10 +142,10 @@ public:
 		//approximate the expectation of the energy gradient with respect to the model distribution
 		//using samples from the Markov chain
 		for(std::size_t i = 0; i != m_chains.size();++i){
-			swap(m_chains[i],m_chainOperator.samples());//set the current GibbsChain
+			std::swap(m_chains[i],m_chainOperator.samples());//set the current GibbsChain
 			m_chainOperator.step(m_k);//do the next step along the gibbs chain
 			modelAverage.addVH(m_chainOperator.samples().hidden, m_chainOperator.samples().visible);//update gradient
-			swap(m_chains[i],m_chainOperator.samples());//save the GibbsChain.
+			std::swap(m_chains[i],m_chainOperator.samples());//save the GibbsChain.
 		}
 		
 		derivative.resize(mpe_rbm->numberOfParameters());
@@ -162,8 +162,8 @@ public:
 private:
 	RBM* mpe_rbm;
 	mutable MarkovChainType m_chainOperator;
-	mutable std::vector<typename MarkovChainType::SampleBatch> m_chains;
-	UnlabeledData<RealVector> m_data;
+	mutable std::vector<typename MarkovChainType::Sample> m_chains;
+	Data<RealVector> m_data;
 
 	unsigned int m_k;
 	std::size_t m_samples;

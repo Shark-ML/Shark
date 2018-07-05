@@ -127,9 +127,10 @@ public:
 	{
 		std::vector<std::pair<std::size_t, std::size_t>> pairs;
 		std::size_t i = 0;
-		for (auto const& yi : dataset.labels().elements()) {
+		auto labels = elements(dataset.labels());
+		for (auto const& yi : labels) {
 			std::size_t j = 0;
-			for (auto const& yj : dataset.labels().elements()) {
+			for (auto const& yj : labels) {
 				if (j >= i) break;
 				if (yi < yj) pairs.push_back(std::make_pair(i, j));
 				else if (yi > yj) pairs.push_back(std::make_pair(j, i));

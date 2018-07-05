@@ -126,9 +126,10 @@ BOOST_AUTO_TEST_CASE(BasicTests)
 		LabeledData<RealVector, boost::int32_t> data;
 		importHDF5<RealVector, boost::int32_t>(data, m_exampleFileName, m_datasetNameData1, m_labelNameLabel1);
 		BOOST_CHECK(verify(data.inputs(), m_expectedFromData1));
+		auto labels = elements(data.labels());
 		BOOST_CHECK_EQUAL_COLLECTIONS(
-			data.labels().elements().begin(), 
-			data.labels().elements().end(), 
+			labels.begin(), 
+			labels.end(), 
 			m_expectedFromLabel1.begin(), 
 			m_expectedFromLabel1.end()
 		);
@@ -188,9 +189,10 @@ BOOST_AUTO_TEST_CASE(CscTests)
 		expectedLabels += 100,200,300,400,500,600;
 
 		BOOST_CHECK(verify(data.inputs(), expectedInputs));
+		auto labels = elements(data.labels());
 		BOOST_CHECK_EQUAL_COLLECTIONS(
-			data.labels().elements().begin(), 
-			data.labels().elements().end(), 
+			labels.begin(), 
+			labels.end(), 
 			expectedLabels.begin(), 
 			expectedLabels.end()
 		);

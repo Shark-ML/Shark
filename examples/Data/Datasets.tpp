@@ -98,12 +98,12 @@ int main()
 }
 {
 //###begin<construct-size>
-	Data<RealVector> data(1000, RealVector(5));
+	Data<RealVector> data(1000, {5});
 //###end<construct-size>
 }
 {
 //###begin<construct-size-2>
-	Data<RealVector> data(1000, RealVector(5), 100);
+	Data<RealVector> data(1000, {5}, 100);
 //###end<construct-size-2>
 }
 {
@@ -151,17 +151,15 @@ int main()
 	}
 //###end<batches-doubleloop>
 //###begin<elements-loops>
-	typedef Data<RealVector>::element_range Elements;
-
 	// 1: explicit iterator loop using the range over the elements
-	Elements elements = data.elements();
-	for (auto pos = elements.begin(); pos != elements.end(); ++pos) {
+	auto points = shark::elements(data);
+	for (auto pos = points.begin(); pos != points.end(); ++pos) {
 		std::cout << *pos << std::endl;
 	}
 
 	// 2: foreach
 	//note pass by value, the range returns proxy elements instead of references
-	for(auto element: data.elements()) {
+	for(auto element: elements(data)) {
 		std::cout << element << std::endl;
 	}
 //###end<elements-loops>
@@ -187,21 +185,25 @@ int main()
 {
 	F f;
 	G g;
+	Shape shape_f;
+	Shape shape_g;
 //###begin<transform-1>
 	Data<RealVector> data;                             // initial data set
-	data = transform(data, f);                         // applies f to each element
+	data = transform(data, f, shape_f);                         // applies f to each element. output has the supplied shape
 
 	LabeledData<RealVector, unsigned int> labeledData; // initial labeled dataset
-	labeledData = transformInputs(labeledData, f);     // applies f to each input
-	labeledData = transformLabels(labeledData, g);     // applies g to each label
+	labeledData = transformInputs(labeledData, f, shape_f);     // applies f to each input and sets the shape
+	labeledData = transformLabels(labeledData, g, shape_g);     // applies g to each label and sets the shape
 //###end<transform-1>
 
 //###begin<transform-2>
 	// a linear model, for example for whitening
 	LinearModel<> model;
-	// application of the model to the data
+	// application of the model to the data, shape is infered from the model
 	labeledData = transformInputs(labeledData, model);
-	// or an alternate shortcut:
+	
+	// transform for data objects has a shortcut
+	data = transform(data, model);
 	data = model(data);
 //###end<transform-2>
 }
@@ -209,7 +211,7 @@ int main()
 	Data<RealVector> data;
 //###begin<transform-4>
 	RealVector v(3); v(0) = 1.0; v(1) = 3.0; v(2) = -0.5;
-	data = transform(data, Add(v));
+	data = transform(data, Add(v), {3});
 //###end<transform-4>
 }
 {
@@ -233,6 +235,8 @@ int main()
 	std::size_t maximumBatchSize = 100;
 //###begin<view-2b>
 	Data<unsigned int> subsetData = toDataset(subset(view, indices), maximumBatchSize);
+	std::vector<std::size_t> individualBatchSizes;
+	subsetData = toDataset(subset(view, indices), individualBatchSizes);
 //###end<view-2b>
 }
 {

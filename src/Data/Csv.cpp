@@ -39,27 +39,9 @@
 #include <vector>
 #include <ctype.h>
 
+using namespace shark;
+
 namespace {
-
-template<class T>
-inline std::vector<T> importCSVReaderSingleValue(
-	std::string const& contents,
-	char comment = '#'
-) {
-	std::string::const_iterator first = contents.begin();
-	std::string::const_iterator last = contents.end();
-
-	using namespace boost::spirit::qi;
-	std::vector<T>  fileContents;
-
-	bool r = phrase_parse(
-		first, last,
-		*auto_,
-		space| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
-	);
-	SHARK_RUNTIME_CHECK(r && first == last, "Failed to parse file");
-	return fileContents;
-}
 
 //csv input for multiple homogenous values in a row
 inline std::vector<std::vector<double> > importCSVReaderSingleValues(
@@ -100,6 +82,13 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 	}
 
 	SHARK_RUNTIME_CHECK(r && first == last, "Failed to parse file");
+	
+	for(std::size_t i = 0; i != fileContents.size(); ++i){
+		SHARK_RUNTIME_CHECK(
+			fileContents[i].size() == fileContents[0].size(),
+			"Detected different number of columns in a row of the file!"
+		);
+	}
 	return fileContents;
 }
 
@@ -107,7 +96,7 @@ inline std::vector<std::vector<double> > importCSVReaderSingleValues(
 typedef std::pair<int, std::vector<double > > CsvPoint;
 inline std::vector<CsvPoint> import_csv_reader_points(
 	std::string const& contents,
-	shark::LabelPosition position,
+	LabelPosition position,
 	char separator,
 	char comment = '#'
 ) {
@@ -127,7 +116,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 	double qnan = std::numeric_limits<double>::quiet_NaN();
 
 	bool r = false;
-	if(separator == 0 && position == shark::FIRST_COLUMN){
+	if(separator == 0 && position == FIRST_COLUMN){
 		r = phrase_parse(
 			first, last,
 			(
@@ -137,7 +126,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 			(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)), fileContents
 		);
 	}
-	else if(separator != 0 && position == shark::FIRST_COLUMN){
+	else if(separator != 0 && position == FIRST_COLUMN){
 		r = phrase_parse(
 			first, last,
 			(
@@ -147,7 +136,7 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 			(space-eol)| (comment >> *(char_ - eol) >> (eol| eoi)) , fileContents
 		);
 	}
-	else if(separator == 0 && position == shark::LAST_COLUMN){
+	else if(separator == 0 && position == LAST_COLUMN){
 		do{
 			std::pair<std::vector<double>, int > reversed_point;
 			r = phrase_parse(
@@ -175,37 +164,128 @@ inline std::vector<CsvPoint> import_csv_reader_points(
 	}
 	SHARK_RUNTIME_CHECK(r && first == last, "Failed to parse file");
 
-
+	for(std::size_t i = 0; i != fileContents.size(); ++i){
+		SHARK_RUNTIME_CHECK(
+			fileContents[i].second.size() == fileContents[0].second.size(),
+			"Detected different number of columns in a row of the file!"
+		);
+		SHARK_RUNTIME_CHECK(fileContents[i].first >= -1, "labels can not be smaller than -1" );
+	}
 	return fileContents;
 }
 
+
+//copy file with vectorial data into dataset
 template<class T>
-void csvStringToDataImpl(
-    shark::Data<T> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
+void readCSVData(
+	Data<blas::vector<T> > &dataset,
+	std::string const& contents,
+	char separator,
+	char comment,
+	std::size_t maximumBatchSize
 ){
-	std::vector<T> rows = importCSVReaderSingleValue<T>(contents, comment);
+	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
 	if(rows.empty()){//empty file leads to empty data object.
-		data = shark::Data<T>();
+		dataset = Data<blas::vector<T> >();
 		return;
 	}
 
 	//copy rows of the file into the dataset
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	data = shark::Data<T>(batchSizes.size());
+	std::size_t dimensions = rows[0].size();
+	dataset = Data<blas::vector<T> >(rows.size(), dimensions, maximumBatchSize);
 	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		typename shark::Data<T>::batch_type& batch = data.batch(b);
-		batch.resize(batchSizes[b]);
-		//copy the values into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			batch(i) = rows[currentRow];
+	for(auto&& batch: dataset.batches()) {
+		//copy the rows into the batch
+		for(std::size_t i = 0; i != batch.size1(); ++i,++currentRow){
+			for(std::size_t j = 0; j != dimensions; ++j){
+				batch(i,j) = rows[currentRow][j];
+			}
 		}
 	}
-	SIZE_CHECK(currentRow == rows.size());
+}
+
+//copy file with input-class pair into dataset
+template<class T>
+void readCSVData(
+	LabeledData<blas::vector<T>, unsigned int> &dataset,
+	std::string const& contents,
+	LabelPosition lp,
+	char separator,
+	char comment,
+	std::size_t maximumBatchSize
+){
+	std::vector<CsvPoint> rows = import_csv_reader_points(contents, lp, separator,comment);
+	if(rows.empty()){//empty file leads to empty data object.
+		dataset = LabeledData<blas::vector<T>, unsigned int>();
+		return;
+	}
+
+	//check labels for conformity
+	bool binaryLabels = false;
+	int minPositiveLabel = std::numeric_limits<int>::max();
+	int maxPositiveLabel = -1;
+	{
+		for(std::size_t i = 0; i != rows.size(); ++i){
+			if(rows[i].first == -1)
+				binaryLabels = true;
+			maxPositiveLabel = std::max(rows[i].first, maxPositiveLabel);
+			minPositiveLabel = std::min(rows[i].first, minPositiveLabel);
+		}
+		SHARK_RUNTIME_CHECK(
+			minPositiveLabel >= 0 || (minPositiveLabel == -1 && maxPositiveLabel == 1),
+			"negative labels are only allowed for classes -1/1"
+		);
+	}
+	//copy rows of the file into the dataset
+	std::size_t dimensions = rows[0].second.size();
+	dataset = LabeledData<blas::vector<T>, unsigned int>(rows.size(), {dimensions, maxPositiveLabel + 1}, maximumBatchSize);
+	std::size_t currentRow = 0;
+	for(auto&& batch: dataset.batches()){
+		//copy the rows into the batch
+		for(std::size_t i = 0; i != batch.input.size1(); ++i,++currentRow){
+			for(std::size_t j = 0; j != dimensions; ++j){
+				batch.input(i,j) = rows[currentRow].second[j];
+			}
+			int rawLabel = rows[currentRow].first;
+			batch.label[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel;
+		}
+	}
+}
+
+//copy file with input-vector-label pair into dataset
+template<class T>
+void readCSVData(
+	LabeledData<blas::vector<T>, blas::vector<T> > &dataset,
+	std::string const& contents,
+	LabelPosition lp,
+	std::size_t numberOfOutputs,
+	char separator,
+	char comment,
+	std::size_t maximumBatchSize
+){
+	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
+	if(rows.empty()){//empty file leads to empty data object.
+		dataset = LabeledData<blas::vector<T>, blas::vector<T> >();
+		return;
+	}
+	//copy rows of the file into the dataset
+	SHARK_RUNTIME_CHECK(rows[0].size() > numberOfOutputs,"Files must have more columns than requested number of outputs");
+	std::size_t numberOfInputs = rows[0].size() - numberOfOutputs;
+	dataset = LabeledData<blas::vector<T>, blas::vector<T> >(rows.size(), {numberOfInputs, numberOfOutputs}, maximumBatchSize);
+	std::size_t inputStart = (lp == FIRST_COLUMN)? numberOfOutputs : 0;
+	std::size_t outputStart = (lp == FIRST_COLUMN)? 0: numberOfInputs;
+	std::size_t currentRow = 0;
+	for(auto&& batch: dataset.batches()){
+		//copy the rows into the batch
+		for(std::size_t i = 0; i != batch.input.size1(); ++i,++currentRow){
+			for(std::size_t j = 0; j != numberOfInputs; ++j){
+				batch.input(i,j) = rows[currentRow][j+inputStart];
+			}
+			for(std::size_t j = 0; j != numberOfOutputs; ++j){
+				batch.label(i,j) = rows[currentRow][j+outputStart];
+			}
+		}
+	}
 }
 
 }//end unnamed namespace
@@ -213,233 +293,101 @@ void csvStringToDataImpl(
 //start function implementations
 
 void shark::csvStringToData(
-    Data<RealVector> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
+	Data<unsigned int> &dataset,
+	std::string const& contents,
+	char separator,
+	char comment,
+	std::size_t maximumBatchSize
 ){
-	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
-	if(rows.empty()){//empty file leads to empty data object.
-		data = Data<RealVector>();
+	//read file contents
+	std::string::const_iterator first = contents.begin();
+	std::string::const_iterator last = contents.end();
+
+	using namespace boost::spirit::qi;
+	std::vector<int>  rows;
+
+	bool r = phrase_parse(
+		first, last,
+		*auto_,
+		space| (comment >> *(char_ - eol) >> (eol| eoi)), rows
+	);
+	SHARK_RUNTIME_CHECK(r && first == last, "Failed to parse file");
+	
+	//empty file leads to empty data object.
+	if(rows.empty()){
+		dataset = Data<unsigned int>();
 		return;
 	}
-
-	//copy rows of the file into the dataset
-	std::size_t dimensions = rows[0].size();
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	data = Data<RealVector>(batchSizes.size());
-	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		RealMatrix& batch = data.batch(b);
-		batch.resize(batchSizes[b],dimensions);
-		//copy the rows into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			SHARK_RUNTIME_CHECK(rows[currentRow].size() == dimensions, "Vectors are required to have same size");
-
-			for(std::size_t j = 0; j != dimensions; ++j){
-				batch(i,j) = rows[currentRow][j];
-			}
-		}
-	}
-	data.shape() = {dimensions};
-	SIZE_CHECK(currentRow == rows.size());
-}
-
-void shark::csvStringToData(
-    Data<FloatVector> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
-){
-	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
-	if(rows.empty()){//empty file leads to empty data object.
-		data = Data<FloatVector>();
-		return;
-	}
-
-	//copy rows of the file into the dataset
-	std::size_t dimensions = rows[0].size();
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	data = Data<FloatVector>(batchSizes.size());
-	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		FloatMatrix& batch = data.batch(b);
-		batch.resize(batchSizes[b],dimensions);
-		//copy the rows into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			SHARK_RUNTIME_CHECK(rows[currentRow].size() == dimensions, "Vectors are required to have same size");
-
-			for(std::size_t j = 0; j != dimensions; ++j){
-				batch(i,j) = static_cast<float>(rows[currentRow][j]);
-			}
-		}
-	}
-	data.shape() = {dimensions};
-	SIZE_CHECK(currentRow == rows.size());
-}
-
-void shark::csvStringToData(
-    Data<int> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
-){
-	csvStringToDataImpl(data,contents,separator,comment,maximumBatchSize);
-}
-
-void shark::csvStringToData(
-    Data<unsigned int> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
-){
-	csvStringToDataImpl(data,contents,separator,comment,maximumBatchSize);
-}
-
-void shark::csvStringToData(
-    Data<float> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
-){
-	csvStringToDataImpl(data,contents,separator,comment,maximumBatchSize);
-}
-
-void shark::csvStringToData(
-    Data<double> &data,
-    std::string const& contents,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
-){
-	csvStringToDataImpl(data,contents,separator,comment,maximumBatchSize);
-}
-
-void shark::csvStringToData(
-    LabeledData<RealVector, unsigned int> &dataset,
-    std::string const& contents,
-    LabelPosition lp,
-    char separator,
-    char comment,
-    std::size_t maximumBatchSize
-){
-	std::vector<CsvPoint> rows = import_csv_reader_points(contents, lp, separator,comment);
-	if(rows.empty()){//empty file leads to empty data object.
-		dataset = LabeledData<RealVector, unsigned int>();
-		return;
-	}
-
+	
 	//check labels for conformity
 	bool binaryLabels = false;
 	int minPositiveLabel = std::numeric_limits<int>::max();
+	int maxPositiveLabel = -1;
 	{
-
-		int maxPositiveLabel = -1;
 		for(std::size_t i = 0; i != rows.size(); ++i){
-			int label = rows[i].first;
-			SHARK_RUNTIME_CHECK(label >= -1, "labels can not be smaller than -1" );
-			if(label == -1)
+			if(rows[i] == -1)
 				binaryLabels = true;
-			else if(label < minPositiveLabel)
-				minPositiveLabel = label;
-			else if(label > maxPositiveLabel)
-				maxPositiveLabel = label;
+			maxPositiveLabel = std::max(rows[i], maxPositiveLabel);
+			minPositiveLabel = std::min(rows[i], minPositiveLabel);
 		}
 		SHARK_RUNTIME_CHECK(
 			minPositiveLabel >= 0 || (minPositiveLabel == -1 && maxPositiveLabel == 1),
 			"negative labels are only allowed for classes -1/1"
 		);
 	}
-
+	
 	//copy rows of the file into the dataset
-	std::size_t dimensions = rows[0].second.size();
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	dataset = LabeledData<RealVector, unsigned int>(batchSizes.size());
+	dataset = Data<unsigned int>(rows.size(), maxPositiveLabel + 1, maximumBatchSize);
 	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		RealMatrix& inputs = dataset.batch(b).input;
-		UIntVector& labels = dataset.batch(b).label;
-		inputs.resize(batchSizes[b],dimensions);
-		labels.resize(batchSizes[b]);
-		//copy the rows into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			SHARK_RUNTIME_CHECK(rows[currentRow].second.size() == dimensions, "Vectors are required to have same size");
-
-			for(std::size_t j = 0; j != dimensions; ++j){
-				inputs(i,j) = rows[currentRow].second[j];
-			}
-			int rawLabel = rows[currentRow].first;
-			labels[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel -minPositiveLabel;
+	for(std::size_t b = 0; b != dataset.numberOfBatches(); ++b) {
+		auto& batch = dataset.batch(b);
+		for(std::size_t i = 0; i != batch.size(); ++i,++currentRow){
+			int rawLabel = rows[currentRow];
+			batch[i] = static_cast<unsigned int>(binaryLabels? 1 + (rawLabel-1)/2 : rawLabel);
 		}
 	}
-	dataset.inputs().shape() = {dimensions};
-	SIZE_CHECK(currentRow == rows.size());
 }
 
 void shark::csvStringToData(
-    LabeledData<FloatVector, unsigned int> &dataset,
+    Data<RealVector> &dataset,
     std::string const& contents,
-    LabelPosition lp,
     char separator,
     char comment,
     std::size_t maximumBatchSize
 ){
-	std::vector<CsvPoint> rows = import_csv_reader_points(contents, lp, separator,comment);
-	if(rows.empty()){//empty file leads to empty data object.
-		dataset = LabeledData<FloatVector, unsigned int>();
-		return;
-	}
+	readCSVData(dataset,contents, separator, comment, maximumBatchSize);
+}
 
-	//check labels for conformity
-	bool binaryLabels = false;
-	int minPositiveLabel = std::numeric_limits<int>::max();
-	{
+void shark::csvStringToData(
+    Data<FloatVector> &dataset,
+    std::string const& contents,
+    char separator,
+    char comment,
+    std::size_t maximumBatchSize
+){
+	readCSVData(dataset,contents, separator, comment, maximumBatchSize);
+}
 
-		int maxPositiveLabel = -1;
-		for(std::size_t i = 0; i != rows.size(); ++i){
-			int label = rows[i].first;
-			SHARK_RUNTIME_CHECK(label >= -1, "labels can not be smaller than -1" );
-			if(label == -1)
-				binaryLabels = true;
-			else if(label < minPositiveLabel)
-				minPositiveLabel = label;
-			else if(label > maxPositiveLabel)
-				maxPositiveLabel = label;
-		}
-		SHARK_RUNTIME_CHECK(
-			minPositiveLabel >= 0 || (minPositiveLabel == -1 && maxPositiveLabel == 1),
-			"negative labels are only allowed for classes -1/1"
-		);
-	}
+void shark::csvStringToData(
+	LabeledData<RealVector, unsigned int> &dataset,
+	std::string const& contents,
+	LabelPosition lp,
+	char separator,
+	char comment,
+	std::size_t maximumBatchSize
+){
+	readCSVData(dataset, contents, lp, separator, comment, maximumBatchSize);
+}
 
-	//copy rows of the file into the dataset
-	std::size_t dimensions = rows[0].second.size();
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	dataset = LabeledData<FloatVector, unsigned int>(batchSizes.size());
-	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		FloatMatrix& inputs = dataset.batch(b).input;
-		UIntVector& labels = dataset.batch(b).label;
-		inputs.resize(batchSizes[b],dimensions);
-		labels.resize(batchSizes[b]);
-		//copy the rows into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			SHARK_RUNTIME_CHECK(rows[currentRow].second.size() == dimensions, "Vectors are required to have same size");
-
-			for(std::size_t j = 0; j != dimensions; ++j){
-				inputs(i,j) = static_cast<float>(rows[currentRow].second[j]);
-			}
-			int rawLabel = rows[currentRow].first;
-			labels[i] = binaryLabels? 1 + (rawLabel-1)/2 : rawLabel -minPositiveLabel;
-		}
-	}
-	dataset.inputs().shape() = {dimensions};
-	SIZE_CHECK(currentRow == rows.size());
+void shark::csvStringToData(
+	LabeledData<FloatVector, unsigned int> &dataset,
+	std::string const& contents,
+	LabelPosition lp,
+	char separator,
+	char comment,
+	std::size_t maximumBatchSize
+){
+	readCSVData(dataset, contents, lp, separator, comment, maximumBatchSize);
 }
 
 void shark::csvStringToData(
@@ -451,41 +399,7 @@ void shark::csvStringToData(
 	char comment,
 	std::size_t maximumBatchSize
 ){
-	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
-	if(rows.empty()){//empty file leads to empty data object.
-		dataset = LabeledData<RealVector, RealVector>();
-		return;
-	}
-
-	//copy rows of the file into the dataset
-	SHARK_RUNTIME_CHECK(rows[0].size() > numberOfOutputs,"Files must have more columns than requested number of outputs");
-	std::size_t dimensions = rows[0].size();
-	std::size_t numberOfInputs = dimensions-numberOfOutputs;
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	dataset = LabeledData<RealVector, RealVector>(batchSizes.size());
-	std::size_t inputStart = (lp == FIRST_COLUMN)? numberOfOutputs : 0;
-	std::size_t outputStart = (lp == FIRST_COLUMN)? 0: numberOfInputs;
-	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		RealMatrix& inputs = dataset.batch(b).input;
-		RealMatrix& labels = dataset.batch(b).label;
-		inputs.resize(batchSizes[b],numberOfInputs);
-		labels.resize(batchSizes[b],numberOfOutputs);
-		//copy the rows into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			SHARK_RUNTIME_CHECK(rows[currentRow].size() == dimensions,"Detected different number of columns in a row of the file!");
-
-			for(std::size_t j = 0; j != numberOfInputs; ++j){
-				inputs(i,j) = rows[currentRow][j+inputStart];
-			}
-			for(std::size_t j = 0; j != numberOfOutputs; ++j){
-				labels(i,j) = rows[currentRow][j+outputStart];
-			}
-		}
-	}
-	dataset.inputs().shape() = {numberOfInputs};
-	dataset.labels().shape() = {numberOfOutputs};
-	SIZE_CHECK(currentRow == rows.size());
+	readCSVData(dataset, contents, lp, numberOfOutputs, separator, comment, maximumBatchSize);
 }
 
 void shark::csvStringToData(
@@ -497,41 +411,7 @@ void shark::csvStringToData(
 	char comment,
 	std::size_t maximumBatchSize
 ){
-	std::vector<std::vector<double> > rows = importCSVReaderSingleValues(contents, separator,comment);
-	if(rows.empty()){//empty file leads to empty data object.
-		dataset = LabeledData<FloatVector, FloatVector>();
-		return;
-	}
-
-	//copy rows of the file into the dataset
-	SHARK_RUNTIME_CHECK(rows[0].size() > numberOfOutputs,"Files must have more columns than requested number of outputs");
-	std::size_t dimensions = rows[0].size();
-	std::size_t numberOfInputs = dimensions-numberOfOutputs;
-	std::vector<std::size_t> batchSizes = shark::detail::optimalBatchSizes(rows.size(),maximumBatchSize);
-	dataset = LabeledData<FloatVector, FloatVector>(batchSizes.size());
-	std::size_t inputStart = (lp == FIRST_COLUMN)? numberOfOutputs : 0;
-	std::size_t outputStart = (lp == FIRST_COLUMN)? 0: numberOfInputs;
-	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != batchSizes.size(); ++b) {
-		FloatMatrix& inputs = dataset.batch(b).input;
-		FloatMatrix& labels = dataset.batch(b).label;
-		inputs.resize(batchSizes[b],numberOfInputs);
-		labels.resize(batchSizes[b],numberOfOutputs);
-		//copy the rows into the batch
-		for(std::size_t i = 0; i != batchSizes[b]; ++i,++currentRow){
-			SHARK_RUNTIME_CHECK(rows[currentRow].size() == dimensions,"Detected different number of columns in a row of the file!");
-
-			for(std::size_t j = 0; j != numberOfInputs; ++j){
-				inputs(i,j) = static_cast<float>(rows[currentRow][j+inputStart]);
-			}
-			for(std::size_t j = 0; j != numberOfOutputs; ++j){
-				labels(i,j) = static_cast<float>(rows[currentRow][j+outputStart]);
-			}
-		}
-	}
-	dataset.inputs().shape() = {numberOfInputs};
-	dataset.labels().shape() = {numberOfOutputs};
-	SIZE_CHECK(currentRow == rows.size());
+	readCSVData(dataset, contents, lp, numberOfOutputs, separator, comment, maximumBatchSize);
 }
 
 

@@ -236,8 +236,11 @@ private:
 		classMean /= m_elements;
 		m_meanY /= sqr(double(m_elements));
 		m_columnMeanY.resize(m_elements);
-		for(std::size_t i = 0; i != m_elements; ++i){
-			m_columnMeanY(i) = classMean(labels.element(i));
+		std::size_t i = 0;
+		for(auto const& batch:labels.batches()){
+			for(std::size_t j = 0; j != batch.size(); ++j, ++i){
+				m_columnMeanY(i) = classMean(batch(j));
+			}
 		}
 		if(!centering){
 			m_meanY = 0;
@@ -248,10 +251,13 @@ private:
 	void setupY(Data<RealVector>const& labels, bool centering){
 		RealVector meanLabel = mean(labels);
 		m_columnMeanY.resize(m_elements);
-		for(std::size_t i = 0; i != m_elements; ++i){
-			m_columnMeanY(i) = inner_prod(labels.element(i),meanLabel);
+		std::size_t i = 0;
+		for(auto const& batch:labels.batches()){
+			std::size_t size = batch.size1();
+			noalias(subrange(m_columnMeanY, i, i+ size)) = batch % meanLabel;
+			i+= size;
 		}
-		m_meanY=inner_prod(meanLabel,meanLabel);
+		m_meanY = inner_prod(meanLabel,meanLabel);
 		if(!centering){
 			m_meanY = 0;
 			m_columnMeanY.clear();

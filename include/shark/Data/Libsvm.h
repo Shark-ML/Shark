@@ -60,7 +60,7 @@ inline void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 )
 { importSparseData(dataset, stream, highestIndex, batchSize); }
 
@@ -76,7 +76,7 @@ inline void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 )
 { importSparseData(dataset, stream, highestIndex, batchSize); }
 
@@ -92,7 +92,7 @@ inline void import_libsvm(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 )
 { importSparseData(dataset, fn, highestIndex, batchSize); }
 
@@ -108,7 +108,7 @@ inline void import_libsvm(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
 	unsigned int highestIndex = 0,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
+	std::size_t batchSize = constants::DefaultBatchSize
 )
 { importSparseData(dataset, fn, highestIndex, batchSize); }
 

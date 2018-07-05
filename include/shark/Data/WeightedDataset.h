@@ -108,8 +108,6 @@ public:
 		decltype(getBatchElement(std::declval<typename std::add_const<DataBatchType>::type&>(),0)),
 		decltype(getBatchElement(std::declval<typename std::add_const<WeightBatchType>::type&>(),0))
 	> const_reference;
-	typedef IndexingIterator<WeightedDataBatch> iterator;
-	typedef IndexingIterator<WeightedDataBatch const> const_iterator;
 
 	template<class D, class W>
 	WeightedDataBatch(
@@ -131,20 +129,6 @@ public:
 
 	std::size_t size()const{
 		return DataBatchTraits::size(data);
-	}
-	
-	iterator begin(){
-		return iterator(*this,0);
-	}
-	const_iterator begin()const{
-		return const_iterator(*this,0);
-	}
-
-	iterator end(){
-		return iterator(*this,size());
-	}
-	const_iterator end()const{
-		return const_iterator(*this,size());
 	}
 
 	reference operator[](std::size_t i){
@@ -182,6 +166,7 @@ class BaseWeightedDataset : public ISerializable
 {
 public:
 	typedef typename DataContainerT::element_type DataType;
+	typedef typename DataContainerT::shape_type shape_type;
 	typedef double WeightType;
 	typedef DataContainerT DataContainer;
 	typedef Data<WeightType> WeightContainer;
@@ -207,48 +192,15 @@ public:
 		typename DataContainer::const_batch_reference,
 		typename WeightContainer::const_batch_reference
 	> const_batch_reference;
-	
-	typedef typename Batch<element_type>::reference element_reference;
-	typedef typename Batch<element_type>::const_reference const_element_reference;
 
-	typedef boost::iterator_range< detail::DataElementIterator<BaseWeightedDataset<DataContainer> > > element_range;
-	typedef boost::iterator_range< detail::DataElementIterator<BaseWeightedDataset<DataContainer> const> > const_element_range;
 	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> > batch_range;
 	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> const> const_batch_range;
-
-
-	///\brief Returns the range of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	const_element_range elements()const{
-		return const_element_range(
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,0,0,0),
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
-	///\brief Returns therange of elements.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
-	element_range elements(){
-		return element_range(
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,0,0,0),
-			detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,numberOfBatches(),0,numberOfElements())
-		);
-	}
 	
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	const_batch_range batches()const{
 		return const_batch_range(this);
 	}
 	///\brief Returns the range of batches.
-	///
-	///It is compatible to boost::range and STL and can be used whenever an algorithm requires
-	///element access via begin()/end() in which case data.elements() provides the correct interface
 	batch_range batches(){
 		return batch_range(this);
 	}
@@ -284,18 +236,16 @@ public:
 	WeightContainer& weights(){
 		return m_weights;
 	}
+	
+	///\brief Returns the shape of the elements in the dataset.
+	shape_type const& shape() const{
+		return m_data.shape();
+	}
 
 	// CONSTRUCTORS
 
 	///\brief Constructs an Empty data set.
 	BaseWeightedDataset()
-	{}
-
-	///\brief Create an empty set with just the correct number of batches.
-	///
-	/// The user must initialize the dataset after that by himself.
-	BaseWeightedDataset(std::size_t numBatches)
-	: m_data(numBatches),m_weights(numBatches)
 	{}
 
 	/// \brief Construtor using a single element as blueprint to create a dataset with a specified number of elements.
@@ -317,7 +267,7 @@ public:
 	BaseWeightedDataset(DataContainer const& data, Data<WeightType> const& weights)
 	: m_data(data), m_weights(weights)
 	{
-		SHARK_RUNTIME_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedUnlabeledData] number of data and number of weights must agree");
+		SHARK_RUNTIME_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedData] number of data and number of weights must agree");
 #ifndef DNDEBUG
 		for(std::size_t i  = 0; i != data.numberOfBatches(); ++i){
 			SIZE_CHECK(batchSize(data.batch(i)) == batchSize(weights.batch(i)));
@@ -327,20 +277,10 @@ public:
 	
 	///\brief Construction from data. All points get the same weight assigned
 	BaseWeightedDataset(DataContainer const& data, double weight)
-	: m_data(data), m_weights(data.numberOfBatches())
-	{
+	: m_data(data), m_weights(data.getPartitioning(), 1){
 		for(std::size_t i = 0; i != numberOfBatches(); ++i){
 			m_weights.batch(i) = Batch<WeightType>::type(batchSize(m_data.batch(i)),weight);
 		}
-	}
-	
-	
-	// ELEMENT ACCESS
-	element_reference element(std::size_t i){
-		return *(detail::DataElementIterator<BaseWeightedDataset<DataContainer> >(this,0,0,0)+i);
-	}
-	const_element_reference element(std::size_t i) const{
-		return *(detail::DataElementIterator<BaseWeightedDataset<DataContainer> const>(this,0,0,0)+i);
 	}
 
 	// BATCH ACCESS
@@ -371,11 +311,6 @@ public:
 		m_data.makeIndependent();
 	}
 
-	///\brief shuffles all elements in the entire dataset (that is, also across the batches)
-	virtual void shuffle(){
-		shark::shuffle(this->elements().begin(),this->elements().end(), random::globalRng);
-	}
-
 	void splitBatch(std::size_t batch, std::size_t elementIndex){
 		m_data.splitBatch(batch,elementIndex);
 		m_weights.splitBatch(batch,elementIndex);
@@ -389,21 +324,10 @@ public:
 		m_data.append(other.m_data);
 		m_weights.append(other.m_weights);
 	}
-
-
-	///\brief Reorders the batch structure in the container to that indicated by the batchSizes vector
-	///
-	///After the operation the container will contain batchSizes.size() batches with the i-th batch having size batchSize[i].
-	///However the sum of all batch sizes must be equal to the current number of elements
-	template<class Range>
-	void repartition(Range const& batchSizes){
-		m_data.repartition(batchSizes);
-		m_weights.repartition(batchSizes);
-	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
-	/// This method can be used together with repartition to ensure
+	/// This method can be used together to ensure
 	/// that two datasets have the same batch structure.
 	std::vector<std::size_t> getPartitioning()const{
 		return m_data.getPartitioning();
@@ -433,20 +357,20 @@ private:
 ///
 /// \brief Weighted data set for unsupervised learning
 ///
-/// The WeightedUnlabeledData class extends UnlabeledData for the
+/// The WeightedData class extends Data for the
 /// representation of data. In addition it holds and provides access to the corresponding weights.
 ///
-/// WeightedUnlabeledData tries to mimic the underlying data as pairs of data points and weights.
+/// WeightedData tries to mimic the underlying data as pairs of data points and weights.
 /// this means that when accessing a batch by calling batch(i) or choosing one of the iterators
 /// one access the input batch by batch(i).data and the weights by batch(i).weight
 ///
 ///this also holds true for single element access using operator(). Be aware, that direct access to element is
 ///a linear time operation. So it is not advisable to iterate over the elements, but instead iterate over the batches.
 template <class DataT>
-class WeightedUnlabeledData : public detail::BaseWeightedDataset <UnlabeledData<DataT> >
+class WeightedData : public detail::BaseWeightedDataset <Data<DataT> >
 {
 private:
-	typedef detail::BaseWeightedDataset <UnlabeledData<DataT> > base_type;
+	typedef detail::BaseWeightedDataset <Data<DataT> > base_type;
 public:
 	using base_type::data;
 	using base_type::weights;
@@ -455,52 +379,40 @@ public:
 	typedef typename base_type::element_type element_type;
 	typedef DataT InputType;
 
-	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = UnlabeledData<DataT>::DefaultBatchSize);
-
 	// CONSTRUCTORS
 
 	///\brief Empty data set.
-	WeightedUnlabeledData()
+	WeightedData()
 	{}
 
 	///\brief Create an empty set with just the correct number of batches.
 	///
 	/// The user must initialize the dataset after that by himself.
-	WeightedUnlabeledData(std::size_t numBatches)
+	WeightedData(std::size_t numBatches)
 	: base_type(numBatches)
 	{}
-
-	/// \brief Construtor using a single element as blueprint to create a dataset with a specified number of elements.
-	///
-	/// Optionally the desired batch Size can be set
-	///
-	///@param size the new size of the container
-	///@param element the blueprint element from which to create the Container
-	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	WeightedUnlabeledData(std::size_t size, element_type const& element, std::size_t batchSize = DefaultBatchSize)
-	: base_type(size,element,batchSize){}
 
 	///\brief Construction from data.
 	///
 	/// Beware that when calling this constructor the organization of batches must be equal in both
 	/// containers. This Constructor will not reorganize the data!
-	WeightedUnlabeledData(UnlabeledData<DataType> const& data, Data<WeightType> const& weights)
+	WeightedData(Data<DataType> const& data, Data<WeightType> const& weights)
 	: base_type(data,weights)
 	{}
 		
 	///\brief Construction from data and a constant weight for all elements
-	WeightedUnlabeledData(UnlabeledData<DataType> const& data, double weight)
+	WeightedData(Data<DataType> const& data, double weight)
 	: base_type(data,weight)
 	{}
 		
-	//we additionally add the two below for compatibility with UnlabeledData
+	//we additionally add the two below for compatibility with Data
 		
 	///\brief Access to the inputs as a separate container.
-	UnlabeledData<DataT> const& inputs() const{
+	Data<DataT> const& inputs() const{
 		return data();
 	}
 	///\brief Access to the inputs as a separate container.
-	UnlabeledData<DataT>& inputs(){
+	Data<DataT>& inputs(){
 		return data();
 	}
 	
@@ -517,41 +429,48 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	WeightedUnlabeledData splice(std::size_t batch){
-		return WeightedUnlabeledData(data().splice(batch),weights().splice(batch));
+	WeightedData splice(std::size_t batch){
+		return WeightedData(data().splice(batch),weights().splice(batch));
 	}
 
-	friend void swap(WeightedUnlabeledData& a, WeightedUnlabeledData& b){
+	friend void swap(WeightedData& a, WeightedData& b){
 		swap(static_cast<base_type&>(a),static_cast<base_type&>(b));
 	}
 };
 
 ///brief  Outstream of elements for weighted data.
 template<class T>
-std::ostream &operator << (std::ostream &stream, const WeightedUnlabeledData<T>& d) {
-	for(auto elem: d.elements())
+std::ostream &operator << (std::ostream &stream, const WeightedData<T>& d) {
+	for(auto elem: elements(d))
 		stream << elem.weight << " [" << elem.data<<"]"<< "\n";
 	return stream;
+}
+
+/// \brief Returns a shuffled copy of the input data
+///
+/// The order of points is randomized and a copy of the initial data object returned.
+/// The batch sizes are the same as in the original dataset.
+/// \param data the dataset to shuffle
+template<class T>
+WeightedData<T> shuffle(WeightedData<T> const& data){
+	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartitioning());
 }
 
 /// \brief creates a weighted unweighted data object from two ranges, representing data and weights
 template<class DataRange, class WeightRange>
 typename boost::disable_if<
 	boost::is_arithmetic<WeightRange>,
-	WeightedUnlabeledData<
+	WeightedData<
 		typename boost::range_value<DataRange>::type
 	> 
->::type createUnlabeledDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = 0){
+>::type createDataFromRange(DataRange const& data, WeightRange const& weights, std::size_t batchSize = constants::DefaultBatchSize){
 
 	SHARK_RUNTIME_CHECK(batchSize(data) == batchSize(weights),"Number of datapoints and number of weights must agree");
 
 	typedef typename boost::range_value<DataRange>::type Data;
 
-	if (batchSize == 0)
-		batchSize = WeightedUnlabeledData<Data>::DefaultBatchSize;
-
-	return WeightedUnlabeledData<Data>(
-		shark::createUnlabeledDataFromRange(data,batchSize),
+	return WeightedData<Data>(
+		shark::createDataFromRange(data,batchSize),
 		createDataFromRange(weights,batchSize)
 	);
 }
@@ -589,8 +508,6 @@ public:
 	using base_type::data;
 	using base_type::weights;
 
-	BOOST_STATIC_CONSTANT(std::size_t, DefaultBatchSize = (LabeledData<InputT,LabelT>::DefaultBatchSize));
-
 	// CONSTRUCTORS
 
 	///\brief Empty data set.
@@ -611,7 +528,7 @@ public:
 	///@param size the new size of the container
 	///@param element the blueprint element from which to create the Container
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	WeightedLabeledData(std::size_t size, element_type const& element, std::size_t batchSize = DefaultBatchSize)
+	WeightedLabeledData(std::size_t size, element_type const& element, std::size_t batchSize = constants::DefaultBatchSize)
 	: base_type(size,element,batchSize){}
 
 	///\brief Construction from data.
@@ -628,11 +545,11 @@ public:
 	{}
 		
 	///\brief Access to the inputs as a separate container.
-	UnlabeledData<InputType> const& inputs() const{
+	Data<InputType> const& inputs() const{
 		return data().inputs();
 	}
 	///\brief Access to the inputs as a separate container.
-	UnlabeledData<InputType>& inputs(){
+	Data<InputType>& inputs(){
 		return data().inputs();
 	}
 	
@@ -665,9 +582,14 @@ public:
 		return labels().shape();
 	}
 	
-	/// \brief Constructs an WeightedUnlabeledData object for the inputs.
-	WeightedUnlabeledData<InputType> weightedInputs() const{
-		return WeightedUnlabeledData<InputType>(data().inputs(),weights());
+	/// \brief Constructs an WeightedData object for the inputs.
+	WeightedData<InputType> weightedInputs() const{
+		return WeightedData<InputType>(data().inputs(),weights());
+	}
+	
+	/// \brief Constructs an WeightedData object for the labels.
+	WeightedData<LabelType> weightedLabels() const{
+		return WeightedData<LabelType>(data().labels(),weights());
 	}
 
 	///\brief Splits the container into two independent parts. The left part remains in the container, the right is stored as return type
@@ -686,25 +608,36 @@ public:
 ///brief  Outstream of elements for weighted labeled data.
 template<class T, class U>
 std::ostream &operator << (std::ostream &stream, const WeightedLabeledData<T, U>& d) {
-	for(auto elem: d.elements())
+	for(auto elem: elements(d))
 		stream << elem.weight <<" ("<< elem.data.label << " [" << elem.data.input<<"] )"<< "\n";
 	return stream;
 }
 
+/// \brief Returns a shuffled copy of the input data
+///
+/// The order of (input-label)-pairs is randomized and a copy of the initial data object returned.
+/// The batch sizes are the same as in the original dataset.
+/// \param data the dataset to shuffle
+template<class I, class L>
+WeightedLabeledData<I,L> shuffle(WeightedLabeledData<I,L> const& data){
+	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartitioning());
+}
+
+
 //Stuff for Dimensionality and querying of basic information
 
-inline std::size_t numberOfClasses(WeightedUnlabeledData<unsigned int> const& labels){
+inline std::size_t numberOfClasses(WeightedData<unsigned int> const& labels){
 	return numberOfClasses(labels.data());
 }
 
 ///\brief Returns the number of members of each class in the dataset.
-inline std::vector<std::size_t> classSizes(WeightedUnlabeledData<unsigned int> const& labels){
+inline std::vector<std::size_t> classSizes(WeightedData<unsigned int> const& labels){
 	return classSizes(labels.data());
 }
 
 ///\brief  Return the dimnsionality of points of a weighted dataset
 template <class InputType>
-std::size_t dataDimension(WeightedUnlabeledData<InputType> const& dataset){
+std::size_t dataDimension(WeightedData<InputType> const& dataset){
 	return dataDimension(dataset.data());
 }
 
@@ -733,7 +666,7 @@ inline std::vector<std::size_t> classSizes(WeightedLabeledData<InputType, LabelT
 
 ///\brief Returns the total sum of weights.
 template<class InputType>
-double sumOfWeights(WeightedUnlabeledData<InputType> const& dataset){
+double sumOfWeights(WeightedData<InputType> const& dataset){
 	double weightSum = 0;
 	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
 		weightSum += sum(dataset.batch(i).weight);
@@ -754,7 +687,7 @@ double sumOfWeights(WeightedLabeledData<InputType,LabelType> const& dataset){
 template<class InputType>
 RealVector classWeight(WeightedLabeledData<InputType,unsigned int> const& dataset){
 	RealVector weights(numberOfClasses(dataset),0.0);
-	for(auto const& elem: dataset.elements()){
+	for(auto const& elem: elements(dataset)){
 		weights(elem.data.label) += elem.weight;
 	}
 	return weights;
@@ -770,7 +703,7 @@ typename boost::disable_if<
 		typename boost::range_value<InputRange>::type,
 		typename boost::range_value<LabelRange>::type
 	>
->::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = 0){
+>::type createLabeledDataFromRange(InputRange const& inputs, LabelRange const& labels, WeightRange const& weights, std::size_t batchSize = constants::DefaultBatchSize){
 
 	SHARK_RUNTIME_CHECK(batchSize(inputs) == batchSize(labels),
 	"number of inputs and number of labels must agree");
@@ -778,9 +711,6 @@ typename boost::disable_if<
 	"number of data points and number of weights must agree");
 	typedef typename boost::range_value<InputRange>::type InputType;
 	typedef typename boost::range_value<LabelRange>::type LabelType;
-
-	if (batchSize == 0)
-		batchSize = WeightedLabeledData<InputRange,LabelRange>::DefaultBatchSize;
 
 	return WeightedLabeledData<InputType,LabelType>(
 		createLabeledDataFromRange(inputs,labels,batchSize),
@@ -807,16 +737,17 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 	
 	WeightedLabeledData<InputType,LabelType> bootstrapSet(dataset,0.0);
 
+	auto booststrap =  elements(bootstrapSet);
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
-		bootstrapSet.element(index).weight += 1.0;
+		booststrap[index].weight += 1.0;
 	}
 	bootstrapSet.inputShape() = dataset.inputShape();
 	bootstrapSet.labelShape() = dataset.labelShape();
 	return bootstrapSet;
 }
 
-/// \brief Creates a bootstrap partition of an unlabeled dataset and returns it using weighting.
+/// \brief Creates a bootstrap partition of an  dataset and returns it using weighting.
 ///
 /// Bootstrapping resamples the dataset by drawing a set of points with
 /// replacement. Thus the sampled set will contain some points multiple times
@@ -826,18 +757,19 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 /// Optionally the size of the bootstrap (that is, the number of sampled points)
 /// can be set. By default it is 0, which indicates that it is the same size as the original dataset.
 template<class InputType>
-WeightedUnlabeledData<InputType> bootstrap(
-	UnlabeledData<InputType> const& dataset,
+WeightedData<InputType> bootstrap(
+	Data<InputType> const& dataset,
 	std::size_t bootStrapSize = 0
 ){
 	if(bootStrapSize == 0)
 		bootStrapSize = dataset.numberOfElements();
 	
-	WeightedUnlabeledData<InputType> bootstrapSet(dataset,0.0);
+	WeightedData<InputType> bootstrapSet(dataset,0.0);
 
+	auto booststrap =  elements(bootstrapSet);
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
 		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
-		bootstrapSet.element(index).weight += 1.0;
+		booststrap[index].weight += 1.0;
 	}
 	bootstrapSet.shape() = dataset.shape();
 	return bootstrapSet;

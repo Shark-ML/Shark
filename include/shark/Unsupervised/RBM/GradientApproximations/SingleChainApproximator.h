@@ -90,7 +90,7 @@ public:
 		return m_chain;
 	}
 	
-	void setData(UnlabeledData<RealVector> const& data){
+	void setData(Data<RealVector> const& data){
 		m_data = data;
 		m_chain.initializeChain(m_data);
 	}
@@ -133,11 +133,17 @@ public:
 		for(std::size_t batch = 0; batch != batches; ++batch){
 			//calculate the size of the next batch which is batchSize as long as there are enough samples left to draw
 			std::size_t currentBatchSize = std::min(samplesToDraw-batch*m_batchSize, m_batchSize);
-			typename MarkovChainType::SampleBatch gradientBatch(currentBatchSize, mpe_rbm->numberOfVN(),mpe_rbm->numberOfHN());
+			typename MarkovChainType::Sample gradientBatch(currentBatchSize,mpe_rbm->numberOfHN(), mpe_rbm->numberOfVN());
 			//fill the batch with fresh samples
 			for(std::size_t i = 0; i != currentBatchSize; ++i){
 				m_chain.step(m_k);
-				getBatchElement(gradientBatch,i) = m_chain.sample();
+				noalias(row(gradientBatch.hidden.input,i)) = row(m_chain.samples().hidden.input,0);
+				noalias(row(gradientBatch.hidden.statistics,i)) = row(m_chain.samples().hidden.statistics,0);
+				noalias(row(gradientBatch.hidden.state,i)) = row(m_chain.samples().hidden.state,0);
+				noalias(row(gradientBatch.visible.input,i)) = row(m_chain.samples().visible.input,0);
+				noalias(row(gradientBatch.visible.statistics,i)) = row(m_chain.samples().visible.statistics,0);
+				noalias(row(gradientBatch.visible.state,i)) = row(m_chain.samples().visible.state,0);
+				gradientBatch.energy(i) = m_chain.samples().energy(0);
 			}
 			//do the gradient update
 			modelAverage.addVH(gradientBatch.hidden, gradientBatch.visible);
@@ -158,7 +164,7 @@ public:
 private:
 	RBM* mpe_rbm;
 	mutable MarkovChainType m_chain; 
-	UnlabeledData<RealVector> m_data;
+	Data<RealVector> m_data;
 
 	unsigned int m_k;
 	unsigned int m_samples;

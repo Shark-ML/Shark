@@ -24,16 +24,16 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	RealMatrix covariance=prod(base,trans(base));
 	covariance /= 2.0*Dimensions;
 	
-	
 	MultiVariateNormalDistribution dist(covariance);
-	Data<RealVector> sampleSet(Samples,RealVector(Dimensions));
-	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
-	
+	std::vector<RealVector> x;
+	std::vector<RealVector> z;
 	for(std::size_t i = 0; i != Samples; ++i){
 		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
-		sampleSet.element(i) = sample.first;
-		normalSampleSet.element(i) = sample.second;
+		x.push_back(sample.first);
+		z.push_back(sample.second);
 	}
+	Data<RealVector> sampleSet = createDataFromRange(x);
+	Data<RealVector> normalSampleSet = createDataFromRange(z);
 	
 	RealVector meanSampled;
 	RealMatrix covarianceSampled;
@@ -73,14 +73,15 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	
 	
 	MultiVariateNormalDistributionCholesky dist(covariance);
-	Data<RealVector> sampleSet(Samples,RealVector(Dimensions));
-	Data<RealVector> normalSampleSet(Samples,RealVector(Dimensions));
-	
+	std::vector<RealVector> x;
+	std::vector<RealVector> z;
 	for(std::size_t i = 0; i != Samples; ++i){
 		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
-		sampleSet.element(i) = sample.first;
-		normalSampleSet.element(i) = sample.second;
+		x.push_back(sample.first);
+		z.push_back(sample.second);
 	}
+	Data<RealVector> sampleSet = createDataFromRange(x);
+	Data<RealVector> normalSampleSet = createDataFromRange(z);
 	
 	RealVector meanSampled;
 	RealMatrix covarianceSampled;

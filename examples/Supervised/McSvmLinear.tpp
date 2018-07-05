@@ -21,8 +21,8 @@ typedef CompressedRealMatrix MatrixType;
 class Problem : public LabeledDataDistribution<VectorType, unsigned int>
 {
 public:
-	void draw(VectorType& input, unsigned int& label)const
-	{
+	Problem():LabeledDataDistribution<VectorType, unsigned int>({1000002,5}){}
+	void draw(VectorType& input, unsigned int& label)const{
 		label = random::discrete(random::globalRng, 0, 4);
 		input.resize(1000002);
 		input.set_element(input.end(), 1000000,  noise * random::gauss(random::globalRng) + 3.0 * std::cos((double)label));

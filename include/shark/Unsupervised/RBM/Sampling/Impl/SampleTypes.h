@@ -30,8 +30,8 @@
 #ifndef SHARK_UNSUPERVISED_RBM_SAMPLING_IMPL_SAMPLETYPES_H
 #define SHARK_UNSUPERVISED_RBM_SAMPLING_IMPL_SAMPLETYPES_H
 
-#include <shark/Data/BatchInterfaceAdaptStruct.h>
-
+#include <shark/LinAlg/Base.h>
+#include <utility>
 namespace shark{
 namespace detail{
 ///\brief Represents a single sample of the GibbsOperator.
@@ -41,24 +41,27 @@ namespace detail{
 template<class Statistics>
 struct GibbsSample{
 public:
-	RealVector input;
+	RealMatrix input;
 	Statistics statistics;
-	RealVector state;
+	RealMatrix state;
 	
 	///\brief Constructs sample with size neurons
 	GibbsSample(){}
-	explicit GibbsSample(std::size_t numNeurons):
-	input(numNeurons),statistics(numNeurons),state(numNeurons)
+	explicit GibbsSample(std::size_t batchSize, std::size_t numNeurons):
+	input(batchSize, numNeurons),statistics(batchSize, numNeurons),state(batchSize, numNeurons)
 	{}
-	GibbsSample(RealVector const& input, Statistics const& statistics, RealVector const& state)
+	GibbsSample(RealMatrix const& input, Statistics const& statistics, RealMatrix const& state)
 	:input(input),statistics(statistics),state(state)
 	{}
 	
-	friend void swap(GibbsSample& sample1, GibbsSample& sample2){
-		using std::swap;
-		swap(sample1.input,sample2.input);
-		swap(sample1.statistics,sample2.statistics);
-		swap(sample1.state,sample2.state);
+	std::size_t size() const{
+		return input.size1();
+	}
+	
+	void swap_rows(std::size_t i, std::size_t j){
+		input.swap_rows(i,j);
+		statistics.swap_rows(i,j);
+		state.swap_rows(i,j);
 	}
 };
 
@@ -66,116 +69,26 @@ template<class HiddenSample, class VisibleSample>
 struct MarkovChainSample{
 	HiddenSample hidden;
 	VisibleSample visible;
-	double energy;
+	RealVector energy;
 		
-	explicit MarkovChainSample(std::size_t hiddenNeurons, std::size_t visibleNeurons)
-	:hidden(hiddenNeurons),visible(visibleNeurons),energy(0){}
+	MarkovChainSample(){}
+	explicit MarkovChainSample(std::size_t size, std::size_t hiddenNeurons, std::size_t visibleNeurons)
+	:hidden(size, hiddenNeurons),visible(size, visibleNeurons),energy(size, 0){}
 
-	explicit MarkovChainSample(HiddenSample const& hidden, VisibleSample const& visible, double energy)
+	explicit MarkovChainSample(HiddenSample const& hidden, VisibleSample const& visible, RealVector const& energy)
 	:hidden(hidden),visible(visible),energy(energy)
 	{}
 	
-	friend void swap(MarkovChainSample& sample1, MarkovChainSample& sample2){
-		using std::swap;
-		swap(sample1.hidden,sample2.hidden);
-		swap(sample1.visible,sample2.visible);
-		swap(sample1.energy,sample2.energy);
+	std::size_t size() const{
+		return energy.size();
 	}
-};
-}
-}
-BOOST_FUSION_ADAPT_TPL_STRUCT(
-	(Statistics),
-	(shark::detail::GibbsSample)(Statistics),
-	(shark::RealVector, input)(Statistics, statistics)(shark::RealVector, state)
-)
-namespace shark{
-//now create the batch specialisation for our new sample types
-template<class Statistics>
-struct Batch< detail::GibbsSample<Statistics> >{
-	SHARK_CREATE_BATCH_INTERFACE( 
-		detail::GibbsSample<Statistics>,
-		(RealVector, input)(Statistics, statistics)(RealVector, state)
-	)
-};
+	
+	void swap_rows(std::size_t i, std::size_t j){
+		hidden.swap_rows(i,j);
+		visible.swap_rows(i,j);
+		std::swap(energy(i),energy(j));
+	}
 
-template<class Hidden, class Visible>
-struct Batch< detail::MarkovChainSample<Hidden,Visible> >{
-private:
-	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, 
-		SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(type,(Hidden, hidden)(Visible, visible)(double, energy))
-	)
-public:
-	struct type:public detail::FusionFacade<FusionType>{
-		typedef detail::MarkovChainSample<Hidden,Visible> value_type;
-	
-		SHARK_CREATE_BATCH_REFERENCES_TPL((Hidden, hidden)(Visible, visible)(double, energy))
-		SHARK_CREATE_BATCH_ITERATORS()
-		
-		type(){}
-		type(std::size_t batchSize, std::size_t numVisible, std::size_t numHidden){
-			FusionType::visible.resize(batchSize,numVisible);
-			FusionType::hidden.resize(batchSize,numHidden);
-			FusionType::energy.resize(batchSize);
-		}
-		
-		friend void swap(type& op1, type& op2){
-			boost::fusion::swap(fusionize(op1),fusionize(op2));
-		}
-		std::size_t size()const{
-			return batchSize(boost::fusion::at_c<0>(fusionize(*this)));
-		}
-		
-		reference operator[](std::size_t i){
-			return *(begin()+i);
-		}
-		const_reference operator[](std::size_t i)const{
-			return *(begin()+i);
-		}
-		
-		template<class Archive>
-		void serialize(Archive & archive,unsigned int version)
-		{
-			boost::fusion::for_each(fusionize(*this), detail::ItemSerializer<Archive>(archive));
-		}
-	};
-	typedef detail::MarkovChainSample<Hidden,Visible> value_type;
-	typedef typename type::reference reference;
-	typedef typename type::const_reference const_reference;
-	typedef typename type::iterator iterator;
-	typedef typename type::const_iterator const_iterator;
-
-	static type createBatch(value_type const& input, std::size_t size = 1){
-		return type(size,batchSize(FusionType::visible),batchSize(FusionType::hidden));
-	}
-	
-	template<class T>
-	static std::size_t size(T const& batch){return batch.size();}
-	
-	template<class T>
-	static typename T::reference get(T& batch, std::size_t i){
-		return batch[i];
-	}
-	template<class T>
-	static const_reference get(T const& batch, std::size_t i){
-		return batch[i];
-	}
-	template<class T>
-	static typename T::iterator begin(T& batch){
-		return batch.begin();
-	}
-	template<class T>
-	static const_iterator begin(T const& batch){
-		return batch.begin();
-	}
-	template<class T>
-	static typename T::iterator end(T& batch){
-		return batch.end();
-	}
-	template<class T>
-	static const_iterator end(T const& batch){
-		return batch.end();
-	}
 };
-}
+}}
 #endif

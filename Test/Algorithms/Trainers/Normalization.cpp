@@ -19,14 +19,18 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_VARIANCE )
 	v(0) = 0.0; input[0] = v;
 	v(0) = 1.0; input[1] = v;
 	v(0) = 2.0; input[2] = v;
-	UnlabeledData<RealVector> set = createDataFromRange(input);
+	Data<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsUnitVariance<> normalizer(true);
 	Normalizer<> map;
 	normalizer.train(map, set);
-	Data<RealVector> transformedSet = map(set);
-	double error = std::abs(-std::sqrt(1.5) - transformedSet.element(0)(0)) 
-				+ std::abs(transformedSet.element(1)(0)) 
-				+ std::abs(sqrt(1.5) - transformedSet.element(2)(0));
+	auto points= elements(map(set));
+	std::cout<<points.dataset()<<std::endl;
+	std::cout<<points[0]<<std::endl;
+	std::cout<<points[1]<<std::endl;
+	std::cout<<points[2]<<std::endl;
+	double error = std::abs(-std::sqrt(1.5) - points[0](0)) 
+				+ std::abs(points[1](0)) 
+				+ std::abs(sqrt(1.5) - points[2](0));
 	BOOST_CHECK_SMALL(error, 1e-10);
 }
 
@@ -37,14 +41,14 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_TO_UNIT_INTERVAL )
 	v(0) = 0.0; input[0] = v;
 	v(0) = 1.0; input[1] = v;
 	v(0) = 2.0; input[2] = v;
-	UnlabeledData<RealVector> set = createDataFromRange(input);
+	Data<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsUnitInterval<> normalizer;
 	Normalizer<> map;
 	normalizer.train(map, set);
-	Data<RealVector> transformedSet = map(set);
-	BOOST_CHECK_SMALL(transformedSet.element(0)(0),1.e-10);
-	BOOST_CHECK_SMALL(0.5 - transformedSet.element(1)(0),1.e-10);
-	BOOST_CHECK_SMALL(1.0 - transformedSet.element(2)(0),1.e-10);
+	auto points= elements(map(set));
+	BOOST_CHECK_SMALL(points[0](0),1.e-10);
+	BOOST_CHECK_SMALL(0.5 - points[1](0),1.e-10);
+	BOOST_CHECK_SMALL(1.0 - points[2](0),1.e-10);
 }
 
 BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)
@@ -67,7 +71,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING)
 	for(std::size_t i = 0; i != 1000;++i)
 		input[i]=dist(random::globalRng).first+mean;
 
-	UnlabeledData<RealVector> set = createDataFromRange(input);
+	Data<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsWhitening normalizer(1.5);
 	LinearModel<> map(3, 3);
 	normalizer.train(map, set);
@@ -107,7 +111,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_WHITENING_RANK_2)
 	for(std::size_t i = 0; i != 1000;++i)
 		input[i]=dist(random::globalRng).first+mean;
 
-	UnlabeledData<RealVector> set = createDataFromRange(input);
+	Data<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsWhitening normalizer(1.5);
 	LinearModel<> map;
 	normalizer.train(map, set);
@@ -148,7 +152,7 @@ BOOST_AUTO_TEST_CASE( NORMALIZE_ZCA)
 	for(std::size_t i = 0; i != 1000;++i)
 		input[i]=dist(random::globalRng).first+mean;
 
-	UnlabeledData<RealVector> set = createDataFromRange(input);
+	Data<RealVector> set = createDataFromRange(input);
 	NormalizeComponentsZCA normalizer(1.5);
 	LinearModel<> map(3, 3);
 	normalizer.train(map, set);

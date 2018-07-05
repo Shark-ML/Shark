@@ -185,18 +185,21 @@ public:
 	/// \param[in]  model   Model to work on
 	/// \param[in]  firstIndex  The index of the first element of the pair to merge.
 	///
-	virtual void reduceBudget(ModelType& model, size_t firstIndex)
-	{
-		size_t maxIndex = model.basis().numberOfElements();
+	void reduceBudget(ModelType& model, size_t firstIndex, DataView<Data<RealVector> >& basis){
+		size_t maxIndex = basis.size();
+		auto&& firstVector = basis[firstIndex];
 
 		// compute the kernel row of the given, first element and all the others
 		// should take O(B) time, as it is a row of size B
 		blas::vector<float> kernelRow(maxIndex, 0.0);
-		for(size_t j = 0; j < maxIndex; j++)
-			kernelRow(j) = static_cast<float>( model.kernel()->eval(model.basis().element(firstIndex), model.basis().element(j)));
+		size_t currentIndex = 0;
+		for(auto&& element: basis){
+			kernelRow(currentIndex) = static_cast<float>( model.kernel()->eval(firstVector, element));
+			++currentIndex;
+		}
 
 		// initialize the search
-		double fret(0.);
+		double fret =0.;
 		RealVector h(1);     // initial search starting point
 		RealVector xi(1);    // direction of search
 		RealVector d(1);    // derivative ater line-search (not needed)
@@ -211,8 +214,7 @@ public:
 
 		// we need to check every other vector
 		RealMatrix &alpha = model.alpha();
-		for(size_t currentIndex = 0; currentIndex < maxIndex; currentIndex++)
-		{
+		for(std::size_t currentIndex = 0; currentIndex != maxIndex; ++currentIndex){
 			// we do not want the vector already chosen
 			if(firstIndex == currentIndex)
 				continue;
@@ -243,10 +245,6 @@ public:
 			// the optimal point is now given by h.
 			// the vector that corresponds to this is
 			// $z = h x_m + (1-h) x_n$  by formula (6.7)
-			RealVector firstVector = model.basis().element(firstIndex);
-			RealVector currentVector = model.basis().element(currentIndex);
-			RealVector mergedVector = h(0) * firstVector + (1.0 - h(0)) * currentVector;
-
 			// this is another minimization problem, which has as optimal
 			// solution $\alpha_z^{(i)} = \alpha_m^{(i)} k(x_m, z) + \alpha_n^{(i)} k(x_n, z).$
 
@@ -281,23 +279,20 @@ public:
 		}
 
 		// compute merged vector
-		RealVector firstVector = model.basis().element(firstIndex);
-		RealVector secondVector = model.basis().element(secondIndex);
-		RealVector mergedVector = minH * firstVector + (1.0 - minH) * secondVector;
-
-		// replace the second vector by the merged one
-		model.basis().element(secondIndex) = mergedVector;
+		// the optimal point is now given by h.
+		// the vector that corresponds to this is
+		// $z = h x_m + (1-h) x_n$  by formula (6.7)
+		//we directly replace the second vector with this
+		auto&& secondVector = basis[secondIndex];
+		noalias(secondVector) = minH * firstVector + (1.0 - minH) * secondVector;
 
 		// and update the alphas
-		for(size_t c = 0; c < alpha.size2(); c++)
-		{
-			alpha(secondIndex, c) = minAlphaMergedFirst * alpha(firstIndex, c) + minAlphaMergedSecond * alpha(secondIndex, c);
-		}
+		noalias(row(alpha,secondIndex)) = minAlphaMergedFirst * row(alpha, firstIndex) + minAlphaMergedSecond * row(alpha, secondIndex);
 
 		// the first index is now obsolete, so we copy the
 		// last vector, which serves as a buffer, to this position
-		row(alpha, firstIndex) = row(alpha, maxIndex - 1);
-		model.basis().element(firstIndex) = model.basis().element(maxIndex - 1);
+		noalias(row(alpha, firstIndex)) = row(alpha, maxIndex - 1);
+		noalias(firstVector) = basis[maxIndex - 1];
 
 		// clear the  buffer by cleaning the alphas
 		// finally the vectors we merged.
@@ -315,8 +310,7 @@ public:
 	/// @param[in]  alpha   alphas for the new budget vector
 	/// @param[in]  supportVector the vector to add to the model by applying the maintenance strategy
 	///
-	virtual void addToModel(ModelType& model, InputType const& alpha, ElementType const& supportVector)
-	{
+	virtual void addToModel(ModelType& model, InputType const& alpha, ElementType const& supportVector){
 
 		// find the two indicies we want to merge
 
@@ -327,10 +321,12 @@ public:
 		// last entry of the model for buffer. it will be freed again,
 		// when merging is finished.
 
+
 		// put the new vector into place
 		size_t maxIndex = model.basis().numberOfElements();
-		model.basis().element(maxIndex - 1) = supportVector.input;
-		row(model.alpha(), maxIndex - 1) = alpha;
+		auto basis = shark::elements(model.basis());
+		basis[maxIndex - 1] = supportVector.input;
+		noalias(row(model.alpha(), maxIndex - 1)) = alpha;
 
 
 		// the first vector to merge is the one with the smallest alpha coefficient
@@ -342,12 +338,11 @@ public:
 
 		// if the smallest vector has zero alpha,
 		// the budget is not yet filled so we can skip merging it.
-		if(firstAlpha == 0.0f)
-		{
+		if(firstAlpha == 0.0f){
 			// as we need the last vector to be zero, we put the new
 			// vector to that place and undo our putting-the-vector-to-back-position
-			model.basis().element(firstIndex) = supportVector.input;
-			row(model.alpha(), firstIndex) = alpha;
+			basis[firstIndex] = supportVector.input;
+			noalias(row(model.alpha(), firstIndex)) = alpha;
 
 			// enough to zero out the alpha
 			row(model.alpha(), maxIndex - 1).clear();
@@ -360,7 +355,7 @@ public:
 		// taking O(B) time. we also have to provide to the findVectorToMerge
 		// function the supportVector we want to add, as we cannot, as
 		// said, just extend the model with this vector.
-		reduceBudget(model, firstIndex);
+		reduceBudget(model, firstIndex, basis);
 	}
 
 

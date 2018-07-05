@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 	// read data
-	UnlabeledData<RealVector> data;
+	Data<RealVector> data;
 	try {
 	//###begin<import>
 		importCSV(data, argv[1], ' ');
@@ -62,10 +62,10 @@ int main(int argc, char **argv) {
 		cerr << "unable to read data from file " <<  argv[1] << endl;
 		exit(EXIT_FAILURE);
 	}
-	std::size_t elements = data.numberOfElements();
+	std::size_t numElements = data.numberOfElements();
 
 	// write statistics of input data
-	cout << "number of data points: " << elements << " dimensions: " << dataDimension(data) << endl;
+	cout << "number of data points: " << numElements << " dimensions: " << dataDimension(data) << endl;
 
 	// normalize data
 	//###begin<normalization>
@@ -98,15 +98,13 @@ int main(int argc, char **argv) {
 	// write results to files
 	ofstream c1("cl1.csv");
 	ofstream c2("cl2.csv");
-	ofstream cc("clc.csv");
 	//###begin<print_cluster_assignment>
-	for(std::size_t i=0; i != elements; i++) {
-		if(clusters.element(i)) 
-			c1 << data.element(i)(0) << " " << data.element(i)(1) << endl;
+	LabeledData<RealVector, unsigned int> assignment(data, clusters);
+	for(auto const& element: elements(assignment)) {
+		if(element.label) 
+			c1 << element.input(0) << " " << element.input(1) << endl;
 		else 
-			c2 << data.element(i)(0) << " " << data.element(i)(1) << endl;
+			c2 << element.input(0) << " " << element.input(1) << endl;
 	}
 	//###end<print_cluster_assignment>
-	cc << c.element(0)(0) << " " << c.element(0)(1) << endl;
-	cc << c.element(1)(0) << " " << c.element(1)(1) << endl;
 }

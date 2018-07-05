@@ -76,14 +76,16 @@ public:
 		unsigned P = 0; // positive examples
 		unsigned N = 0; // negative examples
 		std::vector<AUCPair> L(elements); // list of predictions and labels
+		auto targets = shark::elements(target);
+		auto predictions = shark::elements(prediction);
 
 		for(std::size_t i=0; i!= elements; i++) { // build list
-			LabelType t = target.element(i);
+			LabelType t = targets[i];
 			// negate predictions if m_invert is set
 			if(!m_invert)
-				L[i] = AUCPair(prediction.element(i)(column), t);
+				L[i] = AUCPair(predictions[i](column), t);
 			else
-				L[i] = AUCPair(-prediction.element(i)(column), t);
+				L[i] = AUCPair(-predictions[i](column), t);
 			// count positive and negative examples
 			if(t > 0) 
 				P++;
@@ -149,99 +151,99 @@ protected:
 	bool m_invert;
 };
 
-///
-/// \brief Negative Wilcoxon-Mann-Whitney statistic 
-/// 
-/// This class computes the Wilcoxon-Mann-Whitney statistic, which is
-/// an unbiased estimate of the area under the ROC curve.
-///
-/// See, for example:
-/// Corinna Cortes, Mehryar Mohri. Confidence Intervals for the Area under the ROC Curve. NIPS, 2004
-///
-/// The area is negated so that optimizing the AUC corresponds to a minimization task. 
-/// \ingroup costfunctions
-template<class LabelType = unsigned int, class OutputType = LabelType>
-class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, OutputType>
-{
-public:
-	/// Constructor.
-	/// \param invert: if set to true, the role of positive and negative class are switched
-	NegativeWilcoxonMannWhitneyStatistic(bool invert = false) {
-		m_invert = invert;
-	}
+//~ ///
+//~ /// \brief Negative Wilcoxon-Mann-Whitney statistic 
+//~ /// 
+//~ /// This class computes the Wilcoxon-Mann-Whitney statistic, which is
+//~ /// an unbiased estimate of the area under the ROC curve.
+//~ ///
+//~ /// See, for example:
+//~ /// Corinna Cortes, Mehryar Mohri. Confidence Intervals for the Area under the ROC Curve. NIPS, 2004
+//~ ///
+//~ /// The area is negated so that optimizing the AUC corresponds to a minimization task. 
+//~ /// \ingroup costfunctions
+//~ template<class LabelType = unsigned int, class OutputType = LabelType>
+//~ class NegativeWilcoxonMannWhitneyStatistic : public AbstractCost<LabelType, OutputType>
+//~ {
+//~ public:
+	//~ /// Constructor.
+	//~ /// \param invert: if set to true, the role of positive and negative class are switched
+	//~ NegativeWilcoxonMannWhitneyStatistic(bool invert = false) {
+		//~ m_invert = invert;
+	//~ }
 
-	/// \brief From INameable: return the class name.
-	std::string name() const
-	{ return "NegativeWilcoxonMannWhitneyStatistic"; }
+	//~ /// \brief From INameable: return the class name.
+	//~ std::string name() const
+	//~ { return "NegativeWilcoxonMannWhitneyStatistic"; }
 
-	/// \brief Computes Wilcoxon-Mann-Whitney statistic.
-	/// \param target: interpreted as binary class label
-	/// \param prediction: interpreted as binary class label
-	/// \param column: indicates the column of the prediction vector interpreted as probability of positive class
-	double eval(Data<LabelType> const& target, Data<OutputType> const& prediction, unsigned int column) const {
-		SHARK_RUNTIME_CHECK(prediction(0).size() > column,"column number too large");
-		std::vector<double> pos, neg;
-		for(std::size_t i=0; i<prediction.size(); i++) {
-			if(!m_invert){
-				if(target(i) > 0) 
-					pos.push_back(prediction.element(i)(column));
-				else  
-					neg.push_back(prediction.element(i)(column));
-			}else{
-				if(target(i) > 0)
-					pos.push_back(-prediction.element(i)(column));
-				else
-					neg.push_back(-prediction.element(i)(column));
-			}
-		}
-		std::size_t m = pos.size();
-		std::size_t n = neg.size();
+	//~ /// \brief Computes Wilcoxon-Mann-Whitney statistic.
+	//~ /// \param target: interpreted as binary class label
+	//~ /// \param prediction: interpreted as binary class label
+	//~ /// \param column: indicates the column of the prediction vector interpreted as probability of positive class
+	//~ double eval(Data<LabelType> const& target, Data<OutputType> const& prediction, unsigned int column) const {
+		//~ SHARK_RUNTIME_CHECK(prediction(0).size() > column,"column number too large");
+		//~ std::vector<double> pos, neg;
+		//~ for(std::size_t i=0; i<prediction.size(); i++) {
+			//~ if(!m_invert){
+				//~ if(target(i) > 0) 
+					//~ pos.push_back(prediction.element(i)(column));
+				//~ else  
+					//~ neg.push_back(prediction.element(i)(column));
+			//~ }else{
+				//~ if(target(i) > 0)
+					//~ pos.push_back(-prediction.element(i)(column));
+				//~ else
+					//~ neg.push_back(-prediction.element(i)(column));
+			//~ }
+		//~ }
+		//~ std::size_t m = pos.size();
+		//~ std::size_t n = neg.size();
 
-		std::sort (pos.begin(), pos.end());
-		std::sort (neg.begin(), neg.end());
+		//~ std::sort (pos.begin(), pos.end());
+		//~ std::sort (neg.begin(), neg.end());
 
-		double A = 0;
-		for(std::size_t i = 0, j = 0; i != m; i++) {
-			A += j; 
-			for(std::size_t j = 0; j != n; j++) {
-				if(pos[i] > neg[j]) 
-					A++;
-				else 
-					break;
-			}
-		}
+		//~ double A = 0;
+		//~ for(std::size_t i = 0, j = 0; i != m; i++) {
+			//~ A += j; 
+			//~ for(std::size_t j = 0; j != n; j++) {
+				//~ if(pos[i] > neg[j]) 
+					//~ A++;
+				//~ else 
+					//~ break;
+			//~ }
+		//~ }
 
-#ifdef DEBUG
-		// most naive implementation 
-		double verifyA = 0.;
-		for(std::size_t i=0; i<m; i++) {
-			for(std::size_t  j=0; j<n; j++) {
-				if(pos[i] > neg[j]) verifyA++;
-			}
-		}
-		if (A!=verifyA) {
-			throw( shark::Exception( "shark::WilcoxonMannWhitneyStatistic::eval: error in algorithm, efficient and naive implementation do no coincide", __FILE__, __LINE__ ) );
-		}
-#endif
+//~ #ifdef DEBUG
+		//~ // most naive implementation 
+		//~ double verifyA = 0.;
+		//~ for(std::size_t i=0; i<m; i++) {
+			//~ for(std::size_t  j=0; j<n; j++) {
+				//~ if(pos[i] > neg[j]) verifyA++;
+			//~ }
+		//~ }
+		//~ if (A!=verifyA) {
+			//~ throw( shark::Exception( "shark::WilcoxonMannWhitneyStatistic::eval: error in algorithm, efficient and naive implementation do no coincide", __FILE__, __LINE__ ) );
+		//~ }
+//~ #endif
 
-		return -A / (n*m);
-	}
+		//~ return -A / (n*m);
+	//~ }
 
-	double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
-		SHARK_RUNTIME_CHECK(prediction.numberOfElements() >= 1,"Empty prediction set");
-		SHARK_RUNTIME_CHECK(dataDimension(prediction) < 3, "Can not compute with more than two columns");
+	//~ double eval(Data<LabelType> const& target, Data<OutputType>  const& prediction) const {
+		//~ SHARK_RUNTIME_CHECK(prediction.numberOfElements() >= 1,"Empty prediction set");
+		//~ SHARK_RUNTIME_CHECK(dataDimension(prediction) < 3, "Can not compute with more than two columns");
 		
-		std::size_t dim = dataDimension(prediction);
-		if(dim == 1) 
-			return eval(target, prediction, 0);
-		else if(dim == 2) 
-			return eval(target, prediction, 1);
-		return 0.;
-	}
+		//~ std::size_t dim = dataDimension(prediction);
+		//~ if(dim == 1) 
+			//~ return eval(target, prediction, 0);
+		//~ else if(dim == 2) 
+			//~ return eval(target, prediction, 1);
+		//~ return 0.;
+	//~ }
 
-private:
-	bool m_invert;
-};
+//~ private:
+	//~ bool m_invert;
+//~ };
 
 
 }

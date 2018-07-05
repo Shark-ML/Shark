@@ -101,9 +101,9 @@ public:
 		// prepare m_problem internal variables
 		m_activeEx = m_numExamples;
 		m_activeVar = m_numVariables;
-		for (std::size_t v=0, i=0; i<m_numExamples; i++)
-		{
-			unsigned int y = target.element(i);
+		std::size_t i = 0;
+		std::size_t v = 0;
+		for(auto y: elements(target)){
 			m_examples[i].index = i;
 			m_examples[i].y = y;
 			m_examples[i].active = m_cardP;
@@ -122,6 +122,7 @@ public:
 				
 				m_linear(v) = m_gradient(v) = linearMat(i,p);
 			}
+			++i;
 		}
 	}
 	

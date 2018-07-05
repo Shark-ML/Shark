@@ -63,14 +63,13 @@ BOOST_AUTO_TEST_CASE( EPSILON_SVM_TEST )
 	trainer.sparsify() = false;
 	trainer.train(svm, training);
 
-	Data<RealVector> output;
-	output = svm(training.inputs());
-
+	auto output = elements(svm(training.inputs()));
+	auto labels = elements(training.labels());
 	RealVector alpha = svm.parameterVector();
 	for (std::size_t i=0; i<training.numberOfElements(); i++)
 	{
-		double y = training.labels().element(i)(0);
-		double f = output.element(i)(0);
+		double y = labels[i](0);
+		double f = output[i](0);
 		double a = alpha(i);
 		double xi = std::max(0.0, std::abs(f - y) - epsilon);
 		if (a == 0.0)

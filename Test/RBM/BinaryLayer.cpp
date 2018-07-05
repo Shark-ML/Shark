@@ -11,7 +11,7 @@ BOOST_AUTO_TEST_SUITE (RBM_BinaryLayer)
 
 BOOST_AUTO_TEST_CASE( BinaryLayer_SufficientStatistics){
 	BinaryLayer layer;
-	BinaryLayer::StatisticsBatch statistics(10,3);
+	BinaryLayer::SufficientStatistics statistics(10,3);
 	layer.resize(3);
 	RealMatrix input(10,3);
 	RealMatrix testInput(10,3);
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_Parameters){
 
 BOOST_AUTO_TEST_CASE( BinaryLayer_Sample){
 	BinaryLayer layer;
-	BinaryLayer::StatisticsBatch statistics(10,5);
+	BinaryLayer::SufficientStatistics statistics(10,5);
 	layer.resize(5);
 	random::globalRng.seed(42);
 	

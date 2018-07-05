@@ -78,12 +78,13 @@ BOOST_AUTO_TEST_CASE(KMeans_simple)
 	Data<RealVector> const& c = centroids.centroids();
 	std::cout<<c<<std::endl;
 	BOOST_CHECK_EQUAL(c.numberOfElements(), 3u);
-	BOOST_CHECK(c.element(0)(0) >  0.0);
-	BOOST_CHECK(c.element(0)(0) <  1.0);
-	BOOST_CHECK(c.element(1)(0) > 10.0);
-	BOOST_CHECK(c.element(1)(0) < 11.0);
-	BOOST_CHECK(c.element(2)(0) > 20.0);
-	BOOST_CHECK(c.element(2)(0) < 21.0);
+	auto centers = elements(c);
+	BOOST_CHECK(centers[0](0) >  0.0);
+	BOOST_CHECK(centers[0](0) <  1.0);
+	BOOST_CHECK(centers[1](0) > 10.0);
+	BOOST_CHECK(centers[1](0) < 11.0);
+	BOOST_CHECK(centers[2](0) > 20.0);
+	BOOST_CHECK(centers[2](0) < 21.0);
 	BOOST_CHECK_LE(iterations, 3u);
 }
 
@@ -131,13 +132,13 @@ BOOST_AUTO_TEST_CASE(KMeans_multiple_gauss)
 		std::vector<std::size_t> members = classSizes(clusters);
 		for (std::size_t i=0; i<numPoints; i++)
 		{
-			unsigned int id = clusters.element(i);
+			unsigned int id = elements(clusters)[i];
 			clusterMeans[id]+=data[i]/members[id];
 		}
 		
 		//check that the means are the same
 		for (unsigned int i=0; i<numMeans; i++){
-			double distance = distanceSqr(clusterMeans[i],centroids.centroids().element(i));
+			double distance = distanceSqr(clusterMeans[i],elements(centroids.centroids())[i]);
 			BOOST_CHECK_SMALL(distance, 1.e-10);
 		}
 	}
@@ -224,7 +225,7 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		std::vector<std::size_t> members = classSizes(clusters);
 		for (std::size_t i=0; i<numPoints; i++)
 		{
-			unsigned int id = clusters.element(i);
+			unsigned int id = elements(clusters)[i];
 			newClusterMeans[id]+=data[i]/members[id];
 		}
 		

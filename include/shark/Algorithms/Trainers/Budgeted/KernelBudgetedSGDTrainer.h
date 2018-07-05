@@ -58,6 +58,7 @@
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Algorithms/KMeans.h>
 #include <shark/Core/IParameterizable.h>
+#include <shark/Data/DataView.h>
 #include <shark/LinAlg/KernelMatrix.h>
 #include <shark/LinAlg/PartlyPrecomputedMatrix.h>
 #include <shark/Models/Kernels/KernelExpansion.h>
@@ -226,15 +227,15 @@ public:
 	/// \param[in]  classifier      classifier object for the final solution.
 	/// \param[in]  dataset     dataset to work with.
 	///
-	void train(ClassifierType &classifier, const LabeledData<InputType, unsigned int> &dataset)
+	void train(ClassifierType &classifier, const LabeledData<InputType, unsigned int> &data)
 	{
-
-		std::size_t ell = dataset.numberOfElements();
-		std::size_t classes = numberOfClasses(dataset);
+		auto dataset = shark::elements(data); 
+		
+		std::size_t ell = dataset.size();
+		std::size_t classes = numberOfClasses(data);
 
 		// is the budget size larger than reasonable?
-		if(m_budgetSize > ell)
-		{
+		if(m_budgetSize > ell){
 			// in this case we just set the budgetSize to the given dataset size, so basically
 			// there is an infinite budget.
 			m_budgetSize = ell;
@@ -252,26 +253,15 @@ public:
 		// merge strategy).
 		m_budgetSize = m_budgetSize + 1;
 
-		// easy access
-		UIntVector y = createBatch(dataset.labels().elements());
-
 		// create a preinitialized budget.
 		// this is used to initialize the kernelexpansion, we will work with.
-		LabeledData<InputType, unsigned int> preinitializedBudgetVectors(m_budgetSize, dataset.element(0));
+		LabeledData<InputType, unsigned int> preinitializedBudgetVectors(m_budgetSize, dataset.shape());
 
 		// preinit the vectors first
 		// we still preinit even for no preinit, as we need the vectors in the
 		// constructor of the kernelexpansion. the alphas will be set to zero for none.
-		if((m_preInitializationMethod == RANDOM) || (m_preInitializationMethod == NONE))
-		{
-			for(size_t j = 0; j < m_budgetSize; j++)
-			{
-				// choose a random vector
-				std::size_t b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
-
-				// copy over the vector
-				preinitializedBudgetVectors.element(j) = dataset.element(b);
-			}
+		if((m_preInitializationMethod == RANDOM) || (m_preInitializationMethod == NONE)){
+			preinitializedBudgetVectors = toDataset(randomSubset(dataset, m_budgetSize));
 		}
 
 		/*
@@ -304,24 +294,23 @@ public:
 
 		// variables
 		const double lambda = 1.0 / (ell * m_C);
-		std::size_t iterations;
+		
 
 
 		// set epoch number
-		if(m_epochs == 0)
+		std::size_t iterations = m_epochs * ell; 
+		if(iterations == 0)
 			iterations = std::max(10 * ell, std::size_t (std::ceil(m_C * ell)));
-		else
-			iterations = m_epochs * ell;
 
 
 		// set the initial alphas (we do this here, after the array has been initialized by setStructure)
-		if(m_preInitializationMethod == RANDOM)
-		{
-			for(size_t j = 0; j < m_budgetSize; j++)
-			{
-				size_t c = preinitializedBudgetVectors.labels().element(j);
+		if(m_preInitializationMethod == RANDOM){
+			std::size_t j = 0;
+			budgetAlpha.clear();
+			for(unsigned int c: elements(preinitializedBudgetVectors.labels())){
 				budgetAlpha(j, c) = 1 / (1 + lambda);
 				budgetAlpha(j, (c + 1) % classes) = -1 / (1 + lambda);
+				++j;
 			}
 		}
 
@@ -329,21 +318,18 @@ public:
 		// whatever strategy we did use-- the last budget vector needs
 		// to be zeroed out, either it was zero anyway (none preinit)
 		// or it is the extra budget vector we need for technical reasons
-		row(budgetAlpha, m_budgetSize - 1) *= 0;
+		row(budgetAlpha, m_budgetSize - 1).clear();
 
 
 		// preinitialize everything to prevent costly memory allocations in the loop
 		RealVector predictions(classes, 0.0);
-		RealVector derivative(classes, 0.0);
-
 
 		// SGD loop
-		std::size_t b = 0;
-
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
-			b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
+			std::size_t b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
+			ElementType element = dataset[b];
 
 			// for smaller datasets instead of choosing randomly a sample
 			// permuting the dataset can be a valid strategy. We do not implement
@@ -351,28 +337,24 @@ public:
 
 			// compute prediction within the budgeted model
 			// this will compute the predictions for all classes in one step
-			budgetModel.eval(dataset.inputs().element(b), predictions);
+			budgetModel.eval(element.input, predictions);
 
 			// now we follow the crammer-singer model as written
 			// in paper (p. 11 top), we compute the scores of the true
 			// class and the runner-up class. for the latter we remove
 			// our true prediction temporarily and redo the argmax.
 
-			RealVector predictionsCopy = predictions;
-			unsigned int trueClass = y[b];
+			unsigned int trueClass = element.label;
 			double scoreOfTrueClass = predictions[trueClass];
                         predictions[trueClass] = -std::numeric_limits<double>::infinity();
 			unsigned int runnerupClass = (unsigned int)arg_max(predictions);
 			double scoreOfRunnerupClass = predictions[runnerupClass];
 
-			SHARK_ASSERT(trueClass != runnerupClass);
-
 			// scale alphas
 			budgetModel.alpha() *= ((long double)(1.0 - 1.0 / (iter + 1.0)));
 
 			// check if there is a margin violation
-			if(scoreOfTrueClass - scoreOfRunnerupClass < m_minMargin)
-			{
+			if(scoreOfTrueClass - scoreOfRunnerupClass < m_minMargin){
 				// TODO: check if the current vector is already part of our budget
 
 				// as we do not use the predictions anymore, we use them to push the new alpha values
@@ -386,7 +368,7 @@ public:
 				// alpha of runnerup class
 				predictions[runnerupClass] = -1.0 / ((long double)(iter + 1.0) * lambda);
 
-				m_budgetMaintenanceStrategy->addToModel(budgetModel, predictions, dataset.element(b));
+				m_budgetMaintenanceStrategy->addToModel(budgetModel, predictions, element);
 			}
 		}
 

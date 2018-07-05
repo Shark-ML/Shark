@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS){
 	
 	auto resultLabel = model(dataset.inputs());
 	for(size_t i=0;i!=TrainExamples;++i){
-		BOOST_CHECK_EQUAL(expectedResult[i], resultLabel.element(i));
+		BOOST_CHECK_EQUAL(expectedResult[i], elements(resultLabel)[i]);
 	}
 }
 BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS_WEIGHTING ){
@@ -126,15 +126,16 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS_WEIGHTING ){
 	for(std::size_t trial = 0; trial != Trials; ++trial){
 		//generate weighted and unweighted dataset
 		WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,0.0);
-		ClassificationDataset unweightedDataset(1);
-		unweightedDataset.batch(0).input.resize(DatasetSize,inputDimension(dataset));
-		unweightedDataset.batch(0).label.resize(DatasetSize);
+		ClassificationDataset unweightedDataset(DatasetSize, dataset.shape(), DatasetSize);
+		auto dataElements = elements(dataset);
+		auto weightedElements = elements(weightedDataset);
+		auto unweightedElements = elements(unweightedDataset);
 		RealVector classWeight(classes,0);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
 			std::size_t index = random::discrete(random::globalRng,std::size_t(0),TrainExamples-1);
-			weightedDataset.element(index).weight +=1.0;
-			unweightedDataset.element(i) = dataset.element(index);
-			classWeight(weightedDataset.element(index).data.label) += 1.0/DatasetSize;
+			weightedElements[index].weight +=1.0;
+			unweightedElements[i] = dataElements[index];
+			classWeight(weightedElements[index].data.label) += 1.0/DatasetSize;
 		}
 		DenseLinearKernel kernel;
 		KernelMeanClassifier<RealVector> trainer(&kernel);
@@ -143,11 +144,11 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS_WEIGHTING ){
 		trainer.train(modelUnweighted, unweightedDataset);
 		trainer.train(modelWeighted, weightedDataset);
 		
-		auto resultUnweighted = modelUnweighted.decisionFunction()(dataset.inputs());
-		auto resultWeighted = modelWeighted.decisionFunction()(dataset.inputs());
+		auto resultUnweighted = elements(modelUnweighted.decisionFunction()(dataset.inputs()));
+		auto resultWeighted = elements(modelWeighted.decisionFunction()(dataset.inputs()));
 		
 		for(std::size_t i = 0; i != TrainExamples; ++i){
-			BOOST_CHECK_SMALL(norm_inf(resultUnweighted.element(i) - resultWeighted.element(i)), 1.e-8);
+			BOOST_CHECK_SMALL(norm_inf(resultUnweighted[i] - resultWeighted[i]), 1.e-8);
 		}
 	}
 }
