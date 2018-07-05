@@ -423,13 +423,13 @@ private:
 		>::type type;
 	};
 public:
-	typedef typename boost::mpl::eval_if<
-		CanBeCalled<Functor,T>,
+	typedef typename std::conditional<
+		!CanBeCalled<Functor,typename Batch<T>::type>::value,
 		std::result_of<Functor&&(T) >,
 		TransformedDataElementTypeFromBatch<
 			typename Batch<T>::type 
 		>
-	>::type type;
+	>::type::type type;
 };
 /** @*/
 }

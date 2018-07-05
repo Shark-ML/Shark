@@ -37,6 +37,7 @@
 #include <shark/ObjectiveFunctions/AbstractCost.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Traits/ProxyReferenceTraits.h>
+#include <shark/Core/Threading/Algorithms.h>
 namespace shark {
 	
 /// \defgroup lossfunctions Loss Functions
@@ -149,14 +150,10 @@ public:
 	double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const{
 		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
 		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
-		int numBatches = (int) targets.numberOfBatches();
-		double error = 0;
-		SHARK_PARALLEL_FOR(int i = 0; i < numBatches; ++i){
-			double batchError= eval(targets.batch(i),predictions.batch(i));
-			SHARK_CRITICAL_REGION{
-				error+=batchError;
-			}
-		}
+
+		using namespace std::placeholders;
+		auto map = [this](BatchLabelType const& labels, BatchOutputType const& outputs){return eval(labels, outputs);};
+		double error = threading::mapAccumulate( targets.batches(), predictions.batches(), 0.0, map, threading::globalThreadPool());
 		return error / targets.numberOfElements();
 	}
 

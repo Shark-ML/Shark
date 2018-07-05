@@ -189,7 +189,7 @@ public:
 	/// \param patterns the input of the model
 	/// \returns the responses of the model
 	Data<OutputType> operator()(Data<InputType> const& patterns)const{
-		return transform(patterns,*this, outputShape());
+		return transform(patterns, [this](BatchInputType const& batch){return (*this)(batch);} , outputShape());
 	}
 
 	/// \brief Model evaluation as an operator for a single pattern. This is a convenience function
@@ -253,7 +253,7 @@ public:
 	/// the feed-forward neural networks. However, there exists the obvious default implementation that just calculates
 	/// the derivatives one after another.
 	/// \param patterns       the patterns to evaluate
-    /// \param outputs        the target outputs
+	/// \param outputs        the target outputs
 	/// \param coefficients  the coefficients which are used to calculate the weighted sum
 	/// \param state intermediate results stored by eval to sped up calculations of the derivatives
 	/// \param parameterDerivative  the calculated parameter derivative as sum over all derivates of all patterns
@@ -296,7 +296,7 @@ Data<O> transform(Data<I> const& data, AbstractModel<I, O, P> const& model){
 /// \param model the model that is applied element by element
 template<class I, class L, class O, class P>
 LabeledData<O,L> transformInputs(LabeledData<I,L> const& data, AbstractModel<I, O, P> const& model){
-	return transformInputs(data,model, model.outputShape());
+	return createLabeledData(model(data.inputs()), data.labels());
 }
 
 ///\brief Transforms the labels of a dataset using a model f and returns the transformed result.
@@ -306,7 +306,7 @@ LabeledData<O,L> transformInputs(LabeledData<I,L> const& data, AbstractModel<I, 
 /// \param model the model that is applied element by element
 template<class I, class L, class O, class P>
 LabeledData<I,O> transformLabels(LabeledData<I,L> const& data, AbstractModel<L, O, P> const& model){
-	return transformLabels(data,model, model.outputShape());
+	return createLabeledData(data.inputs(), model(data.labels()));
 }
 
 /// \brief Initialize model parameters normally distributed.

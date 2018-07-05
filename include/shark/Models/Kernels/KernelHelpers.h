@@ -38,7 +38,7 @@
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
 #include <shark/Data/Dataset.h>
-#include <shark/Core/OpenMP.h>
+#include <shark/Core/Threading/Algorithms.h>
 namespace shark{
 	
 ///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.
@@ -69,20 +69,18 @@ void calculateRegularizedKernelMatrix(
 	ensure_size(matrix,N,N);
 	
 	
-	for (std::size_t i=0; i<B; i++){
+	auto computeSubmatrix =[&](std::size_t i, std::size_t j){
 		std::size_t startX = batchStart[i];
 		std::size_t endX = batchStart[i+1];
-		SHARK_PARALLEL_FOR(int j=0; j < (int)B; j++){
-			std::size_t startY = batchStart[j];
-			std::size_t endY = batchStart[j+1];
-			RealMatrix submatrix = kernel(dataset.batch(i), dataset.batch(j));
-			noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
-			//~ if(i != j)
-				//~ noalias(subrange(matrix(),startY,endY,startX,endX))=trans(submatrix);
-		}
-		for(std::size_t k = startX; k != endX; ++k){
-			matrix()(k,k) += static_cast<typename M::value_type>(regularizer);
-		}
+		std::size_t startY = batchStart[j];
+		std::size_t endY = batchStart[j+1];
+		auto const& submatrix = kernel(dataset.batch(i), dataset.batch(j));
+		noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
+	};
+	threading::parallelND({B,B}, {1,1},computeSubmatrix, threading::globalThreadPool());
+	
+	for(std::size_t k = 0; k != N; ++k){
+		matrix()(k,k) += static_cast<typename M::value_type>(regularizer);
 	}
 }
 
@@ -118,18 +116,16 @@ void calculateMixedKernelMatrix(
 	std::size_t N2 = batchStart2[B2];//number of elements
 	ensure_size(matrix,N1,N2);
 	
-	for (std::size_t i=0; i<B1; i++){
+	
+	auto computeSubmatrix =[&](std::size_t i, std::size_t j){
 		std::size_t startX = batchStart1[i];
 		std::size_t endX = batchStart1[i+1];
-		SHARK_PARALLEL_FOR(int j=0; j < (int)B2; j++){
-			std::size_t startY = batchStart2[j];
-			std::size_t endY = batchStart2[j+1];
-			RealMatrix submatrix = kernel(dataset1.batch(i), dataset2.batch(j));
-			noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
-			//~ if(i != j)
-				//~ noalias(subrange(matrix(),startY,endY,startX,endX))=trans(submatrix);
-		}
-	}
+		std::size_t startY = batchStart2[j];
+		std::size_t endY = batchStart2[j+1];
+		auto const& submatrix = kernel(dataset1.batch(i), dataset2.batch(j));
+		noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
+	};
+	threading::parallelND({B1,B2}, {1,1}, computeSubmatrix, threading::globalThreadPool());
 }
 
 ///  \brief Calculates the regularized kernel gram matrix of the points stored inside a dataset.

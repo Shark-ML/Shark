@@ -33,11 +33,9 @@
 
 #include <shark/Algorithms/DirectSearch/CMA.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
-
+#include <fstream>
 using namespace shark;
 using namespace std;
-
-#include <boost/property_tree/json_parser.hpp>
 
 int main( int argc, char ** argv ) {
 

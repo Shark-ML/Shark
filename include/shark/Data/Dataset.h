@@ -48,7 +48,7 @@
 #include <boost/range/iterator_range.hpp>
 
 #include <shark/Core/Exception.h>
-#include <shark/Core/OpenMP.h>
+#include <shark/Core/Threading/Algorithms.h>
 #include <shark/Core/utility/functional.h>
 #include <boost/iterator/transform_iterator.hpp>
 #include <shark/Core/Random.h>
@@ -180,6 +180,13 @@ public:
 		return *(m_data.begin()+i);
 	}
 	const_batch_reference batch(std::size_t i) const{
+		return *(m_data.begin()+i);
+	}
+	
+	batch_reference operator[](std::size_t i){
+		return *(m_data.begin()+i);
+	}
+	const_batch_reference operator[](std::size_t i) const{
 		return *(m_data.begin()+i);
 	}
 
@@ -731,16 +738,16 @@ transform(
 	typename TransformedData<Functor,T>::type::shape_type const& shape
 ){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
-	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(data.getPartitioning(), shape);//TODO HACK!!!!
-	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i){
-		typedef BatchIterator<typename Batch<T>::type const> Iterator;
-		
-		result.batch(i) = createBatch<ResultType>(
-			boost::make_transform_iterator(Iterator(data.batch(i),0), f),
-			boost::make_transform_iterator(Iterator(data.batch(i), batchSize(data.batch(i))), f)
-		);
-	}
+	
+	threading::transform(data.batches(), result.batches(),
+		[&](typename Data<T>::const_batch_reference input ){
+			typedef BatchIterator<typename Batch<T>::type const> Iterator;
+			return createBatch<ResultType>(
+				boost::make_transform_iterator(Iterator(input, 0), f),
+				boost::make_transform_iterator(Iterator(input, batchSize(input)), f)
+			);
+		}, threading::globalThreadPool());
 	return result;
 }
 
@@ -757,14 +764,12 @@ typename boost::lazy_enable_if<
 	TransformedData<Functor,T>
 >::type
 transform(
-	Data<T> const& data, Functor const& f,
+	Data<T> const& data, Functor f,
 	typename TransformedData<Functor,T>::type::shape_type const& shape
 ){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
-	int batches = (int) data.numberOfBatches();
 	Data<ResultType> result(data.getPartitioning(), shape);
-	SHARK_PARALLEL_FOR(int i = 0; i < batches; ++i)
-		result.batch(i)= f(data.batch(i));
+	threading::transform(data.batches(), result.batches(), f, threading::globalThreadPool());
 	return result;
 }
 ///\brief Transforms the inputs of a dataset using a Functor f and returns the transformed result.

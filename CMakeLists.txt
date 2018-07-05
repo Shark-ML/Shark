@@ -130,6 +130,13 @@ list(APPEND COMPILE_DEFINITIONS_RELEASE NDEBUG)
 message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 
 #####################################################################
+#           Threads
+#####################################################################
+
+find_package (Threads)
+list(APPEND LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+
+#####################################################################
 #           Boost configuration
 #####################################################################
 set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
@@ -137,6 +144,7 @@ set(Boost_USE_MULTITHREADED ON)
 add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
 add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
+add_definitions(-DBOOST_BIND_NO_PLACEHOLDERS) # clashes with C++11
 
 # Should we link the boost test dynamically
 if(NOT Boost_USE_STATIC_LIBS)
@@ -166,30 +174,6 @@ link_directories( ${Boost_LIBRARY_DIR} )
 list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES})
 
 message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
-
-#####################################################################
-#		OpenMP
-#####################################################################
-option( ENABLE_OPENMP "Enable OpenMP" ON )
-if( ENABLE_OPENMP )
-	find_package( OpenMP QUIET )
-	if( OPENMP_FOUND )
-		message( STATUS "OpenMP found" )
-		set(SHARK_USE_OPENMP 1)
-		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-
-		set(SHARK_REQUIRED_C_FLAGS "${OpenMP_C_FLAGS}")
-		set(SHARK_REQUIRED_CXX_FLAGS "${OpenMP_CXX_FLAGS}")
-		set(SHARK_REQUIRED_EXE_LINKER_FLAGS "${OpenMP_EXE_LINKER_FLAGS}")
-
-	else()
-		message( STATUS "OpenMP not found" )
-	endif()
-else()
-	message( STATUS "Building without OpenMP as requested." )
-endif()
 
 #####################################################################
 #           HDF5 configuration

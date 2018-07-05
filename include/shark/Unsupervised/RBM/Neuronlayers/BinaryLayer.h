@@ -36,7 +36,6 @@
 #include <shark/Data/BatchInterfaceAdaptStruct.h>
 #include <shark/Core/Random.h>
 #include <shark/Unsupervised/RBM/StateSpaces/TwoStateSpace.h>
-#include <shark/Core/OpenMP.h>
 namespace shark{
 
 ///\brief Layer of binary units taking values in {0,1}. 
@@ -131,33 +130,31 @@ public:
 		SIZE_CHECK(statistics.size1() == state.size1());
 		SIZE_CHECK(statistics.size2() == state.size2());
 		
-		SHARK_CRITICAL_REGION{
-			if(alpha == 0.0){//special case: normal gibbs sampling
-				for(std::size_t s = 0; s != state.size1();++s){
-					for(std::size_t i = 0; i != state.size2();++i){
-						state(s,i) = random::coinToss(rng, statistics(s,i));
-					}
+		if(alpha == 0.0){//special case: normal gibbs sampling
+			for(std::size_t s = 0; s != state.size1();++s){
+				for(std::size_t i = 0; i != state.size2();++i){
+					state(s,i) = random::coinToss(rng, statistics(s,i));
 				}
 			}
-			else{//flip-the state sampling
-				for(size_t s = 0; s != state.size1(); ++s){
-					for (size_t i = 0; i != state.size2(); i++) {
-						double prob = statistics(s,i);
-						if (state(s,i) == 0) {
-							if (prob <= 0.5) {
-								prob = (1. - alpha) * prob + alpha * prob / (1. - prob);
-							} else {
-								prob = (1. - alpha) * prob  + alpha;
-							}
+		}
+		else{//flip-the state sampling
+			for(size_t s = 0; s != state.size1(); ++s){
+				for (size_t i = 0; i != state.size2(); i++) {
+					double prob = statistics(s,i);
+					if (state(s,i) == 0) {
+						if (prob <= 0.5) {
+							prob = (1. - alpha) * prob + alpha * prob / (1. - prob);
 						} else {
-							if (prob >= 0.5) {
-								prob = (1. - alpha) * prob + alpha * (1. - (1. - prob) / prob);
-							} else {
-								prob = (1. - alpha) * prob;
-							}
+							prob = (1. - alpha) * prob  + alpha;
 						}
-						state(s,i) = random::coinToss(rng, prob);
+					} else {
+						if (prob >= 0.5) {
+							prob = (1. - alpha) * prob + alpha * (1. - (1. - prob) / prob);
+						} else {
+							prob = (1. - alpha) * prob;
+						}
 					}
+					state(s,i) = random::coinToss(rng, prob);
 				}
 			}
 		}

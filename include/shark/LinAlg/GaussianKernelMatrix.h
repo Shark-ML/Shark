@@ -42,7 +42,7 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
 #include <shark/LinAlg/Base.h>
-
+#include <shark/Core/Threading/Algorithms.h>
 #include <vector>
 #include <cmath>
 
@@ -88,12 +88,15 @@ public:
 	///The entries start,...,end of the i-th row are computed and stored in storage.
 	///There must be enough room for this operation preallocated.
 	void row(std::size_t i, std::size_t start, std::size_t end, QpFloatType *storage) const {
+		if(start == end) return;
 		auto const& xi = m_data[i];
 		m_accessCounter +=end-start;
-		SHARK_PARALLEL_FOR(int j = start; j < (int) end; j++) {
-			double distance = m_squaredNorms(i)-2*inner_prod(xi, m_data[j])+m_squaredNorms(j);
-			storage[j-start] = std::exp(- m_gamma * distance);
-		}
+		
+		auto k = [&](std::size_t j){
+			double distance = m_squaredNorms(i) - 2 * inner_prod(xi, m_data[start + j]) + m_squaredNorms( start + j);
+			storage[j] = std::exp(-m_gamma * distance);
+		};
+		threading::parallelND({end - start}, {0}, k,  threading::globalThreadPool());
 	}
 
 	/// \brief Computes the kernel-matrix

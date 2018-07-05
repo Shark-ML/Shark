@@ -36,7 +36,7 @@
 #include <shark/Data/Dataset.h>
 #include <shark/Data/Statistics.h>
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-
+#include <boost/range/counting_range.hpp>
 
 namespace shark{
 	
@@ -171,11 +171,9 @@ public:
 		KernelMatrixResults results = evaluateKernelMatrix();
 
 		std::size_t parameters = mep_kernel->numberOfParameters();
-		derivative.resize(parameters);
-		derivative.clear();
-		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
+		auto processBatch = [&](std::size_t i){
 			std::size_t startX = 0;
-			for(int j = 0; j != i; ++j){
+			for(std::size_t j = 0; j != i; ++j){
 				startX+= batchSize(m_data.batch(j));
 			}
 			RealVector threadDerivative(parameters,0.0);
@@ -184,7 +182,7 @@ public:
 			RealMatrix blockK;//block of the KernelMatrix
 			RealMatrix blockW;//block of the WeightMatrix
 			std::size_t startY = 0;
-			for(int j = 0; j <= i; ++j){
+			for(std::size_t j = 0; j <= i; ++j){
 				mep_kernel->eval(m_data.batch(i).input,m_data.batch(j).input,blockK,*state);
 				mep_kernel->weightedParameterDerivative(
 					m_data.batch(i).input,m_data.batch(j).input,
@@ -195,10 +193,14 @@ public:
 				noalias(threadDerivative) += blockDerivative;
 				startY += batchSize(m_data.batch(j));
 			}
-			SHARK_CRITICAL_REGION{
-				noalias(derivative) += threadDerivative;
-			}
-		}
+			return threadDerivative;
+		};
+		
+		derivative = threading::mapAccumulate(
+			boost::counting_range<std::size_t>(0,m_data.numberOfBatches()), 
+			RealVector(numberOfVariables(), 0.0), processBatch,
+			threading::globalThreadPool()
+		);
 		derivative *= -1;
 		derivative /= m_elements;
 		return -results.error;
@@ -281,7 +283,7 @@ private:
 		noalias(blockY) = labelsi % trans(labelsj);
 	}
     
-    /// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
+	/// Update a sub-block of the matrix \f$ \langle Y, K^x \rangle \f$.
 	double updateYK(UIntVector const& labelsi,UIntVector const& labelsj, RealMatrix const& block)const{
 		std::size_t blockSize1 = labelsi.size();
 		std::size_t blockSize2 = labelsj.size();
@@ -351,61 +353,76 @@ private:
 	/// where k is the row mean over K and y the row mean over y, mk, my the total means of K and Y
 	/// and n the number of elements
 	KernelMatrixResults evaluateKernelMatrix()const{
+		
 		//it holds
 		// \langle K^c,K^c \rangle  = \langle K,K \rangle  -2n\langle k,k \rangle  +mk^2n^2
 		// \langle K^c,Y \rangle  = \langle K, Y \rangle  - 2 n \langle k, y \rangle  + n^2 mk my
 		// where k is the row mean over K and y the row mean over y, mk, my the total means of K and Y
 		// and n the number of elements
-
-		double KK = 0; //stores \langle K,K \rangle
-		double YK = 0; //stores \langle Y,K^c \rangle
-		RealVector k(m_elements,0.0);//stores the row/column means of K
-		SHARK_PARALLEL_FOR(int i = 0; i < (int)m_data.numberOfBatches(); ++i){
+		
+		//Accumulator for the single threads
+		struct accumulator{
+			double KK;
+			double YK;
+			RealVector k;
+			accumulator& operator+= (accumulator const& other){
+				KK += other.KK;
+				YK += other.YK;
+				noalias(k) += other.k;
+				return *this;
+			}
+		};
+		auto processBatch = [&](std::size_t i){
 			std::size_t startRow = 0;
-			for(int j = 0; j != i; ++j){
+			for(std::size_t j = 0; j != i; ++j){
 				startRow+= batchSize(m_data.batch(j));
 			}
 			std::size_t rowSize = batchSize(m_data.batch(i));
-			double threadKK = 0;
-			double threadYK = 0;
-			RealVector threadk(m_elements,0.0);
+			double KK = 0;
+			double YK = 0;
+			RealVector k(m_elements,0.0);
 			std::size_t startColumn = 0; //starting column of the current block
-			for(int j = 0; j <= i; ++j){
+			for(std::size_t j = 0; j <= i; ++j){
 				std::size_t columnSize = batchSize(m_data.batch(j));
 				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
 				if(i == j){
-					threadKK += frobenius_prod(blockK,blockK);
-					subrange(threadk,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));//update sum_rows(K)
-					threadYK += updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
+					KK += frobenius_prod(blockK,blockK);
+					subrange(k,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));//update sum_rows(K)
+					YK += updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				else{//use symmetry ok K
-					threadKK += 2.0 * frobenius_prod(blockK,blockK);
-					subrange(threadk,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));
-					subrange(threadk,startRow,startRow+rowSize)+=sum(as_rows(blockK));//symmetry: block(j,i)
-					threadYK += 2.0 * updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
+					KK += 2.0 * frobenius_prod(blockK,blockK);
+					subrange(k,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));
+					subrange(k,startRow,startRow+rowSize)+=sum(as_rows(blockK));//symmetry: block(j,i)
+					YK += 2.0 * updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
 				}
 				startColumn+=columnSize;
 			}
-			SHARK_CRITICAL_REGION{
-				KK += threadKK;
-				YK +=threadYK;
-				noalias(k) +=threadk;
-			}
-		}
+			
+			return accumulator{KK,YK, std::move(k)};
+		};
+		auto acc = threading::mapAccumulate(
+			boost::counting_range<std::size_t>(0,m_data.numberOfBatches()),
+			accumulator{0.0, 0.0, RealVector(m_elements, 0.0)},
+			processBatch,
+			threading::globalThreadPool()
+		);
+		
+		
 		//calculate the error
 		double n = (double)m_elements;
-		k /= n;//means
-		double meanK = sum(k)/n;
+		acc.k /= n;//means
+		double meanK = sum(acc.k)/n;
 		if(!m_centering){
-			k.clear();
+			acc.k.clear();
 			meanK = 0;
 		}
 		double n2 = sqr(n);
-		double YcKc = YK-2.0*n*inner_prod(k,m_columnMeanY)+n2*m_meanY*meanK;
-		double KcKc = KK - 2.0*n*inner_prod(k,k)+n2*sqr(meanK);
+		double YcKc = acc.YK-2.0*n*inner_prod(acc.k,m_columnMeanY)+n2*m_meanY*meanK;
+		double KcKc = acc.KK - 2.0*n*inner_prod(acc.k,acc.k)+n2*sqr(meanK);
 
 		KernelMatrixResults results;
-		results.k=k;
+		results.k= acc.k;
 		results.YcKc = YcKc;
 		results.KcKc = KcKc;
 		results.meanK = meanK;

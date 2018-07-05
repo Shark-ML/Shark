@@ -33,7 +33,6 @@
 #define SHARK_ALGORITHMS_DIRECTSEARCH_INDICATORS_HYPERVOLUMEINDICATOR_H
 
 #include <shark/Core/Exception.h>
-#include <shark/Core/OpenMP.h>
 #include <shark/Algorithms/DirectSearch/Operators/Hypervolume/HypervolumeContribution.h>
 
 #include <algorithm>

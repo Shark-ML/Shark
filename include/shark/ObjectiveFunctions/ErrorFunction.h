@@ -90,10 +90,11 @@ public:
 	ErrorFunction(
 		WeightedLabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType, SearchPointType>* model, 
-		AbstractLoss<LabelType, OutputType>* loss
+		AbstractLoss<LabelType, OutputType>* loss,
+		bool useMiniBatches = false
 	){
 		m_regularizer = nullptr;
-		mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss));
+		mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss, useMiniBatches));
 		this -> m_features = mp_wrapper -> features();
 	}
 	ErrorFunction(ErrorFunction const& op)
