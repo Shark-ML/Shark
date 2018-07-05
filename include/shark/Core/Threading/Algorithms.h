@@ -112,7 +112,7 @@ void transform(
 
 template<
 	class Functor, class RangeFrom, class RangeTo, 
-	class = typename std::enable_if<!std::is_reference<RangeTo>::Value, void>::type//gcc 4.8 bug with rvalue references requires this.
+	class = typename std::enable_if<!std::is_reference<RangeTo>::value, void>::type//gcc 4.8 bug with rvalue references requires this.
 >
 void transform(
 	RangeFrom const& elementsFrom, 
