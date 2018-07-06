@@ -1,3 +1,29 @@
+/*!
+ * \brief       Implements the Pipeline class
+ * \author      O.Krause
+ * \date        2018
+ *
+ *
+ * \par Copyright 1995-2017 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://shark-ml.org/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #ifndef SHARK_CORE_THREADING_PIPELINE_H
 #define SHARK_CORE_THREADING_PIPELINE_H
 
@@ -28,6 +54,17 @@ public:
 		return m_task_start_counter == m_task_read_counter;
 	}
 	
+	
+	/// \brief Pushes task into the queue.
+	///
+	/// On return:
+	/// queue_status::success: task is moved into the pool and evaluated in parallel to all
+	/// other tasks pushed before (assuming there are enough worker threads available).
+	/// Once ready, the tasks can be read in order of their push by calling pull.
+	////
+	/// queue_status::full: Pipeline is full, i.e. the number of tasks started + the number of
+	/// tasks read is equal to the suplied maximum in the constructor.
+	/// In this case, task is elft unchanged.
 	template<class Task>
 	queue_status push(Task&& task){
 		//check whether we are at max load
@@ -52,6 +89,14 @@ public:
 		
 		return queue_status::success;
 	};
+	/// \brief Pulls the enxt task from the queue
+	///
+	/// Checks if the result of next task in the order of pushed tasks is ready.
+	/// If it is available, it is stored in elem.
+	/// Returns:
+	/// queue_status::success: elem contains the result of the next task
+	/// queue_status::empty: all pushed tasks are pulled
+	/// queue_status::busy: the next item is not done processing.
 	queue_status pull(value_type& elem){
 		//check if we expect any more work in the queue
 		if(empty()){
@@ -70,13 +115,13 @@ public:
 	};
 	
 private:
-	typedef KeyValuePair<unsigned int, value_type> result_type;
+	typedef KeyValuePair<std::size_t, value_type> result_type;
 	std::priority_queue<result_type, std::vector<result_type>, std::greater<result_type> > m_ordered_results;
 	std::mutex m_results_mutex;
 	ThreadPool& m_threadpool;
 	std::size_t m_maxUnreadElements;
-	unsigned int m_task_start_counter;
-	unsigned int m_task_read_counter;
+	std::size_t m_task_start_counter;
+	std::size_t m_task_read_counter;
 };
 
 }}

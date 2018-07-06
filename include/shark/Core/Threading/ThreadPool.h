@@ -1,3 +1,29 @@
+/*!
+ * \brief       Implements Threadpool facilities
+ * \author      O.Krause
+ * \date        2018
+ *
+ *
+ * \par Copyright 1995-2017 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://shark-ml.org/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #ifndef SHARK_CORE_THREADING_THREADPOOL_H
 #define SHARK_CORE_THREADING_THREADPOOL_H
 
@@ -20,6 +46,12 @@ class is_future: public std::false_type{};
 template<class T>
 class is_future<std::future<T> >: public std::true_type{};
 
+/// \brief Implements a threadpool class that computes work asynchronously in parallel
+///
+/// The threadpool is designed such that worker threads are allowed to submit work themselves and lend
+/// their compute power back to the pool in case they have to wait. This allows to implement threading functionality where 
+/// functions that are computed in parallel can themselves queue more work. Look at Threading/Algorithms.h for a set
+/// of possible algorithms.
 class ThreadPool{
 private:
 	/// the worker m_workers
@@ -107,7 +139,7 @@ public:
 	void submit(Functor&& task) {
 		std::function<void()> f(std::move(task));
 		if(m_tasks.push(std::move(f)) != queue_status::success){
-			task();
+			f();
 		}
 	}
 	
@@ -133,8 +165,18 @@ public:
 	}
 };
 
-inline ThreadPool& globalThreadPool(){
+/// \brief Returns a reference to the global Threadpool.
+///
+/// On first call, the threadpool is initialized. For this, the following information is used:
+/// sizeHint: if not zero, the threadpool uses that amount of threads
+/// environment variable "SHARK_NUM_THREADS" 
+/// otherwise, the number of threads is number_of_cores+1
+/// \param sizeHint optional. On first call, it is used to initialize the threadpool to a certain size
+inline ThreadPool& globalThreadPool(std::size_t sizeHint = 0){
 	static unsigned threadCount = 0;
+	if(threadCount == 0){
+		threadCount = sizeHint;
+	}
 	if(threadCount == 0){
 		char const* m_workers = std::getenv("SHARK_NUM_THREADS");
 		if(m_workers && std::atoi(m_workers) > 0)
