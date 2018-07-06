@@ -1,3 +1,29 @@
+/*!
+ * \brief       Implements parallel algorithms using ThreadPool
+ * \author      O.Krause
+ * \date        2018
+ *
+ *
+ * \par Copyright 1995-2017 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://shark-ml.org/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #ifndef SHARK_CORE_THREADING_ALGORITHMS_H
 #define SHARK_CORE_THREADING_ALGORITHMS_H
 
@@ -27,7 +53,8 @@ private:
 /// \brief Runs jobs on a number of function evaluations in parallel. Tasks are grouped in larger task packages
 ///
 /// Runs the function f(i) for i in {0,...,rangeSize[0]-1}. for efficiency reasons, the range is split up in packages of
-/// size workSize[0]. The evaluations are evaluated in parallel and no order is guarantueed.
+/// size taskSize[0]. The evaluations are evaluated in parallel and no order is guarantueed.  Supplying 0
+/// as taskSize will divide the range into one chunk for every thread in the supplied pool.
 template<class Functor>
 void parallelND(
 	size_arg<1> rangeSize,
@@ -61,7 +88,8 @@ void parallelND(
 /// \brief Runs jobs on a number of function evaluations in parallel. Tasks are grouped in larger task packages
 ///
 /// Runs the function f(i,j) for (i,j) in {0,...,rangeSize[0]-1}x{0,...,rangeSize[1]-1}. for efficiency reasons, the range is split up in packages of
-/// size workSize[0].x workSize[1] The evaluations are evaluated in parallel and no order is guarantueed.
+/// size taskSize[0] x taskSize[1] The evaluations are evaluated in parallel and no order is guarantueed. Supplying 0
+/// as taskSize will divide the range into one chunk for every thread in the supplied pool.
 template<class Functor>
 void parallelND(
 	size_arg<2> const& rangeSize,

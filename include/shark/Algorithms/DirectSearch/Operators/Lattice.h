@@ -38,6 +38,7 @@
 #include <shark/Core/Random.h>
 
 #include <numeric>
+#include <set>
 
 namespace shark {
 

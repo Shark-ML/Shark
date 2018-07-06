@@ -34,6 +34,7 @@
 
 #include <string>
 #include <exception>
+#include <cassert>
 
 
 

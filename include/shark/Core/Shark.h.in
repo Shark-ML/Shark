@@ -37,7 +37,6 @@
 #define SHARK_CORE_SHARK_H
 
 #include <boost/version.hpp>
-#include <boost/assign.hpp>
 #include <boost/config.hpp>
 
 #include <iostream>
@@ -233,7 +232,7 @@ class Shark {
    */
   template<typename Stream>
   static void info( Stream & s ) {
-	std::map< BuildType, std::string > buildTypeMap = boost::assign::map_list_of( RELEASE_BUILD_TYPE, "Release" )( DEBUG_BUILD_TYPE, "Debug" );
+	std::map< BuildType, std::string > buildTypeMap = { { RELEASE_BUILD_TYPE, "Release" }, { DEBUG_BUILD_TYPE, "Debug" } };
 
 	s << "Version:" << version_type::MAJOR() << "." << version_type::MINOR() << "." << version_type::PATCH() << std::endl;
 	s << "boostVersion:" << boost_version_type::MAJOR() << "." << boost_version_type::MINOR() << "." << boost_version_type::PATCH() << std::endl;

@@ -34,7 +34,7 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Algorithms/DirectSearch/Individual.h>
-
+#include <set>
 namespace shark {
 
 /**
