@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE( LinearRegression_TEST ){
 	std::vector<RealVector> trainTarget(trainExamples,RealVector(2));
 	std::vector<RealVector> testTarget(trainExamples,RealVector(2));
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = random::uni(random::globalRng,-3.0, 3.0);
-		input[i](1) = random::uni(random::globalRng,-3.0, 3.0);
+		input[i](0) = random::uni(random::globalRng(),-3.0, 3.0);
+		input[i](1) = random::uni(random::globalRng(),-3.0, 3.0);
 		testTarget[i] =  model(input[i]);
-		trainTarget[i] = noise(random::globalRng).first + testTarget[i];
+		trainTarget[i] = noise(random::globalRng()).first + testTarget[i];
 	}
 
 	// let the model forget...

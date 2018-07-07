@@ -117,7 +117,7 @@ std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t num
 		double norm = 0;
 		double sum = 0;
 		for(std::size_t j = 0; j != numObj; ++j){
-			points[i](j) = 1- random::uni(random::globalRng,0.0, 1.0-sum);
+			points[i](j) = 1- random::uni(random::globalRng(),0.0, 1.0-sum);
 			sum += 1-points[i](j);
 			norm += std::pow(points[i](j),p);
 		}
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContribution3D ) {
 	const std::size_t numPoints = 50;
 	
 	RealVector reference(3,1.0);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	
 	for(unsigned int t = 0; t != numTests; ++t){
 		auto frontLinear = createRandomFront(numPoints,3,1);
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionMD_With_3D ) {
 	const std::size_t numPoints = 50;
 	
 	RealVector reference(3,1.0);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	
 	for(unsigned int t = 0; t != numTests; ++t){
 		auto frontLinear = createRandomFront(numPoints,3,1);
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE( Algorithms_HypervolumeContributionApproximator ) {
 	std::cout<<"Contribution MD Approx"<<std::endl;
 	
 	RealVector reference(5,1.0);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	
 	for(unsigned int t = 0; t != numTests; ++t){
 		auto set = createRandomFront(numPoints,5,2);

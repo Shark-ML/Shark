@@ -22,9 +22,9 @@ public:
 	Problem():LabeledDataDistribution<RealVector,unsigned int>({5,2}){}
 	void draw(RealVector& input,unsigned int& label) const{
 		input.resize(5);
-		label = random::coinToss(random::globalRng,0.5)*2+1;
+		label = random::coinToss(random::globalRng(),0.5)*2+1;
 		for(std::size_t i = 0; i != 5; ++i){
-			input(i) = random::uni(random::globalRng,-1,1);
+			input(i) = random::uni(random::globalRng(),-1,1);
 		}
 	}
 };
@@ -197,10 +197,10 @@ BOOST_AUTO_TEST_CASE( QP_CachedMatrix_Flipping ) {
 
 	//next do a running check that the cache works with flipping of rows and random accesses
 	for(std::size_t t = 0; t != simulationSteps; ++t){
-		std::size_t index = random::discrete(random::globalRng,std::size_t(0),size-1);
-		std::size_t accessSize = random::discrete(random::globalRng,size/2,size-1);
-		std::size_t flipi = random::discrete(random::globalRng,std::size_t(0),size-1);
-		std::size_t flipj = random::discrete(random::globalRng,std::size_t(0),size-1);
+		std::size_t index = random::discrete(random::globalRng(),std::size_t(0),size-1);
+		std::size_t accessSize = random::discrete(random::globalRng(),size/2,size-1);
+		std::size_t flipi = random::discrete(random::globalRng(),std::size_t(0),size-1);
+		std::size_t flipj = random::discrete(random::globalRng(),std::size_t(0),size-1);
 		
 		//access matrix cache and check whether the right values are returned
 		double* line = cache.row(index,0,accessSize);

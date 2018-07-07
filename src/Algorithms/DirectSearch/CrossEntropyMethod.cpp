@@ -185,7 +185,7 @@ void CrossEntropyMethod::step(ObjectiveFunctionType const& function){
 	for( std::size_t i = 0; i < offspring.size(); i++ ) {
 		RealVector sample(m_numberOfVariables);
 		for (std::size_t j = 0; j < m_numberOfVariables; j++){
-			sample(j) = random::gauss(random::globalRng,m_mean(j), m_variance(j)); // N (0, 100)
+			sample(j) = random::gauss(random::globalRng(),m_mean(j), m_variance(j)); // N (0, 100)
 		}
 		offspring[i].searchPoint() = sample;
 	}

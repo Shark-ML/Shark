@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( MarkovChain_Distribution )
 	RealMatrix stateMatrix = blas::adapt_matrix(16,4,states);
 	
 	//create rbm and chain
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(4,4);
 	initRandomUniform(rbm,-1.0,1.0);
 	

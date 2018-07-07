@@ -116,7 +116,7 @@ public:
 
 	using Base::train;
 	void train(ModelType& model, WeightedDatasetType const& dataset){
-		trainImpl(random::globalRng, model,dataset,*mep_loss);
+		trainImpl(random::globalRng(), model,dataset,*mep_loss);
 	}
 	
 

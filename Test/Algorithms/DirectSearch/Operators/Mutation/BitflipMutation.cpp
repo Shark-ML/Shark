@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE( BitflipMutation ) {
 	ind1.searchPoint() = std::vector< bool >( n, false );
 	ind2.searchPoint() = ind1.searchPoint();
 	for(std::size_t t = 0; t != trials; ++t){
-		flip(shark::random::globalRng, ind2);
+		flip(shark::random::globalRng(), ind2);
 		for(std::size_t i = 0; i != n; ++i){
 			flipCount[i] += (ind1.searchPoint()[i] == ind2.searchPoint()[i])? 0:1;
 		}

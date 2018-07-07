@@ -61,8 +61,7 @@ struct RotatedObjectiveFunction : public SingleObjectiveFunction {
 	}
 	
 	void init(){
-		m_rotation = blas::randomRotationMatrix(*mep_rng, numberOfVariables());
-		m_objective->setRng(mep_rng);
+		m_rotation = blas::randomRotationMatrix(random::globalRng(), numberOfVariables());
 		m_objective->init();
 	}
 	

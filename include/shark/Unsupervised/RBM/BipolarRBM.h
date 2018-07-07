@@ -44,7 +44,7 @@
 #include <shark/Core/Random.h>
 namespace shark{
 
-typedef RBM<BipolarLayer,BipolarLayer, random::rng_type> BipolarRBM;
+typedef RBM<BipolarLayer,BipolarLayer> BipolarRBM;
 typedef GibbsOperator<BipolarRBM> BipolarGibbsOperator;
 typedef MarkovChain<BipolarGibbsOperator> BipolarGibbsChain;
 typedef TemperedMarkovChain<BipolarGibbsOperator> BipolarPTChain;

@@ -69,7 +69,7 @@ void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, Ra
 ///\brief random_shuffle algorithm which stops after acquiring the random subsequence for [begin,middle)
 template<class RandomAccessIterator>
 void partial_shuffle(RandomAccessIterator begin, RandomAccessIterator middle, RandomAccessIterator end){
-	partial_shuffle(begin,middle,end,random::globalRng);
+	partial_shuffle(begin,middle,end,random::globalRng());
 }
 
 ///\brief Returns the iterator to the median element. after this call, the range is partially ordered.

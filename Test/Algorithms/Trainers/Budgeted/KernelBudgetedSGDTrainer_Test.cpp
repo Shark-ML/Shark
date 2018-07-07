@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_SUITE (Algorithms_Trainers_Budgeted_KernelBudgetedSGDTrainer_Tes
 BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
 {
 	// fix random seed 
-	random::globalRng.seed(44);
+	random::globalRng().seed(44);
 	
 	// Create a Gaussian RBF Kernel 
 	double gamma = 1.0f;

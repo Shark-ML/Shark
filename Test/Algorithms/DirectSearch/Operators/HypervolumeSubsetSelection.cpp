@@ -129,12 +129,12 @@ std::vector<RealVector> createRandomFront(std::size_t numPoints, std::size_t num
 	for (std::size_t i = 0; i != numPoints; ++i) {
 		points[i].resize(numObj);
 		for (std::size_t j = 0; j != numObj - 1; ++j) {
-			points[i][j] = random::uni(random::globalRng,0.0, 1.0);
+			points[i][j] = random::uni(random::globalRng(),0.0, 1.0);
 		}
-		if (numObj > 2 && random::coinToss(random::globalRng))
+		if (numObj > 2 && random::coinToss(random::globalRng()))
 		{
 			// make sure that some objective values coincide
-			std::size_t jj = random::discrete(random::globalRng, std::size_t(0), numObj - 2);
+			std::size_t jj = random::discrete(random::globalRng(), std::size_t(0), numObj - 2);
 			points[i][jj] = std::round(4.0 * points[i][jj]) / 4.0;
 		}
 		double sum = 0.0;

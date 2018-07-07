@@ -71,7 +71,7 @@ class CMSA : public AbstractSingleObjectiveOptimizer<RealVector > {
 public:
 
 	/// \brief Default c'tor.
-	CMSA(random::rng_type& rng = random::globalRng)
+	CMSA(random::rng_type& rng = random::globalRng())
 	: m_mu( 100 )
 	, m_lambda( 200 )
 	, m_userSetMu(false)

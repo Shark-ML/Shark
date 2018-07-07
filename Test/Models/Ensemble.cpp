@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 	
 	for(std::size_t i = 0; i != 5; ++i){
 		//create parameters of linear models
-		RealMatrix curWeights = blas::normal(random::globalRng, 4, 2, 0.0, 1.0, blas::cpu_tag());
-		RealVector curBias = blas::normal(random::globalRng, 4, 0.0, 1.0, blas::cpu_tag());
-		double curAlpha = random::uni(random::globalRng,0.1,1);
+		RealMatrix curWeights = blas::normal(random::globalRng(), 4, 2, 0.0, 1.0, blas::cpu_tag());
+		RealVector curBias = blas::normal(random::globalRng(), 4, 0.0, 1.0, blas::cpu_tag());
+		double curAlpha = random::uni(random::globalRng(),0.1,1);
 		alphaSum +=curAlpha;
 		weights += curAlpha * curWeights;
 		bias +=curAlpha * curBias;
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 	//first the ensembles of linear models
 	for(std::size_t i = 0; i != 100; ++i){
 		//the testpoint2
-		RealMatrix point = blas::uniform(random::globalRng, 5, 2, 0.0, 1.0, blas::cpu_tag());
+		RealMatrix point = blas::uniform(random::globalRng(), 5, 2, 0.0, 1.0, blas::cpu_tag());
 		
 		RealMatrix truth = linear(point);
 		RealMatrix test = linEnsemble(point);
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 	//now the ensembles of classifiers
 	for(std::size_t i = 0; i != 100; ++i){
 		//the testpoint2
-		RealMatrix point = blas::uniform(random::globalRng, 5, 2, 0.0, 1.0, blas::cpu_tag());
+		RealMatrix point = blas::uniform(random::globalRng(), 5, 2, 0.0, 1.0, blas::cpu_tag());
 		
 		//create ground truth of decision function and response
 		RealMatrix truthVotes(5,4,0.0);
@@ -122,9 +122,9 @@ BOOST_AUTO_TEST_CASE( Ensemble_Serialize )
 	Ensemble<LinearModel<> > modelLin;
 	for(std::size_t i = 0; i != 5; ++i){
 		//create parameters of linear models
-		RealMatrix curWeights = blas::normal(random::globalRng, 4, 2, 0.0, 1.0, blas::cpu_tag());
-		RealVector curBias = blas::normal(random::globalRng, 4, 0.0, 1.0, blas::cpu_tag());
-		double curAlpha = random::uni(random::globalRng,0.1,1);
+		RealMatrix curWeights = blas::normal(random::globalRng(), 4, 2, 0.0, 1.0, blas::cpu_tag());
+		RealVector curBias = blas::normal(random::globalRng(), 4, 0.0, 1.0, blas::cpu_tag());
+		double curAlpha = random::uni(random::globalRng(),0.1,1);
 		
 		model.addModel(LinearModel<>(curWeights,curBias),curAlpha);
 		modelLin.addModel(LinearModel<>(curWeights,curBias),curAlpha);
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( Ensemble_Serialize )
 	{
 		for(size_t j=0;j!=2;++j)
 		{
-			input(j)=random::uni(random::globalRng,-1,1);
+			input(j)=random::uni(random::globalRng(),-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model.decisionFunction()(input));

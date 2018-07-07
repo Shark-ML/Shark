@@ -37,17 +37,17 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 	RealVector modelParams(modelParameters);
 	RealVector net1Params(net1.numberOfParameters());
 	for(size_t i=0;i!=net1Params.size();++i){
-		net1Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
+		net1Params(i)=shark::random::uni( shark::random::globalRng(),-1,1);
 		modelParams(i)=net1Params(i);
 	}
 	RealVector net2Params(net2.numberOfParameters());
 	for(size_t i=0;i!=net2Params.size();++i){
-		net2Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
+		net2Params(i)=shark::random::uni( shark::random::globalRng(),-1,1);
 		modelParams(i+net1Params.size())=net2Params(i);
 	}
 	RealVector net3Params(net3.numberOfParameters());
 	for(size_t i=0;i!=net3Params.size();++i){
-		net3Params(i)=shark::random::uni( shark::random::globalRng,-1,1);
+		net3Params(i)=shark::random::uni( shark::random::globalRng(),-1,1);
 		modelParams(i+net1Params.size() + net2Params.size())=net3Params(i);
 	}
 	//check whether parameter copying is working
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_Value )
 	//test Results;
 	RealVector input(3);
 	for(size_t i=0;i!=3;++i){
-		input(i)=shark::random::uni( shark::random::globalRng,-1,1);
+		input(i)=shark::random::uni( shark::random::globalRng(),-1,1);
 	}
 	RealVector intermediateResult1 = net1(input);
 	RealVector intermediateResult2 = net2(intermediateResult1);
@@ -94,13 +94,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = random::uni(random::globalRng,-5,5);
+				parameters(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 2;++i){
-				coefficients(i) = random::uni(random::globalRng,-5,5);
+				coefficients(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = random::uni(random::globalRng,-5,5);
+				point(i) = random::uni(random::globalRng(),-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -121,13 +121,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = random::uni(random::globalRng,-5,5);
+				parameters(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 2;++i){
-				coefficients(i) = random::uni(random::globalRng,-5,5);
+				coefficients(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = random::uni(random::globalRng,-5,5);
+				point(i) = random::uni(random::globalRng(),-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -147,13 +147,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = random::uni(random::globalRng,-5,5);
+				parameters(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 2;++i){
-				coefficients(i) = random::uni(random::globalRng,-5,5);
+				coefficients(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = random::uni(random::globalRng,-5,5);
+				point(i) = random::uni(random::globalRng(),-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -174,13 +174,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedParameterDerivative )
 		RealVector point(3);
 		for(unsigned int test = 0; test != 10; ++test){
 			for(size_t i = 0; i != modelParameters;++i){
-				parameters(i) = random::uni(random::globalRng,-5,5);
+				parameters(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 2;++i){
-				coefficients(i) = random::uni(random::globalRng,-5,5);
+				coefficients(i) = random::uni(random::globalRng(),-5,5);
 			}
 			for(size_t i = 0; i != 3;++i){
-				point(i) = random::uni(random::globalRng,-5,5);
+				point(i) = random::uni(random::globalRng(),-5,5);
 			}
 			
 			model.setParameterVector(parameters);
@@ -212,13 +212,13 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedInputDerivative )
 	RealVector point(3);
 	for(unsigned int test = 0; test != 100; ++test){
 		for(size_t i = 0; i != modelParameters;++i){
-			parameters(i) = random::uni(random::globalRng,-10,10);
+			parameters(i) = random::uni(random::globalRng(),-10,10);
 		}
 		for(size_t i = 0; i != 10;++i){
-			coefficients(i) = random::uni(random::globalRng,-10,10);
+			coefficients(i) = random::uni(random::globalRng(),-10,10);
 		}
 		for(size_t i = 0; i != 3;++i){
-			point(i) = random::uni(random::globalRng,-10,10);
+			point(i) = random::uni(random::globalRng(),-10,10);
 		}
 		
 		model.setParameterVector(parameters);
@@ -242,14 +242,14 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_weightedDerivatives )
 	RealMatrix pointBatch(5,3);
 	for(unsigned int test = 0; test != 100; ++test){
 		for(size_t i = 0; i != modelParameters;++i){
-			parameters(i) = random::uni(random::globalRng,-10,10);
+			parameters(i) = random::uni(random::globalRng(),-10,10);
 		}
 		for(std::size_t k = 0; k != 5; ++k){
 			for(size_t i = 0; i != 10;++i){
-				coeffBatch(k,i) = random::uni(random::globalRng,-10,10);
+				coeffBatch(k,i) = random::uni(random::globalRng(),-10,10);
 			}
 			for(size_t i = 0; i != 3;++i){
-				pointBatch(k,i) = random::uni(random::globalRng,-10,10);
+				pointBatch(k,i) = random::uni(random::globalRng(),-10,10);
 			}
 		}
 		
@@ -286,7 +286,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	//parameters
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t i=0;i!=model.numberOfParameters();++i){
-		testParameters(i)=random::uni(random::globalRng,-1,1);
+		testParameters(i)=random::uni(random::globalRng(),-1,1);
 	}
 	model.setParameterVector(testParameters);
 
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE( CONCATENATED_MODEL_SERIALIZE )
 	{
 		for(size_t j=0;j!=10;++j)
 		{
-			input(j)=random::uni(random::globalRng,-1,1);
+			input(j)=random::uni(random::globalRng(),-1,1);
 		}
 		data.push_back(input);
 		target.push_back(model(input));

@@ -88,7 +88,7 @@ struct IHR6 : public MultiObjectiveFunction{
 	}
 
 	void init() {
-		m_rotationMatrix = blas::randomRotationMatrix(*mep_rng, numberOfVariables());
+		m_rotationMatrix = blas::randomRotationMatrix(random::globalRng(), numberOfVariables());
 		m_ymax = 1.0/norm_inf(row(m_rotationMatrix,0));
 	}
 

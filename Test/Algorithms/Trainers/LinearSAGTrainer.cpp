@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_2Classes_Offset )
 	
 	RealVector weights(dataset.numberOfElements());
 	for(auto& weight: weights)
-		weight = random::uni(random::globalRng,0.2,4);
+		weight = random::uni(random::globalRng(),0.2,4);
 	
 	WeightedLabeledData<RealVector,unsigned int> weightedDataset(dataset,createDataFromRange(weights));
 	std::cout<<"train 2 classes weighted with offset"<<std::endl;
@@ -171,9 +171,9 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_Regression)
 	std::vector<RealVector> input(trainExamples,RealVector(2));
 	std::vector<RealVector> trainTarget(trainExamples,RealVector(2));
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = random::uni(random::globalRng,-3.0,3.0);
-		input[i](1) = random::uni(random::globalRng,-3.0,3.0);
-		trainTarget[i] = noise(random::globalRng).first + model(input[i]);
+		input[i](0) = random::uni(random::globalRng(),-3.0,3.0);
+		input[i](1) = random::uni(random::globalRng(),-3.0,3.0);
+		trainTarget[i] = noise(random::globalRng()).first + model(input[i]);
 	}
 	RegressionDataset dataset = createLabeledDataFromRange(input, trainTarget);
 	
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( Linear_SAG_Trainer_Test_Regression)
 	
 	RealVector weights(dataset.numberOfElements());
 	for(auto& weight: weights)
-		weight = random::uni(random::globalRng,0.2,4);
+		weight = random::uni(random::globalRng(),0.2,4);
 	
 	WeightedLabeledData<RealVector,RealVector> weightedDataset(dataset,createDataFromRange(weights));
 	testRegression(weightedDataset,0.1,100,true);

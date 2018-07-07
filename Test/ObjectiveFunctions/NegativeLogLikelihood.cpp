@@ -35,9 +35,9 @@ BOOST_AUTO_TEST_CASE( ObjFunct_NegativeLogLikelihood_Derivative ){
 	RealVector point(model.numberOfParameters());
 	for(std::size_t t = 0; t != numTrials; ++t){
 		for(std::size_t i = 0; i != model.numberOfParameters()-1; ++i){
-			point(i) = random::gauss(random::globalRng, 0,1);
+			point(i) = random::gauss(random::globalRng(), 0,1);
 		}
-		point(model.numberOfParameters()-1) = random::uni(random::globalRng, -5,-3);
+		point(model.numberOfParameters()-1) = random::uni(random::globalRng(), -5,-3);
 		testDerivative(function,point,1.e-5,0,0.01);
 	}
 }
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_NegativeLogLikelihood_Optimize ){
 	RBFLayer model(10,1);
 	RealVector point(model.numberOfParameters());
 	for(std::size_t i = 0; i != model.numberOfParameters()-1; ++i){
-		point(i) = random::gauss(random::globalRng, 0,1);
+		point(i) = random::gauss(random::globalRng(), 0,1);
 	}
 	model.setParameterVector(point);
 	

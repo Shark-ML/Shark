@@ -83,7 +83,7 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(*this->mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
 			double error = processBatch(m_dataset.batch(batchIndex));
 			return error / shark::batchSize(m_dataset.batch(batchIndex));
 		}
@@ -115,7 +115,7 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(*this->mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
 			batch_result result = processBatch(m_dataset.batch(batchIndex));
 			
 			derivative = std::move(result.second);
@@ -215,7 +215,7 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(*this->mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
 			double error = processBatch(m_dataset.batch(batchIndex));
 			return error / sum(m_dataset.batch(batchIndex).weight);
 		}
@@ -257,7 +257,7 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(*this->mep_rng, std::size_t(0),m_dataset.numberOfBatches()-1);
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
 			auto const& batch = m_dataset.batch(batchIndex);
 			batch_result result = processBatch(batch);
 			

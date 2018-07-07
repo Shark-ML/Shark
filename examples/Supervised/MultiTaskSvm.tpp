@@ -34,10 +34,10 @@ public:
 	{
 		size_t taskindex = 0;
 		do {
-			taskindex = random::discrete(random::globalRng, 0, 2);
+			taskindex = random::discrete(random::globalRng(), 0, 2);
 		} while (! m_task[taskindex]);
-		double x1 = random::gauss(random::globalRng);
-		double x2 = 3.0 * random::gauss(random::globalRng);
+		double x1 = random::gauss(random::globalRng());
+		double x2 = 3.0 * random::gauss(random::globalRng());
 		unsigned int y = (x1 > 0.0) ? 1 : 0;
 		double alpha = 0.05 * M_PI * taskindex;
 		input.input.resize(2);

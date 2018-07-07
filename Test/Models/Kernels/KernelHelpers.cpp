@@ -46,7 +46,7 @@ struct KernelHelpersFixture {
 		std::vector<RealVector> points(datasetSize, RealVector(dimensions));
 		for(std::size_t i = 0; i != datasetSize; ++i){
 			for(std::size_t j = 0; j != dimensions; ++j){
-				points[i](j)=random::uni(random::globalRng,-1,1);
+				points[i](j)=random::uni(random::globalRng(),-1,1);
 			}
 		}
 		data = createDataFromRange(points,batchSize);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( KernelHelpers_calculateKernelMatrixParameterDerivative ){
 		RealMatrix weights(datasetSize,datasetSize);
 		for(std::size_t i = 0; i != datasetSize; ++i){
 			for(std::size_t  j = 0; j <= i; ++j){
-				weights(j,i) = weights(i,j)=random::uni(random::globalRng,1,2);
+				weights(j,i) = weights(i,j)=random::uni(random::globalRng(),1,2);
 			}
 		};
 		

@@ -149,7 +149,7 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 
 	//shuffle elements in members
 	for (std::size_t c = 0; c != numClasses; c++) {
-		std::shuffle(members[c].begin(), members[c].end(), random::globalRng);
+		std::shuffle(members[c].begin(), members[c].end(), random::globalRng());
 	}
 
 	//calculate number of elements per validation subset in the new to construct container
@@ -242,7 +242,7 @@ CVFolds<LabeledData<I,L> > createCVIID(LabeledData<I,L> &set,
         std::size_t batchSize =constants::DefaultBatchSize) {
 	std::vector<std::size_t> indices(set.numberOfElements());
 	for (std::size_t i=0; i != set.numberOfElements(); i++)
-		indices[i] = random::discrete(random::globalRng, std::size_t(0), numberOfPartitions - 1);
+		indices[i] = random::discrete(random::globalRng(), std::size_t(0), numberOfPartitions - 1);
 	return createCVIndexed(set,numberOfPartitions,indices,batchSize);
 }
 
@@ -330,7 +330,7 @@ CVFolds<LabeledData<I,L> > createCVBatch (
 	std::vector<std::size_t> indizes(set.numberOfBatches());
 	for(std::size_t i= 0; i != set.numberOfBatches(); ++i)
 		indizes[i] = i;
-	shark::shuffle(indizes.begin(),indizes.end(), random::globalRng);
+	shark::shuffle(indizes.begin(),indizes.end(), random::globalRng());
 	
 	typedef typename LabeledData<I,L>::IndexSet IndexSet;
 	

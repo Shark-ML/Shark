@@ -62,7 +62,7 @@ class IndicatorBasedRealCodedNSGAII : public AbstractMultiObjectiveOptimizer<Rea
 public:
 
 	/// \brief Default c'tor.
-	IndicatorBasedRealCodedNSGAII(random::rng_type& rng = random::globalRng):mpe_rng(&rng){
+	IndicatorBasedRealCodedNSGAII(random::rng_type& rng = random::globalRng()):mpe_rng(&rng){
 		mu() = 100;
 		crossoverProbability() = 0.9;
 		nc() = 20.0;

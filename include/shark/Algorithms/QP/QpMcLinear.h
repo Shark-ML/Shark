@@ -92,19 +92,18 @@ public:
 	///
 	/// \brief Solve the SVM training problem.
 	///
-	/// \param  rng	     random number generator used by the algorithm
 	/// \param  C        regularization constant of the SVM
 	/// \param  stop     stopping condition(s)
 	/// \param  prop     solution properties
 	/// \param  verbose  if true, the solver prints status information and solution statistics
 	///
 	RealMatrix solve(
-		random::rng_type& rng,
 		double C,
 		QpStoppingCondition& stop,
 		QpSolutionProperties* prop = NULL,
-		bool verbose = false)
-	{
+		bool verbose = false
+	){
+		random::rng_type& rng = random::globalRng();
 		// sanity checks
 		SHARK_ASSERT(C > 0.0);
 
@@ -159,7 +158,6 @@ public:
 					double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
 					std::size_t n = (std::size_t)std::floor(num);
 					double prob = num - n;
-					//~ if (random::coinToss(rng,prob)) n++;
 					if (random::uni(rng) < prob) n++;
 					for (std::size_t j=0; j<n; j++)
 					{
@@ -172,16 +170,10 @@ public:
 				SHARK_ASSERT(pos == ell);
 			}
 
-			if (m_shrinking == true)
-			{
-				//~ for (std::size_t i=0; i<active; i++) 
-					//~ std::swap(schedule[i], schedule[random::discrete(rng, std::size_t(0), active - 1)]);
+			if (m_shrinking == true){
 				std::shuffle(schedule.begin(),schedule.begin()+active,rng);
 			}
-			else
-			{
-				//~ for (std::size_t i=0; i<ell; i++) 
-					//~ std::swap(schedule[i], schedule[random::discrete(rng, std::size_t(0), ell - 1)]);
+			else{
 				std::shuffle(schedule.begin(),schedule.end(),rng);
 			}
 

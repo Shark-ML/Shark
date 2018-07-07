@@ -16,9 +16,9 @@ BOOST_AUTO_TEST_CASE( PCDTraining_Bars ){
 	BarsAndStripes problem;
 	Data<RealVector> data = problem.data();
 	
-	random::globalRng.seed(0);
+	random::globalRng().seed(0);
 	
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(16,8);
 	initRandomUniform(rbm,-0.1,0.1);
 	BinaryPCD cd(&rbm);

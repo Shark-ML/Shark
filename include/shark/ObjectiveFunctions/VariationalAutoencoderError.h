@@ -103,7 +103,7 @@ public:
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
 		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
 		//sample random point from distribution
-		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
+		MatrixType epsilon = blas::normal(random::globalRng(),mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
 		return mu + exp(0.5*log_var) * epsilon;
 	}
 
@@ -113,14 +113,14 @@ public:
 		mep_decoder->setParameterVector(subrange(parameters,0,mep_decoder->numberOfParameters()));
 		mep_encoder->setParameterVector(subrange(parameters,mep_decoder->numberOfParameters(), numberOfVariables()));
 		
-		auto const& batch = m_data.batch(random::discrete(*this->mep_rng, std::size_t(0), m_data.numberOfBatches() -1));
+		auto const& batch = m_data.batch(random::discrete(random::globalRng(), std::size_t(0), m_data.numberOfBatches() -1));
 		MatrixType hiddenResponse = (*mep_encoder)(batch);
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
 		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
 		//compute kulback leibler divergence term
 		double klError = 0.5 * (sum(exp(log_var)) + sum(sqr(mu))  - mu.size1() * mu.size2()  - sum(log_var));
 		//sample random point from distribution
-		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
+		MatrixType epsilon = blas::normal(random::globalRng(),mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
 		MatrixType z = mu + exp(0.5*log_var) * epsilon;
 		//reconstruct and compute reconstruction error
 		MatrixType reconstruction = (*mep_decoder)(z);
@@ -139,7 +139,7 @@ public:
 		
 		boost::shared_ptr<State> stateEncoder = mep_encoder->createState();
 		boost::shared_ptr<State> stateDecoder = mep_decoder->createState();
-		auto const& batch = m_data.batch(random::discrete(*this->mep_rng, std::size_t(0), m_data.numberOfBatches() -1));
+		auto const& batch = m_data.batch(random::discrete(random::globalRng(), std::size_t(0), m_data.numberOfBatches() -1));
 		MatrixType hiddenResponse;
 		mep_encoder->eval(batch,hiddenResponse,*stateEncoder);
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
@@ -147,7 +147,7 @@ public:
 		//compute kulback leibler divergence term
 		double klError = 0.5 * (sum(exp(log_var)) + sum(sqr(mu))  - mu.size1() * mu.size2() - sum(log_var));
 		MatrixType klDerivative = mu | (0.5 * exp(log_var) - 0.5);
-		MatrixType epsilon = blas::normal(*this->mep_rng,mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
+		MatrixType epsilon = blas::normal(random::globalRng(),mu.size1(), mu.size2(), value_type(0.0), value_type(1.0), device_type());
 		MatrixType z = mu + exp(0.5*log_var) * epsilon;
 		MatrixType reconstructions;
 		mep_decoder->eval(z,reconstructions, *stateDecoder);

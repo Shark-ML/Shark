@@ -18,13 +18,13 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL ) {
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,2);
-		testPoint(0,0) = random::uni(random::globalRng, -10.0,10.0);
-		testPoint(0,1) = random::uni(random::globalRng, -10.0,10.0);
+		testPoint(0,0) = random::uni(random::globalRng(), -10.0,10.0);
+		testPoint(0,1) = random::uni(random::globalRng(), -10.0,10.0);
 
 		//sample label between -10,10
 		RealMatrix testLabel(1,2);
-		testLabel(0,0) = random::uni(random::globalRng, -10.0,10.0);
-		testLabel(0,1) = random::uni(random::globalRng, -10.0,10.0);
+		testLabel(0,0) = random::uni(random::globalRng(), -10.0,10.0);
+		testLabel(0,1) = random::uni(random::globalRng(), -10.0,10.0);
 
 
 		//the test results
@@ -51,13 +51,13 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL_Classification ) {
 
 		//sample point between -10,10
 		RealMatrix testPoint(1,3);
-		testPoint(0,0) = random::uni(random::globalRng, -10.0,10.0);
-		testPoint(0,1) = random::uni(random::globalRng, -10.0,10.0);
-		testPoint(0,2) = random::uni(random::globalRng, -10.0,10.0);
+		testPoint(0,0) = random::uni(random::globalRng(), -10.0,10.0);
+		testPoint(0,1) = random::uni(random::globalRng(), -10.0,10.0);
+		testPoint(0,2) = random::uni(random::globalRng(), -10.0,10.0);
 
 		//sample class label
 		UIntVector testLabelDisc(1);
-		testLabelDisc(0) = (unsigned int)random::discrete(random::globalRng, 0,2);
+		testLabelDisc(0) = (unsigned int)random::discrete(random::globalRng(), 0,2);
 		
 		RealMatrix testLabel(1,3);
 		testLabel(0,testLabelDisc(0))=1;
@@ -101,8 +101,8 @@ BOOST_AUTO_TEST_CASE( SQUAREDLOSS_EVAL_Sequence ) {
 			
 			for(std::size_t i = 0; i != sequenceLength -10; ++i){
 				for(std::size_t j = 0; j != dims; ++j){
-					seqMat(i,j) = random::gauss(random::globalRng, 0,1);
-					seqMatLabel(i,j) = random::gauss(random::globalRng, 0,1);
+					seqMat(i,j) = random::gauss(random::globalRng(), 0,1);
+					seqMatLabel(i,j) = random::gauss(random::globalRng(), 0,1);
 				}
 				seq.push_back(row(seqMat,i));
 				seqLabel.push_back(row(seqMatLabel,i));

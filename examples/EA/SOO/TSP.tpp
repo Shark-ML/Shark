@@ -200,9 +200,9 @@ int main( int argc, char ** argv ) {
 		for( std::size_t i = 0; i < offspring.size() - 1; i+=2 ) {
 			// Carry out fitness proportional fitness selection and
 			// perform partially mapped crossover on parent individuals.
-			offspring[ i ] = *rws( random::globalRng, parents.begin(), parents.end(), selectionProbabilities );
-			offspring[ i+1 ] = *rws( random::globalRng, parents.begin(), parents.end(), selectionProbabilities );
-			pmx(random::globalRng, offspring[ i ], offspring[ i+1 ]);
+			offspring[ i ] = *rws( random::globalRng(), parents.begin(), parents.end(), selectionProbabilities );
+			offspring[ i+1 ] = *rws( random::globalRng(), parents.begin(), parents.end(), selectionProbabilities );
+			pmx(random::globalRng(), offspring[ i ], offspring[ i+1 ]);
 
 			// Evaluate offspring individuals.
 			offspring[ i ].penalizedFitness() = 

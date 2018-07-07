@@ -386,7 +386,7 @@ int main(int argc, char** argv)
     RealVector v(num_dims);
     for ( std::size_t i=0; i<num_points; i++ ) {
         for ( std::size_t j=0; j<num_dims; j++ )
-            v(j) = random::uni(random::globalRng, -1,1);
+            v(j) = random::uni(random::globalRng(), -1,1);
         input[i] = v;
     }
     Data<RealVector> rand_data = createDataFromRange( input );

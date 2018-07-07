@@ -69,7 +69,7 @@ namespace shark {
 class ElitistCMA : public AbstractSingleObjectiveOptimizer<RealVector >{	    
 public:
 
-	SHARK_EXPORT_SYMBOL ElitistCMA(random::rng_type& rng = random::globalRng);
+	SHARK_EXPORT_SYMBOL ElitistCMA(random::rng_type& rng = random::globalRng());
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

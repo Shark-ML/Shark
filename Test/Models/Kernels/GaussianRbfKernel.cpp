@@ -15,11 +15,11 @@ void testBatch(Kernel& kernel,std::size_t batchSize1,std::size_t batchSize2,std:
 	Matrix batch2(batchSize2,dim);
 	for(std::size_t i = 0; i != batchSize1;++i){
 		for(std::size_t j = 0; j != dim; ++j)
-			batch1(i,j)=random::uni(random::globalRng,-1,1);
+			batch1(i,j)=random::uni(random::globalRng(),-1,1);
 	}
 	for(std::size_t i = 0; i != batchSize2;++i){
 		for(std::size_t j = 0; j != dim; ++j)
-			batch2(i,j)=random::uni(random::globalRng,-1,1);
+			batch2(i,j)=random::uni(random::globalRng(),-1,1);
 	}
 	testEval(kernel,batch1,batch2);
 
@@ -204,11 +204,11 @@ void benchmark(std::size_t batchSize1,std::size_t batchSize2, std::size_t dim, s
 	std::vector<RealVector> batchVec2(batchSize2,RealVector(dim));
 	for(std::size_t i = 0; i != batchSize1;++i){
 		for(std::size_t j = 0; j != dim; ++j)
-			batchVec1[i](j)=batch1(i,j)=random::uni(random::globalRng,-1,1);
+			batchVec1[i](j)=batch1(i,j)=random::uni(random::globalRng(),-1,1);
 	}
 	for(std::size_t i = 0; i != batchSize2;++i){
 		for(std::size_t j = 0; j != dim; ++j)
-			batchVec2[i](j)=batch2(i,j)=random::uni(random::globalRng,-1,1);
+			batchVec2[i](j)=batch2(i,j)=random::uni(random::globalRng(),-1,1);
 	}
 
 

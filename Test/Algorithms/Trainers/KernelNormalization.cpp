@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_LinearKernel
 	RealVector v(num_dims);
 	for ( std::size_t i=0; i<num_points; i++ ) {
 		for ( std::size_t j=0; j<num_dims; j++ ) {
-			v(j) = random::uni(random::globalRng,-20,20);
+			v(j) = random::uni(random::globalRng(),-20,20);
 		}
 		input[i] = v;
 	}
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_GaussianKern
 	RealVector v(num_dims);
 	for ( std::size_t i=0; i<num_points; i++ ) {
 		for ( std::size_t j=0; j<num_dims; j++ ) {
-			v(j) = random::uni(random::globalRng,-1,1);
+			v(j) = random::uni(random::globalRng(),-1,1);
 		}
 		input[i] = v;
 	}
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE( Normalize_Kernel_Unit_Variance_InFeatureSpace_GaussianKern
 //	RealVector v(num_dims);
 //	for ( std::size_t i=0; i<num_points; i++ ) {
 //		for ( std::size_t j=0; j<num_dims; j++ ) {
-//			v(j) = random::uni(random::globalRng,-1,1);
+//			v(j) = random::uni(random::globalRng(),-1,1);
 //		}
 //		input[i] = v;
 //	}

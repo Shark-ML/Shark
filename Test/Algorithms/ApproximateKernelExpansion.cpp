@@ -62,12 +62,12 @@ BOOST_AUTO_TEST_CASE( Solution_Linear ){
 		RealMatrix WTrue(3,2,0.0);
 		for(std::size_t i = 0; i != 50; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
+				expansion.alpha()(i,j) = random::gauss(random::globalRng(), 0,1);
 			}
 			noalias(WTrue) += outer_prod(row(expansion.alpha(),i), elements(dataset)[i].input);
 		}
 		//compute approximation
-		KernelExpansion<RealVector> approx=approximateKernelExpansion(random::globalRng, expansion,2);
+		KernelExpansion<RealVector> approx=approximateKernelExpansion( expansion,2);
 		
 		BOOST_REQUIRE_EQUAL(approx.alpha().size1(), 2);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size2(), 3);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear_Single ){
 		RealMatrix WTrue(3,2,0.0);
 		for(std::size_t i = 0; i != 50; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
+				expansion.alpha()(i,j) = random::gauss(random::globalRng(), 0,1);
 			}
 			noalias(WTrue) += outer_prod(row(expansion.alpha(),i), elements(dataset)[i].input);
 		}
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear_Single ){
 		RealVector truthZ = column(eigen.Q(),0);
 		RealMatrix truthApproxW = outer_prod(eval_block(WTrue % truthZ), truthZ); 
 		//compute approximation
-		KernelExpansion<RealVector> approx=approximateKernelExpansion(random::globalRng, expansion,1);
+		KernelExpansion<RealVector> approx=approximateKernelExpansion(expansion,1);
 		
 		BOOST_REQUIRE_EQUAL(approx.alpha().size1(), 1);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size2(), 3);
@@ -157,11 +157,11 @@ BOOST_AUTO_TEST_CASE( Solution_Gaussian ){
 		KernelExpansion<RealVector> expansion(&kernel,dataset.inputs(),false,3);
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				expansion.alpha()(i,j) = random::gauss(random::globalRng, 0,1);
+				expansion.alpha()(i,j) = random::gauss(random::globalRng(), 0,1);
 			}
 		}
 		//compute approximation
-		KernelExpansion<RealVector> approx=approximateKernelExpansion(random::globalRng, expansion,4,1.e-4);
+		KernelExpansion<RealVector> approx=approximateKernelExpansion(expansion,4,1.e-4);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size1(), 4);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size2(), 3);
 		

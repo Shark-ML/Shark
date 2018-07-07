@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	RealMatrix base(Dimensions,2*Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
 		for(std::size_t j = 0; j != 2*Dimensions; ++j){//2* to guarantue full rank.
-			base(i,j) = random::gauss(random::globalRng, 0,1);
+			base(i,j) = random::gauss(random::globalRng(), 0,1);
 		}
 	}
 	RealMatrix covariance=prod(base,trans(base));
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_EIGENVALUES ) {
 	std::vector<RealVector> x;
 	std::vector<RealVector> z;
 	for(std::size_t i = 0; i != Samples; ++i){
-		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
+		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng());
 		x.push_back(sample.first);
 		z.push_back(sample.second);
 	}
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	RealMatrix base(Dimensions,2*Dimensions);
 	for(std::size_t i = 0; i != Dimensions; ++i){
 		for(std::size_t j = 0; j != 2*Dimensions; ++j){//2* to guarantue full rank.
-			base(i,j) = random::gauss(random::globalRng, 0,1);
+			base(i,j) = random::gauss(random::globalRng(), 0,1);
 		}
 	}
 	RealMatrix covariance=prod(base,trans(base));
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( MULTIVARIATENORMAL_Cholesky) {
 	std::vector<RealVector> x;
 	std::vector<RealVector> z;
 	for(std::size_t i = 0; i != Samples; ++i){
-		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng);
+		MultiVariateNormalDistribution::result_type sample = dist(random::globalRng());
 		x.push_back(sample.first);
 		z.push_back(sample.second);
 	}

@@ -65,7 +65,7 @@ struct Schwefel : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::gauss(*mep_rng, 0,1);
+			x(i) = random::gauss(random::globalRng(), 0,1);
 		}
 		return x;
 	}

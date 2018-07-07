@@ -33,15 +33,103 @@
 #define SHARK_CORE_RANDOM_H
 
 #include <random>
-#include <shark/Core/DLLSupport.h>
+#include <mutex>
+#include <thread>
+#include <unordered_set>
 
+#include <iostream>
 namespace shark{
 namespace random{
 
-	/** \brief Default RNG of the shark library. */
-	typedef std::mt19937 rng_type;
+	/// \brief RNG of the shark library.
+	///
+	/// The GlobalRng is a mostly threadsafe Rng based on mt19937.
+	/// It can only be accessed using the free function globalRng()().
+	/// There is one instance of the Rng per thread. Except seeding, 
+	/// All operations on an individual instance
+	/// of GlobalRng are threadsafe. Thus, during seeding it has to be ensured that no
+	/// thread generates random numbers to prevent race-conditions.
+	///
+	/// The implementation uses a global registry of active instances of the rng.
+	/// Each Rng registers itself and a call to seed reseeds eeach rng
+	/// with numbers derived from the seed. However, the order in which this happens
+	/// is unspecified. Threads created afterwards are also initialized based on this seed.
+	/// If no seeding is performed, the initial seed starts
+	/// from the standard mandated default seed for mt19937.
+	class ThreadsafeRng : public std::mt19937{
+	public:
+		using result_type = std::mt19937::result_type;
 	
-	SHARK_EXPORT_SYMBOL extern rng_type globalRng;
+		/// \brief Destructor
+		~ThreadsafeRng(){
+			std::lock_guard<std::mutex> lock(m_state->stateMutex);
+			m_state->all.erase(this);
+		}
+
+		/// \brief Get Access to an instance of the rng
+		///
+		/// There is one instane per thread. Thus care has to be taken that one rng is not
+		/// shared between threads.
+		friend ThreadsafeRng& globalRng();
+		
+
+		
+		/// \brief Reseeds globally all Rngs in all threads
+		///
+		/// This operation is not threadsafe!
+		void seed(result_type s){
+			std::lock_guard<std::mutex> lock(m_state->stateMutex);
+			m_state->globalseed = s;
+			std::cout<<"reseed"<<s<<std::endl;
+			for (ThreadsafeRng* p : m_state->all)
+				p->seedInternal( m_state->globalseed++);//race condition with parallel thread using operator()
+		}
+	private:
+		void seedInternal(result_type s){
+			std::cout<<this<<" seed "<<s<<std::endl;
+			std::mt19937::seed(s);
+		};
+		struct GlobalState{
+			std::mutex stateMutex;
+			result_type globalseed;//next seed to use. guarded by stateMutex
+			std::unordered_set<ThreadsafeRng*> all;//list of all rngs. guarded by stateMutex
+
+			GlobalState(){
+				globalseed = std::mt19937::default_seed;
+			}
+		};
+		
+		/// \brief private constructor. Can only be created by globalRng()();
+		///
+		/// Registers the Rng in the global list of Rngs and seeds it from the global state
+		ThreadsafeRng(std::shared_ptr<GlobalState> const& state)
+		: m_state(state){
+			std::lock_guard<std::mutex> lock(m_state->stateMutex);
+			std::cout<<"gen "<<this<<std::endl;
+			seedInternal(m_state->globalseed++);
+			m_state->all.insert(this);
+			
+		}
+		std::shared_ptr<GlobalState> m_state;		
+	};
+	
+	typedef ThreadsafeRng rng_type;
+	
+	/// \brief Get Access to an instance of the rng
+	///
+	/// There is one instane per thread. Thus care has to be taken that one rng is not
+	/// shared between threads.
+	inline rng_type& globalRng(){
+		//We use a shared_ptr to prevent us from the static destructor order fiasco: 
+		// if global state is killed before the thread_local, we try to delete dead objects. bad.
+		// Through shared_ptr, nothing is cleaned up, until the last shared_ptr is dead.
+		static auto state = std::make_shared<ThreadsafeRng::GlobalState>();
+		static thread_local rng_type rng(state);
+		return rng;
+	}
+	
+	
+
 	
 	///\brief Flips a coin with probability of heads being pHeads by drawing random numbers from rng.
 	template<class RngType>
@@ -91,9 +179,6 @@ namespace random{
 			Z = 1-std::exp(-lambda*maximum);
 		return - std::log(1. - y*Z)/lambda;
 	}
-	
-	
-
 
 }}
 

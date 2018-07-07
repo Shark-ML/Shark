@@ -75,7 +75,7 @@ std::size_t shark::kMeans(Data<RealVector> const& dataset, std::size_t k, Centro
 		for (std::size_t j=0; j<k; j++) {
 			if (numPoints[j] == 0) {
 				// empty cluster - assign random training point
-				std::size_t index = random::discrete(random::globalRng, std::size_t(0), ell-1);
+				std::size_t index = random::discrete(random::globalRng(), std::size_t(0), ell-1);
 				newCenters[j] = data[index];
 			}
 			else {

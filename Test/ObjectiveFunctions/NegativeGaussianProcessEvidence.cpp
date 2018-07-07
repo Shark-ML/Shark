@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_SUITE (ObjectiveFunctions_NegativeGaussianProcessEvidence)
 BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 {
 	// experiment settings
-	random::globalRng.seed( 0 );
+	random::globalRng().seed( 0 );
 	const unsigned int ell   = 100;
 	const unsigned int tests = 10000;
 	const double gamma = 100.;
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( GAUUSIAN_PROCESS_EVIDENCE )
 	for(std::size_t test = 0; test != 100; ++test){
 		RealVector parameters(params.size());
 		for(std::size_t i = 0; i != params.size(); ++i){
-			parameters(i) = random::uni(random::globalRng, -2,2);
+			parameters(i) = random::uni(random::globalRng(), -2,2);
 		}
 		testDerivative(evidence,parameters,1.e-8);
 	}

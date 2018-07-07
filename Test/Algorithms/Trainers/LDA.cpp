@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create samples. class 1 has double as many elements as class 0
 		target[i]=(i%3 == 0);
-		input[i]=dist(random::globalRng).first+mean[target[i]];
+		input[i]=dist(random::globalRng()).first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		RealVector diff=input[i]-mean[0];
 		double dist0=inner_prod(diff,prod(inverse,diff))+prior[0];
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_TWOCLASS_SINGULAR ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]= (i%3 != 0);
-		RealVector vec = dist(random::globalRng).first+mean[target[i]];
+		RealVector vec = dist(random::globalRng()).first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		RealVector diff=vec-mean[0];
 		double dist0=inner_prod(diff,prod(inverse,diff)) + prior[0];
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	const unsigned int classes = 10;
 	LDA trainer;
 	LinearClassifier<> model;
-	random::globalRng.seed(44);
+	random::globalRng().seed(44);
 
 
 	//create datatsets - overlapping normal distributions
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){
 		for(std::size_t j = 0; j != 2; ++j){
-			mean[c](j) = random::gauss(random::globalRng,0,30);
+			mean[c](j) = random::gauss(random::globalRng(),0,30);
 		}
 	}
 	MultiVariateNormalDistribution dist(covariance);
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]=i%classes;
-		input[i]=dist(random::globalRng).first+mean[target[i]];
+		input[i]=dist(random::globalRng()).first+mean[target[i]];
 		//calculate bayes Target - the best fit to the distributions
 		unsigned int bayesTarget = 0;
 		double minDist = 1.e30;
@@ -219,8 +219,8 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){
-		mean[c](0) = random::gauss(random::globalRng,0,30);
-		mean[c](1) = random::gauss(random::globalRng,0,30);
+		mean[c](0) = random::gauss(random::globalRng(),0,30);
+		mean[c](1) = random::gauss(random::globalRng(),0,30);
 	}
 	MultiVariateNormalDistribution dist(covariance);
 
@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]=i%classes;
-		input[i]=dist(random::globalRng).first+mean[target[i]];
+		input[i]=dist(random::globalRng()).first+mean[target[i]];
 	}
 	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 	
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE( LDA_TEST_MULTICLASS_WEIGHTING ){
 		auto unweightedElements = elements(unweightedDataset);
 		RealVector classWeight(classes,0);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
-			std::size_t index = random::discrete(random::globalRng,std::size_t(0),TrainExamples-1);
+			std::size_t index = random::discrete(random::globalRng(),std::size_t(0),TrainExamples-1);
 			weightedElements[index].weight +=1.0;
 			unweightedElements[i]= dataElements[index];
 			classWeight(weightedElements[index].data.label) += 1.0/DatasetSize;

@@ -38,7 +38,7 @@ struct NoisyEllipsoid : public AbstractObjectiveFunction<VectorType,double> {
 		VectorType x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(*this->mep_rng, 0,1);
+			x(i) = random::uni(random::globalRng(), 0,1);
 		}
 		return x;
 	}
@@ -48,7 +48,7 @@ struct NoisyEllipsoid : public AbstractObjectiveFunction<VectorType,double> {
 		double sum = 0;
 		double sizeMinusOne = p.size() - 1.;
 		for( std::size_t i = 0; i < p.size(); i++ ){
-			sum += ::pow( m_alpha, i / sizeMinusOne ) * sqr(p( i ) - random::gauss(random::globalRng,0,m_epsilon*m_epsilon));
+			sum += ::pow( m_alpha, i / sizeMinusOne ) * sqr(p( i ) - random::gauss(random::globalRng(),0,m_epsilon*m_epsilon));
 		}
 
 		return sum;
@@ -61,7 +61,7 @@ struct NoisyEllipsoid : public AbstractObjectiveFunction<VectorType,double> {
 		double sum = 0.0;
 		for (std::size_t i = 0; i < p.size(); i++) {
 			double c = ::pow(m_alpha, i / sizeMinusOne);
-			double noise = random::gauss(random::globalRng,0,m_epsilon*m_epsilon);
+			double noise = random::gauss(random::globalRng(),0,m_epsilon*m_epsilon);
 			derivative(i) = 2 * c * (p(i) - noise);
 			sum += c * sqr(p(i) - noise);
 		}

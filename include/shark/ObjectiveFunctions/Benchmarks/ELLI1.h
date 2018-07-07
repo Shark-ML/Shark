@@ -87,7 +87,7 @@ struct ELLI1 : public MultiObjectiveFunction{
 	}
 
 	void init() {
-		m_rotationMatrix = blas::randomRotationMatrix(*mep_rng, numberOfVariables() );
+		m_rotationMatrix = blas::randomRotationMatrix(random::globalRng(), numberOfVariables() );
 	}
 
 	ResultType eval( const SearchPointType & x ) const {
@@ -114,7 +114,7 @@ struct ELLI1 : public MultiObjectiveFunction{
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(*mep_rng, -10,10);
+			x(i) = random::uni(random::globalRng(), -10,10);
 		}
 		return x;
 	}

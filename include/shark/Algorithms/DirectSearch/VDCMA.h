@@ -58,7 +58,7 @@ private:
 public:
 
 	/// \brief Default c'tor.
-	VDCMA(random::rng_type& rng = random::globalRng):m_initialSigma(0.0), mpe_rng(&rng){
+	VDCMA(random::rng_type& rng = random::globalRng()):m_initialSigma(0.0), mpe_rng(&rng){
 		m_features |= REQUIRES_VALUE;
 	}
 	

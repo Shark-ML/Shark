@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( HypervolumeIndicator_Consistency ) {
 		for(std::size_t i = 0; i != numPoints; ++i){
 			population[i].resize(numDims);
 			for(std::size_t j = 0; j != numDims; ++j){
-				population[i][j]= random::uni(random::globalRng,-1,10);
+				population[i][j]= random::uni(random::globalRng(),-1,10);
 			}
 		}
 		//archive is empty
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( HypervolumeIndicator_LeastK ) {
 		for(std::size_t i = 0; i != numPoints; ++i){
 			population[i].resize(numDims);
 			for(std::size_t j = 0; j != numDims; ++j){
-				population[i][j]= random::uni(random::globalRng,-1,10);
+				population[i][j]= random::uni(random::globalRng(),-1,10);
 			}
 			indices[i] = i;
 		}

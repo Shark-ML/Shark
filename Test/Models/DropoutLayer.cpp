@@ -15,11 +15,11 @@ BOOST_AUTO_TEST_SUITE (Models_DropoutLayer)
 
 BOOST_AUTO_TEST_CASE( DropoutLayer_Value)
 {
-	DropoutLayer<> layer(10,0.5,random::globalRng);
+	DropoutLayer<> layer(10,0.5);
 	RealMatrix inputs(100,10);
 	for(std::size_t i = 0; i != 100; ++i){
 		for(std::size_t j = 0; j != 10; ++j){
-			inputs(i,j) = random::uni(random::globalRng,2,3);
+			inputs(i,j) = random::uni(random::globalRng(),2,3);
 		}
 	}
 	
@@ -45,20 +45,20 @@ BOOST_AUTO_TEST_CASE( DropoutLayer_Value)
 
 BOOST_AUTO_TEST_CASE( DropoutLayer_Derivative)
 {
-	DropoutLayer<> layer(10,0.5,random::globalRng);
+	DropoutLayer<> layer(10,0.5);
 	RealMatrix inputs(100,10);
 	RealMatrix coeffs(100,10);
 	for(std::size_t i = 0; i != 100; ++i){
 		for(std::size_t j = 0; j != 10; ++j){
-			inputs(i,j) = random::uni(random::globalRng,2,3);
-			coeffs(i,j) = random::gauss(random::globalRng,2,3);
+			inputs(i,j) = random::uni(random::globalRng(),2,3);
+			coeffs(i,j) = random::gauss(random::globalRng(),2,3);
 		}
 	}
 	
 	
 	for(std::size_t i = 0; i != 100; ++i){
 		for(std::size_t j = 0; j != 10; ++j){
-			inputs(i,j) = random::uni(random::globalRng,2,3);
+			inputs(i,j) = random::uni(random::globalRng(),2,3);
 		}
 	}
 	

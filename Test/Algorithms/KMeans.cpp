@@ -54,11 +54,11 @@ BOOST_AUTO_TEST_CASE(KMeans_simple)
 	std::vector<RealVector> data(300);
 	for (std::size_t i=0; i<100; i++)
 	{
-		v(0) = random::uni(random::globalRng);
+		v(0) = random::uni(random::globalRng());
 		data[i] = v;
-		v(0) = random::uni(random::globalRng) + 10.0;
+		v(0) = random::uni(random::globalRng()) + 10.0;
 		data[100+i] = v;
-		v(0) = random::uni(random::globalRng) + 20.0;
+		v(0) = random::uni(random::globalRng()) + 20.0;
 		data[200+i] = v;
 	}
 	Data<RealVector> dataset = createDataFromRange(data);
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(KMeans_multiple_gauss)
 		std::vector<RealVector> means(numMeans,RealVector(numDimensions));
 		for (unsigned int i=0; i<numMeans; i++){
 			for (unsigned int j=0; j <numDimensions; j++){
-				means[i](j) = random::uni(random::globalRng,0,5);
+				means[i](j) = random::uni(random::globalRng(),0,5);
 			}
 		}
 		// prepare data set
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(KMeans_multiple_gauss)
 		{
 			data[i]=means[i%numMeans];
 			for (unsigned int j=0; j <numDimensions; j++){
-				data[i](j) += random::uni(random::globalRng,0,1);
+				data[i](j) += random::uni(random::globalRng(),0,1);
 			}
 		}
 		Data<RealVector> dataset = createDataFromRange(data);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		std::vector<RealVector> means(numMeans,RealVector(numDimensions));
 		for (unsigned int i=0; i<numMeans; i++){
 			for (unsigned int j=0; j <numDimensions; j++){
-				means[i](j) = random::uni(random::globalRng,0,5);
+				means[i](j) = random::uni(random::globalRng(),0,5);
 			}
 		}
 		// prepare data set
@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 		{
 			data[i]=means[i%numMeans];
 			for (unsigned int j=0; j <numDimensions; j++){
-				data[i](j) += random::uni(random::globalRng,0,1);
+				data[i](j) += random::uni(random::globalRng(),0,1);
 			}
 		}
 		Data<RealVector> dataset = createDataFromRange(data);

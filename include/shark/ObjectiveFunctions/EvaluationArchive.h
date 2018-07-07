@@ -141,7 +141,6 @@ public:
 
 	/// \brief Wrapper function.
 	void init(){
-		mep_objective->setRng(this->mep_rng);
 		mep_objective->init();
 	}
 

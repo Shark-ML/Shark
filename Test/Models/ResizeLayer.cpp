@@ -34,8 +34,8 @@ BOOST_AUTO_TEST_CASE( Models_ResizeLayer_Spline_GPU){
 	ResizeLayer<FloatGPUVector> model_gpu(imageShape, outputShape, Interpolation::Spline);
 	
 	//define inputs
-	FloatMatrix images_cpu = blas::uniform(random::globalRng, 1, imageShape.numElements(), float(0), float(1), blas::cpu_tag());
-	FloatMatrix coefficients_cpu = blas::uniform(random::globalRng, 1, outputShape.numElements(), float(-1), float(1), blas::cpu_tag());
+	FloatMatrix images_cpu = blas::uniform(random::globalRng(), 1, imageShape.numElements(), float(0), float(1), blas::cpu_tag());
+	FloatMatrix coefficients_cpu = blas::uniform(random::globalRng(), 1, outputShape.numElements(), float(-1), float(1), blas::cpu_tag());
 	FloatGPUMatrix images_gpu = blas::copy_to_gpu(images_cpu);
 	FloatGPUMatrix coefficients_gpu = blas::copy_to_gpu(coefficients_cpu);
 	

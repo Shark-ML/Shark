@@ -67,7 +67,7 @@ struct Himmelblau : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(*mep_rng, -3,3);
+			x(i) = random::uni(random::globalRng(), -3,3);
 		}
 		return x;
 	}
