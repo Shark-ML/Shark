@@ -126,27 +126,14 @@ specifies the default batch size of the container. It should usually be
 left at its default.
 
 
-HDF5 and MLData
-++++++++++++++++++++++++++++++++++++++++
-
-.. todo:: Write this section!
-
-
 Downloading Data from Online Resources
 ++++++++++++++++++++++++++++++++++++++++
 
 Shark supports downloading data from websites. This is of interest for
-quick experimentation, as well as for benchmark studies. The mldata.org
-website acts as a central repository for machine learning data sets.
+quick experimentation, as well as for benchmark studies.
 
 Shark supports HTTP downloads of dense (CSV) and sparse (libSVM) data.
 Simply provide the URL to the data file to populate a LabeledData object:
 
 ..sharkcode<Data/Import.tpp,download-url>
 
-Shark has special support for the MLData platform. If allows to download
-a data set by name. The download uses the sparse (libSVM) format, hence
-every data set available in that format can be obtained directly from
-MLData with a single command:
-
-..sharkcode<Data/Import.tpp,download-mldata>

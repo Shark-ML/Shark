@@ -8,10 +8,10 @@
  * By itself, it does not do anything particularly useful.
  *
  * \author      T. Glasmachers
- * \date        2014, 2016
+ * \date        2014-2018
  *
  *
- * \par Copyright 1995-2017 Shark Development Team
+ * \par Copyright 1995-2018 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -109,17 +109,10 @@ int main(int argc, char** argv)
 	ClassificationDataset dataset;
 //###begin<download-url>
 	// download dense data
-	downloadCsvData(dataset, "http://mldata.org/repository/data/download/csv/banana-ida/", FIRST_COLUMN);
+	downloadCsvData(dataset, "http://www.shark-ml.org/data/quickstart-train.csv", LAST_COLUMN, ' ');
 
 	// download sparse data
 	downloadSparseData(dataset, "http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/svmguide1");
 //###end<download-url>
-}
-{
-	ClassificationDataset dataset;
-//###begin<download-mldata>
-	// fetch data set by name from mldata.org
-	downloadFromMLData(dataset, "iris");
-//###end<download-mldata>
 }
 }

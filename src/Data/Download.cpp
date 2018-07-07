@@ -7,10 +7,10 @@
  * 
  *
  * \author      T.Glasmachers, O.Krause
- * \date        2017
+ * \date        2017-2018
  *
  *
- * \par Copyright 1995-2017 Shark Development Team
+ * \par Copyright 1995-2018 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.

@@ -13,10 +13,10 @@
  * 
  *
  * \author      T. Glasmachers
- * \date        2016
+ * \date        2016-2018
  *
  *
- * \par Copyright 1995-2017 Shark Development Team
+ * \par Copyright 1995-2018 Shark Development Team
  * 
  * <BR><HR>
  * This file is part of Shark.
@@ -63,7 +63,7 @@ namespace shark {
 /// std::tie(domain, resource) = splitUrl(url);
 /// will fill the std::string variables domain and resource.
 SHARK_EXPORT_SYMBOL std::pair<std::string, std::string> splitUrl(std::string const & url);
-	
+
 /// \brief Download a document with the HTTP protocol.
 ///
 /// \param  url       download URL, for example "www.shark-ml.org/index.html"
@@ -97,29 +97,6 @@ template <class InputType, class LabelType> void downloadSparseData(
 	std::string content = download(url, port);
 	std::stringstream ss(content);
 	importSparseData(dataset, ss, highestIndex, batchSize);
-}
-
-
-/// \brief Download a data set from mldata.org.
-///
-/// \param  dataset       container storing the loaded data
-/// \param  name          data set name
-/// \param  batchSize     size of batch
-template <class InputType, class LabelType> void downloadFromMLData(
-	LabeledData<InputType, LabelType>& dataset,
-	std::string const& name,
-	std::size_t batchSize = LabeledData<RealVector, unsigned int>::DefaultBatchSize
-)
-{
-	std::string filename;
-	for (char c : name)
-	{
-		if (c == ' ') c = '-';
-		else if (c >= 'A' && c <= 'Z') c += 32;
-		else if (c == '[' || c == '(' || c == ')' || c == '.' || c == ']') continue;
-		filename += c;
-	}
-	downloadSparseData(dataset, "mldata.org/repository/data/download/libsvm/" + filename + "/", 80, 0, batchSize);
 }
 
 
