@@ -70,9 +70,10 @@ BOOST_AUTO_TEST_CASE( RF_Classifier ) {
 	std::cout<<OOBerror<<std::endl;
 	BOOST_CHECK(error_train < 0.01);
 	BOOST_CHECK_CLOSE(error_train2, error_train,0.001);
+	BOOST_CHECK(error_test < 0.1);
+	BOOST_CHECK(OOBerror < 0.1);
 	BOOST_REQUIRE_EQUAL(model.numberOfModels(), 100);
 	BOOST_REQUIRE_EQUAL(model.featureImportances().size(), 10);
-	BOOST_CHECK_CLOSE(error_test, OOBerror, 10.0);
 	for(std::size_t i = 0; i != 5; ++i){
 		BOOST_CHECK(model.featureImportances()(i) > 0.01);
 		BOOST_CHECK(model.featureImportances()(i+5) < 0.01);
