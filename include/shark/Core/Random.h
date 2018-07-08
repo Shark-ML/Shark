@@ -80,13 +80,11 @@ namespace random{
 		void seed(result_type s){
 			std::lock_guard<std::mutex> lock(m_state->stateMutex);
 			m_state->globalseed = s;
-			std::cout<<"reseed"<<s<<std::endl;
 			for (ThreadsafeRng* p : m_state->all)
 				p->seedInternal( m_state->globalseed++);//race condition with parallel thread using operator()
 		}
 	private:
 		void seedInternal(result_type s){
-			std::cout<<this<<" seed "<<s<<std::endl;
 			std::mt19937::seed(s);
 		};
 		struct GlobalState{
@@ -105,7 +103,6 @@ namespace random{
 		ThreadsafeRng(std::shared_ptr<GlobalState> const& state)
 		: m_state(state){
 			std::lock_guard<std::mutex> lock(m_state->stateMutex);
-			std::cout<<"gen "<<this<<std::endl;
 			seedInternal(m_state->globalseed++);
 			m_state->all.insert(this);
 			
