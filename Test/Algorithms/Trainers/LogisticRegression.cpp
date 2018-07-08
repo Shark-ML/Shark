@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_NoLone){
 }
 
 BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone){
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	PamiToy problem;
 	ClassificationDataset const& dataset = problem.generateDataset(50);
 	
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone){
 }
 
 BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_Lone){
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	PamiToy problem;
 	ClassificationDataset const& dataset = problem.generateDataset(50);
 	
@@ -154,12 +154,12 @@ BOOST_AUTO_TEST_CASE( LogReg_Binary_NoBias_Lone){
 }
 
 BOOST_AUTO_TEST_CASE( LogReg_Binary_Lone_Weighted){
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	PamiToy problem;
 	ClassificationDataset const& baseDataset = problem.generateDataset(50);
 	WeightedLabeledData<RealVector, unsigned int> dataset(baseDataset, 1.0);
 	for(double& weight: elements(dataset.weights())){
-		weight = random::uni(random::globalRng, 0.1,2);
+		weight = random::uni(random::globalRng(), 0.1,2);
 	}
 	double lambda1 = 0.1;
 	LogisticRegression<> trainer(lambda1,0.1);

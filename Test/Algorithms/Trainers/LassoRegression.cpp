@@ -20,8 +20,8 @@ public:
 	void draw(RealVector& input, RealVector& label) const{
 		input.resize(10);
 		label.resize(1);
-		double g = random::gauss(random::globalRng);
-		for (size_t i=0; i<10; i++) input(i) = random::gauss(random::globalRng);
+		double g = random::gauss(random::globalRng());
+		for (size_t i=0; i<10; i++) input(i) = random::gauss(random::globalRng());
 		input(5) += g;
 		label(0) = g;
 	}

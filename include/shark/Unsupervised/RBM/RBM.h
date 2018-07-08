@@ -39,15 +39,14 @@
 namespace shark{
 
 ///\brief stub for the RBM class. at the moment it is just a holder of the parameter set and the Energy.
-template<class VisibleLayerT,class HiddenLayerT, class randomT>
+template<class VisibleLayerT,class HiddenLayerT>
 class RBM : public AbstractModel<RealVector, RealVector>{
 private:
 	typedef AbstractModel<RealVector, RealVector> base_type;
 public:
 	typedef HiddenLayerT HiddenType; ///< type of the hidden layer
 	typedef VisibleLayerT VisibleType; ///< type of the visible layer
-	typedef randomT randomType;
-	typedef Energy<RBM<VisibleType,HiddenType,randomT> > EnergyType;///< Type of the energy function
+	typedef Energy<RBM<VisibleType,HiddenType> > EnergyType;///< Type of the energy function
 	typedef detail::AverageEnergyGradient<RBM> GradientType;///< Type of the gradient calculator
 	
 	typedef typename base_type::BatchInputType BatchInputType;
@@ -63,7 +62,6 @@ private:
 	///The Layer of visible Neurons
 	VisibleType m_visibleNeurons;
 
-	randomType* mpe_rng;
 	bool m_forward;
 	bool m_evalMean;
 
@@ -84,7 +82,7 @@ private:
 			noalias(output) = hiddenNeurons().mean(statisticsBatch);
 		}
 		else{
-			hiddenNeurons().sample(statisticsBatch,output,0.0,*mpe_rng);
+			hiddenNeurons().sample(statisticsBatch,output,0.0,rng());
 		}
 	}
 
@@ -105,11 +103,11 @@ private:
 			noalias(output) = visibleNeurons().mean(statisticsBatch);
 		}
 		else{
-			visibleNeurons().sample(statisticsBatch,output,0.0,*mpe_rng);
+			visibleNeurons().sample(statisticsBatch,output,0.0,rng());
 		}
 	}
 public:
-	RBM(randomType& rng):mpe_rng(&rng),m_forward(true),m_evalMean(true)
+	RBM():m_forward(true),m_evalMean(true)
 	{ }
 
 	/// \brief From INameable: return the class name.
@@ -187,8 +185,8 @@ public:
 	}
 	
 	///\brief Returns the random number generator associated with this RBM.
-	randomType& rng(){
-		return *mpe_rng;
+	random::rng_type& rng() const{
+		return random::globalRng();
 	}
 	
 	///\brief Sets the type of evaluation, eval will perform.
@@ -294,13 +292,6 @@ public:
 		archive >> m_weightMatrix;
 		archive >> m_hiddenNeurons;
 		archive >> m_visibleNeurons;
-		
-		//serialization of the rng is a bit...complex
-		//let's hope that we can remove this hack one time. But we really can't ignore the state of the rng.
-		std::string str;
-		archive>> str;
-		std::stringstream stream(str);
-		stream>> *mpe_rng;
 	}
 
 	/// \brief Writes the network to an archive.
@@ -308,11 +299,6 @@ public:
 		archive << m_weightMatrix;
 		archive << m_hiddenNeurons;
 		archive << m_visibleNeurons;
-		
-		std::stringstream stream;
-		stream <<*mpe_rng;
-		std::string str = stream.str();
-		archive <<str;
 	}
 
 };

@@ -41,11 +41,11 @@ BOOST_AUTO_TEST_CASE( DensePolynomialKernel_Value ){
 	RealMatrix batch2(20,2);
 	for(std::size_t i = 0; i != 10;++i){
 		for(std::size_t j = 0; j != 2; ++j)
-			batch1(i,j)=random::uni(random::globalRng,-1,1);
+			batch1(i,j)=random::uni(random::globalRng(),-1,1);
 	}
 	for(std::size_t i = 0; i != 20;++i){
 		for(std::size_t j = 0; j != 2; ++j)
-			batch2(i,j)=random::uni(random::globalRng,-1,1);
+			batch2(i,j)=random::uni(random::globalRng(),-1,1);
 	}
 	kernel.setDegree(3);
 	testEval(kernel,batch1,batch2);
@@ -94,11 +94,11 @@ BOOST_AUTO_TEST_CASE( SparsePolynomialKernel_Test ){
 	CompressedRealMatrix batch2(20,200);
 	for(std::size_t i = 0; i != 10;++i){
 		for(std::size_t j = 0; j != 2; ++j)
-			batch1.set_element(batch1.major_end(i), j * 100, random::uni(random::globalRng,-1,1));
+			batch1.set_element(batch1.major_end(i), j * 100, random::uni(random::globalRng(),-1,1));
 	}
 	for(std::size_t i = 0; i != 20;++i){
 		for(std::size_t j = 0; j != 4; ++j)
-			batch2.set_element(batch2.major_end(i), j * 100, random::uni(random::globalRng,-1,1));
+			batch2.set_element(batch2.major_end(i), j * 100, random::uni(random::globalRng(),-1,1));
 	}
 	kernel.setDegree(3);
 	testEval(kernel,batch1,batch2);

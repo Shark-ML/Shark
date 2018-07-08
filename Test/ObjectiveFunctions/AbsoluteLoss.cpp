@@ -54,15 +54,15 @@ BOOST_AUTO_TEST_CASE( ABSOLUTELOSS_EVAL ) {
 	unsigned int batchSize = 10;
 	for (unsigned int test = 0; test != maxTests; ++test)
 	{
-		std::size_t dim = random::discrete(random::globalRng, 5, 100);
+		std::size_t dim = random::discrete(random::globalRng(), 5, 100);
 		RealMatrix target(batchSize,dim);
 		RealMatrix output(batchSize,dim);
 		double sum = 0;
 		for(std::size_t b = 0; b != batchSize; ++b){
 			double dist2 = 0;
 			for (std::size_t d=0; d != dim; d++){
-				target(b,d) = random::gauss(random::globalRng);
-				output(b,d) = random::gauss(random::globalRng);
+				target(b,d) = random::gauss(random::globalRng());
+				output(b,d) = random::gauss(random::globalRng());
 				double diff = target(b,d) - output(b,d);
 				dist2 += diff * diff;
 			}

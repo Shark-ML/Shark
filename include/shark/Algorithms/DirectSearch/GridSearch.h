@@ -591,7 +591,7 @@ public:
 			m_points[sample].resize(parameters);
 			for(size_t param=0; param!=parameters; ++param)
 			{
-				m_points[sample](param)=random::uni(random::globalRng, min,max);
+				m_points[sample](param)=random::uni(random::globalRng(), min,max);
 			}
 		}
 		m_configured=true;

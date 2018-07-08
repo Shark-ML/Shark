@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Structure)
 	
 	RealVector newParams(weightNum);
 	for(std::size_t i = 0; i != weightNum; ++i){
-		newParams(i) = random::uni(random::globalRng,0,1);
+		newParams(i) = random::uni(random::globalRng(),0,1);
 	}
 	//check that setting and getting parameters works
 	net.setParameterVector(newParams);
@@ -62,14 +62,14 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
 		//initialize parameters
 		RealVector parameters(numParams);
 		for(size_t j=0; j != numParams;++j)
-			parameters(j)=random::gauss(random::globalRng,0,1);
+			parameters(j)=random::gauss(random::globalRng(),0,1);
 		net.setParameterVector(parameters);
 
 		//the testpoints
 		RealVector point(3);
-		point(0)=random::uni(random::globalRng,-5,5);
-		point(1)= random::uni(random::globalRng,-5,5);
-		point(2)= random::uni(random::globalRng,-5,5);
+		point(0)=random::uni(random::globalRng(),-5,5);
+		point(1)= random::uni(random::globalRng(),-5,5);
+		point(2)= random::uni(random::globalRng(),-5,5);
 
 		//evaluate ground truth result
 		RealVector hidden = sigmoid(prod(net.encoderMatrix(),point)+net.hiddenBias());
@@ -85,9 +85,9 @@ BOOST_AUTO_TEST_CASE( TIED_AUTOENCODER_Value )
 	//now also test batches
 	RealMatrix inputs(100,3);
 	for(std::size_t i = 0; i != 100; ++i){
-		inputs(i,0)=random::uni(random::globalRng,-5,5);
-		inputs(i,1)= random::uni(random::globalRng,-5,5);
-		inputs(i,2)= random::uni(random::globalRng,-5,5);
+		inputs(i,0)=random::uni(random::globalRng(),-5,5);
+		inputs(i,1)= random::uni(random::globalRng(),-5,5);
+		inputs(i,2)= random::uni(random::globalRng(),-5,5);
 	}
 	testBatchEval(net,inputs);
 }

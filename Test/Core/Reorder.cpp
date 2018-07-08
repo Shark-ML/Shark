@@ -14,7 +14,7 @@ struct ImageReorderFixture {
 		totalSize = sizesIn[0] *  sizesIn[1] *  sizesIn[2] *  sizesIn[3];
 		values_CHWN.resize(totalSize);
 		values_NCWH.resize(totalSize);
-		values_NHWC = blas::normal(random::globalRng, totalSize, 0, 1, blas::cpu_tag()); 
+		values_NHWC = blas::normal(random::globalRng(), totalSize, 0, 1, blas::cpu_tag()); 
 		
 		double (*valuesIn)[10][20][7][15] = (double (*)[10][20][7][15]) values_NHWC.raw_storage().values;
 		double (*valuesCHWN)[15][20][7][10]= (double (*)[15][20][7][10]) values_CHWN.raw_storage().values;

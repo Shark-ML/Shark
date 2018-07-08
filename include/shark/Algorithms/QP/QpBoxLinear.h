@@ -163,7 +163,7 @@ public:
 				double num = (psum < 1e-6) ? ell - pos : std::min((double)(ell - pos), (ell - pos) * p / psum);
 				std::size_t n = (std::size_t)std::floor(num);
 				double prob = num - n;
-				if (random::coinToss(random::globalRng,prob)) n++;
+				if (random::coinToss(random::globalRng(),prob)) n++;
 				for (std::size_t j=0; j<n; j++)
 				{
 					schedule[pos] = i;
@@ -173,7 +173,7 @@ public:
 				prefsum += p;
 			}
 			SHARK_ASSERT(pos == ell);
-			std::shuffle(schedule.begin(),schedule.end(),random::globalRng);
+			std::shuffle(schedule.begin(),schedule.end(),random::globalRng());
 
 			// inner loop
 			max_violation = 0.0;

@@ -96,16 +96,16 @@ BOOST_AUTO_TEST_CASE( Binary_CSVM_TRAINER_TEST )
 	for (unsigned int run=0; run<10; run++)
 	{
 		// generate random training set
-		random::globalRng.seed(run);
+		random::globalRng().seed(run);
 		cout << endl << "generating test problem " << (run+1) << " out of 10" << endl;
 		vector<CompressedRealVector> input(ell, CompressedRealVector(dim));
 		vector<unsigned int> target(ell);
 		for (size_t i=0; i<ell; i++)
 		{
-			unsigned int label = random::coinToss(random::globalRng);
+			unsigned int label = random::coinToss(random::globalRng());
 			for (unsigned int d=0; d<dim; d++)
 			{
-				input[i].set_element(input[i].end(), d, 0.2 * random::gauss(random::globalRng) + 2*label-1);
+				input[i].set_element(input[i].end(), d, 0.2 * random::gauss(random::globalRng()) + 2*label-1);
 			}
 			target[i] = label;
 		}
@@ -181,17 +181,17 @@ BOOST_AUTO_TEST_CASE( MCSVM_TRAINER_TEST )
 	for (unsigned int run=0; run<10; run++)
 	{
 		// generate random training set
-		random::globalRng.seed(42+run);
+		random::globalRng().seed(42+run);
 		cout << endl << "generating test problem " << (run+1) << " out of 10" << endl;
 		vector<CompressedRealVector> input(ell, CompressedRealVector(dim));
 		vector<unsigned int> target(ell);
 		for (size_t i=0; i<ell; i++)
 		{
-			unsigned int label = (unsigned int)random::discrete(random::globalRng, std::size_t(0), classes - 1);
+			unsigned int label = (unsigned int)random::discrete(random::globalRng(), std::size_t(0), classes - 1);
 			for (unsigned int d=0; d<dim; d++)
 			{
 				double y = ((d / var_per_class) == label) ? 1.0: -1.0;
-				input[i].set_element(input[i].end(), d, 0.3 * random::gauss(random::globalRng) + y);
+				input[i].set_element(input[i].end(), d, 0.3 * random::gauss(random::globalRng()) + y);
 			}
 			target[i] = label;
 		}

@@ -65,7 +65,7 @@ private:
 	///@param p the flipping probability
 	void perturbate(RealVector& pattern, double p)const{
 		for (std::size_t i = 0; i < pattern.size(); ++i){
-			if (random::uni(random::globalRng, 0,1) > p){
+			if (random::uni(random::globalRng(), 0,1) > p){
 				pattern(i) = !pattern(i);
 			}
 		}

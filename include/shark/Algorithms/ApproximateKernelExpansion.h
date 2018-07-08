@@ -57,12 +57,10 @@ namespace shark{
 ///
 /// The algorithms is O(k^3 + k m) in each iteration.
 ///
-/// \param rng the Rng used for the kMeans clustering
 /// \param model the kernel expansion to approximate
 /// \param k the number of basis vectors to be used by the approximation
 /// \param precision target precision of the gradient to be reached during optimization
 SHARK_EXPORT_SYMBOL KernelExpansion<RealVector> approximateKernelExpansion(
-	random::rng_type& rng,
 	KernelExpansion<RealVector> const& model,
 	std::size_t k,
 	double precision = 1.e-8

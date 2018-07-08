@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE( ExactGradientTraining_Bars ){
 	
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
-		random::globalRng.seed(42+trial);
-		BinaryRBM rbm(random::globalRng);
+		random::globalRng().seed(42+trial);
+		BinaryRBM rbm;
 		rbm.setStructure(16,8);
 		initRandomUniform(rbm,-0.1,0.1);
 		ExactGradient<BinaryRBM> gradient(&rbm);

@@ -58,18 +58,18 @@ int main( int argc, char ** argv ) {
 		for( std::size_t i = 0; i < offspring.size(); i++ ) {
 		
 			// Select two parent individuals at random
-			example::Population::const_iterator mom = parents.begin() + random::discrete(random::globalRng,  std::size_t(0), parents.size() - 1 );
-			example::Population::const_iterator dad = parents.begin() + random::discrete(random::globalRng,  std::size_t(0), parents.size() - 1 );
+			example::Population::const_iterator mom = parents.begin() + random::discrete(random::globalRng(),  std::size_t(0), parents.size() - 1 );
+			example::Population::const_iterator dad = parents.begin() + random::discrete(random::globalRng(),  std::size_t(0), parents.size() - 1 );
 		
 			// Recombine step size
-			offspring[i].chromosome() = random::uni(random::globalRng,  mom->chromosome(), dad->chromosome() );			
+			offspring[i].chromosome() = random::uni(random::globalRng(),  mom->chromosome(), dad->chromosome() );			
 			// Mutate step size
-			offspring[i].chromosome() *= random::logNormal(random::globalRng,  0, tau0 + tau1 );
+			offspring[i].chromosome() *= random::logNormal(random::globalRng(),  0, tau0 + tau1 );
 			
 			// Recombine search points
-			offspring[i].searchPoint() = uniform(random::globalRng, mom->searchPoint(), dad->searchPoint() );
+			offspring[i].searchPoint() = uniform(random::globalRng(), mom->searchPoint(), dad->searchPoint() );
 			// Mutate search point
-			offspring[i].searchPoint() = offspring[i].chromosome() * mutationDistribution(random::globalRng).first;
+			offspring[i].searchPoint() = offspring[i].chromosome() * mutationDistribution(random::globalRng()).first;
 	
 			// Assign fitness
 			offspring[i].unpenalizedFitness() = ackley.eval( offspring[i].searchPoint() );

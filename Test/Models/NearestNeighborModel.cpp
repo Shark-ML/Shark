@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple_Brute_Force )
 	for(std::size_t i = 0; i != Points; ++i){
 		target[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			input[i][d]=random::gauss(random::globalRng,3*target[i],1);
+			input[i][d]=random::gauss(random::globalRng(),3*target[i],1);
 		}
 	}
 	std::vector<RealVector> testInput(Points, RealVector(Dimension));
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_Simple_Brute_Force )
 	for(std::size_t i = 0; i != TestPoints; ++i){
 		testTarget[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			testInput[i][d]=random::gauss(random::globalRng,3*testTarget[i],1);
+			testInput[i][d]=random::gauss(random::globalRng(),3*testTarget[i],1);
 		}
 	}
 
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KDTree_Brute_Force) 
 	for(std::size_t i = 0; i != Points; ++i){
 		target[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			input[i][d]=random::gauss(random::globalRng,3*target[i],1);
+			input[i][d]=random::gauss(random::globalRng(),3*target[i],1);
 		}
 	}
 	std::vector<RealVector> testInput(Points, RealVector(Dimension));
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE( Models_NearestNeighbor_Classification_KDTree_Brute_Force) 
 	for(std::size_t i = 0; i != TestPoints; ++i){
 		testTarget[i] = i%2;
 		for(std::size_t d = 0; d != Dimension; ++d){
-			testInput[i][d]=random::gauss(random::globalRng,3*testTarget[i],1);
+			testInput[i][d]=random::gauss(random::globalRng(),3*testTarget[i],1);
 		}
 	}
 

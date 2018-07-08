@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS){
 
 	std::vector<RealVector> mean(classes,RealVector(2,0.0));
 	for(unsigned int c = 0; c != classes; ++c){
-		mean[c](0) = random::gauss(random::globalRng,0,30);
-		mean[c](1) = random::gauss(random::globalRng,0,30);
+		mean[c](0) = random::gauss(random::globalRng(),0,30);
+		mean[c](1) = random::gauss(random::globalRng(),0,30);
 	}
 
 	std::vector<RealVector> input(TrainExamples,RealVector(2));
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]=i%classes;
-		input[i]=dist(random::globalRng).first+mean[target[i]];
+		input[i]=dist(random::globalRng()).first+mean[target[i]];
 		noalias(row(empiricalMean,target[i])) += input[i]/(TrainExamples/classes);
 	}
 	std::vector<unsigned int> expectedResult(TrainExamples);
@@ -107,8 +107,8 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS_WEIGHTING ){
 
 	std::vector<RealVector> mean(classes,RealVector(2));
 	for(unsigned int c = 0; c != classes; ++c){
-		mean[c](0) = random::gauss(random::globalRng,0,30);
-		mean[c](1) = random::gauss(random::globalRng,0,30);
+		mean[c](0) = random::gauss(random::globalRng(),0,30);
+		mean[c](1) = random::gauss(random::globalRng(),0,30);
 	}
 
 	std::vector<RealVector> input(TrainExamples,RealVector(2));
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS_WEIGHTING ){
 	for(size_t i=0;i!=TrainExamples;++i){
 		//create sample
 		target[i]=i%classes;
-		input[i]=dist(random::globalRng).first+mean[target[i]];
+		input[i]=dist(random::globalRng()).first+mean[target[i]];
 	}
 	ClassificationDataset dataset = createLabeledDataFromRange(input,target);
 	
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS_WEIGHTING ){
 		auto unweightedElements = elements(unweightedDataset);
 		RealVector classWeight(classes,0);
 		for(std::size_t i = 0; i != DatasetSize; ++i){
-			std::size_t index = random::discrete(random::globalRng,std::size_t(0),TrainExamples-1);
+			std::size_t index = random::discrete(random::globalRng(),std::size_t(0),TrainExamples-1);
 			weightedElements[index].weight +=1.0;
 			unweightedElements[i] = dataElements[index];
 			classWeight(weightedElements[index].data.label) += 1.0/DatasetSize;

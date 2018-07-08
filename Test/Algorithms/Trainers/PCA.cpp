@@ -82,7 +82,7 @@ Data<RealVector> createData3D()
 	for(auto& sample: data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
-		sample = mean + distribution(random::globalRng).first;
+		sample = mean + distribution(random::globalRng()).first;
 	}
 	return  createDataFromRange(data);
 }
@@ -102,7 +102,7 @@ Data<RealVector> createData2D()
 
 	std::vector<RealVector> v;
 	for(unsigned i=0; i<numberOfExamples; i++) 
-		v.push_back(mu + distribution(random::globalRng).first);
+		v.push_back(mu + distribution(random::globalRng()).first);
 	return  createDataFromRange(v);
 }
 
@@ -142,7 +142,7 @@ Data<RealVector> createDataNotFullRank()
 	for(auto& sample: data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
-		sample = mean + distribution(random::globalRng).first;
+		sample = mean + distribution(random::globalRng()).first;
 	}
 	return  createDataFromRange(data,2);//small batch size to get batching errors
 }

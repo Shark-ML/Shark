@@ -58,7 +58,7 @@ namespace shark {
 /// \ingroup multidirect
 class SMSEMOA : public AbstractMultiObjectiveOptimizer<RealVector >{
 public:
-	SMSEMOA(random::rng_type& rng = random::globalRng):mpe_rng(&rng) {
+	SMSEMOA(random::rng_type& rng = random::globalRng()):mpe_rng(&rng) {
 		m_mu = 100;
 		m_mutator.m_nm = 20.0;
 		m_crossover.m_nc = 20.0;

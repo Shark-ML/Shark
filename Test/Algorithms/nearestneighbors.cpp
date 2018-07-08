@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_SUITE (Algorithms_nearestneighbors)
 BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 {
 	double start;
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	// generate data set and test set
 	std::vector<RealVector> data(TRAINING);
 	std::vector<RealVector> test(10);
@@ -161,18 +161,18 @@ BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 	{
 		// multiple instances of the same point
 		test[i].resize(3);
-		test[i][0] = random::gauss(random::globalRng);
-		test[i][1] = random::gauss(random::globalRng);
-		test[i][2] = random::gauss(random::globalRng);
+		test[i][0] = random::gauss(random::globalRng());
+		test[i][1] = random::gauss(random::globalRng());
+		test[i][2] = random::gauss(random::globalRng());
 	}
 	test[0].clear();//(0,0,0)
 	for (std::size_t i=0; i<TRAINING; i++)
 	{
 		// random data
 		data[i].resize(3);
-		data[i][0] = random::gauss(random::globalRng);
-		data[i][1] = random::gauss(random::globalRng);
-		data[i][2] = random::gauss(random::globalRng);
+		data[i][0] = random::gauss(random::globalRng());
+		data[i][1] = random::gauss(random::globalRng());
+		data[i][2] = random::gauss(random::globalRng());
 	}
 
 	Data<RealVector> dataset = createDataFromRange(data);

@@ -84,14 +84,14 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_SingleObjective_Infeasible ) {
 	std::size_t trials = 0;
 	while(trials < 1000){
 		TestIndividualSOO tester;
-		generator.generateRandomPoint(random::globalRng, tester.m_point);
+		generator.generateRandomPoint(random::globalRng(), tester.m_point);
 		
 		RealVector corrected=tester.m_point;
 		objective.closestFeasible(corrected);
 		BOOST_REQUIRE(objective.isFeasible(corrected));
 		
 		double fitness = objective(corrected);
-		evaluator.m_penaltyFactor = random::uni(random::globalRng,0.1,1);//make errors obvious!
+		evaluator.m_penaltyFactor = random::uni(random::globalRng(),0.1,1);//make errors obvious!
 		evaluator(objective,tester);
 		
 		//calculate the expected penalty
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_MultiObjective_Infeasible ) {
 	std::size_t trials = 0;
 	while(trials < 1000){
 		TestIndividualMOO tester;
-		generator.generateRandomPoint(random::globalRng, tester.m_point);
+		generator.generateRandomPoint(random::globalRng(), tester.m_point);
 		if(objective.isFeasible(tester.m_point)) continue;//don't increase trial counters
 		
 		RealVector corrected=tester.m_point;
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE( PenalizingEvaluator_MultiObjective_Infeasible ) {
 		BOOST_REQUIRE(objective.isFeasible(corrected));
 		
 		RealVector fitness = objective(corrected);
-		evaluator.m_penaltyFactor = random::uni(random::globalRng,0.1,1);//make errors obvious!
+		evaluator.m_penaltyFactor = random::uni(random::globalRng(),0.1,1);//make errors obvious!
 		evaluator(objective,tester);
 		BOOST_REQUIRE_EQUAL(tester.m_penalizedFitness.size(), fitness.size());
 		BOOST_REQUIRE_EQUAL(tester.m_unpenalizedFitness.size(), fitness.size());

@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( Models_PoolingLayer_MaxPooling_Value){
 	BOOST_REQUIRE_EQUAL(modelBig.inputShape(), imageShape);
 	BOOST_REQUIRE_EQUAL(modelBig.outputShape(), outputShape);
 	
-	RealMatrix batchInput = blas::normal(random::globalRng, 16, imageShape.numElements(), 0.0, 1.0, blas::cpu_tag());
+	RealMatrix batchInput = blas::normal(random::globalRng(), 16, imageShape.numElements(), 0.0, 1.0, blas::cpu_tag());
 	testBatchEval(modelBig, batchInput);
 }
 
@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE( Models_PoolingLayer_Spline_GPU){
 	PoolingLayer<FloatGPUVector> model_gpu(imageShape, patchShape, Pooling::Maximum);
 	
 	//define inputs
-	FloatMatrix images_cpu = blas::uniform(random::globalRng, 100, imageShape.numElements(), 0.0f, 1.0f, blas::cpu_tag());
-	FloatMatrix coefficients_cpu = blas::uniform(random::globalRng, 100, outputShape.numElements(), 0.0f, 1.0f, blas::cpu_tag());
+	FloatMatrix images_cpu = blas::uniform(random::globalRng(), 100, imageShape.numElements(), 0.0f, 1.0f, blas::cpu_tag());
+	FloatMatrix coefficients_cpu = blas::uniform(random::globalRng(), 100, outputShape.numElements(), 0.0f, 1.0f, blas::cpu_tag());
 	FloatGPUMatrix images_gpu = blas::copy_to_gpu(images_cpu);
 	FloatGPUMatrix coefficients_gpu = blas::copy_to_gpu(coefficients_cpu);
 	

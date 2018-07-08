@@ -328,7 +328,7 @@ public:
 		for(std::size_t iter = 0; iter < iterations; iter++)
 		{
 			// active variable
-			std::size_t b = random::discrete(random::globalRng, std::size_t(0), ell - 1);
+			std::size_t b = random::discrete(random::globalRng(), std::size_t(0), ell - 1);
 			ElementType element = dataset[b];
 
 			// for smaller datasets instead of choosing randomly a sample

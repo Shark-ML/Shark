@@ -89,10 +89,10 @@ BOOST_AUTO_TEST_CASE( Algorithms_DirectSearch_SteadyStateMOCMA_Serialize ) {
 		TextInArchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> ssMocma2) );
 
-		random::globalRng.seed( 0 );
+		random::globalRng().seed( 0 );
 		ssMocma.step( dtlz1 );
 		SteadyStateMOCMA::SolutionType set1 =  ssMocma.solution();
-		random::globalRng.seed( 0 );
+		random::globalRng().seed( 0 );
 		ssMocma2.step( dtlz1 );
 		SteadyStateMOCMA::SolutionType set2 =  ssMocma2.solution();
 

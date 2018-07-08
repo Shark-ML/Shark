@@ -43,7 +43,7 @@ struct MultiplicativeNoisySphere : public SingleObjectiveFunction {
 		RealVector x(numberOfVariables());
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::gauss(random::globalRng,0,1);
+			x(i) = random::gauss(random::globalRng(),0,1);
 		}
 		return x;
 	}
@@ -52,7 +52,7 @@ struct MultiplicativeNoisySphere : public SingleObjectiveFunction {
 		SIZE_CHECK(x.size() == numberOfVariables());
 		m_evaluationCounter++;
 		double f = norm_sqr(x);
-		double noise = (1+random::gauss(random::globalRng,0,m_sigma));
+		double noise = (1+random::gauss(random::globalRng(),0,m_sigma));
 		return f * noise;
 	}
 private:
@@ -117,12 +117,12 @@ BOOST_AUTO_TEST_CASE( CMA_Ellipsoid_Niko )
 
 BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 {
-	random::globalRng.seed(43);
+	random::globalRng().seed(43);
 	const unsigned N = 10;
 	RealVector x0(10, 0.1);
 	Sphere sphere(N);
 	sphere.init();
-	CMA cma(random::globalRng);
+	CMA cma(random::globalRng());
 	cma.setInitialSigma(1.e-4);
 	cma.init(sphere, x0);
 	BOOST_REQUIRE(cma.sigma() == 1.e-4);
@@ -145,12 +145,12 @@ BOOST_AUTO_TEST_CASE( CMA_Sphere_Niko )
 BOOST_AUTO_TEST_CASE( CMA_Multiplicative_Noisy_Sphere)
 {
 	std::cout<<"start"<<std::endl;
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	const unsigned N = 10;
 	RealVector x0(10, 0.1);
 	MultiplicativeNoisySphere sphere(N,10.0);
 	sphere.init();
-	CMA cma(random::globalRng);
+	CMA cma(random::globalRng());
 	cma.init(sphere, x0);
 
 	double start = log(norm_sqr(cma.solution().point));

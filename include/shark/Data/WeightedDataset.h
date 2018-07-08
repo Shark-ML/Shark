@@ -739,7 +739,7 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 
 	auto booststrap =  elements(bootstrapSet);
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
-		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
+		std::size_t index = random::discrete(random::globalRng(), std::size_t(0),bootStrapSize-1);
 		booststrap[index].weight += 1.0;
 	}
 	bootstrapSet.inputShape() = dataset.inputShape();
@@ -768,7 +768,7 @@ WeightedData<InputType> bootstrap(
 
 	auto booststrap =  elements(bootstrapSet);
 	for(std::size_t i = 0; i != bootStrapSize; ++i){
-		std::size_t index = random::discrete(random::globalRng, std::size_t(0),bootStrapSize-1);
+		std::size_t index = random::discrete(random::globalRng(), std::size_t(0),bootStrapSize-1);
 		booststrap[index].weight += 1.0;
 	}
 	bootstrapSet.shape() = dataset.shape();

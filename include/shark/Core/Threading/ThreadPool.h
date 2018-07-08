@@ -90,8 +90,20 @@ public:
 		}
 	}
 	
+	/// \brief Returns the number of workers in the Pool.
+	///
+	/// This is the maximum number of threads.
 	std::size_t numWorkers() const{
 		return m_workers.size();
+	}
+	
+	/// \brief Closes the queue.
+	///
+	/// Threads will empty the queue and newly added work via submit() 
+	/// is performed by the thread calling submit(), i.e. all task are performed serial, like
+	/// in a siungle-threaded programm.
+	void close(){
+		m_tasks.close();
 	}
 	
 	/// \brief Lends the current thread as additional worker to the work pool

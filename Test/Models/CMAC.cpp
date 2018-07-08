@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE( CMAC_PARAMETERS ){
 	RealVector testParameters(model.numberOfParameters());
 	for(size_t param=0;param!=model.numberOfParameters();++param)
 	{
-		 testParameters(param)=random::gauss(random::globalRng,0,1);
+		 testParameters(param)=random::gauss(random::globalRng(),0,1);
 	}
 	model.setParameterVector( testParameters);
 	
@@ -48,22 +48,22 @@ BOOST_AUTO_TEST_CASE( CMAC_DERIVATIVE )
 		RealVector testParameters(model.numberOfParameters());
 		for(size_t param=0;param!=model.numberOfParameters();++param)
 		{
-			testParameters(param)=random::gauss(random::globalRng,0,1);
+			testParameters(param)=random::gauss(random::globalRng(),0,1);
 		}
 		model.setParameterVector( testParameters);
 
 		// Test the general derivative
 		RealVector coefficients(5);
-		coefficients(0) = random::uni(random::globalRng,-1,1);
-		coefficients(1) = random::uni(random::globalRng,-1,1);
-		coefficients(2) = random::uni(random::globalRng,-1,1);
-		coefficients(3) = random::uni(random::globalRng,-1,1);
-		coefficients(4) = random::uni(random::globalRng,-1,1);
+		coefficients(0) = random::uni(random::globalRng(),-1,1);
+		coefficients(1) = random::uni(random::globalRng(),-1,1);
+		coefficients(2) = random::uni(random::globalRng(),-1,1);
+		coefficients(3) = random::uni(random::globalRng(),-1,1);
+		coefficients(4) = random::uni(random::globalRng(),-1,1);
 		
 		RealVector testInput(3);
-		testInput(0) = random::uni(random::globalRng,-1,1);
-		testInput(1) = random::uni(random::globalRng,-1,1);
-		testInput(2) = random::uni(random::globalRng,-1,1);
+		testInput(0) = random::uni(random::globalRng(),-1,1);
+		testInput(1) = random::uni(random::globalRng(),-1,1);
+		testInput(2) = random::uni(random::globalRng(),-1,1);
 		
  		testWeightedDerivative(model,testInput,coefficients);
 		//testWeightedDerivative(model);
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( CMAC_COPY )
 	RealVector testParameters(cmac.numberOfParameters());
 	for(size_t param=0;param!=cmac.numberOfParameters();++param)
 	{
-		 testParameters(param)=random::gauss(random::globalRng,0,1);
+		 testParameters(param)=random::gauss(random::globalRng(),0,1);
 	}
 	cmac.setParameterVector( testParameters);
 
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( CMAC_COPY )
 	{
 		for(size_t j=0;j!=input.size();++j)
 		{
-			input(j)=random::uni(random::globalRng,-1,1);
+			input(j)=random::uni(random::globalRng(),-1,1);
 		}
 		data.push_back(input);
 		target.push_back(cmac(input));
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE( CMAC_COPY )
 	RealVector parameters(cmac.numberOfParameters());
 	for(size_t param=0;param!=cmacTest.numberOfParameters();++param)
 	{
-		parameters(param)=random::gauss(random::globalRng,0,1);
+		parameters(param)=random::gauss(random::globalRng(),0,1);
 	}
 	cmacTest.setParameterVector(parameters);
 
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 	RealVector testParameters(cmac.numberOfParameters());
 	for(size_t param=0;param!=cmac.numberOfParameters();++param)
 	{
-		 testParameters(param)=random::gauss(random::globalRng,0,1);
+		 testParameters(param)=random::gauss(random::globalRng(),0,1);
 	}
 	cmac.setParameterVector( testParameters);
 
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( CMAC_SERIALIZE )
 	{
 		for(size_t j=0;j!= input.size();++j)
 		{
-			input(j)=random::uni(random::globalRng,-1,1);
+			input(j)=random::uni(random::globalRng(),-1,1);
 		}
 		data.push_back(input);
 		target.push_back(cmac(input));

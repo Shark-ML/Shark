@@ -32,14 +32,14 @@ BOOST_AUTO_TEST_CASE( ProductKernel_Test )
 	RealMatrix batchX1(10,3);
 	RealMatrix batchX2(12,3);
 	for(std::size_t i = 0; i != 10; ++i){
-		batchX1(i,0) = random::uni(random::globalRng,-1,1); 
-		batchX1(i,1) = random::uni(random::globalRng,-1,1); 
-		batchX1(i,2) = random::uni(random::globalRng,-1,1);
+		batchX1(i,0) = random::uni(random::globalRng(),-1,1); 
+		batchX1(i,1) = random::uni(random::globalRng(),-1,1); 
+		batchX1(i,2) = random::uni(random::globalRng(),-1,1);
 	}
 	for(std::size_t i = 0; i != 12; ++i){
-		batchX2(i,0) = random::uni(random::globalRng,-1,1); 
-		batchX2(i,1) = random::uni(random::globalRng,-1,1); 
-		batchX2(i,2) = random::uni(random::globalRng,-1,1);
+		batchX2(i,0) = random::uni(random::globalRng(),-1,1); 
+		batchX2(i,1) = random::uni(random::globalRng(),-1,1); 
+		batchX2(i,2) = random::uni(random::globalRng(),-1,1);
 	}
 	
 	//Evaluate the kernel matrices by hand

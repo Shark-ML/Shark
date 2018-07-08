@@ -124,7 +124,6 @@ public:
 	}
 	
 	void init(){
-		mp_wrapper->setRng(this->mep_rng);
 		mp_wrapper-> init();
 	}
 

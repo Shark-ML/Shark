@@ -205,7 +205,6 @@ private:
 }
 
 KernelExpansion<RealVector> shark::approximateKernelExpansion(
-	random::rng_type& rng,
 	KernelExpansion<RealVector> const& model,
 	std::size_t k,
 	double precision

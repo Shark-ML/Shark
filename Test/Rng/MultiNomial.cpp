@@ -21,10 +21,10 @@ BOOST_AUTO_TEST_CASE( MultiNomial_same_probabilities) {
 	RealVector draws(Dimensions,0.0);
 	RealVector drawsDiscrete(Dimensions,0.0);
 	for(std::size_t s = 0; s != Samples; ++s){
-		MultiNomialDistribution::result_type sample = dist(random::globalRng);
+		MultiNomialDistribution::result_type sample = dist(random::globalRng());
 		BOOST_REQUIRE(sample < Dimensions);
 		draws[sample]++;
-		drawsDiscrete[random::discrete(random::globalRng, std::size_t(0),Dimensions-1)]++;
+		drawsDiscrete[random::discrete(random::globalRng(), std::size_t(0),Dimensions-1)]++;
 	}
 	draws/=Samples;
 	drawsDiscrete/=Samples;
@@ -43,12 +43,12 @@ BOOST_AUTO_TEST_CASE( MultiNomial_different_probabilities) {
 	std::size_t trials = 10;
 	
 	for(std::size_t t = 0; t != trials; ++t){
-		std::size_t Dimensions = random::discrete(random::globalRng, 6,10);
+		std::size_t Dimensions = random::discrete(random::globalRng(), 6,10);
 		//Generate probability vector
 		RealVector probabilities(Dimensions);
 		
 		for(std::size_t i = 0; i != Dimensions; ++i){
-			probabilities(i) = random::uni(random::globalRng, 0.5,2);
+			probabilities(i) = random::uni(random::globalRng(), 0.5,2);
 		}
 		probabilities[5] = 0;//make it a bit harder by creating a state which is not going to be drawn
 		RealVector probabilitiesNormalized = probabilities/sum(probabilities);
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( MultiNomial_different_probabilities) {
 		MultiNomialDistribution dist(probabilities);
 		RealVector draws(Dimensions,0.0);
 		for(std::size_t s = 0; s != Samples; ++s){
-			MultiNomialDistribution::result_type sample = dist(random::globalRng);
+			MultiNomialDistribution::result_type sample = dist(random::globalRng());
 			BOOST_REQUIRE(sample < Dimensions);
 			draws[sample]++;
 		}

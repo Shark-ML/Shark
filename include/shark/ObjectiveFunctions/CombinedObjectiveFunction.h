@@ -99,7 +99,6 @@ public:
 	
 	void init(){
 		for ( std::size_t i=0; i<m_elements.size(); i++){
-			m_elements[i]->setRng(this->mep_rng);
 			m_elements[i]->init();
 		}
 	}

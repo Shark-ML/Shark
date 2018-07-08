@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 	for (std::size_t i=0; i<trainingSize; i++) 
 		tr_d[i](0) = 100.0 * (i + 0.5) / (double)trainingSize;
 	for (std::size_t i=0; i<testSize; i++) 
-		te_d[i](0) = random::uni(random::globalRng,0.0, 100.0);
+		te_d[i](0) = random::uni(random::globalRng(),0.0, 100.0);
 		
 	Data<RealVector> training = createDataFromRange(tr_d);
 	Data<RealVector> test = createDataFromRange(te_d);

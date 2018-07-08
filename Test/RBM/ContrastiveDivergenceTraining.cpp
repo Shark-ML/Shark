@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 	Data<RealVector> dataBatched = problem2.data();
 	std::size_t inputs = data.numberOfElements();
 	
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(16,4);
 	BinaryCD cd(&rbm);
 	cd.setData(dataBatched);
@@ -187,14 +187,14 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergenceTraining_Bars ){
 	BarsAndStripes problem(9);
 	Data<RealVector> data = problem.data();
 	
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(16,8);
 	BinaryCD cd(&rbm);
 	cd.numBatches() =1;
 	cd.setData(data);
 	
 	for(unsigned int trial = 0; trial != trials; ++trial){
-		random::globalRng.seed(42+trial);
+		random::globalRng().seed(42+trial);
 		initRandomUniform(rbm,-0.1,0.1);
 		BinaryCD cd(&rbm);
 		cd.setData(data);

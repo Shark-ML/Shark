@@ -26,10 +26,10 @@ BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 	std::vector<RealVector> dataV2(examples,RealVector(dim2));
 	for(std::size_t i = 0; i != examples; ++i){		
 		for(std::size_t j = 0; j != dim1; ++j){
-			dataV1[i](j)=data[i](j)=random::uni(random::globalRng,-1,1);
+			dataV1[i](j)=data[i](j)=random::uni(random::globalRng(),-1,1);
 		}
 		for(std::size_t j = 0; j != dim2; ++j){
-			dataV2[i](j)=data[i](j+dim1)=random::uni(random::globalRng,-1,1);
+			dataV2[i](j)=data[i](j+dim1)=random::uni(random::globalRng(),-1,1);
 		}
 	}
 	Data<RealVector> dataset = createDataFromRange(data,10);

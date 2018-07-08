@@ -127,10 +127,9 @@ public:
 		{
 			RealVector translation(numberOfVariables());
 			for(double& v: translation){
-				v=random::gauss(*mep_rng, 0,1)/std::sqrt(double(numberOfVariables()));
+				v=random::gauss(random::globalRng(), 0,1)/std::sqrt(double(numberOfVariables()));
 			}
 			m_translations.push_back(translation);
-			f.setRng(mep_rng);
 			f.init();
 		}
 	}
@@ -140,7 +139,7 @@ public:
 
 		std::size_t index = random::discrete(0,m_rotations.size()-1);
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = m_translations[index](i)+random::gauss(*mep_rng, 0,1)/std::sqrt(double(numberOfVariables()));
+			x(i) = m_translations[index](i)+random::gauss(random::globalRng(), 0,1)/std::sqrt(double(numberOfVariables()));
 		}
 		return x;
 	}

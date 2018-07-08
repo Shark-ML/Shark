@@ -56,7 +56,7 @@ public:
 	};
 public:
 	
-	IndicatorBasedSteadyStateMOCMA(random::rng_type& rng = random::globalRng):mpe_rng(&rng){
+	IndicatorBasedSteadyStateMOCMA(random::rng_type& rng = random::globalRng()):mpe_rng(&rng){
 		m_individualSuccessThreshold = 0.44;
 		initialSigma() = 1.0;
 		mu() = 100;

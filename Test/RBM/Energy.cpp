@@ -10,7 +10,7 @@ using namespace shark;
 
 //structure of values which is used for the tests
 struct RBMFixture {
-	RBMFixture():rbm(random::globalRng) {
+	RBMFixture(){
 		rbm.setStructure(5,5);
 		rbm.weightMatrix().clear();
 		hiddenState.resize(1,5);
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 
 	//now some random sampling to get the energy
 	{
-		BinaryRBM bigRBM(random::globalRng);
+		BinaryRBM bigRBM;
 		bigRBM.setStructure(10,18);
 		initRandomNormal(bigRBM,1);
 
@@ -94,10 +94,10 @@ BOOST_AUTO_TEST_CASE( Energy_SimpleEnergy )
 		RealVector energies(10);
 		for(std::size_t j = 0; j != 10; ++j) {
 			for(std::size_t k = 0; k != 10; ++k) {
-				inputBatch(j,k)=random::coinToss(random::globalRng,0.5);
+				inputBatch(j,k)=random::coinToss(random::globalRng(),0.5);
 			}
 			for(std::size_t k = 0; k != 18; ++k) {
-				hiddenBatch(j,k)=random::coinToss(random::globalRng,0.5);
+				hiddenBatch(j,k)=random::coinToss(random::globalRng(),0.5);
 			}
 			energies(j) = - inner_prod(bigRBM.hiddenNeurons().bias(),row(hiddenBatch,j));
 			energies(j)-= inner_prod(bigRBM.visibleNeurons().bias(),row(inputBatch,j));
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityHidden )
 	visibleStateSpace(3,1)=1;
 
 	//create RBM with 2 visible and 4 hidden units and initialize it randomly
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(2,4);
 	initRandomNormal(rbm,1);
 
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE( Energy_UnnormalizedProbabilityVisible )
 	hiddenStateSpace(3,1)=1;
 
 	//create RBM with 4 visible and 2 hidden units and initialize it randomly
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(4,2);
 	initRandomNormal(rbm,1);
 

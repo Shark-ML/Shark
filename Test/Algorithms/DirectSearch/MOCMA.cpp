@@ -90,10 +90,10 @@ BOOST_AUTO_TEST_CASE( MOCMA_SERIALIZATION ) {
 		TextInArchive ia( ss );
 		BOOST_CHECK_NO_THROW( (ia >> mocma2) );
 
-		random::globalRng.seed( 1 );
+		random::globalRng().seed( 1 );
 		mocma.step( dtlz1 );
 		MOCMA::SolutionType set1 = mocma.solution();
-		random::globalRng.seed( 1 );
+		random::globalRng().seed( 1 );
 		mocma2.step( dtlz1 );
 		MOCMA::SolutionType set2 = mocma2.solution();
 

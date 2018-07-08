@@ -12,12 +12,12 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Creation ){
 	///test for numerical stability of createHouseholderReflection
 	std::size_t NumTests = 1000;
 	std::size_t Dimensions = 200;
-	random::globalRng.seed(42);//our all loved default seed :)
+	random::globalRng().seed(42);//our all loved default seed :)
 	for(std::size_t testi = 0;testi!=NumTests;++testi){
 		RealVector test(Dimensions);
 		RealVector reflection(Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
-			test(i) = random::gauss(random::globalRng,0,1);
+			test(i) = random::gauss(random::globalRng(),0,1);
 		}
 		double norm = -copySign(norm_2(test),test(0));
 		
@@ -42,14 +42,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Apply_Left ){
 	std::size_t NumTests = 100;
 	std::size_t Dimension1 = 200;
 	std::size_t Dimension2 = 10;
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	for(std::size_t testi = 0; testi != NumTests; ++testi){
 		RealMatrix test(Dimension1,Dimension2);
 		RealMatrix result(Dimension1,Dimension2);
 		RealVector reflection(Dimension1);
 		for(std::size_t i = 0; i != Dimension1; ++i){
 			for(std::size_t j = 0; j != Dimension2; ++j){
-				result(i,j) = test(i,j) = random::gauss(random::globalRng,0,1);
+				result(i,j) = test(i,j) = random::gauss(random::globalRng(),0,1);
 			}
 		}
 
@@ -77,14 +77,14 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Apply_Right ){
 	std::size_t NumTests = 100;
 	std::size_t Dimension1 = 200;
 	std::size_t Dimension2 = 10;
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	for(std::size_t testi = 0; testi != NumTests; ++testi){
 		RealMatrix test(Dimension1,Dimension2);
 		RealMatrix result(Dimension1,Dimension2);
 		RealVector reflection(Dimension2);
 		for(std::size_t i = 0; i != Dimension1; ++i){
 			for(std::size_t j = 0; j != Dimension2; ++j){
-				result(i,j) = test(i,j) = random::gauss(random::globalRng,0,1);
+				result(i,j) = test(i,j) = random::gauss(random::globalRng(),0,1);
 			}
 		}
 
@@ -109,12 +109,12 @@ BOOST_AUTO_TEST_CASE( LinAlg_Householder_Apply_Right ){
 BOOST_AUTO_TEST_CASE( LinAlg_Random_Rotation_Matrix ){
 	std::size_t NumTests = 100;
 	std::size_t Dimensions = 50;
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	RealMatrix result(Dimensions,Dimensions);
 	for(std::size_t test = 0;test!=NumTests;++test){
 
 		//test whether R^TR = RR^T = I
-		RealMatrix R = blas::randomRotationMatrix(random::globalRng, Dimensions);
+		RealMatrix R = blas::randomRotationMatrix(random::globalRng(), Dimensions);
 		for(std::size_t i = 0; i != Dimensions; ++i){
 			BOOST_CHECK_SMALL(norm_2(row(R,i))-1,1.e-12);
 			BOOST_CHECK_SMALL(norm_2(column(R,i))-1,1.e-12);

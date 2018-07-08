@@ -74,7 +74,7 @@ public:
 	};
 
 	/// \brief Default c'tor.
-	SHARK_EXPORT_SYMBOL CMA(random::rng_type& rng = random::globalRng);
+	SHARK_EXPORT_SYMBOL CMA(random::rng_type& rng = random::globalRng());
 
 	/// \brief From INameable: return the class name.
 	std::string name() const

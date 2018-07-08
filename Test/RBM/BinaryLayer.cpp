@@ -15,16 +15,16 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_SufficientStatistics){
 	layer.resize(3);
 	RealMatrix input(10,3);
 	RealMatrix testInput(10,3);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	
 	for(std::size_t test = 0; test != 10000; ++test){
-		double beta = random::uni(random::globalRng,0,1);
+		double beta = random::uni(random::globalRng(),0,1);
 		for(std::size_t j = 0; j != 3; ++j){
-			layer.bias()(j) = random::gauss(random::globalRng,0,10);
+			layer.bias()(j) = random::gauss(random::globalRng(),0,10);
 		}
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 3; ++j){
-				input(i,j) = random::gauss(random::globalRng,0,10);
+				input(i,j) = random::gauss(random::globalRng(),0,10);
 			}
 			
 			//calculate result
@@ -46,10 +46,10 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_Parameters){
 	BinaryLayer layer;
 	layer.resize(20);
 	RealVector parameters(20);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	
 	for(std::size_t j = 0; j != 20; ++j){
-		parameters(j) = random::gauss(random::globalRng,0,1);
+		parameters(j) = random::gauss(random::globalRng(),0,1);
 	}
 	
 	layer.setParameterVector(parameters);
@@ -63,13 +63,13 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_Sample){
 	BinaryLayer layer;
 	BinaryLayer::SufficientStatistics statistics(10,5);
 	layer.resize(5);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	
 	std::vector<double> alphas;
 	alphas.push_back(0);
 	alphas.push_back(1);
 	for(std::size_t i = 0; i != 10; ++i){
-		alphas.push_back(random::uni(random::globalRng,0,1));
+		alphas.push_back(random::uni(random::globalRng(),0,1));
 	}
 	
 	const std::size_t numSamples = 100000;
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_Sample){
 		double alpha = alphas[a];
 		for(std::size_t i = 0; i != 10; ++i){
 			for(std::size_t j = 0; j != 5; ++j){
-				statistics(i,j) = random::uni(random::globalRng,0.0,1.0);
+				statistics(i,j) = random::uni(random::globalRng(),0.0,1.0);
 			}
 		}
 		
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_Sample){
 		RealMatrix mean(10,5,0.0);
 		RealMatrix samples(10,5,0.0);
 		for(std::size_t i = 0; i != numSamples; ++i){
-			layer.sample(statistics,samples,alpha,random::globalRng);
+			layer.sample(statistics,samples,alpha,random::globalRng());
 			mean+=samples;
 		}
 		mean/=numSamples;
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE( BinaryLayer_LogMarginalize){
 	BinaryLayer layer;
 	layer.resize(3);
 	RealVector input(3);
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 
 	for(std::size_t j = 0; j != 3; ++j){
 		layer.bias()(j) = -0.5*j-1;

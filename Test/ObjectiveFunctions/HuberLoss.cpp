@@ -17,20 +17,20 @@ BOOST_AUTO_TEST_CASE( HUBERLOSS_TEST ) {
 		HuberLoss loss(2.0);
 
 		RealMatrix testPoint(2,3);
-		testPoint(0,0) = random::uni(random::globalRng, -1,1);
-		testPoint(1,0) = random::uni(random::globalRng, -1,1);
-		testPoint(0,1) = random::uni(random::globalRng, -1,1);
-		testPoint(1,1) = random::uni(random::globalRng, -1,1);
-		testPoint(0,2) = random::uni(random::globalRng, -1,1);
-		testPoint(1,2) = random::uni(random::globalRng, -1,1);
+		testPoint(0,0) = random::uni(random::globalRng(), -1,1);
+		testPoint(1,0) = random::uni(random::globalRng(), -1,1);
+		testPoint(0,1) = random::uni(random::globalRng(), -1,1);
+		testPoint(1,1) = random::uni(random::globalRng(), -1,1);
+		testPoint(0,2) = random::uni(random::globalRng(), -1,1);
+		testPoint(1,2) = random::uni(random::globalRng(), -1,1);
 		
 		RealMatrix testLabel(2,3);
-		testLabel(0,0) = random::uni(random::globalRng, -1,1);
-		testLabel(1,0) = random::uni(random::globalRng, -1,1);
-		testLabel(0,1) = random::uni(random::globalRng, -1,1);
-		testLabel(1,1) = random::uni(random::globalRng, -1,1);
-		testLabel(0,2) = random::uni(random::globalRng, -1,1);
-		testLabel(1,2) = random::uni(random::globalRng, -1,1);
+		testLabel(0,0) = random::uni(random::globalRng(), -1,1);
+		testLabel(1,0) = random::uni(random::globalRng(), -1,1);
+		testLabel(0,1) = random::uni(random::globalRng(), -1,1);
+		testLabel(1,1) = random::uni(random::globalRng(), -1,1);
+		testLabel(0,2) = random::uni(random::globalRng(), -1,1);
+		testLabel(1,2) = random::uni(random::globalRng(), -1,1);
 		
 		//test evalDerivative (first)
 		RealMatrix derivative;

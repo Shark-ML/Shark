@@ -17,14 +17,14 @@ BOOST_AUTO_TEST_SUITE (RBM_AverageEnergyGradient)
 
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 {
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 4; ++k){
-			batch(j,k)=random::coinToss(random::globalRng, 0.5);
+			batch(j,k)=random::coinToss(random::globalRng(), 0.5);
 		}
 	}
 	
@@ -48,14 +48,14 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Visible )
 //test1 is with weight 1
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 {
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
 	RealMatrix batch(10,4);
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 4; ++k){
-			batch(j,k)=random::coinToss(random::globalRng, 0.5);
+			batch(j,k)=random::coinToss(random::globalRng(), 0.5);
 		}
 	}
 	
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_One_Hidden )
 //test2 is with different weights
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 {
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 	RealVector weights(10);
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 4; ++k){
-			batch(j,k)=random::coinToss(random::globalRng, 0.5);
+			batch(j,k)=random::coinToss(random::globalRng(), 0.5);
 		}
 		weights(j)=(j+1.0);
 	}
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Visible )
 //test2 is with different weights
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 {
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(4,4);
 	initRandomNormal(rbm,2);
 	
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_Weighted_Hidden )
 	RealVector weights(10);
 	for(std::size_t j = 0; j != 10; ++j){
 		for(std::size_t k = 0; k != 4; ++k){
-			batch(j,k)=random::coinToss(random::globalRng, 0.5);
+			batch(j,k)=random::coinToss(random::globalRng(), 0.5);
 		}
 		weights(j)=(j+1.0);
 	}
@@ -230,7 +230,7 @@ private:
 
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 {
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(10,16);
 	initRandomNormal(rbm,0.1);
 	RealVector parameters = rbm.parameterVector();
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeVH )
 	std::vector<RealVector> dataVec(50,RealVector(10));
 	for(std::size_t j = 0; j != 50; ++j){
 		for(std::size_t k = 0; k != 10; ++k){
-			dataVec[j](k)=random::coinToss(random::globalRng, 0.5);
+			dataVec[j](k)=random::coinToss(random::globalRng(), 0.5);
 		}
 	}
 	Data<RealVector> data = createDataFromRange(dataVec,25);
@@ -312,7 +312,7 @@ private:
 
 BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 {
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(16,10);
 	initRandomNormal(rbm,0.1);
 	RealVector parameters = rbm.parameterVector();
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE( AverageEnergyGradient_DerivativeHV )
 	std::vector<RealVector> dataVec(1,RealVector(10));
 	for(std::size_t j = 0; j != 1; ++j){
 		for(std::size_t k = 0; k != 10; ++k){
-			dataVec[j](k)=random::coinToss(random::globalRng, 0.5);
+			dataVec[j](k)=random::coinToss(random::globalRng(), 0.5);
 		}
 	}
 	Data<RealVector> data = createDataFromRange(dataVec,25);

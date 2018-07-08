@@ -52,7 +52,7 @@ Data<RealVector> createData()
 	for (auto& sample: data)
 	{
 		//first element is the sample, second is the underlying uniform gaussian
-		sample = mean + distribution(random::globalRng).first;
+		sample = mean + distribution(random::globalRng()).first;
 	}
 	return createDataFromRange(data);
 }

@@ -59,11 +59,11 @@ BOOST_AUTO_TEST_CASE(DenseMklKernel_Test_Eval) {
 		data[i].v3.resize(dim2);
 
 		for (std::size_t j = 0; j != dim1; ++j) {
-			dataV1[i](j)=data[i].v1(j)=random::uni(random::globalRng, -1, 1);
+			dataV1[i](j)=data[i].v1(j)=random::uni(random::globalRng(), -1, 1);
 		}
-		dataV2[i]=data[i].v2=random::discrete(random::globalRng, 0, 5);
+		dataV2[i]=data[i].v2=random::discrete(random::globalRng(), 0, 5);
 		for (std::size_t j = 0; j != dim2; ++j) {
-			dataV3[i](j)=data[i].v3(j)=random::uni(random::globalRng, -1, 1);
+			dataV3[i](j)=data[i].v3(j)=random::uni(random::globalRng(), -1, 1);
 		}
 	}
 	//wouldn't it be nice if we could split these, too?
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE(DenseMklKernel_Test_Eval) {
 	RealMatrix matK(maxElem+1, maxElem+1);
 	for (std::size_t i = 0; i != matK.size1(); ++i) {
 		for (std::size_t j = 0; j <= i; ++j) {
-			matK(i, j) = random::uni(random::globalRng, -1, 1);
+			matK(i, j) = random::uni(random::globalRng(), -1, 1);
 			matK(j, i) = matK(i, j);
 		}
 	}

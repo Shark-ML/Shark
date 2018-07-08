@@ -85,7 +85,7 @@ struct CIGTAB1 : public MultiObjectiveFunction {
 	}
 
 	void init() {
-		m_rotationMatrix = blas::randomRotationMatrix(*mep_rng, m_numberOfVariables);
+		m_rotationMatrix = blas::randomRotationMatrix(random::globalRng(), m_numberOfVariables);
 	}
 
 	ResultType eval( const SearchPointType & x ) const {
@@ -117,7 +117,7 @@ struct CIGTAB1 : public MultiObjectiveFunction {
 		RealVector x(m_numberOfVariables);
 
 		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(*mep_rng, -10.0, 10.0);
+			x(i) = random::uni(random::globalRng(), -10.0, 10.0);
 		}
 		return x;
 	}

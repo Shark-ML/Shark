@@ -18,7 +18,7 @@ public:
 	void draw(RealVector& input)const{
 		input.resize(shape().numElements());
 		for ( std::size_t j=0; j<input.size(); j++ ) {
-			input(j) = random::uni(random::globalRng, -1,1);
+			input(j) = random::uni(random::globalRng(), -1,1);
 		}
 	}
 };

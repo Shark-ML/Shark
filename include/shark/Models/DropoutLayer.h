@@ -53,7 +53,6 @@ private:
 		MatrixType mask;
 	};
 	Shape m_shape;
-	random::rng_type* mep_rng;
 	double m_dropoutProbability;
 	
 public:
@@ -61,8 +60,8 @@ public:
 	typedef typename base_type::BatchOutputType BatchOutputType;
 	typedef typename base_type::ParameterVectorType ParameterVectorType;
 
-	DropoutLayer(Shape const& inputShape, double probability = 0.5, random::rng_type& rng = random::globalRng)
-	: m_shape(inputShape), mep_rng(&rng), m_dropoutProbability(probability){
+	DropoutLayer(Shape const& inputShape, double probability = 0.5)
+	: m_shape(inputShape), m_dropoutProbability(probability){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
 	}
@@ -106,7 +105,7 @@ public:
 		noalias(outputs) = inputs;
 		for(std::size_t i = 0; i != outputs.size1(); ++i){
 			for(std::size_t j = 0; j != outputs.size2(); ++j){
-				if(!random::coinToss(*mep_rng,m_dropoutProbability)){
+				if(!random::coinToss(random::globalRng(),m_dropoutProbability)){
 					outputs(i,j) = 0;
 				}
 			}
@@ -117,7 +116,7 @@ public:
 		output.resize(input.size());
 		noalias(output) = input;
 		for(std::size_t j = 0; j != output.size(); ++j){
-			if(!random::coinToss(*mep_rng,m_dropoutProbability)){
+			if(!random::coinToss(random::globalRng(),m_dropoutProbability)){
 				output(j) = 0;
 			}
 		}
@@ -128,7 +127,7 @@ public:
 		mask.resize(inputs.size1(),inputs.size2());
 		for(std::size_t i = 0; i != outputs.size1(); ++i){
 			for(std::size_t j = 0; j != outputs.size2(); ++j){
-				mask(i,j) = random::coinToss(*mep_rng,m_dropoutProbability);
+				mask(i,j) = random::coinToss(random::globalRng(),m_dropoutProbability);
 			}
 		}
 		noalias(outputs) = inputs * mask;

@@ -331,7 +331,7 @@ private:
 			//sample a point inside the box
 			point.sample.resize(point.point.size());
 			for( unsigned int i = 0; i < point.sample.size(); i++ ) {
-				point.sample[ i ] =  random::uni(random::globalRng, point.point[ i ], point.boundingBox[ i ] );
+				point.sample[ i ] =  random::uni(random::globalRng(), point.point[ i ], point.boundingBox[ i ] );
 			}
 			++point.noSamples;
 			//check if the point is not dominated by any of the influencing points

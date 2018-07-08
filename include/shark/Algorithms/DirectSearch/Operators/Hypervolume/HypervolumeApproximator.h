@@ -110,17 +110,17 @@ struct HypervolumeApproximator {
 		while (true)
 		{
 			// sample ROI based on its volume. the ROI is defined as the Area between the reference point and a point in the front.
-			auto point = points.begin() + pointDist(random::globalRng);
+			auto point = points.begin() + pointDist(random::globalRng());
 			
 			// sample point in ROI   
 			for( std::size_t i = 0; i < rndpoint.size(); i++ ){
-				rndpoint[i] = random::uni(random::globalRng,(*point )[i], refPoint[i]);
+				rndpoint[i] = random::uni(random::globalRng(),(*point )[i], refPoint[i]);
 			}
 
 			while (true)
 			{
 				if (samples_sofar>=maxSamples) return maxSamples * totalVolume / noPoints / round;
-				auto candidate = points.begin() + random::discrete(random::globalRng, std::size_t(0), noPoints - 1);
+				auto candidate = points.begin() + random::discrete(random::globalRng(), std::size_t(0), noPoints - 1);
 				samples_sofar++;
 				DominanceRelation rel = dominance(*candidate, rndpoint);
 				if (rel == LHS_DOMINATES_RHS || rel == EQUIVALENT) break;

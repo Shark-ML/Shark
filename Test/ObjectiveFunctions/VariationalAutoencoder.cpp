@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_NoLoss )
 	// create samples
 	std::vector<RealVector> input(trainExamples,RealVector(2));
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = random::gauss(random::globalRng, 0,4);
-		input[i](1) = random::uni(random::globalRng, 0, 9);
+		input[i](0) = random::gauss(random::globalRng(), 0,4);
+		input[i](1) = random::uni(random::globalRng(), 0, 9);
 	}
 	Data<RealVector> dataset = createDataFromRange(input,trainExamples);
 	
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_Full )
 	// create samples
 	std::vector<RealVector> input(trainExamples,RealVector(2));
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = random::gauss(random::globalRng, 0,4);
-		input[i](1) = random::uni(random::globalRng, 0, 9);
+		input[i](0) = random::gauss(random::globalRng(), 0,4);
+		input[i](1) = random::uni(random::globalRng(), 0, 9);
 	}
 	Data<RealVector> dataset = createDataFromRange(input,trainExamples);
 	
@@ -101,14 +101,14 @@ BOOST_AUTO_TEST_CASE( ObjFunct_VariationalAutoencoder_Grad_Full )
 		RealVector pplus = p;
 		pplus(i) += eps;
 		
-		random::globalRng.seed(42);
+		random::globalRng().seed(42);
 		gradEst(i) += error.eval(pplus);
-		random::globalRng.seed(42);
+		random::globalRng().seed(42);
 		gradEst(i) -= error.eval(pminus);		
 	}
 	gradEst /= 2*eps;
 	
-	random::globalRng.seed(42);
+	random::globalRng().seed(42);
 	RealVector grad(gradEst.size());
 	error.evalDerivative(p,grad);
 	for(std::size_t i = 0; i != p.size(); ++i){

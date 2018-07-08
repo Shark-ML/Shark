@@ -141,11 +141,10 @@ BOOST_AUTO_TEST_CASE(computeOptimalLatticeTicks_2d_correct)
 
 
 BOOST_AUTO_TEST_CASE(sampleUniformly_correct){
-	random::rng_type rng;
 	for(std::size_t n = 2; n < 5; ++n){
 		for(std::size_t sum = n; sum < 15; ++sum){
 			RealMatrix m = weightLattice(n, sum);
-			RealMatrix sampled = sampleLatticeUniformly(rng, m, sum);
+			RealMatrix sampled = sampleLatticeUniformly(random::globalRng(), m, sum);
 			BOOST_CHECK_EQUAL(sampled.size1(), sum);
 			std::size_t num_corners_orig = 0;
 			std::size_t num_corners_sampled = 0;

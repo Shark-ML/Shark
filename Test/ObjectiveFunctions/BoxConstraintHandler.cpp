@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( BoxConstraintHandler_Bounds ) {
 BOOST_AUTO_TEST_CASE( BoxConstraintHandler_Generate ) {
 	for(std::size_t i = 0; i != 1000; ++i){
 		RealVector point;
-		handler.generateRandomPoint(random::globalRng, point);
+		handler.generateRandomPoint(random::globalRng(), point);
 		BOOST_REQUIRE_EQUAL(point.size(),10);
 		//check that the point is feasible
 		for(std::size_t i = 0; i != 10; ++i){
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( BoxConstraintHandler_Infeasible ) {
 		RealVector corrected(10);
 		bool feasible = true;
 		for(std::size_t i = 0; i != 10; ++i){
-			point(i) = random::uni(random::globalRng, -30,40);
+			point(i) = random::uni(random::globalRng(), -30,40);
 			corrected(i) = point(i);
 			if(point(i) < handler.lower()(i)){
 				corrected(i) = handler.lower()(i);

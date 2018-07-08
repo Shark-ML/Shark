@@ -52,7 +52,7 @@ namespace shark {
 class MOEAD : public AbstractMultiObjectiveOptimizer<RealVector>
 {
 public:
-	SHARK_EXPORT_SYMBOL MOEAD(random::rng_type & rng = random::globalRng);
+	SHARK_EXPORT_SYMBOL MOEAD(random::rng_type & rng = random::globalRng());
 
 	std::string name() const{
 		return "MOEA/D";

@@ -28,7 +28,7 @@ int main(){
 	size_t numberOfVisible = problem.inputDimension();//visible units of the inputs
 
 	//create rbm with simple binary units
-	BinaryRBM rbm(random::globalRng);
+	BinaryRBM rbm;
 	rbm.setStructure(numberOfVisible,numberOfHidden);
 	//###end<RBM>
 	

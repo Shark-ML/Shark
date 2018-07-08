@@ -146,10 +146,10 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	std::vector<RealVector> testTarget(trainExamples,RealVector(2));
 	double optimalMSE = 0;
 	for (size_t i=0;i!=trainExamples;++i) {
-		input[i](0) = random::uni(random::globalRng, -3.0,3.0);
-		input[i](1) = random::uni(random::globalRng, -3.0,3.0);
+		input[i](0) = random::uni(random::globalRng(), -3.0,3.0);
+		input[i](1) = random::uni(random::globalRng(), -3.0,3.0);
 		testTarget[i] =  model(input[i]);
-		RealVector noiseVal = noise(random::globalRng).first;
+		RealVector noiseVal = noise(random::globalRng()).first;
 		trainTarget[i] = noiseVal + testTarget[i];
 		optimalMSE+=norm_sqr(noiseVal);
 	}
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_WeightedErrorFunction_LinearRegression )
 		Data<double> weights(50,1,10);
 		
 		for(std::size_t i = 0; i != 100; ++i){
-			std::size_t e = random::discrete(random::globalRng, 0,49);
+			std::size_t e = random::discrete(random::globalRng(), 0,49);
 			elements(unweightedData)[i] = elements(data)[e];
 			elements(weights)[e] += 1.0;
 		}
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_Noisy )
 	{
 		for(size_t j=0;j!=3;++j)
 		{
-			input(j)=random::uni(random::globalRng, -1,1);
+			input(j)=random::uni(random::globalRng(), -1,1);
 		}
 		data.push_back(input);
 		output(0)=function.eval(input);

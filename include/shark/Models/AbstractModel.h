@@ -317,7 +317,7 @@ template <class InputType, class OutputType, class ParameterVectorType>
 void initRandomNormal(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double s){
 	typedef typename ParameterVectorType::value_type Float;
 	typedef typename ParameterVectorType::device_type Device;
-	auto weights = blas::normal(random::globalRng, model.numberOfParameters(), Float(0), Float(s), Device() );
+	auto weights = blas::normal(random::globalRng(), model.numberOfParameters(), Float(0), Float(s), Device() );
 	model.setParameterVector(weights);
 }
 
@@ -331,7 +331,7 @@ template <class InputType, class OutputType, class ParameterVectorType>
 void initRandomUniform(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double lower, double upper){
 	typedef typename ParameterVectorType::value_type Float;
 	typedef typename ParameterVectorType::device_type Device;
-	auto weights = blas::uniform(random::globalRng, model.numberOfParameters(), Float(lower), Float(upper), Device() );
+	auto weights = blas::uniform(random::globalRng(), model.numberOfParameters(), Float(lower), Float(upper), Device() );
 	model.setParameterVector(weights);
 }
 

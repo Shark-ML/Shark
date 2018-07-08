@@ -145,24 +145,16 @@ public:
 		blas::matrix<double, blas::column_major> data_train = createBatch<RealVector>(elements(dataset.inputs()));
 		auto labels_train = createBatch<LabelType>(elements(dataset.labels()));
 		auto weights_train = createBatch<double>(elements(dataset.weights()));
-
-		//Setup seeds for the rng in the different threads
-		std::vector<unsigned int> seeds(m_numTrees);
-		for (auto& seed: seeds) {
-			seed = random::discrete(random::globalRng, 0u,std::numeric_limits<unsigned int>::max());
-		}
 		
 		std::vector<std::vector<std::size_t> > complements;
 
 		//mutex that protects complements and model
 		std::mutex resultMutex;
 		//Generate trees in parallel
-		auto buildFunc = [&](std::size_t t){
-			random::rng_type rng(seeds[t]);
-			
+		auto buildFunc = [&](std::size_t t){			
 			//Setup data for this tree
-			CART::Bootstrap<blas::matrix<double, blas::column_major>, UIntVector> bootstrap(rng, data_train,labels_train, weights_train);
-			auto const& tree = builder.buildTree(rng, bootstrap);
+			CART::Bootstrap<blas::matrix<double, blas::column_major>, UIntVector> bootstrap(random::globalRng(), data_train,labels_train, weights_train);
+			auto const& tree = builder.buildTree(random::globalRng(), bootstrap);
 			
 			std::lock_guard<std::mutex> lock(resultMutex);
 			model.addModel(tree);
@@ -174,7 +166,7 @@ public:
 			model.computeOOBerror(complements, dataset.data());
 		
 		if(m_computeFeatureImportances)
-			model.computeFeatureImportances(complements,dataset.data(), random::globalRng);
+			model.computeFeatureImportances(complements,dataset.data(), random::globalRng());
 	}
 	
 	
@@ -263,23 +255,15 @@ public:
 		auto labels_train = createBatch<LabelType>(elements(dataset.labels()));
 		auto weights_train = createBatch<double>(elements(dataset.weights()));
 		
-		//Setup seeds for the rng in the different threads
-		std::vector<unsigned int> seeds(m_numTrees);
-		for (auto& seed: seeds) {
-			seed = random::discrete(random::globalRng, 0u,std::numeric_limits<unsigned int>::max());
-		}
-		
 		std::vector<std::vector<std::size_t> > complements;
 
 		//mutex that protects complements and model
 		std::mutex resultMutex;
 		//Generate trees in parallel
 		auto buildFunc = [&](std::size_t t){
-			random::rng_type rng{seeds[t]};
-			
 			//Setup data for this tree and build it
-			CART::Bootstrap<blas::matrix<double, blas::column_major>, RealMatrix> bootstrap(rng, data_train,labels_train, weights_train);
-			auto const& tree = builder.buildTree(rng, bootstrap);
+			CART::Bootstrap<blas::matrix<double, blas::column_major>, RealMatrix> bootstrap(random::globalRng(), data_train,labels_train, weights_train);
+			auto const& tree = builder.buildTree(random::globalRng(), bootstrap);
 			
 			//write models in a  threadsafe way
 			std::lock_guard<std::mutex> lock(resultMutex);
@@ -292,7 +276,7 @@ public:
 			model.computeOOBerror(complements,dataset.data());
 		
 		if(m_computeFeatureImportances)
-			model.computeFeatureImportances(complements,dataset.data(), random::globalRng);
+			model.computeFeatureImportances(complements,dataset.data(), random::globalRng());
 	}
 	
 	
