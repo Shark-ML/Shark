@@ -262,22 +262,19 @@ static auto get_tuple_elem(T&& input, std::integral_constant<int,N>) -> decltype
 ///<code>
 ///struct DataTypeBatch{
 ///     RealMatrix A;
-///     RealVector B;
+///     Batch<T>::type B;
 ///};
 ///</code>
-///In this case the macro can be used to generate a complete specialisation of Batch<DataType>
+///In this case the macro can be used to generate a complete specialisation of Batch<DataType<T> >
 ///<code>
-///#define DataVars (RealVector, A)(double B)
-///
-///SHARK_CREATE_BATCH_INTERFACE( DataType,DataVars)
+/// template<class T>
+/// SHARK_CREATE_BATCH_INTERFACE( DataType<T>,(RealVector, A)(T, B))
 ///};
-///In this case also boost::fusion support is added to the sequence. e.g. it is
-///handled similar to any other tuple type (RealMatrix,RealVector). This is useful for MKL or Transfer
-///kernels
 ///</code>
 #define SHARK_CREATE_BATCH_INTERFACE(NAME,ATTRIBUTES)\
-public:\
+struct Batch< NAME >{\
 	typedef NAME value_type;\
-	SHARK_CREATE_BATCH_INTERFACE_SEQ(SHARK_BATCH_MAKE_SEQUENCE(ATTRIBUTES))
+	SHARK_CREATE_BATCH_INTERFACE_SEQ(SHARK_BATCH_MAKE_SEQUENCE(ATTRIBUTES))\
+};
 	
 #endif

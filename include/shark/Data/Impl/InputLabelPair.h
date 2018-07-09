@@ -83,21 +83,15 @@ void swap(InputLabelPair<I1, L1>&& p1, InputLabelPair<I2, L2>&& p2){
 	swap(p1.input,p2.input);
 	swap(p1.label,p2.label);
 }
-}
 
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-namespace shark {
 template<class InputType, class LabelType>
-struct Batch< InputLabelPair<InputType, LabelType> >{
-	SHARK_CREATE_BATCH_INTERFACE(
-		InputLabelPair<InputType BOOST_PP_COMMA() LabelType>,
-		(InputType, input)(LabelType, label)
-	)
-};
-}
-
+SHARK_CREATE_BATCH_INTERFACE(
+	InputLabelPair<InputType BOOST_PP_COMMA() LabelType>,
+	(InputType, input)(LabelType, label)
+)
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
+}
 #endif

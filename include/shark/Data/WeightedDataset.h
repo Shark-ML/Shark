@@ -80,16 +80,20 @@ struct WeightedDataPair{
 	}
 };
 
+template<class D1, class W1, class D2, class W2>
+void swap(WeightedDataPair<D1, W1>&& p1, WeightedDataPair<D2, W2>&& p2){
+	using std::swap;
+	swap(p1.data,p2.data);
+	swap(p1.weight,p2.weight);
+}
+
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 template<class DataType, class WeightType>
-struct Batch< WeightedDataPair<DataType, WeightType> >{
-	SHARK_CREATE_BATCH_INTERFACE(
-		WeightedDataPair<DataType BOOST_PP_COMMA() WeightType>,
-		(DataType, data)(WeightType, weight)
-	)
-};
-
+SHARK_CREATE_BATCH_INTERFACE(
+	WeightedDataPair<DataType BOOST_PP_COMMA() WeightType>,
+	(DataType, data)(WeightType, weight)
+)
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 namespace detail{

@@ -15,13 +15,10 @@ struct TestStruct1 {
 //todo make this less cumbersome. more like above.
 namespace shark {
 template<>
-struct Batch< TestStruct1 > {
-	SHARK_CREATE_BATCH_INTERFACE(
-		TestStruct1,
-		(shark::RealVector, v1)(std::size_t, v2)(shark::RealVector, v3)
-	)
-};
-
+SHARK_CREATE_BATCH_INTERFACE(
+	TestStruct1,
+	(shark::RealVector, v1)(std::size_t, v2)(shark::RealVector, v3)
+)
 }
 //not sure whther the definitions above can also go below...
 #define BOOST_TEST_MODULE Kernels_MklKernel

@@ -64,22 +64,14 @@ public:
 		ar & task;
 	}
 };
-}
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-namespace shark {
 template<class InputType>
-struct Batch< MultiTaskSample<InputType> >{
-	SHARK_CREATE_BATCH_INTERFACE(
-		MultiTaskSample<InputType>,
-		(InputType, input)(std::size_t, task)
-	)
-};
-}
-
+SHARK_CREATE_BATCH_INTERFACE(
+	MultiTaskSample<InputType>,
+	(InputType, input)(std::size_t, task)
+)
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-namespace shark {
+
 
 ///
 /// \brief Special "Gaussian-like" kernel function on tasks.
