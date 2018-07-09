@@ -10,19 +10,13 @@ struct TestStruct1 {
 	shark::RealVector v3;
 };
 
-//adapt both struct to make boost fusion compatible, this is needed for eval() with single elements
-BOOST_FUSION_ADAPT_STRUCT(
-	TestStruct1,
-	(shark::RealVector, v1)(std::size_t, v2)(shark::RealVector, v3)
-)
-
 
 //Now adapt both structs to the batch interface
 //todo make this less cumbersome. more like above.
 namespace shark {
 template<>
 struct Batch< TestStruct1 > {
-	SHARK_CREATE_BATCH_INTERFACE_NO_TPL(
+	SHARK_CREATE_BATCH_INTERFACE(
 		TestStruct1,
 		(shark::RealVector, v1)(std::size_t, v2)(shark::RealVector, v3)
 	)
@@ -85,7 +79,7 @@ BOOST_AUTO_TEST_CASE(DenseMklKernel_Test_Eval) {
 	DiscreteKernel baseKernelV2(matK);
 	DenseLinearKernel  baseKernelV3;
 
-	MklKernel<TestStruct1> kernel(boost::fusion::make_vector(&baseKernelV1, &baseKernelV2, &baseKernelV3));
+	MklKernel<TestStruct1> kernel(&baseKernelV1, &baseKernelV2, &baseKernelV3);
 
 	//check correct number of parameters
 	const unsigned int numParameters = 3;

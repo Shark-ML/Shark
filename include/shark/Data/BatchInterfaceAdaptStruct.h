@@ -32,182 +32,221 @@
 #ifndef SHARK_DATA_BATCHINTERFACEADAPTSTRUCT_H
 #define SHARK_DATA_BATCHINTERFACEADAPTSTRUCT_H
 
-#include <boost/fusion/sequence/intrinsic/swap.hpp>
-#include <boost/fusion/algorithm/iteration/for_each.hpp>
-#include <boost/fusion/algorithm/transformation/transform.hpp>
-#include <shark/Data/BatchInterface.h>
-
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/comma_if.hpp>
 #include <boost/preprocessor/seq/transform.hpp>
-#include "Impl/BoostFusion151DefineStructInl.hpp"
-namespace shark{
-namespace detail{
-///serializes the object into the archive
-template<class Archive>
-struct ItemSerializer {
-	ItemSerializer(Archive& ar):m_ar(ar) {}
 
-	template<typename T>
-	void operator()(T& o)const{
-		m_ar & o;
-	}
-private:
-	Archive& m_ar;
-};
+#include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/preprocessor/seq/seq.hpp>
+#include <boost/preprocessor/tuple/elem.hpp>
 
 
-struct CreateBatch{
-	CreateBatch(std::size_t size):m_size(size) {}
+//transforms a tuple list (A, a) (B, b)... into a list of tuples
+// ((A, a)) ((B, b))...
+#define SHARK_BATCH_MAKE_SEQUENCE( TUPLES )\
+BOOST_PP_CAT(SHARK_BATCH_ADAPT_STRUCT_FILLER_0 TUPLES, _END)
 
-	template<class> struct result;
-	template<class T>
-	struct result<CreateBatch(T const&)> {
-		typedef typename shark::Batch<T>::type type;
-	};
+#define SHARK_BATCH_ADAPT_STRUCT_FILLER_0(X, Y)\
+    ((X, Y)) SHARK_BATCH_ADAPT_STRUCT_FILLER_1
+#define SHARK_BATCH_ADAPT_STRUCT_FILLER_1(X, Y)\
+    ((X, Y)) SHARK_BATCH_ADAPT_STRUCT_FILLER_0
+#define SHARK_BATCH_ADAPT_STRUCT_FILLER_0_END
+#define SHARK_BATCH_ADAPT_STRUCT_FILLER_1_END
 
-	template<class T>
-	typename result<CreateBatch(T const&)>::type operator()(T const& value)const{
-		return shark::Batch<T>::createBatch(value,m_size);
-	}
-private:
-	std::size_t m_size;
-};
 
-template<typename ThisType, typename ... Args>
-struct is_variadic_constructible : public std::false_type {};
+//for a struct S{ A memA; B memB; ...} generates a string of the form
+//{memA,memB,memC,memD}
+#define SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ)\
+{BOOST_PP_SEQ_FOR_EACH_I(\
+			SHARK_BATCH_MAKE_AGGREGATE_NAME,\
+			~,\
+			ATTRIBUTES_SEQ)}
+			
 
-template<typename ThisType, typename T>
-struct is_variadic_constructible<ThisType, T>: public std::is_base_of<ThisType, typename std::decay<T>::type>{};
+#define SHARK_BATCH_MAKE_AGGREGATE_NAME(R, DATA, N, ATTRIBUTE)\
+	BOOST_PP_COMMA_IF(N) BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE)			
 
-//I am so sorry for writing this
-//Assume we have a batch tuple type (a,b,c) with types (BA,BB,BC)
-// using an underlying single element tuple with types (A,B,C)
-//and we are given a tuple-shape (sa,sb,sc)
-//calling  createFusionBatchFromShape<0>(batch,shape, size evaluates to:
-// batch.a = Batch<A>::createBatchFromShape(shape.sa,size)
-// batch.b = Batch<B>::createBatchFromShape(shape.sb,size)
-// batch.c = Batch<C>::createBatchFromShape(shape.sc,size)
-//we do this by using that tuples are ordered. so we can query the ith type and the ith element.
-//the rest is figuring out BA->A and defining a stopping condition
 
-//last iteration: we are done. must come first so that the compiler can find it
-template<std::size_t I, typename Batch,typename Shape>
-inline typename std::enable_if<
-	I == boost::fusion::result_of::size<Batch>::type::value,
-	void
->::type
-createFusionBatchFromShape(Batch& batch, Shape const& shape, std::size_t size){ }
-//iterate 0...size-1
-template<std::size_t I, typename Batch,typename Shape>
-inline typename std::enable_if<
-	I != boost::fusion::result_of::size<Batch>::type::value,
-	void
->::type
-createFusionBatchFromShape(Batch& batch, Shape const& shape, std::size_t size){
-	//type of the Ith tuple element
-	typedef typename boost::fusion::result_of::at_c<Batch,I>::type BatchElement;
-	typedef typename batch_to_element<BatchElement>::type element_type;
-	//get the ith shape element
-	auto const& s = boost::fusion::at_c<I>(shape);
-	//create the batch element
-	boost::fusion::at_c<I>(batch) = shark::Batch<element_type>::createBatchFromShape(s, size);
-	createFusionBatchFromShape<I+1>(batch,shape,size);//iterate to next element
+//generates member list A memA; B memB; ...
+#define SHARK_BATCH_DECLARE_MEMBERS(ATTRIBUTES_SEQ) \
+BOOST_PP_SEQ_FOR_EACH_I(\
+		SHARK_BATCH_MAKE_DATA_MEMBER,\
+		~,\
+		ATTRIBUTES_SEQ)
+		
+#define SHARK_BATCH_MAKE_DATA_MEMBER(R, DATA, N, ATTRIBUTE)\
+	BOOST_PP_TUPLE_ELEM(2, 0, ATTRIBUTE) BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE);
+
+
+//transformes a list of tuples ((A, a)) ((B, b)) ...
+//to ((Batch<A>::TYPE, a)) ((Batch<B>::TYPE, b))...
+#define SHARK_BATCH_TRANSFORM_TYPES(TYPE,ATTRIBUTES_SEQ)\
+	BOOST_PP_SEQ_TRANSFORM(\
+		SHARK_BATCH_TRANSFORM_BATCH_ATTRIBUTES_IMPL,\
+		TYPE, ATTRIBUTES_SEQ)
+		
+#define SHARK_BATCH_TRANSFORM_BATCH_ATTRIBUTES_IMPL(s,TYPE,ELEM)\
+	( typename Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::TYPE,BOOST_PP_TUPLE_ELEM(2, 1, ELEM))
+	
+// prints whatever is in the list as a sequence of expressions. (A)(B)(C) -> A B C
+#define SHARK_BATCH_PRINT_EXPRESSION(SEQ)\
+	BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_PRINT_EXPRESSION_IMPL,  ~, SEQ)
+
+#define SHARK_BATCH_PRINT_EXPRESSION_IMPL(s, _, N, A) A
+
+//various helper macros...
+
+#define SHARK_BATCH_ASSIGNMENT_HELPER(s,FUNC,N, ELEM)\
+	BOOST_PP_TUPLE_ELEM(2, 1, ELEM) = other.BOOST_PP_TUPLE_ELEM(2, 1, ELEM);
+	
+#define SHARK_BATCH_MOVE_ASSIGNMENT_HELPER(s,FUNC, N,ELEM)\
+	BOOST_PP_TUPLE_ELEM(2, 1, ELEM) = std::move(other.BOOST_PP_TUPLE_ELEM(2, 1, ELEM));
+	
+#define SHARK_BATCH_GET_HELPER(s,FUNC,ELEM)\
+	( BOOST_PP_TUPLE_ELEM(2, 0, ELEM), Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::get(batch.BOOST_PP_TUPLE_ELEM(2, 1, ELEM), i))
+
+#define SHARK_BATCH_CREATE_BATCH_HELPER(s,FUNC,ELEM)\
+	( BOOST_PP_TUPLE_ELEM(2, 0, ELEM), Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::createBatch(input. BOOST_PP_TUPLE_ELEM(2, 1, ELEM), size))
+
+#define SHARK_BATCH_CREATE_BATCH_FROM_SHAPE_HELPER(s,FUNC,ELEM)\
+	( BOOST_PP_TUPLE_ELEM(2, 0, ELEM), Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::createBatchFromShape(shape.BOOST_PP_TUPLE_ELEM(2, 1, ELEM), size))
+
+#define SHARK_BATCH_SERIALIZATION_HELPER(s,FUNC,N, ELEM)\
+	ar & BOOST_PP_TUPLE_ELEM(2, 1, ELEM);
+	
+//extension for batches of aggregate type
+//this is to handle adapted batches, their references and proxies as a tuple type
+//for an adapted struct struct S{ A memA; B memB; ...} and S s;
+// we have Batch<S>::tuple_elem<N>(s)
+#define SHARK_BATCH_GENERATE_TUPLE_ACCESSORS(ATTRIBUTES_SEQ)\
+BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_GENERATE_TUPLE_ACCESSORS_IMPL,  ~, ATTRIBUTES_SEQ);\
+typedef std::integral_constant<int,BOOST_PP_SEQ_SIZE(ATTRIBUTES_SEQ)> tuple_size;\
+template<std::size_t N, class T>\
+static auto tuple_elem(T&& input) -> decltype(get_tuple_elem(std::forward<T>(input), std::integral_constant<int,N>())){\
+	return get_tuple_elem(std::forward<T>(input), std::integral_constant<int,N>());\
 }
 
+#define SHARK_BATCH_GENERATE_TUPLE_ACCESSORS_IMPL(s, _, N, ELEM)\
+template<class T>\
+static auto get_tuple_elem(T&& input, std::integral_constant<int,N>) -> decltype((std::forward<T>(input).BOOST_PP_TUPLE_ELEM(2, 1, ELEM)))\
+{return std::forward<T>(input).BOOST_PP_TUPLE_ELEM(2, 1, ELEM);}
 
-///calls getBatchElement(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
-struct MakeRef{
-	template<class> struct result;
-	template<class T>
-	struct result<MakeRef(T const&)> {
-		typedef typename BatchTraits<T>::type::reference type;
-	};
-
-	MakeRef(std::size_t index):m_index(index){}
-
-	template<class T>
-	typename result<MakeRef(T const&) >::type operator()(T const& container)const{
-		return getBatchElement(const_cast<T&>(container),m_index);//we need the const cast since the argument type must be a const ref.
-	}
-private:
-	std::size_t m_index;
-};
-///calls getBatchElement(container,index) on a container. Used as boost fusion functor in the creation of references in the Batch Interface
-struct MakeConstRef{
-	template<class> struct result;
-	template<class T>
-	struct result<MakeConstRef(T const&)> {
-		typedef typename BatchTraits<T>::type::const_reference type;
-	};
-
-	MakeConstRef(std::size_t index):m_index(index){}
-
-	template<class T>
-	typename result<MakeConstRef(T const&) >::type operator()(T const& container)const{
-		return getBatchElement(container,m_index);
-	}
-private:
-	std::size_t m_index;
-};
-
-
-template<class FusionTuple, class Value>
-struct TupleBatchReference: public FusionTuple{
-	//constructor that maps a tuple-batch to a reference using function f. candidates are MAkeRef or MakeConstRef
-	template<class Batch, class Functor>
-	TupleBatchReference(Batch& batch, Functor f)
-	:FusionTuple(boost::fusion::transform(batch.fusionize(),f)){}
-	
-	//copy constructor and conversion non-const->const
-	template<class OtherTuple>
-	TupleBatchReference(TupleBatchReference<OtherTuple, Value> const& other)
-	:FusionTuple(other.fusionize()){}
-	
-	//assign from value
-	TupleBatchReference& operator= (Value const& other ){
-		fusionize() = other;
-		return *this;
-	}
-	//assign from other reference type
-	template<class OtherTuple>
-	TupleBatchReference& operator= (TupleBatchReference<OtherTuple, Value> const& other ){
-		fusionize() = other.fusionize();
-		return *this;
-	}
-	
-	//conversion to value type
-	operator Value()const{
-		Value ret;
-		boost::fusion::copy(fusionize(), ret);
-		return ret;
-	}
-	//internal conversion functions
-	FusionTuple& fusionize(){ return *this;}
-	FusionTuple const& fusionize() const{ return *this;}
-};
-
-
-}}
-
-#define SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL_IMPL(s,TYPE,ELEM)\
-	( typename Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::TYPE,BOOST_PP_TUPLE_ELEM(2, 1, ELEM))
-
-#define SHARK_TRANSFORM_TUPLELIST_IMPL(s, data,ELEM)\
-	BOOST_PP_TUPLE_ELEM(2, 0, ELEM),BOOST_PP_TUPLE_ELEM(2, 1, ELEM)
-#define SHARK_TRANSFORM_TUPLELIST(ELEMS)\
-	BOOST_PP_SEQ_TRANSFORM(SHARK_TRANSFORM_TUPLELIST_IMPL, _ , ELEMS)
-
-#define SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(TYPE,ATTRIBUTES)\
-	SHARK_TRANSFORM_TUPLELIST(BOOST_PP_SEQ_TRANSFORM(\
-		SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL_IMPL,\
-		TYPE, BOOST_PP_CAT(SHARK_FUSION_ADAPT_STRUCT_FILLER_0 ATTRIBUTES,_END)))
-
-#define SHARK_TRANSFORM_BATCH_ATTRIBUTES_IMPL(s,TYPE,ELEM)\
-	( Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::TYPE,BOOST_PP_TUPLE_ELEM(2, 1, ELEM))
-
-#define SHARK_TRANSFORM_BATCH_ATTRIBUTES(TYPE,ATTRIBUTES)\
-	SHARK_TRANSFORM_TUPLELIST(BOOST_PP_SEQ_TRANSFORM(\
-		SHARK_TRANSFORM_BATCH_ATTRIBUTES_IMPL,\
-		TYPE, BOOST_PP_CAT(SHARK_FUSION_ADAPT_STRUCT_FILLER_0 ATTRIBUTES,_END)))
+//the main macro takes inputs of the form ((TypeA, nameA)) ((TypeB, nameB))...
+#define SHARK_CREATE_BATCH_INTERFACE_SEQ(ATTRIBUTES_SEQ)\
+	struct shape_type{\
+		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(shape_type,ATTRIBUTES_SEQ))\
+		template<class Archive>\
+		void serialize(Archive & ar, unsigned int const){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_SERIALIZATION_HELPER,  ~, ATTRIBUTES_SEQ);\
+		}\
+	};\
+	struct const_proxy_type{\
+		typedef Batch::value_type value_type;\
+		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(const_proxy_type,ATTRIBUTES_SEQ))\
+		std::size_t size() const{\
+			return batchSize(BOOST_PP_TUPLE_ELEM(2,1,BOOST_PP_SEQ_ELEM(0, ATTRIBUTES_SEQ)));\
+		}\
+	};\
+	struct proxy_type{\
+		typedef Batch::value_type value_type;\
+		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(proxy_type,ATTRIBUTES_SEQ))\
+		template<class Other>\
+		proxy_type& operator=(Other const& other){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\
+			return *this;\
+		}\
+		std::size_t size() const{\
+			return batchSize(BOOST_PP_TUPLE_ELEM(2,1,BOOST_PP_SEQ_ELEM(0, ATTRIBUTES_SEQ)));\
+		}\
+		operator const_proxy_type() const{return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
+	};\
+	struct type{\
+		typedef Batch::value_type value_type;\
+		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(type,ATTRIBUTES_SEQ))\
+		std::size_t size() const{\
+			return batchSize(BOOST_PP_TUPLE_ELEM(2,1,BOOST_PP_SEQ_ELEM(0, ATTRIBUTES_SEQ)));\
+		}\
+		template<class Other>\
+		type& operator=(Other const& other){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\
+			return *this;\
+		}\
+		operator proxy_type(){return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
+		operator const_proxy_type() const{return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
+		template<class Archive>\
+		void serialize(Archive & ar, unsigned int const){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_SERIALIZATION_HELPER,  ~, ATTRIBUTES_SEQ);\
+		}\
+	};\
+	struct const_reference{\
+		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(const_reference,ATTRIBUTES_SEQ))\
+		operator value_type() const{return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
+	};\
+	struct reference{\
+		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(reference,ATTRIBUTES_SEQ))\
+		reference& operator=(value_type const& other){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\
+			return *this;\
+		}\
+		reference& operator=(value_type&& other){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_MOVE_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\
+			return *this;\
+		}\
+		reference& operator=(reference const& other){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\
+			return *this;\
+		}\
+		reference& operator=(const_reference const& other){\
+			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\
+			return *this;\
+		}\
+		operator value_type() const{return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
+		operator const_reference() const{return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
+	};\
+	template<class T>\
+	static std::size_t size(T const& batch){return batch.size();}\
+	\
+	static reference get(type& batch, std::size_t i){\
+		return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(\
+			BOOST_PP_SEQ_TRANSFORM(SHARK_BATCH_GET_HELPER,  ~, ATTRIBUTES_SEQ)\
+		);\
+	}\
+	static const_reference get(type const& batch, std::size_t i){\
+		return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(\
+			BOOST_PP_SEQ_TRANSFORM(SHARK_BATCH_GET_HELPER,  ~, ATTRIBUTES_SEQ)\
+		);\
+	}\
+	static reference get(proxy_type const& batch, std::size_t i){\
+		return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(\
+			BOOST_PP_SEQ_TRANSFORM(SHARK_BATCH_GET_HELPER,  ~, ATTRIBUTES_SEQ)\
+		);\
+	}\
+	static const_reference get(const_proxy_type const& batch, std::size_t i){\
+		return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(\
+			BOOST_PP_SEQ_TRANSFORM(SHARK_BATCH_GET_HELPER,  ~, ATTRIBUTES_SEQ)\
+		);\
+	}\
+	static type createBatch(value_type const& input, std::size_t size = 1){\
+		return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(\
+			BOOST_PP_SEQ_TRANSFORM(SHARK_BATCH_CREATE_BATCH_HELPER,  ~, ATTRIBUTES_SEQ)\
+		);\
+	}\
+	template<class Iterator>\
+	static type createBatchFromRange(Iterator const& begin, Iterator const& end){\
+		std::size_t points = end - begin;\
+		type batch = createBatch(*begin,points);\
+		Iterator pos = begin;\
+		for(std::size_t i = 0; i != points; ++i,++pos){\
+			getBatchElement(batch,i) = *pos;\
+		}\
+		return batch;\
+	}\
+	static type createBatchFromShape(shape_type const& shape, std::size_t size = 1){\
+		return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(\
+			BOOST_PP_SEQ_TRANSFORM(SHARK_BATCH_CREATE_BATCH_FROM_SHAPE_HELPER,  ~, ATTRIBUTES_SEQ)\
+		);\
+	}\
+	SHARK_BATCH_GENERATE_TUPLE_ACCESSORS(ATTRIBUTES_SEQ)
 
 ///\brief This macro can be used to specialize a structure type easily to a batch type.
 ///
@@ -237,169 +276,8 @@ struct TupleBatchReference: public FusionTuple{
 ///kernels
 ///</code>
 #define SHARK_CREATE_BATCH_INTERFACE(NAME,ATTRIBUTES)\
-private:\
-	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(type,ATTRIBUTES))\
-	SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(reference,ATTRIBUTES))\
-	SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(const_reference,ATTRIBUTES))\
-	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionShapeType, SHARK_TRANSFORM_BATCH_ATTRIBUTES_TPL(shape_type,ATTRIBUTES))\
 public:\
-	struct shape_type: public FusionShapeType{\
-		shape_type(){}\
-		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<shape_type, Args ...>::value>::type>\
-		shape_type(Args &&... args): FusionShapeType(std::forward<Args>(args)...){}\
-		template<class Archive>\
-		void serialize(Archive & archive,unsigned int version){\
-			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
-		}\
-		FusionShapeType& fusionize(){ return *this;}\
-		FusionShapeType const& fusionize() const{ return *this;}\
-	};\
-	struct type: public FusionType{\
-		typedef NAME value_type;\
-		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<type, Args ...>::value>::type >\
-		type(Args&&... args):FusionType(std::forward<Args>(args)...){}\
-		\
-		friend void swap(type& op1, type& op2){\
-			boost::fusion::swap(op1.fusionize(),op2.fusionize());\
-		}\
-		std::size_t size()const{\
-			return batchSize(boost::fusion::at_c<0>(fusionize()));\
-		}\
-		template<class Archive>\
-		void serialize(Archive & archive,unsigned int version){\
-			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
-		}\
-		FusionType& fusionize(){ return *this;}\
-		FusionType const& fusionize() const{ return *this;}\
-	};\
 	typedef NAME value_type;\
-	typedef detail::TupleBatchReference<FusionRef, value_type> reference;\
-	typedef detail::TupleBatchReference<FusionConstRef, value_type> const_reference;\
-	\
-	static type createBatch(value_type const& input, std::size_t size = 1){\
-		type batch;\
-		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),batch.fusionize());\
-		return batch;\
-	}\
-	template<class Iterator>\
-	static type createBatchFromRange(Iterator const& begin, Iterator const& end){\
-		std::size_t points = end - begin;\
-		type batch = createBatch(*begin,points);\
-		Iterator pos = begin;\
-		for(std::size_t i = 0; i != points; ++i,++pos){\
-			getBatchElement(batch,i) = *pos;\
-		}\
-		return batch;\
-	}\
-	static type createBatchFromShape(shape_type const& shape, std::size_t size = 1){\
-		type batch;\
-		detail::createFusionBatchFromShape<0>(batch.fusionize(),shape.fusionize(),size);\
-		return batch;\
-	}\
-	template<class T>\
-	static std::size_t size(T const& batch){return batch.size();}\
-	\
-	static reference get(type& batch, std::size_t i){\
-		return reference(batch, detail::MakeRef(i));\
-	}\
-	static const_reference get(type const& batch, std::size_t i){\
-		return const_reference(batch, detail::MakeConstRef(i));\
-	}
-
-///\brief This macro can be used to specialize a structure type easily to a batch type.
-///
-///Assume, thjat your input Data looks like:
-///<code>
-///struct DataType{
-///     RealVector A;
-///     double B;
-///};
-///</code>
-///Than the Batch type should propably look like
-///<code>
-///struct DataTypeBatch{
-///     RealMatrix A;
-///     RealVector B;
-///};
-///</code>
-///In this case the macro can be used to generate a complete specialisation of Batch<DataType>
-///<code>
-///#define DataVars (RealVector, A)(double B)
-///
-///SHARK_CREATE_BATCH_INTERFACE( DataType,DataVars)
-///};
-///In this case also boost::fusion support is added to the sequence. e.g. it is
-///handled similar to any other tuple type (RealMatrix,RealVector). This is useful for MKL or Transfer
-///kernels
-///</code>
-#define SHARK_CREATE_BATCH_INTERFACE_NO_TPL(NAME,ATTRIBUTES)\
-private:\
-	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionType, SHARK_TRANSFORM_BATCH_ATTRIBUTES(type,ATTRIBUTES))\
-	SHARK_FUSION_DEFINE_STRUCT_REF_INLINE(FusionRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(reference,ATTRIBUTES))\
-	SHARK_FUSION_DEFINE_STRUCT_CONST_REF_INLINE(FusionConstRef, SHARK_TRANSFORM_BATCH_ATTRIBUTES(const_reference,ATTRIBUTES))\
-	SHARK_FUSION_DEFINE_STRUCT_INLINE(FusionShapeType, SHARK_TRANSFORM_BATCH_ATTRIBUTES(shape_type,ATTRIBUTES))\
-public:\
-	struct shape_type: public FusionShapeType{\
-		shape_type(){}\
-		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<shape_type, Args ...>::value>::type>\
-		shape_type(Args &&... args): FusionShapeType(std::forward<Args>(args)...){}\
-		template<class Archive>\
-		void serialize(Archive & archive,unsigned int version){\
-			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
-		}\
-		FusionShapeType& fusionize(){ return *this;}\
-		FusionShapeType const& fusionize() const{ return *this;}\
-	};\
-	struct type: public FusionType{\
-		typedef NAME value_type;\
-		template<typename... Args, typename = typename std::enable_if<!detail::is_variadic_constructible<type, Args ...>::value>::type >\
-		type(Args&&... args):FusionType(std::forward<Args>(args)...){}\
-		\
-		friend void swap(type& op1, type& op2){\
-			boost::fusion::swap(op1.fusionize(),op2.fusionize());\
-		}\
-		std::size_t size()const{\
-			return batchSize(boost::fusion::at_c<0>(fusionize()));\
-		}\
-		template<class Archive>\
-		void serialize(Archive & archive,unsigned int version){\
-			boost::fusion::for_each(fusionize(), detail::ItemSerializer<Archive>(archive));\
-		}\
-		FusionType& fusionize(){ return *this;}\
-		FusionType const& fusionize() const{ return *this;}\
-	};\
-	typedef NAME value_type;\
-	typedef detail::TupleBatchReference<FusionRef, value_type> reference;\
-	typedef detail::TupleBatchReference<FusionConstRef, value_type> const_reference;\
-	\
-	static type createBatch(value_type const& input, std::size_t size = 1){\
-		type batch;\
-		boost::fusion::copy(boost::fusion::transform(input,detail::CreateBatch(size)),batch.fusionize());\
-		return batch;\
-	}\
-	template<class Iterator>\
-	static type createBatchFromRange(Iterator const& begin, Iterator const& end){\
-		std::size_t points = end - begin;\
-		type batch = createBatch(*begin,points);\
-		Iterator pos = begin;\
-		for(std::size_t i = 0; i != points; ++i,++pos){\
-			getBatchElement(batch,i) = *pos;\
-		}\
-		return batch;\
-	}\
-	static type createBatchFromShape(shape_type const& shape, std::size_t size = 1){\
-		type batch;\
-		detail::createFusionBatchFromShape<0>(batch.fusionize(),shape.fusionize(),size);\
-		return batch;\
-	}\
-	template<class T>\
-	static std::size_t size(T const& batch){return batch.size();}\
-	\
-	static reference get(type& batch, std::size_t i){\
-		return reference(batch, detail::MakeRef(i));\
-	}\
-	static const_reference get(type const& batch, std::size_t i){\
-		return const_reference(batch, detail::MakeConstRef(i));\
-	}
-
+	SHARK_CREATE_BATCH_INTERFACE_SEQ(SHARK_BATCH_MAKE_SEQUENCE(ATTRIBUTES))
+	
 #endif

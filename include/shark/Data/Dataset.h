@@ -119,9 +119,9 @@ public:
 	typedef Type element_type;
 	typedef typename Batch<Type>::shape_type shape_type;
 
-	typedef typename Container::BatchType batch_type;
-	typedef batch_type& batch_reference;
-	typedef batch_type const& const_batch_reference;
+	typedef typename Batch<element_type>::type batch_type;
+	typedef typename Batch<element_type>::type& batch_reference;
+	typedef typename Batch<element_type>::type const& const_batch_reference;
 
 	typedef std::vector<std::size_t> IndexSet;
 
@@ -335,24 +335,13 @@ public:
 	typedef Data<LabelT> LabelContainer;
 	typedef typename InputContainer::IndexSet IndexSet;
 
-	// TYPEDEFS FOR PAIRS
-	typedef InputLabelBatch<
-		typename Batch<InputType>::type,
-		typename Batch<LabelType>::type
-	> batch_type;
-
 	typedef InputLabelPair<InputType,LabelType> element_type;
-	typedef typename Batch<element_type>::shape_type shape_type;
 
-	// TYPEDEFS FOR REFERENCES
-	typedef InputLabelBatch<
-		typename Batch<InputType>::type&,
-		typename Batch<LabelType>::type&
-	> batch_reference;
-	typedef InputLabelBatch<
-		typename Batch<InputType>::type const&,
-		typename Batch<LabelType>::type const&
-	> const_batch_reference;
+	// TYPEDEFS FOR PAIRS
+	typedef typename Batch<element_type>::type batch_type;
+	typedef typename Batch<element_type>::proxy_type batch_reference;
+	typedef typename Batch<element_type>::const_proxy_type const_batch_reference;
+	typedef typename Batch<element_type>::shape_type shape_type;
 
 	typedef detail::BatchRange<LabeledData<InputType,LabelType> > batch_range;
 	typedef detail::BatchRange<LabeledData<InputType,LabelType> const> const_batch_range;
@@ -435,10 +424,10 @@ public:
 	
 	// BATCH ACCESS
 	batch_reference batch(std::size_t i){
-		return batch_reference(m_data.batch(i),m_label.batch(i));
+		return {m_data.batch(i),m_label.batch(i)};
 	}
 	const_batch_reference batch(std::size_t i) const{
-		return const_batch_reference(m_data.batch(i),m_label.batch(i));
+		return {m_data.batch(i),m_label.batch(i)};
 	}
 	
 	///\brief Returns the Shape of the inputs.

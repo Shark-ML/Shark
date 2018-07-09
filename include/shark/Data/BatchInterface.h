@@ -50,6 +50,10 @@ template<class BatchType>
 struct SimpleBatch{
 	/// \brief Type of a batch of elements.
 	typedef BatchType type;
+	/// \brief Reference to a batch
+	typedef type& proxy_type;
+	/// \brief Const Reference to a batch
+	typedef type const& const_proxy_type;
 	/// \brief Type of a single element.
 	typedef typename type::reference reference;
 	/// \brief Type of a single immutable element.
@@ -133,6 +137,11 @@ struct VectorBatch{
 	/// \brief Type of a batch of elements.
 	typedef typename blas::matrix_temporary<Matrix>::type type;
 	
+	/// \brief Reference to a batch
+	typedef type& proxy_type;
+	/// \brief Const Reference to a batch
+	typedef type const& const_proxy_type;
+	
 	/// \brief The type of the elements stored in the batch 
 	typedef typename blas::vector_temporary<Matrix>::type value_type;
 	
@@ -202,6 +211,11 @@ template<class T>
 struct Batch<shark::blas::compressed_vector<T> >{
 	/// \brief Type of a batch of elements.
 	typedef shark::blas::compressed_matrix<T> type;
+	
+	/// \brief Reference to a batch
+	typedef type& proxy_type;
+	/// \brief Const Reference to a batch
+	typedef type const& const_proxy_type;
 	
 	/// \brief The type of the elements stored in the batch 
 	typedef shark::blas::compressed_vector<T> value_type;

@@ -26,10 +26,10 @@ BOOST_AUTO_TEST_CASE( MultiTaskKernel_Test )
 	RealVector x4(3); x4(0) = 0.5; x4(1) = 3.0; x4(2) = 3.5;
 
 	// composition of vector and task index
-	MultiTaskSample<RealVector> v1(x1, 0);
-	MultiTaskSample<RealVector> v2(x2, 1);
-	MultiTaskSample<RealVector> v3(x3, 0);
-	MultiTaskSample<RealVector> v4(x4, 1);
+	MultiTaskSample<RealVector> v1{x1, 0};
+	MultiTaskSample<RealVector> v2{x2, 1};
+	MultiTaskSample<RealVector> v3{x3, 0};
+	MultiTaskSample<RealVector> v4{x4, 1};
 	std::vector<MultiTaskSample<RealVector> > vec;
 	vec.push_back(v1);
 	vec.push_back(v2);

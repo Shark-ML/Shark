@@ -19,18 +19,10 @@
         std::size_t st2;
         shark::RealVector crv3;
     };
-
-    #ifndef DOXYGEN_SHOULD_SKIP_THIS
-        BOOST_FUSION_ADAPT_STRUCT(
-            HeterogeneousInputStruct,
-            (shark::RealVector, rv1)(std::size_t, st2)(shark::RealVector, crv3)
-        )
-    #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-
     namespace shark{
         template<>
         struct Batch< HeterogeneousInputStruct >{
-            SHARK_CREATE_BATCH_INTERFACE_NO_TPL(
+            SHARK_CREATE_BATCH_INTERFACE(
                 HeterogeneousInputStruct,
                 (shark::RealVector, rv1)(std::size_t, st2)(shark::RealVector, crv3)
             )
@@ -342,7 +334,7 @@ int main(int argc, char** argv)
     DenseRbfKernel baseKernelRV1(0.1);
     DiscreteKernel baseKernelST2(matK);
     DenseLinearKernel baseKernelCRV3;
-    MklKernel<HeterogeneousInputStruct> mkl_kernel( boost::fusion::make_vector( &baseKernelRV1, &baseKernelST2, &baseKernelCRV3) );
+    MklKernel<HeterogeneousInputStruct> mkl_kernel( &baseKernelRV1, &baseKernelST2, &baseKernelCRV3);
     //###end<mkl_kernel_create_kernels>
 
     //###begin<mkl_introspection_one>
