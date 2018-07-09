@@ -192,31 +192,6 @@ else()
 endif()
 
 #####################################################################
-#           HDF5 configuration
-#####################################################################
-find_package(HDF5 COMPONENTS C CXX HL QUIET)
-mark_as_advanced(HDF5_DIR)
-if(HDF5_FOUND)
-	if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_CXX_COMPILER_EXECUTABLE)
-		message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
-		include_directories( ${HDF5_INCLUDE_DIRS} )
-		list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
-	else()
-		message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
-		if(NOT( HDF5_C_COMPILER_EXECUTABLE))
-			message(STATUS "  C Compiler Extension not found.")
-		endif()
-		if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
-			message(STATUS "  CXX Compiler Extension not found.")
-		endif()
-			message(STATUS "Disabling HDF5.")
-		unset( HDF5_FOUND )
-	endif()
-else()
-	message(STATUS "HDF5 not found, skip")
-endif()
-
-#####################################################################
 #           BLAS configuration
 #####################################################################
 

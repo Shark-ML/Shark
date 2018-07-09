@@ -21,13 +21,14 @@ points augmented with unsigned integer labels. ::
 File Formats
 ------------
 
-Shark supports a number of standard file formats for data sets,
-including the HDF5-based format used by http://www.mldata.org,
-comma(character)-separated-values (CSV), and the LIBSVM format
-(http://www.csie.ntu.edu.tw/~cjlin/libsvm/). Shark does not come
-with its own data set format any more in order to avoid further
-growth of the jungle of data set formats. However, data can be
-serialized, which practically amounts to a data file format.
+Shark supports a number of standard file formats for data sets, most
+prominently comma(character)-separated-values (CSV) for dense data and
+the LIBSVM format (http://www.csie.ntu.edu.tw/~cjlin/libsvm/) for sparse
+data. Furthermore, images in PGM format can be read.
+
+Shark does not come with its own data set format any more in order to
+avoid further growth of the jungle of data set formats. However, data
+can be serialized, which practically amounts to a data file format.
 
 Most data formats in common use are restricted to (sparse)
 vectorial input data. Thus, when dealing with non-vectorial data
