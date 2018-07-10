@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 		csvStringToData(test, test_separator, ',','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.shape(), Shape({numDimensions+1}));
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
+		BOOST_CHECK_EQUAL(test.size(), 6);
 		std::cout << test<<std::endl;
 
 		checkDataEquality(test_values,test);
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import)
 		csvStringToData(test, test_no_separator, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
 		BOOST_CHECK_EQUAL(test.shape(), Shape({numDimensions+1}));
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
+		BOOST_CHECK_EQUAL(test.size(), 6);
 		std::cout << test<<std::endl;
 
 		checkDataEquality(test_values,test);
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Data_Import_Single_Integer)
 	csvStringToData(test, test_single_integer, ',','#',3);
 	BOOST_REQUIRE_EQUAL(test.numberOfElements(), 7u);
 	BOOST_CHECK_EQUAL(test.shape(), Shape({2}));
-	BOOST_CHECK_EQUAL(test.numberOfBatches(), 3);
+	BOOST_CHECK_EQUAL(test.size(), 3);
 	std::cout << test<<std::endl;
 	
 	for(std::size_t i = 0; i != 7; ++i){
@@ -248,9 +248,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_First_Column )
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_separator, FIRST_COLUMN, ',','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({numDimensions}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({3}));
+		BOOST_CHECK_EQUAL(test.size(), 6);
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({numDimensions}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({3}));
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 3);
 		std::cout << test<<std::endl;
 
@@ -260,11 +260,11 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_First_Column )
 		LabeledData<RealVector, RealVector> test;
 		csvStringToData(test, test_separator, FIRST_COLUMN, 3, ',','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
+		BOOST_CHECK_EQUAL(test.size(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({6}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({3}));
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({6}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({3}));
 
 		std::cout << test<<std::endl;
 
@@ -280,9 +280,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_no_separator, FIRST_COLUMN, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({numDimensions}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({3}));
+		BOOST_CHECK_EQUAL(test.size(), 6);
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({numDimensions}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({3}));
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 3);
 
 		std::cout << test<<std::endl;
@@ -293,11 +293,11 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_First_Column )
 		LabeledData<RealVector, RealVector> test;
 		csvStringToData(test, test_no_separator, FIRST_COLUMN, 3, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
+		BOOST_CHECK_EQUAL(test.size(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({6}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({3}));
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({6}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({3}));
 
 		std::cout << test<<std::endl;
 
@@ -312,9 +312,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_no_separator, LAST_COLUMN, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({numDimensions}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({2}));
+		BOOST_CHECK_EQUAL(test.size(), 6);
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({numDimensions}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({2}));
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 2);
 
 		std::cout << test<<std::endl;
@@ -325,11 +325,11 @@ BOOST_AUTO_TEST_CASE( Data_Csv_No_Separator_Last_Column )
 		LabeledData<RealVector, RealVector> test;
 		csvStringToData(test, test_no_separator, LAST_COLUMN, 3, ' ','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
+		BOOST_CHECK_EQUAL(test.size(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({6}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({3}));
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({6}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({3}));
 
 		std::cout << test<<std::endl;
 
@@ -344,9 +344,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_Last_Column )
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_separator, LAST_COLUMN, ',','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({numDimensions}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({2}));
+		BOOST_CHECK_EQUAL(test.size(), 6);
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({numDimensions}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({2}));
 		BOOST_CHECK_EQUAL(numberOfClasses(test), 2);
 
 		std::cout << test<<std::endl;
@@ -357,11 +357,11 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Separator_Last_Column )
 		LabeledData<RealVector, RealVector> test;
 		csvStringToData(test, test_separator, LAST_COLUMN, 3, ',','#',3);
 		BOOST_CHECK_EQUAL(test.numberOfElements(), 16u);
-		BOOST_CHECK_EQUAL(test.numberOfBatches(), 6);
+		BOOST_CHECK_EQUAL(test.size(), 6);
 		BOOST_CHECK_EQUAL(inputDimension(test), 6);
 		BOOST_CHECK_EQUAL(labelDimension(test), 3);
-		BOOST_CHECK_EQUAL(test.inputShape(), Shape({6}));
-		BOOST_CHECK_EQUAL(test.labelShape(), Shape({3}));
+		BOOST_CHECK_EQUAL(test.shape().input, Shape({6}));
+		BOOST_CHECK_EQUAL(test.shape().label, Shape({3}));
 
 		std::cout << test<<std::endl;
 

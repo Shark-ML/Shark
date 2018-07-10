@@ -144,14 +144,14 @@ BOOST_AUTO_TEST_CASE (Set_SparseData)
 	BOOST_REQUIRE_EQUAL(test_ds_sreg.numberOfElements(), NumLines);
 	
 	//chekc that we got the correct shape
-	BOOST_CHECK_EQUAL(test_ds_bc.inputShape(), Shape({VectorSize}));
-	BOOST_CHECK_EQUAL(test_ds_sbc.inputShape(), Shape({VectorSize}));
-	BOOST_CHECK_EQUAL(test_ds_mc.inputShape(), Shape({VectorSize}));
-	BOOST_CHECK_EQUAL(test_ds_smc.inputShape(), Shape({VectorSize}));
-	BOOST_CHECK_EQUAL(test_ds_reg.inputShape(), Shape({VectorSize}));
-	BOOST_CHECK_EQUAL(test_ds_reg.labelShape(), Shape({1}));
-	BOOST_CHECK_EQUAL(test_ds_sreg.inputShape(), Shape({VectorSize}));
-	BOOST_CHECK_EQUAL(test_ds_sreg.labelShape(), Shape({1}));
+	BOOST_CHECK_EQUAL(test_ds_bc.shape().input, Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_sbc.shape().input, Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_mc.shape().input, Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_smc.shape().input, Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_reg.shape().input, Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_reg.shape().label, Shape({1}));
+	BOOST_CHECK_EQUAL(test_ds_sreg.shape().input, Shape({VectorSize}));
+	BOOST_CHECK_EQUAL(test_ds_sreg.shape().label, Shape({1}));
 
 	// check labels of read-in
 	BOOST_CHECK_EQUAL(0u, elements(test_ds_bc)[0].label);

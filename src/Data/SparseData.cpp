@@ -87,7 +87,7 @@ void copySparsePoints(Data<blas::compressed_vector<T> >& dataset, std::vector<Li
 	std::size_t delta = (hasZero ? 0 : 1);
 	
 	std::size_t start = 0;//first element of the batch in points
-	for(auto& batch: dataset.batches()){
+	for(auto& batch: dataset){
 		//allocate nonzeros for every batch and every row in the batch
 		std::size_t nnz = 0;
 		for(std::size_t i = 0; i != batch.size1(); ++i){
@@ -169,7 +169,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	std::size_t vectorDim = maxIndex + (hasZero ? 1 : 0);
 	shark::LabeledData<T, unsigned int> data(numPoints, {vectorDim, maxPositiveLabel + 1}, batchSize);
 	std::size_t batchStart = 0;
-	for(auto& batch: data.labels().batches()){
+	for(auto& batch: data.labels()){
 		for(std::size_t j = 0; j != batch.size(); ++j){
 			int label = static_cast<int>(contents[batchStart+j].first);
 			unsigned int unsignedLabel = static_cast<unsigned int>(binaryLabels? 1 + (label-1)/2 : label-minPositiveLabel);
@@ -218,7 +218,7 @@ shark::LabeledData<T, blas::vector<typename T::value_type> > libsvm_importer_reg
 	std::size_t vectorDim = maxIndex + (hasZero ? 1 : 0);
 	shark::LabeledData<T, blas::vector<typename T::value_type> > data(numPoints, {vectorDim, 1}, batchSize);
 	std::size_t batchStart = 0;
-	for(auto& batch: data.labels().batches()){
+	for(auto& batch: data.labels()){
 		//copy labels
 		for(std::size_t j = 0; j != batch.size1(); ++j){
 			batch(j,0) = contents[batchStart + j].first;

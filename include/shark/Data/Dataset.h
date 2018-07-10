@@ -46,7 +46,6 @@
 #define SHARK_DATA_DATASET_H
 
 #include <boost/range/iterator_range.hpp>
-
 #include <shark/Core/Exception.h>
 #include <shark/Core/Threading/Algorithms.h>
 #include <shark/Core/utility/functional.h>
@@ -108,66 +107,41 @@ namespace shark {
 /// \endcode
 ///\todo expand docu
 template <class Type>
-class Data : public ISerializable
-{
-protected:
-	typedef detail::SharedContainer<Type> Container;
-
-	Container m_data;///< data
-	typename Batch<Type>::shape_type m_shape;///< shape of a datapoint
+class Data{
+private:
+	typedef Batch<Type> BatchTraits;
 public:
+	typedef std::size_t size_type;
+	typedef ptrdiff_t difference_type;
 	typedef Type element_type;
-	typedef typename Batch<Type>::shape_type shape_type;
+	typedef typename BatchTraits::shape_type shape_type;
+	typedef typename BatchTraits::type value_type;
+	typedef typename BatchTraits::type& reference;
+	typedef typename BatchTraits::type const& const_reference;
 
-	typedef typename Batch<element_type>::type batch_type;
-	typedef typename Batch<element_type>::type& batch_reference;
-	typedef typename Batch<element_type>::type const& const_batch_reference;
-
-	typedef std::vector<std::size_t> IndexSet;
-
-	/// \brief Two containers compare equal if they share the same data.
-	template <class T> bool operator == (const Data<T>& rhs) {
-		return (m_data == rhs.m_data);
-	}
-
-	/// \brief Two containers compare unequal if they don't share the same data.
-	template <class T> bool operator != (const Data<T>& rhs) {
-		return (! (*this == rhs));
-	}
-
-	template <class InputT, class LabelT> friend class LabeledData;
-
-	// RANGES
-	typedef detail::BatchRange<Data<Type> > batch_range;
-	typedef detail::BatchRange<Data<Type> const> const_batch_range;
-
-	///\brief Returns the range of batches.
-	const_batch_range batches()const{
-		return const_batch_range(this);
-	}
-	///\brief Returns the range of batches.
-	batch_range batches(){
-		return batch_range(this);
-	}
+	typedef std::vector<size_type> IndexSet;
 
 	///\brief Returns the number of batches of the set.
-	std::size_t numberOfBatches() const{
+	size_type size() const{
 		return m_data.size();
 	}
 	///\brief Returns the total number of elements.
-	std::size_t numberOfElements() const{
-		return m_data.numberOfElements();
+	size_type numberOfElements() const{
+		std::size_t numElems = 0;
+		for(auto const& p: m_data){
+			numElems+=batchSize(*p);
+		}
+		return numElems;
 	}
-	
 	
 	///\brief Returns the shape of the elements in the dataset.
 	shape_type const& shape() const{
 		return m_shape;
 	}
 	
-	///\brief Returns the shape of the elements in the dataset.
-	shape_type& shape(){
-		return m_shape;
+	///\brief Sets the shape of the elements in the dataset.
+	void setShape(shape_type const& shape){
+		m_shape = shape;
 	}
 
 	///\brief Check whether the set is empty.
@@ -176,19 +150,28 @@ public:
 	}
 
 	// BATCH ACCESS
-	batch_reference batch(std::size_t i){
-		return *(m_data.begin()+i);
+	reference operator[](size_type i){
+		return *m_data[i];
 	}
-	const_batch_reference batch(std::size_t i) const{
-		return *(m_data.begin()+i);
+	const_reference operator[](size_type i) const{
+		return *m_data[i];
+	}
+	// ITERATOR ACCESS
+	typedef IndexingIterator<Data > iterator;
+	typedef IndexingIterator<Data const > const_iterator;
+	iterator begin(){
+		return iterator(*this,0);
+	}
+	const_iterator begin()const{
+		return const_iterator(*this,0);
+	}
+	iterator end(){
+		return iterator(*this,size());
+	}
+	const_iterator end()const{
+		return const_iterator(*this,size());
 	}
 	
-	batch_reference operator[](std::size_t i){
-		return *(m_data.begin()+i);
-	}
-	const_batch_reference operator[](std::size_t i) const{
-		return *(m_data.begin()+i);
-	}
 
 	// CONSTRUCTORS
 
@@ -202,11 +185,11 @@ public:
 	///@param numElements number of data points stored in the dataset
 	///@param shape The shape of the elements to create
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	explicit Data(std::size_t numElements, shape_type const& shape, std::size_t batchSize = constants::DefaultBatchSize)
+	explicit Data(size_type numElements, shape_type const& shape, size_type batchSize = constants::DefaultBatchSize)
 	: m_data( detail::numberOfBatches(numElements, batchSize)), m_shape(shape){
-		auto batches = detail::optimalBatchSizes(numElements, batchSize);
-		for(std::size_t i = 0; i != batches.size(); ++i){
-			m_data.batch(i) = Batch<Type>::createBatchFromShape(shape, batches[i]);
+		auto partitioning = detail::optimalBatchSizes(numElements, batchSize);
+		for(size_type i = 0; i != partitioning.size(); ++i){
+			m_data[i] = boost::make_shared<value_type>(BatchTraits::createBatchFromShape(shape, partitioning[i]));
 		}
 	}
 	
@@ -216,43 +199,98 @@ public:
 	///
 	///@param partitioning batch sizes of the dataset
 	///@param shape The shape of the elements to create
-	explicit Data(std::vector<std::size_t> const& partitioning, shape_type const& shape)
+	explicit Data(std::vector<size_type> const& partitioning, shape_type const& shape)
 	: m_data( partitioning.size()), m_shape(shape){
-		for(std::size_t i = 0; i != numberOfBatches(); ++i){
-			m_data.batch(i) = Batch<Type>::createBatchFromShape(shape, partitioning[i]);
+		for(size_type i = 0; i != partitioning.size(); ++i){
+			m_data[i] = boost::make_shared<value_type>(BatchTraits::createBatchFromShape(shape, partitioning[i]));
 		}
 	}
 
 	// MISC
-
-	void read(InArchive& archive){
-		archive >> m_data;
-		archive >> m_shape;
+	bool operator==(Data const& other){
+		if(size() != other.size()) return false;
+		for(std::size_t i = 0; i != size(); ++i){
+			if(m_data[i] != other.m_data[i]) return false; 
+		}
+		return true;
+	}
+	
+	bool operator!=(Data const& other){
+		return !(*this == other);
+	}
+	
+	template<class Archive>
+	void serialize(Archive & archive, unsigned int const){
+		archive & m_data;
+		archive & m_shape;
+	}
+	
+	///\brief  Is the container independent of all others?
+	///
+	/// In other words, does it NOT share data?
+	/// This method checks for every batch if it is shared.
+	bool isIndependent() const{
+		for(std::size_t i = 0; i != m_data.size(); ++i){
+			if(!m_data[i].unique()){
+				return false;
+			}
+		}
+		return true;
 	}
 
-	void write(OutArchive& archive) const{
-		archive << m_data;
-		archive << m_shape;
-	}
-	///\brief This method makes the vector independent of all siblings and parents.
-	virtual void makeIndependent(){
-		m_data.makeIndependent();
+	///\brief Ensures that the container is independent.
+	///
+	/// Makes sure that the data of this instance can be
+	/// modified without affecting other containers. If
+	/// necessary, a deep copy of the data is made.
+	void makeIndependent(){
+		if (isIndependent()){
+			return;
+		}
+		Data dataCopy;
+		for(std::size_t i = 0; i != size(); ++i){
+			m_data[i] = boost::make_shared<value_type>(*m_data[i]);
+		}
 	}
 
 
 	// METHODS TO ALTER BATCH STRUCTURE
-	void splitBatch(std::size_t batch, std::size_t elementIndex){
-		m_data.splitBatch(m_data.begin()+batch,elementIndex);
+	///\brief splits the given batch in two parts.
+	///
+	///Order of elements remain unchanged. Data is not allowed to be shared for
+	///this to work.
+	void splitBatch(size_type batch, size_type elementIndex){
+		SHARK_RUNTIME_CHECK(isIndependent(), "Container is not Independent");
+
+		value_type& source= *m_data[batch];
+		SIZE_CHECK(elementIndex <= batchSize(source));
+		std::size_t leftElements = elementIndex;
+		std::size_t rightElements = batchSize(source)-leftElements;
+
+		if(leftElements == 0 || rightElements == 0)
+			return;
+
+		auto leftSplit = boost::make_shared<value_type>(BatchTraits::createBatch(getBatchElement(source,0),leftElements));
+		auto rightSplit = boost::make_shared<value_type>(BatchTraits::createBatch(getBatchElement(source,0),rightElements));
+		for(std::size_t i = 0; i != leftElements; ++i){
+			getBatchElement(*leftSplit,i) = getBatchElement(source,i);
+		}
+		for(std::size_t i = 0; i != rightElements; ++i){
+			getBatchElement(*rightSplit,i) = getBatchElement(source,i + leftElements);
+		}
+		m_data[batch] = rightSplit;//override old batch
+		m_data.insert(m_data.begin() + batch, leftSplit);
+
 	}
 
 	///\brief Splits the container into two independent parts. The front part remains in the container, the back part is returned.
 	///
-	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
-	///this to work.
-	Data splice(std::size_t batch){
+	///Order of elements remain unchanged. 
+	Data splice(size_type batch){
 		Data right;
-		right.m_data = m_data.splice(m_data.begin()+batch);
+		right.m_data.assign(m_data.begin() + batch, m_data.end());
 		right.m_shape = m_shape;
+		m_data.erase(m_data.begin() + batch,m_data.end());
 		return right;
 	}
 
@@ -261,25 +299,32 @@ public:
 	/// The batches are not copied but now referenced from both datasets. Thus changing the appended
 	/// dataset might change this one as well.
 	void append(Data const& other){
-		m_data.append(other.m_data);
+		m_data.insert(m_data.end(),other.m_data.begin(),other.m_data.end());
 	}
-	
-	void push_back(const_batch_reference batch){
-		m_data.push_back(batch);
+	void push_back(const_reference batch){
+		m_data.push_back(boost::make_shared<value_type>(batch));
 	}
 	
 	/// \brief Creates a vector with the batch sizes of every batch.
 	///
 	/// This method can be used together with to ensure
 	/// that two datasets have the same batch structure.
-	std::vector<std::size_t> getPartitioning()const{
-		return m_data.getPartitioning();
+	std::vector<size_type> getPartitioning()const{
+		std::vector<size_type> batchSizes(size());
+		for(std::size_t i = 0; i != size(); ++i){
+			batchSizes[i] = BatchTraits::size(*m_data[i]);
+		}
+		return batchSizes;
 	}
 
 	// SUBSETS
 	Data indexedSubset(IndexSet const& indices) const{
 		Data subset;
-		subset.m_data = Container(m_data,indices);
+		subset.m_data.resize(indices.size());
+		for(std::size_t i = 0; i != indices.size(); ++i){
+			SIZE_CHECK(indices[i] < size());
+			subset.m_data[i] = m_data[indices[i]];
+		}
 		subset.m_shape = m_shape;
 		return subset;
 	}
@@ -288,6 +333,9 @@ public:
 		swap(a.m_data,b.m_data);
 		std::swap(a.m_shape,b.m_shape);
 	}
+protected:
+	std::vector<boost::shared_ptr<value_type> > m_data; ;///< stores the data
+	shape_type m_shape;///< shape of a datapoint
 };
 
 /**
@@ -326,8 +374,7 @@ Data<T> shuffle(Data<T> const& data){
 /// this means that when accessing a batch by calling batch(i) or choosing one of the iterators
 /// one access the input batch by batch(i).input and the labels by batch(i).label
 template <class InputT, class LabelT>
-class LabeledData : public ISerializable
-{
+class LabeledData{
 public:
 	typedef InputT InputType;
 	typedef LabelT LabelType;
@@ -335,39 +382,14 @@ public:
 	typedef Data<LabelT> LabelContainer;
 	typedef typename InputContainer::IndexSet IndexSet;
 
+	typedef std::size_t size_type;
+	typedef ptrdiff_t difference_type;
 	typedef InputLabelPair<InputType,LabelType> element_type;
-
 	// TYPEDEFS FOR PAIRS
-	typedef typename Batch<element_type>::type batch_type;
-	typedef typename Batch<element_type>::proxy_type batch_reference;
-	typedef typename Batch<element_type>::const_proxy_type const_batch_reference;
 	typedef typename Batch<element_type>::shape_type shape_type;
-
-	typedef detail::BatchRange<LabeledData<InputType,LabelType> > batch_range;
-	typedef detail::BatchRange<LabeledData<InputType,LabelType> const> const_batch_range;
-	
-	///\brief Returns the range of batches.
-	const_batch_range batches()const{
-		return const_batch_range(this);
-	}
-	///\brief Returns the range of batches.
-	batch_range batches(){
-		return batch_range(this);
-	}
-
-	///\brief Returns the number of batches of the set.
-	std::size_t numberOfBatches() const{
-		return m_data.numberOfBatches();
-	}
-	///\brief Returns the total number of elements.
-	std::size_t numberOfElements() const{
-		return m_data.numberOfElements();
-	}
-
-	///\brief Check whether the set is empty.
-	bool empty() const{
-		return m_data.empty();
-	}
+	typedef typename Batch<element_type>::type value_type;
+	typedef typename Batch<element_type>::proxy_type reference;
+	typedef typename Batch<element_type>::const_proxy_type const_reference;
 
 	///\brief Access to inputs as a separate container.
 	InputContainer const& inputs() const{
@@ -387,11 +409,59 @@ public:
 		return m_label;
 	}
 
+	///\brief Returns the number of batches of the set.
+	size_type size() const{
+		return m_data.size();
+	}
+	///\brief Returns the total number of elements.
+	size_type numberOfElements() const{
+		return m_data.numberOfElements();
+	}
+	///\brief Check whether the set is empty.
+	bool empty() const{
+		return m_data.empty();
+	}
+	
+	
+	///\brief Returns the shape of the elements in the dataset.
+	shape_type shape() const{
+		return {m_data.shape(),m_label.shape()};
+	}
+	
+	///\brief Sets the shape of the elements in the dataset.
+	void setShape(shape_type const& shape){
+		m_data.setShape(shape.input);
+		m_label.setShape(shape.label);
+	}
+	
+
+	// BATCH ACCESS
+	reference operator[](size_type i){
+		return {m_data[i],m_label[i]};
+	}
+	const_reference operator[](size_type i) const{
+		return {m_data[i],m_label[i]};
+	}
+	// ITERATOR ACCESS
+	typedef IndexingIterator<LabeledData> iterator;
+	typedef IndexingIterator<LabeledData const> const_iterator;
+	iterator begin(){
+		return iterator(*this,0);
+	}
+	const_iterator begin()const{
+		return const_iterator(*this,0);
+	}
+	iterator end(){
+		return iterator(*this,size());
+	}
+	const_iterator end()const{
+		return const_iterator(*this,size());
+	}
+
 	// CONSTRUCTORS
 
 	///\brief Empty data set.
-	LabeledData()
-	{}
+	LabeledData(){}
 
 	///\brief Constructs a set holding a specific number of elements of a given shape.
 	///
@@ -402,7 +472,7 @@ public:
 	///@param numElements number of data points stored in the dataset
 	///@param shape The shape of the datapoints
 	///@param batchSize the size of the batches. if this is 0, the size is unlimited
-	explicit LabeledData(std::size_t numElements, shape_type const& shape, std::size_t batchSize = constants::DefaultBatchSize)
+	explicit LabeledData(size_type numElements, shape_type const& shape, size_type batchSize = constants::DefaultBatchSize)
 	: m_data(numElements, shape.input, batchSize), m_label(numElements, shape.label, batchSize){}
 	
 	///\brief Constructs a set with a given shape and a chosen partitioning
@@ -411,60 +481,29 @@ public:
 	///
 	///@param partitioning batch sizes of the dataset
 	///@param shape The shape of the elements to create
-	explicit LabeledData(std::vector<std::size_t> const& partitioning, shape_type const& shape)
+	explicit LabeledData(std::vector<size_type> const& partitioning, shape_type const& shape)
 	: m_data( partitioning, shape.input), m_label(partitioning,shape.label){}
 	
 	explicit LabeledData(Data<InputT> const& data, Data<LabelT> const& label)
 	: m_data(data), m_label(label){
-		SHARK_RUNTIME_CHECK(data.numberOfBatches() == label.numberOfBatches(), "number of input batches and number of label batches must agree");
-		for(std::size_t i  = 0; i != data.numberOfBatches(); ++i){
-			SHARK_RUNTIME_CHECK(batchSize(data.batch(i)) == batchSize(label.batch(i)), "batch sizes of inputs and labels must agree");
+		SHARK_RUNTIME_CHECK(data.size() == label.size(), "number of input batches and number of label batches must agree");
+		for(size_type i  = 0; i != data.size(); ++i){
+			SHARK_RUNTIME_CHECK(batchSize(data[i]) == batchSize(label[i]), "batch sizes of inputs and labels must agree");
 		}
 	}
 	
-	// BATCH ACCESS
-	batch_reference batch(std::size_t i){
-		return {m_data.batch(i),m_label.batch(i)};
-	}
-	const_batch_reference batch(std::size_t i) const{
-		return {m_data.batch(i),m_label.batch(i)};
-	}
-	
-	///\brief Returns the Shape of the inputs.
-	typename Batch<InputType>::shape_type const& inputShape() const{
-		return m_data.shape();
-	}
-	
-	///\brief Returns the Shape of the inputs.
-	typename Batch<InputType>::shape_type& inputShape(){
-		return m_data.shape();
-	}
-	
-	///\brief Returns the Shape of the labels.
-	typename Batch<LabelType>::shape_type const& labelShape() const{
-		return m_label.shape();
-	}
-	
-	///\brief Returns the Shape of the labels.
-	typename Batch<LabelType>::shape_type& labelShape(){
-		return m_label.shape();
-	}
-	
-	///\brief Returns the Shape of the elements
-	shape_type shape() const{
-		return {inputShape(), labelShape()};
-	}
-
 	// MISC
-
-	/// from ISerializable
-	void read(InArchive& archive){
-		archive & m_data;
-		archive & m_label;
+	bool operator==(LabeledData const& other){
+		return (m_data == other.m_data) && (m_label == other.m_label);
 	}
-
-	/// from ISerializable
-	void write(OutArchive& archive) const{
+	
+	bool operator!=(LabeledData const& other){
+		return !(*this == other);
+	}
+	
+	
+	template<class Archive>
+	void serialize(Archive & archive, unsigned int const){
 		archive & m_data;
 		archive & m_label;
 	}
@@ -475,7 +514,7 @@ public:
 		m_data.makeIndependent();
 	}
 
-	void splitBatch(std::size_t batch, std::size_t elementIndex){
+	void splitBatch(size_type batch, size_type elementIndex){
 		m_data.splitBatch(batch,elementIndex);
 		m_label.splitBatch(batch,elementIndex);
 	}
@@ -484,7 +523,7 @@ public:
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
 	///this to work.
-	LabeledData splice(std::size_t batch){
+	LabeledData splice(size_type batch){
 		return LabeledData(m_data.splice(batch),m_label.splice(batch));
 	}
 
@@ -506,7 +545,7 @@ public:
 	}
 	
 	void push_back(
-		const_batch_reference batch
+		const_reference batch
 	){
 		push_back(batch.input,batch.label);
 	}
@@ -516,7 +555,7 @@ public:
 	///
 	/// This method can be used to ensure
 	/// that two datasets have the same batch structure.
-	std::vector<std::size_t> getPartitioning()const{
+	std::vector<size_type> getPartitioning()const{
 		return m_data.getPartitioning();
 	}
 
@@ -566,8 +605,8 @@ template<>
 struct InferShape<Data<unsigned int > >{
 	static Shape infer(Data<unsigned int > const& labels){
 		unsigned int classes = 0;
-		for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
-			classes = std::max(classes,*std::max_element(labels.batch(i).begin(),labels.batch(i).end()));
+		for(std::size_t i = 0; i != labels.size(); ++i){
+			classes = std::max(classes,*std::max_element(labels[i].begin(),labels[i].end()));
 		}
 		return {classes+1};
 	}
@@ -576,14 +615,14 @@ struct InferShape<Data<unsigned int > >{
 template<class T>
 struct InferShape<Data<blas::vector<T> > >{
 	static Shape infer(Data<blas::vector<T> > const& f){
-		return {f.batch(0).size2()};
+		return {f[0].size2()};
 	}
 };
 
 template<class T>
 struct InferShape<Data<blas::compressed_vector<T> > >{
 	static Shape infer(Data<blas::compressed_vector<T> > const& f){
-		return {f.batch(0).size2()};
+		return {f[0].size2()};
 	}
 };
 
@@ -623,12 +662,12 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constant
 
 	//now create the batches taking the remainder into account
 	auto start= inputs.begin();
-	for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
-		std::size_t size = batchSize(data.batch(i));
-		data.batch(i) = createBatch<value_type>(start,start+size);
+	for(std::size_t i = 0; i != data.size(); ++i){
+		std::size_t size = batchSize(data[i]);
+		data[i] = createBatch<value_type>(start,start+size);
 		start = start+size;
 	}
-	data.shape() = detail::InferShape<Data<value_type> >::infer(data);
+	data.setShape(detail::InferShape<Data<value_type> >::infer(data));
 	return data;
 }
 
@@ -663,8 +702,8 @@ LabeledData<
 ///\brief Return the number of classes of a set of class labels with unsigned int label encoding
 inline unsigned int numberOfClasses(Data<unsigned int> const& labels){
 	unsigned int classes = 0;
-	for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
-		classes = std::max(classes,*std::max_element(labels.batch(i).begin(),labels.batch(i).end()));
+	for(std::size_t i = 0; i != labels.size(); ++i){
+		classes = std::max(classes,*std::max_element(labels[i].begin(),labels[i].end()));
 	}
 	return classes+1;
 }
@@ -672,8 +711,8 @@ inline unsigned int numberOfClasses(Data<unsigned int> const& labels){
 ///\brief Returns the number of members of each class in the dataset.
 inline std::vector<std::size_t> classSizes(Data<unsigned int> const& labels){
 	std::vector<std::size_t> classCounts(numberOfClasses(labels),0u);
-	for(std::size_t i = 0; i != labels.numberOfBatches(); ++i){
-		for(unsigned int elem: labels.batch(i)){
+	for(std::size_t i = 0; i != labels.size(); ++i){
+		for(unsigned int elem: labels[i]){
 			classCounts[elem]++;
 		}
 	}
@@ -719,7 +758,7 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 /// \param shape the resulting shape of the transformation
 template<class T,class Functor>
 typename boost::lazy_disable_if<
-	CanBeCalled<Functor,typename Data<T>::batch_type>,
+	CanBeCalled<Functor,typename Data<T>::reference>,
 	TransformedData<Functor,T>
 >::type
 transform(
@@ -729,8 +768,8 @@ transform(
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	Data<ResultType> result(data.getPartitioning(), shape);//TODO HACK!!!!
 	
-	threading::transform(data.batches(), result.batches(),
-		[&](typename Data<T>::const_batch_reference input ){
+	threading::transform(data, result,
+		[&](typename Data<T>::const_reference input ){
 			typedef BatchIterator<typename Batch<T>::type const> Iterator;
 			return createBatch<ResultType>(
 				boost::make_transform_iterator(Iterator(input, 0), f),
@@ -749,7 +788,7 @@ transform(
 /// \param shape the resulting shape of the transformation
 template<class T, class Functor>
 typename boost::lazy_enable_if<
-	CanBeCalled<Functor,typename Data<T>::batch_type>,
+	CanBeCalled<Functor,typename Data<T>::reference>,
 	TransformedData<Functor,T>
 >::type
 transform(
@@ -758,7 +797,7 @@ transform(
 ){
 	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
 	Data<ResultType> result(data.getPartitioning(), shape);
-	threading::transform(data.batches(), result.batches(), f, threading::globalThreadPool());
+	threading::transform(data, result, f, threading::globalThreadPool());
 	return result;
 }
 ///\brief Transforms the inputs of a dataset using a Functor f and returns the transformed result.
@@ -820,8 +859,8 @@ DatasetT splitAtElement(DatasetT& data, std::size_t elementIndex){
 
 	std::size_t batchPos = 0;
 	std::size_t batchStart = 0;
-	while(batchStart + batchSize(data.batch(batchPos)) < elementIndex){
-		batchStart += batchSize(data.batch(batchPos));
+	while(batchStart + batchSize(data[batchPos]) < elementIndex){
+		batchStart += batchSize(data[batchPos]);
 		++batchPos;
 	};
 	std::size_t splitPoint = elementIndex-batchStart;
@@ -897,8 +936,8 @@ LabeledData<I,unsigned int> binarySubProblem(
 	
 	bool foundZero = false;
 	bool foundOne = false;
-	for(std::size_t b = 0; b != data.numberOfBatches(); ++b){
-		unsigned int label = data.batch(b).label(0);
+	for(std::size_t b = 0; b != data.size(); ++b){
+		unsigned int label = data[b].label(0);
 		if(label == zeroClass || label == oneClass){
 			indexSet.push_back(b);
 			foundZero |= (label == zeroClass);
@@ -918,7 +957,7 @@ blas::vector<T> getColumn(Data<blas::vector<T> > const& data, std::size_t column
 	SHARK_ASSERT(dataDimension(data) > columnID);
 	blas::vector<T> newColumn(data.numberOfElements());
 	std::size_t start = 0;
-	for(blas::matrix<T> const& batch: data.batches()){
+	for(blas::matrix<T> const& batch: data){
 		std::size_t end = start + batch.size1();
 		noalias(subrange(newColumn,start, end)) = column(batch, columnID);
 		start = end;
@@ -931,7 +970,7 @@ void setColumn(Data<blas::vector<T>>& data, std::size_t columnID, blas::vector<T
 	SHARK_ASSERT(dataDimension(data) > columnID);
 	SHARK_ASSERT(data.numberOfElements() == newColumn.size());
 	std::size_t start = 0;
-	for(blas::matrix<T>& batch: data.batches()){
+	for(blas::matrix<T>& batch: data){
 		std::size_t end = start + batch.size1();
 		noalias(column(batch, columnID)) = subrange(newColumn,start, end);
 		start = end;

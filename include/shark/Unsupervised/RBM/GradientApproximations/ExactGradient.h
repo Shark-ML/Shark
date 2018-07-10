@@ -92,7 +92,7 @@ public:
 		
 		//calculate the expectation of the energy gradient with respect to the data
 		double negLogLikelihood = 0;
-		for(RealMatrix const& batch: m_data.batches()) {
+		for(RealMatrix const& batch: m_data) {
 			std::size_t currentBatchSize = batch.size1();
 			typename Gibbs::HiddenSample hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			typename Gibbs::VisibleSample visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());

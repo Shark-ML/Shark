@@ -142,7 +142,7 @@ public:
 		std::size_t indexFree = 0;
 		std::size_t indexBounded = 0;
 		std::size_t index = 0;
-		for ( auto const& batch: m_basis.batches()){
+		for ( auto const& batch: m_basis){
 			std::size_t size = batchSize(batch);
 			//compute kernel matrix for batch and store state for derivative
 			RealMatrix kernelResult;

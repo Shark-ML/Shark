@@ -198,8 +198,8 @@ BOOST_AUTO_TEST_CASE(Kernel_KMeans_multiple_gauss)
 			centers+=0.5*outer_prod(row(clusteringModel.alpha(),i),data[i]);
 		}
 		
-		for(std::size_t b = 0; b != dataset.numberOfBatches(); ++b){
-			RealMatrix const& batch = dataset.batch(b);
+		for(std::size_t b = 0; b != dataset.size(); ++b){
+			RealMatrix const& batch = dataset[b];
 			RealMatrix modelResult = clusteringModel(batch);
 			RealMatrix kernelResult = -kernel.featureDistanceSqr(batch,centers);
 			BOOST_REQUIRE_EQUAL(modelResult.size1(),kernelResult.size1());

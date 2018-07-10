@@ -130,6 +130,9 @@ public:
 	IndexingIterator(IndexingIterator<C> const& iterator)
 	: m_container(iterator.m_container){}
 
+	std::size_t index() const{
+		return (std::size_t) m_index;
+	}
 private:
 	friend class SHARK_ITERATOR_CORE_ACCESS;
 

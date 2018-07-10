@@ -113,7 +113,7 @@ public:
 		mep_decoder->setParameterVector(subrange(parameters,0,mep_decoder->numberOfParameters()));
 		mep_encoder->setParameterVector(subrange(parameters,mep_decoder->numberOfParameters(), numberOfVariables()));
 		
-		auto const& batch = m_data.batch(random::discrete(random::globalRng(), std::size_t(0), m_data.numberOfBatches() -1));
+		auto const& batch = m_data[random::discrete(random::globalRng(), std::size_t(0), m_data.size() -1)];
 		MatrixType hiddenResponse = (*mep_encoder)(batch);
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);
 		auto const& log_var = columns(hiddenResponse,hiddenResponse.size2()/2, hiddenResponse.size2());
@@ -139,7 +139,7 @@ public:
 		
 		boost::shared_ptr<State> stateEncoder = mep_encoder->createState();
 		boost::shared_ptr<State> stateDecoder = mep_decoder->createState();
-		auto const& batch = m_data.batch(random::discrete(random::globalRng(), std::size_t(0), m_data.numberOfBatches() -1));
+		auto const& batch = m_data[random::discrete(random::globalRng(), std::size_t(0), m_data.size() -1)];
 		MatrixType hiddenResponse;
 		mep_encoder->eval(batch,hiddenResponse,*stateEncoder);
 		auto const& mu = columns(hiddenResponse,0,hiddenResponse.size2()/2);

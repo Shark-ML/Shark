@@ -195,9 +195,9 @@ public:
 	double eval( SearchPointType const & parameter) const {
 		mpe_rbm->setParameterVector(parameter);
 		double result=0;
-		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
+		for(std::size_t i =0; i != m_data.size();++i){
 			result+=sum(mpe_rbm->energy().logUnnormalizedProbabilityVisible(
-				m_data.batch(i),blas::repeat(1.0,m_data.batch(i).size1())
+				m_data[i],blas::repeat(1.0,m_data[i].size1())
 			));
 		}
 		result/=m_data.numberOfElements();
@@ -212,12 +212,12 @@ public:
 		//create Energy from RBM
 		
 		//calculate the expectation of the energy gradient with respect to the data
-		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
-			std::size_t currentBatchSize=m_data.batch(i).size1();
+		for(std::size_t i=0; i != m_data.size(); i++){
+			std::size_t currentBatchSize=m_data[i].size1();
 			GibbsOperator<BinaryRBM>::HiddenSample hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			GibbsOperator<BinaryRBM>::VisibleSample visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 		
-			sampler.createSample(hiddenSamples,visibleSamples,m_data.batch(i));
+			sampler.createSample(hiddenSamples,visibleSamples,m_data[i]);
 			gradient.addVH(hiddenSamples, visibleSamples);
 		}
 		derivative = gradient.result();
@@ -276,9 +276,9 @@ public:
 		mpe_rbm->setParameterVector(parameter);
 		
 		double result=0;
-		for(std::size_t i =0; i != m_data.numberOfBatches();++i){
+		for(std::size_t i =0; i != m_data.size();++i){
 			result+=sum(mpe_rbm->energy().logUnnormalizedProbabilityHidden(
-				m_data.batch(i),blas::repeat(1,m_data.batch(i).size1())
+				m_data[i],blas::repeat(1,m_data[i].size1())
 			));
 		}
 		result/=m_data.numberOfElements();
@@ -293,12 +293,12 @@ public:
 		//create Energy from RBM
 
 		//calculate the expectation of the energy gradient with respect to the data
-		for(std::size_t i=0; i != m_data.numberOfBatches(); i++){
-			std::size_t currentBatchSize=m_data.batch(i).size1();
+		for(std::size_t i=0; i != m_data.size(); i++){
+			std::size_t currentBatchSize=m_data[i].size1();
 			GibbsOperator<BinaryRBM>::HiddenSample hiddenSamples(currentBatchSize,mpe_rbm->numberOfHN());
 			GibbsOperator<BinaryRBM>::VisibleSample visibleSamples(currentBatchSize,mpe_rbm->numberOfVN());
 		
-			hiddenSamples.state = m_data.batch(i);
+			hiddenSamples.state = m_data[i];
 			sampler.precomputeVisible(hiddenSamples,visibleSamples,blas::repeat(1.0,10));
 			gradient.addHV(hiddenSamples, visibleSamples);
 		}

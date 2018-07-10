@@ -39,7 +39,7 @@ template<class InputType, class LabelType,class OutputType, class SearchPointTyp
 class ErrorFunctionImpl:public FunctionWrapperBase<SearchPointType>{
 private:
 	typedef FunctionWrapperBase<SearchPointType> base_type;
-	typedef typename LabeledData<InputType, LabelType>::const_batch_reference batch_reference;
+	typedef typename LabeledData<InputType, LabelType>::const_reference reference;
 public:
 	typedef typename base_type::ResultType ResultType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
@@ -75,7 +75,7 @@ public:
 	double eval(SearchPointType const& point) const {
 		mep_model->setParameterVector(point);
 		
-		auto processBatch = [&](batch_reference batch){
+		auto processBatch = [&](reference batch){
 			typename Batch<OutputType>::type predictions;
 			mep_model->eval(batch.input,predictions);
 			return mep_loss->eval(batch.label, predictions);
@@ -83,13 +83,13 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
-			double error = processBatch(m_dataset.batch(batchIndex));
-			return error / shark::batchSize(m_dataset.batch(batchIndex));
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.size()-1);
+			double error = processBatch(m_dataset[batchIndex]);
+			return error / shark::batchSize(m_dataset[batchIndex]);
 		}
 		
 		//full batch case
-		double error = threading::mapAccumulate(m_dataset.batches(), 0.0, processBatch, threading::globalThreadPool());
+		double error = threading::mapAccumulate(m_dataset, 0.0, processBatch, threading::globalThreadPool());
 		return error/m_dataset.numberOfElements();
 	}
 
@@ -98,7 +98,7 @@ public:
 		
 		//compute error and derivative of single batch
 		typedef std::pair<double, FirstOrderDerivative> batch_result;
-		auto processBatch = [&](batch_reference batch){
+		auto processBatch = [&](reference batch){
 			boost::shared_ptr<State> state = mep_model->createState();
 			typename Batch<OutputType>::type predictions;
 			mep_model->eval(batch.input,predictions,*state);
@@ -115,11 +115,11 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
-			batch_result result = processBatch(m_dataset.batch(batchIndex));
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.size()-1);
+			batch_result result = processBatch(m_dataset[batchIndex]);
 			
 			derivative = std::move(result.second);
-			auto const& batch = m_dataset.batch(batchIndex);
+			auto const& batch = m_dataset[batchIndex];
 			derivative /= shark::batchSize(batch);
 			return result.first / shark::batchSize(batch);
 		}
@@ -133,7 +133,7 @@ public:
 		};
 		//compute the derivative in parallel
 		batch_result result = threading::mapReduce(
-			m_dataset.batches(),
+			m_dataset,
 			batch_result(0.0,FirstOrderDerivative(mep_model->numberOfParameters(), 0.0)),
 			processBatch, sumBatches,
 			threading::globalThreadPool()
@@ -159,7 +159,7 @@ class WeightedErrorFunctionImpl:public FunctionWrapperBase<SearchPointType>{
 private:
 	typedef FunctionWrapperBase<SearchPointType> base_type;
 	typedef std::pair<double, SearchPointType> batch_result;
-	typedef typename WeightedLabeledData<InputType, LabelType>::const_batch_reference batch_reference;
+	typedef typename WeightedLabeledData<InputType, LabelType>::const_reference reference;
 public:
 	typedef typename base_type::ResultType ResultType;
 	typedef typename base_type::FirstOrderDerivative FirstOrderDerivative;
@@ -198,7 +198,7 @@ public:
 
 		
 		//computes error of a single batch
-		auto processBatch = [&](batch_reference batch){
+		auto processBatch = [&](reference batch){
 			auto const& weights = batch.weight;
 			auto const& data = batch.data;
 			
@@ -215,12 +215,12 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
-			double error = processBatch(m_dataset.batch(batchIndex));
-			return error / sum(m_dataset.batch(batchIndex).weight);
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.size()-1);
+			double error = processBatch(m_dataset[batchIndex]);
+			return error / sum(m_dataset[batchIndex].weight);
 		}
 		
-		double error = threading::mapAccumulate(m_dataset.batches(), 0.0, processBatch, threading::globalThreadPool());
+		double error = threading::mapAccumulate(m_dataset, 0.0, processBatch, threading::globalThreadPool());
 		double sumWeights = sumOfWeights(m_dataset);
 		return error/sumWeights;
 	}
@@ -230,7 +230,7 @@ public:
 
 		//computes error and derivative of a single batch
 		typedef std::pair<double, FirstOrderDerivative> batch_result;
-		auto processBatch = [&](batch_reference batch){
+		auto processBatch = [&](reference batch){
 			auto const& weights = batch.weight;
 			auto const& data = batch.data;
 			
@@ -257,8 +257,8 @@ public:
 		
 		//minibatch case
 		if(m_useMiniBatches){
-			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.numberOfBatches()-1);
-			auto const& batch = m_dataset.batch(batchIndex);
+			std::size_t batchIndex = random::discrete(random::globalRng(), std::size_t(0),m_dataset.size()-1);
+			auto const& batch = m_dataset[batchIndex];
 			batch_result result = processBatch(batch);
 			
 			derivative = std::move(result.second);
@@ -275,7 +275,7 @@ public:
 		};
 		//compute the derivative in parallel
 		batch_result result = threading::mapReduce(
-			m_dataset.batches(),
+			m_dataset,
 			batch_result(0.0,FirstOrderDerivative(mep_model->numberOfParameters(), 0.0)),
 			processBatch, sumBatches,
 			threading::globalThreadPool()

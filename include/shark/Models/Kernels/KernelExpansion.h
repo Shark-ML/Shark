@@ -244,13 +244,13 @@ public:
 			output.clear();
 
 		std::size_t batchStart = 0;
-		for (std::size_t i=0; i != m_basis.numberOfBatches(); i++){
-			std::size_t batchEnd = batchStart+batchSize(m_basis.batch(i));
+		for (std::size_t i=0; i != m_basis.size(); i++){
+			std::size_t batchEnd = batchStart+batchSize(m_basis[i]);
 			//evaluate kernels
 			//results in a matrix of the form where a column consists of the kernel evaluation of 
 			//pattern i with respect to the batch of the basis,this gives a good memory alignment
 			//in the following matrix matrix product
-			RealMatrix kernelEvaluations = (*mep_kernel)(m_basis.batch(i),patterns);
+			RealMatrix kernelEvaluations = (*mep_kernel)(m_basis[i],patterns);
 			
 			//get the part of the alpha matrix which is suitable for this batch
 			auto batchAlpha = subrange(m_alpha,batchStart,batchEnd,0,m_alpha.size2());

@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET )
 		}
 		
 		//now the same with batches
-		svm_deriv.modelCSvmParameterDerivative(test.batch(0), weights, computed_derivative);
+		svm_deriv.modelCSvmParameterDerivative(test[0], weights, computed_derivative);
 		BOOST_CHECK_SMALL( summed -  computed_derivative(0) , 1e-6 );
 		
 	}
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE( KERNEL_EXPANSION_CSVM_DERIVATIVE_TRIVIAL_DATASET_UNCONSTRA
 		}
 		
 		//now the same with batches
-		svm_deriv.modelCSvmParameterDerivative(test.batch(0), weights, computed_derivative);
+		svm_deriv.modelCSvmParameterDerivative(test[0], weights, computed_derivative);
 		BOOST_CHECK_SMALL( summed -  computed_derivative(0) , 1e-4 );
 	}
 }

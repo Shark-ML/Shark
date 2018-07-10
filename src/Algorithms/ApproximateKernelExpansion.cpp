@@ -139,8 +139,8 @@ public:
 		
 		//compute the second term in the same way, taking the block structure into account.
 		std::size_t start = 0;
-		for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
-			RealMatrix const& batch = expansionBasis.batch(i);
+		for(std::size_t i = 0; i != expansionBasis.size(); ++i){
+			RealMatrix const& batch = expansionBasis[i];
 			kernel.weightedInputDerivative(
 				basis,batch,
 				beta % trans(rows(alpha,start,start+batch.size1())),
@@ -178,8 +178,8 @@ private:
 		//construct the linear part
 		linear = blas::repeat(0.0,m_numApproximatingVectors,outputs);
 		std::size_t start = 0;
-		for(std::size_t i = 0; i != expansionBasis.numberOfBatches(); ++i){
-			RealMatrix const& batch = expansionBasis.batch(i);
+		for(std::size_t i = 0; i != expansionBasis.size(); ++i){
+			RealMatrix const& batch = expansionBasis[i];
 			RealMatrix KzxBlock;
 			KzxState.emplace_back(std::move(kernel.createState()));
 			kernel.eval(basis,batch,KzxBlock,*KzxState[i]);

@@ -65,13 +65,13 @@ public:
 	/// an object of type LinearKernel<InputType>.
 	SimpleNearestNeighbors(Dataset const& dataset, Metric const* metric)
 	:m_dataset(dataset), mep_metric(metric){
-		this->m_inputShape=dataset.inputShape();
+		this->m_inputShape=dataset.shape().input;
 	}
 
 	///\brief Return the k nearest neighbors of the query point.
 	std::vector<DistancePair> getNeighbors(BatchInputType const& patterns, std::size_t k)const{
 		std::size_t numPatterns = batchSize(patterns);
-		std::size_t numBatches = m_dataset.numberOfBatches();
+		std::size_t numBatches = m_dataset.size();
 		std::size_t maxThreads = std::min(threading::globalThreadPool().numWorkers(),numBatches);
 		//heaps of key value pairs (distance,classlabel). One heap for every pattern and thread.
 		//For memory alignment reasons, all heaps are stored in one continuous array
@@ -91,7 +91,7 @@ public:
 			//iterate over all batches of this thread
 			for(std::size_t b = begin; b != end; ++b){ 
 				//evaluate distances between the points of the patterns and the batch
-				RealMatrix distances=mep_metric->featureDistanceSqr(patterns,m_dataset.batch(b).input);
+				RealMatrix distances=mep_metric->featureDistanceSqr(patterns,m_dataset[b].input);
 				
 				//now update the heaps with the distances
 				for(std::size_t p = 0; p != numPatterns; ++p){
@@ -108,7 +108,7 @@ public:
 						if(biggest->key >= distances(p,i)){
 							//push the smaller neighbor in the heap and replace the biggest one
 							biggest->key=distances(p,i);
-							biggest->value=getBatchElement(m_dataset.batch(b).label,i);
+							biggest->value=getBatchElement(m_dataset[b].label,i);
 							std::push_heap(heapStart,heapEnd);
 							//pop biggest element, so that 
 							//biggest is again the biggest element

@@ -116,18 +116,18 @@ public:
 		derivative.resize(mpe_rbm->numberOfParameters());
 		derivative.clear();
 		
-		std::size_t batchesForTraining = m_numBatches > 0? m_numBatches: m_data.numberOfBatches();
+		std::size_t batchesForTraining = m_numBatches > 0? m_numBatches: m_data.size();
 		std::size_t elements = 0;
 		//get the batches for this iteration
-		std::vector<std::size_t> batchIds(m_data.numberOfBatches());
+		std::vector<std::size_t> batchIds(m_data.size());
 		{
-			for(std::size_t i = 0; i != m_data.numberOfBatches(); ++i){
+			for(std::size_t i = 0; i != m_data.size(); ++i){
 				batchIds[i] = i;
 			}
 			std::shuffle(batchIds.begin(),batchIds.end(),mpe_rbm->rng());
 			batchIds.erase(batchIds.begin() + batchesForTraining, batchIds.end());
 			for(std::size_t i = 0; i != batchesForTraining; ++i){
-				elements += m_data.batch(batchIds[i]).size1();
+				elements += m_data[batchIds[i]].size1();
 			}
 		}
 		
@@ -135,7 +135,7 @@ public:
 			typename RBM::GradientType empiricalAverage(mpe_rbm);
 			typename RBM::GradientType modelAverage(mpe_rbm);
 		
-			RealMatrix const& batch = m_data.batch(i);
+			RealMatrix const& batch = m_data[i];
 			
 			//create the batches for evaluation
 			typename Operator::HiddenSample hiddenBatch(batch.size1(),mpe_rbm->numberOfHN());

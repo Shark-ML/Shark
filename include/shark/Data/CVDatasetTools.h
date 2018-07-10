@@ -66,7 +66,7 @@ public:
 		std::vector<std::size_t> const &foldStart
 	) : m_dataset(set){
 		for (std::size_t partition = 0; partition != foldStart.size(); partition++) {
-			std::size_t partitionSize = (partition+1 == foldStart.size()) ? set.numberOfBatches() : foldStart[partition+1];
+			std::size_t partitionSize = (partition+1 == foldStart.size()) ? set.size() : foldStart[partition+1];
 			partitionSize -= foldStart[partition];
 			//create the set with the indices of the validation set of the current partition
 			//also update the starting element
@@ -96,7 +96,7 @@ public:
 	IndexSet trainingFoldIndices(std::size_t i)const {
 		SIZE_CHECK(i < size());
 		IndexSet trainingFold;
-		detail::complement(m_validationFolds[i], m_dataset.numberOfBatches(), trainingFold);
+		detail::complement(m_validationFolds[i], m_dataset.size(), trainingFold);
 		return trainingFold;
 	}
 
@@ -197,7 +197,7 @@ CVFolds<LabeledData<I,L> > createCVSameSizeBalanced(
 
 			//if all elements for the current batch are found, create it
 			if (batchElements[fold].size() == batchSizes[batchNumber]) {
-				newSet.batch(validationSetStart[fold]) = subBatch(setView,batchElements[fold]);
+				newSet[validationSetStart[fold]] = subBatch(setView,batchElements[fold]);
 				batchElements[fold].clear();
 				++validationSetStart[fold];
 			}
@@ -327,16 +327,16 @@ CVFolds<LabeledData<I,L> > createCVBatch (
 	LabeledData<I,L> const& set,
 	std::size_t numberOfPartitions
 ){
-	std::vector<std::size_t> indizes(set.numberOfBatches());
-	for(std::size_t i= 0; i != set.numberOfBatches(); ++i)
+	std::vector<std::size_t> indizes(set.size());
+	for(std::size_t i= 0; i != set.size(); ++i)
 		indizes[i] = i;
 	shark::shuffle(indizes.begin(),indizes.end(), random::globalRng());
 	
 	typedef typename LabeledData<I,L>::IndexSet IndexSet;
 	
 	std::vector<IndexSet> folds;
-	std::size_t partitionSize = set.numberOfBatches()/numberOfPartitions;
-	std::size_t remainder = set.numberOfBatches() - partitionSize*numberOfPartitions;
+	std::size_t partitionSize = set.size()/numberOfPartitions;
+	std::size_t remainder = set.size() - partitionSize*numberOfPartitions;
 	std::vector<std::size_t>::iterator pos = indizes.begin();
 	for(std::size_t i = 0; i!= numberOfPartitions; ++i){
 		std::size_t size = partitionSize;
@@ -395,7 +395,7 @@ CVFolds<LabeledData<I,L> > createCVIndexed(
 		//if all elements for the current batch are found, create it
 		std::size_t batchNumber = validationSetStart[partition];
 		if (batchElements[partition].size() == batchSizes[batchNumber]) {
-			newSet.batch(validationSetStart[partition]) = subBatch(setView,batchElements[partition]);
+			newSet[validationSetStart[partition]] = subBatch(setView,batchElements[partition]);
 			batchElements[partition].clear();
 			++validationSetStart[partition];
 		}

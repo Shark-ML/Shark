@@ -47,9 +47,9 @@ namespace shark {
 ///\brief Transfers a dataset from CPU to the GPU/OpenCL device
 template<class Type, class T>
 Data<blas::vector<Type, blas::gpu_tag> > toGPU(Data<blas::vector<T, blas::cpu_tag> > const& data){
-	Data<blas::vector<Type, blas::gpu_tag> > data_gpu(data.numberOfBatches());
-	for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
-		data_gpu.batch(i) = blas::copy_to_gpu(data.batch(i));
+	Data<blas::vector<Type, blas::gpu_tag> > data_gpu(data.size());
+	for(std::size_t i = 0; i != data.size(); ++i){
+		data_gpu[i] = blas::copy_to_gpu(data[i]);
 	}
 	data_gpu.shape() = data.shape();
 	return data_gpu;
@@ -60,15 +60,15 @@ Data<blas::vector<Type, blas::gpu_tag> > toGPU(Data<blas::vector<T, blas::cpu_ta
 /// class labels are converted to one-hot encoding with a given Type
 template<class Type>
 Data<blas::vector<Type, blas::gpu_tag> > toGPU(Data<unsigned int > const& data){
-	Data<blas::vector<Type, blas::gpu_tag> > data_gpu(data.numberOfBatches());
+	Data<blas::vector<Type, blas::gpu_tag> > data_gpu(data.size());
 	std::size_t numClasses = numberOfClasses(data);
-	for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
-		auto const& labels = data.batch(i);
+	for(std::size_t i = 0; i != data.size(); ++i){
+		auto const& labels = data[i];
 		blas::matrix<Type> batch(labels.size(),numClasses, 0.0);
 		for(std::size_t j = 0; j != labels.size(); ++j){
 			batch(j,labels(j)) = Type(1);
 		}
-		data_gpu.batch(i) = blas::copy_to_gpu(batch);
+		data_gpu[i] = blas::copy_to_gpu(batch);
 	}
 	data_gpu.shape() = data.shape();
 	return data_gpu;

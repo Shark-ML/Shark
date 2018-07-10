@@ -57,12 +57,12 @@ void calculateRegularizedKernelMatrix(
 	double regularizer = 0
 ){
 	SHARK_RUNTIME_CHECK(regularizer >= 0, "regularizer must be >=0");
-	std::size_t B = dataset.numberOfBatches();
+	std::size_t B = dataset.size();
 	//get start of all batches in the matrix
 	//also include  the past the end position at the end
 	std::vector<std::size_t> batchStart(B+1,0);
 	for(std::size_t i = 1; i != B+1; ++i){
-		batchStart[i] = batchStart[i-1]+ batchSize(dataset.batch(i-1));
+		batchStart[i] = batchStart[i-1]+ batchSize(dataset[i-1]);
 	}
 	SIZE_CHECK(batchStart[B] == dataset.numberOfElements());
 	std::size_t N  = batchStart[B];//number of elements
@@ -74,7 +74,7 @@ void calculateRegularizedKernelMatrix(
 		std::size_t endX = batchStart[i+1];
 		std::size_t startY = batchStart[j];
 		std::size_t endY = batchStart[j+1];
-		auto const& submatrix = kernel(dataset.batch(i), dataset.batch(j));
+		auto const& submatrix = kernel(dataset[i], dataset[j]);
 		noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
 	};
 	threading::parallelND({B,B}, {1,1},computeSubmatrix, threading::globalThreadPool());
@@ -98,17 +98,17 @@ void calculateMixedKernelMatrix(
 	Data<InputType> const& dataset2,
 	blas::matrix_expression<M, Device>& matrix
 ){
-	std::size_t B1 = dataset1.numberOfBatches();
-	std::size_t B2 = dataset2.numberOfBatches();
+	std::size_t B1 = dataset1.size();
+	std::size_t B2 = dataset2.size();
 	//get start of all batches in the matrix
 	//also include  the past the end position at the end
 	std::vector<std::size_t> batchStart1(B1+1,0);
 	for(std::size_t i = 1; i != B1+1; ++i){
-		batchStart1[i] = batchStart1[i-1]+ batchSize(dataset1.batch(i-1));
+		batchStart1[i] = batchStart1[i-1]+ batchSize(dataset1[i-1]);
 	}
 	std::vector<std::size_t> batchStart2(B2+1,0);
 	for(std::size_t i = 1; i != B2+1; ++i){
-		batchStart2[i] = batchStart2[i-1]+ batchSize(dataset2.batch(i-1));
+		batchStart2[i] = batchStart2[i-1]+ batchSize(dataset2[i-1]);
 	}
 	SIZE_CHECK(batchStart1[B1] == dataset1.numberOfElements());
 	SIZE_CHECK(batchStart2[B2] == dataset2.numberOfElements());
@@ -122,7 +122,7 @@ void calculateMixedKernelMatrix(
 		std::size_t endX = batchStart1[i+1];
 		std::size_t startY = batchStart2[j];
 		std::size_t endY = batchStart2[j+1];
-		auto const& submatrix = kernel(dataset1.batch(i), dataset2.batch(j));
+		auto const& submatrix = kernel(dataset1[i], dataset2[j]);
 		noalias(subrange(matrix(),startX,endX,startY,endY))=submatrix;
 	};
 	threading::parallelND({B1,B2}, {1,1}, computeSubmatrix, threading::globalThreadPool());
@@ -193,14 +193,14 @@ RealVector calculateKernelMatrixParameterDerivative(
 	RealVector blockGradient(kp);//weighted gradient summed over the whole block
 	boost::shared_ptr<State> state = kernel.createState();
 	std::size_t startX = 0;
-	for (std::size_t i=0; i<dataset.numberOfBatches(); i++){
-		std::size_t sizeX= batchSize(dataset.batch(i));
+	for (std::size_t i=0; i<dataset.size(); i++){
+		std::size_t sizeX= batchSize(dataset[i]);
 		std::size_t startY = 0;//start of the current batch in y-direction
 		for (std::size_t j=0; j <= i; j++){
-			std::size_t sizeY= batchSize(dataset.batch(j));
-			kernel.eval(dataset.batch(i), dataset.batch(j),block,*state);
+			std::size_t sizeY= batchSize(dataset[j]);
+			kernel.eval(dataset[i], dataset[j],block,*state);
 			kernel.weightedParameterDerivative(
-				dataset.batch(i), dataset.batch(j),//points
+				dataset[i], dataset[j],//points
 				subrange(weights,startX,startX+sizeX,startY,startY+sizeY),//weights
 				*state,
 				blockGradient

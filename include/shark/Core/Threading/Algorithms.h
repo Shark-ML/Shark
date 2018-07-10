@@ -161,7 +161,7 @@ void mapApply(
 	FMap map, FApply apply, 
 	ThreadPool& pool
 ){
-	typedef decltype(map(elements.front())) return_type;
+	typedef decltype(map(elements[0])) return_type;
 	return_type temp;
 	//assign work to pipeline. make sure not to put too many tasks in the pipeline
 	Pipeline<return_type> pipeline(pool.numWorkers() *2, pool);
@@ -197,7 +197,7 @@ void mapApply(
 	FMap map, FApply apply, 
 	ThreadPool& pool
 ){
-	typedef decltype(map(elements1.front(), elements2.front())) return_type;
+	typedef decltype(map(elements1[0], elements2[0])) return_type;
 	return_type temp;
 	//assign work to pipeline. make sure not to put too many tasks in the pipeline
 	Pipeline<return_type> pipeline(pool.numWorkers() *2, pool);

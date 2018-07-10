@@ -98,7 +98,7 @@ SHARK_CREATE_BATCH_INTERFACE(
 
 namespace detail{
 template <class DataContainerT>
-class BaseWeightedDataset : public ISerializable
+class BaseWeightedDataset
 {
 public:
 	typedef typename DataContainerT::element_type DataType;
@@ -107,30 +107,20 @@ public:
 	typedef Data<WeightType> WeightContainer;
 	typedef typename DataContainer::IndexSet IndexSet;
 
-	// TYPEDEFS FOR PAIRS
+
+	typedef std::size_t size_type;
+	typedef ptrdiff_t difference_type;
 	typedef WeightedDataPair<DataType,WeightType> element_type;
-
 	// TYPEDEFS FOR PAIRS
-	typedef typename Batch<element_type>::type batch_type;
-	typedef typename Batch<element_type>::proxy_type batch_reference;
-	typedef typename Batch<element_type>::const_proxy_type const_batch_reference;
 	typedef typename Batch<element_type>::shape_type shape_type;
+	typedef typename Batch<element_type>::type value_type;
+	typedef typename Batch<element_type>::proxy_type reference;
+	typedef typename Batch<element_type>::const_proxy_type const_reference;
 
-	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> > batch_range;
-	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> const> const_batch_range;
-	
-	///\brief Returns the range of batches.
-	const_batch_range batches()const{
-		return const_batch_range(this);
-	}
-	///\brief Returns the range of batches.
-	batch_range batches(){
-		return batch_range(this);
-	}
 
 	///\brief Returns the number of batches of the set.
-	std::size_t numberOfBatches() const{
-		return m_data.numberOfBatches();
+	std::size_t size() const{
+		return m_data.size();
 	}
 	///\brief Returns the total number of elements.
 	std::size_t numberOfElements() const{
@@ -164,12 +154,20 @@ public:
 	shape_type shape() const{
 		return {m_data.shape(), {}};
 	}
+	
+	///\brief Set the shape of the elements in the dataset.
+	void setShape(shape_type const& shape){
+		m_data.setShape(shape.data);
+	}
+	///\brief Set the shape of the elements in the dataset.
+	void setShape( typename DataContainer::shape_type const& shape){
+		m_data.setShape(shape);
+	}
 
 	// CONSTRUCTORS
 
 	///\brief Constructs an Empty data set.
-	BaseWeightedDataset()
-	{}
+	BaseWeightedDataset(){}
 
 	/// \brief Construtor using a single element as blueprint to create a dataset with a specified number of elements.
 	///
@@ -192,8 +190,8 @@ public:
 	{
 		SHARK_RUNTIME_CHECK(data.numberOfElements() == weights.numberOfElements(), "[ BaseWeightedDataset::WeightedData] number of data and number of weights must agree");
 #ifndef DNDEBUG
-		for(std::size_t i  = 0; i != data.numberOfBatches(); ++i){
-			SIZE_CHECK(batchSize(data.batch(i)) == batchSize(weights.batch(i)));
+		for(std::size_t i  = 0; i != data.size(); ++i){
+			SIZE_CHECK(batchSize(data[i]) == batchSize(weights[i]));
 		}
 #endif
 	}
@@ -201,29 +199,38 @@ public:
 	///\brief Construction from data. All points get the same weight assigned
 	BaseWeightedDataset(DataContainer const& data, double weight)
 	: m_data(data), m_weights(data.getPartitioning(), 1){
-		for(std::size_t i = 0; i != numberOfBatches(); ++i){
-			m_weights.batch(i) = Batch<WeightType>::type(batchSize(m_data.batch(i)),weight);
+		for(std::size_t i = 0; i != size(); ++i){
+			m_weights[i] = Batch<WeightType>::type(batchSize(m_data[i]),weight);
 		}
 	}
 
 	// BATCH ACCESS
-	batch_reference batch(std::size_t i){
-		return {m_data.batch(i),m_weights.batch(i)};
+	reference operator[](std::size_t i){
+		return {m_data[i],m_weights[i]};
 	}
-	const_batch_reference batch(std::size_t i) const{
-		return {m_data.batch(i),m_weights.batch(i)};
+	const_reference operator[](std::size_t i) const{
+		return {m_data[i],m_weights[i]};
+	}
+	
+	// ITERATOR ACCESS
+	typedef IndexingIterator<BaseWeightedDataset> iterator;
+	typedef IndexingIterator<BaseWeightedDataset const> const_iterator;
+	iterator begin(){
+		return iterator(*this,0);
+	}
+	const_iterator begin()const{
+		return const_iterator(*this,0);
+	}
+	iterator end(){
+		return iterator(*this,size());
+	}
+	const_iterator end()const{
+		return const_iterator(*this,size());
 	}
 
 	// MISC
-
-	/// from ISerializable
-	void read(InArchive& archive){
-		archive & m_data;
-		archive & m_weights;
-	}
-
-	/// from ISerializable
-	void write(OutArchive& archive) const{
+	template<class Archive>
+	void serialize(Archive & archive, unsigned int const){
 		archive & m_data;
 		archive & m_weights;
 	}
@@ -284,8 +291,8 @@ private:
 /// representation of data. In addition it holds and provides access to the corresponding weights.
 ///
 /// WeightedData tries to mimic the underlying data as pairs of data points and weights.
-/// this means that when accessing a batch by calling batch(i) or choosing one of the iterators
-/// one access the input batch by batch(i).data and the weights by batch(i).weight
+/// this means that when accessing a batch by calling[i] or choosing one of the iterators
+/// one access the input batch by[i].data and the weights by[i].weight
 ///
 ///this also holds true for single element access using operator(). Be aware, that direct access to element is
 ///a linear time operation. So it is not advisable to iterate over the elements, but instead iterate over the batches.
@@ -327,27 +334,7 @@ public:
 	WeightedData(Data<DataType> const& data, double weight)
 	: base_type(data,weight)
 	{}
-		
-	//we additionally add the two below for compatibility with Data
-		
-	///\brief Access to the inputs as a separate container.
-	Data<DataT> const& inputs() const{
-		return data();
-	}
-	///\brief Access to the inputs as a separate container.
-	Data<DataT>& inputs(){
-		return data();
-	}
 	
-	///\brief Returns the Shape of the data.
-	Shape const& shape() const{
-		return data().shape();
-	}
-	
-	///\brief Returns the Shape of the data.
-	Shape& shape(){
-		return data().shape();
-	}
 	///\brief Splits the container into two independent parts. The left part remains in the container, the right is stored as return type
 	///
 	///Order of elements remain unchanged. The SharedVector is not allowed to be shared for
@@ -406,9 +393,9 @@ typename boost::disable_if<
 /// representation of data. In addition it holds and provides access to the corresponding weights.
 ///
 /// WeightedLabeledData tries to mimic the underlying data as pairs of data tuples(input,label) and weights.
-/// this means that when accessing a batch by calling batch(i) or choosing one of the iterators
-/// one access the databatch by batch(i).data and the weights by batch(i).weight. to access the points and labels
-/// use batch(i).data.input and batch(i).data.label
+/// this means that when accessing a batch by calling[i] or choosing one of the iterators
+/// one access the databatch by[i].data and the weights by[i].weight. to access the points and labels
+/// use[i].data.input and[i].data.label
 ///
 ///this also holds true for single element access using operator(). Be aware, that direct access to element is
 ///a linear time operation. So it is not advisable to iterate over the elements, but instead iterate over the batches.
@@ -434,15 +421,13 @@ public:
 	// CONSTRUCTORS
 
 	///\brief Empty data set.
-	WeightedLabeledData()
-	{}
+	WeightedLabeledData(){}
 
 	///\brief Create an empty set with just the correct number of batches.
 	///
 	/// The user must initialize the dataset after that by himself.
 	WeightedLabeledData(std::size_t numBatches)
-	: base_type(numBatches)
-	{}
+	: base_type(numBatches){}
 
 	/// \brief Construtor using a single element as blueprint to create a dataset with a specified number of elements.
 	///
@@ -483,26 +468,6 @@ public:
 	///\brief Access to the labels as a separate container.
 	Data<LabelType>& labels(){
 		return data().labels();
-	}
-	
-	///\brief Returns the Shape of the inputs.
-	Shape const& inputShape() const{
-		return inputs().shape();
-	}
-	
-	///\brief Returns the Shape of the inputs.
-	Shape& inputShape(){
-		return inputs().shape();
-	}
-	
-	///\brief Returns the Shape of the labels.
-	Shape const& labelShape() const{
-		return labels().shape();
-	}
-	
-	///\brief Returns the Shape of the labels.
-	Shape& labelShape(){
-		return labels().shape();
 	}
 	
 	/// \brief Constructs an WeightedData object for the inputs.
@@ -591,8 +556,8 @@ inline std::vector<std::size_t> classSizes(WeightedLabeledData<InputType, LabelT
 template<class InputType>
 double sumOfWeights(WeightedData<InputType> const& dataset){
 	double weightSum = 0;
-	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-		weightSum += sum(dataset.batch(i).weight);
+	for(std::size_t i = 0; i != dataset.size(); ++i){
+		weightSum += sum(dataset[i].weight);
 	}
 	return weightSum;
 }
@@ -600,8 +565,8 @@ double sumOfWeights(WeightedData<InputType> const& dataset){
 template<class InputType, class LabelType>
 double sumOfWeights(WeightedLabeledData<InputType,LabelType> const& dataset){
 	double weightSum = 0;
-	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-		weightSum += sum(dataset.batch(i).weight);
+	for(std::size_t i = 0; i != dataset.size(); ++i){
+		weightSum += sum(dataset[i].weight);
 	}
 	return weightSum;
 }
@@ -665,8 +630,7 @@ WeightedLabeledData< InputType, LabelType> bootstrap(
 		std::size_t index = random::discrete(random::globalRng(), std::size_t(0),bootStrapSize-1);
 		booststrap[index].weight += 1.0;
 	}
-	bootstrapSet.inputShape() = dataset.inputShape();
-	bootstrapSet.labelShape() = dataset.labelShape();
+	bootstrapSet.setShape(dataset.shape());
 	return bootstrapSet;
 }
 
@@ -694,7 +658,7 @@ WeightedData<InputType> bootstrap(
 		std::size_t index = random::discrete(random::globalRng(), std::size_t(0),bootStrapSize-1);
 		booststrap[index].weight += 1.0;
 	}
-	bootstrapSet.shape() = dataset.shape();
+	bootstrapSet.setShape(dataset.shape());
 	return bootstrapSet;
 }
 

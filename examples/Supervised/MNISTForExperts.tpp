@@ -22,20 +22,20 @@ int main(int argc, char **argv)
 //###begin<data>
 	LabeledData<FloatVector,unsigned int> data;
 	importSparseData( data, argv[1] , 784 , 100);
-	std::cout<<"input shape:"<< data.inputShape()<<std::endl;
-	std::cout<<"output shape:"<< data.labelShape()<<std::endl;
-	data.inputShape() = {28,28,1}; //store shape for model creation
-	std::cout<<"input shape:"<< data.inputShape()<<std::endl;
+	std::cout<<"input shape:"<< data.shape().input<<std::endl;
+	std::cout<<"label shape:"<< data.shape().label<<std::endl;
+	data.shape().input = {28,28,1}; //store shape for model creation
+	std::cout<<"input shape:"<< data.shape().input<<std::endl;
 //###end<data>
 
 	//Step 2: define model
 //###begin<model_creation>
-	Conv2DModel<FloatVector, RectifierNeuron> conv1(data.inputShape(), {32, 5, 5});
+	Conv2DModel<FloatVector, RectifierNeuron> conv1(data.shape().input, {32, 5, 5});
 	PoolingLayer<FloatVector> pooling1(conv1.outputShape(), {2, 2}, Pooling::Maximum, Padding::Valid);
 	Conv2DModel<FloatVector, RectifierNeuron> conv2(pooling1.outputShape(), {64, 5, 5});
 	PoolingLayer<FloatVector> pooling2(conv2.outputShape(), {2, 2}, Pooling::Maximum, Padding::Valid);
 	LinearModel<FloatVector, RectifierNeuron> dense1(pooling2.outputShape(), 1024, true);
-	LinearModel<FloatVector> dense2(dense1.outputShape(), data.labelShape(), true);
+	LinearModel<FloatVector> dense2(dense1.outputShape(), data.shape().label, true);
 	auto model = conv1 >> pooling1 >> conv2 >> pooling2 >> dense1 >> dense2;
 //###end<model_creation>
 	

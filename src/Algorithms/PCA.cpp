@@ -67,15 +67,15 @@ void PCA::setData(Data<RealVector> const& inputs) {
 		//than S = B0 B0^T B0 B1^T
 		//               B1 B0^T  B1 B1^T
 		std::size_t start1 = 0;
-		for(std::size_t b1 = 0; b1 != inputs.numberOfBatches(); ++b1){
-			std::size_t batchSize1 = inputs.batch(b1).size1();
-			RealMatrix X1 = inputs.batch(b1)-repeat(m_mean,batchSize1);
+		for(std::size_t b1 = 0; b1 != inputs.size(); ++b1){
+			std::size_t batchSize1 = inputs[b1].size1();
+			RealMatrix X1 = inputs[b1]-repeat(m_mean,batchSize1);
 			std::size_t start2 = 0;
 			//calculate off-diagonal blocks
 			//and the block X2 X1^T is the transpose of X1X2^T and thus can bee calculated for free.
 			for(std::size_t b2 = 0; b2 != b1; ++b2){
-				std::size_t batchSize2 = inputs.batch(b2).size1();
-				RealMatrix X2 = inputs.batch(b2)-repeat(m_mean,batchSize2);
+				std::size_t batchSize2 = inputs[b2].size1();
+				RealMatrix X2 = inputs[b2]-repeat(m_mean,batchSize2);
 				auto X1X2T= subrange(S,start1,start1+batchSize1,start2,start2+batchSize2);
 				auto X2X1T= subrange(S,start2,start2+batchSize2,start1,start1+batchSize1);
 				noalias(X1X2T) = prod(X1,trans(X2));// X1 X2^T
@@ -96,10 +96,10 @@ void PCA::setData(Data<RealVector> const& inputs) {
 		// compute true eigenvectors
 		//eigenv=X0^T U
 		std::size_t batchStart  = 0;
-		for(std::size_t b = 0; b != inputs.numberOfBatches(); ++b){
-			std::size_t batchSize = inputs.batch(b).size1();
+		for(std::size_t b = 0; b != inputs.size(); ++b){
+			std::size_t batchSize = inputs[b].size1();
 			std::size_t batchEnd = batchStart+batchSize;
-			RealMatrix X = inputs.batch(b)-repeat(m_mean,batchSize);
+			RealMatrix X = inputs[b]-repeat(m_mean,batchSize);
 			noalias(m_eigenvectors) += prod(trans(X),rows(eigen.Q(),batchStart,batchEnd));
 			batchStart = batchEnd;
 		}

@@ -224,9 +224,9 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::
 	if (numberOfClasses(dataset) != 2) oneMinusOne = false;
 
 	std::vector< KeyValuePair<unsigned int, std::pair<std::size_t, std::size_t> > > order;
-	for (std::size_t b=0; b<dataset.numberOfBatches(); b++)
+	for (std::size_t b=0; b<dataset.size(); b++)
 	{
-		auto batch = dataset.batch(b);
+		auto batch = dataset[b];
 		for (std::size_t i=0; i<batchSize(batch); i++)
 		{
 			order.emplace_back(getBatchElement(batch, i).label, std::make_pair(b, i));
@@ -239,7 +239,7 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, std::
 
 	for (auto const& p : order)
 	{
-		auto element = getBatchElement(dataset.batch(p.value.first), p.value.second);
+		auto element = getBatchElement(dataset[p.value.first], p.value.second);
 		// apply transformation to label and write it to file
 		if (oneMinusOne) stream << 2*int(element.label)-1 << " ";
 		//libsvm file format documentation is scarce, but by convention the first class seems to be 1..
@@ -283,9 +283,9 @@ void exportSparseData(LabeledData<InputType, unsigned int> const& dataset, const
 template<typename InputType>
 void exportSparseData(LabeledData<InputType, RealVector> const& dataset, std::ostream& stream)
 {
-	for (std::size_t b=0; b<dataset.numberOfBatches(); b++)
+	for (std::size_t b=0; b<dataset.size(); b++)
 	{
-		auto batch = dataset.batch(b);
+		auto batch = dataset[b];
 		for (std::size_t i=0; i<batchSize(batch); i++)
 		{
 			auto element = getBatchElement(batch, i);

@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 		optimizer.step(error);
 		if(i % 100 == 0){
 			//create some reconstructions for evaluation
-			auto const& batch = data.batch(0).input;
+			auto const& batch = data[0].input;
 			RealMatrix reconstructed = decoder(error.sampleZ(optimizer.solution().point, batch));
 			
 			std::cout<<i<<" "<<optimizer.solution().value<<" "<<loss(batch, reconstructed)/batch.size1()<<std::endl;

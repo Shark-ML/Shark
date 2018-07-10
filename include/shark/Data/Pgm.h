@@ -189,8 +189,8 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 	while(gridX*gridY < numFilters) ++gridX;
 	
 	double minimum = std::numeric_limits<double>::max();
-	for(std::size_t i = 0; i != filters.numberOfBatches(); ++i){
-		minimum =std::min(minimum,min(filters.batch(i)));
+	for(std::size_t i = 0; i != filters.size(); ++i){
+		minimum =std::min(minimum,min(filters[i]));
 	}
 	
 	RealMatrix image((height+1)*gridY,(width+1)*gridX,minimum);
@@ -248,7 +248,7 @@ void importPGMSet(std::string const&p, Data<T> &set){
 		}
 	}
 	set = createDataFromRange(container);
-	set.shape() = {info.front().second,info.front().first};
+	set.setShape({info.front().second,info.front().first});
 }
 
 /** @}*/

@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( DenseSubrangeKernel_Test)
 			BOOST_CHECK_CLOSE(kernelMatTest(i,j),kernelMat(i,j),1.e-5);
 		}
 	}
-	testEval(kernel,dataset.batch(0),dataset.batch(3));
+	testEval(kernel,dataset[0],dataset[3]);
 	testKernelDerivative(kernel,22,1.e-7);
 	testKernelInputDerivative(kernel,22);
 }

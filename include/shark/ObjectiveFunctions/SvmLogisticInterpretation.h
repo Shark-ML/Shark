@@ -217,15 +217,15 @@ public:
 		double error = 0;
 		for (std::size_t i=0; i<m_numFolds; i++) {
 			LabeledData<InputType, unsigned int> validation = m_folds.validation(i);
-			for(std::size_t j = 0; j != validation.numberOfBatches(); ++j){
-				auto const&  score = validation_scores[i].batch(j);
+			for(std::size_t j = 0; j != validation.size(); ++j){
+				auto const&  score = validation_scores[i][j];
 				RealMatrix logRegGradient;
 				CrossEntropy<unsigned int, RealVector> logistic_loss;
 				error += logistic_loss.evalDerivative(score.label,logistic_model.decisionFunction()(score.input),logRegGradient);
 				logRegGradient *= logistic_model.decisionFunction().matrix()(0,0);//backprop through the log-reg model
 				//backprop through SVM
 				RealVector der;
-				svm_derivatives[i].modelCSvmParameterDerivative(validation.batch(j).input, logRegGradient, der);
+				svm_derivatives[i].modelCSvmParameterDerivative(validation[j].input, logRegGradient, der);
 				noalias(derivative) += der; //accumulate
 			}
 		}

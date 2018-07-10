@@ -70,20 +70,11 @@ public:
 	DifferenceKernelMatrix(
 				AbstractKernelFunction<InputType> const& kernel,
 				Data<InputType> const& dataset,
-				std::vector<std::pair<std::size_t, std::size_t>> const& pairs)
+				std::vector<std::pair<std::size_t, std::size_t> > const& pairs)
 	: m_kernel(kernel)
 	, m_dataset(dataset)
-	, m_indices(pairs.size())
-	{
-		DataView< Data<InputType> const > view(dataset);
-		for (std::size_t i=0; i<pairs.size(); i++)
-		{
-			std::pair<std::size_t, std::size_t> const& p = pairs[i];
-			m_indices[i] = std::make_tuple(
-					view.batch(p.first), view.positionInBatch(p.first),
-					view.batch(p.second), view.positionInBatch(p.second));
-		}
-	}
+	, m_pairs(pairs)
+	{}
 
 
 	/// return a single matrix entry
@@ -91,27 +82,12 @@ public:
 	{ return entry(i, j); }
 
 	/// return a single matrix entry
-	QpFloatType entry(std::size_t i, std::size_t j) const
-	{
-		std::tuple<std::size_t, std::size_t, std::size_t, std::size_t> const& pi = m_indices[i];
-		std::tuple<std::size_t, std::size_t, std::size_t, std::size_t> const& pj = m_indices[j];
-		std::size_t batch_si = std::get<0>(pi);
-		std::size_t index_si = std::get<1>(pi);
-		std::size_t batch_gi = std::get<2>(pi);
-		std::size_t index_gi = std::get<3>(pi);
-		std::size_t batch_sj = std::get<0>(pj);
-		std::size_t index_sj = std::get<1>(pj);
-		std::size_t batch_gj = std::get<2>(pj);
-		std::size_t index_gj = std::get<3>(pj);
-		auto si = getBatchElement(m_dataset.batch(batch_si), index_si);
-		auto gi = getBatchElement(m_dataset.batch(batch_gi), index_gi);
-		auto sj = getBatchElement(m_dataset.batch(batch_sj), index_sj);
-		auto gj = getBatchElement(m_dataset.batch(batch_gj), index_gj);
-		double k_gi_gj = m_kernel(gi, gj);
-		double k_gi_sj = m_kernel(gi, sj);
-		double k_si_gj = m_kernel(si, gj);
-		double k_si_sj = m_kernel(si, sj);
-		return (k_gi_gj - k_gi_sj - k_si_gj + k_si_sj);
+	QpFloatType entry(std::size_t i, std::size_t j) const{
+		auto si = m_dataset[m_pairs[i].first];
+		auto gi = m_dataset[m_pairs[i].second];
+		auto sj = m_dataset[m_pairs[j].first];
+		auto gj = m_dataset[m_pairs[j].second];
+		return m_kernel(gi, gj) - m_kernel(gi, sj) - m_kernel(si, gj) + m_kernel(si, sj);
 	}
 
 	/// \brief Computes the i-th row of the kernel matrix.
@@ -119,7 +95,8 @@ public:
 	/// The entries start,...,end of the i-th row are computed and stored in storage.
 	/// There must be enough room for this operation preallocated.
 	void row(std::size_t i, std::size_t start, std::size_t end, QpFloatType* storage) const {
-		for (std::size_t j = start; j < end; j++) storage[j-start] = entry(i, j);
+		for (std::size_t j = start; j < end; j++) 
+			storage[j-start] = entry(i, j);
 	}
 
 	/// \brief Computes the kernel-matrix
@@ -133,25 +110,24 @@ public:
 	}
 
 	/// swap two variables
-	void flipColumnsAndRows(std::size_t i, std::size_t j)
-	{
+	void flipColumnsAndRows(std::size_t i, std::size_t j){
 		using namespace std;
-		swap(m_indices[i], m_indices[j]);
+		swap(m_pairs[i], m_pairs[j]);
 	}
 
     /// return the size of the quadratic matrix
     std::size_t size() const
-    { return m_indices.size(); }
+    { return m_pairs.size(); }
 
 protected:
 	/// underlying kernel function
 	AbstractKernelFunction<InputType> const& m_kernel;
 
 	/// underlying set of points
-	Data<InputType> const& m_dataset;
+	DataView< Data<InputType> const > m_dataset;
 
 	/// pairs of points defining the matrix components
-	std::vector<std::tuple<std::size_t, std::size_t, std::size_t, std::size_t>> m_indices;
+	std::vector<std::pair<std::size_t, std::size_t> > m_pairs;
 };
 
 }
