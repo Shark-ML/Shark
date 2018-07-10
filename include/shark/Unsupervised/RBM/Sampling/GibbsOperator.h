@@ -106,14 +106,14 @@ public:
 	///\brief Samples a new batch of states of the hidden units using their precomputed statistics.
 	void sampleHidden(HiddenSample& Sample)const{
 		//sample state of the hidden neurons, input and statistics was allready computed by precompute
-		mpe_rbm->hiddenNeurons().sample(Sample.statistics, Sample.state, m_alphaHidden, mpe_rbm->rng());
+		mpe_rbm->hiddenNeurons().sample(Sample.statistics, Sample.state, m_alphaHidden, random::globalRng());
 	}
 
 
 	///\brief Samples a new batch of states of the visible units using their precomputed statistics.
 	void sampleVisible(VisibleSample& Sample)const{
 		//sample state of the visible neurons, input and statistics was allready computed by precompute
-		mpe_rbm->visibleNeurons().sample(Sample.statistics, Sample.state, m_alphaVisible, mpe_rbm->rng());
+		mpe_rbm->visibleNeurons().sample(Sample.statistics, Sample.state, m_alphaVisible, random::globalRng());
 	}
 	
 	/// \brief Applies the Gibbs operator a number of times to a given sample.

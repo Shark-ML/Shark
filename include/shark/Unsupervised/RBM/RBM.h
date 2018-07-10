@@ -82,7 +82,7 @@ private:
 			noalias(output) = hiddenNeurons().mean(statisticsBatch);
 		}
 		else{
-			hiddenNeurons().sample(statisticsBatch,output,0.0,rng());
+			hiddenNeurons().sample(statisticsBatch,output,0.0, random::globalRng());
 		}
 	}
 
@@ -103,7 +103,7 @@ private:
 			noalias(output) = visibleNeurons().mean(statisticsBatch);
 		}
 		else{
-			visibleNeurons().sample(statisticsBatch,output,0.0,rng());
+			visibleNeurons().sample(statisticsBatch,output,0.0, random::globalRng());
 		}
 	}
 public:
@@ -182,11 +182,6 @@ public:
 	///\brief Returns the energy function of the RBM.
 	EnergyType energy()const{
 		return EnergyType(*this);
-	}
-	
-	///\brief Returns the random number generator associated with this RBM.
-	random::rng_type& rng() const{
-		return random::globalRng();
 	}
 	
 	///\brief Sets the type of evaluation, eval will perform.
