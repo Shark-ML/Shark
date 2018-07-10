@@ -50,7 +50,7 @@ RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batc
 		for(std::size_t i = 0; i != data.size(); ++i){
 			batchIds[i] = i;
 		}
-		std::shuffle(batchIds.begin(),batchIds.end(),rbm.rng());
+		std::shuffle(batchIds.begin(),batchIds.end(), random::globalRng());
 		batchIds.erase(batchIds.begin() + batchesForTraining, batchIds.end());
 		for(std::size_t i = 0; i != batchesForTraining; ++i){
 			elements += data[batchIds[i]].size1();
