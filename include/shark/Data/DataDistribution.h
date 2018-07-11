@@ -339,7 +339,6 @@ protected:
 	double m_noiselevel;
 };
 
-
 /// \brief Generates a set of normally distributed points
 class NormalDistributedPoints:public DataDistribution<RealVector>
 {
@@ -365,46 +364,6 @@ public:
 private:
 	MultiVariateNormalDistributionCholesky m_dist;
 	RealVector m_offset;
-};
-
-/// \brief Given a set of images, draws a set of image patches of a given size
-class ImagePatches:public DataDistribution<RealVector>{
-public:
-	ImagePatches(
-		Data<RealVector> images, 
-		std::size_t imageWidth, std::size_t imageHeight,
-		std::size_t patchWidth, std::size_t patchHeight
-	):DataDistribution<RealVector>({patchWidth, patchHeight})
-	, m_images(images)
-	, m_imageWidth(imageWidth)
-	, m_imageHeight(imageHeight)
-	, m_patchWidth(patchWidth)
-	, m_patchHeight(patchHeight){}
-		
-	void draw(reference input) const{
-		//sample image
-		std::size_t imageNum = random::discrete(random::globalRng(), std::size_t(0),m_images.size()-1);
-		auto image = m_images[imageNum];
-		//draw the upper left corner of the image
-		std::size_t m_startX = random::discrete(random::globalRng(), std::size_t(0),m_imageWidth-m_patchWidth);
-		std::size_t m_startY = random::discrete(random::globalRng(), std::size_t(0),m_imageHeight-m_patchHeight);
-		
-		
-		//copy patch
-		std::size_t rowStart = m_startY * m_imageWidth + m_startX;
-		for (size_t y = 0; y < m_patchHeight; ++y){
-			for (size_t x = 0; x < m_patchWidth; ++x){
-				input(y * m_patchWidth + x) = image(rowStart+x);
-			}
-			rowStart += m_imageWidth;
-		}
-	}
-private:
-	DataView<Data<RealVector> > m_images;
-	std::size_t m_imageWidth;
-	std::size_t m_imageHeight;
-	std::size_t m_patchWidth;
-	std::size_t m_patchHeight;
 };
 
 }

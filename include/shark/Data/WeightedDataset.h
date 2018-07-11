@@ -348,6 +348,14 @@ public:
 	}
 };
 
+/// specialized templates for generators returning labeled data batches
+template<class I, class L>
+using WeightedLabeledDataGenerator = Generator<WeightedDataPair<InputLabelPair<I,L>, double> >;
+
+/// specialized templates for generators returning labeled data batches
+template<class D, class L>
+using WeightedGenerator = Generator<WeightedDataPair<D, double> >;
+
 template<class D>
 struct InputToDataType<WeightedDataPair<D, double > >{
 	typedef WeightedData<D> type;

@@ -598,6 +598,10 @@ typedef LabeledData<RealVector, RealVector> RegressionDataset;
 /// specialized template for classification with unsigned int labels and sparse data
 typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
 
+/// specialized templates for generators returning labeled data batches
+template<class I, class L>
+using LabeledDataGenerator = Generator<InputLabelPair<I,L> >;
+
 namespace detail{
 template<class T>
 struct InferShape{
@@ -724,13 +728,13 @@ DataView<typename std::remove_reference<DatasetType>::type >  elements(DatasetTy
 /// \param set the dataset from which to create the generator
 /// \param cacheSize how many elements should be cached. default is 0.
 template<class DatasetType>
-Generator<typename DatasetType::element_type >  generator(DatasetType const& set){
-	auto gen = [set](){
-		std::size_t i = random::discrete(random::globalRng(), 0, set.numberOfBatches() -1 );
-		return set.batch(i);
+Generator<typename DatasetType::element_type >  generator(DatasetType const& set, std::size_t cacheSize = 0){
+	auto gen = [set]() -> typename DatasetType::value_type{
+		std::size_t i = random::discrete(random::globalRng(), std::size_t(0), set.size() -1 );
+		return set[i];
 	};
 	
-	return DataView<typename std::remove_reference<DatasetType>::type>(std::forward<DatasetType>(set));
+	return Generator<typename DatasetType::element_type >(gen, set.shape(), cacheSize);
 }
 
 
