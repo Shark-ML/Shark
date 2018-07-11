@@ -126,7 +126,7 @@ transform(
 ){
 	typedef typename detail::TransformedBatchElement<Functor,typename Batch<T>::type>::element_type ResultType;
 	auto oldGen = gen.generatingFunction();
-	return Generator<ResultType>([oldGen, f]{return f(oldGen());}, shape, gen.cacheSize());
+	return Generator<ResultType>([oldGen, f]{return transformBatch(oldGen(),f);}, shape, gen.cacheSize());
 }
 
 ///\brief For a generator returning pairs of inputs and labels, transforms the inputs using a function f and returns the transformed generator.
@@ -149,9 +149,9 @@ transformInputs(
 	auto oldGen = gen.generatingFunction();
 	auto newGen = [oldGen, f]{
 		auto oldBatch = oldGen();
-		return ResultBatch{f(std::move(oldBatch.input)),std::move(oldBatch.label)};
+		return ResultBatch{transformBatch(std::move(oldBatch.input),f),std::move(oldBatch.label)};
 	};
-	return Generator<InputLabelPair<ResultType, L> >(newGen, shape, gen.cacheSize());
+	return Generator<InputLabelPair<ResultType, L> >(newGen, {shape, gen.shape().label}, gen.cacheSize());
 }
 
 ///\brief For a generator returning pairs of inputs and labels, transforms the labels using a function f and returns the transformed generator.
@@ -174,9 +174,9 @@ transformLabels(
 	auto oldGen = gen.generatingFunction();
 	auto newGen = [oldGen, f]{
 		auto oldBatch = oldGen();
-		return ResultBatch{std::move(oldBatch.input), f(std::move(oldBatch.label))};
+		return ResultBatch{std::move(oldBatch.input), transformBatch(std::move(oldBatch.label), f)};
 	};
-	return Generator<InputLabelPair<I, ResultType> >(newGen, shape, gen.cacheSize());
+	return Generator<InputLabelPair<I, ResultType> >(newGen, {gen.shape().input, shape}, gen.cacheSize());
 }
 
 }
