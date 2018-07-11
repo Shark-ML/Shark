@@ -37,12 +37,9 @@
 
 
 #include <shark/Models/Kernels/AbstractKernelFunction.h>
-#include <shark/Data/BatchInterfaceAdaptStruct.h> //need in a lot of MKL-Kernel-Applications
-#include <boost/fusion/algorithm/iteration/fold.hpp>
-#include <boost/fusion/include/as_vector.hpp>
-#include <boost/mpl/transform_view.hpp>
-#include <boost/mpl/range_c.hpp>
-#include <boost/fusion/container/generation/make_vector.hpp>
+#include <shark/Data/BatchInterfaceAdaptStruct.h>
+#include <shark/Core/utility/integer_sequence.h>
+
 namespace shark {
 	
 	
@@ -50,17 +47,14 @@ namespace detail{
 /// \brief given a tuple of Inputs (a_1,...a_n) calculates the kernel k(a_N,a_N) for some chosen N
 ///
 /// \warning This Class assumes that Batch<T> is specialised for the input tuple such, that
-/// Batch<T>::type is a tuple of batches which can be queried using boost fusion!
+/// Batch<T>::type is a tuple of batches 
 template<class InputType, std::size_t N>
 class MklKernelWrapper : public AbstractKernelFunction<InputType>{
 private:
 	typedef AbstractKernelFunction<InputType> base_type;
 public:
 	/// \brief the type of the N-th element of the tuple
-	typedef typename boost::fusion::result_of::value_at<
-		InputType,
-		boost::mpl::int_<N>
-	>::type KernelInputType;
+	typedef typename std::remove_reference<decltype(Batch<InputType>::template tuple_elem<N>(std::declval<InputType&>()))>::type  KernelInputType;
 	typedef typename base_type::BatchInputType BatchInputType;
 	typedef typename base_type::ConstInputReference ConstInputReference;
 
@@ -84,15 +78,15 @@ public:
 	}
 	
 	double eval(ConstInputReference x1, ConstInputReference x2) const{
-		return m_kernel->eval(boost::fusion::at_c<N>(x1),boost::fusion::at_c<N>(x2));//no fusionize, because we assume the type is a fusion type already
+		return m_kernel->eval(Batch<InputType>::template tuple_elem<N>(x1),Batch<InputType>::template tuple_elem<N>(x2));
 	}
 	
 	void eval(BatchInputType const& batchX1, BatchInputType const& batchX2, RealMatrix& result, State& state) const{
-		m_kernel->eval(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),result,state);
+		m_kernel->eval(Batch<InputType>::template tuple_elem<N>(batchX1),Batch<InputType>::template tuple_elem<N>(batchX2),result,state);
 	}
 	
 	void eval(BatchInputType const& batchX1, BatchInputType const& batchX2, RealMatrix& result) const{
-		m_kernel->eval(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),result);
+		m_kernel->eval(Batch<InputType>::template tuple_elem<N>(batchX1),Batch<InputType>::template tuple_elem<N>(batchX2),result);
 	}
 	
 	void weightedParameterDerivative(
@@ -102,7 +96,11 @@ public:
 		State const& state, 
 		RealVector& gradient
 	) const{
-		m_kernel->weightedParameterDerivative(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),coefficients,state,gradient);
+		m_kernel->weightedParameterDerivative(
+			Batch<InputType>::template tuple_elem<N>(batchX1),
+			Batch<InputType>::template tuple_elem<N>(batchX2),
+			coefficients,state,gradient
+		);
 	}
 	void weightedInputDerivative( 
 		BatchInputType const& batchX1, 
@@ -111,14 +109,17 @@ public:
 		State const& state, 
 		BatchInputType& gradient
 	) const{
-		m_kernel->weightedInputDerivative(boost::fusion::at_c<N>(batchX1.fusionize()),boost::fusion::at_c<N>(batchX2.fusionize()),coefficientsX2,state,boost::fusion::at_c<N>(fusionize(gradient)));
+		m_kernel->weightedInputDerivative(
+			Batch<InputType>::template tuple_elem<N>(batchX1),
+			Batch<InputType>::template tuple_elem<N>(batchX2),
+			coefficientsX2,state,
+			Batch<InputType>::template tuple_elem<N>(gradient)
+		);
 	}
 	
 	//w don't need serializing here, this is done by the implementing Kernel
-	void read(InArchive& ar){
-	}
-	void write(OutArchive& ar) const{
-	}
+	void read(InArchive& ar){}
+	void write(OutArchive& ar) const{}
 	
 private:
 	AbstractKernelFunction<KernelInputType>* m_kernel;
@@ -129,46 +130,31 @@ class MklKernelBase
 {
 public:
 	/// \brief number of Kernels stored in the KernelContainer
-	//static const std::size_t NumKernels = boost::fusion::size<InputType>::value;
-	BOOST_STATIC_CONSTANT(std::size_t, NumKernels = boost::fusion::result_of::size<InputType>::value ); 
+	static const std::size_t NumKernels = Batch<InputType>::tuple_size::value; 
 private:
 	
-	///\brief metafunction creating the kernel type of the N-th input element
-	template<class N>
-	struct KernelType{
-		typedef detail::MklKernelWrapper<InputType,N::value> type;
-	};
+	//figure out what the kernel type for a given tuple should be
+	template<int... Is>
+	static auto type_generator(integer_sequence<Is...>) -> std::tuple<MklKernelWrapper<InputType,Is>... >;
+	typedef  decltype(type_generator(generate_integer_sequence<NumKernels>())) KernelContainer;
 	
-	///\brief maps a fusion sequence of kernels to a sequence of pointers to the base class
-	struct MakeKernelContainer{
-		typedef std::vector<AbstractKernelFunction<InputType>* > result_type;
-		
-		result_type operator()(result_type container, AbstractKernelFunction<InputType> const& k) const
-		{
-			container.push_back(const_cast<AbstractKernelFunction<InputType>* >(&k));
-			return container;
+	//map each stored wrapper to its address
+	template<int... Is>
+	std::vector<AbstractKernelFunction<InputType>* > makeKernelVectorImpl(integer_sequence<Is...>){
+		auto pointer = [](AbstractKernelFunction<InputType>& kernel){
+			return static_cast<AbstractKernelFunction<InputType> *>(&kernel);
 		};
-	};
+		return { pointer(std::get<Is>(m_kernelWrappers))... };
+	}
 public:
+
 	
-	/// \brief The Type of Container used to hold the Kernels.
-	typedef typename boost::fusion::result_of::as_vector<
-		boost::mpl::transform_view<
-			boost::mpl::range_c<unsigned int,0,NumKernels>,
-			KernelType<boost::mpl::_1>
-		>
-	>::type KernelContainer;
-	
-	template<class KernelTuple>
-	MklKernelBase(KernelTuple const& kernels)
-	: m_kernelWrappers(kernels){}
+	template<class... KernelArgs, class = typename std::enable_if<sizeof...(KernelArgs) == NumKernels, void>::type>
+	MklKernelBase(KernelArgs const&... kernels)
+	: m_kernelWrappers(std::make_tuple(kernels...)){}
 	
 	std::vector<AbstractKernelFunction<InputType>* > makeKernelVector(){
-		return boost::fusion::fold(//fold the wrapper sequence to a normal vector of pointers
-			m_kernelWrappers,
-			std::vector<AbstractKernelFunction<InputType>* >(),
-			MakeKernelContainer()
-		);
+		return makeKernelVectorImpl(generate_integer_sequence<NumKernels>());
 	}
 	
 	KernelContainer m_kernelWrappers;

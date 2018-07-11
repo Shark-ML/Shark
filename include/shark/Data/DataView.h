@@ -184,7 +184,13 @@ public:
 	reference operator[](std::size_t position){
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		return getBatchElement(static_cast<DatasetType&>(m_dataset).batch(index.batch),index.positionInBatch);
+		typename std::conditional<
+			std::is_const<DatasetType>::value,
+			typename dataset_type::const_batch_reference,
+			typename dataset_type::batch_reference
+		>::type batch = static_cast<DatasetType&>(m_dataset).batch(index.batch);
+		return Batch<value_type>::get(batch,index.positionInBatch);
+		//~ return getBatchElement(batch,index.positionInBatch);
 	}
 	const_reference operator[](std::size_t position) const{
 		SIZE_CHECK(position < size());

@@ -51,54 +51,27 @@ namespace shark {
 /// task identifier in multi-task and transfer learning.
 /// \ingroup kernels
 template <class InputTypeT>
-struct MultiTaskSample : public ISerializable
-{
+struct MultiTaskSample{
+public:
 	typedef InputTypeT InputType;
-	/// \brief Default constructor.
-	MultiTaskSample()
-	{ }
-
-	/// \brief Construction from an input and a task index
-	MultiTaskSample(InputType const& i, std::size_t t)
-	: input(i), task(t)
-	{ }
-
-	void read(InArchive& ar){
-		ar >> input;
-		ar >> task;
-	}
-
-	void write(OutArchive& ar) const{
-		ar << input;
-		ar << task;
-	}
 
 	InputType input;                ///< input data
 	std::size_t task;               ///< task index
 
+	template<class Archive>
+	void serialize(Archive & ar, unsigned int const){
+		ar & input;
+		ar & task;
+	}
 };
-}
-
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-
-    BOOST_FUSION_ADAPT_TPL_STRUCT(
-        (InputType),
-        (shark::MultiTaskSample) (InputType),
-        (InputType, input)(std::size_t, task)
-    )
-
-namespace shark {
 template<class InputType>
-struct Batch< MultiTaskSample<InputType> >{
-	SHARK_CREATE_BATCH_INTERFACE(
-		MultiTaskSample<InputType>,
-		(InputType, input)(std::size_t, task)
-	)
-};
-}
-
+SHARK_CREATE_BATCH_INTERFACE(
+	MultiTaskSample<InputType>,
+	(InputType, input)(std::size_t, task)
+)
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
-namespace shark {
+
 
 ///
 /// \brief Special "Gaussian-like" kernel function on tasks.
@@ -310,7 +283,7 @@ public:
 	MultiTaskKernel(
 		InputKernelType* inputkernel,
 		DiscreteKernel* taskkernel)
-	:base_type1(boost::fusion::make_vector(inputkernel,taskkernel))
+	:base_type1(inputkernel,taskkernel)
 	,base_type2(base_type1::makeKernelVector())
 	{}
 

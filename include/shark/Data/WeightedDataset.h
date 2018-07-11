@@ -83,82 +83,18 @@ struct WeightedDataPair{
 template<class D1, class W1, class D2, class W2>
 void swap(WeightedDataPair<D1, W1>&& p1, WeightedDataPair<D2, W2>&& p2){
 	using std::swap;
-	swap(std::forward<D1>(p1.data),std::forward<D2>(p2.data));
-	swap(std::forward<W1>(p1.weight),std::forward<W2>(p2.weight));
-}
-
-template<class DataBatchType,class WeightBatchType>
-struct WeightedDataBatch{
-private:
-	typedef typename BatchTraits<typename std::decay<DataBatchType>::type >::type DataBatchTraits;
-	typedef typename BatchTraits<typename std::decay<WeightBatchType>::type >::type WeightBatchTraits;
-public:
-	DataBatchType data;
-	WeightBatchType weight;
-
-	typedef WeightedDataPair<
-		typename DataBatchTraits::value_type,
-		typename WeightBatchTraits::value_type
-	> value_type;
-	typedef WeightedDataPair<
-		decltype(getBatchElement(std::declval<DataBatchType&>(),0)),
-		decltype(getBatchElement(std::declval<WeightBatchType&>(),0))
-	> reference;
-	typedef WeightedDataPair<
-		decltype(getBatchElement(std::declval<typename std::add_const<DataBatchType>::type&>(),0)),
-		decltype(getBatchElement(std::declval<typename std::add_const<WeightBatchType>::type&>(),0))
-	> const_reference;
-
-	template<class D, class W>
-	WeightedDataBatch(
-		D&& data,
-		W&& weight
-	):data(data),weight(weight){}
-	
-	template<class Pair>
-	WeightedDataBatch(
-		std::size_t size,Pair const& p
-	):data(DataBatchTraits::createBatch(p.data,size)),weight(WeightBatchTraits::createBatch(p.weight,size)){}
-	
-	template<class I, class L>
-	WeightedDataBatch& operator=(WeightedDataBatch<I,L> const& batch){
-		data = batch.data;
-		weight = batch.weight;
-		return *this;
-	}
-
-	std::size_t size()const{
-		return DataBatchTraits::size(data);
-	}
-
-	reference operator[](std::size_t i){
-		return reference(getBatchElement(data,i),getBatchElement(weight,i));
-	}
-	const_reference operator[](std::size_t i)const{
-		return const_reference(getBatchElement(data,i),getBatchElement(weight,i));
-	}
-};
-
-template<class D1, class W1, class D2, class W2>
-void swap(WeightedDataBatch<D1, W1>& p1, WeightedDataBatch<D2, W2>& p2){
-	using std::swap;
 	swap(p1.data,p2.data);
 	swap(p1.weight,p2.weight);
 }
 
-template<class DataType, class WeightType>
-struct Batch<WeightedDataPair<DataType, WeightType> >
-: public detail::SimpleBatch<
-	WeightedDataBatch<typename detail::element_to_batch<DataType>::type, typename detail::element_to_batch<WeightType>::type>
->{};
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 template<class DataType, class WeightType>
-struct BatchTraits<WeightedDataBatch<DataType, WeightType> >{
-	typedef typename detail::batch_to_element<DataType>::type DataElem;
-	typedef typename detail::batch_to_element<WeightType>::type WeightElem;
-	typedef Batch<WeightedDataPair<DataElem,WeightElem> > type;
-};
-
+SHARK_CREATE_BATCH_INTERFACE(
+	WeightedDataPair<DataType BOOST_PP_COMMA() WeightType>,
+	(DataType, data)(WeightType, weight)
+)
+#endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 namespace detail{
 template <class DataContainerT>
@@ -166,32 +102,19 @@ class BaseWeightedDataset : public ISerializable
 {
 public:
 	typedef typename DataContainerT::element_type DataType;
-	typedef typename DataContainerT::shape_type shape_type;
 	typedef double WeightType;
 	typedef DataContainerT DataContainer;
 	typedef Data<WeightType> WeightContainer;
 	typedef typename DataContainer::IndexSet IndexSet;
 
 	// TYPEDEFS FOR PAIRS
-	typedef WeightedDataPair<
-		DataType,
-		WeightType
-	> element_type;
+	typedef WeightedDataPair<DataType,WeightType> element_type;
 
-	typedef WeightedDataBatch<
-		typename DataContainer::batch_type,
-		typename WeightContainer::batch_type
-	> batch_type;
-
-	// TYPEDEFS FOR BATCH REFERENCES
-	typedef WeightedDataBatch<
-		typename DataContainer::batch_reference,
-		typename WeightContainer::batch_reference
-	> batch_reference;
-	typedef WeightedDataBatch<
-		typename DataContainer::const_batch_reference,
-		typename WeightContainer::const_batch_reference
-	> const_batch_reference;
+	// TYPEDEFS FOR PAIRS
+	typedef typename Batch<element_type>::type batch_type;
+	typedef typename Batch<element_type>::proxy_type batch_reference;
+	typedef typename Batch<element_type>::const_proxy_type const_batch_reference;
+	typedef typename Batch<element_type>::shape_type shape_type;
 
 	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> > batch_range;
 	typedef detail::BatchRange<BaseWeightedDataset<DataContainer> const> const_batch_range;
@@ -238,8 +161,8 @@ public:
 	}
 	
 	///\brief Returns the shape of the elements in the dataset.
-	shape_type const& shape() const{
-		return m_data.shape();
+	shape_type shape() const{
+		return {m_data.shape(), {}};
 	}
 
 	// CONSTRUCTORS
@@ -285,10 +208,10 @@ public:
 
 	// BATCH ACCESS
 	batch_reference batch(std::size_t i){
-		return batch_reference(m_data.batch(i),m_weights.batch(i));
+		return {m_data.batch(i),m_weights.batch(i)};
 	}
 	const_batch_reference batch(std::size_t i) const{
-		return const_batch_reference(m_data.batch(i),m_weights.batch(i));
+		return {m_data.batch(i),m_weights.batch(i)};
 	}
 
 	// MISC

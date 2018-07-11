@@ -62,9 +62,27 @@ namespace shark {
 /// kernel weights, so that in total, this amounts to fixing the sum
 /// of the of the weights to one.
 ///
-/// In the current implementation, we expect the InputType to be a
-/// boost::fusion::vector. For example, boost::fusion::vector<RealVector,RealVector>
-/// represents a tuple of two vectors.
+/// The easiest way to generate a compatible type is via structs
+/// <code>
+/// struct MyAggregate{
+///     A a; 
+///     B b; 
+///     C c;
+/// };
+/// </code>
+/// Next, you have to tell the shark data system how to work with this type. 
+/// For simple aggregates like the struct above, we offer a macro:
+/// <code>
+/// template<>//list of template arguments for MyAggregate (empty, if none).
+/// SHARK_CREATE_BATCH_INTERFACE(
+/// 	MyAggregate,
+/// 	(A, a)(B, b)(C c)
+/// )
+/// </code>
+/// This macro assumes that the arguments are given in the right order, i.e. 
+/// MyAggregative obj={a,b,c} must work!
+/// Afterwards, the kernel can be instantiated with one kernel for a, one kernel for b and one for c,
+/// again in the same order.
 /// \ingroup kernels
 template<class InputType>
 class MklKernel
@@ -76,8 +94,9 @@ private:
 	typedef WeightedSumKernel<InputType> base_type2;
 public:
 
-	template<class KernelTuple>
-	MklKernel(KernelTuple const& kernels):base_type1(kernels),base_type2(base_type1::makeKernelVector()){}
+	/// \brief Constructor. It uses one kernel for each element in the aggregate type.
+	template<class... Kernels>
+	MklKernel(Kernels*... kernels):base_type1(kernels...),base_type2(base_type1::makeKernelVector()){}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
