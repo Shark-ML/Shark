@@ -40,7 +40,7 @@
 #include <shark/Data/WeightedDataset.h>
 #include "Impl/ErrorFunction.inl"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace shark{
 
@@ -145,7 +145,7 @@ public:
 		return value;
 	}
 private:
-	boost::scoped_ptr<detail::FunctionWrapperBase<SearchPointType> > mp_wrapper;
+	std::unique_ptr<detail::FunctionWrapperBase<SearchPointType> > mp_wrapper;
 	FunctionType* m_regularizer;
 	double m_regularizationStrength;
 };

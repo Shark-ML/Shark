@@ -176,13 +176,13 @@ BOOST_AUTO_TEST_CASE(IterativeNearestNeighborQueries)
 	}
 
 	Data<RealVector> dataset = createDataFromRange(data);
-
+	DataView<Data<RealVector> > view(dataset); 
 	//test trees
 	KDTree<RealVector> kdtree(dataset);
 	testTreeStructure(kdtree,data);
 	LCTree<RealVector> lctree(dataset);
 	LinearKernel<RealVector> kernel;
-	KHCTree<std::vector<RealVector> > khctree(data, &kernel);
+	KHCTree<DataView<Data<RealVector> > > khctree(view, &kernel);
 	
 	for(std::size_t k = 0; k != 10; ++k){
 		// brute force sorting (for comparison)

@@ -38,8 +38,8 @@
 
 #include <shark/Models/Trees/BinaryTree.h>
 #include <shark/LinAlg/Base.h>
-#include <boost/array.hpp>
-
+#include <array>
+#include <numeric>
 namespace shark {
 
 
@@ -75,7 +75,7 @@ template <class Container, int CuttingAccuracy = 25>
 class KHCTree : public BinaryTree<typename Container::value_type>
 {
 public:
-	typedef IndexedIterator<typename boost::range_iterator<Container const>::type> const_iterator;
+	typedef typename Container::const_iterator const_iterator;
 	typedef typename Container::value_type value_type;
 	typedef AbstractKernelFunction<value_type> kernel_type;
 	typedef BinaryTree<value_type> base_type;
@@ -89,12 +89,9 @@ public:
 	KHCTree(Container const& points, kernel_type const* kernel, TreeConstruction tc = TreeConstruction())
 	: base_type(points.size())
 	, mep_kernel(kernel)
-	, m_normalInvNorm(1.0)
-    {
-		//create a list to the iterator elements as temporary storage
-		//we need indexed operators to have a fast lookup of the position of the elements in the container
+	, m_normalInvNorm(1.0){
 		std::vector<const_iterator> elements(m_size);
-		boost::iota(elements,const_iterator(boost::begin(points),0));
+		std::iota(elements.begin(),elements.end(), points.begin());
 
 		buildTree(tc,elements);
 
@@ -160,7 +157,7 @@ protected:
 			calculateNormal(points);
 		}
 		else{
-			boost::array<const_iterator,CuttingAccuracy> samples;
+			std::array<const_iterator,CuttingAccuracy> samples;
 			for(std::size_t i = 0; i != CuttingAccuracy; i++)
 				samples[i] = points[m_size * (2*i+1) / (2*CuttingAccuracy)];
 			calculateNormal(samples);

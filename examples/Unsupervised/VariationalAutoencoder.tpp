@@ -27,14 +27,14 @@ int main(int argc, char **argv)
 	//build encoder network
 	//note that the output layer must be linear and must twice the number of outputs than the decoder inptus
 	//as we have to model mean and variance for each decoder-input.
-	LinearModel<FloatVector, RectifierNeuron> encoder1(data.inputShape(),500, true);
+	LinearModel<FloatVector, RectifierNeuron> encoder1(data.shape().input,500, true);
 	LinearModel<FloatVector, LinearNeuron> encoder2(encoder1.outputShape(),2 * 300, true);
 	auto encoder = encoder1 >> encoder2;
 	
 	//build decoder network
 	//mnist is scaled between 0 and 1 soa  sigmoid output makes prediciton compelte black and complete white pixels easier
 	LinearModel<FloatVector, RectifierNeuron> decoder1(300, 500, true);
-	LinearModel<FloatVector, LogisticNeuron> decoder2(decoder1.outputShape(), data.inputShape(), true);
+	LinearModel<FloatVector, LogisticNeuron> decoder2(decoder1.outputShape(), data.shape().input, true);
 	auto decoder = decoder1 >> decoder2;
 //###end<model_creation>
 	

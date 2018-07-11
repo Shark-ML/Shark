@@ -38,8 +38,7 @@
 #include <shark/ObjectiveFunctions/Loss/AbstractLoss.h>
 #include <shark/Algorithms/Trainers/AbstractTrainer.h>
 #include <shark/Data/DataView.h>
-#include <boost/range/algorithm_ext/iota.hpp>
-
+#include <numeric>
 
 namespace shark {
 
@@ -118,10 +117,8 @@ public:
 		Data<OutputType> output;
 		double sum = 0.0;
 		std::vector<std::size_t> indices(ell - 1);
-		boost::iota(indices,0);
-		for (std::size_t i=0; i<ell-1; i++) indices[i] = i+1;
-		for (std::size_t i=0; i<ell; i++)
-		{
+		std::iota(indices.begin(),indices.end(),1);
+		for (std::size_t i=0; i<ell; i++){
 			DatasetType train = toDataset(subset(m_dataset,indices));
 			mep_trainer->train(*mep_model, train);
 			OutputType validation = (*mep_model)(m_dataset[i].input);

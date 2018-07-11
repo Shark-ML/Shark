@@ -37,8 +37,6 @@
 #include <shark/Core/utility/Iterators.h>
 #include <shark/Core/Shape.h>
 
-#include <boost/utility/enable_if.hpp>
-#include <boost/mpl/if.hpp>
 #include <type_traits>
 
 namespace shark{
@@ -388,8 +386,7 @@ template<class Sequence>
 class BatchIterator: public SHARK_ITERATOR_FACADE<
 	BatchIterator<Sequence>,
 	typename detail::batch_to_element<Sequence>::type,
-	//boost::random_access_traversal_tag,
-	std::random_access_iterator_tag,//keep VC quiet.
+	std::random_access_iterator_tag,
 	typename detail::batch_to_reference<Sequence>::type
 >{
 private:

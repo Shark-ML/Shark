@@ -52,7 +52,7 @@ class TestProblem : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
 	TestProblem(size_t informative, size_t nnz, size_t dim)
-	: LabeledDataDistribution<RealVector, RealVector>({m_dim, 1})
+	: LabeledDataDistribution<RealVector, RealVector>({dim, 1})
 	, m_informative(informative)
 	, m_nnz(nnz)
 	, m_dim(dim)
