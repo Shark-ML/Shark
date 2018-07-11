@@ -29,8 +29,6 @@
 #define SHARK_DATA_IMPL_DATASET_INL
 
 #include <shark/Data/BatchInterface.h>
-#include <shark/Core/utility/CanBeCalled.h>
-
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 
@@ -128,26 +126,6 @@ void complement(
 	comp.resize(std::distance(resultSet.begin(),pos));
 	std::copy(resultSet.begin(),pos,comp.begin());
 }
-
-/// \brief For Data<T> and functor F calculates the result of the resulting elements F(T).
-template<class Functor, class T>
-struct TransformedDataElement{
-private:
-	template<class B>
-	struct TransformedDataElementTypeFromBatch{
-		typedef typename batch_to_element<
-			typename std::result_of<Functor&&(B)>::type 
-		>::type type;
-	};
-public:
-	typedef typename std::conditional<
-		!CanBeCalled<Functor,typename Batch<T>::type>::value,
-		std::result_of<Functor&&(T) >,
-		TransformedDataElementTypeFromBatch<
-			typename Batch<T>::type 
-		>
-	>::type::type type;
-};
 /** @*/
 }
 }

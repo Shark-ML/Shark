@@ -36,7 +36,8 @@
 #include <shark/Core/Shape.h>
 #include <shark/Core/utility/Iterators.h>
 #include <shark/Core/Shape.h>
-
+#include <shark/Core/utility/CanBeCalled.h>
+#include <boost/iterator/transform_iterator.hpp>
 #include <type_traits>
 
 namespace shark{
@@ -366,7 +367,6 @@ template<class T, class Iterator>
 typename Batch<T>::type createBatch(Iterator const& begin, Iterator const& end){
 	return Batch<T>::createBatchFromRange(begin,end);
 }
-
 template<class BatchT>
 auto getBatchElement(BatchT& batch, std::size_t i)->decltype(BatchTraits<BatchT>::type::get(std::declval<BatchT&>(),i)){
 	return BatchTraits<BatchT>::type::get(batch,i);
@@ -433,6 +433,66 @@ private:
 	Sequence* m_sequence;
 	std::size_t m_position;
 };
+
+namespace detail{
+/// \brief For a given Batch of elements T and functor F calculates the type of the resulting elements F(T).
+template<class F, class BatchT>
+struct TransformedBatchElement{
+private:
+	template<class B>
+	struct TransformedElementTypeFromBatch{
+		typedef typename batch_to_element<
+			typename std::result_of<F&&(B)>::type 
+		>::type type;
+	};
+public:
+	typedef typename std::conditional<
+		!CanBeCalled<F,BatchT>::value,
+		std::result_of<F&&(typename batch_to_reference<BatchT const&>::type)>,
+		TransformedElementTypeFromBatch<BatchT>
+	>::type::type element_type;
+	typedef typename Batch<element_type>::type batch_type;
+	typedef typename Batch<element_type>::shape_type shape_type;
+};
+}
+
+template<class BatchT, class Functor>
+typename std::enable_if<
+	!CanBeCalled<Functor, BatchT>::value,
+	typename detail::TransformedBatchElement<Functor, BatchT>::batch_type
+>::type
+transformBatch(
+	BatchT const& batch, Functor f
+){
+	typedef BatchIterator<BatchT const> Iterator;
+	typedef typename detail::TransformedBatchElement<Functor, BatchT>::element_type ResultType;
+	return createBatch<ResultType>(
+		boost::make_transform_iterator(Iterator(batch, 0), f),
+		boost::make_transform_iterator(Iterator(batch, batchSize(batch)), f)
+	);
+}
+
+template<class BatchT, class Functor>
+typename std::enable_if<
+	CanBeCalled<Functor, BatchT>::value,
+	typename detail::TransformedBatchElement<Functor, BatchT>::batch_type
+>::type
+transformBatch(
+	BatchT const& batch, Functor f
+){
+	return f(batch);
+}
+
+template<class BatchT, class Functor>
+typename std::enable_if<
+	CanBeCalled<Functor, BatchT>::value,
+	typename detail::TransformedBatchElement<Functor, BatchT>::batch_type
+>::type
+transformBatch(
+	BatchT&& batch, Functor f
+){
+	return f(std::move(batch));
+}
 
 }
 #endif

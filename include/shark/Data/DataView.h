@@ -266,17 +266,6 @@ typename DataView<DatasetType>::batch_type randomSubBatch(
 	return subBatch(view,boost::make_iterator_range(indices.begin(),indices.begin()+size));
 }
 
-/// \brief Creates a View from a dataset.
-///
-/// This is just a helper function to omit the actual type of the view
-///
-/// \param set the dataset from which to create the view
-template<class DatasetType>
-DataView<typename std::remove_reference<DatasetType>::type >  elements(DatasetType&& set){
-	return DataView<typename std::remove_reference<DatasetType>::type>(std::forward<DatasetType>(set));
-}
-
-
 /// \brief Creates a new dataset from a View.
 ///
 /// \param view the view from which to create the new dataset

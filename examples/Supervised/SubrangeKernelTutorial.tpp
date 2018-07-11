@@ -15,8 +15,7 @@ class UniformPoints : public DataDistribution<RealVector>
 public:
 	UniformPoints(std::size_t dimensions): DataDistribution<RealVector>(dimensions){}
 
-	void draw(RealVector& input)const{
-		input.resize(shape().numElements());
+	void draw(reference input)const{
 		for ( std::size_t j=0; j<input.size(); j++ ) {
 			input(j) = random::uni(random::globalRng(), -1,1);
 		}

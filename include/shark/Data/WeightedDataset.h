@@ -348,6 +348,11 @@ public:
 	}
 };
 
+template<class D>
+struct InputToDataType<WeightedDataPair<D, double > >{
+	typedef WeightedData<D> type;
+};
+
 ///brief  Outstream of elements for weighted data.
 template<class T>
 std::ostream &operator << (std::ostream &stream, const WeightedData<T>& d) {
@@ -491,6 +496,11 @@ public:
 	friend void swap(WeightedLabeledData& a, WeightedLabeledData& b){
 		swap(static_cast<base_type&>(a),static_cast<base_type&>(b));
 	}
+};
+
+template<class I, class L>
+struct InputToDataType<WeightedDataPair<InputLabelPair<I, L>, double > >{
+	typedef WeightedLabeledData<I, L> type;
 };
 
 ///brief  Outstream of elements for weighted labeled data.
