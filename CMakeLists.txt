@@ -27,13 +27,13 @@ if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
 endif()
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 	if(UNIX)
-		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/lib")
+		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/lib${LIB_SUFFIX}")
 	else()
 		set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/bin")
 	endif()
 endif()
 if(NOT CMAKE_ARCHIVE_OUTPUT_DIRECTORY)
-	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/lib")
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${shark_BINARY_DIR}/lib${LIB_SUFFIX}")
 endif()
 mark_as_advanced( 
 	CMAKE_RUNTIME_OUTPUT_DIRECTORY
@@ -412,7 +412,7 @@ endif()
 ###################################################################
 #                       CPACK PACKAGING
 ###################################################################
-set(INSTALL_CMAKE_DIR lib/cmake/Shark/)
+set(INSTALL_CMAKE_DIR lib${LIB_SUFFIX}/cmake/Shark/)
 
 # Add all targets to the build-tree export set
 export(TARGETS shark SharkVersion FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
@@ -421,7 +421,7 @@ export(TARGETS shark SharkVersion FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
 set(SHARK_USE_FILE "${PROJECT_SOURCE_DIR}/UseShark.cmake")
 set(SHARK_TARGETS_FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
 set(SHARK_LIBRARIES ${LINK_LIBRARIES} shark)
-set(SHARK_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/lib")
+set(SHARK_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/lib${LIB_SUFFIX}")
 set(SHARK_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include" "${PROJECT_BINARY_DIR}/include" "${Boost_INCLUDE_DIR}" ${EXTRA_INCLUDE_DIRECTORIES})
 
 # Configure the files to be exported
@@ -445,7 +445,7 @@ set(SHARK_CONFIG_CODE "${SHARK_CONFIG_CODE}")
 set(SHARK_USE_FILE "\${SHARK_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}UseShark.cmake")
 set(SHARK_TARGETS_FILE "\${SHARK_INSTALL_PREFIX}/${INSTALL_CMAKE_DIR}SharkTargets.cmake")
 set(SHARK_LIBRARIES ${LINK_LIBRARIES} shark)
-set(SHARK_LIBRARY_DIRS "\${SHARK_INSTALL_PREFIX}/lib")
+set(SHARK_LIBRARY_DIRS "\${SHARK_INSTALL_PREFIX}/lib${LIB_SUFFIX}")
 set(SHARK_INCLUDE_DIRS "\${SHARK_INSTALL_PREFIX}/${SHARK_INSTALL_INCLUDE_DIR}" "${Boost_INCLUDE_DIR}" ${EXTRA_INCLUDE_DIRECTORIES})
 configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SharkConfig.cmake")
 
