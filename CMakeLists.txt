@@ -163,6 +163,7 @@ message(STATUS "ZLIB include dir: " ${ZLIB_INCLUDE_DIRS} )
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS} )
 list(APPEND LINK_LIBRARIES ${ZLIB_LIBRARIES})
+
 #####################################################################
 #           libPNG
 #####################################################################
@@ -189,6 +190,33 @@ message(STATUS "libpng include dir: " ${PNG_INCLUDE_DIRS} )
 message(STATUS "libpng libraries: " ${PNG_LIBRARIES})
 include_directories(SYSTEM ${PNG_INCLUDE_DIRS} )
 list(APPEND LINK_LIBRARIES ${PNG_LIBRARIES})
+
+#####################################################################
+#           libJPEG
+#####################################################################
+find_package(JPEG)
+
+if(NOT JPEG_FOUND)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libjpeg-cmake)
+	message(STATUS ${CMAKE_SOURCE_DIR}/contrib/libjpeg/)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND}
+		-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+		-DCMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+		-DBASE_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/contrib/libjpeg/
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libjpeg-cmake
+	)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} --build .
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libjpeg-cmake
+	)
+	find_package(JPEG)
+endif()
+message(STATUS "libjpeg include dir: " ${JPEG_INCLUDE_DIR} )
+message(STATUS "libjpeg libraries: " ${JPEG_LIBRARIES})
+include_directories(SYSTEM ${JPEG_INCLUDE_DIR} )
+list(APPEND LINK_LIBRARIES ${JPEG_LIBRARIES})
 
 #####################################################################
 #           Boost configuration

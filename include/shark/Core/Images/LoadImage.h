@@ -41,26 +41,14 @@
 
 extern "C"{
 #include <png.h>
+#include <jpeglib.h>
 }
 
 
 namespace shark { namespace image{
 	
-namespace detail{
-//set up the data streaming callback
-//we wrap our data in a source that is fed to the callback
-struct pngIOSource{
-	unsigned char const* data;
-	std::size_t pos;
-};
-//callback used by libpng to read the next chunk of data
-void readPNGData(png_struct* pngPtr, unsigned char* data, std::size_t length) {
-	pngIOSource* source = (pngIOSource*)png_get_io_ptr(pngPtr);
-	for(std::size_t i = 0; i != length; ++i, ++source->pos){
-		data[i] = source->data[source->pos];
-	}
-}
-}
+	
+////////////////////////PNG READER///////////////////////
 template<class T>
 std::pair<blas::vector<T>, Shape> readPNG(std::vector<unsigned char> const& data){
 	//Let LibPNG check the sig. If this function returns 0, everything is OK.
@@ -83,9 +71,19 @@ std::pair<blas::vector<T>, Shape> readPNG(std::vector<unsigned char> const& data
 		throw SHARKEXCEPTION("[readPNG] An error occured while processing the PNG file");
 	}
 
-	//set up the callback
-	detail::pngIOSource source ={data.data(), 0};
-	png_set_read_fn(pngPtr,(void*)&source, detail::readPNGData);
+	//set up the data source callback
+	struct pngIOSource{
+		unsigned char const* data;
+		std::size_t pos;
+	};
+	auto readPNGData = [](png_struct* pngPtr, unsigned char* data, std::size_t length) {
+		pngIOSource* source = (pngIOSource*)png_get_io_ptr(pngPtr);
+		for(std::size_t i = 0; i != length; ++i, ++source->pos){
+			data[i] = source->data[source->pos];
+		}
+	};
+	pngIOSource source ={data.data(), 0};
+	png_set_read_fn(pngPtr,(void*)&source, readPNGData);
 	
 	//read the image
 	png_read_png(
@@ -114,6 +112,72 @@ std::pair<blas::vector<T>, Shape> readPNG(std::vector<unsigned char> const& data
 	//done
 	return {std::move(image), {imgHeight, imgWidth, channels}};
 	
+}
+
+////////////////////////JPEG READER///////////////////////
+
+template<class T>
+std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& data){
+	//initialize jpeg object and configure error reporting via exceptions
+	jpeg_decompress_struct cinfo;
+	jpeg_error_mgr mgr;
+	cinfo.err = jpeg_std_error(&mgr);
+	mgr.error_exit = [](j_common_ptr cinfo){throw cinfo->err;};
+	
+	//try to decompress (this can call our error callback defined above)
+	try{	
+	//set up decompression
+	jpeg_create_decompress(&cinfo);
+	
+	//set up the data source
+	jpeg_mem_src(&cinfo, (unsigned char*)data.data(), data.size());
+	
+	//check if the file is a valid jpeg
+	if(jpeg_read_header(&cinfo, TRUE) != 1){
+		jpeg_destroy_decompress(&cinfo);
+		throw SHARKEXCEPTION("[readJPEG] Image does not look like a JPEG");
+	}
+	
+	jpeg_start_decompress(&cinfo);
+	//get image geometry and allocate space for the decompressed image
+	std::size_t imgWidth =  cinfo.output_width;
+	std::size_t imgHeight = cinfo.output_height;
+	std::size_t channels = cinfo.output_components;
+	std::vector<unsigned char> pixBuf(imgWidth * imgHeight * channels);
+	
+	
+		//decompress image block by block
+		std::vector<unsigned char*> scanlines(cinfo.rec_outbuf_height);
+		while (cinfo.output_scanline < cinfo.output_height) {
+			//set up the beginning of the lines to read
+			for(int i = 0; i != cinfo.rec_outbuf_height; ++i){
+				scanlines[i] = pixBuf.data() + (cinfo.output_scanline + i) * imgWidth * channels;
+			}
+			jpeg_read_scanlines(&cinfo, scanlines.data(), cinfo.rec_outbuf_height);
+		}
+	
+	//clean-up
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+	
+	
+	//convert to float vector
+	T conv = (T)255.0;
+	blas::vector<T> image(imgWidth * imgHeight * channels);
+	for (std::size_t i=0; i != image.size(); ++i){
+		image[i] = pixBuf[i] / conv;
+	}
+	
+	//done
+	return {std::move(image), {imgHeight, imgWidth, channels}};
+	
+	}catch(jpeg_error_mgr* mgr){//on failure, write message and rethrow
+		char messageBuffer[JMSG_LENGTH_MAX];
+		( *(mgr->format_message) ) ((j_common_ptr)&cinfo, messageBuffer);
+		jpeg_abort_decompress(&cinfo);
+		jpeg_destroy_decompress(&cinfo);
+		throw SHARKEXCEPTION(std::string("[readJPEG] Error during reading:") + messageBuffer);
+	}
 }
 
 }}
