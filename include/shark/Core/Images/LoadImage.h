@@ -38,7 +38,7 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Shape.h>
 #include <memory>
-
+#include <fstream>
 extern "C"{
 #include <png.h>
 #include <jpeglib.h>
@@ -179,6 +179,30 @@ std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& dat
 		throw SHARKEXCEPTION(std::string("[readJPEG] Error during reading:") + messageBuffer);
 	}
 }
+
+
+template<class T>
+std::pair<blas::vector<T>, Shape> readImage(std::vector<unsigned char> const& data){
+	if(data[0] == 0xFF && data[1] == 0xD8)
+		return readJPEG<T>(data);
+	if(png_sig_cmp(data.data(), 0, 8) == 0)
+		return readPNG<T>(data);
+	throw SHARKEXCEPTION("[readImage] Could not determine image file type");
+}
+
+template<class T>
+std::pair<blas::vector<T>, Shape> readImageFromFile(std::string const& filename){
+	std::ifstream file(filename, std::ios::binary );
+	if(!file)
+		throw SHARKEXCEPTION("readImageFromFile] Could not open file: "+filename);
+	file.seekg(0, std::ios::end);
+	std::streampos fileSize = file.tellg();
+	file.seekg(0, std::ios::beg);
+	std::vector<unsigned char> buffer(fileSize);
+	file.read((char*) &buffer[0], fileSize);
+	return readImage<T>(buffer);
+}
+
 
 }}
 #endif

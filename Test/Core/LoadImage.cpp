@@ -97,4 +97,78 @@ BOOST_AUTO_TEST_CASE( Core_Load_JPEG){
 		BOOST_CHECK_SMALL(result.first[i] - dataRGB[i], 0.05);
 	}
 }
+
+BOOST_AUTO_TEST_CASE( Core_Load_Image_PNG){
+	std::ifstream file( "Test/test_data/testImage.png", std::ios::binary );
+	if(!file)
+		std::cout<<"could not open file"<<std::endl;
+	file.seekg(0, std::ios::end);
+	std::streampos fileSize = file.tellg();
+	file.seekg(0, std::ios::beg);
+	std::vector<unsigned char> buffer(fileSize);
+	file.read((char*) &buffer[0], fileSize);
+
+	
+	std::pair<blas::vector<double>, Shape> result = image::readImage<double>(buffer);
+	
+	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGBA[0]);
+	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGBA[1]);
+	BOOST_REQUIRE_EQUAL(result.second[2], shapeRGBA[2]);
+	BOOST_REQUIRE_EQUAL(result.first.size(), dataRGBA.size());
+	
+	for(std::size_t i = 0; i != dataRGBA.size(); ++i){
+		BOOST_CHECK_SMALL(result.first[i] - dataRGBA[i], 1.e-4);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Core_Load_Image_JPEG){
+	std::ifstream file( "Test/test_data/testImage.jpeg", std::ios::binary );
+	if(!file)
+		std::cout<<"could not open file"<<std::endl;
+	file.seekg(0, std::ios::end);
+	std::streampos fileSize = file.tellg();
+	file.seekg(0, std::ios::beg);
+	std::vector<unsigned char> buffer(fileSize);
+	file.read((char*) &buffer[0], fileSize);
+
+	
+	std::pair<blas::vector<double>, Shape> result = image::readImage<double>(buffer);
+	
+	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
+	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGB[1]);
+	BOOST_REQUIRE_EQUAL(result.second[2], shapeRGB[2]);
+	BOOST_REQUIRE_EQUAL(result.first.size(), dataRGB.size());
+	
+	//jpeg is not loss-less so we have to give it some slack
+	for(std::size_t i = 0; i != dataRGB.size(); ++i){
+		BOOST_CHECK_SMALL(result.first[i] - dataRGB[i], 0.05);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Core_Load_Image_From_File_PNG){
+	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/testImage.png");
+	
+	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGBA[0]);
+	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGBA[1]);
+	BOOST_REQUIRE_EQUAL(result.second[2], shapeRGBA[2]);
+	BOOST_REQUIRE_EQUAL(result.first.size(), dataRGBA.size());
+	
+	for(std::size_t i = 0; i != dataRGBA.size(); ++i){
+		BOOST_CHECK_SMALL(result.first[i] - dataRGBA[i], 1.e-4);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Core_Load_Image_From_File_JPEG){
+	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/testImage.jpeg");
+	
+	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
+	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGB[1]);
+	BOOST_REQUIRE_EQUAL(result.second[2], shapeRGB[2]);
+	BOOST_REQUIRE_EQUAL(result.first.size(), dataRGB.size());
+	
+	//jpeg is not loss-less so we have to give it some slack
+	for(std::size_t i = 0; i != dataRGB.size(); ++i){
+		BOOST_CHECK_SMALL(result.first[i] - dataRGB[i], 0.05);
+	}
+}
 BOOST_AUTO_TEST_SUITE_END()
