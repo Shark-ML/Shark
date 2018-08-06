@@ -133,8 +133,62 @@ message(STATUS "Will build: " ${CMAKE_BUILD_TYPE})
 #           Threads
 #####################################################################
 
-find_package (Threads)
+find_package (Threads QUIET)
 list(APPEND LINK_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} .)
+
+#####################################################################
+#           ZLIB
+#####################################################################
+find_package(ZLIB)
+
+if(NOT ZLIB_FOUND)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/zlib-cmake)
+	message(STATUS ${CMAKE_SOURCE_DIR}/contrib/zlib/)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND}
+		-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+		-DCMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+		-DBASE_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/contrib/zlib/
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/zlib-cmake
+	)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} --build .
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/zlib-cmake
+	)
+	find_package(ZLIB)
+endif()
+message(STATUS "ZLIB include dir: " ${ZLIB_INCLUDE_DIRS} )
+message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
+include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS} )
+list(APPEND LINK_LIBRARIES ${ZLIB_LIBRARIES})
+#####################################################################
+#           libPNG
+#####################################################################
+find_package(PNG)
+
+if(NOT PNG_FOUND)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libpng-cmake)
+	message(STATUS ${CMAKE_SOURCE_DIR}/contrib/libpng/)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND}
+		-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+		-DCMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+		-DBASE_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/contrib/libpng/
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libpng-cmake
+	)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} --build .
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libpng-cmake
+	)
+	find_package(PNG)
+endif()
+message(STATUS "libpng include dir: " ${PNG_INCLUDE_DIRS} )
+message(STATUS "libpng libraries: " ${PNG_LIBRARIES})
+include_directories(SYSTEM ${PNG_INCLUDE_DIRS} )
+list(APPEND LINK_LIBRARIES ${PNG_LIBRARIES})
 
 #####################################################################
 #           Boost configuration
@@ -174,31 +228,6 @@ link_directories( ${Boost_LIBRARY_DIR} )
 list(APPEND LINK_LIBRARIES ${Boost_LIBRARIES})
 
 message( STATUS "Using boost from " ${Boost_LIBRARY_DIR} )
-
-#####################################################################
-#           HDF5 configuration
-#####################################################################
-find_package(HDF5 COMPONENTS C CXX HL QUIET)
-mark_as_advanced(HDF5_DIR)
-if(HDF5_FOUND)
-	if(HDF5_C_COMPILER_EXECUTABLE AND HDF5_CXX_COMPILER_EXECUTABLE)
-		message(STATUS "Checking HDF5 installation: HDF5 installation seems ok.")
-		include_directories( ${HDF5_INCLUDE_DIRS} )
-		list(APPEND LINK_LIBRARIES ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
-	else()
-		message(STATUS "Checking HDF5 installation:HDF5 package might be broken.")
-		if(NOT( HDF5_C_COMPILER_EXECUTABLE))
-			message(STATUS "  C Compiler Extension not found.")
-		endif()
-		if(NOT( HDF5_CXX_COMPILER_EXECUTABLE))
-			message(STATUS "  CXX Compiler Extension not found.")
-		endif()
-			message(STATUS "Disabling HDF5.")
-		unset( HDF5_FOUND )
-	endif()
-else()
-	message(STATUS "HDF5 not found, skip")
-endif()
 
 #####################################################################
 #           BLAS configuration
