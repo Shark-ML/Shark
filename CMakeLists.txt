@@ -237,7 +237,7 @@ endif()
 find_package( 
 	Boost 1.48.0 REQUIRED COMPONENTS
 	serialization
-	filesystem system
+	filesystem system regex
 )
 
 if(NOT Boost_FOUND)

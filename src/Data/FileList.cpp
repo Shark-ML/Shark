@@ -36,8 +36,9 @@
 #define SHARK_COMPILE_DLL
 #include <shark/Data/DataDistribution.h>
 
-#include <regex>
+//~ #include <regex>
 #include <boost/filesystem.hpp>
+#include <boost/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 using namespace shark;
@@ -87,11 +88,12 @@ FileList::FileList(std::string const& expression):DataDistribution(Shape()){
 	
 
 std::vector<std::string> FileList::filterGlob(std::string expression, std::vector<std::string> const& paths){
+	namespace rx=boost;
 	//first escape everything that might interfere with the regex we construct
 	expression = regex_replace(
 		expression, 
-		std::regex("[.^$()\\[\\]+\\\\]"), std::string("\\\\&"),
-		std::regex_constants::match_default | std::regex_constants::format_sed
+		rx::regex("[.^$()\\[\\]+\\\\]"), std::string("\\\\&"),
+		rx::regex_constants::match_default | rx::regex_constants::format_sed
 	);
 	
 	//replace "?"->".", "{"->"(?:" and "}"->")"
@@ -102,11 +104,11 @@ std::vector<std::string> FileList::filterGlob(std::string expression, std::vecto
 	boost::replace_all(expression, "*", ".*");
 	
 	//create regex and filter strings
-	std::regex regex(expression, std::regex::ECMAScript | std::regex::optimize);
+	rx::regex regex(expression, rx::regex::ECMAScript | rx::regex::optimize);
 	std::vector<std::string> filtered;
 	
 	for(auto const& path: paths){
-		if(std::regex_match(path, regex)){
+		if(rx::regex_match(path, regex)){
 			filtered.push_back(path);
 		}
 	}

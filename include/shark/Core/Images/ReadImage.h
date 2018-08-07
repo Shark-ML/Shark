@@ -76,7 +76,7 @@ std::pair<blas::vector<T>, Shape> readPNG(std::vector<unsigned char> const& data
 		unsigned char const* data;
 		std::size_t pos;
 	};
-	auto readPNGData = [](png_struct* pngPtr, unsigned char* data, std::size_t length) {
+	auto readPNGData = [](png_struct* pngPtr, unsigned char* data, long unsigned int length) {
 		pngIOSource* source = (pngIOSource*)png_get_io_ptr(pngPtr);
 		for(std::size_t i = 0; i != length; ++i, ++source->pos){
 			data[i] = source->data[source->pos];
