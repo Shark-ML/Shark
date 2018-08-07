@@ -90,7 +90,7 @@ std::vector<std::string> FileList::filterGlob(std::string expression, std::vecto
 	//first escape everything that might interfere with the regex we construct
 	expression = regex_replace(
 		expression, 
-		std::regex("[.^$()\\[\\]+\\\\]"), "\\\\&",
+		std::regex("[.^$()\\[\\]+\\\\]"), std::string("\\\\&"),
 		std::regex_constants::match_default | std::regex_constants::format_sed
 	);
 	
