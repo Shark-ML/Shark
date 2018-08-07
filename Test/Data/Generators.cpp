@@ -1,4 +1,4 @@
-#define BOOST_TEST_MODULE Data_Generators
+#define BOOST_TEST_MODULE Generator_Generators
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
@@ -10,7 +10,7 @@ using namespace shark;
 
 
 
-BOOST_AUTO_TEST_SUITE (Data_Generators)
+BOOST_AUTO_TEST_SUITE (Generator_Generators)
 
 //in this suit, we check:
 //generation using op()
@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_SUITE (Data_Generators)
 //We make sure, that at least one of those tests has a different output than input type
 
 //check whether the datapoints of a specific ditribution fulfill the real distribution
-BOOST_AUTO_TEST_CASE( Data_Basic_Test){
+BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 	NormalDistributedPoints distId(2);
 	Generator<RealVector> genId = distId.generator(100,100);
 	
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( Data_Basic_Test){
 }
 
 
-BOOST_AUTO_TEST_CASE( Data_TransformInputs_Test){
+BOOST_AUTO_TEST_CASE( Generator_TransformInputs_Test){
 	Chessboard problem;
 	LabeledDataGenerator<RealVector, unsigned int> gen = problem.generator(100,100);
 	
@@ -171,7 +171,7 @@ class TestModel : public AbstractModel<unsigned int, RealVector, RealVector>{
 	}
 };
 
-BOOST_AUTO_TEST_CASE( Data_TransformLabels_Test){
+BOOST_AUTO_TEST_CASE( Generator_TransformLabels_Test){
 	Chessboard problem;
 	LabeledDataGenerator<RealVector, unsigned int> gen = problem.generator(100,100);
 
@@ -214,5 +214,81 @@ BOOST_AUTO_TEST_CASE( Data_TransformLabels_Test){
 	}
 }
 
+BOOST_AUTO_TEST_CASE( Generator_FilePaths_Glob){
+	std::vector<std::string> paths ={
+		"a/b/c1/d.png", "a/b/c2/d.jpeg", "a/b/c3/d.zip",
+		"a/b/1/d.png", "a/b/1/d.jpeg", "a/b/1/d.zip",
+		"e/b/c1/d.png", "e/b/c/d.jpeg", "e/b/c/d.zip",
+		"e/b/1/d.png", "e/b/1/d.jpeg", "e/b/1/d.zip"
+	};
+	std::vector<std::string> allJPEG ={"a/b/c2/d.jpeg","a/b/1/d.jpeg", "e/b/c/d.jpeg", "e/b/1/d.jpeg"};
+	std::vector<std::string> allJPEGOrPNG ={
+		"a/b/c1/d.png", "a/b/c2/d.jpeg",
+		"a/b/1/d.png", "a/b/1/d.jpeg",
+		"e/b/c1/d.png", "e/b/c/d.jpeg",
+		"e/b/1/d.png", "e/b/1/d.jpeg"
+	};
+	std::vector<std::string> allAB ={"a/b/c1/d.png", "a/b/c2/d.jpeg", "a/b/c3/d.zip", "a/b/1/d.png", "a/b/1/d.jpeg", "a/b/1/d.zip"};
+	std::vector<std::string> allCNum ={"a/b/c1/d.png", "a/b/c2/d.jpeg", "a/b/c3/d.zip", "e/b/c1/d.png"};
+	
+	auto testAllJPEGOrPNG = FileList::filterGlob("*.{jpeg|png}", paths);
+	BOOST_REQUIRE_EQUAL(testAllJPEGOrPNG.size(), allJPEGOrPNG.size());
+	for(std::size_t i = 0; i != allJPEGOrPNG.size(); ++i){
+		BOOST_CHECK_EQUAL(testAllJPEGOrPNG[i], allJPEGOrPNG[i]);
+	}
+	
+	auto testAllJPEG = FileList::filterGlob("*.jpeg", paths);
+	BOOST_REQUIRE_EQUAL(testAllJPEG.size(), allJPEG.size());
+	for(std::size_t i = 0; i != allJPEG.size(); ++i){
+		BOOST_CHECK_EQUAL(testAllJPEG[i], allJPEG[i]);
+	}
+
+	auto testAllAB = FileList::filterGlob("a/b/*", paths);
+	BOOST_REQUIRE_EQUAL(testAllAB.size(), allAB.size());
+	for(std::size_t i = 0; i != allAB.size(); ++i){
+		BOOST_CHECK_EQUAL(testAllAB[i], allAB[i]);
+	}
+	
+	auto testAllCNum = FileList::filterGlob("*/c?/*", paths);
+	BOOST_REQUIRE_EQUAL(testAllCNum.size(), allCNum.size());
+	for(std::size_t i = 0; i != allCNum.size(); ++i){
+		BOOST_CHECK_EQUAL(testAllCNum[i], allCNum[i]);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Generator_FilePaths_Paths){
+	std::vector<std::string> paths ={
+		"a/b/c1/d.png", "a/b/c2/d.jpeg", "a/b/c3/d.zip",
+		"a/b/1/d.png", "a/b/1/d.jpeg", "a/b/1/d.zip",
+		"e/b/c1/d.png", "e/b/c/d.jpeg", "e/b/c/d.zip",
+		"e/b/1/d.png", "e/b/1/d.jpeg", "e/b/1/d.zip"
+	};
+	std::vector<std::string> allJPEGOrPNG ={
+		"a/b/c1/d.png", "a/b/c2/d.jpeg",
+		"a/b/1/d.png", "a/b/1/d.jpeg",
+		"e/b/c1/d.png", "e/b/c/d.jpeg",
+		"e/b/1/d.png", "e/b/1/d.jpeg"
+	};
+		
+	FileList list(paths, "*.{jpeg|png}");
+	BOOST_REQUIRE_EQUAL(list.paths().size(), allJPEGOrPNG.size());
+	for(std::size_t i = 0; i != allJPEGOrPNG.size(); ++i){
+		BOOST_CHECK_EQUAL(list.paths()[i], allJPEGOrPNG[i]);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Generator_FilePaths_FileSystem){
+	std::vector<std::string> allJPEGOrPNG ={
+		"Test/test_data/testImage.jpeg", "Test/test_data/testImage.png"
+	};
+		
+	FileList list("Test/test_data/*.{jpeg|png}");
+	auto result = list.paths();
+	std::sort(result.begin(),result.end());
+	BOOST_REQUIRE_EQUAL(result.size(), allJPEGOrPNG.size());
+	for(std::size_t i = 0; i != allJPEGOrPNG.size(); ++i){
+		BOOST_CHECK_EQUAL(result[i], allJPEGOrPNG[i]);
+	}
+}
 
 BOOST_AUTO_TEST_SUITE_END()
