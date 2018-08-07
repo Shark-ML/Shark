@@ -73,7 +73,9 @@ FileList::FileList(std::string const& expression):DataDistribution(Shape()){
 		throw SHARKEXCEPTION("Path does not exist or is no directory: "+base.string());
 	
 	std::vector<std::string> filePaths;
-	for(auto const& entry: fs::recursive_directory_iterator(base)){
+	//~ for(auto const& entry: fs::recursive_directory_iterator(base)){//unsupported of boost @ travis
+	for(fs::recursive_directory_iterator pos(base); pos != fs::recursive_directory_iterator(); ++pos){
+		auto const& entry = *pos;
 		//skip directories
 		if(fs::is_directory(entry))
 			continue;
