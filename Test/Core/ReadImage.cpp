@@ -1,5 +1,5 @@
 #define BOOST_COMPUTE_DEBUG_KERNEL_COMPILATION
-#include <shark/Core/Images/LoadImage.h>
+#include <shark/Core/Images/ReadImage.h>
 
 #define BOOST_TEST_MODULE Core_ImageReorder
 #include <boost/test/unit_test.hpp>
@@ -49,9 +49,9 @@ struct ImageFixture {
 };
 
 
-BOOST_FIXTURE_TEST_SUITE (Core_LoadImage_Tests, ImageFixture )
+BOOST_FIXTURE_TEST_SUITE (Core_ReadImage_Tests, ImageFixture )
 
-BOOST_AUTO_TEST_CASE( Core_Load_PNG){
+BOOST_AUTO_TEST_CASE( Core_Read_PNG){
 	std::ifstream file( "Test/test_data/testImage.png", std::ios::binary );
 	if(!file)
 		std::cout<<"could not open file"<<std::endl;
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( Core_Load_PNG){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Core_Load_JPEG){
+BOOST_AUTO_TEST_CASE( Core_Read_JPEG){
 	std::ifstream file( "Test/test_data/testImage.jpeg", std::ios::binary );
 	if(!file)
 		std::cout<<"could not open file"<<std::endl;
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE( Core_Load_JPEG){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Core_Load_Image_PNG){
+BOOST_AUTO_TEST_CASE( Core_Read_Image_PNG){
 	std::ifstream file( "Test/test_data/testImage.png", std::ios::binary );
 	if(!file)
 		std::cout<<"could not open file"<<std::endl;
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( Core_Load_Image_PNG){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Core_Load_Image_JPEG){
+BOOST_AUTO_TEST_CASE( Core_Read_Image_JPEG){
 	std::ifstream file( "Test/test_data/testImage.jpeg", std::ios::binary );
 	if(!file)
 		std::cout<<"could not open file"<<std::endl;
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( Core_Load_Image_JPEG){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Core_Load_Image_From_File_PNG){
+BOOST_AUTO_TEST_CASE( Core_Read_Image_From_File_PNG){
 	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/testImage.png");
 	
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGBA[0]);
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE( Core_Load_Image_From_File_PNG){
 	}
 }
 
-BOOST_AUTO_TEST_CASE( Core_Load_Image_From_File_JPEG){
+BOOST_AUTO_TEST_CASE( Core_Read_Image_From_File_JPEG){
 	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/testImage.jpeg");
 	
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);

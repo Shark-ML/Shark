@@ -2,12 +2,12 @@
 /*!
  * 
  *
- * \brief       Importing and exporting PGM images
+ * \brief       Importing and exporting of Images
  * 
  * 
  *
- * \author      C. Igel
- * \date        2011
+ * \author      O.Krause
+ * \date        2018
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -32,8 +32,8 @@
  */
 //===========================================================================
 
-#ifndef SHARK_DATA_LOAD_IMAGE_H
-#define SHARK_DATA_LOAD_IMAGE_H
+#ifndef SHARK_DATA_READ_IMAGE_H
+#define SHARK_DATA_READ_IMAGE_H
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Shape.h>
@@ -179,7 +179,6 @@ std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& dat
 		throw SHARKEXCEPTION(std::string("[readJPEG] Error during reading:") + messageBuffer);
 	}
 }
-
 
 template<class T>
 std::pair<blas::vector<T>, Shape> readImage(std::vector<unsigned char> const& data){
