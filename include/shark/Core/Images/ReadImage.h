@@ -52,7 +52,7 @@ namespace shark { namespace image{
 template<class T>
 std::pair<blas::vector<T>, Shape> readPNG(std::vector<unsigned char> const& data){
 	//Let LibPNG check the sig. If this function returns 0, everything is OK.
-	if(png_sig_cmp(data.data(), 0, 8) != 0)
+	if(png_sig_cmp((unsigned char*)data.data(), 0, 8) != 0)
 		throw SHARKEXCEPTION("[readPNG] Image does not look like a png");
 	
 	png_struct* pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
@@ -184,7 +184,7 @@ template<class T>
 std::pair<blas::vector<T>, Shape> readImage(std::vector<unsigned char> const& data){
 	if(data[0] == 0xFF && data[1] == 0xD8)
 		return readJPEG<T>(data);
-	if(png_sig_cmp(data.data(), 0, 8) == 0)
+	if(png_sig_cmp((unsigned char*)data.data(), 0, 8) == 0)
 		return readPNG<T>(data);
 	throw SHARKEXCEPTION("[readImage] Could not determine image file type");
 }
