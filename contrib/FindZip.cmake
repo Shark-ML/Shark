@@ -30,8 +30,6 @@ IF("${Zip_LIBRARY_DIRS}" MATCHES "/zip$")
     # Strip off the trailing "/include" in the path.
     GET_FILENAME_COMPONENT(Zip_LIBRARY_DIRS ${Zip_LIBRARY_DIRS} PATH)
   ENDIF()
-  
-  message(STATUS ${Zip_LIBRARY_DIRS})
 
   # Find Zip libraries
   FIND_LIBRARY(Zip_DEBUG_LIBRARY NAMES zipd zip_d libzipd libzip_d
