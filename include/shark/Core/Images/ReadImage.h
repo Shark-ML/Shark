@@ -38,6 +38,8 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Shape.h>
 #include <memory>
+#include <cstdlib>
+#include <cctype>
 #include <fstream>
 extern "C"{
 #include <png.h>
@@ -126,50 +128,50 @@ std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& dat
 	
 	//try to decompress (this can call our error callback defined above)
 	try{	
-	//set up decompression
-	jpeg_create_decompress(&cinfo);
-	
-	//set up the data source
-	jpeg_mem_src(&cinfo, (unsigned char*)data.data(), data.size());
-	
-	//check if the file is a valid jpeg
-	if(jpeg_read_header(&cinfo, TRUE) != 1){
-		jpeg_destroy_decompress(&cinfo);
-		throw SHARKEXCEPTION("[readJPEG] Image does not look like a JPEG");
-	}
-	
-	jpeg_start_decompress(&cinfo);
-	//get image geometry and allocate space for the decompressed image
-	std::size_t imgWidth =  cinfo.output_width;
-	std::size_t imgHeight = cinfo.output_height;
-	std::size_t channels = cinfo.output_components;
-	std::vector<unsigned char> pixBuf(imgWidth * imgHeight * channels);
-	
-	
-		//decompress image block by block
-		std::vector<unsigned char*> scanlines(cinfo.rec_outbuf_height);
-		while (cinfo.output_scanline < cinfo.output_height) {
-			//set up the beginning of the lines to read
-			for(int i = 0; i != cinfo.rec_outbuf_height; ++i){
-				scanlines[i] = pixBuf.data() + (cinfo.output_scanline + i) * imgWidth * channels;
-			}
-			jpeg_read_scanlines(&cinfo, scanlines.data(), cinfo.rec_outbuf_height);
+		//set up decompression
+		jpeg_create_decompress(&cinfo);
+		
+		//set up the data source
+		jpeg_mem_src(&cinfo, (unsigned char*)data.data(), data.size());
+		
+		//check if the file is a valid jpeg
+		if(jpeg_read_header(&cinfo, TRUE) != 1){
+			jpeg_destroy_decompress(&cinfo);
+			throw SHARKEXCEPTION("[readJPEG] Image does not look like a JPEG");
 		}
-	
-	//clean-up
-	jpeg_finish_decompress(&cinfo);
-	jpeg_destroy_decompress(&cinfo);
-	
-	
-	//convert to float vector
-	T conv = (T)255.0;
-	blas::vector<T> image(imgWidth * imgHeight * channels);
-	for (std::size_t i=0; i != image.size(); ++i){
-		image[i] = pixBuf[i] / conv;
-	}
-	
-	//done
-	return {std::move(image), {imgHeight, imgWidth, channels}};
+		
+		jpeg_start_decompress(&cinfo);
+		//get image geometry and allocate space for the decompressed image
+		std::size_t imgWidth =  cinfo.output_width;
+		std::size_t imgHeight = cinfo.output_height;
+		std::size_t channels = cinfo.output_components;
+		std::vector<unsigned char> pixBuf(imgWidth * imgHeight * channels);
+		
+		
+			//decompress image block by block
+			std::vector<unsigned char*> scanlines(cinfo.rec_outbuf_height);
+			while (cinfo.output_scanline < cinfo.output_height) {
+				//set up the beginning of the lines to read
+				for(int i = 0; i != cinfo.rec_outbuf_height; ++i){
+					scanlines[i] = pixBuf.data() + (cinfo.output_scanline + i) * imgWidth * channels;
+				}
+				jpeg_read_scanlines(&cinfo, scanlines.data(), cinfo.rec_outbuf_height);
+			}
+		
+		//clean-up
+		jpeg_finish_decompress(&cinfo);
+		jpeg_destroy_decompress(&cinfo);
+		
+		
+		//convert to float vector
+		T conv = (T)255.0;
+		blas::vector<T> image(imgWidth * imgHeight * channels);
+		for (std::size_t i=0; i != image.size(); ++i){
+			image[i] = pixBuf[i] / conv;
+		}
+		
+		//done
+		return {std::move(image), {imgHeight, imgWidth, channels}};
 	
 	}catch(jpeg_error_mgr* mgr){//on failure, write message and rethrow
 		char messageBuffer[JMSG_LENGTH_MAX];
@@ -180,10 +182,68 @@ std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& dat
 	}
 }
 
+
+template<class T>
+std::pair<blas::vector<T>, Shape> readPGM(std::vector<unsigned char> const& data){
+	//locale and state needed for text processing
+	//we do the read in a very low-level way to have better control over reading, e.g. when the first pixel has the value of a white space we really don't want to skip it.
+	std::locale loc("C");//we need the C-locale to read numbers correctly
+	
+	//the header is in text format, so lets read it
+	if(data[0] != 'P' || data[1] != '5')
+		throw SHARKEXCEPTION("File does not have PGM format");
+	
+	auto pos = (char*) data.data() + 2;
+	auto end = (char*) data.data() + data.size();
+	while(std::isspace(*pos)) ++pos;
+	//skip comments and white space
+	while( pos != end && *pos == '#'){
+		while(pos != end &&  *pos != '\n') ++pos;
+		while(pos != end &&  std::isspace(*pos, loc)) ++pos;
+	}
+	if(pos == end)
+		throw SHARKEXCEPTION("Error reading header!");
+	
+	//read width
+	long imgWidth = std::strtol(pos, &pos, 0);
+	if(pos == end || imgWidth == 0)
+		throw SHARKEXCEPTION("Error reading header!");
+	++pos; //skip white space
+	
+	//read height
+	long imgHeight = std::strtol(pos, &pos, 0);
+	if(pos == end || imgHeight == 0)
+		throw SHARKEXCEPTION("Error reading header!");
+	++pos; //skip white space
+	
+	//read number of GrayValues
+	long nGrayValues = std::strtol(pos, &pos, 0);
+	if(pos == end || nGrayValues == 0)
+		throw SHARKEXCEPTION("Error reading header!");
+	++pos; //skip white space
+	
+	if(nGrayValues > 255)
+		throw SHARKEXCEPTION("Only 8-Bit PGMs are supported");
+	
+	if( imgWidth * imgHeight > end - pos)
+		throw SHARKEXCEPTION("Error: error reading image contents");
+	
+	
+	T conv = (T)(nGrayValues +1);
+	blas::vector<T> image(imgWidth * imgHeight);
+	for (std::size_t i=0; i != image.size(); ++i, ++pos){
+		image[i] = ((unsigned char)*pos) / conv;
+	}
+
+	return {std::move(image), {(std::size_t) imgHeight,(std::size_t) imgWidth, 1}};
+}
+
 template<class T>
 std::pair<blas::vector<T>, Shape> readImage(std::vector<unsigned char> const& data){
 	if(data[0] == 0xFF && data[1] == 0xD8)
 		return readJPEG<T>(data);
+	if(data[0] == 'P' && data[1] == '5')
+		return readPGM<T>(data);
 	if(png_sig_cmp((unsigned char*)data.data(), 0, 8) == 0)
 		return readPNG<T>(data);
 	throw SHARKEXCEPTION("[readImage] Could not determine image file type");

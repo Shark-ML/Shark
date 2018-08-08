@@ -250,8 +250,6 @@ set_tests_properties( Trainers_LinearSvmTrainer PROPERTIES LABELS "slow" )
 
 # Create output dir
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_output)
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_data)
 # copy test data
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_data/testImage.png DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_data/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_data/testImage.jpeg DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_data/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_data/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_data/)
 
