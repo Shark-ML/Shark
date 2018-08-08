@@ -185,10 +185,6 @@ std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& dat
 
 template<class T>
 std::pair<blas::vector<T>, Shape> readPGM(std::vector<unsigned char> const& data){
-	//locale and state needed for text processing
-	//we do the read in a very low-level way to have better control over reading, e.g. when the first pixel has the value of a white space we really don't want to skip it.
-	std::locale loc("C");//we need the C-locale to read numbers correctly
-	
 	//the header is in text format, so lets read it
 	if(data[0] != 'P' || data[1] != '5')
 		throw SHARKEXCEPTION("File does not have PGM format");
@@ -199,7 +195,7 @@ std::pair<blas::vector<T>, Shape> readPGM(std::vector<unsigned char> const& data
 	//skip comments and white space
 	while( pos != end && *pos == '#'){
 		while(pos != end &&  *pos != '\n') ++pos;
-		while(pos != end &&  std::isspace(*pos, loc)) ++pos;
+		while(pos != end &&  std::isspace(*pos)) ++pos;
 	}
 	if(pos == end)
 		throw SHARKEXCEPTION("Error reading header!");
