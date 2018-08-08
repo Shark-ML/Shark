@@ -20,6 +20,12 @@ endif()
 if(POLICY CMP0053)
 	cmake_policy(SET CMP0053 NEW)
 endif()
+
+#####################################################################
+# Module Paths
+#####################################################################
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/contrib/")
+
 #=========================================================
 # Output directories.
 if(NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
@@ -163,6 +169,36 @@ message(STATUS "ZLIB include dir: " ${ZLIB_INCLUDE_DIRS} )
 message(STATUS "ZLIB libraries: " ${ZLIB_LIBRARIES})
 include_directories(SYSTEM ${ZLIB_INCLUDE_DIRS} )
 list(APPEND LINK_LIBRARIES ${ZLIB_LIBRARIES})
+
+
+#####################################################################
+#           libZip
+#####################################################################
+find_package(Zip)
+
+if(NOT Zip_FOUND)
+	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libZip-cmake)
+	message(STATUS ${CMAKE_SOURCE_DIR}/contrib/libZip/)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND}
+		-DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+		-DCMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+		-DBASE_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+		${CMAKE_CURRENT_SOURCE_DIR}/contrib/libZip/
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libZip-cmake
+	)
+	execute_process(
+		COMMAND ${CMAKE_COMMAND} --build .
+		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libZip-cmake
+	)
+	set( Zip_ROOT ${CMAKE_CURRENT_BINARY_DIR})
+	find_package(Zip REQUIRED)
+endif()
+
+message(STATUS "Zip include dir: " ${Zip_INCLUDE_DIRS} )
+message(STATUS "Zip libraries: " ${Zip_LIBRARIES})
+include_directories(SYSTEM ${Zip_INCLUDE_DIRS} )
+list(APPEND LINK_LIBRARIES ${Zip_LIBRARIES})
 
 #####################################################################
 #           libPNG
