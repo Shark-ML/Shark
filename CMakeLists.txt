@@ -174,7 +174,7 @@ list(APPEND LINK_LIBRARIES ${ZLIB_LIBRARIES})
 #####################################################################
 #           libZip
 #####################################################################
-find_package(Zip)
+find_package(Zip QUIET)
 
 if(NOT Zip_FOUND)
 	file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libZip-cmake)
@@ -192,7 +192,7 @@ if(NOT Zip_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libZip-cmake
 	)
 	set( Zip_ROOT ${CMAKE_CURRENT_BINARY_DIR})
-	find_package(Zip REQUIRED)
+	find_package(Zip REQUIRED QUIET)
 endif()
 
 message(STATUS "Zip include dir: " ${Zip_INCLUDE_DIRS} )
