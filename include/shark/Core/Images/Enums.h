@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Image Padding routines and defines
+ * \brief       Enums for Image handling
  * 
  * 
  *
@@ -32,15 +32,24 @@
  */
 //===========================================================================
 
-#ifndef SHARK_CORE_IMAGE_PADDING_H
-#define SHARK_CORE_IMAGE_PADDING_H
+#ifndef SHARK_CORE_IMAGE_ENUMS_H
+#define SHARK_CORE_IMAGE_ENuMS_H
 
-#include <shark/LinAlg/Base.h>
 namespace shark{
+enum class Interpolation{
+	Spline
+};
 enum class Padding{
 	Valid,
 	ZeroPad,
 	RepeatBorder
+};
+
+enum class PixelType{
+	RGB,
+	RGBA,
+	ARGB,
+	Luma
 };
 
 }

@@ -32,7 +32,7 @@
  
 #include <shark/LinAlg/Base.h>
 #include <shark/Models/AbstractModel.h>
-#include <shark/Core/Images/Padding.h>
+#include <shark/Core/Images/Enums.h>
 #include <shark/Core/Images/CPU/Pooling.h>
 #ifdef SHARK_USE_OPENCL
 #include <shark/Core/Images/OpenCL/Pooling.h>

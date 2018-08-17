@@ -2,7 +2,7 @@
 /*!
  * 
  *
- * \brief       Importing and exporting of Images
+ * \brief       Importing of Images
  * 
  * 
  *
@@ -147,17 +147,17 @@ std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& dat
 		std::size_t channels = cinfo.output_components;
 		std::vector<unsigned char> pixBuf(imgWidth * imgHeight * channels);
 		
-		
-			//decompress image block by block
-			std::vector<unsigned char*> scanlines(cinfo.rec_outbuf_height);
-			while (cinfo.output_scanline < cinfo.output_height) {
-				//set up the beginning of the lines to read
-				for(int i = 0; i != cinfo.rec_outbuf_height; ++i){
-					scanlines[i] = pixBuf.data() + (cinfo.output_scanline + i) * imgWidth * channels;
-				}
-				jpeg_read_scanlines(&cinfo, scanlines.data(), cinfo.rec_outbuf_height);
+	
+		//decompress image block by block
+		std::vector<unsigned char*> scanlines(cinfo.rec_outbuf_height);
+		while (cinfo.output_scanline < cinfo.output_height) {
+			//set up the beginning of the lines to read
+			for(int i = 0; i != cinfo.rec_outbuf_height; ++i){
+				scanlines[i] = pixBuf.data() + (cinfo.output_scanline + i) * imgWidth * channels;
 			}
-		
+			jpeg_read_scanlines(&cinfo, scanlines.data(), cinfo.rec_outbuf_height);
+		}
+	
 		//clean-up
 		jpeg_finish_decompress(&cinfo);
 		jpeg_destroy_decompress(&cinfo);
