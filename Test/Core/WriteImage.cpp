@@ -182,8 +182,8 @@ BOOST_AUTO_TEST_CASE( Core_Write_PGM_Luma){
 ///////////////////////////////////WRITE IMAGE/////////////////////////////////////
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_PNG){
-	image::writeImageToFile("Test/test_data/writer_test.png", dataRGB, shapeRGB, PixelType::RGB);
-	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/writer_test.png");
+	image::writeImageToFile("Test/test_output/writer_test.png", dataRGB, shapeRGB, PixelType::RGB);
+	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_output/writer_test.png");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
 	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGB[1]);
