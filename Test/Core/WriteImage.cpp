@@ -182,8 +182,8 @@ BOOST_AUTO_TEST_CASE( Core_Write_PGM_Luma){
 ///////////////////////////////////WRITE IMAGE/////////////////////////////////////
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_PNG){
-	image::writeImageToFile("Test/test_data/test_output.png", dataRGB, shapeRGB, PixelType::RGB);
-	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/test_output.png");
+	image::writeImageToFile("Test/test_data/writer_test.png", dataRGB, shapeRGB, PixelType::RGB);
+	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/writer_test.png");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
 	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGB[1]);
@@ -196,8 +196,8 @@ BOOST_AUTO_TEST_CASE( Core_Write_Image_PNG){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_PGM){
-	image::writeImageToFile("Test/test_data/test_output.pgm", dataGray, shapeGray, PixelType::Luma);
-	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/test_output.pgm");
+	image::writeImageToFile("Test/test_output/writer_test.pgm", dataGray, shapeGray, PixelType::Luma);
+	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_output/writer_test.pgm");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeGray[0]);
 	BOOST_REQUIRE_EQUAL(result.second[1], shapeGray[1]);
@@ -210,8 +210,8 @@ BOOST_AUTO_TEST_CASE( Core_Write_Image_PGM){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_JPEG){
-	image::writeImageToFile("Test/test_data/test_output.jpeg", dataRGB, shapeRGB, PixelType::RGB);
-	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_data/test_output.jpeg");
+	image::writeImageToFile("Test/test_output/writer_test.jpeg", dataRGB, shapeRGB, PixelType::RGB);
+	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_output/writer_test.jpeg");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
 	BOOST_REQUIRE_EQUAL(result.second[1], shapeRGB[1]);

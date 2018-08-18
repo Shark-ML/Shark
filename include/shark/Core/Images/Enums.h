@@ -33,7 +33,7 @@
 //===========================================================================
 
 #ifndef SHARK_CORE_IMAGE_ENUMS_H
-#define SHARK_CORE_IMAGE_ENuMS_H
+#define SHARK_CORE_IMAGE_ENUMS_H
 
 namespace shark{
 enum class Interpolation{
