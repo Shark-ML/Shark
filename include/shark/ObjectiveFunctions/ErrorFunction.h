@@ -79,11 +79,13 @@ public:
 		LabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType, SearchPointType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss,
-		bool useMiniBatches = false
+		std::size_t numMiniBatches = 0
 	){
 		m_regularizer = nullptr;
-		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss, useMiniBatches));
-
+		if(numMiniBatches == 0)
+			mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss));
+		else
+			mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(generator(dataset),model,loss, numMiniBatches));
 		this -> m_features = mp_wrapper -> features();
 	}
 	template<class InputType, class LabelType, class OutputType>
@@ -91,12 +93,36 @@ public:
 		WeightedLabeledData<InputType, LabelType> const& dataset,
 		AbstractModel<InputType,OutputType, SearchPointType>* model, 
 		AbstractLoss<LabelType, OutputType>* loss,
-		bool useMiniBatches = false
+		std::size_t numMiniBatches = 0
 	){
 		m_regularizer = nullptr;
-		mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss, useMiniBatches));
+		if(numMiniBatches == 0)
+			mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(dataset,model,loss));
+		else
+			mp_wrapper.reset(new detail::WeightedErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(generator(dataset),model,loss, numMiniBatches));
 		this -> m_features = mp_wrapper -> features();
 	}
+	template<class InputType, class LabelType, class OutputType>
+	ErrorFunction(
+		LabeledDataGenerator<InputType, LabelType> const& gen,
+		AbstractModel<InputType,OutputType, SearchPointType>* model, 
+		AbstractLoss<LabelType, OutputType>* loss,
+		std::size_t numMiniBatches
+	){
+		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(gen,model,loss, numMiniBatches));
+		this -> m_features = mp_wrapper -> features();
+	}
+	template<class InputType, class LabelType, class OutputType>
+	ErrorFunction(
+		WeightedLabeledDataGenerator<InputType, LabelType> const& gen,
+		AbstractModel<InputType,OutputType, SearchPointType>* model, 
+		AbstractLoss<LabelType, OutputType>* loss,
+		std::size_t numMiniBatches
+	){
+		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(gen,model,loss, numMiniBatches));
+		this -> m_features = mp_wrapper -> features();
+	}
+	
 	ErrorFunction(ErrorFunction const& op)
 	:mp_wrapper(op.mp_wrapper->clone()){
 		this -> m_features = mp_wrapper -> features();

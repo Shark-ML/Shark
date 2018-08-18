@@ -39,6 +39,7 @@
 
 #include <shark/Data/Dataset.h>
 #include <shark/Data/DataView.h>
+#include <shark/Data/Generator.h>
 #include <shark/Core/Random.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <utility>
@@ -47,30 +48,24 @@ namespace shark {
 
 
 ///
-/// \brief A DataDistribution defines an unsupervised learning problem.
+/// \brief A DataDistribution defines a learning problem.
 ///
-/// \par
-/// The unsupervised learning problem is defined by an explicit
-/// distribution (in contrast to a finite dataset). The only
-/// method we need is to draw a sample from the distribution.
-///
-template <class InputType>
-class DataDistribution
-{
+/// Depending on the Input type,
+/// this class represents unsupervised or supervised, weighted or
+/// unweighted problems
+template <class Type>
+class DataDistribution{
 public:
-	typedef Data<InputType> DatasetType;
+	typedef typename InputToDataType<Type>::type DatasetType;
+	typedef typename Batch<Type>::reference reference;
 	typedef typename DatasetType::shape_type shape_type;
 
-	DataDistribution(shape_type const& shape):m_shape(shape){}
+	DataDistribution(shape_type const& shape)
+	:m_shape(shape){}
 
 	/// \brief Virtual destructor.
 	virtual ~DataDistribution() { }
 
-	/// \brief Generates a single pair of input and label.
-	///
-	/// @param input the generated input
-	virtual void draw(InputType& input) const = 0;
-	
 	/// \brief Returns the shape of the dataset.
 	shape_type const& shape() const{
 		return m_shape;
@@ -79,68 +74,40 @@ public:
 	/// \brief Generates a data set with samples from from the distribution.
 	///
 	/// @param size the number of samples in the dataset
-	/// @param maximumBatchSize the maximum size of a batch
-	Data<InputType> generateDataset(std::size_t size,std::size_t maximumBatchSize = constants::DefaultBatchSize) const {
+	/// @param maximumBatchSize the batch size of the batches generated
+	DatasetType generateDataset(std::size_t size, std::size_t maximumBatchSize = constants::DefaultBatchSize) const {
 		DatasetType data(size, shape(), maximumBatchSize);
 
 		// draw the samples
-		InputType input;
-		for(auto&& element: elements(data)){
-			draw(input);
-			element = input;
+		for(reference element: elements(data)){
+			draw(element);
 		}
 		return data;
 	}
-private:
-	shape_type m_shape;
-};
-
-
-///
-/// \brief A LabeledDataDistribution defines a supervised learning problem.
-///
-/// \par
-/// The supervised learning problem is defined by an explicit
-/// distribution (in contrast to a finite dataset). The only
-/// method we need is to draw a sample from the distribution.
-///
-template <class InputType, class LabelType>
-class LabeledDataDistribution
-{
-public:
-	typedef LabeledData<InputType, LabelType> DatasetType;
-	typedef typename DatasetType::shape_type shape_type;
-
-	LabeledDataDistribution(shape_type const& shape):m_shape(shape){}
-
-	/// \brief Generates a single pair of input and label.
-	/// @param input the generated input
-	/// @param label the generated label
-	virtual void draw(InputType& input, LabelType& label) const = 0;
-	
-	/// \brief Returns the shape of the dataset.
-	shape_type const& shape() const{
-		return m_shape;
-	}
-	
-	/// \brief Generates a dataset with samples from from the distribution.
+	/// \brief Generates a data set with samples from from the distribution.
 	///
-	/// @param size the number of samples in the dataset
-	/// @param maximumBatchSize the maximum size of a batch
-	DatasetType generateDataset(std::size_t size,std::size_t maximumBatchSize = constants::DefaultBatchSize) const{
-		DatasetType data(size, shape(), maximumBatchSize);
-
-		// draw the samples
-		InputLabelPair<InputType,LabelType> pair;
-		for(auto&& element: elements(data)){
-			draw(pair.input,pair.label);
-			element = pair;
-		}
-		return data;
+	/// @param cacheSize the number of elements that are to be cached, default is no caching
+	/// @param maximumBatchSize the batch size of the batches generated
+	Generator<Type> generator(std::size_t cacheSize = 0, std::size_t maximumBatchSize = constants::DefaultBatchSize) const {
+		auto batchGeneratorFunc = [this, maximumBatchSize](){
+			auto batch = Batch<Type>::createBatchFromShape(m_shape, maximumBatchSize);
+			for(std::size_t i = 0; i != maximumBatchSize; ++i){
+				draw(getBatchElement(batch,i));
+			}
+			return batch;
+		};
+		Generator<Type> gen(batchGeneratorFunc, shape(), cacheSize);
+		return std::move(gen);
 	}
+	/// \brief Generates a single input
+	virtual void draw(reference input) const = 0;
 private:
 	shape_type m_shape;
+	std::size_t m_maximumBatchSize;
 };
+
+template<class I,class L>
+using LabeledDataDistribution = DataDistribution<InputLabelPair<I,L> >;
 
 
 ///
@@ -156,17 +123,17 @@ public:
 	}
 
 
-	void draw(RealVector& input, unsigned int& label)const{
-		input.resize(2);
-		unsigned int j, t = 0;
-		for (j = 0; j < 2; j++)
+	void draw(reference point)const{
+		unsigned int t = 0;
+		for (std::size_t j = 0; j < 2; j++)
 		{
 			double v = random::uni(random::globalRng(), 0.0, (double)m_size);
 			t += (int)floor(v);
-			input(j) = v;
+			point.input(j) = v;
 		}
-		label = (t & 1);
-		if (random::uni(random::globalRng(), 0.0, 1.0) < m_noiselevel) label = 1 - label;
+		point.label = (t & 1);
+		if (random::uni(random::globalRng(), 0.0, 1.0) < m_noiselevel) 
+			point.label = 1 - point.label;
 	}
 
 protected:
@@ -187,14 +154,14 @@ public:
 		m_range = range;
 	}
 
-	void draw(RealVector& input, RealVector& label)const{
-		input.resize(1);
-		label.resize(1);
+	void draw(reference point)const{
+		auto& input = point.input;
+		auto& label = point.label;
 		input(0) = random::uni(random::globalRng(), -m_range, m_range);
 		if(input(0) != 0)
-            label(0) = sin(input(0)) / input(0) + random::gauss(random::globalRng(), 0.0, m_stddev);
+		label(0) = sin(input(0)) / input(0) + random::gauss(random::globalRng(), 0.0, m_stddev);
         else
-            label(0) = random::gauss(random::globalRng(), 0.0, m_stddev);
+		label(0) = random::gauss(random::globalRng(), 0.0, m_stddev);
 	}
 
 protected:
@@ -221,8 +188,9 @@ public:
 	, m_noiseVar( noise_variance )
 	{ }
 
-	void draw(RealVector& input, unsigned int& label)const{
-		input.resize( m_size );
+	void draw(reference point)const{
+		auto& input = point.input;
+		auto& label = point.label;
 		label =  (unsigned int) random::discrete(random::globalRng(), 0,1); //fix label first
 		double y2 = label - 0.5; //"clean" informative feature values
 		// now fill the informative features..
@@ -262,8 +230,7 @@ public:
 	{ }
 	
 	/// allow for arbitrary box limits
-	void setLimits( double lower_limit, double upper_limit, double inner_radius, double outer_radius )
-	{
+	void setLimits( double lower_limit, double upper_limit, double inner_radius, double outer_radius ){
 		RANGE_CHECK( lower_limit < upper_limit );
 		RANGE_CHECK( inner_radius <= outer_radius );
 		RANGE_CHECK( 2*outer_radius <= upper_limit-lower_limit );
@@ -274,9 +241,9 @@ public:
 		m_outer_radius2 = outer_radius*outer_radius;
 	}
 	
-	void draw(RealVector& input, unsigned int& label)const
-	{
-		input.resize( m_dimensions );
+	void draw(reference point)const{
+		auto& input = point.input;
+		auto& label = point.label;
 		double v, dist;
 		
 		if ( m_equal_class_prob ) { //each class has equal probability - this implementation is brute-force and gorgeously inefficient :/
@@ -345,8 +312,9 @@ public:
 	, m_noiselevel( noise )
 	{ }
 	
-	void draw(RealVector& input, unsigned int& label)const{
-		input.resize( 2 );
+	void draw(reference point)const{
+		auto& input = point.input;
+		auto& label = point.label;
 		double x,y;
 		x = random::uni(random::globalRng(), 0, 4 ); //zero is left
 		y = random::uni(random::globalRng(), 0, 4 ); //zero is bottom
@@ -371,7 +339,6 @@ protected:
 	double m_noiselevel;
 };
 
-
 /// \brief Generates a set of normally distributed points
 class NormalDistributedPoints:public DataDistribution<RealVector>
 {
@@ -389,8 +356,7 @@ public:
 	, m_dist(covariance), m_offset(offset){
 		SIZE_CHECK(offset.size() == covariance.size1());
 	}
-	void draw(RealVector& input) const{
-		input.resize(m_offset.size());
+	void draw(reference input)const{
 		noalias(input) = m_offset;
 		noalias(input) += m_dist(random::globalRng()).first;
 	}
@@ -398,47 +364,6 @@ public:
 private:
 	MultiVariateNormalDistributionCholesky m_dist;
 	RealVector m_offset;
-};
-
-/// \brief Given a set of images, draws a set of image patches of a given size
-class ImagePatches:public DataDistribution<RealVector>{
-public:
-	ImagePatches(
-		Data<RealVector> images, 
-		std::size_t imageWidth, std::size_t imageHeight,
-		std::size_t patchWidth, std::size_t patchHeight
-	):DataDistribution<RealVector>({patchWidth, patchHeight})
-	, m_images(images)
-	, m_imageWidth(imageWidth)
-	, m_imageHeight(imageHeight)
-	, m_patchWidth(patchWidth)
-	, m_patchHeight(patchHeight){}
-		
-	void draw(RealVector& input) const{
-		//sample image
-		std::size_t imageNum = random::discrete(random::globalRng(), std::size_t(0),m_images.size()-1);
-		auto image = m_images[imageNum];
-		//draw the upper left corner of the image
-		std::size_t m_startX = random::discrete(random::globalRng(), std::size_t(0),m_imageWidth-m_patchWidth);
-		std::size_t m_startY = random::discrete(random::globalRng(), std::size_t(0),m_imageHeight-m_patchHeight);
-		
-		
-		//copy patch
-		input.resize(m_patchWidth * m_patchHeight);
-		std::size_t rowStart = m_startY * m_imageWidth + m_startX;
-		for (size_t y = 0; y < m_patchHeight; ++y){
-			for (size_t x = 0; x < m_patchWidth; ++x){
-				input(y * m_patchWidth + x) = image(rowStart+x);
-			}
-			rowStart += m_imageWidth;
-		}
-	}
-private:
-	DataView<Data<RealVector> > m_images;
-	std::size_t m_imageWidth;
-	std::size_t m_imageHeight;
-	std::size_t m_patchWidth;
-	std::size_t m_patchHeight;
 };
 
 }

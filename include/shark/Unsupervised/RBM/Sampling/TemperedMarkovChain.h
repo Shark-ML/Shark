@@ -73,7 +73,7 @@ private:
 		double baseRateDiff = inner_prod(row(m_temperedChains.visible.state,i) - row(m_temperedChains.visible.state,j),baseRate);
 		double r = betaDiff * energyDiff + betaDiff*baseRateDiff;
 		
-		double z = random::uni(m_operator.rbm()->rng(),0,1);
+		double z = random::uni(random::globalRng(),0,1);
 		if( r >= 0 || (z > 0 && std::log(z) < r) ){
 			m_temperedChains.swap_rows(i,j);
 		}

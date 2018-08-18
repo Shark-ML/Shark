@@ -20,11 +20,10 @@ class Problem : public LabeledDataDistribution<RealVector,unsigned int>
 {
 public:
 	Problem():LabeledDataDistribution<RealVector,unsigned int>({5,2}){}
-	void draw(RealVector& input,unsigned int& label) const{
-		input.resize(5);
-		label = random::coinToss(random::globalRng(),0.5)*2+1;
+	void draw(reference point) const{
+		point.label = random::coinToss(random::globalRng(),0.5)*2+1;
 		for(std::size_t i = 0; i != 5; ++i){
-			input(i) = random::uni(random::globalRng(),-1,1);
+			point.input(i) = random::uni(random::globalRng(),-1,1);
 		}
 	}
 };

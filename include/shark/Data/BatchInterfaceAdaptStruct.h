@@ -76,6 +76,39 @@ BOOST_PP_SEQ_FOR_EACH_I(\
 		
 #define SHARK_BATCH_MAKE_DATA_MEMBER(R, DATA, N, ATTRIBUTE)\
 	BOOST_PP_TUPLE_ELEM(2, 0, ATTRIBUTE) BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE);
+	
+//generates argument list A PREFIXmemA, B PREFIXmemC, C PREFIXmemC,...
+#define SHARK_BATCH_DECLARE_ARG_LIST(PREFIX,ATTRIBUTES_SEQ) \
+BOOST_PP_SEQ_FOR_EACH_I(\
+			SHARK_BATCH_MAKE_ARG_LIST_ELEM,\
+			PREFIX,\
+			ATTRIBUTES_SEQ)
+			
+
+#define SHARK_BATCH_MAKE_ARG_LIST_ELEM(R, PREFIX, N, ATTRIBUTE)\
+	BOOST_PP_COMMA_IF(N) BOOST_PP_TUPLE_ELEM(2, 0, ATTRIBUTE)	BOOST_PP_CAT( PREFIX, BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE))
+
+//generates init list memA(PREFIXmemA)
+#define SHARK_BATCH_DECLARE_INIT_LIST(PREFIX, ATTRIBUTES_SEQ) \
+BOOST_PP_SEQ_FOR_EACH_I(\
+			SHARK_BATCH_MAKE_INIT_LIST_ELEM,\
+			PREFIX,\
+			ATTRIBUTES_SEQ)
+			
+
+#define SHARK_BATCH_MAKE_INIT_LIST_ELEM(R, PREFIX, N, ATTRIBUTE)\
+	BOOST_PP_COMMA_IF(N) BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE)( BOOST_PP_CAT( PREFIX,  BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE)))
+
+//generates init list memA(PREFIXmemA), where prefix could be some arbitrary prefix like "other."
+#define SHARK_BATCH_DECLARE_COPY_INIT_LIST(PREFIX, ATTRIBUTES_SEQ) \
+BOOST_PP_SEQ_FOR_EACH_I(\
+			SHARK_BATCH_MAKE_COPY_INIT_LIST_ELEM,\
+			PREFIX,\
+			ATTRIBUTES_SEQ)
+			
+
+#define SHARK_BATCH_MAKE_COPY_INIT_LIST_ELEM(R, PREFIX, N, ATTRIBUTE)\
+	BOOST_PP_COMMA_IF(N) BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE)( PREFIX .  BOOST_PP_TUPLE_ELEM(2, 1, ATTRIBUTE))
 
 
 //transformes a list of tuples ((A, a)) ((B, b)) ...
@@ -87,12 +120,7 @@ BOOST_PP_SEQ_FOR_EACH_I(\
 		
 #define SHARK_BATCH_TRANSFORM_BATCH_ATTRIBUTES_IMPL(s,TYPE,ELEM)\
 	( typename Batch<BOOST_PP_TUPLE_ELEM(2, 0, ELEM)>::TYPE,BOOST_PP_TUPLE_ELEM(2, 1, ELEM))
-	
-// prints whatever is in the list as a sequence of expressions. (A)(B)(C) -> A B C
-#define SHARK_BATCH_PRINT_EXPRESSION(SEQ)\
-	BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_PRINT_EXPRESSION_IMPL,  ~, SEQ)
 
-#define SHARK_BATCH_PRINT_EXPRESSION_IMPL(s, _, N, A) A
 
 //various helper macros...
 
@@ -163,9 +191,17 @@ static auto get_tuple_elem(T&& input, std::integral_constant<int,N>) -> decltype
 	struct type{\
 		typedef Batch::value_type value_type;\
 		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(type,ATTRIBUTES_SEQ))\
+		type()=default;\
+		type(type const&) = default;\
+		type(type &&) = default;\
+		type(const_proxy_type other):SHARK_BATCH_DECLARE_COPY_INIT_LIST(other , ATTRIBUTES_SEQ){}\
+		type(proxy_type other):SHARK_BATCH_DECLARE_COPY_INIT_LIST(other , ATTRIBUTES_SEQ){}\
+		type(SHARK_BATCH_DECLARE_ARG_LIST(ARG,SHARK_BATCH_TRANSFORM_TYPES(const_proxy_type,ATTRIBUTES_SEQ) ) ):SHARK_BATCH_DECLARE_INIT_LIST(ARG, ATTRIBUTES_SEQ){}\
 		std::size_t size() const{\
 			return batchSize(BOOST_PP_TUPLE_ELEM(2,1,BOOST_PP_SEQ_ELEM(0, ATTRIBUTES_SEQ)));\
 		}\
+		type& operator=(type const&) = default;\
+		type& operator=(type &&) = default;\
 		template<class Other>\
 		type& operator=(Other const& other){\
 			BOOST_PP_SEQ_FOR_EACH_I(SHARK_BATCH_ASSIGNMENT_HELPER,  ~, ATTRIBUTES_SEQ);\

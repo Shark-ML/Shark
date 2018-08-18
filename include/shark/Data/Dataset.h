@@ -49,12 +49,13 @@
 #include <shark/Core/Exception.h>
 #include <shark/Core/Threading/Algorithms.h>
 #include <shark/Core/utility/functional.h>
-#include <boost/iterator/transform_iterator.hpp>
 #include <shark/Core/Random.h>
 #include <shark/Core/Shape.h>
 #include "Impl/Dataset.inl"
 #include "Impl/InputLabelPair.h"
+#include <shark/Data/BatchInterface.h>
 #include <shark/Data/DataView.h>
+#include <shark/Data/Generator.h>
 
 namespace shark {
 
@@ -338,6 +339,11 @@ protected:
 	shape_type m_shape;///< shape of a datapoint
 };
 
+template<class T>
+struct InputToDataType{
+	typedef Data<T> type;
+};
+
 /**
  * \ingroup shark_globals
  * @{
@@ -576,6 +582,13 @@ protected:
 	LabelContainer m_label;		/// label data
 };
 
+template<class I, class L>
+struct InputToDataType<InputLabelPair<I,L> >{
+	typedef LabeledData<I,L> type;
+};
+
+
+
 /// specialized template for classification with unsigned int labels
 typedef LabeledData<RealVector, unsigned int> ClassificationDataset;
 
@@ -585,10 +598,9 @@ typedef LabeledData<RealVector, RealVector> RegressionDataset;
 /// specialized template for classification with unsigned int labels and sparse data
 typedef LabeledData<CompressedRealVector, unsigned int> CompressedClassificationDataset;
 
-template<class Functor, class T>
-struct TransformedData{
-	typedef Data<typename detail::TransformedDataElement<Functor,T>::type > type;
-};
+/// specialized templates for generators returning labeled data batches
+template<class I, class L>
+using LabeledDataGenerator = Generator<InputLabelPair<I,L> >;
 
 namespace detail{
 template<class T>
@@ -692,6 +704,38 @@ LabeledData<
 	);
 }
 
+//////////////ALTERNATIVE VIEWS OF A DATASET
+
+/// \brief Creates a DataView from a Data object.
+///
+/// This is just a helper function to omit the actual type of the view
+///
+/// \param set the dataset from which to create the view
+template<class DatasetType>
+DataView<typename std::remove_reference<DatasetType>::type >  elements(DatasetType&& set){
+	return DataView<typename std::remove_reference<DatasetType>::type>(std::forward<DatasetType>(set));
+}
+
+/// \brief Creates a Generator from a dataset.
+///
+/// The generator generates an infinite sequence of data by picking a batch at random.
+/// Note that until Generator is destroyed, the supplied data set is shared.
+/// Generators can use caching which allows generating batche sin parallel
+/// using the global ThreadPool. This is not useful if only batches from the dataset are returned.
+/// However, if another expensive operation is bperformed via a transform -
+/// for example moving a batch to GPU, preprocessing or data augmentation, caching is helpful.
+///
+/// \param set the dataset from which to create the generator
+/// \param cacheSize how many elements should be cached. default is 0.
+template<class DatasetType>
+Generator<typename DatasetType::element_type >  generator(DatasetType const& set, std::size_t cacheSize = 0){
+	auto gen = [set]() -> typename DatasetType::value_type{
+		std::size_t i = random::discrete(random::globalRng(), std::size_t(0), set.size() -1 );
+		return set[i];
+	};
+	
+	return Generator<typename DatasetType::element_type >(gen, set.shape(), cacheSize);
+}
 
 
 
@@ -748,56 +792,23 @@ inline std::vector<std::size_t> classSizes(LabeledData<InputType, LabelType> con
 	return classSizes(dataset.labels());
 }
 
-// TRANSFORMATION
 ///\brief Transforms a dataset using a Functor f and returns the transformed result.
-///
-/// this version is used, when the Functor supports only element-by-element transformations
-///
-/// \param data The dataset to transform
-/// \param f the function that is applied element by element
-/// \param shape the resulting shape of the transformation
-template<class T,class Functor>
-typename boost::lazy_disable_if<
-	CanBeCalled<Functor,typename Data<T>::reference>,
-	TransformedData<Functor,T>
->::type
-transform(
-	Data<T> const& data, Functor f,
-	typename TransformedData<Functor,T>::type::shape_type const& shape
-){
-	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
-	Data<ResultType> result(data.getPartitioning(), shape);//TODO HACK!!!!
-	
-	threading::transform(data, result,
-		[&](typename Data<T>::const_reference input ){
-			typedef BatchIterator<typename Batch<T>::type const> Iterator;
-			return createBatch<ResultType>(
-				boost::make_transform_iterator(Iterator(input, 0), f),
-				boost::make_transform_iterator(Iterator(input, batchSize(input)), f)
-			);
-		}, threading::globalThreadPool());
-	return result;
-}
-
-///\brief Transforms a dataset using a Functor f and returns the transformed result.
-///
-/// this version is used, when the Functor supports batch-by-batch transformations
 ///
 /// \param data The dataset to transform
 /// \param f the function that is applied element by element
 /// \param shape the resulting shape of the transformation
 template<class T, class Functor>
-typename boost::lazy_enable_if<
-	CanBeCalled<Functor,typename Data<T>::reference>,
-	TransformedData<Functor,T>
->::type
+Data<typename detail::TransformedBatchElement<Functor,typename Batch<T>::type>::element_type >
 transform(
 	Data<T> const& data, Functor f,
-	typename TransformedData<Functor,T>::type::shape_type const& shape
+	typename detail::TransformedBatchElement<Functor,typename Batch<T>::type>::shape_type const& shape
 ){
-	typedef typename detail::TransformedDataElement<Functor,T>::type ResultType;
+	typedef typename detail::TransformedBatchElement<Functor,typename Batch<T>::type>::element_type ResultType;
 	Data<ResultType> result(data.getPartitioning(), shape);
-	threading::transform(data, result, f, threading::globalThreadPool());
+	threading::transform(data, result,
+		[f](typename Data<T>::const_reference input ){
+			return transformBatch(input, f);
+		}, threading::globalThreadPool());
 	return result;
 }
 ///\brief Transforms the inputs of a dataset using a Functor f and returns the transformed result.
@@ -808,7 +819,7 @@ transform(
 template<class I, class L,  class Functor>
 auto transformInputs(
 	LabeledData<I,L> const& data, Functor const& f, 
-	typename TransformedData<Functor,I>::type::shape_type const& shape)
+	typename  detail::TransformedBatchElement<Functor,typename Batch<I>::type>::shape_type const& shape)
 ->decltype(createLabeledData(transform(data.inputs(),f, shape),data.labels())){
 	return createLabeledData(transform(data.inputs(),f, shape),data.labels());
 }
@@ -820,7 +831,7 @@ auto transformInputs(
 template<class I, class L, class Functor>
 auto transformLabels(
 	LabeledData<I,L> const& data, Functor const& f, 
-	typename TransformedData<Functor,L>::type::shape_type const& shape)
+	typename  detail::TransformedBatchElement<Functor,typename Batch<L>::type>::shape_type const& shape)
 ->decltype(createLabeledData(data.inputs(), transform(data.labels(), f, shape))){
 	return createLabeledData(data.inputs(), transform(data.labels(), f, shape));
 }
