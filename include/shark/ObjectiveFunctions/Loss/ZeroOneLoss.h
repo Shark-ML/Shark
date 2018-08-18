@@ -125,11 +125,11 @@ public:
 	double eval(Data<unsigned int> const& targets, Data< blas::vector<Float>> const& predictions, RealVector const& weights) const{
 		SIZE_CHECK(predictions.numberOfElements() == weights.size());
 		SIZE_CHECK(targets.numberOfElements() == weights.size());
-		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
+		SIZE_CHECK(predictions.size() == targets.size());
 		double error = 0;
-		for(std::size_t i = 0; i != predictions.numberOfBatches(); ++i){
-			for(std::size_t j = 0; j != targets.batch(i).size(); ++j){
-				error+= weights(i) * evalSingle(targets.batch(i)(j),row(predictions.batch(i),j));
+		for(std::size_t i = 0; i != predictions.size(); ++i){
+			for(std::size_t j = 0; j != targets[i].size(); ++j){
+				error+= weights(i) * evalSingle(targets[i](j),row(predictions[i],j));
 			}
 		}
 		return error / weights.size();

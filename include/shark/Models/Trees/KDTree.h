@@ -40,6 +40,7 @@
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Math.h>
+#include <numeric>
 namespace shark {
 
 
@@ -83,11 +84,11 @@ public:
 	KDTree(Data<InputT> const& dataset, TreeConstruction tc = TreeConstruction())
 	: base_type(dataset.numberOfElements())
 	, m_cutDim(0xffffffff){
-		typedef DataView<Data<RealVector> const> PointSet;
+		typedef DataView<Data<InputT> const> PointSet;
 		PointSet points(dataset);
 		//create a list to the iterator elements as temporary storage
-		std::vector<typename boost::range_iterator<PointSet>::type> elements(m_size);
-		boost::iota(elements,boost::begin(points));
+		std::vector<typename PointSet::const_iterator> elements(m_size);
+		std::iota(elements.begin(), elements.end(), points.begin());
 
 		buildTree(tc,elements);
 
@@ -199,8 +200,8 @@ protected:
 	void buildTree(TreeConstruction tc, Range& points){
 		typedef typename boost::range_iterator<Range>::type iterator;
 
-		iterator begin = boost::begin(points);
-		iterator end = boost::end(points);
+		iterator begin = points.begin();
+		iterator end = points.end();
 
 		if (tc.maxDepth() == 0 || m_size <= tc.maxBucketSize()){
 			m_nodes = 1; 
@@ -242,16 +243,13 @@ protected:
 	///and splits the longest dimension
 	template<class Range>
 	std::size_t calculateCuttingDimension(Range const& points)const{
-		typedef typename boost::range_iterator<Range const>::type iterator;
-
-		iterator begin = boost::begin(points);
-		// iterator end = boost::end(points);
+		auto begin = points.begin();
 
 		// calculate bounding box of the data
 		InputT L = **begin;
 		InputT U = **begin;
 		std::size_t dim = L.size();
-		iterator point = begin;
+		auto point = begin;
 		++point;
 		for (std::size_t i=1; i != m_size; ++i,++point){
 			for (std::size_t d = 0; d != dim; d++){

@@ -44,7 +44,7 @@ LinearRegression::LinearRegression(double regularization){
 void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealVector> const& dataset){
 	std::size_t inputDim = inputDimension(dataset);
 	std::size_t outputDim = labelDimension(dataset);
-	std::size_t numBatches = dataset.numberOfBatches();
+	std::size_t numBatches = dataset.size();
 
 	//Let P be the matrix of points with n rows and X=(P|1). the 1 rpresents the bias weight
 	//Let A = X^T X + lambda * I
@@ -54,7 +54,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	RealMatrix matA(inputDim+1,inputDim+1,0.0);
 	//compute A and the label matrix batchwise
 	for (std::size_t b=0; b != numBatches; b++){
-		auto const& input = dataset.batch(b).input;
+		auto const& input = dataset[b].input;
 		noalias(matA) += prod(trans(input|1),input|1);
 	}
 	//X^TX+=lambda* I
@@ -64,7 +64,7 @@ void LinearRegression::train(LinearModel<>& model, LabeledData<RealVector, RealV
 	//we also need to compute X^T L= (P^TL, 1^T L) where L is the matrix of labels 
 	RealMatrix XTL(inputDim + 1,outputDim,0.0);
 	for (std::size_t b=0; b != numBatches; b++){
-		auto const& batch = dataset.batch(b);
+		auto const& batch = dataset[b];
 		noalias(XTL) += prod(trans(batch.input | 1),batch.label);
 	}	
 	

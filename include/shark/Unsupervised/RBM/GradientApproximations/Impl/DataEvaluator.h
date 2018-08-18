@@ -40,20 +40,20 @@ template<class VectorType,class RBM>
 RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batchesForTraining = 0 ){
 	//get the batches for this iteration
 	if( batchesForTraining == 0){
-		batchesForTraining =  data.numberOfBatches();
+		batchesForTraining =  data.size();
 	}
 	
 	std::size_t elements = 0;
 	
-	std::vector<std::size_t> batchIds(data.numberOfBatches());
+	std::vector<std::size_t> batchIds(data.size());
 	{
-		for(std::size_t i = 0; i != data.numberOfBatches(); ++i){
+		for(std::size_t i = 0; i != data.size(); ++i){
 			batchIds[i] = i;
 		}
 		std::shuffle(batchIds.begin(),batchIds.end(), random::globalRng());
 		batchIds.erase(batchIds.begin() + batchesForTraining, batchIds.end());
 		for(std::size_t i = 0; i != batchesForTraining; ++i){
-			elements += data.batch(batchIds[i]).size1();
+			elements += data[batchIds[i]].size1();
 		}
 	}
 	
@@ -62,7 +62,7 @@ RealVector evaluateData(Data<VectorType> const& data, RBM& rbm, std::size_t batc
 		typedef GibbsOperator<RBM> Operator;
 		Operator gibbs(&rbm);
 		typename RBM::GradientType empiricalAverage(&rbm);
-		RealMatrix const& batch = data.batch(i);
+		RealMatrix const& batch = data[i];
 		
 		//create the batches for evaluation
 		typename Operator::HiddenSample hiddenBatch(batch.size1(),rbm.numberOfHN());

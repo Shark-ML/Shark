@@ -118,33 +118,18 @@ int main()
 }
 {
 	Data<RealVector> data;
-//###begin<batches>
-	typedef Data<RealVector>::batch_range Batches;
-	Batches batches = data.batches();
-
-	std::cout << batches.size() << std::endl;
-	for (auto pos = batches.begin(); pos != batches.end(); ++pos) {
-		std::cout << *pos << std::endl;
-	}
-//###end<batches>
-}
-{
-	Data<RealVector> data;
-//###begin<batches-const>
-	Data<RealVector>::const_batch_range batches = data.batches();
-//###end<batches-const>
 //###begin<batches-foreach>
-	for(auto const& batch: data.batches()) {
+	for(auto const& batch: data) {
 		std::cout << batch << std::endl;
 	}
 //###end<batches-foreach>
 //###begin<batches-for>
-	for (std::size_t i = 0; i != data.numberOfBatches(); ++i) {
-		std::cout << data.batch(i) << std::endl;
+	for (std::size_t i = 0; i != data.size(); ++i) {
+		std::cout << data[i] << std::endl;
 	}
 //###end<batches-for>
 //###begin<batches-doubleloop>
-	for(auto const& batch: data.batches()) {
+	for(auto const& batch: data) {
 		for(std::size_t i=0; i != batchSize(batch); ++i) {
 			std::cout << getBatchElement(batch,i );   // prints element i of the batch
 		}

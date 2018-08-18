@@ -52,17 +52,16 @@ class TestProblem : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
 	TestProblem(size_t informative, size_t nnz, size_t dim)
-	: LabeledDataDistribution<RealVector, RealVector>({m_dim, 1})
+	: LabeledDataDistribution<RealVector, RealVector>({dim, 1})
 	, m_informative(informative)
 	, m_nnz(nnz)
 	, m_dim(dim)
 	{ }
 
-	void draw(RealVector& input, RealVector& label) const
-	{
-		input.resize(m_dim);
+	void draw(reference point) const{
+		auto& input = point.input;
+		auto& label = point.label;
 		input.clear();
-		label.resize(1);
 
 		// we have one informative component per example
 		double g = random::gauss(random::globalRng());
@@ -71,8 +70,7 @@ public:
 		label(0) = g;
 
 		// the rest is non-informative
-		for (size_t n=1; n<m_nnz; n++)
-		{
+		for (size_t n=1; n<m_nnz; n++){
 			size_t i = random::discrete(random::globalRng(), m_informative, m_dim-1);
 			input(i) = random::gauss(random::globalRng());
 		}

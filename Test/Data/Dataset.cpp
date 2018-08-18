@@ -3,29 +3,30 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Data/Dataset.h>
+#include <shark/Core/ISerializable.h>
 
 #include <sstream>
 
 using namespace shark;
 
 void testSetEquality(Data<int> const& set1, Data<int> const& set2){
-	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),set2.numberOfBatches());
+	BOOST_REQUIRE_EQUAL(set1.size(),set2.size());
 	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),set2.numberOfElements());
 
-	for(size_t i=0;i!=set1.numberOfBatches();++i) {
-		IntVector vec1=set1.batch(i);
-		IntVector vec2=set2.batch(i);
+	for(size_t i=0;i!=set1.size();++i) {
+		IntVector vec1=set1[i];
+		IntVector vec2=set2[i];
 		BOOST_REQUIRE_EQUAL(vec1.size(),vec2.size());
 		BOOST_CHECK_EQUAL_COLLECTIONS(vec1.begin(),vec1.end(),vec2.begin(),vec2.end());
 	}
 }
 
 void testDatasetEquality(LabeledData<int, int> const& set1, LabeledData<int, int> const& set2){
-	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),set2.numberOfBatches());
+	BOOST_REQUIRE_EQUAL(set1.size(),set2.size());
 	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),set2.numberOfElements());
-	for(std::size_t i = 0; i != set1.numberOfBatches(); ++i){
-		BOOST_REQUIRE_EQUAL(set1.batch(i).input.size(),set1.batch(i).label.size());
-		BOOST_REQUIRE_EQUAL(set2.batch(i).input.size(),set2.batch(i).label.size());
+	for(std::size_t i = 0; i != set1.size(); ++i){
+		BOOST_REQUIRE_EQUAL(set1[i].input.size(),set1[i].label.size());
+		BOOST_REQUIRE_EQUAL(set2[i].input.size(),set2[i].label.size());
 	}
 	testSetEquality(set1.inputs(),set2.inputs());
 	testSetEquality(set1.labels(),set2.labels());
@@ -53,7 +54,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	Data<int> set = createDataFromRange(inputs,5);//20 batches
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(), 100u);
 	BOOST_CHECK_EQUAL(set.shape(), Shape({}));
-	BOOST_REQUIRE_EQUAL(set.numberOfBatches(), 20u);
+	BOOST_REQUIRE_EQUAL(set.size(), 20u);
 	auto setPoints = elements(set);
 	BOOST_CHECK_EQUAL_COLLECTIONS(
 		setPoints.begin(), setPoints.end(),
@@ -62,7 +63,7 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	
 	//1.2 test batch access
 	for (size_t i=0; i!=10; ++i) {
-		IntVector batch=set.batch(i);
+		IntVector batch=set[i];
 		BOOST_REQUIRE_EQUAL(batch.size(),5u);
 		BOOST_CHECK_EQUAL_COLLECTIONS(
 			batch.begin(),batch.end(),
@@ -74,10 +75,10 @@ BOOST_AUTO_TEST_CASE( Set_Test )
 	// 2. create indexed partitions
 	{
 		Data<int> subset = set.indexedSubset(indizes[0]);
-		BOOST_REQUIRE_EQUAL(subset.numberOfBatches(), indizes[0].size());
+		BOOST_REQUIRE_EQUAL(subset.size(), indizes[0].size());
 
-		for (size_t i=0; i!=subset.numberOfBatches(); ++i) {
-			IntVector batch=subset.batch(i);
+		for (size_t i=0; i!=subset.size(); ++i) {
+			IntVector batch=subset[i];
 			BOOST_REQUIRE_EQUAL(batch.size(),5);
 			BOOST_CHECK_EQUAL_COLLECTIONS(
 				batch.begin(),batch.end(),
@@ -115,8 +116,8 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_Boundary_Test )
 		set= toDataset(elements(set),batchSizes);
 		Data<int> split = splitAtElement(set,index);
 		
-		BOOST_REQUIRE_EQUAL(set.numberOfBatches(),i);
-		BOOST_REQUIRE_EQUAL(split.numberOfBatches(),8-i);
+		BOOST_REQUIRE_EQUAL(set.size(),i);
+		BOOST_REQUIRE_EQUAL(split.size(),8-i);
 		BOOST_REQUIRE_EQUAL(set.numberOfElements(),index);
 		BOOST_REQUIRE_EQUAL(split.numberOfElements(),100-index);
 		
@@ -154,14 +155,14 @@ BOOST_AUTO_TEST_CASE( Set_Merge_Test )
 	
 	set1.append(set2);
 	
-	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),15);
+	BOOST_REQUIRE_EQUAL(set1.size(),15);
 	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),120);
 	for(std::size_t i = 0; i != 15; ++i){
 		if(i < 5){
-			BOOST_CHECK_EQUAL(set1.batch(i).size(),10);
+			BOOST_CHECK_EQUAL(set1[i].size(),10);
 		}
 		else{
-			BOOST_CHECK_EQUAL(set1.batch(i).size(),7);
+			BOOST_CHECK_EQUAL(set1[i].size(),7);
 		}
 	}
 
@@ -216,14 +217,14 @@ BOOST_AUTO_TEST_CASE( LabledData_Merge_Test )
 	
 	set1.append(set2);
 	
-	BOOST_REQUIRE_EQUAL(set1.numberOfBatches(),15);
+	BOOST_REQUIRE_EQUAL(set1.size(),15);
 	BOOST_REQUIRE_EQUAL(set1.numberOfElements(),120);
 	for(std::size_t i = 0; i != 15; ++i){
 		if(i < 5){
-			BOOST_CHECK_EQUAL(set1.batch(i).size(),10);
+			BOOST_CHECK_EQUAL(set1[i].size(),10);
 		}
 		else{
-			BOOST_CHECK_EQUAL(set1.batch(i).size(),7);
+			BOOST_CHECK_EQUAL(set1[i].size(),7);
 		}
 	}
 	auto points = elements(set1);
@@ -259,8 +260,8 @@ BOOST_AUTO_TEST_CASE( Set_splitAtElement_MiddleOfBatch_Test )
 	set= toDataset(elements(set),batchSizes);
 	Data<int> split = splitAtElement(set,53);
 	
-	BOOST_REQUIRE_EQUAL(set.numberOfBatches(),5u);
-	BOOST_REQUIRE_EQUAL(split.numberOfBatches(),4u);
+	BOOST_REQUIRE_EQUAL(set.size(),5u);
+	BOOST_REQUIRE_EQUAL(split.size(),4u);
 	BOOST_REQUIRE_EQUAL(set.numberOfElements(),53u);
 	BOOST_REQUIRE_EQUAL(split.numberOfElements(),47u);
 	
@@ -292,12 +293,12 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	LabeledData<UIntVector,unsigned int> data = createLabeledDataFromRange(inputs,labels,9);
 	
 	BOOST_REQUIRE_EQUAL(data.numberOfElements(),101);
-	BOOST_REQUIRE_EQUAL(data.numberOfBatches(),12);
+	BOOST_REQUIRE_EQUAL(data.size(),12);
 	
 	repartitionByClass(data,11);//different batch size to check other side effects
 	//check dataset integrity
 	BOOST_REQUIRE_EQUAL(data.numberOfElements(),101);
-	BOOST_REQUIRE_EQUAL(data.numberOfBatches(),11);
+	BOOST_REQUIRE_EQUAL(data.size(),11);
 	std::vector<std::size_t> classes = classSizes(data);
 	BOOST_REQUIRE_EQUAL(classes[0],34);
 	BOOST_REQUIRE_EQUAL(classes[1],34);
@@ -319,17 +320,17 @@ BOOST_AUTO_TEST_CASE( RepartitionByClass_Test )
 	}
 	
 	//check the correct sizes of the batches
-	BOOST_CHECK_EQUAL(data.batch(0).size(),9);
-	BOOST_CHECK_EQUAL(data.batch(1).size(),9);
-	BOOST_CHECK_EQUAL(data.batch(2).size(),8);
-	BOOST_CHECK_EQUAL(data.batch(3).size(),8);
-	BOOST_CHECK_EQUAL(data.batch(4).size(),9);
-	BOOST_CHECK_EQUAL(data.batch(5).size(),9);
-	BOOST_CHECK_EQUAL(data.batch(6).size(),8);
-	BOOST_CHECK_EQUAL(data.batch(7).size(),8);
-	BOOST_CHECK_EQUAL(data.batch(8).size(),11);
-	BOOST_CHECK_EQUAL(data.batch(9).size(),11);
-	BOOST_CHECK_EQUAL(data.batch(10).size(),11);
+	BOOST_CHECK_EQUAL(data[0].size(),9);
+	BOOST_CHECK_EQUAL(data[1].size(),9);
+	BOOST_CHECK_EQUAL(data[2].size(),8);
+	BOOST_CHECK_EQUAL(data[3].size(),8);
+	BOOST_CHECK_EQUAL(data[4].size(),9);
+	BOOST_CHECK_EQUAL(data[5].size(),9);
+	BOOST_CHECK_EQUAL(data[6].size(),8);
+	BOOST_CHECK_EQUAL(data[7].size(),8);
+	BOOST_CHECK_EQUAL(data[8].size(),11);
+	BOOST_CHECK_EQUAL(data[9].size(),11);
+	BOOST_CHECK_EQUAL(data[10].size(),11);
 	
 	//check order of the labels of the elements
 	for(std::size_t i = 0; i != 34; ++i){
@@ -351,8 +352,8 @@ BOOST_AUTO_TEST_CASE( BinarySubproblem_Test )
 	LabeledData<UIntVector,unsigned int> data(batch_sizes,{1,5});
 	for(std::size_t i = 0; i != 11; ++i){
 		for(std::size_t j = 0; j != batch_sizes[i]; ++j){
-			data.batch(i).input(j,0) = (unsigned int)j;
-			data.batch(i).label(j) = labels[i];
+			data[i].input(j,0) = (unsigned int)j;
+			data[i].label(j) = labels[i];
 		}
 	}
 	

@@ -49,7 +49,7 @@ void LDA::train(LinearClassifier<>& model, LabeledData<RealVector,unsigned int> 
 	RealMatrix covariance(dim, dim,0.0);
 
 	//we compute the data batch wise
-	for(auto const& batch: dataset.batches()){
+	for(auto const& batch: dataset){
 		UIntVector const& labels = batch.label;
 		RealMatrix const& points = batch.input;
 		//load batch and update mean
@@ -115,7 +115,7 @@ void LDA::train(LinearClassifier<>& model, WeightedLabeledData<RealVector,unsign
 	RealVector classWeight(classes,0.0);
 
 	//we compute the data batch wise
-	for(auto const& batch: dataset.batches()){
+	for(auto const& batch: dataset){
 		UIntVector const& labels = batch.data.label;
 		RealMatrix points = batch.data.input;
 		RealVector const& weights = batch.weight;

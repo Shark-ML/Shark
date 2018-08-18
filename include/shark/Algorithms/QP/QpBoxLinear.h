@@ -356,9 +356,9 @@ protected:
 		//~ // (yes, ublas is slow...), and compute the diagonal
 		//~ // elements of the quadratic matrix
 		//~ SparseVector sparse;
-		//~ for (std::size_t b=0, j=0; b<dataset.numberOfBatches(); b++)
+		//~ for (std::size_t b=0, j=0; b<dataset.size(); b++)
 		//~ {
-			//~ DatasetType::const_batch_reference batch = dataset.batch(b);
+			//~ DatasetType::const_reference batch = dataset[b];
 			//~ for (std::size_t i=0; i<batch.size(); i++)
 			//~ {
 				//~ auto const& x_i = shark::get(batch, i).input;
@@ -381,9 +381,9 @@ protected:
 				//~ j++;
 			//~ }
 		//~ }
-		//~ for (std::size_t b=0, j=0, k=0; b<dataset.numberOfBatches(); b++)
+		//~ for (std::size_t b=0, j=0, k=0; b<dataset.size(); b++)
 		//~ {
-			//~ DatasetType::const_batch_reference batch = dataset.batch(b);
+			//~ DatasetType::const_reference batch = dataset[b];
 			//~ for (std::size_t i=0; i<batch.size(); i++)
 			//~ {
 				//~ auto const& x_i = shark::get(batch, i).input;

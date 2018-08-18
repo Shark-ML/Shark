@@ -278,6 +278,34 @@ public:
  * @{
  */
 
+/// \brief Initialize model parameters normally distributed.
+///
+/// \param model: model to be initialized
+/// \param s: variance of mean-free normal distribution
+template <class InputType, class OutputType, class ParameterVectorType>
+void initRandomNormal(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double s){
+	typedef typename ParameterVectorType::value_type Float;
+	typedef typename ParameterVectorType::device_type Device;
+	auto weights = blas::normal(random::globalRng(), model.numberOfParameters(), Float(0), Float(s), Device() );
+	model.setParameterVector(weights);
+}
+
+
+/// \brief Initialize model parameters uniformly at random.
+///
+/// \param model model to be initialized
+/// \param lower lower bound of initialization interval
+/// \param upper upper bound of initialization interval
+template <class InputType, class OutputType, class ParameterVectorType>
+void initRandomUniform(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double lower, double upper){
+	typedef typename ParameterVectorType::value_type Float;
+	typedef typename ParameterVectorType::device_type Device;
+	auto weights = blas::uniform(random::globalRng(), model.numberOfParameters(), Float(lower), Float(upper), Device() );
+	model.setParameterVector(weights);
+}
+
+/////////////////TRANSFORMATIONS FOR DATASETS/////////////////////////////////////
+
 ///\brief Transforms the dataset using a model f and returns the transformed result.
 ///
 /// The shape of the data returned is directly taken from the model.
@@ -309,30 +337,36 @@ LabeledData<I,O> transformLabels(LabeledData<I,L> const& data, AbstractModel<L, 
 	return createLabeledData(data.inputs(), model(data.labels()));
 }
 
-/// \brief Initialize model parameters normally distributed.
+
+////////////////////////////////////TRANSFORMATIONS FOR GENERATORS///////////////////////////////
+///\brief Transforms the output of the generator using a model f and returns the transformed generator.
 ///
-/// \param model: model to be initialized
-/// \param s: variance of mean-free normal distribution
-template <class InputType, class OutputType, class ParameterVectorType>
-void initRandomNormal(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double s){
-	typedef typename ParameterVectorType::value_type Float;
-	typedef typename ParameterVectorType::device_type Device;
-	auto weights = blas::normal(random::globalRng(), model.numberOfParameters(), Float(0), Float(s), Device() );
-	model.setParameterVector(weights);
+/// The shape of the data returned is directly taken from the model.
+/// \param gen The generator to transform
+/// \param model the model that is applied element by element
+template<class I, class O, class P>
+Generator<O> transform(Generator<I> const& gen, AbstractModel<I, O, P> const& model){
+	return transform(gen, [&model](typename Batch<I>::type const& batch){return model(batch);} , model.outputShape());
 }
 
-
-/// \brief Initialize model parameters uniformly at random.
+///\brief For a Generator generating input-label pair, transforms the generated inputs using a model.
 ///
-/// \param model model to be initialized
-/// \param lower lower bound of initialization interval
-/// \param upper upper bound of initialization interval
-template <class InputType, class OutputType, class ParameterVectorType>
-void initRandomUniform(AbstractModel<InputType, OutputType, ParameterVectorType>& model, double lower, double upper){
-	typedef typename ParameterVectorType::value_type Float;
-	typedef typename ParameterVectorType::device_type Device;
-	auto weights = blas::uniform(random::globalRng(), model.numberOfParameters(), Float(lower), Float(upper), Device() );
-	model.setParameterVector(weights);
+/// The shape of the inputs returned is directly taken from the model.
+/// \param gen The generator to transform
+/// \param model the model that is applied element by element
+template<class I, class L, class O, class P>
+Generator<InputLabelPair<O,L> > transformInputs(Generator<InputLabelPair<I,L> > const& gen, AbstractModel<I, O, P> const& model){
+	return transformInputs(gen, [&model](typename Batch<I>::type const& batch){return model(batch);} , model.outputShape());
+}
+
+///\brief For a Generator generating input-label pair, transforms the generated labels using a model.
+///
+/// The labels of the inputs returned is directly taken from the model.
+/// \param gen The generator to transform
+/// \param model the model that is applied element by element
+template<class I, class L, class O, class P>
+Generator<InputLabelPair<I,O> > transformLabels(Generator<InputLabelPair<I,L> > const& gen, AbstractModel<L, O, P> const& model){
+	return transformLabels(gen, [&model](typename Batch<L>::type const& batch){return model(batch);} , model.outputShape());
 }
 
 /** @}*/

@@ -68,7 +68,7 @@ class DataView
 public:
 	typedef typename std::remove_const<DatasetType>::type dataset_type;   //(non const) type of the underlying dataset
 	typedef typename dataset_type::element_type value_type;
-	typedef typename dataset_type::batch_type batch_type;
+	typedef typename dataset_type::value_type batch_type;
 	typedef typename dataset_type::shape_type shape_type;
 	// We want to support immutable as well as mutable datasets. So we query whether the dataset
 	// is mutable and change the reference type to const if the dataset is immutable.
@@ -80,72 +80,17 @@ public:
 		>::type
 	>::type reference;
 	typedef typename detail::batch_to_reference<batch_type const>::type const_reference;
-private:
-	template<class Reference, class View>
-	class IteratorBase: public SHARK_ITERATOR_FACADE<
-		IteratorBase<Reference,View>,
-		value_type,
-		std::random_access_iterator_tag,
-		Reference
-	>{
-	public:
-		IteratorBase(){}
-	
-		IteratorBase(View& view, std::size_t position)
-		: mpe_view(&view),m_position(position) {}
-	
-		template<class R,class V>
-		IteratorBase(IteratorBase<R,V> const& other)
-		: mpe_view(other.mpe_view),m_position(other.position){}
-		
-		/// \brief returns the position of the element referenced by the iterator inside the dataset
-		///
-		/// This is usefull for bagging, when identical elements between several susbsets are to be identified
-		std::size_t index()const{
-			return mpe_view->index(m_position);
-		}
-	private:
-		friend class SHARK_ITERATOR_CORE_ACCESS;
-		template <class, class> friend class IteratorBase;
 
-		void increment() {
-			++m_position;
-		}
-		void decrement() {
-			--m_position;
-		}
-
-		void advance(std::ptrdiff_t n){
-			m_position+=n;
-		}
-	
-		template<class R,class V>
-		std::ptrdiff_t distance_to(IteratorBase<R,V> const& other) const{
-			return (std::ptrdiff_t)other.m_position - (std::ptrdiff_t)m_position;
-		}
-	
-		template<class R,class V>
-		bool equal(IteratorBase<R,V> const& other) const{
-			return m_position == other.m_position;
-		}
-		Reference dereference() const { 
-			return (*mpe_view)[m_position];
-		}
-
-		View* mpe_view;
-		std::size_t m_position;
-	};
-public:
-	typedef IteratorBase<reference,DataView<DatasetType> > iterator;
-	typedef IteratorBase<const_reference, DataView<DatasetType> const > const_iterator;
+	typedef IndexingIterator<DataView> iterator;
+	typedef IndexingIterator<DataView<DatasetType> const > const_iterator;
 
 	DataView(){}
 	DataView(DatasetType& dataset)
 	:m_dataset(dataset),m_indices(m_dataset.numberOfElements())
 	{
 		std::size_t index = 0;
-		for(std::size_t i = 0; i != m_dataset.numberOfBatches(); ++i){
-			std::size_t batchSize = Batch<value_type>::size(m_dataset.batch(i));
+		for(std::size_t i = 0; i != m_dataset.size(); ++i){
+			std::size_t batchSize = Batch<value_type>::size(m_dataset[i]);
 			for(std::size_t j = 0; j != batchSize; ++j,++index){
 				m_indices[index].batch = i;
 				m_indices[index].positionInBatch = j;
@@ -158,8 +103,8 @@ public:
 	:m_dataset(std::move(dataset)),m_indices(m_dataset.numberOfElements())
 	{
 		std::size_t index = 0;
-		for(std::size_t i = 0; i != m_dataset.numberOfBatches(); ++i){
-			std::size_t batchSize = Batch<value_type>::size(m_dataset.batch(i));
+		for(std::size_t i = 0; i != m_dataset.size(); ++i){
+			std::size_t batchSize = Batch<value_type>::size(m_dataset[i]);
 			for(std::size_t j = 0; j != batchSize; ++j,++index){
 				m_indices[index].batch = i;
 				m_indices[index].positionInBatch = j;
@@ -184,18 +129,12 @@ public:
 	reference operator[](std::size_t position){
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		typename std::conditional<
-			std::is_const<DatasetType>::value,
-			typename dataset_type::const_batch_reference,
-			typename dataset_type::batch_reference
-		>::type batch = static_cast<DatasetType&>(m_dataset).batch(index.batch);
-		return Batch<value_type>::get(batch,index.positionInBatch);
-		//~ return getBatchElement(batch,index.positionInBatch);
+		return Batch<value_type>::get(static_cast<DatasetType&>(m_dataset)[index.batch],index.positionInBatch);
 	}
 	const_reference operator[](std::size_t position) const{
 		SIZE_CHECK(position < size());
 		Index const& index = m_indices[position];
-		return getBatchElement(m_dataset.batch(index.batch),index.positionInBatch);
+		return getBatchElement(m_dataset[index.batch],index.positionInBatch);
 	}
 	
 	reference front(){
@@ -327,17 +266,6 @@ typename DataView<DatasetType>::batch_type randomSubBatch(
 	return subBatch(view,boost::make_iterator_range(indices.begin(),indices.begin()+size));
 }
 
-/// \brief Creates a View from a dataset.
-///
-/// This is just a helper function to omit the actual type of the view
-///
-/// \param set the dataset from which to create the view
-template<class DatasetType>
-DataView<typename std::remove_reference<DatasetType>::type >  elements(DatasetType&& set){
-	return DataView<typename std::remove_reference<DatasetType>::type>(std::forward<DatasetType>(set));
-}
-
-
 /// \brief Creates a new dataset from a View.
 ///
 /// \param view the view from which to create the new dataset
@@ -351,9 +279,9 @@ toDataset(DataView<T> const& view, std::size_t maximumBatchSize = constants::Def
 	typename DataView<T>::dataset_type dataset(view.size(), view.shape(), maximumBatchSize);
 	
 	std::size_t batchStart = 0;
-	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-		std::size_t batchEnd = batchStart + batchSize(dataset.batch(i));
-		dataset.batch(i) = createBatch<typename DataView<T>::value_type>(view.begin()+batchStart, view.begin()+batchEnd);
+	for(std::size_t i = 0; i != dataset.size(); ++i){
+		std::size_t batchEnd = batchStart + batchSize(dataset[i]);
+		dataset[i] = createBatch<typename DataView<T>::value_type>(view.begin()+batchStart, view.begin()+batchEnd);
 		batchStart = batchEnd;
 	}
 	return dataset;
@@ -369,9 +297,9 @@ toDataset(DataView<T> const& view, std::vector<std::size_t> const& batchSizes){
 	typename DataView<T>::dataset_type dataset(batchSizes, view.shape());
 	
 	std::size_t batchStart = 0;
-	for(std::size_t i = 0; i != dataset.numberOfBatches(); ++i){
-		std::size_t batchEnd = batchStart + batchSize(dataset.batch(i));
-		dataset.batch(i) = createBatch<typename DataView<T>::value_type>(view.begin()+batchStart, view.begin()+batchEnd);
+	for(std::size_t i = 0; i != dataset.size(); ++i){
+		std::size_t batchEnd = batchStart + batchSize(dataset[i]);
+		dataset[i] = createBatch<typename DataView<T>::value_type>(view.begin()+batchStart, view.begin()+batchEnd);
 		batchStart = batchEnd;
 	}
 	return dataset;

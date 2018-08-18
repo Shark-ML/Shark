@@ -17,13 +17,12 @@ class TestProblem : public LabeledDataDistribution<RealVector, RealVector>
 {
 public:
 	TestProblem(): LabeledDataDistribution<RealVector, RealVector>({10,1}){}
-	void draw(RealVector& input, RealVector& label) const{
-		input.resize(10);
-		label.resize(1);
+
+	void draw(reference point) const{
 		double g = random::gauss(random::globalRng());
-		for (size_t i=0; i<10; i++) input(i) = random::gauss(random::globalRng());
-		input(5) += g;
-		label(0) = g;
+		for (size_t i=0; i<10; i++) point.input(i) = random::gauss(random::globalRng());
+		point.input(5) += g;
+		point.label(0) = g;
 	}
 };
 

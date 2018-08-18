@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE( ObjFunct_ErrorFunction_LinearRegression ){
 	}
 	
 	{
-		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector,RealVector> mse(trainset,&model,&loss,false);
+		detail::ErrorFunctionImpl<RealVector,RealVector,RealVector,RealVector> mse(trainset,&model,&loss);
 		double val = mse.eval(optimum);
 		BOOST_CHECK_CLOSE(optimalMSE,val,1.e-10);
 		

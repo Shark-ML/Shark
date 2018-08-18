@@ -48,9 +48,8 @@ class Gaussians : public DataDistribution<RealVector>
 {
 public:
 	Gaussians():DataDistribution<RealVector>(2){}
-	void draw(RealVector& point) const
+	void draw(reference point) const
 	{
-		point.resize(2);
 		size_t cluster = random::discrete(random::globalRng(),0, 4);
 		double alpha = 0.4 * M_PI * cluster;
 		point(0) = 3.0 * cos(alpha) + 0.75 * random::gauss(random::globalRng());

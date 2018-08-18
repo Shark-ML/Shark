@@ -194,7 +194,7 @@ void readCSVData(
 	std::size_t dimensions = rows[0].size();
 	dataset = Data<blas::vector<T> >(rows.size(), dimensions, maximumBatchSize);
 	std::size_t currentRow = 0;
-	for(auto&& batch: dataset.batches()) {
+	for(auto&& batch: dataset) {
 		//copy the rows into the batch
 		for(std::size_t i = 0; i != batch.size1(); ++i,++currentRow){
 			for(std::size_t j = 0; j != dimensions; ++j){
@@ -240,7 +240,7 @@ void readCSVData(
 	std::size_t dimensions = rows[0].second.size();
 	dataset = LabeledData<blas::vector<T>, unsigned int>(rows.size(), {dimensions, maxPositiveLabel + 1}, maximumBatchSize);
 	std::size_t currentRow = 0;
-	for(auto&& batch: dataset.batches()){
+	for(auto&& batch: dataset){
 		//copy the rows into the batch
 		for(std::size_t i = 0; i != batch.input.size1(); ++i,++currentRow){
 			for(std::size_t j = 0; j != dimensions; ++j){
@@ -275,7 +275,7 @@ void readCSVData(
 	std::size_t inputStart = (lp == FIRST_COLUMN)? numberOfOutputs : 0;
 	std::size_t outputStart = (lp == FIRST_COLUMN)? 0: numberOfInputs;
 	std::size_t currentRow = 0;
-	for(auto&& batch: dataset.batches()){
+	for(auto&& batch: dataset){
 		//copy the rows into the batch
 		for(std::size_t i = 0; i != batch.input.size1(); ++i,++currentRow){
 			for(std::size_t j = 0; j != numberOfInputs; ++j){
@@ -339,8 +339,8 @@ void shark::csvStringToData(
 	//copy rows of the file into the dataset
 	dataset = Data<unsigned int>(rows.size(), maxPositiveLabel + 1, maximumBatchSize);
 	std::size_t currentRow = 0;
-	for(std::size_t b = 0; b != dataset.numberOfBatches(); ++b) {
-		auto& batch = dataset.batch(b);
+	for(std::size_t b = 0; b != dataset.size(); ++b) {
+		auto& batch = dataset[b];
 		for(std::size_t i = 0; i != batch.size(); ++i,++currentRow){
 			int rawLabel = rows[currentRow];
 			batch[i] = static_cast<unsigned int>(binaryLabels? 1 + (rawLabel-1)/2 : rawLabel);

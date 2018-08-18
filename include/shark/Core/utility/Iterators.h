@@ -39,83 +39,13 @@
 #include <boost/range/iterator.hpp>
 namespace shark{
 
-///\brief creates an Indexed Iterator, an Iterator which also carries index information using index()
-///
-///The underlying Iterator must be a random access iterator
-template<class Iterator>
-class IndexedIterator: public  SHARK_ITERATOR_FACADE<
-	IndexedIterator<Iterator>,
-	typename boost::iterator_value<Iterator>::type,
-	std::random_access_iterator_tag,
-	typename boost::iterator_reference<Iterator>::type
->
-{
-public:
-	IndexedIterator()
-	:m_index(0){}
-
-	///\brief Copy-Constructs this iterator from some other IndexedIterator convertible to this.
-	template<class I>
-	IndexedIterator(IndexedIterator<I> const& iterator)
-	: m_iterator(iterator.m_iterator),m_index(iterator.index){}
-
-	///\brief Constructs the iterator from another iterator plus a starting index.
-	template<class IteratorT>
-	IndexedIterator(IteratorT const& iterator, std::size_t startIndex)
-	: m_iterator(Iterator(iterator)),m_index(startIndex){}
-
-	std::size_t index()const{
-		return m_index;
-	}
-private:
-	typedef SHARK_ITERATOR_FACADE<
-		IndexedIterator<Iterator>,
-		typename boost::iterator_value<Iterator>::type,
-		boost::random_access_traversal_tag,
-		typename boost::iterator_reference<Iterator>::type
-	> base_type;
-
-	friend class SHARK_ITERATOR_CORE_ACCESS;
-
-	typename base_type::reference dereference() const {
-		return *m_iterator;
-	}
-
-	void increment() {
-		++m_index;
-		++m_iterator;
-	}
-	void decrement() {
-		--m_index;
-		--m_iterator;
-	}
-
-	void advance(std::ptrdiff_t n){
-		m_index += n;
-		m_iterator += n;
-	}
-
-	template<class I>
-	std::ptrdiff_t distance_to(IndexedIterator<I> const& other) const{
-		return other.m_iterator - m_iterator;
-	}
-
-	template<class I>
-	bool equal(IndexedIterator<I> const& other) const{
-		return m_iterator == other.m_iterator;
-	}
-
-	Iterator m_iterator;
-	std::size_t m_index;
-};
-
 template<class Container>
 class IndexingIterator: public SHARK_ITERATOR_FACADE<
 	IndexingIterator<Container>,
 	typename Container::value_type,
 	std::random_access_iterator_tag,
-	typename boost::mpl::if_<
-		std::is_const<Container>,
+	typename std::conditional<
+		std::is_const<Container>::value,
 		typename Container::const_reference,
 		typename Container::reference
 	>::type
@@ -128,8 +58,11 @@ public:
 	
 	template<class C>
 	IndexingIterator(IndexingIterator<C> const& iterator)
-	: m_container(iterator.m_container){}
+	: m_container(iterator.m_container), m_index(iterator.m_index){}
 
+	std::size_t index() const{
+		return (std::size_t) m_index;
+	}
 private:
 	friend class SHARK_ITERATOR_CORE_ACCESS;
 

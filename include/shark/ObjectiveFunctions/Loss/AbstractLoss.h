@@ -149,11 +149,11 @@ public:
 	/// \param  predictions  predictions, typically made by a model
 	double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const{
 		SIZE_CHECK(predictions.numberOfElements() == targets.numberOfElements());
-		SIZE_CHECK(predictions.numberOfBatches() == targets.numberOfBatches());
+		SIZE_CHECK(predictions.size() == targets.size());
 
 		using namespace std::placeholders;
 		auto map = [this](BatchLabelType const& labels, BatchOutputType const& outputs){return eval(labels, outputs);};
-		double error = threading::mapAccumulate( targets.batches(), predictions.batches(), 0.0, map, threading::globalThreadPool());
+		double error = threading::mapAccumulate( targets, predictions, 0.0, map, threading::globalThreadPool());
 		return error / targets.numberOfElements();
 	}
 

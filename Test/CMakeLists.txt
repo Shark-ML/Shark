@@ -5,6 +5,9 @@
 #       Test implementation: Boost UTF                              #
 #####################################################################
 
+include(CTest)
+enable_testing()
+
 #####################################################################
 #       Get Boost Unit test                  #
 #####################################################################
@@ -16,11 +19,6 @@ find_package(
 set( boost_unit_test_lib ${Boost_LIBRARIES})
 
 #####################################################################
-#       Configure logging of test restults to XML                    #
-#####################################################################
-option( LOG_TEST_OUTPUT "Log test output to XML files." OFF )
-
-#####################################################################
 #   Adds a unit test for the shark library                          #
 #   Param: SRC Source files for compilation                         #
 #   Param: NAME Target name for the resulting executable            #
@@ -30,10 +28,6 @@ option( LOG_TEST_OUTPUT "Log test output to XML files." OFF )
 #   to ${NAME_Log.xml} in ${SHARK}/Test/bin.                        #
 #####################################################################
 macro(SHARK_ADD_TEST SRC NAME)
-   
-	if( OPT_LOG_TEST_OUTPUT )
-		set( XML_LOGGING_COMMAND_LINE_ARGS "--log_level=test_suite --log_format=XML --log_sink=${NAME}_Log.xml --report_level=no" )
-	endif( OPT_LOG_TEST_OUTPUT )
 
 	# Create the test executable
 	add_executable( ${NAME} ${SRC} Models/derivativeTestHelper.h )
@@ -46,11 +40,11 @@ macro(SHARK_ADD_TEST SRC NAME)
 	endif (GCOV_CHECK)
 
 	# Add the test
-	add_test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} )
+	add_test( NAME ${NAME} COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../)
 
 	set_target_properties(${NAME} PROPERTIES FOLDER "Tests")
 	if(GCOV_CHECK)
-		add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} ${XML_LOGGING_COMMAND_LINE_ARGS} COMMAND Coverage)
+		add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} COMMAND Coverage)
 	endif (GCOV_CHECK)
 endmacro()
 
@@ -181,11 +175,15 @@ shark_add_test( Models/RFClassifier.cpp Models_RFClassifier )
 # Core tests
 #shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
 shark_add_test( Core/Reorder.cpp Core_ImageReorder )
+shark_add_test( Core/ZipSupport.cpp Core_ZipSupport )
+shark_add_test( Core/ReadImage.cpp Core_ReadImage )
+shark_add_test( Core/WriteImage.cpp Core_WriteImage )
 
 # Data Tests
 shark_add_test( Data/Csv.cpp Data_Csv )
-shark_add_test( Data/Download.cpp Data_Download )
+#shark_add_test( Data/Download.cpp Data_Download )
 shark_add_test( Data/Bootstrap.cpp Data_Bootstrap )
+shark_add_test( Data/Generators.cpp Data_Generators )
 shark_add_test( Data/CVDatasetTools.cpp Data_CVDatasetTools )
 shark_add_test( Data/Dataset.cpp Data_Dataset )
 shark_add_test( Data/DataView.cpp Data_DataView )
@@ -253,14 +251,7 @@ set_tests_properties( ObjFunct_LooErrorCSvm PROPERTIES LABELS "slow" )
 set_tests_properties( Trainers_LinearSvmTrainer PROPERTIES LABELS "slow" )
 
 # Create output dir
-add_custom_command(
-	TARGET Data_Csv
-	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
-)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_output)
+# copy test data
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test_data/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/test_data/)
 
-add_custom_command(
-	TARGET Data_ExportKernelMatrix
-	POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/Test/test_output
-)

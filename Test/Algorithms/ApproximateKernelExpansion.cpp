@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear ){
 		BOOST_REQUIRE_EQUAL(approx.alpha().size1(), 2);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size2(), 3);
 		//compute weight vectors of the approximation
-		RealMatrix W = trans(approx.alpha()) % approx.basis().batch(0);
+		RealMatrix W = trans(approx.alpha()) % approx.basis()[0];
 		
 		BOOST_CHECK_SMALL(norm_inf(WTrue-W),1.e-4);
 	}
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( Solution_Linear_Single ){
 		BOOST_REQUIRE_EQUAL(approx.alpha().size1(), 1);
 		BOOST_REQUIRE_EQUAL(approx.alpha().size2(), 3);
 		RealVector Z = elements(approx.basis())[0]/norm_2(elements(approx.basis())[0]);
-		RealMatrix approxW = trans(approx.alpha()) % approx.basis().batch(0);
+		RealMatrix approxW = trans(approx.alpha()) % approx.basis()[0];
 		
 		BOOST_CHECK_SMALL(norm_inf(truthZ-Z),1.e-4);
 		BOOST_CHECK_SMALL(norm_inf(truthApproxW-approxW),1.e-3);
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE( Solution_Gaussian ){
 		
 		
 		DistanceTest test(&expansion,4);
-		RealVector point = to_vector(approx.basis().batch(0));
+		RealVector point = to_vector(approx.basis()[0]);
 		RealVector derivativeEst = estimateDerivative(test,point,1.e-5);
 		
 		//~ std::cout<<derivativeEst<<std::endl;

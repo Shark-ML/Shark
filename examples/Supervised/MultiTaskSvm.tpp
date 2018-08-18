@@ -30,8 +30,9 @@ public:
 		m_task[2] = task2;
 	}
 
-	void draw(InputType& input, unsigned int& label) const
-	{
+	void draw(reference point) const{
+		auto& input = point.input;
+		auto& label = point.label;
 		size_t taskindex = 0;
 		do {
 			taskindex = random::discrete(random::globalRng(), 0, 2);
@@ -40,7 +41,6 @@ public:
 		double x2 = 3.0 * random::gauss(random::globalRng());
 		unsigned int y = (x1 > 0.0) ? 1 : 0;
 		double alpha = 0.05 * M_PI * taskindex;
-		input.input.resize(2);
 		input.input(0) = cos(alpha) * x1 - sin(alpha) * x2;
 		input.input(1) = sin(alpha) * x1 + cos(alpha) * x2;
 		input.task = taskindex;

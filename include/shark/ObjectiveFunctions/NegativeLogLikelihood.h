@@ -87,7 +87,7 @@ public:
 			SIZE_CHECK(predictions.size2() == 1);
 			return sum(log(max(predictions,minProb)));
 		};
-		double error = threading::mapAccumulate( m_data.batches(), 0.0, map, threading::globalThreadPool());
+		double error = threading::mapAccumulate( m_data, 0.0, map, threading::globalThreadPool());
 		return -error / m_data.numberOfElements();
 	}
 	ResultType evalDerivative( 
@@ -136,7 +136,7 @@ public:
 			error += result.first;
 			derivative += result.second;
 		};
-		threading::mapApply( m_data.batches(), map, apply, threading::globalThreadPool());
+		threading::mapApply( m_data, map, apply, threading::globalThreadPool());
 
 		std::size_t numElements = m_data.numberOfElements();
 		error /= numElements;

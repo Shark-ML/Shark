@@ -58,7 +58,7 @@ Centroids::Centroids(Data<RealVector> const& centroids)
 RealVector Centroids::parameterVector() const{
 	RealVector param(numberOfParameters());
 	std::size_t pos = 0;
-	for(auto const& mat:m_centroids.batches()){
+	for(auto const& mat:m_centroids){
 		auto vec = to_vector(mat);
 		noalias(subrange(param,pos,pos+vec.size())) = vec;
 		pos += vec.size();
@@ -68,7 +68,7 @@ RealVector Centroids::parameterVector() const{
 
 void Centroids::setParameterVector(RealVector const& newParameters){
 	std::size_t pos = 0;
-	for(auto& mat:m_centroids.batches()){
+	for(auto& mat:m_centroids){
 		auto vec = to_vector(mat);
 		noalias(vec) = subrange(newParameters,pos,pos+vec.size());
 		pos += vec.size();
@@ -98,9 +98,9 @@ RealMatrix Centroids::distances(BatchInputType const& patterns) const{
 	RealMatrix distances(numPatterns, numClusters);
 	//first evaluate distance to all centroids;
 	std::size_t batchBegin = 0;
-	for (std::size_t i=0; i != m_centroids.numberOfBatches(); i++){
-		std::size_t batchEnd = batchBegin + m_centroids.batch(i).size1();
-		columns(distances,batchBegin,batchEnd) = sqrt(distanceSqr(patterns, m_centroids.batch(i)));
+	for (std::size_t i=0; i != m_centroids.size(); i++){
+		std::size_t batchEnd = batchBegin + m_centroids[i].size1();
+		columns(distances,batchBegin,batchEnd) = sqrt(distanceSqr(patterns, m_centroids[i]));
 		batchBegin = batchEnd;
 	}
 	return distances;
@@ -111,9 +111,9 @@ RealVector Centroids::softMembership(RealVector const& pattern) const{
 	RealVector membership(numClusters);
 	//first evaluate distance to all centroids;
 	std::size_t batchBegin = 0;
-	for (std::size_t i=0; i != m_centroids.numberOfBatches(); i++){
-		std::size_t batchEnd = batchBegin + m_centroids.batch(i).size1();
-		subrange(membership,batchBegin,batchEnd) = sqrt(distanceSqr(pattern, m_centroids.batch(i)));
+	for (std::size_t i=0; i != m_centroids.size(); i++){
+		std::size_t batchEnd = batchBegin + m_centroids[i].size1();
+		subrange(membership,batchBegin,batchEnd) = sqrt(distanceSqr(pattern, m_centroids[i]));
 		batchBegin = batchEnd;
 	}
 	//apply membership kernels and normalize to 1

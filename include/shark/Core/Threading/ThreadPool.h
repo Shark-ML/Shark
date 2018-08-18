@@ -148,7 +148,7 @@ public:
 	/// If this is not possible for whatever reason - for example the pool is full or closed,
 	/// the task is immediately computed synchronously
 	template<class Functor>
-	void submit(Functor&& task) {
+	void submit(Functor task) {
 		std::function<void()> f(std::move(task));
 		if(m_tasks.push(std::move(f)) != queue_status::success){
 			f();
@@ -162,7 +162,7 @@ public:
 	///
 	/// See submit for further information
 	template<class Function>
-	std::future<decltype(std::declval<Function>()())> execute_async( Function&& task){
+	std::future<decltype(std::declval<Function>()())> execute_async( Function task){
 		//obtain return type of the task
 		typedef decltype(task()) return_type;
 		//Create a task package from the task

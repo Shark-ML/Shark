@@ -39,8 +39,8 @@
 #include <shark/Models/Trees/BinaryTree.h>
 #include <shark/Data/Dataset.h>
 #include <shark/LinAlg/Base.h>
-#include <boost/array.hpp>
-
+#include <array>
+#include <numeric>
 namespace shark {
 
 
@@ -90,13 +90,10 @@ public:
 	LCTree(Data<RealVector> const& dataset, TreeConstruction tc = TreeConstruction())
 	: base_type(dataset.numberOfElements())
 	, m_normal(dataDimension(dataset)){
-		typedef DataView<Data<RealVector> const> PointSet;
+		typedef DataView<Data<VectorType> const> PointSet;
 		PointSet points(dataset);
-		//create a list to the iterator elements as temporary storage
-		//we need indexed operators to have a fast lookup of the position of the elements in the container
-		typedef IndexedIterator<typename boost::range_iterator<PointSet>::type> iterator;
-		std::vector<iterator> elements(m_size);
-		boost::iota(elements,iterator(boost::begin(points),0));
+		std::vector<typename PointSet::const_iterator> elements(m_size);
+		std::iota(elements.begin(),elements.end(), points.begin());
 
 		buildTree(tc,elements);
 		//after the creation of the trees, the iterators in the array are sorted in the order, 
@@ -160,7 +157,7 @@ protected:
 			calculateNormal(points);
 		}
 		else{
-			boost::array<pointIterator,CuttingAccuracy> samples;
+			std::array<pointIterator,CuttingAccuracy> samples;
 			for(std::size_t i = 0; i != CuttingAccuracy; i++) 
 				samples[i] = points[m_size * (2*i+1) / (2*CuttingAccuracy)];
 			calculateNormal(samples);

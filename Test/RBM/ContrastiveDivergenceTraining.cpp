@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( ContrastiveDivergence_ExactGradient)
 		RealMatrix hiddenInput(inputs,4);
 		
 		BinaryLayer::SufficientStatistics hiddenStatistics(inputs,4);
-		energy.inputHidden(hiddenInput,data.batch(0));
+		energy.inputHidden(hiddenInput,data[0]);
 		rbm.hiddenNeurons().sufficientStatistics(hiddenInput,hiddenStatistics, blas::repeat(1.0,inputs));
 		
 		//calculate the propability for every hidden state given the visible state p(h|v)

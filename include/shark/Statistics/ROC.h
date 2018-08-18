@@ -86,11 +86,11 @@ public:
 		
 		//calculate the model responses batchwise for the whole set
 		for(std::size_t i = 0; i != set.size(); ++i){
-			RealMatrix output = model(set.batch(i).input);
+			RealMatrix output = model(set[i].input);
 			SIZE_CHECK(output.size2() == 1);
 			for(std::size_t j = 0; j != output.size1(); ++j){ 
 				double value = output(j,0);
-				if (set.batch(i)(j) == 1)
+				if (set[i](j) == 1)
 				{
 					m_scorePositive[posPositive] = value;
 					posPositive++;

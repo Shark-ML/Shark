@@ -90,11 +90,11 @@ public:
 		//O.K. tried to make it more efficient (and shorter)
 		m_mean = 0.0;
 		m_matrixTrace = 0.0;
-		for(std::size_t i = 0; i != input.numberOfBatches(); ++i){
-			typename Data<InputType>::const_batch_reference batch = input.batch(i);
+		for(std::size_t i = 0; i != input.size(); ++i){
+			typename Data<InputType>::const_reference batch = input[i];
 			//off diagonal entries
 			for(std::size_t j = 0; j < i; ++j){
-				RealMatrix matrixBlock = k(batch, input.batch(j));
+				RealMatrix matrixBlock = k(batch, input[j]);
 				m_mean += 2*sum(matrixBlock);
 			}
 			RealMatrix matrixBlock = k(batch, batch);

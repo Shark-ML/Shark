@@ -422,7 +422,7 @@ public:
 	, m_labels(dataset.labels())
 	, mep_tree(tree)
 	{
-		this->m_inputShape = dataset.inputShape();
+		this->m_inputShape = dataset.shape().input;
 	}
 
 	///\brief returns the k nearest neighbors of the point

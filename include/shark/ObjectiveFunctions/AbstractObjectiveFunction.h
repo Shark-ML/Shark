@@ -39,7 +39,7 @@
 #include <shark/Core/Flags.h>
 #include <shark/LinAlg/Base.h>
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
-
+#include <type_traits>
 namespace shark {
 	
 /// \defgroup objfunctions Objective functions
@@ -95,8 +95,8 @@ public:
 	typedef ResultT ResultType;
 
 	//if the result type is not an arithmetic type, we assume it is a vector-type->multi objective optimization
-	typedef typename boost::mpl::if_<
-		std::is_arithmetic<ResultT>,
+	typedef typename std::conditional<
+		std::is_arithmetic<ResultT>::value,
 		SearchPointType,
 		RealMatrix
 	>::type FirstOrderDerivative;

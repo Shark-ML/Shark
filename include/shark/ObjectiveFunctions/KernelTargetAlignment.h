@@ -174,7 +174,7 @@ public:
 		auto processBatch = [&](std::size_t i){
 			std::size_t startX = 0;
 			for(std::size_t j = 0; j != i; ++j){
-				startX+= batchSize(m_data.batch(j));
+				startX+= batchSize(m_data[j]);
 			}
 			RealVector threadDerivative(parameters,0.0);
 			RealVector blockDerivative;
@@ -183,21 +183,21 @@ public:
 			RealMatrix blockW;//block of the WeightMatrix
 			std::size_t startY = 0;
 			for(std::size_t j = 0; j <= i; ++j){
-				mep_kernel->eval(m_data.batch(i).input,m_data.batch(j).input,blockK,*state);
+				mep_kernel->eval(m_data[i].input,m_data[j].input,blockK,*state);
 				mep_kernel->weightedParameterDerivative(
-					m_data.batch(i).input,m_data.batch(j).input,
+					m_data[i].input,m_data[j].input,
 					generateDerivativeWeightBlock(i,j,startX,startY,blockK,results),//takes symmetry into account
 					*state,
 					blockDerivative
 				);
 				noalias(threadDerivative) += blockDerivative;
-				startY += batchSize(m_data.batch(j));
+				startY += batchSize(m_data[j]);
 			}
 			return threadDerivative;
 		};
 		
 		derivative = threading::mapAccumulate(
-			boost::counting_range(std::size_t(0), m_data.numberOfBatches()), 
+			boost::counting_range(std::size_t(0), m_data.size()), 
 			RealVector(numberOfVariables(), 0.0), processBatch,
 			threading::globalThreadPool()
 		);
@@ -239,9 +239,9 @@ private:
 		m_meanY /= sqr(double(m_elements));
 		m_columnMeanY.resize(m_elements);
 		std::size_t i = 0;
-		for(auto const& batch:labels.batches()){
+		for(auto const& batch:labels){
 			for(std::size_t j = 0; j != batch.size(); ++j, ++i){
-				m_columnMeanY(i) = classMean(batch(j));
+				m_columnMeanY(i) = classMean[batch(j)];
 			}
 		}
 		if(!centering){
@@ -254,7 +254,7 @@ private:
 		RealVector meanLabel = mean(labels);
 		m_columnMeanY.resize(m_elements);
 		std::size_t i = 0;
-		for(auto const& batch:labels.batches()){
+		for(auto const& batch:labels){
 			std::size_t size = batch.size1();
 			noalias(subrange(m_columnMeanY, i, i+ size)) = batch % meanLabel;
 			i+= size;
@@ -316,8 +316,8 @@ private:
 		RealMatrix const& blockK,
 		KernelMatrixResults const& matrixStatistics
 	)const{
-		std::size_t blockSize1 = batchSize(m_data.batch(i));
-		std::size_t blockSize2 = batchSize(m_data.batch(j));
+		std::size_t blockSize1 = batchSize(m_data[i]);
+		std::size_t blockSize2 = batchSize(m_data[j]);
 		//double n = m_elements;
 		double KcKc = matrixStatistics.KcKc;
 		double YcKc = matrixStatistics.YcKc;
@@ -325,7 +325,7 @@ private:
 		RealMatrix blockW(blockSize1,blockSize2);
 
 		//first calculate \langle Kc,Kc \rangle  Y.
-		computeBlockY(m_data.batch(i).label,m_data.batch(j).label,blockW);
+		computeBlockY(m_data[i].label,m_data[j].label,blockW);
 		blockW *= KcKc;
 		//- \langle Y,K^c \rangle K
 		blockW-=YcKc*blockK;
@@ -375,26 +375,26 @@ private:
 		auto processBatch = [&](std::size_t i){
 			std::size_t startRow = 0;
 			for(std::size_t j = 0; j != i; ++j){
-				startRow+= batchSize(m_data.batch(j));
+				startRow+= batchSize(m_data[j]);
 			}
-			std::size_t rowSize = batchSize(m_data.batch(i));
+			std::size_t rowSize = batchSize(m_data[i]);
 			double KK = 0;
 			double YK = 0;
 			RealVector k(m_elements,0.0);
 			std::size_t startColumn = 0; //starting column of the current block
 			for(std::size_t j = 0; j <= i; ++j){
-				std::size_t columnSize = batchSize(m_data.batch(j));
-				RealMatrix blockK = (*mep_kernel)(m_data.batch(i).input,m_data.batch(j).input);
+				std::size_t columnSize = batchSize(m_data[j]);
+				RealMatrix blockK = (*mep_kernel)(m_data[i].input,m_data[j].input);
 				if(i == j){
 					KK += frobenius_prod(blockK,blockK);
 					subrange(k,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));//update sum_rows(K)
-					YK += updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
+					YK += updateYK(m_data[i].label,m_data[j].label,blockK);
 				}
 				else{//use symmetry ok K
 					KK += 2.0 * frobenius_prod(blockK,blockK);
 					subrange(k,startColumn,startColumn+columnSize)+=sum(as_columns(blockK));
 					subrange(k,startRow,startRow+rowSize)+=sum(as_rows(blockK));//symmetry: block(j,i)
-					YK += 2.0 * updateYK(m_data.batch(i).label,m_data.batch(j).label,blockK);
+					YK += 2.0 * updateYK(m_data[i].label,m_data[j].label,blockK);
 				}
 				startColumn+=columnSize;
 			}
@@ -402,7 +402,7 @@ private:
 			return accumulator{KK,YK, std::move(k)};
 		};
 		auto acc = threading::mapAccumulate(
-			boost::counting_range(std::size_t(0), m_data.numberOfBatches()),
+			boost::counting_range(std::size_t(0), m_data.size()),
 			accumulator{0.0, 0.0, RealVector(m_elements, 0.0)},
 			processBatch,
 			threading::globalThreadPool()
