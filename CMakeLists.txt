@@ -497,6 +497,7 @@ add_subdirectory( examples )
 #                       Include Unit Tests
 #####################################################################
 # Enable Testing
+option( BUILD_TESTING "Build tests." OFF )
 include(CTest)
 if(BUILD_TESTING)
 	enable_testing()
