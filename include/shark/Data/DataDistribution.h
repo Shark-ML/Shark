@@ -43,7 +43,7 @@
 #include <shark/Core/Random.h>
 #include <shark/Statistics/Distributions/MultiVariateNormalDistribution.h>
 #include <utility>
-
+#include <shark/Core/DLLSupport.h>
 namespace shark {
 
 
@@ -108,6 +108,61 @@ private:
 
 template<class I,class L>
 using LabeledDataDistribution = DataDistribution<InputLabelPair<I,L> >;
+
+
+/// \brief Samples file paths from a list, possibly aquuired by enumerating paths in the file system
+///
+/// File paths can be explicitely generated and filtered using globbing expressions.
+/// Globbing expressions are defined to have a simple syntax with the following special characters
+/// *: matches one or more characters
+/// ?: matches exactly one character
+/// {String1|String2|String3} matches String1 String2 or String3, however no * or ? are allowed inside.
+///
+/// All other characters are not special. Examples are
+/// *.jpeg: matches all paths ending in jpeg
+/// *.{jpeg|png}: matches all paths ending in either jpeg or png.
+/// a/b/class_?_*.jpeg: matches paths of the form a/b/class_0_123.jpeg
+///
+/// When iterating the file system, the parser first checks whether there is a path before the globbing expression,
+/// e.g. a/b/*.jpeg will find "a/b" as the base to start the recursive search for files. if there is no part, e.g.
+/// a*b.jpeg, this is interpreted as relative path, equivalent to ./a*b.jpeg
+///
+/// Instead of enumerating 
+class FileList : public DataDistribution<std::string>
+{
+public:
+	/// \brief Enumerates files in the file system matching a glob pattern
+	///
+	/// The enumerated files are stored and can be drawn randomly
+	SHARK_EXPORT_SYMBOL FileList(std::string const& expression);
+	
+	/// \brief Takes a set of paths and filters the ones matching the glob expression
+	///
+	/// This allows to create a file list from a different source than the file system, e.g. files in a zip-archive.
+	SHARK_EXPORT_SYMBOL FileList(std::vector<std::string> const& filePaths, std::string const& expression);
+	
+	/// \brief Constructs the list directly from a set of paths
+	SHARK_EXPORT_SYMBOL FileList(std::vector<std::string> const& filePaths);
+	
+	/// \brief Returns the vector of paths which matched the glob expression
+	std::vector<std::string> const& paths() const{
+		return m_paths;
+	}
+	
+	/// \brief Filters a set of paths based on the globbing expression
+	///
+	/// This function is mainly public for testing
+	SHARK_EXPORT_SYMBOL static std::vector<std::string> filterGlob(std::string expression, std::vector<std::string> const& paths);
+
+	/// \brief Draws a random path.
+	void draw(reference point) const{
+		std::size_t i =  random::discrete(random::globalRng(), std::size_t(0), m_paths.size() - 1);
+		point = m_paths[i];
+	}
+
+protected:
+	std::vector<std::string> m_paths;
+};
 
 
 ///

@@ -26,6 +26,8 @@ addons:
       - libboost-system1.55-dev
       - libboost-test1.55-dev
       - libboost-thread1.55-dev
+      - libjpeg-dev
+      - libpng-dev
 
 matrix:
   include:

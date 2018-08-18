@@ -4,26 +4,26 @@ file(GLOB_RECURSE SHARK_HEADERS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ../include/
 list(REMOVE_ITEM SHARK_SRCS "Version.cpp")
 # Group the source for MSVC
 foreach(FILE ${SHARK_SRCS}) 
-    # Get the directory of the source file
-    get_filename_component(PARENT_DIR "${FILE}" PATH)
-    # Make sure we are using windows slashes
-    string(REPLACE "/" "\\" GROUP "${PARENT_DIR}")
+	# Get the directory of the source file
+	get_filename_component(PARENT_DIR "${FILE}" PATH)
+	# Make sure we are using windows slashes
+	string(REPLACE "/" "\\" GROUP "${PARENT_DIR}")
 
-    set(GROUP "src\\${GROUP}")
+	set(GROUP "src\\${GROUP}")
 
-    source_group("${GROUP}" FILES "${FILE}")
+	source_group("${GROUP}" FILES "${FILE}")
 endforeach()
 #Also Group the Header Files
 foreach(FILE ${SHARK_HEADERS}) 
-    # Get the directory of the source file
-    get_filename_component(PARENT_DIR "${FILE}" PATH)
+	# Get the directory of the source file
+	get_filename_component(PARENT_DIR "${FILE}" PATH)
 
 	string(REPLACE "../" "" GROUP "${PARENT_DIR}")
 
-    # Make sure we are using windows slashes
-    string(REPLACE "/" "\\" GROUP "${GROUP}")
+	# Make sure we are using windows slashes
+	string(REPLACE "/" "\\" GROUP "${GROUP}")
 
-    source_group("${GROUP}" FILES "${FILE}")
+	source_group("${GROUP}" FILES "${FILE}")
 endforeach()
 
 
@@ -37,7 +37,7 @@ set_property(TARGET shark PROPERTY CXX_STANDARD 11)
 set_property(TARGET shark PROPERTY CXX_STANDARD_REQUIRED ON)
 
 if( WIN32 )
-  set_target_properties( shark PROPERTIES DEBUG_PREFIX ../ )
+	set_target_properties( shark PROPERTIES DEBUG_PREFIX ../ )
 endif()
 
 # Add the version executable
@@ -52,9 +52,9 @@ set_target_properties( shark PROPERTIES
 	SOVERSION ${SHARK_SOVERSION})
 
 install(TARGETS shark
-	    EXPORT SharkTargets
-	    RUNTIME DESTINATION ${SHARK_INSTALL_BIN_DIR}
-	    LIBRARY DESTINATION ${SHARK_INSTALL_LIB_DIR}
-	    ARCHIVE DESTINATION ${SHARK_INSTALL_LIB_DIR})
+	EXPORT SharkTargets
+	RUNTIME DESTINATION ${SHARK_INSTALL_BIN_DIR}
+	LIBRARY DESTINATION ${SHARK_INSTALL_LIB_DIR}
+	ARCHIVE DESTINATION ${SHARK_INSTALL_LIB_DIR})
 	
 install(TARGETS SharkVersion RUNTIME DESTINATION ${SHARK_INSTALL_BIN_DIR})

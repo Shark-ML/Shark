@@ -35,7 +35,7 @@
 #include <shark/Models/AbstractModel.h>
 #include <shark/Models/NeuronLayers.h>
 #include <shark/LinAlg/BLAS/kernels/conv2d.hpp>
-#include <shark/Core/Images/Padding.h>
+#include <shark/Core/Images/Enums.h>
 #include <shark/Core/Images/Reorder.h>
 namespace shark {
 

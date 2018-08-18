@@ -3,14 +3,12 @@
 
 #include <shark/LinAlg/Base.h>
 #include <shark/Core/Shark.h>
+#include <shark/Core/Images/Enums.h>
 #include "CPU/SplineInterpolation2D.h"
 #ifdef SHARK_USE_OPENCL
 #include "OpenCL/SplineInterpolation2D.h"
 #endif
 namespace shark{
-enum class Interpolation{
-	Spline
-};
 
 /// \brief Performs interpolation of an image at a set of evaluation points.
 ///

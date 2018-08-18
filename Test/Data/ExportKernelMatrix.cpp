@@ -50,31 +50,31 @@ BOOST_AUTO_TEST_CASE( Set_ExportKernelMatrix )
 	CompressedLinearKernel skernel; //sparse
 	
 	// no scaling
-	exportKernelMatrix( test_ds_c, kernel, "test_output/check_kernelmatrix_c_none.libsvm", NONE, false, 15 );
-	exportKernelMatrix( test_ds_mcc, kernel, "test_output/check_kernelmatrix_mcc_none.libsvm", NONE, false, 15 );
+	exportKernelMatrix( test_ds_c, kernel, "./Test/test_output/check_kernelmatrix_c_none.libsvm", NONE, false, 15 );
+	exportKernelMatrix( test_ds_mcc, kernel, "./Test/test_output/check_kernelmatrix_mcc_none.libsvm", NONE, false, 15 );
 	//~ exportKernelMatrix( test_ds_r, kernel, "test_output/check_kernelmatrix_r_none.libsvm", NONE, false, 15 );
 	// trace=1
-	exportKernelMatrix( test_ds_c, kernel, "test_output/check_kernelmatrix_c_trace.libsvm", MULTIPLICATIVE_TRACE_ONE, false, 15 );
-	exportKernelMatrix( test_ds_mcc, kernel, "test_output/check_kernelmatrix_mcc_trace.libsvm", MULTIPLICATIVE_TRACE_ONE, false, 15 );
+	exportKernelMatrix( test_ds_c, kernel, "./Test/test_output/check_kernelmatrix_c_trace.libsvm", MULTIPLICATIVE_TRACE_ONE, false, 15 );
+	exportKernelMatrix( test_ds_mcc, kernel, "./Test/test_output/check_kernelmatrix_mcc_trace.libsvm", MULTIPLICATIVE_TRACE_ONE, false, 15 );
 	//~ exportKernelMatrix( test_ds_r, kernel, "test_output/check_kernelmatrix_r_trace.libsvm", MULTIPLICATIVE_TRACE_ONE, false, 15 );
 	// trace=N
-	exportKernelMatrix( test_ds_c, kernel, "test_output/check_kernelmatrix_c_traceN.libsvm", MULTIPLICATIVE_TRACE_N, false, 15 );
-	exportKernelMatrix( test_ds_mcc, kernel, "test_output/check_kernelmatrix_mcc_traceN.libsvm", MULTIPLICATIVE_TRACE_N, false, 15 );
+	exportKernelMatrix( test_ds_c, kernel, "./Test/test_output/check_kernelmatrix_c_traceN.libsvm", MULTIPLICATIVE_TRACE_N, false, 15 );
+	exportKernelMatrix( test_ds_mcc, kernel, "./Test/test_output/check_kernelmatrix_mcc_traceN.libsvm", MULTIPLICATIVE_TRACE_N, false, 15 );
 	//~ exportKernelMatrix( test_ds_r, kernel, "test_output/check_kernelmatrix_r_traceN.libsvm", MULTIPLICATIVE_TRACE_N, false, 15 );
 	// var=1
-	exportKernelMatrix( test_ds_c, kernel, "test_output/check_kernelmatrix_c_var.libsvm", MULTIPLICATIVE_VARIANCE_ONE, false, 15 );
-	exportKernelMatrix( test_ds_mcc, kernel, "test_output/check_kernelmatrix_mcc_var.libsvm", MULTIPLICATIVE_VARIANCE_ONE, false, 15 );
+	exportKernelMatrix( test_ds_c, kernel, "./Test/test_output/check_kernelmatrix_c_var.libsvm", MULTIPLICATIVE_VARIANCE_ONE, false, 15 );
+	exportKernelMatrix( test_ds_mcc, kernel, "./Test/test_output/check_kernelmatrix_mcc_var.libsvm", MULTIPLICATIVE_VARIANCE_ONE, false, 15 );
 	//~ exportKernelMatrix( test_ds_r, kernel, "test_output/check_kernelmatrix_r_var.libsvm", MULTIPLICATIVE_VARIANCE_ONE, false, 15 );
 	// center
-	exportKernelMatrix( test_ds_c, kernel, "test_output/check_kernelmatrix_c_center.libsvm", CENTER_ONLY, false, 15 );
-	exportKernelMatrix( test_ds_mcc, kernel, "test_output/check_kernelmatrix_mcc_center.libsvm", CENTER_ONLY, false, 15 );
+	exportKernelMatrix( test_ds_c, kernel, "./Test/test_output/check_kernelmatrix_c_center.libsvm", CENTER_ONLY, false, 15 );
+	exportKernelMatrix( test_ds_mcc, kernel, "./Test/test_output/check_kernelmatrix_mcc_center.libsvm", CENTER_ONLY, false, 15 );
 	//~ exportKernelMatrix( test_ds_r, kernel, "test_output/check_kernelmatrix_r_center.libsvm", CENTER_ONLY, false, 15 );
 	// center and tr=1
-	exportKernelMatrix( test_ds_c, kernel, "test_output/check_kernelmatrix_c_center_tr.libsvm", CENTER_AND_MULTIPLICATIVE_TRACE_ONE, false, 15 );
-	exportKernelMatrix( test_ds_mcc, kernel, "test_output/check_kernelmatrix_mcc_center_tr.libsvm", CENTER_AND_MULTIPLICATIVE_TRACE_ONE, false, 15 );
+	exportKernelMatrix( test_ds_c, kernel, "./Test/test_output/check_kernelmatrix_c_center_tr.libsvm", CENTER_AND_MULTIPLICATIVE_TRACE_ONE, false, 15 );
+	exportKernelMatrix( test_ds_mcc, kernel, "./Test/test_output/check_kernelmatrix_mcc_center_tr.libsvm", CENTER_AND_MULTIPLICATIVE_TRACE_ONE, false, 15 );
 	//~ exportKernelMatrix( test_ds_r, kernel, "test_output/check_kernelmatrix_r_center_tr.libsvm", CENTER_AND_MULTIPLICATIVE_TRACE_ONE, false, 15 );
 	// sparse classif., no scaling
-	exportKernelMatrix( test_ds_sc, skernel, "test_output/check_kernelmatrix_sparse_c_none.libsvm", NONE, false, 15 );
+	exportKernelMatrix( test_ds_sc, skernel, "./Test/test_output/check_kernelmatrix_sparse_c_none.libsvm", NONE, false, 15 );
 	
 	// mt: todo: add tests here once read-in is supported
 	

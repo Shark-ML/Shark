@@ -375,9 +375,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Export)
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_separator, FIRST_COLUMN, ',','#',3);
 
-		exportCSV(test, "./test_output/check_first.csv", FIRST_COLUMN);
+		exportCSV(test, "./Test/test_output/check_first.csv", FIRST_COLUMN);
 		LabeledData<RealVector, unsigned int> loaded;
-		importCSV(loaded, "./test_output/check_first.csv", FIRST_COLUMN);
+		importCSV(loaded, "./Test/test_output/check_first.csv", FIRST_COLUMN);
 
 		checkDataEquality(test_values_1,labels_1,loaded);
 	}
@@ -386,9 +386,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Export)
 		LabeledData<RealVector, unsigned int> test;
 		csvStringToData(test, test_separator, FIRST_COLUMN, ',','#',3);
 
-		exportCSV(test, "./test_output/check_last.csv", LAST_COLUMN);
+		exportCSV(test, "./Test/test_output/check_last.csv", LAST_COLUMN);
 		LabeledData<RealVector, unsigned int> loaded;
-		importCSV(loaded, "./test_output/check_last.csv", LAST_COLUMN);
+		importCSV(loaded, "./Test/test_output/check_last.csv", LAST_COLUMN);
 
 		checkDataEquality(test_values_1,labels_1,loaded);
 	}
@@ -397,9 +397,9 @@ BOOST_AUTO_TEST_CASE( Data_Csv_Export)
 		Data<RealVector> test;
 		csvStringToData(test, test_separator, ',','#',3);
 
-		exportCSV(test, "test_output/check_regression.csv");
+		exportCSV(test, "./Test/test_output/check_regression.csv");
 		Data<RealVector> loaded;
-		importCSV(loaded, "test_output/check_regression.csv");
+		importCSV(loaded, "./Test/test_output/check_regression.csv");
 
 		checkDataEquality(test_values,loaded);
 	}
