@@ -44,11 +44,10 @@ inline void tpmv(
 	CBLAS_DIAG const unit,
 	int const N,
 	float const *A,
-        float* X, int const incX
+	float* X, int const incX
 ) {
 	cblas_stpmv(Order, uplo, transA, unit, N, 
-		A,
-	        X, incX
+		A, X, incX
 	);
 }
 
@@ -59,11 +58,10 @@ inline void tpmv(
 	CBLAS_DIAG const unit,
 	int const N,
 	double const *A,
-        double* X, int const incX
+	double* X, int const incX
 ) {
 	cblas_dtpmv(Order, uplo, transA, unit, N, 
-		A,
-	        X, incX
+		A, X, incX
 	);
 }
 
@@ -75,11 +73,11 @@ inline void tpmv(
 	CBLAS_DIAG const unit,
 	int const N,
 	std::complex<float> const *A,
-        std::complex<float>* X, int const incX
+	std::complex<float>* X, int const incX
 ) {
 	cblas_ctpmv(Order, uplo, transA, unit, N, 
 		reinterpret_cast<cblas_float_complex_type const *>(A),
-	        reinterpret_cast<cblas_float_complex_type *>(X), incX
+		reinterpret_cast<cblas_float_complex_type *>(X), incX
 	);
 }
 
@@ -90,11 +88,11 @@ inline void tpmv(
 	CBLAS_DIAG const unit,
 	int const N,
 	std::complex<double> const *A,
-        std::complex<double>* X, int const incX
+	std::complex<double>* X, int const incX
 ) {
 	cblas_ztpmv(Order, uplo, transA, unit, N, 
 		reinterpret_cast<cblas_double_complex_type const *>(A),
-	        reinterpret_cast<cblas_double_complex_type *>(X), incX
+		reinterpret_cast<cblas_double_complex_type *>(X), incX
 	);
 }
 
@@ -116,9 +114,9 @@ void tpmv(
 	auto storageA = A().raw_storage();
 	auto storagex = x().raw_storage();
 	tpmv(stor_ord, cblasUplo, CblasNoTrans, cblasUnit, (int)n,
-	        storageA.values,
+		storageA.values,
 		storagex.values,
-	        storagex.stride
+		(int)storagex.stride
 	);
 }
 

@@ -46,12 +46,12 @@ inline void trmm(
 	int const M,
 	int const N,
 	float const *A, int const lda,
-        float* B, int const incB
+	float* B, int const incB
 ) {
 	cblas_strmm(order, side, uplo, transA, unit, M, N, 
 		1.0,
 		A, lda,
-	        B, incB
+		B, incB
 	);
 }
 
@@ -64,12 +64,12 @@ inline void trmm(
 	int const M,
 	int const N,
 	double const *A, int const lda,
-        double* B, int const incB
+	double* B, int const incB
 ) {
 	cblas_dtrmm(order, side, uplo, transA, unit, M, N, 
 		1.0,
 		A, lda,
-	        B, incB
+		B, incB
 	);
 }
 
@@ -83,13 +83,13 @@ inline void trmm(
 	int const M,
 	int const N,
 	std::complex<float> const *A, int const lda,
-        std::complex<float>* B, int const incB
+	std::complex<float>* B, int const incB
 ) {
 	std::complex<float> alpha = 1.0;
 	cblas_ctrmm(order, side, uplo, transA, unit, M, N, 
 		reinterpret_cast<cblas_float_complex_type const *>(&alpha),
 		reinterpret_cast<cblas_float_complex_type const *>(A), lda,
-	        reinterpret_cast<cblas_float_complex_type *>(B), incB
+		reinterpret_cast<cblas_float_complex_type *>(B), incB
 	);
 }
 
@@ -102,13 +102,13 @@ inline void trmm(
 	int const M,
 	int const N,
 	std::complex<double> const *A, int const lda,
-        std::complex<double>* B, int const incB
+	std::complex<double>* B, int const incB
 ) {
 	std::complex<double> alpha = 1.0;
 	cblas_ztrmm(order, side, uplo, transA, unit, M, N, 
 		reinterpret_cast<cblas_double_complex_type const *>(&alpha),
 		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
-	        reinterpret_cast<cblas_double_complex_type *>(B), incB
+		reinterpret_cast<cblas_double_complex_type *>(B), incB
 	);
 }
 
@@ -140,9 +140,9 @@ void trmm(
 	trmm(stor_ordB, CblasLeft, cblasUplo, trans, cblasUnit,
 		(int)n, int(m),
 		storageA.values,
-	        storageA.leading_dimension,
+		(int)storageA.leading_dimension,
 		storageB.values,
-	        storageB.leading_dimension
+		(int)storageB.leading_dimension
 	);
 }
 

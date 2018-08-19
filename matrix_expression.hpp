@@ -244,7 +244,7 @@ name (matrix_expression<MatA, Device> const& m, T t){ \
 	typedef typename MatA::value_type type;\
 	typedef typename device_traits<Device>:: template F<type> functor_type;\
 	typedef scalar_matrix<type,Device, typename MatA::orientation> mat_type;\
-	return matrix_binary<MatA, mat_type, functor_type >(m(), mat_type(m().size1(), m().size2(), t) ,functor_type()); \
+	return matrix_binary<MatA, mat_type, functor_type >(m(), mat_type(m().size1(), m().size2(), type(t)) ,functor_type()); \
 }
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator/, divide)
 REMORA_MATRIX_SCALAR_TRANSFORMATION(operator<, less)

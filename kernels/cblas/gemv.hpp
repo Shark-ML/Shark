@@ -39,9 +39,9 @@ namespace remora{namespace bindings {
 
 inline void gemv(CBLAS_ORDER const Order,
         CBLAS_TRANSPOSE const TransA, int const M, int const N,
-        double alpha, float const *A, int const lda,
+        float alpha, float const *A, int const lda,
         float const *X, int const incX,
-        double beta, float *Y, int const incY
+        float beta, float *Y, int const incY
 ) {
 	cblas_sgemv(Order, TransA, M, N, alpha, A, lda,
 	        X, incX,
@@ -61,10 +61,10 @@ inline void gemv(CBLAS_ORDER const Order,
 
 inline void gemv(CBLAS_ORDER const Order,
         CBLAS_TRANSPOSE const TransA, int const M, int const N,
-        double alpha,
+        float alpha,
         std::complex<float> const *A, int const lda,
         std::complex<float> const *X, int const incX,
-        double beta,
+        float beta,
         std::complex<float> *Y, int const incY
 ) {
 	std::complex<float> alphaArg(alpha,0);
@@ -78,21 +78,21 @@ inline void gemv(CBLAS_ORDER const Order,
 }
 
 inline void gemv(CBLAS_ORDER const Order,
-        CBLAS_TRANSPOSE const TransA, int const M, int const N,
-         double alpha,
-        std::complex<double> const *A, int const lda,
-        std::complex<double> const *X, int const incX,
-        double beta,
-        std::complex<double> *Y, int const incY
+	CBLAS_TRANSPOSE const TransA, int const M, int const N,
+	double alpha,
+	std::complex<double> const *A, int const lda,
+	std::complex<double> const *X, int const incX,
+	double beta,
+	std::complex<double> *Y, int const incY
 ) {
 	std::complex<double> alphaArg(alpha,0);
 	std::complex<double> betaArg(beta,0);
 	cblas_zgemv(Order, TransA, M, N,
-	        reinterpret_cast<cblas_double_complex_type const *>(&alphaArg),
-	        reinterpret_cast<cblas_double_complex_type const *>(A), lda,
-	        reinterpret_cast<cblas_double_complex_type const *>(X), incX,
-	        reinterpret_cast<cblas_double_complex_type const *>(&betaArg),
-	        reinterpret_cast<cblas_double_complex_type *>(Y), incY);
+		reinterpret_cast<cblas_double_complex_type const *>(&alphaArg),
+		reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+		reinterpret_cast<cblas_double_complex_type const *>(X), incX,
+		reinterpret_cast<cblas_double_complex_type const *>(&betaArg),
+		reinterpret_cast<cblas_double_complex_type *>(Y), incY);
 }
 
 
@@ -102,7 +102,7 @@ template <typename MatA, typename VectorX, typename VectorY>
 void gemv(
 	matrix_expression<MatA, cpu_tag> const &A,
 	vector_expression<VectorX, cpu_tag> const &x,
-        vector_expression<VectorY, cpu_tag> &y,
+	vector_expression<VectorY, cpu_tag> &y,
 	typename VectorY::value_type alpha,
 	std::true_type
 ){
@@ -119,12 +119,12 @@ void gemv(
 	auto storagey = y().raw_storage();
 	gemv(stor_ord, CblasNoTrans, (int)m, (int)n, alpha,
 		storageA.values,
-	        storageA.leading_dimension,
+		(int)storageA.leading_dimension,
 		storagex.values,
-	        storagex.stride,
-	        typename VectorY::value_type(1),
+		(int)storagex.stride,
+		typename VectorY::value_type(1),
 		storagey.values,
-	        storagey.stride
+		(int)storagey.stride
 	);
 }
 

@@ -141,12 +141,12 @@ void dense_gemm(
 	auto storageC = C().raw_storage();
 	dense_gemm(stor_ord, transA, transB, (int)m, (int)n, (int)k, alpha,
 		storageA.values,
-		storageA.leading_dimension,
+		(int)storageA.leading_dimension,
 		storageB.values,
-		storageB.leading_dimension,
+		(int)storageB.leading_dimension,
 		typename MatC::value_type(1),
 		storageC.values,
-		storageC.leading_dimension
+		(int)storageC.leading_dimension
 	);
 }
 

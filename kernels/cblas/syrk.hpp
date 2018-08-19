@@ -89,10 +89,10 @@ void syrk(
 	syrk(stor_ord, uplo, trans,
 		(int)n, (int)k, alpha,
 		storageA.values,
-	        storageA.leading_dimension,
+		(int)storageA.leading_dimension,
 		typename MatC::value_type(1),
 		storageC.values,
-	        storageC.leading_dimension
+		(int)storageC.leading_dimension
 	);
 }
 

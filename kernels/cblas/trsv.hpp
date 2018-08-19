@@ -91,14 +91,14 @@ void trsv_impl(
 	CBLAS_UPLO uplo = Triangular::is_upper?CblasUpper:CblasLower;
 	
 
-	int const n = A().size1();
+	int const n = (int)A().size1();
 	auto storageA = A().raw_storage();
 	auto storageb = b().raw_storage();
 	trsv(storOrd, uplo, CblasNoTrans,cblasUnit, n,
-	        storageA.values,
-	        storageA.leading_dimension,
+		storageA.values,
+		(int)storageA.leading_dimension,
 		storageb.values,
-	        storageb.stride
+		(int)storageb.stride
 	);
 }
 
