@@ -238,7 +238,7 @@ void readCSVData(
 	}
 	//copy rows of the file into the dataset
 	std::size_t dimensions = rows[0].second.size();
-	dataset = LabeledData<blas::vector<T>, unsigned int>(rows.size(), {dimensions, maxPositiveLabel + 1}, maximumBatchSize);
+	dataset = LabeledData<blas::vector<T>, unsigned int>(rows.size(), {dimensions, (std::size_t)maxPositiveLabel + 1}, maximumBatchSize);
 	std::size_t currentRow = 0;
 	for(auto&& batch: dataset){
 		//copy the rows into the batch

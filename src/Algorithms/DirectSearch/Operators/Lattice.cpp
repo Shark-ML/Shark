@@ -40,7 +40,8 @@ namespace detail {
 std::size_t sumlength(std::size_t const n, std::size_t const sum)
 {
 	return static_cast<std::size_t>(
-		boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
+		boost::math::binomial_coefficient<double>((unsigned)(n - 1 + sum), (unsigned)sum)
+	);
 }
 
 void pointLattice_helper(
@@ -51,7 +52,7 @@ void pointLattice_helper(
 ){
 	const std::size_t n = pointMatrix.size2() - colidx;
 	if(n == 1){
-		pointMatrix(rowidx, colidx) = sum_rest;
+		pointMatrix(rowidx, colidx) = (unsigned)sum_rest;
 	}
 	else{
 		std::size_t total_rows = 0;
@@ -61,7 +62,7 @@ void pointLattice_helper(
 			// in each row all sum to sum_rest - i.
 			for(std::size_t j = 0; j < submatrix_height; ++j)
 			{
-				pointMatrix(total_rows + rowidx + j, colidx) = i;
+				pointMatrix(total_rows + rowidx + j, colidx) = (unsigned)i;
 			}
 			pointLattice_helper(pointMatrix, total_rows + rowidx,
 			                    colidx + 1, sum_rest - i);

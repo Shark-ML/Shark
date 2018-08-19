@@ -14,7 +14,7 @@ using namespace shark;
 		
 ////////////////////////PNG WRITE///////////////////////
 template<class T>
-std::vector<unsigned char> image::writePNG(blas::vector<T> const& image, Shape const& shape, PixelType type){
+std::vector<unsigned char> image::writePNG(blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type){
 	RANGE_CHECK(shape.size() == 3);
 	SHARK_RUNTIME_CHECK(image.size() == shape.numElements(), "Shape does not match input vector size");
 	
@@ -66,7 +66,7 @@ std::vector<unsigned char> image::writePNG(blas::vector<T> const& image, Shape c
 
 	//write image header
 	png_set_IHDR(
-		png, info, shape[1], shape[0], 8, colorType,  
+		png, info, (png_uint_32)shape[1], (png_uint_32)shape[0], 8, colorType,  
 		PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT//last 2 parameters must be set to this
 	);
@@ -102,7 +102,7 @@ std::vector<unsigned char> image::writePNG(blas::vector<T> const& image, Shape c
 /////////////////////////////////////JPEG WRITE/////////////////////////////////////////////////////
 
 template<class T>
-std::vector<unsigned char> image::writeJPEG(blas::vector<T> const& image, Shape const& shape, PixelType type){
+std::vector<unsigned char> image::writeJPEG(blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type){
 	RANGE_CHECK(shape.size() == 3);
 	SHARK_RUNTIME_CHECK(image.size() == shape.numElements(), "Shape does not match input vector size");
 	
@@ -137,9 +137,9 @@ std::vector<unsigned char> image::writeJPEG(blas::vector<T> const& image, Shape 
 	
 	try{
 		//setup file header
-		info.image_width = shape[1];
-		info.image_height = shape[0];
-		info.input_components = shape[2];
+		info.image_width = (JDIMENSION) shape[1];
+		info.image_height = (JDIMENSION) shape[0];
+		info.input_components = (JDIMENSION) shape[2];
 		info.in_color_space = colorType;
 		
 		
@@ -178,7 +178,7 @@ std::vector<unsigned char> image::writeJPEG(blas::vector<T> const& image, Shape 
 ///////////////////////////////////PGM WRITE///////////////////////////////////////////////////////
 
 template<class T>
-std::vector<unsigned char> image::writePGM(blas::vector<T> const& image, Shape const& shape, PixelType type){
+std::vector<unsigned char> image::writePGM(blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type){
 	RANGE_CHECK(shape.size() == 3);
 	SHARK_RUNTIME_CHECK(image.size() == shape.numElements(), "Shape does not match input vector size");
 	SHARK_RUNTIME_CHECK(type == PixelType::Luma, "PGM does only support Luma Pixeltype");
@@ -201,7 +201,7 @@ std::vector<unsigned char> image::writePGM(blas::vector<T> const& image, Shape c
 }
 
 template<class T>
-void image::writeImageToFile(std::string const& filename, blas::vector<T> const& image, Shape const& shape, PixelType type){
+void image::writeImageToFile(std::string const& filename, blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type){
 	//find extension
 	std::size_t pos = filename.find_last_of('.');
 	SHARK_RUNTIME_CHECK(pos != std::string::npos, "Can not find extension");
@@ -227,11 +227,11 @@ void image::writeImageToFile(std::string const& filename, blas::vector<T> const&
 
 
 //explicit instantiation
-template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePNG<float>(blas::vector<float> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePNG<double>(blas::vector<double> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writeJPEG<float>(blas::vector<float> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writeJPEG<double>(blas::vector<double> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePGM<float>(blas::vector<float> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePGM<double>(blas::vector<double> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL void image::writeImageToFile(std::string const& filename, blas::vector<float> const& image, Shape const& shape, PixelType type);
-template SHARK_EXPORT_SYMBOL void image::writeImageToFile(std::string const& filename, blas::vector<double> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePNG<float>(blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePNG<double>(blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writeJPEG<float>(blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writeJPEG<double>(blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePGM<float>(blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL std::vector<unsigned char> image::writePGM<double>(blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL void image::writeImageToFile(std::string const& filename, blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+template SHARK_EXPORT_SYMBOL void image::writeImageToFile(std::string const& filename, blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);

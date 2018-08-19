@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE( HYPERVOLUME_Functions ) {
 	RealVector reference(2);
 	reference(0) = 11;
 	reference(1) = 11;
-	std::size_t mu = 10;
+	unsigned mu = 10;
 	{
 		DTLZ2 function(5);
 		double volume = 120.178966;

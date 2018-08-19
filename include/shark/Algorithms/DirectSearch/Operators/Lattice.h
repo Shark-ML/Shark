@@ -181,16 +181,16 @@ UIntMatrix computeClosestNeighbourIndicesOnLattice(
 	for(std::size_t i = 0; i < m.size1(); ++i)
 	{
 		// Make some indices we can sort.
-		std::vector<std::size_t> indices(distances.size2());
-		std::iota(indices.begin(), indices.end(), 0);
+		std::vector<unsigned> indices(distances.size2());
+		std::iota(indices.begin(), indices.end(), 0u);
 		// Sort indices by the distances.
 		std::sort(indices.begin(), indices.end(),
-		          [&](std::size_t a, std::size_t b)
+		          [&](unsigned a, unsigned b)
 		          {
 			          return distances(i, a) < distances(i, b);
 		          });
 		// Copy the T closest indices into B.
-		std::copy_n(indices.begin(), n, neighbourIndices.major_begin(i));
+		std::copy_n(indices.begin(), (int)n, neighbourIndices.major_begin(i));
 	}
 	return neighbourIndices;
 }

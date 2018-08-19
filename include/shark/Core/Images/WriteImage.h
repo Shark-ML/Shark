@@ -48,38 +48,38 @@ namespace shark { namespace image{
 /// PNG supports all Pixel Types. The image shape is interpreted as height x width x channels, where the number
 /// of channels must match the channels indicated by type (e.g. RGB requires exactly 3 channels, Luma 1)
 template<class T>
-std::vector<unsigned char> writePNG(blas::vector<T> const& image, Shape const& shape, PixelType type);
+std::vector<unsigned char> writePNG(blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type);
 
 /// \brief Encodes an image as JPEG
 /// 
 /// JPEG does not support images with alpha channels. The image shape is interpreted as height x width x channels, where the number
 /// of channels must match the channels indicated by type (e.g. RGB requires exactly 3 channels, Luma 1)
 template<class T>
-std::vector<unsigned char> writeJPEG(blas::vector<T> const& image, Shape const& shape, PixelType type);
+std::vector<unsigned char> writeJPEG(blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type);
 
 /// \brief Encodes LUMA images as PNG
 /// 
 /// PGM only supports single channel Luma images. The image shape is interpreted as height x width x 1. 
 template<class T>
-std::vector<unsigned char> writePGM(blas::vector<T> const& image, Shape const& shape, PixelType type);
+std::vector<unsigned char> writePGM(blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type);
 
 /// \brief Stores an image to a file
 ///
 /// The image format is read from the extension, e.g. ".png" calls writePNG. Images are always encoded with 8 bit per pixel per channel.
 /// exceptions are thrown if the indicated pixel type can not be stored by the image format (e.g. alpha channels in jpeg).
 template<class T>
-void writeImageToFile(std::string const& filename, blas::vector<T> const& image, Shape const& shape, PixelType type);
+void writeImageToFile(std::string const& filename, blas::dense_vector_adaptor<T const> const& image, Shape const& shape, PixelType type);
 
 	
 //implementation in cpp for float and double cpu vectors only
-extern template std::vector<unsigned char> writePNG<float>(blas::vector<float> const& image, Shape const& shape, PixelType type);
-extern template std::vector<unsigned char> writePNG<double>(blas::vector<double> const& image, Shape const& shape, PixelType type);
-extern template std::vector<unsigned char> writeJPEG<float>(blas::vector<float> const& image, Shape const& shape, PixelType type);
-extern template std::vector<unsigned char> writeJPEG<double>(blas::vector<double> const& image, Shape const& shape, PixelType type);
-extern template std::vector<unsigned char> writePGM<float>(blas::vector<float> const& image, Shape const& shape, PixelType type);
-extern template std::vector<unsigned char> writePGM<double>(blas::vector<double> const& image, Shape const& shape, PixelType type);
-extern template void writeImageToFile(std::string const& filename, blas::vector<float> const& image, Shape const& shape, PixelType type);
-extern template void writeImageToFile(std::string const& filename, blas::vector<double> const& image, Shape const& shape, PixelType type);
+extern template std::vector<unsigned char> writePNG<float>(blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+extern template std::vector<unsigned char> writePNG<double>(blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
+extern template std::vector<unsigned char> writeJPEG<float>(blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+extern template std::vector<unsigned char> writeJPEG<double>(blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
+extern template std::vector<unsigned char> writePGM<float>(blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+extern template std::vector<unsigned char> writePGM<double>(blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
+extern template void writeImageToFile(std::string const& filename, blas::dense_vector_adaptor<float const> const& image, Shape const& shape, PixelType type);
+extern template void writeImageToFile(std::string const& filename, blas::dense_vector_adaptor<double const> const& image, Shape const& shape, PixelType type);
 
 
 }}

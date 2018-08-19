@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( Ensemble_Test )
 		truthVotes /= alphaSum;
 		UIntVector truthLabel(point.size1(),0);
 		for(std::size_t j = 0; j != point.size1(); ++j){
-			truthLabel(j) = arg_max(row(truthVotes,j));
+			truthLabel(j) = (unsigned) arg_max(row(truthVotes,j));
 		}
 		UIntVector testClass = classEnsemble(point);
 		UIntVector testClassPtr = classEnsemblePtr(point);

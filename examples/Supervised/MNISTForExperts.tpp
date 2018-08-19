@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 	std::size_t iterations = 20001;
 	initRandomNormal(model,0.0001); //init model
 	Adam<FloatVector> optimizer;
-	optimizer.setEta(0.0001);//learning rate of the algorithm
+	optimizer.setEta(0.0001f);//learning rate of the algorithm
 	error.init();
 	optimizer.init(error);
 	std::cout<<"Optimizing model "<<std::endl;

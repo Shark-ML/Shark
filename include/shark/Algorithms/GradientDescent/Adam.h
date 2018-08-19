@@ -44,17 +44,18 @@ namespace shark{
 /// a step size for each coordinate.
 /// \ingroup gradientopt
 template<class SearchPointType = RealVector>
-class Adam : public AbstractSingleObjectiveOptimizer<SearchPointType >
-{
+class Adam : public AbstractSingleObjectiveOptimizer<SearchPointType >{
+private:
+	typedef typename SearchPointType::value_type scalar_type;
 public:
 	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunctionType;
 	Adam() {
 		this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
 
-		m_beta1 = 0.9;
-		m_beta2 = 0.999;
-		m_epsilon = 1.e-8;
-		m_eta = 0.001;
+		m_beta1 = scalar_type(0.9);
+		m_beta2 = scalar_type(0.999);
+		m_epsilon = scalar_type(1.e-8);
+		m_eta = scalar_type(0.001);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -77,45 +78,45 @@ public:
 	using AbstractSingleObjectiveOptimizer<SearchPointType >::init;
 
 	/// \brief get learning rate eta
-	double eta() const {
+	scalar_type eta() const {
 		return m_eta;
 	}
 
 	/// \brief set learning rate eta
-	void setEta(double eta) {
+	void setEta(scalar_type eta) {
 		SHARK_RUNTIME_CHECK(eta > 0, "eta must be positive.");
 		m_eta = eta;
 	}
 	
 	/// \brief get gradient averaging parameter beta1
-	double beta1() const {
+	scalar_type beta1() const {
 		return m_beta1;
 	}
 
 	/// \brief set gradient averaging parameter beta1
-	void setBeta1(double beta1) {
+	void setBeta1(scalar_type beta1) {
 		SHARK_RUNTIME_CHECK(beta1 > 0, "beta1 must be positive.");
 		m_beta1 = beta1;
 	}
 	
 	/// \brief get gradient averaging parameter beta2
-	double beta2() const {
+	scalar_type beta2() const {
 		return m_beta2;
 	}
 
 	/// \brief set gradient averaging parameter beta2
-	void setBeta2(double beta2) {
+	void setBeta2(scalar_type beta2) {
 		SHARK_RUNTIME_CHECK(beta2 > 0, "beta2 must be positive.");
 		m_beta2 = beta2;
 	}
 	
 	/// \brief get minimum noise estimate epsilon
-	double epsilon() const {
+	scalar_type epsilon() const {
 		return m_epsilon;
 	}
 
 	/// \brief set minimum noise estimate epsilon
-	void setEpsilon(double epsilon) {
+	void setEpsilon(scalar_type epsilon) {
 		SHARK_RUNTIME_CHECK(epsilon > 0, "epsilon must be positive.");
 		m_epsilon = epsilon;
 	}
@@ -134,8 +135,8 @@ public:
 		noalias(m_secondMoment) = m_beta2 * m_secondMoment + (1-m_beta2)* sqr(m_derivative);
 		//for the first few iterations, we need bias correction
 		++m_counter;
-		double bias1 = 1-std::pow(m_beta1,m_counter);
-		double bias2 = 1-std::pow(m_beta2,m_counter);
+		scalar_type bias1 = 1-std::pow(m_beta1,m_counter);
+		scalar_type bias2 = 1-std::pow(m_beta2,m_counter);
 		
 		noalias(this->m_best.point) -= (m_eta/bias1) * m_avgGrad/(m_epsilon + sqrt(m_secondMoment/bias2));
 		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
@@ -173,10 +174,10 @@ private:
 	unsigned int m_counter;
 	SearchPointType m_derivative;
 	
-	double m_beta1;
-	double m_beta2;
-	double m_epsilon;
-	double m_eta;
+	scalar_type m_beta1;
+	scalar_type m_beta2;
+	scalar_type m_epsilon;
+	scalar_type m_eta;
 };
 
 }

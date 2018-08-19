@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( SQUAREDHINGELOSS_EVAL_MULTICLASS ) {
 		UIntVector testLabel(5);
 		RealVector valueResultP(5,0);
 		for(std::size_t i = 0; i != 5; ++i){
-			testLabel(i) = random::discrete(random::globalRng(), std::size_t(0),dim-1);
+			testLabel(i) = (unsigned) random::discrete(random::globalRng(), std::size_t(0),dim-1);
 			testPoint(i,testLabel(i)) = random::uni(random::globalRng(), -10.0,10.0);
 			for(std::size_t j = 0; j != dim; ++j){
 				if(j == testLabel(i)) continue;

@@ -189,12 +189,12 @@ BOOST_AUTO_TEST_CASE(vector_sorting_correct)
 		const RealMatrix weights = weightLattice(mu_prime, n);
 		for(std::size_t T = 1; T <= weights.size1() / 2 && T <= 30; ++T)
 		{
-			RealMatrix dists = computeClosestNeighbourIndicesOnLattice(weights, T);
+			UIntMatrix dists = computeClosestNeighbourIndicesOnLattice(weights, T);
 			for(std::size_t row = 0; row < dists.size1(); ++row)
 			{
 				std::list<std::vector<double>> my_nearest_points;
 				std::for_each(dists.major_begin(row), dists.major_end(row),
-							  [&](std::size_t idx)
+							  [&](unsigned int idx)
 							  {
 								  my_nearest_points.push_back(
 									  std::vector<double>(weights.major_begin(idx),

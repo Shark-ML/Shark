@@ -50,7 +50,7 @@ LabeledData<RealVector,unsigned int> createProblem(){
 BinaryRBM trainRBM(
 	Data<RealVector> const& data,//the data to train with
 	std::size_t numHidden,//number of features in the AutoencoderModel
-	std::size_t iterations, //number of iterations to optimize
+	unsigned int iterations, //number of iterations to optimize
 	double regularisation,//strength of the regularisation
 	double learningRate // learning rate of steepest descent
 ){
@@ -96,7 +96,7 @@ int main()
 	std::size_t unsupIterations = 10000;
 	//supervised hyper parameters
 	double regularisation = 0.0001;
-	std::size_t iterations = 200;
+	unsigned int iterations = 200;
 	
 	//load data and split into training and test
 	LabeledData<RealVector,unsigned int> data = createProblem();

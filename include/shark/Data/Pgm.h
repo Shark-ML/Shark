@@ -35,102 +35,13 @@
 #ifndef SHARK_DATA_IMPORT_PGM_H
 #define SHARK_DATA_IMPORT_PGM_H
 
-#include <fstream>
-
-#include <boost/format.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/archive/text_oarchive.hpp>
-
 
 #include <shark/LinAlg/Base.h>
+#include <shark/Core/Images/ReadImage.h>
+#include <shark/Core/Images/WriteImage.h>
 #include <shark/Data/Dataset.h>
-
+#include <boost/filesystem.hpp>
 namespace shark {
-
-namespace detail {
-void importPGM( std::string const& fileName, std::vector<unsigned char>& ppData, std::size_t& sx, std::size_t& sy )
-{
-	std::ifstream file(fileName.c_str(), std::ios::binary);
-	SHARK_RUNTIME_CHECK(file, "Can not open File");
-	
-	std::string id;
-	std::size_t nGrayValues = 0;
-	file>> id;
-	SHARK_RUNTIME_CHECK(id == "P5" , "File " + fileName+ "is not a pgm");
-	//ignore comments
-	file >> std::ws;//skip white space
-	while(file.peek() == '#'){
-		file.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
-	file >> sx >> sy >> nGrayValues;
-	SHARK_RUNTIME_CHECK(file, "Error reading file!");
-	SHARK_RUNTIME_CHECK(nGrayValues <= 255, "File " + fileName+ "unsupported format");
-	
-	ppData.resize(sx*sy);
-	file.read((char*)ppData.data(),sx*sy);
-	SHARK_RUNTIME_CHECK(file, "Error reading file!");
-}
-
-/**
- * \ingroup shark_globals
- *
- * @{
- */
-
-/// \brief Writes a PGM file.
-///
-/// \param  fileName   File to write to
-/// \param  pData      unsigned char pointer to the data
-/// \param  sx         Width of image
-/// \param  sy         Height of image
-void writePGM( std::string const& fileName, std::vector<unsigned char> const& data, std::size_t sx, std::size_t sy )
-{
-	std::ofstream file(fileName.c_str(), std::ios::binary);
-	SHARK_RUNTIME_CHECK(file, "Can not open File");
-
-	file<<"P5\n"<<sx<<" "<<sy<<"\n"<<255<<"\n";
-	file.write((char*)data.data(),sx*sy);
-}
-} // end namespace detail
-
-/// \brief Import a PGM image from file
-///
-/// \param  fileName   The file to read from
-/// \param  data       Linear object for storing image 
-/// \param  sx         Width of imported image
-/// \param  sy         Height of imported image
-template <class T>
-void importPGM( std::string const& fileName, T& data, std::size_t& sx, std::size_t& sy ) {
-	std::vector<unsigned char> rawData;
-	detail::importPGM(fileName, rawData, sx, sy);
-	data.resize(sx*sy);
-	std::copy(rawData.begin(), rawData.end(), data.begin());
-}
-
-/// \brief Export a PGM image to file
-///
-/// \param  fileName   File to write to
-/// \param  data       Linear object storing image 
-/// \param  sx         Width of image
-/// \param  sy         Height of image
-/// \param  normalize  Adjust values to [0,255], default false
-template <class T>
-void exportPGM(std::string const& fileName, T const& data, std::size_t sx, std::size_t sy, bool normalize = false) {
-	SIZE_CHECK(sx*sy == data.size());
-	std::vector<unsigned char> rawData(data.size());
-	typename T::const_iterator it = data.begin();
-	std::size_t i = 0;
-	if(normalize) {
-		double lb = *std::min_element(data.begin(),data.end());
-		double ub = *std::max_element(data.begin(), data.end());
-		for( it = data.begin() ; it != data.end(); ++it, ++i )
-			rawData[i] = (unsigned char)( (*it - lb) / (ub - lb) * 255 );
-	} else {
-		for( it = data.begin() ; it != data.end(); ++it, ++i )
-			rawData[i] = (unsigned char)( *it );
-	}
-	detail::writePGM(fileName, rawData, sx, sy);
-}
 
 /// \brief Exports a set of filters as a grid image
 ///
@@ -150,7 +61,7 @@ inline void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const
 	std::size_t gridY = gridX;
 	while(gridX*gridY < filters.size1()) ++gridX;
 	
-	RealMatrix image((height+1)*gridY,(width+1)*gridX,min(filters));
+	RealMatrix image((height+1)*gridY, (width+1)*gridX,min(filters));
 	
 	for(std::size_t filter = 0; filter != filters.size1(); ++filter){
 		//get grid position from filter
@@ -161,12 +72,10 @@ inline void exportFiltersToPGMGrid(std::string const& basename, RealMatrix const
 		//copy images
 		noalias(subrange(image,startY,startY+height,startX,startX+width)) = to_matrix(row(filters,filter),height,width);
 	}
-	exportPGM(
-		(basename+".pgm").c_str(), 
-		blas::adapt_vector((height+1)*gridY*(width+1)*gridX,&image(0,0)),
-		(width+1)*gridX, (height+1)*gridY,
-		true
-	);
+	//normalize to [0,1]
+	image -= min(filters);
+	image /=(max(filters) - min(filters));
+	shark::image::writeImageToFile<double>(basename+".pgm", to_vector(image), {(height+1)*gridY, (width+1)*gridX, 1}, PixelType::Luma);
 }
 
 /// \brief Exports a set of filters as a grid image
@@ -189,8 +98,10 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 	while(gridX*gridY < numFilters) ++gridX;
 	
 	double minimum = std::numeric_limits<double>::max();
+	double maximum = -std::numeric_limits<double>::max();
 	for(std::size_t i = 0; i != filters.size(); ++i){
 		minimum =std::min(minimum,min(filters[i]));
+		maximum =std::max(maximum,max(filters[i]));
 	}
 	
 	RealMatrix image((height+1)*gridY,(width+1)*gridX,minimum);
@@ -207,11 +118,10 @@ inline void exportFiltersToPGMGrid(std::string const& basename, Data<RealVector>
 		noalias(subrange(image,startY,startY+height,startX,startX+width)) = to_matrix(filterImage,height,width);
 		++filter;
 	}
-	exportPGM(
-		(basename+".pgm").c_str(), 
-		blas::adapt_vector((height+1)*gridY*(width+1)*gridX,&image(0,0)),
-		(width+1)*gridX, (height+1)*gridY,
-		true);
+	//normalize to [0,1]
+	image -= minimum;
+	image /=(maximum - minimum);
+	shark::image::writeImageToFile<double>(basename+".pgm", to_vector(image), {(height+1)*gridY, (width+1)*gridX, 1}, PixelType::Luma);
 }
 
 /// \brief Import PGM images scanning a directory recursively
@@ -231,7 +141,10 @@ void importPGMSet(std::string const&p, Data<T> &set){
 				    (boost::filesystem::extension(itr->path()) == ".pgm")) {
 					T img;
 					std::pair<std::size_t,std::size_t> imgInfo;
-					importPGM(itr->path().string().c_str(), img, imgInfo.first, imgInfo.second);
+					auto result = shark::image::readImageFromFile<double>(itr->path().string());
+					container.push_back(result.first);
+					imgInfo.first = result.second[1];
+					imgInfo.second = result.second[0];
 					container.push_back(img);
 					info.push_back(imgInfo);
 				}

@@ -42,8 +42,8 @@ namespace shark{
 
 template<class SearchPointType>
 void LBFGS<SearchPointType>::initModel(){
-	m_bdiag = 1.0;         // Start with the identity
-	m_updThres = 1e-10;       // Reasonable threshold
+	m_bdiag = scalar_type(1.0);         // Start with the identity
+	m_updThres = scalar_type(1e-10);       // Reasonable threshold
 	m_gradientDifferences.clear();
 	m_steps.clear();
 }
@@ -94,7 +94,7 @@ void LBFGS<SearchPointType>::write( OutArchive & archive ) const
 template<class SearchPointType>
 void LBFGS<SearchPointType>::updateHist(SearchPointType& y, SearchPointType &step) {
 	//Only update if <y,s> is above some reasonable threshold.
-	double ys = inner_prod(y, step);
+	scalar_type ys = inner_prod(y, step);
 	if (ys > m_updThres) {
 		// Only store m_numHist steps, so possibly pop the oldest.
 		if (m_steps.size() >= m_numHist) {
@@ -116,7 +116,7 @@ void LBFGS<SearchPointType>::getBoxConstrainedDirection(
 	SearchPointType const& x = this->m_best.point;
 	//when a point is closer than eps to a inequality constraint we
 	//consider the constraint as equality constraint.
-	double eps = 1.e-13;
+	scalar_type eps = 1.e-13f;
 	
 	//separate movable(active) and immovable(inactive) variables
 	SearchPointType p0 = -this->m_derivative;//movable search direction
@@ -163,11 +163,11 @@ void LBFGS<SearchPointType>::getBoxConstrainedDirection(
 	SearchPointType cauchy= p0 / inner_prod(p0,Bp0);
 	
 	//check maximum step length along cauchy direction
-	double alpha = 1.0;
+	scalar_type alpha = 1.0;
 	for(std::size_t i: active){
 		if(cauchy(i) == 0) continue;
-		double l_alpha = (l(i) - x(i))/cauchy(i);
-		double u_alpha = (u(i) - x(i))/cauchy(i);
+		scalar_type l_alpha = (l(i) - x(i))/cauchy(i);
+		scalar_type u_alpha = (u(i) - x(i))/cauchy(i);
 		if(l_alpha > 0)
 			alpha = std::min( alpha, l_alpha);
 		if(u_alpha > 0)
@@ -187,8 +187,8 @@ void LBFGS<SearchPointType>::getBoxConstrainedDirection(
 	alpha = 1.0;
 	for(std::size_t i: active){
 		if(dir(i) == 0) continue;
-		double l_alpha = (l(i) - point(i))/dir(i);
-		double u_alpha = (u(i) - point(i))/dir(i);
+		scalar_type l_alpha = (l(i) - point(i))/dir(i);
+		scalar_type u_alpha = (u(i) - point(i))/dir(i);
 		if(l_alpha > 0)
 			alpha = std::min( alpha, l_alpha);
 		if(u_alpha > 0)
@@ -211,7 +211,7 @@ void LBFGS<SearchPointType>::multBInv(SearchPointType& x)const{
 	}
 	x /= m_bdiag;
 	for (std::size_t i = 0; i < m_steps.size(); ++i) {
-		double beta = rho(i) * inner_prod(m_gradientDifferences[i], x);
+		scalar_type beta = rho(i) * inner_prod(m_gradientDifferences[i], x);
 		x += m_steps[i] * (alpha(i) - beta);
 	}
 }
@@ -219,7 +219,7 @@ void LBFGS<SearchPointType>::multBInv(SearchPointType& x)const{
 template<class SearchPointType>
 void LBFGS<SearchPointType>::multB(SearchPointType& x)const{
 	
-	RealMatrix A(m_numHist, x.size(),0.0);
+	blas::matrix<scalar_type> A(m_numHist, x.size(),0.0);
 	SearchPointType beta(m_numHist);
 
 	//compute the beta values (inverse rho of multBInv)
@@ -227,12 +227,12 @@ void LBFGS<SearchPointType>::multB(SearchPointType& x)const{
 	SearchPointType result = m_bdiag * x;
 	for (std::size_t i = 0; i < m_steps.size(); ++i){
 		beta(i) = inner_prod(m_gradientDifferences[i], m_steps[i]);
-		double yiTx = inner_prod(m_gradientDifferences[i], x);
+		scalar_type yiTx = inner_prod(m_gradientDifferences[i], x);
 		noalias(result) += yiTx/beta(i) * m_gradientDifferences[i];
 		
 		noalias(row(A,i)) = m_bdiag * m_steps[i];
 		for (std::size_t j = 0; j < i; ++j){
-			double yjTsi = inner_prod(m_gradientDifferences[j], m_steps[i]);
+			scalar_type yjTsi = inner_prod(m_gradientDifferences[j], m_steps[i]);
 			noalias(row(A,i)) += yjTsi/beta(j) * m_gradientDifferences[j];
 		}
 		noalias(row(A,i)) -= trans(rows(A,0,i)) % rows(A,0,i) % m_steps[i];

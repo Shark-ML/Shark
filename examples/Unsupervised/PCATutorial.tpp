@@ -71,9 +71,9 @@ int main(){
 	cout << "done." << endl;
 	
 	//###begin<import>
-	unsigned l = images.numberOfElements();   // number of samples
-	unsigned x = images.shape()[1]; // width of images
-	unsigned y = images.shape()[0]; // height of images
+	std::size_t l = images.numberOfElements();   // number of samples
+	std::size_t x = images.shape()[1]; // width of images
+	std::size_t y = images.shape()[0]; // height of images
 	//###end<import>
 	
 	cout << "Eigenvalue decomposition ... " << flush;
@@ -87,7 +87,7 @@ int main(){
 	for(unsigned i=0; i<l; i++) 
 		ofs << pca.eigenvalue(i) << endl;
 	//###begin<export_mean>
-	exportPGM("facesMean.pgm", pca.mean(), x, y);
+	image::writeImageToFile<double>("facesMean.pgm", pca.mean(), {x, y, 1}, PixelType::Luma );
 	//###end<export_mean>
 	cout << "done. " << endl;
 
@@ -105,14 +105,15 @@ int main(){
 	//###end<model_reconstruction>
 	cout << "Reconstructing face " << sampleImage << " ... " << flush;
 	boost::format fmterTrue("face%d.pgm");
-	exportPGM((fmterTrue % sampleImage).str().c_str(), elements(images)[sampleImage], x, y);
+	image::writeImageToFile<double>("face" + std::to_string(sampleImage) + ".pgm", elements(images)[sampleImage], {x, y, 1}, PixelType::Luma );
 	//###begin<model_decoder>
 	LinearModel<> dec;
 	pca.decoder(dec, m);
 	//###end<model_decoder>
 	//###begin<model_reconstruction>
-	boost::format fmterRec("facesReconstruction%d-%d.pgm");
-	exportPGM((fmterRec % sampleImage % m).str().c_str(), dec(elements(encodedImages)[sampleImage]), x, y);
+	std::string filename = "facesReconstruction" + std::to_string(sampleImage) + "-" + std::to_string(m) + ".pgm";
+	auto reconstruction = dec(elements(encodedImages)[sampleImage]);
+	image::writeImageToFile<double>(filename, reconstruction, {x, y, 1}, PixelType::Luma );
 	//###end<model_reconstruction>
 	cout << "done." << endl;
 }

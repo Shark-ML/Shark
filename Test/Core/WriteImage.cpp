@@ -75,7 +75,7 @@ BOOST_FIXTURE_TEST_SUITE (Core_ReadImage_Tests, ImageFixture )
 
 //we check only that round tripping write& read works
 BOOST_AUTO_TEST_CASE( Core_Write_PNG_RGBA){
-	std::vector<unsigned char> buffer = image::writePNG(dataRGBA, shapeRGBA, PixelType::RGBA);
+	std::vector<unsigned char> buffer = image::writePNG<double>(dataRGBA, shapeRGBA, PixelType::RGBA);
 	std::pair<blas::vector<double>, Shape> result = image::readPNG<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGBA[0]);
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_PNG_RGBA){
 
 //roundtrip ARGB->RGBA
 BOOST_AUTO_TEST_CASE( Core_Write_PNG_ARGB){
-	std::vector<unsigned char> buffer = image::writePNG(dataARGB, shapeRGBA, PixelType::ARGB);
+	std::vector<unsigned char> buffer = image::writePNG<double>(dataARGB, shapeRGBA, PixelType::ARGB);
 	std::pair<blas::vector<double>, Shape> result = image::readPNG<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGBA[0]);
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_PNG_ARGB){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_PNG_RGB){
-	std::vector<unsigned char> buffer = image::writePNG(dataRGB, shapeRGB, PixelType::RGB);
+	std::vector<unsigned char> buffer = image::writePNG<double>(dataRGB, shapeRGB, PixelType::RGB);
 	std::pair<blas::vector<double>, Shape> result = image::readPNG<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_PNG_RGB){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_PNG_Luma){
-	std::vector<unsigned char> buffer = image::writePNG(dataGray, shapeGray, PixelType::Luma);
+	std::vector<unsigned char> buffer = image::writePNG<double>(dataGray, shapeGray, PixelType::Luma);
 	std::pair<blas::vector<double>, Shape> result = image::readPNG<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeGray[0]);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_PNG_Luma){
 ///////////////////////////////////JPEG/////////////////////////////////////
 
 BOOST_AUTO_TEST_CASE( Core_Write_JPEG_RGB){
-	std::vector<unsigned char> buffer = image::writeJPEG(dataRGB, shapeRGB, PixelType::RGB);
+	std::vector<unsigned char> buffer = image::writeJPEG<double>(dataRGB, shapeRGB, PixelType::RGB);
 	std::pair<blas::vector<double>, Shape> result = image::readJPEG<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_JPEG_RGB){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_JPEG_Luma){
-	std::vector<unsigned char> buffer = image::writeJPEG(dataGray, shapeGray, PixelType::Luma);
+	std::vector<unsigned char> buffer = image::writeJPEG<double>(dataGray, shapeGray, PixelType::Luma);
 	std::pair<blas::vector<double>, Shape> result = image::readJPEG<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeGray[0]);
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_JPEG_Luma){
 ///////////////////////////////////PGM/////////////////////////////////////
 
 BOOST_AUTO_TEST_CASE( Core_Write_PGM_Luma){
-	std::vector<unsigned char> buffer = image::writePGM(dataGray, shapeGray, PixelType::Luma);
+	std::vector<unsigned char> buffer = image::writePGM<double>(dataGray, shapeGray, PixelType::Luma);
 	std::pair<blas::vector<double>, Shape> result = image::readPGM<double>(buffer);
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeGray[0]);
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_PGM_Luma){
 ///////////////////////////////////WRITE IMAGE/////////////////////////////////////
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_PNG){
-	image::writeImageToFile("Test/test_output/writer_test.png", dataRGB, shapeRGB, PixelType::RGB);
+	image::writeImageToFile<double>("Test/test_output/writer_test.png", dataRGB, shapeRGB, PixelType::RGB);
 	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_output/writer_test.png");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_Image_PNG){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_PGM){
-	image::writeImageToFile("Test/test_output/writer_test.pgm", dataGray, shapeGray, PixelType::Luma);
+	image::writeImageToFile<double>("Test/test_output/writer_test.pgm", dataGray, shapeGray, PixelType::Luma);
 	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_output/writer_test.pgm");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeGray[0]);
@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE( Core_Write_Image_PGM){
 }
 
 BOOST_AUTO_TEST_CASE( Core_Write_Image_JPEG){
-	image::writeImageToFile("Test/test_output/writer_test.jpeg", dataRGB, shapeRGB, PixelType::RGB);
+	image::writeImageToFile<double>("Test/test_output/writer_test.jpeg", dataRGB, shapeRGB, PixelType::RGB);
 	std::pair<blas::vector<double>, Shape> result = image::readImageFromFile<double>("Test/test_output/writer_test.jpeg");
 
 	BOOST_REQUIRE_EQUAL(result.second[0], shapeRGB[0]);

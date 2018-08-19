@@ -56,7 +56,7 @@ struct CrowdingDistance {
 		double keep = std::numeric_limits<double>::max();
 		//compute the crowding distance
 		std::vector<double> distances(front.size(),0.0);
-		std::vector<KeyValuePair<double, unsigned int > > order(front.size() + archive.size());
+		std::vector<KeyValuePair<double, std::size_t > > order(front.size() + archive.size());
 		for( std::size_t i = 0; i != numDims; ++i ) {
 			//create a joint set of front and archive
 			for( std::size_t j = 0; j != front.size(); ++j ) {

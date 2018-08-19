@@ -41,21 +41,21 @@ namespace shark{
 template<class SearchPointType>
 void BFGS<SearchPointType>::initModel(){
 	m_hessian.resize(this->m_dimension, this->m_dimension);
-	noalias(m_hessian) = blas::identity_matrix<double>(this->m_dimension);
+	noalias(m_hessian) = blas::identity_matrix<scalar_type>(this->m_dimension);
 }
 template<class SearchPointType>
 void BFGS<SearchPointType>::computeSearchDirection(ObjectiveFunctionType const&){
 	SearchPointType gamma = this->m_derivative - this->m_lastDerivative;
 	SearchPointType delta = this->m_best.point - this->m_lastPoint;
-	double d = inner_prod(gamma,delta);
+	scalar_type d = inner_prod(gamma,delta);
 	
 	SearchPointType Hg = prod(m_hessian,gamma);
 	
 	//update hessian
 	if (d < 1e-20){
-		noalias(m_hessian) = blas::identity_matrix<double>(this->m_dimension);
+		noalias(m_hessian) = blas::identity_matrix<scalar_type>(this->m_dimension);
 	}else{
-		double scale=inner_prod(gamma,Hg);
+		scalar_type scale=inner_prod(gamma,Hg);
 		scale = (scale / d + 1) / d;
 		
 		m_hessian += scale * outer_prod(delta,delta) 

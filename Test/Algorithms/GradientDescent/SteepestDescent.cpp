@@ -10,8 +10,8 @@ using namespace shark;
 template<class VectorType>
 struct TestFunction : public AbstractObjectiveFunction<VectorType, double>{
 
-	RealMatrix A;
-	TestFunction():A(3,3,0.0){
+	blas::matrix<typename VectorType::value_type> A;
+	TestFunction():A(3,3){
 
 		A(0,0)=10;
 		A(1,1)=5;
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(SteepestDescent_Test, VectorType,VectorTypes){
 	start(1)=1;
 	start(2)=1;
 	SteepestDescent<VectorType> optimizer;
-	optimizer.setLearningRate(0.1*(1-0.3));
-	optimizer.setMomentum(0.3);
+	optimizer.setLearningRate(0.1f*(1-0.3f));
+	optimizer.setMomentum(0.3f);
 	optimizer.init(function,start);
 
 

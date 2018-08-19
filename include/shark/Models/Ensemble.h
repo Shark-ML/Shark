@@ -46,21 +46,21 @@ class EnsembleImpl: public AbstractModel<
 	typename std::remove_pointer<BaseModelType>::type::ParameterVectorType
 >{
 public:
-	typedef typename std::remove_pointer<BaseModelType>::type ModelType;
-	typedef typename ModelType::InputType InputType;
+	typedef typename std::remove_pointer<BaseModelType>::type RefModelType;
+	typedef typename RefModelType::InputType InputType;
 private:
-	typedef AbstractModel<InputType, VectorType, typename ModelType::ParameterVectorType> Base;
+	typedef AbstractModel<InputType, VectorType, typename RefModelType::ParameterVectorType> Base;
 
 	// the following functions are returning a reference to the model
 	// independent of whether a pointer to the model or the model itself 
 	// is stored.
-	ModelType& derefIfPtr(ModelType& model)const{
+	RefModelType& derefIfPtr(RefModelType& model)const{
 		return model;
 	}
-	ModelType const& derefIfPtr(ModelType const& model)const{
+	RefModelType const& derefIfPtr(RefModelType const& model)const{
 		return model;
 	}
-	ModelType& derefIfPtr(ModelType* model)const{
+	RefModelType& derefIfPtr(RefModelType* model)const{
 		return *model;
 	}
 	
@@ -113,11 +113,11 @@ public:
 		m_weights.clear();
 	}
 	
-	ModelType& model(std::size_t index){
+	RefModelType& model(std::size_t index){
 		return derefIfPtr(m_models[index]);
 	}
 	
-	ModelType const& model(std::size_t index)const{
+	RefModelType const& model(std::size_t index)const{
 		return derefIfPtr(m_models[index]);
 	}
 	
@@ -154,7 +154,7 @@ public:
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs)const{
 		outputs.resize(patterns.size1(), outputShape().numElements());
 		outputs.clear();
-		pool(patterns,outputs, tag<typename ModelType::OutputType>());
+		pool(patterns,outputs, tag<typename RefModelType::OutputType>());
 	}
 	void eval(BatchInputType const& patterns, BatchOutputType& outputs, State&)const{
 		eval(patterns,outputs);
@@ -204,9 +204,9 @@ protected:
 };
 
 //if the OutputType is void, this is treated as choosing it as the OutputType of the model
-template<class ModelType>
-struct EnsembleBase<ModelType, void>
-: public EnsembleBase<ModelType, typename std::remove_pointer<ModelType>::type::OutputType>{};
+template<class BaseModelType>
+struct EnsembleBase<BaseModelType, void>
+: public EnsembleBase<BaseModelType, typename std::remove_pointer<BaseModelType>::type::OutputType>{};
 }
 
 /// \brief Represents en weighted ensemble of models. 

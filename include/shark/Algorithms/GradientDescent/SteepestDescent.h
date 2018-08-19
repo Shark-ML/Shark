@@ -41,15 +41,16 @@ namespace shark{
 ///@brief Standard steepest descent.
 /// \ingroup gradientopt
 template<class SearchPointType = RealVector>
-class SteepestDescent : public AbstractSingleObjectiveOptimizer<SearchPointType>
-{
+class SteepestDescent : public AbstractSingleObjectiveOptimizer<SearchPointType>{
+private:
+	typedef typename SearchPointType::value_type scalar_type;
 public:
 	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunctionType;
 	SteepestDescent() {
 		this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
 
-		m_learningRate = 0.1;
-		m_momentum = 0.0;
+		m_learningRate = scalar_type(0.1);
+		m_momentum = scalar_type(0);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -70,28 +71,28 @@ public:
 	/*!
 	 *  \brief get learning rate
 	 */
-	double learningRate() const {
+	scalar_type learningRate() const {
 		return m_learningRate;
 	}
 
 	/*!
 	 *  \brief set learning rate
 	 */
-	void setLearningRate(double learningRate) {
+	void setLearningRate(scalar_type learningRate) {
 		m_learningRate = learningRate;
 	}
 
 	/*!
 	 *  \brief get momentum parameter
 	 */
-	double momentum() const {
+	scalar_type momentum() const {
 		return m_momentum;
 	}
 
 	/*!
 	 *  \brief set momentum parameter
 	 */
-	void setMomentum(double momentum) {
+	void setMomentum(scalar_type momentum) {
 		m_momentum = momentum;
 	}
 	/*!
@@ -119,8 +120,8 @@ public:
 private:
 	SearchPointType m_path;
 	SearchPointType m_derivative;
-	double m_learningRate;
-	double m_momentum;
+	scalar_type m_learningRate;
+	scalar_type m_momentum;
 };
 
 }

@@ -203,8 +203,8 @@ public:
 	/// This creates already the two childs of the node, which are untyped.
 	Node& transformInternalNode(std::size_t nodeId, std::size_t attributeIndex, double attributeValue) {
 		// ids for new child nodes
-		int nodeIdLeft = m_tree.size();
-		int nodeIdRight = m_tree.size() + 1;
+		std::size_t nodeIdLeft = m_tree.size();
+		std::size_t nodeIdRight = m_tree.size() + 1;
 		
 		//create new child nodes
 		Node leftChild;

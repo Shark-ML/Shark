@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 //###begin<training>	
 	std::size_t iterations = 20000;
 	Adam<FloatVector> optimizer;
-	optimizer.setEta(0.001);
+	optimizer.setEta(0.001f);
 	initRandomNormal(encoder,0.0001);
 	initRandomNormal(decoder,0.0001);
 	error.init();

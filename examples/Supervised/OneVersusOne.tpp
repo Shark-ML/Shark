@@ -81,10 +81,11 @@ int main()
 	OneVersusOneClassifier<RealVector> ovo;
 	unsigned int pairs = classes * (classes - 1) / 2;
 	std::vector< KernelClassifier<RealVector> > bin_svm(pairs);
-	for (std::size_t n=0, c=1; c<classes; c++)
+	std::size_t n=0;
+	for (unsigned int c=1; c<classes; c++)
 	{
 		std::vector< OneVersusOneClassifier<RealVector>::binary_classifier_type* > vs_c;
-		for (std::size_t e=0; e<c; e++, n++)
+		for (unsigned int e=0; e<c; e++, n++)
 		{
 			//get the binary subproblem
 			ClassificationDataset bindata = binarySubProblem(training,e,c);

@@ -6,7 +6,6 @@
 
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>
-#include <boost/assign/std/vector.hpp>
 
 namespace shark {
 
@@ -61,9 +60,7 @@ BOOST_AUTO_TEST_CASE(TestMissingFeaturesKernelExpansion)
 	RealVector output = ke(pattern);
 	std::cout<<"d"<<std::endl;
 
-	using namespace boost::assign;
-	std::vector<double> expected;
-	expected += 34.7851;
+	std::vector<double> expected = {34.7851};
 	BOOST_CHECK(test::verifyVectors(output, expected, 1e-2));
 }
 

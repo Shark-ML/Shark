@@ -179,7 +179,7 @@ protected:
 		std::vector<ResultType> const& functionValues,
 		RealVector const& lowerBounds,
 		RealVector const& upperBounds,
-		std::size_t mu,
+		unsigned mu,
 		double nm,
 		double nc,
 		double crossover_prob

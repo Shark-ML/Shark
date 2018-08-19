@@ -112,11 +112,11 @@ BOOST_AUTO_TEST_CASE( LBFGS_Constrained ){
 	std::cout<<"Testing: "<<optimizer.name()<<" with "<<function.name()<<" and wolfe line search"<<std::endl;
 	
 	
-	std::size_t trials = 100;
-	std::size_t iterations = 100;
+	unsigned int trials = 100;
+	unsigned int iterations = 100;
 	double eps = 1.e-13;
 	boost::progress_display pd( trials * iterations );
-	for( size_t trial =0;trial != static_cast<size_t>(trials);++trial ){
+	for( unsigned int trial =0;trial != trials;++trial ){
 		function.init();
 		optimizer.init(function);
 		for( unsigned int iteration = 0; iteration < iterations; ++iteration ) {

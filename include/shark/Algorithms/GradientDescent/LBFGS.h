@@ -94,6 +94,7 @@ public:
 	void read(InArchive &archive);
 	void write(OutArchive &archive) const;
 protected: // Methods inherited from AbstractLineSearchOptimizer
+	typedef typename SearchPointType::value_type scalar_type;
 	void initModel();
 	void computeSearchDirection(ObjectiveFunctionType const&);
 private:
@@ -129,11 +130,11 @@ private:
 		SearchPointType const& upper
 	)const;
 
-	double m_updThres;///<Threshold for when to update history.
+	scalar_type m_updThres;///<Threshold for when to update history.
 	unsigned int m_numHist; ///< Number of steps to use for LBFGS.
 	// Initial Hessian approximation. We use a diagonal matrix, where each element is
 	// the same, so we only need to store one double.
-	double          m_bdiag;
+	scalar_type m_bdiag;
 
 	// Saved steps for creating the approximation.
 	// Use deque as it gives fast pop.front, push.back and access. Supposedly.

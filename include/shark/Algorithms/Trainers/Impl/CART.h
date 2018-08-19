@@ -57,13 +57,13 @@ struct Bootstrap{
 		// sample bootstrap indices (with replacement)
 		// we use the sample weights as sample probabilities (they are correctly normalized to 1)
 		MultiNomialDistribution dist(sample_weights);
-		unsigned int ell = data.size1();
-		std::vector<unsigned int> bootstrapIndices(ell,0);
-		for (unsigned int i = 0; i < ell; i++) {
+		std::size_t ell = data.size1();
+		std::vector<std::size_t> bootstrapIndices(ell,0);
+		for (std::size_t i = 0; i < ell; i++) {
 			bootstrapIndices[dist(rng)] += 1;
 		}
 		//compress bootstrap sample to actually sampled points
-		for (unsigned int i = 0; i < ell; i++) {
+		for (std::size_t i = 0; i < ell; i++) {
 			if (bootstrapIndices[i] == 0){
 				complement.push_back(i);
 			}else{
@@ -182,7 +182,7 @@ struct MSECriterion{
 	static void updateCriterion(
 		CriterionRecord& critRecord,
 		std::size_t new_pos,
-		std::vector<KeyValuePair<double,unsigned int> >& XF,
+		std::vector<KeyValuePair<double,std::size_t> >& XF,
 		RealMatrix const& labels,
 		std::vector<unsigned int> const& weights
 	) {
@@ -302,7 +302,7 @@ struct ClassificationCriterion{
 	static void updateCriterion(
 		CriterionRecord& critRecord,
 		std::size_t new_pos,
-		std::vector<KeyValuePair<double,unsigned int> >& XF,
+		std::vector<KeyValuePair<double,std::size_t> >& XF,
 		UIntVector const& labels,
 		std::vector<unsigned int> const& weights
 	) {
@@ -387,7 +387,7 @@ private:
 	struct SplitRecord{
 		unsigned int feature;
 		double threshold;
-		unsigned pos;
+		std::size_t pos;
 		double improvement;
 		double impurity_left;
 		double impurity_right;
@@ -494,7 +494,7 @@ private:
 		std::size_t end = record.end;
 		
 		//vector for storing split feature values. This gives faster memory access later
-		std::vector<KeyValuePair<double,unsigned int> > XF(end - start);
+		std::vector<KeyValuePair<double,std::size_t> > XF(end - start);
 		split.improvement = 0.0;
 		CriterionRecord bestCriterion;
 		for (std::size_t j = 0; j < randomFeatures.size(); j++) {
@@ -535,7 +535,7 @@ private:
 	}
 	
 	SplitRecord computeOptimalThreshold(
-		std::vector<KeyValuePair<double,unsigned int> >& XF,
+		std::vector<KeyValuePair<double,std::size_t> >& XF,
 		Bootstrap const& bootstrap,
 		CriterionRecord criterion//copied because it is changed
 	){
@@ -552,8 +552,8 @@ private:
 		
 		//choosing start position and end this way ensures that splits 
 		//have correct sizes (also saves some iteration cost)
-		int end = XF.size() - m_min_samples_leaf + 1;
-		int p = m_min_samples_leaf - 1;
+		std::size_t end = XF.size() - m_min_samples_leaf + 1;
+		std::size_t p = m_min_samples_leaf - 1;
 		while (p < end) {
 
 			// Increase counter until feature difference is significant

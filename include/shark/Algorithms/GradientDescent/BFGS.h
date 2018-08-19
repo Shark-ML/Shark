@@ -51,6 +51,7 @@ class BFGS : public AbstractLineSearchOptimizer<SearchPointType>
 public:
 	typedef typename AbstractLineSearchOptimizer<SearchPointType>::ObjectiveFunctionType ObjectiveFunctionType;
 protected:
+	typedef typename SearchPointType::value_type scalar_type; 
 	void initModel();
 	void computeSearchDirection(ObjectiveFunctionType const&);
 public:
@@ -61,7 +62,7 @@ public:
 	void read( InArchive & archive );
 	void write( OutArchive & archive ) const;
 protected:
-	RealMatrix m_hessian;
+	blas::matrix<scalar_type> m_hessian;
 };
 
 //implementation is included in the library

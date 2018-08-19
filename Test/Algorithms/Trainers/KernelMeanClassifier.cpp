@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( KMC_TEST_MULTICLASS){
 		input[i]=dist(random::globalRng()).first+mean[target[i]];
 		noalias(row(empiricalMean,target[i])) += input[i]/(TrainExamples/classes);
 	}
-	std::vector<unsigned int> expectedResult(TrainExamples);
+	std::vector<std::size_t> expectedResult(TrainExamples);
 	for(size_t i=0;i!=TrainExamples;++i){
 		RealMatrix m = sqr(empiricalMean - blas::repeat(input[i],classes));
 		expectedResult[i] = arg_min(sum(as_rows(m)));

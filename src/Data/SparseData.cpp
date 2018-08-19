@@ -113,7 +113,7 @@ void copySparsePoints(Data<blas::compressed_vector<T> >& dataset, std::vector<Li
 template<class T>//We assume T to be vectorial
 shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 	std::istream& stream,
-	unsigned int dimensions,
+	std::size_t dimensions,
 	std::size_t batchSize
 ){
 	//read contents of stream
@@ -167,7 +167,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 
 	//copy contents into a new dataset
 	std::size_t vectorDim = maxIndex + (hasZero ? 1 : 0);
-	shark::LabeledData<T, unsigned int> data(numPoints, {vectorDim, maxPositiveLabel + 1}, batchSize);
+	shark::LabeledData<T, unsigned int> data(numPoints, {vectorDim, (std::size_t)maxPositiveLabel + 1}, batchSize);
 	std::size_t batchStart = 0;
 	for(auto& batch: data.labels()){
 		for(std::size_t j = 0; j != batch.size(); ++j){
@@ -184,7 +184,7 @@ shark::LabeledData<T, unsigned int> libsvm_importer_classification(
 template<class T>//We assume T to be vectorial
 shark::LabeledData<T, blas::vector<typename T::value_type> > libsvm_importer_regression(
 	std::istream& stream,
-	unsigned int dimensions,
+	std::size_t dimensions,
 	std::size_t batchSize
 ){
 	//read contents of stream
@@ -236,7 +236,7 @@ shark::LabeledData<T, blas::vector<typename T::value_type> > libsvm_importer_reg
 void shark::importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_classification<RealVector>(stream, highestIndex, batchSize);
@@ -245,7 +245,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<RealVector, RealVector>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_regression<RealVector>(stream, highestIndex, batchSize);
@@ -254,7 +254,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_classification<CompressedRealVector>(stream, highestIndex, batchSize);
@@ -263,7 +263,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedRealVector, RealVector>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_regression<CompressedRealVector>(stream, highestIndex, batchSize);
@@ -272,7 +272,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<RealVector, unsigned int>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -283,7 +283,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<RealVector, RealVector>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -294,7 +294,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedRealVector, unsigned int>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -305,7 +305,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedRealVector, RealVector>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -317,7 +317,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<FloatVector, unsigned int>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_classification<FloatVector>(stream, highestIndex, batchSize);
@@ -326,7 +326,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<FloatVector, FloatVector>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_regression<FloatVector>(stream, highestIndex, batchSize);
@@ -335,7 +335,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedFloatVector, unsigned int>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_classification<CompressedFloatVector>(stream, highestIndex, batchSize);
@@ -344,7 +344,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedFloatVector, FloatVector>& dataset,
 	std::istream& stream,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	dataset =  libsvm_importer_regression<CompressedFloatVector>(stream, highestIndex, batchSize);
@@ -353,7 +353,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<FloatVector, unsigned int>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -364,7 +364,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<FloatVector, FloatVector>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -375,7 +375,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedFloatVector, unsigned int>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());
@@ -386,7 +386,7 @@ void shark::importSparseData(
 void shark::importSparseData(
 	LabeledData<CompressedFloatVector, FloatVector>& dataset,
 	std::string fn,
-	unsigned int highestIndex,
+	std::size_t highestIndex,
 	std::size_t batchSize
 ){
 	std::ifstream ifs(fn.c_str());

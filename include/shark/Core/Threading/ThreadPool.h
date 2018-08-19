@@ -184,7 +184,7 @@ public:
 /// environment variable "SHARK_NUM_THREADS" 
 /// otherwise, the number of threads is number_of_cores+1
 /// \param sizeHint optional. On first call, it is used to initialize the threadpool to a certain size
-inline ThreadPool& globalThreadPool(std::size_t sizeHint = 0){
+inline ThreadPool& globalThreadPool(unsigned sizeHint = 0){
 	static unsigned threadCount = 0;
 	if(threadCount == 0){
 		threadCount = sizeHint;

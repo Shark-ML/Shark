@@ -48,11 +48,11 @@ struct PartiallyMappedCrossover {
 		for( std::size_t i = 0; i < t1.size(); i++) {
 			if ((i >= cuttingPoint1) && (i <= cuttingPoint2)) continue;
 
-			std::size_t n1 = t1[i] ;
-			std::size_t m1 = r1[n1] ;
+			auto n1 = t1[i] ;
+			auto m1 = r1[n1] ;
 
-			std::size_t n2 = t2[i] ;
-			std::size_t m2 = r2[n2] ;
+			auto n2 = t2[i] ;
+			auto m2 = r2[n2] ;
 
 			while (m1 != unset) {
 				n1 = m1 ;

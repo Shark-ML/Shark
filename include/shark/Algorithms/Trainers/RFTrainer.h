@@ -100,7 +100,7 @@ public:
 	void setMTry(std::size_t mtry) { m_max_features = mtry; }
 
 	/// Set the number of trees to grow. (default 100)
-	void setNTrees(std::size_t numTrees) {m_numTrees = numTrees;}
+	void setNTrees(long numTrees) {m_numTrees = numTrees;}
 	
 	/// Set Minimum number of samples that is split (default 2)
 	void setMinSplit(std::size_t numSamples) {m_min_split = numSamples;}
@@ -212,7 +212,7 @@ public:
 	void setMTry(std::size_t mtry) { m_max_features = mtry; }
 
 	/// Set the number of trees to grow. (default 100)
-	void setNTrees(std::size_t numTrees) {m_numTrees = numTrees;}
+	void setNTrees(long numTrees) {m_numTrees = numTrees;}
 	
 	/// Set Minimum number of samples that is split (default 10)
 	void setMinSplit(std::size_t numSamples) {m_min_split = numSamples;}

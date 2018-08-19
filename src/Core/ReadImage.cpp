@@ -42,7 +42,7 @@ std::pair<blas::vector<T>, Shape> image::readPNG(std::vector<unsigned char> cons
 		unsigned char const* data;
 		std::size_t pos;
 	};
-	auto readPNGData = [](png_struct* pngPtr, unsigned char* data, long unsigned int length) {
+	auto readPNGData = [](png_struct* pngPtr, png_byte* data, png_size_t length) {
 		pngIOSource* source = (pngIOSource*)png_get_io_ptr(pngPtr);
 		for(std::size_t i = 0; i != length; ++i, ++source->pos){
 			data[i] = source->data[source->pos];
@@ -96,7 +96,7 @@ std::pair<blas::vector<T>, Shape> image::readJPEG(std::vector<unsigned char> con
 		jpeg_create_decompress(&cinfo);
 		
 		//set up the data source
-		jpeg_mem_src(&cinfo, (unsigned char*)data.data(), data.size());
+		jpeg_mem_src(&cinfo, (unsigned char*)data.data(), (unsigned long)data.size());
 		
 		//check if the file is a valid jpeg
 		if(jpeg_read_header(&cinfo, TRUE) != 1){

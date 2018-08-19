@@ -70,6 +70,7 @@ class Classifier : public AbstractModel<
 >{
 private:
 	typedef typename Model::BatchOutputType ModelBatchOutputType;
+	typedef typename Model::OutputType ModelOutputType;
 public:
 	typedef Model DecisionFunctionType;
 	typedef typename Model::InputType InputType;
@@ -132,9 +133,9 @@ public:
 		std::size_t batchSize = modelResult.size1();
 		output.resize(batchSize);
 		if(modelResult.size2()== 1){
-			double bias = m_bias.empty()? 0.0 : m_bias(0);
+			auto bias = m_bias.empty()? typename ModelOutputType::value_type() : m_bias(0);
 			for(std::size_t i = 0; i != batchSize; ++i){
-				output(i) = modelResult(i,0) + bias > 0.0;
+				output(i) = modelResult(i,0) + bias > 0;
 			}
 		}
 		else{
@@ -152,12 +153,12 @@ public:
 	
 	void eval(InputType const & pattern, OutputType& output)const{
 		SIZE_CHECK(m_bias.empty() || m_decisionFunction.outputShape().numElements() == m_bias.size());
-		typename Model::OutputType modelResult;
+		ModelOutputType modelResult;
 		m_decisionFunction.eval(pattern,modelResult);
 		if(m_bias.empty()){
 			if(modelResult.size() == 1){
-				double bias = m_bias.empty()? 0.0 : m_bias(0);
-				output = modelResult(0) + bias > 0.0;
+				auto bias = m_bias.empty()? typename ModelOutputType::value_type() : m_bias(0);
+				output = (modelResult(0) + bias) > 0;
 			}
 			else{
 				if(m_bias.empty())
@@ -181,7 +182,7 @@ public:
 	
 private:
 	Model m_decisionFunction;
-	RealVector m_bias;
+	ModelOutputType m_bias;
 };
 
 };

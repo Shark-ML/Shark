@@ -1,7 +1,5 @@
 #define BOOST_TEST_MODULE MissingFeaturesSvmTrainerTestModule
 
-#include <boost/assign/list_of.hpp>
-#include <boost/assign/std/vector.hpp>
 #include <boost/format.hpp>
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test.hpp>

@@ -77,7 +77,7 @@ int main()
 	repartitionByClass(data);
 //###end<repartitionByClass>
 
-	std::size_t class0 = 0, class1 = 1;
+	unsigned int class0 = 0, class1 = 1;
 //###begin<binarySubProblem>
 	ClassificationDataset subproblem = binarySubProblem(data, class0, class1);
 //###end<binarySubProblem>

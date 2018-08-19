@@ -144,7 +144,7 @@ public:
 	/// was closed.
 	std::size_t read(char* buffer, std::size_t buffersize)
 	{
-		int ret = recv(m_handle, buffer, buffersize, 0);
+		int ret = recv(m_handle, buffer, (int)buffersize, 0);
 		if (ret <= 0)
 		{
 			ret = 0;
@@ -202,7 +202,7 @@ public:
 	std::size_t write(const char* buffer, std::size_t buffersize)
 	{
 		if (buffersize == 0) return 0;
-		int ret = send(m_handle, buffer, buffersize, MSG_NOSIGNAL);
+		int ret = send(m_handle, buffer, (int)buffersize, MSG_NOSIGNAL);
 		if (ret <= 0)
 		{
 			ret = 0;
