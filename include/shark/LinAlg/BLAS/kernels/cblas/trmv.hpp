@@ -115,9 +115,9 @@ void trmv(
 	auto storagex = x().raw_storage();
 	trmv(stor_ord, cblasUplo, CblasNoTrans, cblasUnit, (int)n,
 		storageA.values,
-	        storageA.leading_dimension,
+		(int)storageA.leading_dimension,
 		storagex.values,
-	        storagex.stride
+		(int)storagex.stride
 	);
 }
 

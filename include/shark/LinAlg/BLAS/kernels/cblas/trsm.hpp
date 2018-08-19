@@ -64,8 +64,8 @@ inline void trsm(
 	std::complex<float> alpha(1.0,0);
 	cblas_ctrsm(order, side, uplo, transA, unit,n, nRHS,
 		reinterpret_cast<cblas_float_complex_type const *>(&alpha),
-	        reinterpret_cast<cblas_float_complex_type const *>(A), lda,
-	        reinterpret_cast<cblas_float_complex_type *>(B), ldb);
+	    reinterpret_cast<cblas_float_complex_type const *>(A), lda,
+	    reinterpret_cast<cblas_float_complex_type *>(B), ldb);
 }
 inline void trsm(
 	CBLAS_ORDER order, CBLAS_UPLO uplo,CBLAS_TRANSPOSE transA, 
@@ -76,8 +76,8 @@ inline void trsm(
 	std::complex<double> alpha(1.0,0);
 	cblas_ztrsm(order, side, uplo, transA, unit,n, nRHS,
 		reinterpret_cast<cblas_double_complex_type const *>(&alpha),
-	        reinterpret_cast<cblas_double_complex_type const *>(A), lda,
-	        reinterpret_cast<cblas_double_complex_type *>(B), ldb);
+	    reinterpret_cast<cblas_double_complex_type const *>(A), lda,
+	    reinterpret_cast<cblas_double_complex_type *>(B), ldb);
 }
 
 // trsm(): solves A system of linear equations A * X = B
@@ -100,15 +100,15 @@ void trsm_impl(
 	CBLAS_UPLO cblasUplo = (Triangular::is_upper != transposeA)?CblasUpper:CblasLower;
 	CBLAS_TRANSPOSE transA = transposeA?CblasTrans:CblasNoTrans;
 	
-	int m = B().size1();
-	int nrhs = B().size2();
+	int m = (int)B().size1();
+	int nrhs = (int)B().size2();
 	auto storageA = A().raw_storage();
 	auto storageB = B().raw_storage();
 	trsm(storOrd, cblasUplo, transA, CblasLeft,cblasUnit, m, nrhs,
 		storageA.values,
-	        storageA.leading_dimension,
+		(int)storageA.leading_dimension,
 		storageB.values,
-	        storageB.leading_dimension
+		(int)storageB.leading_dimension
 	);
 }
 

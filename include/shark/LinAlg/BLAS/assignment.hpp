@@ -405,14 +405,14 @@ typename VecX::closure_type operator/=(vector_expression<VecX, Device>&& x, vect
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,VecX&>::type
 operator+=(vector_expression<VecX, Device>& x, T t){
-	kernels::assign<typename device_traits<Device>:: template add<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template add<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
 operator+=(vector_expression<VecX, Device>&& x, T t){
-	kernels::assign<typename device_traits<Device>:: template add<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template add<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
@@ -422,14 +422,14 @@ operator+=(vector_expression<VecX, Device>&& x, T t){
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,VecX&>::type
 operator-=(vector_expression<VecX, Device>& x, T t){
-	kernels::assign<typename device_traits<Device>:: template subtract<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template subtract<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
 operator-=(vector_expression<VecX, Device>&& x, T t){
-	kernels::assign<typename device_traits<Device>:: template subtract<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template subtract<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
@@ -439,14 +439,14 @@ operator-=(vector_expression<VecX, Device>&& x, T t){
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,VecX&>::type
 operator*=(vector_expression<VecX, Device>& x, T t){
-	kernels::assign<typename device_traits<Device>:: template multiply<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename VecX::value_type> > (x ,typename VecX::value_type(t));
 	return x();
 }
 
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
 operator*=(vector_expression<VecX, Device>&& x, T t){
-	kernels::assign<typename device_traits<Device>:: template multiply<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
@@ -456,14 +456,14 @@ operator*=(vector_expression<VecX, Device>&& x, T t){
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,VecX&>::type
 operator/=(vector_expression<VecX, Device>& x, T t){
-	kernels::assign<typename device_traits<Device>:: template divide<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template divide<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
 template<class VecX, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename VecX::value_type>::value,typename VecX::closure_type>::type
 operator/=(vector_expression<VecX, Device>&& x, T t){
-	kernels::assign<typename device_traits<Device>:: template divide<typename VecX::value_type> > (x, t);
+	kernels::assign<typename device_traits<Device>:: template divide<typename VecX::value_type> > (x, typename VecX::value_type(t));
 	return x();
 }
 
@@ -567,14 +567,14 @@ typename MatA::closure_type operator/=(matrix_expression<MatA, Device>&& A, matr
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,MatA&>::type
 operator+=(matrix_expression<MatA, Device>& A, T t){
-	kernels::assign<typename device_traits<Device>:: template add<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template add<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
 operator+=(matrix_expression<MatA, Device>&& A, T t){
-	kernels::assign<typename device_traits<Device>:: template add<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template add<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
@@ -584,14 +584,14 @@ operator+=(matrix_expression<MatA, Device>&& A, T t){
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,MatA&>::type
 operator-=(matrix_expression<MatA, Device>& A, T t){
-	kernels::assign<typename device_traits<Device>:: template subtract<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template subtract<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
 operator-=(matrix_expression<MatA, Device>&& A, T t){
-	kernels::assign<typename device_traits<Device>:: template subtract<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template subtract<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
@@ -601,14 +601,14 @@ operator-=(matrix_expression<MatA, Device>&& A, T t){
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,MatA&>::type
 operator*=(matrix_expression<MatA, Device>& A, T t){
-	kernels::assign<typename device_traits<Device>:: template multiply<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
 operator*=(matrix_expression<MatA, Device>&& A, T t){
-	kernels::assign<typename device_traits<Device>:: template multiply<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template multiply<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
@@ -618,14 +618,14 @@ operator*=(matrix_expression<MatA, Device>&& A, T t){
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,MatA&>::type
 operator/=(matrix_expression<MatA, Device>& A, T t){
-	kernels::assign<typename device_traits<Device>:: template divide<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template divide<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
 template<class MatA, class T, class Device>
 typename std::enable_if<std::is_convertible<T, typename MatA::value_type>::value,typename MatA::closure_type>::type
 operator/=(matrix_expression<MatA, Device>&& A, T t){
-	kernels::assign<typename device_traits<Device>:: template divide<typename MatA::value_type> > (A, t);
+	kernels::assign<typename device_traits<Device>:: template divide<typename MatA::value_type> > (A, typename MatA::value_type(t));
 	return A();
 }
 
