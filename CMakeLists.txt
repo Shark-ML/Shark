@@ -515,19 +515,18 @@ endif()
 ###################################################################
 #                       CPACK PACKAGING
 ###################################################################
-set(INSTALL_CMAKE_DIR lib/cmake/Shark/)
+set(INSTALL_CMAKE_DIR "lib/cmake/Shark/" CACHE STRING "relative path for placing the CMake config files" )
 
 # Add all targets to the build-tree export set
 export(TARGETS shark SharkVersion FILE "${shark_BINARY_DIR}/SharkTargets.cmake")
 
-# Create the SharkConfig.cmake and SharkConfigVersion files
+# Create the SharkConfig.cmake and SharkConfigVersion files for the local installation
+set(SHARK_CONFIG_CODE "")
 set(SHARK_USE_FILE "${PROJECT_SOURCE_DIR}/UseShark.cmake")
 set(SHARK_TARGETS_FILE "${PROJECT_BINARY_DIR}/SharkTargets.cmake")
 set(SHARK_LIBRARIES ${LINK_LIBRARIES} shark)
 set(SHARK_LIBRARY_DIRS "${PROJECT_BINARY_DIR}/lib")
 set(SHARK_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/include" "${PROJECT_BINARY_DIR}/include" "${Boost_INCLUDE_DIR}" ${EXTRA_INCLUDE_DIRECTORIES})
-
-# Configure the files to be exported
 configure_file(SharkConfig.cmake.in "${PROJECT_BINARY_DIR}/SharkConfig.cmake")
 configure_file(SharkConfigVersion.cmake.in "${PROJECT_BINARY_DIR}/SharkConfigVersion.cmake")
 
