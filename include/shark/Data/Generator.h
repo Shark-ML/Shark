@@ -77,7 +77,7 @@ public:
 	}
 	
 	value_type operator()()const{
-		if(m_cache.size() == 0){//if caching is not used, generate 
+		if(m_cacheSize == 0){//if caching is not used, generate 
 			return m_generator();
 		}
 		//else, query the cache and return when ready

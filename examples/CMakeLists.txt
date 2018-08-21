@@ -60,7 +60,6 @@ shark_add_example( EA/SOO/Archive Archive "EA/SOO" )
 
 shark_add_example( Supervised/MultiTaskSvm MultiTaskSvm "Supervised" )
 
-
 shark_add_example( Supervised/CVFolds CVFolds "Supervised" )
 shark_add_example( Supervised/CSvmLinear CSvmLinear "Supervised" )
 shark_add_example( Supervised/McSvm McSvm "Supervised" )
@@ -85,6 +84,7 @@ shark_add_example( Supervised/LassoRegression LassoRegression "Supervised" )
 shark_add_example( Supervised/FFNNBasicTutorial FFNNBasicTutorial "Supervised" )
 shark_add_example( Supervised/MNISTForExperts MNISTForExperts "Supervised" )
 shark_add_example( Supervised/DeepNetworkTrainingRBM DeepNetworkTrainingRBM "Supervised" )
+shark_add_example( Supervised/FaceID FaceID "Supervised" )
 shark_add_example( Supervised/RFTutorial RFTutorial "Supervised" )
 shark_add_example( Supervised/KTA-tutorial KTA-tutorial "Supervised" )
 shark_add_example( Supervised/KernelBudgetedSGDTutorial KernelBudgetedSGDTutorial "Supervised" )

@@ -109,6 +109,7 @@ public:
 		AbstractLoss<LabelType, OutputType>* loss,
 		std::size_t numMiniBatches
 	){
+		m_regularizer = nullptr;
 		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(gen,model,loss, numMiniBatches));
 		this -> m_features = mp_wrapper -> features();
 	}
@@ -119,18 +120,23 @@ public:
 		AbstractLoss<LabelType, OutputType>* loss,
 		std::size_t numMiniBatches
 	){
+		m_regularizer = nullptr;
 		mp_wrapper.reset(new detail::ErrorFunctionImpl<InputType,LabelType,OutputType, SearchPointType>(gen,model,loss, numMiniBatches));
 		this -> m_features = mp_wrapper -> features();
 	}
 	
 	ErrorFunction(ErrorFunction const& op)
 	:mp_wrapper(op.mp_wrapper->clone()){
+		m_regularizer = op->m_regularizer;
 		this -> m_features = mp_wrapper -> features();
 	}
 	ErrorFunction& operator=(ErrorFunction const& op){
 		ErrorFunction copy(op);
 		swap(copy.mp_wrapper,mp_wrapper);
 		swap(copy.m_features, this->m_features);
+		using std::swap;
+		swap(copy.m_regularizer, this->m_regularizer);
+		swap(copy.m_regularizationStrength, this->m_regularizationStrength);
 		return *this;
 	}
 

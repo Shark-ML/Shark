@@ -38,12 +38,10 @@
 extern "C"{
 #include <zip.h>
 }
-
-
 using namespace shark;
 
 struct ZipReader::ZipImpl{
-	std::mutex m_mutex;
+	mutable std::mutex m_mutex;
 	zip_t* m_archive;
 	struct Info{
 		std::string name;
@@ -90,10 +88,10 @@ struct ZipReader::ZipImpl{
 	
 	std::vector<unsigned char> readFile(Info const& info) const{
 		//lock for thread-safety
-		std::unique_lock<std::mutex> lock;
+		std::lock_guard<std::mutex> lock(m_mutex);
 		
 		//open file for reading
-		zip_file_t* file = zip_fopen_index(m_archive, info.index, 0);
+		zip_file_t* file = zip_fopen_index(m_archive, info.index, ZIP_FL_UNCHANGED);
 		if(file == nullptr){
 			handleError();
 		}
@@ -103,16 +101,16 @@ struct ZipReader::ZipImpl{
 		unsigned char* pos = buffer.data();
 		unsigned char* end = pos + buffer.size();
 		while(pos != end){
-			zip_int64_t  len = zip_fread(file, (void*) pos, info.size);
+			zip_int64_t  len = zip_fread(file, (void*) pos, end - pos);
 			if(len == -1){
+				std::string message =  std::string("Error reading from zip-archive. Error returned was:") + zip_file_strerror(file);
 				zip_fclose(file);
-				handleError();
+				throw SHARKEXCEPTION(message);
 			}
 			pos += len;
 		}
 		zip_fclose(file);
 		return buffer;
-		
 	}
 };
 
