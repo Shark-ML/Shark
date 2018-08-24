@@ -37,6 +37,7 @@
 
 namespace shark{
 enum class Interpolation{
+	Linear, 
 	Spline
 };
 enum class Padding{

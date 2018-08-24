@@ -2,6 +2,7 @@
 #include <shark/Core/ZipSupport.h> //for the ZipReader class
 #include <shark/Data/DataDistribution.h> //for random sampling of paths in the zip
 #include <shark/Core/Images/ReadImage.h> //for reading the images
+#include <shark/Core/Images/Resize.h> //for resizing the images
 
 #include <shark/Models/LinearModel.h>//single dense layer
 #include <shark/Models/ConvolutionalModel.h>//single convolutional layer
@@ -179,7 +180,7 @@ int main(int argc, char **argv)
 
 	//Step1: set up the pipeline
 //###begin<data_load_images>
-	Shape imageShape = {112,92, 1}; //height x width x channels of image
+	Shape imageShape = {56,46, 1}; //height x width x channels of image
 	ZipReader zip(argv[1]);//load the zip file and read single images
 	FileList filesTrain(zip.fileNames(), "s?\?/*.pgm");//random sampling of paths. we filter s1/ ... s9/ out for testing
 	// load a single image
@@ -188,7 +189,10 @@ int main(int argc, char **argv)
 		//todo: resize image
 		auto numberString = path.substr(1,path.find_first_of('/'));
 		unsigned int label = std::stoi(numberString) - 1;
-		return InputLabelPair<FloatVector, unsigned int>(image.first, label);
+		return InputLabelPair<FloatVector, unsigned int>(
+			image::resize(image.first, image.second, imageShape),//resize to target size
+			label
+		);
 	};
 	//create a generator pipeline where we first randomly sample paths from the zip
 	//and than load the image. We have to give the shape of the result as an argument
@@ -237,7 +241,7 @@ int main(int argc, char **argv)
 	ErrorFunction<FloatVector> error(pairGenerator, &faceId, &loss, 2);
 	
 	std::size_t iterations = 20001;
-	initRandomNormal(faceId,0.0001); //init model
+	initRandomNormal(faceId,0.01); //init model
 	Adam<FloatVector> optimizer;
 	optimizer.setEta(0.01f);//learning rate of the algorithm
 	error.init();
