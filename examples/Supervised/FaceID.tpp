@@ -229,7 +229,9 @@ int main(int argc, char **argv)
 	auto map = conv1 >> pooling1 >> conv2 >> pooling2 >> dense;
 	
 	//simple linear model as classifier
-	LinearModel<FloatVector> classifier(map.outputShape(), 1, true);
+	LinearModel<FloatVector, RectifierNeuron> inputClassifier(map.outputShape(), 16, true);
+	LinearModel<FloatVector> outputClassifier(inputClassifier.outputShape(), 1, true);
+	auto classifier = inputClassifier >> outputClassifier;
 	
 	//create faceId model from map and classifier
 	FaceIdModel faceId(&map, &classifier);
@@ -240,8 +242,8 @@ int main(int argc, char **argv)
 	CrossEntropy<unsigned int, FloatVector> loss;
 	ErrorFunction<FloatVector> error(pairGenerator, &faceId, &loss, 2);
 	
-	std::size_t iterations = 20001;
-	initRandomNormal(faceId,0.01); //init model
+	std::size_t iterations = 1001;
+	initRandomNormal(faceId,0.001); //init model
 	Adam<FloatVector> optimizer;
 	optimizer.setEta(0.01f);//learning rate of the algorithm
 	error.init();
