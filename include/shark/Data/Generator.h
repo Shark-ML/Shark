@@ -72,6 +72,15 @@ public:
 		return *this;
 	}
 	
+	~Generator(){
+		//we need to block until all the cache is done computing. Otherwise the threadpool might start computing
+		//after this and variables referenced in the generator function are destroyed!
+		while(!m_cache.empty()){
+			m_cache.front().get();//blocks until computed
+			m_cache.pop_front();
+		}
+	}
+	
 	shape_type const& shape()const{
 		return m_shape;
 	}

@@ -19,15 +19,16 @@ BOOST_AUTO_TEST_SUITE (Generator_Generators)
 
 //check whether the datapoints of a specific ditribution fulfill the real distribution
 BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
+	std::size_t numBatches = 1000;
 	NormalDistributedPoints distId(2);
-	Generator<RealVector> genId = distId.generator(100,100);
+	Generator<RealVector> genId = distId.generator(10,100);
 	
 
 	RealVector b = {-2.0, 2.0};
 	RealMatrix A={{2, 0}, {0,1}};
 	RealMatrix C=A % trans(A);
 	NormalDistributedPoints distC(C,b);
-	Generator<RealVector> genC = distC.generator(100,100);
+	Generator<RealVector> genC = distC.generator(10,100);
 	Generator<RealVector> genA = transform(genId, [&](RealVector const& vec){return eval_block(b + A % vec);}, {2});
 	LinearModel<RealVector> model(A,b);
 	Generator<RealVector> genA2 = transform(genId, model);
@@ -37,7 +38,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 	Data<RealVector> dataC;
 	Data<RealVector> dataA;
 	Data<RealVector> dataA2;
-	for(std::size_t i = 0; i != 1000; ++i){
+	for(std::size_t i = 0; i != numBatches; ++i){
 		dataId.push_back(genId());
 		dataC.push_back(genC());
 		dataA.push_back(genA());
@@ -50,7 +51,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 	
 	//test ID
 	{
-		BOOST_CHECK_EQUAL(dataId.numberOfElements(), 1000*100);
+		BOOST_CHECK_EQUAL(dataId.numberOfElements(), numBatches*100);
 		BOOST_CHECK_EQUAL(genId.shape(), 2);
 		RealMatrix cov;
 		RealVector mean;
@@ -61,7 +62,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 	
 	//test C
 	{
-		BOOST_CHECK_EQUAL(dataC.numberOfElements(), 1000*100);
+		BOOST_CHECK_EQUAL(dataC.numberOfElements(), numBatches*100);
 		BOOST_CHECK_EQUAL(genC.shape(), 2);
 		RealMatrix cov;
 		RealVector mean;
@@ -72,7 +73,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 	
 	//test A
 	{
-		BOOST_CHECK_EQUAL(dataA.numberOfElements(), 1000*100);
+		BOOST_CHECK_EQUAL(dataA.numberOfElements(), numBatches*100);
 		BOOST_CHECK_EQUAL(genA.shape(), 2);
 		RealMatrix cov;
 		RealVector mean;
@@ -83,7 +84,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 	
 	//test A2
 	{
-		BOOST_CHECK_EQUAL(dataA2.numberOfElements(), 1000*100);
+		BOOST_CHECK_EQUAL(dataA2.numberOfElements(), numBatches*100);
 		BOOST_CHECK_EQUAL(genA2.shape(), 2);
 		RealMatrix cov;
 		RealVector mean;
@@ -95,6 +96,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 
 
 BOOST_AUTO_TEST_CASE( Generator_TransformInputs_Test){
+	std::size_t numBatches = 1000;
 	Chessboard problem;
 	LabeledDataGenerator<RealVector, unsigned int> gen = problem.generator(100,100);
 	
@@ -108,7 +110,7 @@ BOOST_AUTO_TEST_CASE( Generator_TransformInputs_Test){
 	LabeledData<RealVector, unsigned int> data;
 	LabeledData<RealVector, unsigned int> dataA;
 	LabeledData<RealVector, unsigned int> dataA2;
-	for(std::size_t i = 0; i != 1000; ++i){
+	for(std::size_t i = 0; i != numBatches; ++i){
 		data.push_back(gen());
 		dataA.push_back(genA());
 		dataA2.push_back(genA2());
@@ -126,7 +128,7 @@ BOOST_AUTO_TEST_CASE( Generator_TransformInputs_Test){
 	
 	//test A
 	{
-		BOOST_CHECK_EQUAL(dataA.numberOfElements(), 1000*100);
+		BOOST_CHECK_EQUAL(dataA.numberOfElements(), numBatches*100);
 		BOOST_CHECK_EQUAL(genA.shape().input, 2);
 		BOOST_CHECK_EQUAL(genA.shape().label, 2);
 		RealMatrix cov;
@@ -138,7 +140,7 @@ BOOST_AUTO_TEST_CASE( Generator_TransformInputs_Test){
 	
 	//test A2
 	{
-		BOOST_CHECK_EQUAL(dataA2.numberOfElements(), 1000*100);
+		BOOST_CHECK_EQUAL(dataA2.numberOfElements(), numBatches*100);
 		BOOST_CHECK_EQUAL(genA2.shape().input, 2);
 		BOOST_CHECK_EQUAL(genA2.shape().label, 2);
 		RealMatrix cov;
