@@ -33,24 +33,27 @@
 #define SHARK_MODELS_RESIZE_LAYER_H
 
 #include <shark/Models/AbstractModel.h>
-#include <shark/Core/Images/Interpolation.h>
+#include <shark/Core/Images/Resize.h>
 #include <shark/LinAlg/BLAS/device_copy.hpp>
 namespace shark {
-
-
-	
-	
-	
-
 ///
 /// \brief Resizes an input image to a given size
 ///
 /// \par
-/// The image is resized using an interpolation algorithm which can be chosen by the user. Right now,
-/// only spline interpolation is supported. This will slightly smooth input images
-/// over a 4x4 grid. This also means that resizing to the same size is not an identity operation
+/// The image is resized using an interpolation algorithm which can be chosen by the user. 
+/// In general, resizing with the same size might not be an identity operation, e.g. performing
+/// a spline-interpolation will smooth the image.
+/// Right now, only linear interpolation is supported.
 ///
-/// The derivative of the model wrt its input images is available.
+/// Implementation details: 
+/// Interpolation is implemented such that corners are aligned and the area
+/// of each pixel is mapped roughly to a same-size area in the output image. This means that
+/// when upsampling, the border of the image needs to be padded as each pixel is replaced
+/// by a set of pixels in the same area. We use zero-padding,
+/// which might lead to noticable artefacts (dark border) in small images.
+///
+/// Note that scaling down by a factor larger than two is
+/// not a good idea with most interpolation schemes as this can lead to ringing and other artifacts.
 ///
 /// \ingroup models
 template <class VectorType = RealVector>
@@ -76,9 +79,9 @@ public:
 	///
 	/// \arg inputShape Shape of the image imHeight x imWidth x channel
 	/// \arg outputShape Shape of the resized output imHeight x imWidth
-	/// \arg type Type of interpolation to perform, default is Spline-Interpolation
+	/// \arg type Type of interpolation to perform, default is Linear-Interpolation
 	ResizeLayer(
-		Shape const& inputShape, Shape const& outputShape, Interpolation type = Interpolation::Spline
+		Shape const& inputShape, Shape const& outputShape, Interpolation type = Interpolation::Linear
 	){
 		base_type::m_features |= base_type::HAS_FIRST_PARAMETER_DERIVATIVE;
 		base_type::m_features |= base_type::HAS_FIRST_INPUT_DERIVATIVE;
@@ -114,23 +117,14 @@ public:
 	///
 	/// \arg inputShape Shape of the image imHeight x imWidth x channel
 	/// \arg outputShape Shape of the resized output imHeight x imWidth
-	/// \arg type Type of interpolation to perform, default is Spline-Interpolation
+	/// \arg type Type of interpolation to perform, default is Linear-Interpolation
 	void setStructure(
-		Shape const& inputShape, Shape const& outputShape, Interpolation type = Interpolation::Spline
+		Shape const& inputShape, Shape const& outputShape, Interpolation type = Interpolation::Linear
 	){
+		SHARK_RUNTIME_CHECK(type == Interpolation::Linear, "Sorry, only linear interpolation is currently supported");
 		m_type = type;
 		m_inputShape = inputShape;
 		m_outputShape = {outputShape[0], outputShape[1], inputShape[2]};
-		//compute pixel coordinates by evenly spreading them out on the image
-		blas::matrix<value_type> points(outputShape[0] * outputShape[1], 2);
-		for(std::size_t i = 0; i != outputShape[1]; ++i){
-			for(std::size_t j = 0; j != outputShape[0]; ++j){
-				points(i * outputShape[0] +j, 0) = value_type(i) / outputShape[1];
-				points(i * outputShape[0] +j, 1) = value_type(j) / outputShape[0];
-			}
-		}
-		
-		m_points = copy_to_device(points, device_type());
 	}
 
 	boost::shared_ptr<State> createState()const{
@@ -143,10 +137,10 @@ public:
 	void eval(BatchInputType const& inputs, BatchOutputType& outputs, State&)const{
 		SIZE_CHECK(inputs.size2() == m_inputShape.numElements());
 		outputs.resize(inputs.size1(), m_outputShape.numElements());
-		imageInterpolate2D<value_type, device_type>(
-			inputs, m_inputShape, m_type,
-			m_points, m_points.size1(),
-			outputs
+		image::resize(
+			inputs, outputs, 
+			m_inputShape, m_outputShape,
+			m_type
 		);
 	}
 
@@ -158,7 +152,7 @@ public:
 		State const& state,
 		ParameterVectorType& gradient
 	)const{}
-	///\brief Calculates the first derivative w.r.t the inputs and summs them up over all inputs of the last computed batch
+	///\brief Calculates the first derivative w.r.t the inputs and sums them up over all inputs of the last computed batch
 	void weightedInputDerivative(
 		BatchInputType const & inputs,
 		BatchOutputType const& outputs,
@@ -173,24 +167,21 @@ public:
 		SIZE_CHECK(outputs.size1() == inputs.size1());
 		
 		derivatives.resize(inputs.size1(), m_inputShape.numElements());
-		weightedImageInterpolate2DDerivative<value_type, device_type>(
-			inputs, m_inputShape, m_type,
-			coefficients,
-			m_points, m_points.size1(),
-			derivatives
+		image::resizeWeightedDerivative(
+			inputs, coefficients, derivatives, 
+			m_inputShape, m_outputShape,
+			m_type
 		);
 	}
 
 	/// From ISerializable
 	void read(InArchive& archive){
-		archive >> m_points;
 		archive >> (int&)m_type;
 		archive >> m_inputShape;
 		archive >> m_outputShape;
 	}
 	/// From ISerializable
 	void write(OutArchive& archive) const{
-		archive << m_points;
 		archive << (int&)m_type;
 		archive << m_inputShape;
 		archive << m_outputShape;
@@ -198,7 +189,6 @@ public:
 	
 private:
 	Interpolation m_type;
-	MatrixType m_points;
 	Shape m_inputShape;
 	Shape m_outputShape;
 };

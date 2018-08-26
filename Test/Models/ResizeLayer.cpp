@@ -12,11 +12,11 @@ using namespace shark;
 
 BOOST_AUTO_TEST_SUITE (Models_ResizeLayer)
 
-BOOST_AUTO_TEST_CASE( Models_ResizeLayer_Spline_Derivatives){
+BOOST_AUTO_TEST_CASE( Models_ResizeLayer_Linear_Derivatives){
 	Shape imageShape = {3,4,3};
 	Shape outputShape = {5,2};
 	Shape outputShape3 = {5,2,3};
-	ResizeLayer<RealVector> model(imageShape, outputShape, Interpolation::Spline);
+	ResizeLayer<RealVector> model(imageShape, outputShape, Interpolation::Linear);
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), 0);
 	BOOST_REQUIRE_EQUAL(model.inputShape(), imageShape);
 	BOOST_REQUIRE_EQUAL(model.outputShape(), outputShape3);

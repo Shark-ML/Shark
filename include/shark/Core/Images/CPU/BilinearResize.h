@@ -60,6 +60,9 @@ void bilinearResize(
 	std::size_t widthOut = outShape[1];
 	std::size_t numChannels = (inShape.size() == 3)? inShape[2]: 1;
 	
+	//fill with 0
+	resizedImages.clear();
+	
 	//we parallelize over images*rows of the result, i.e. each function evaluation computes a full row of the image
 	auto resizeRow = [&](std::size_t id){
 		std::size_t im = id / heightOut; //image-index
@@ -67,40 +70,42 @@ void bilinearResize(
 		auto pixelsIn = to_matrix(row(images,im), heightIn * widthIn, numChannels);
 		auto pixelsOut = to_matrix(row(resizedImages,im), heightOut * widthOut, numChannels);
 		
-		double in_per_outi = double(heightIn)/heightOut;
-		double in_per_outj = double(widthIn)/widthOut;
+		double in_per_outi = double(heightIn)/(heightOut);
+		double in_per_outj = double(widthIn)/(widthOut);
+		
+		//correction in x-coordinates to correct for the change in first pixel position
+		//compared to the original image. the 1.e-8 corrects for rounding errors
+		double basexi = 0.5 * in_per_outi - 0.5+ 1.e-8;
+		double basexj = 0.5 * in_per_outj - 0.5+ 1.e-8;
 		
 		for(std::size_t j = 0; j != widthOut; ++j){
 			auto outpx = row(pixelsOut, i * widthOut + j);
-			//find lower left corner of input
-			double xi = i * in_per_outi;
-			double xj = j * in_per_outj;
-			std::size_t i_lower = std::size_t(xi);
-			std::size_t j_lower = std::size_t(xj);
+			//calculate coordinates of point wrt input pixel scale
+			//we take into account that pixels have an area, therefore
+			//when upsampling, we have to sample negative coordinates
+			double xi = i * in_per_outi + basexi;
+			double xj = j * in_per_outj + basexj;
 			//find delta values of relative pixel positions in [0,1] coordinates 
-			T deltai = T(xi - i_lower);
-			T deltaj = T(xj - j_lower);
+			T deltai = T(xi - std::floor(xi));
+			T deltaj = T(xj - std::floor(xj));
+			
+			int il = int(std::floor(xi));
+			int iu =int(std::ceil(xi));
+			int jl = int(std::floor(xj));
+			int jr = int(std::ceil(xj));
 			
 			//lower left corner
-			auto inpx_ll = row(pixelsIn, i_lower * widthIn + j_lower);
-			noalias(outpx) = T(1 - deltai) * T(1 - deltaj) * inpx_ll;
-			
+			if(il >= 0 && jl  >= 0)
+				noalias(outpx) += T(1 - deltai) * T(1 - deltaj) * row(pixelsIn, il * widthIn + jl);
 			//lower right corner
-			if(j_lower + 1 < widthIn){
-				auto inpx_lr = row(pixelsIn, i_lower * widthIn + j_lower + 1);
-				noalias(outpx) += T(1 - deltai) * deltaj * inpx_lr;
-			}
+			if(il >= 0 && jr  < (int)widthIn)
+				noalias(outpx) += T(1 - deltai) * deltaj * row(pixelsIn, il * widthIn + jr);
 			//upper left corner
-			if(i_lower + 1 < heightIn){
-				auto inpx_ur = row(pixelsIn, (i_lower+1) * widthIn + j_lower);
-				noalias(outpx) += deltai * T(1 - deltaj) * inpx_ur;
-			}
-			
+			if(iu < (int)heightIn && jl  >= 0)
+				noalias(outpx) += deltai * T(1 - deltaj) * row(pixelsIn, iu * widthIn + jl);
 			//upper right corner
-			if(j_lower + 1 < widthIn && i_lower + 1 < heightIn){
-				auto inpx_ur = row(pixelsIn, (i_lower+1) * widthIn + j_lower + 1);
-				noalias(outpx) += deltai * deltaj * inpx_ur;
-			}
+			if(iu < (int)heightIn && jr < (int)widthIn)
+				noalias(outpx) += deltai * deltaj * row(pixelsIn, iu * widthIn + jr);
 		}
 	};
 	threading::parallelND({images.size1() * heightOut}, {0}, resizeRow, threading::globalThreadPool());
@@ -127,6 +132,7 @@ void bilinearResizeWeightedDerivative(
 	std::size_t numChannels = (inShape.size() == 3)? inShape[2]: 1;
 	inputDerivatives.clear();
 	
+	
 	//we parallelize over images*rows of the result, i.e. each function evaluation computes a full row of the image
 	auto derivativeRow = [&](std::size_t id){
 		std::size_t im = id / heightIn; //image-index
@@ -140,22 +146,31 @@ void bilinearResizeWeightedDerivative(
 		double in_per_outi = 1.0/out_per_ini;
 		double in_per_outj = 1.0/out_per_inj;
 		
+		//correction in x-coordinates to correct for the change in first pixel position between original and resized image.
+		//compared to the original image. the 1.e-8 corrects for rounding errors
+		double basexi = 0.5 - 0.5 * out_per_ini;
+		double basexj = 0.5 - 0.5 * out_per_inj;
+		
 		for(std::size_t j = 0; j != widthIn; ++j){
 			auto derivp = row(derivs, i * widthIn + j);
 			
-			double xi = i * out_per_ini;
-			double xj = j * out_per_inj;
+			double xi = i * out_per_ini - basexi;
+			double xj = j * out_per_inj - basexj;
+			
 			//lower and upper bound for output pixels being affected by the input
-			double mxi = (i - 1.0) * out_per_ini;
+			double mxi = xi - out_per_ini - 1.e-8;
+			double Mxi = xi + out_per_ini + 1.e-8;
+			double mxj = xj - out_per_inj - 1.e-8;
+			double Mxj = xj + out_per_inj + 1.e-8;
 			if(mxi == std::floor(mxi))
 				mxi += 1.0;
-			double Mxi = (i + 1.0) * out_per_ini;
+			
 			if(Mxi == std::floor(Mxi))
 				Mxi -= 1.0;
-			double mxj = (j - 1.0) * out_per_inj;
+			
 			if(mxj == std::floor(mxj))
 				mxj += 1.0;
-			double Mxj = (j + 1.0) * out_per_inj;
+			
 			if(Mxj == std::floor(Mxj))
 				Mxj -= 1.0;
 			//find bounds for output pixels that were affected by the input pixel
@@ -163,23 +178,15 @@ void bilinearResizeWeightedDerivative(
 			std::size_t imax = std::min(std::size_t(Mxi) + 1, heightOut);
 			
 			std::size_t jmin = std::size_t(std::max(std::ceil(mxj),0.0));
-			std::size_t jmax = std::min(std::size_t(Mxj) + 1, heightOut);
-			
-			//~ if(im == 0 && i == 6){
-				//~ std::cout<<out_per_ini<<" "<<out_per_inj<<std::endl;
-				//~ std::cout<<j<<" "<<jmin<<" "<<jmax<<std::endl;
-			//~ }
+			std::size_t jmax = std::min(std::size_t(Mxj) + 1, widthOut);
 			
 			//backpropagate coeffcients from affected pixel
 			for(std::size_t i0 = imin; i0 < imax; ++i0){
-				T deltai = T(i0 * in_per_outi - i);
+				T deltai = T((i0 - xi) * in_per_outi);
 				deltai = T(1) - std::abs(deltai);
 				for(std::size_t j0 = jmin; j0 < jmax; ++j0){
-					T deltaj = T(j0 * in_per_outj - j);
+					T deltaj = T((j0 - xj) * in_per_outj);
 					deltaj = T(1) - std::abs(deltaj);
-					//~ if(im == 0 && i == 6){
-						//~ std::cout<<deltaj<<std::endl;
-					//~ }
 					auto coeffp = row(coeffs, i0 * widthOut + j0);
 					noalias(derivp) += deltai * deltaj* coeffp;
 				}

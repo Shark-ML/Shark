@@ -48,6 +48,16 @@ namespace image{
 ///
 /// The method can interpolate a batch of images at the same time.
 /// Currently, only linear interpolation is supported.
+///
+/// Implementation details: 
+/// Interpolation is implemented such that corners are aligned and the area
+/// of each pixel is mapped roughly to a same-size area in the output image. This means that
+/// when upsampling, the border of the image needs to be padded as each pixel is replaced
+/// by a set of pixels in the same area. We use zero-padding,
+/// which might lead to noticable artefacts (dark border) in small images.
+///
+/// Note that scaling down by a factor larger than two is
+/// not a good idea with most interpolation schemes as this can lead to ringing and other artifacts.
 template<class M1, class M2, class Device>
 void resize(
 	blas::matrix_expression<M1, Device> const& images, 
@@ -74,14 +84,18 @@ void resize(
 ///
 /// The method can interpolate a batch of images at the same time.
 /// Currently, only linear interpolation is supported.
-template<class M1, class M2, class Device>
+template<class M, class M1, class M2, class Device>
 void resizeWeightedDerivative(
+	blas::matrix_expression<M, Device> const& images,
 	blas::matrix_expression<M1, Device> const& coefficients, 
 	blas::matrix_expression<M2, Device>& inputDerivatives, 
 	Shape const& shapeIn,
 	Shape const& shapeOut,
 	Interpolation method = Interpolation::Linear
 ){
+	SIZE_CHECK(images().size1() == coefficients().size1());
+	SIZE_CHECK(images().size1() == inputDerivatives().size1());
+	SIZE_CHECK(images().size2() == inputDerivatives().size2());
 	SIZE_CHECK(shapeIn.size() == shapeOut.size());
 	SIZE_CHECK(shapeIn.size() <= 3);
 	SIZE_CHECK(shapeIn.size() == 2 || shapeIn[2] == shapeOut[2] );
@@ -93,6 +107,7 @@ void resizeWeightedDerivative(
 	}else{
 		throw SHARKEXCEPTION("Unsupported interpolation");
 	}
+	(void)images;//prevent warning
 }
 
 
