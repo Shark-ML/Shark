@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( Generator_Basic_Test){
 		RealVector mean;
 		meanvar(dataId,mean,cov);
 		BOOST_CHECK_SMALL(norm_sqr(mean),1.e-2);
-		BOOST_CHECK_SMALL(sum(sqr(cov - blas::identity_matrix<double>(2))),1.e-4);
+		BOOST_CHECK_SMALL(sum(sqr(cov - blas::identity_matrix<double>(2))),1.e-2);
 	}
 	
 	//test C
