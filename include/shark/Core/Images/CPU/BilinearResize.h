@@ -74,9 +74,9 @@ void bilinearResize(
 		double in_per_outj = double(widthIn)/(widthOut);
 		
 		//correction in x-coordinates to correct for the change in first pixel position
-		//compared to the original image. the 1.e-8 corrects for rounding errors
-		double basexi = 0.5 * in_per_outi - 0.5+ 1.e-8;
-		double basexj = 0.5 * in_per_outj - 0.5+ 1.e-8;
+		//compared to the original image.
+		double basexi = 0.5 * in_per_outi - 0.5;
+		double basexj = 0.5 * in_per_outj - 0.5;
 		
 		for(std::size_t j = 0; j != widthOut; ++j){
 			auto outpx = row(pixelsOut, i * widthOut + j);
@@ -89,10 +89,11 @@ void bilinearResize(
 			T deltai = T(xi - std::floor(xi));
 			T deltaj = T(xj - std::floor(xj));
 			
-			int il = int(std::floor(xi));
-			int iu =int(std::ceil(xi));
-			int jl = int(std::floor(xj));
-			int jr = int(std::ceil(xj));
+			//obtain the 4 corner pixels. the 1.e-8 corrects for rounding errors
+			int il = int(std::floor(xi + 1.e-8));
+			int iu =int(std::ceil(xi - 1.e-8));
+			int jl = int(std::floor(xj + 1.e-8));
+			int jr = int(std::ceil(xj - 1.e-8));
 			
 			//lower left corner
 			if(il >= 0 && jl  >= 0)
