@@ -157,7 +157,7 @@ SHARK_EXPORT_SYMBOL RealMatrix preferenceAdjustedWeightVectors(
 /// n-dimensional simplex grid at least as many points as a target number points.	
 /// For example, the points in a two-dimensional
 /// grid -- a line -- with size n are the points (0,n-1), (1,n-2), ... (n-1,0).
-std::size_t computeOptimalLatticeTicks(
+SHARK_EXPORT_SYMBOL std::size_t computeOptimalLatticeTicks(
 	std::size_t const n, std::size_t const target_count
 );
 
