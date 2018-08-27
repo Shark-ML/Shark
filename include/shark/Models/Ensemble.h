@@ -142,8 +142,8 @@ public:
 	}
 	
 	///\brief Returns the expected shape of the input
-	typename shape_type<InputType>::type inputShape() const{
-		return m_models.empty() ? typename shape_type<InputType>::type(): model(0).inputShape();
+	Shape inputShape() const{
+		return m_models.empty() ? Shape(): model(0).inputShape();
 	}
 	///\brief Returns the shape of the output
 	Shape outputShape() const{
