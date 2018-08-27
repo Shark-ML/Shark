@@ -29,7 +29,7 @@
  *
  */
 //===========================================================================
-
+#define SHARK_COMPILE_DLL
 #include <boost/math/special_functions/binomial.hpp>
 
 #include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
