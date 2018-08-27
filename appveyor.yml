@@ -46,4 +46,4 @@ before_build:
 build:
   project: C:\projects\shark\build\shark.sln 
   parallel: true 
-verbosity: minimal # compiler verbosity
+  verbosity: minimal # compiler verbosity
