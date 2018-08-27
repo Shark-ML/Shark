@@ -34,16 +34,8 @@
 
 #include <shark/Algorithms/DirectSearch/Operators/Lattice.h>
 
-namespace shark {
-namespace detail {
 
-std::size_t sumlength(std::size_t const n, std::size_t const sum)
-{
-	return static_cast<std::size_t>(
-		boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
-}
-
-void pointLattice_helper(
+void shark::detail::pointLattice_helper(
 	UIntMatrix & pointMatrix,
 	std::size_t const rowidx,
 	std::size_t const colidx,
@@ -70,9 +62,14 @@ void pointLattice_helper(
 	}
 }
 
-} // namespace detail
+std::size_t shark::detail::sumlength(std::size_t const n, std::size_t const sum)
+{
+	return static_cast<std::size_t>(
+		boost::math::binomial_coefficient<double>(n - 1 + sum, sum));
+}
 
-std::size_t computeOptimalLatticeTicks(
+
+std::size_t shark::computeOptimalLatticeTicks(
 	std::size_t const n,std::size_t const target_count
 ){
 	if(n == 1){
@@ -89,7 +86,7 @@ std::size_t computeOptimalLatticeTicks(
 }
 
 
-RealMatrix weightLattice(std::size_t const n, std::size_t const sum)
+shark::RealMatrix shark::weightLattice(std::size_t const n, std::size_t const sum)
 {
 	const std::size_t point_count = detail::sumlength(n, sum);
 	UIntMatrix pointMatrix(point_count, n);
@@ -99,7 +96,7 @@ RealMatrix weightLattice(std::size_t const n, std::size_t const sum)
 	return result;
 }
 
-RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum){
+shark::RealMatrix shark::unitVectorsOnLattice(std::size_t const n, std::size_t const sum){
 	RealMatrix m = weightLattice(n, sum);
 	for(std::size_t i = 0; i < m.size1(); ++i){
 		row(m, i) /= norm_2(row(m, i));
@@ -107,7 +104,7 @@ RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum){
 	return m;
 }
 
-RealMatrix preferenceAdjustedUnitVectors(
+shark::RealMatrix shark::preferenceAdjustedUnitVectors(
 	std::size_t const n,
 	std::size_t const sum, 
 	std::vector<Preference> const & preferences){
@@ -151,7 +148,7 @@ RealMatrix preferenceAdjustedUnitVectors(
 	return adjusted;
 }
 
-RealMatrix preferenceAdjustedWeightVectors(
+shark::RealMatrix shark::preferenceAdjustedWeightVectors(
 	std::size_t const n,
 	std::size_t const sum,
 	std::vector<Preference> const & preferences){
@@ -168,5 +165,3 @@ RealMatrix preferenceAdjustedWeightVectors(
 	}
 	return m;
 }
-
-} // namespace shark
