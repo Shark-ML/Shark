@@ -55,7 +55,7 @@ public:
 		AbstractModel<FloatVector, FloatVector, FloatVector>* classifier
 	): m_map(map), m_classifier(classifier){
 		SHARK_RUNTIME_CHECK(
-			map->outputShape().numberOfElements() == classifier->inputShape().numberOfElements(), 
+			map->outputShape().numElements() == classifier->inputShape().numElements(), 
 			"Shapes Incompatible!"
 		);
 		this->m_features |= HAS_FIRST_PARAMETER_DERIVATIVE;
@@ -227,7 +227,7 @@ int main(int argc, char **argv)
 //###end<data_load_zip>
 		//load image and resize to target size
 		std::pair<FloatVector, Shape> image = image::readImage<float>(contents);
-		FloatVector resizedImage = image::resize(image.first, image.second, imageShape),
+		FloatVector resizedImage = image::resize(image.first, image.second, imageShape);
 		// extract person id and turn into label
 		auto numberString = path.substr(1,path.find_first_of('/'));
 		unsigned int label = std::stoi(numberString) - 1;
