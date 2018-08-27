@@ -169,14 +169,14 @@ static auto get_tuple_elem(T&& input, std::integral_constant<int,N>) -> decltype
 		}\
 	};\
 	struct const_proxy_type{\
-		typedef Batch::value_type value_type;\
+		typedef typename Batch::value_type value_type;\
 		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(const_proxy_type,ATTRIBUTES_SEQ))\
 		std::size_t size() const{\
 			return batchSize(BOOST_PP_TUPLE_ELEM(2,1,BOOST_PP_SEQ_ELEM(0, ATTRIBUTES_SEQ)));\
 		}\
 	};\
 	struct proxy_type{\
-		typedef Batch::value_type value_type;\
+		typedef typename Batch::value_type value_type;\
 		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(proxy_type,ATTRIBUTES_SEQ))\
 		template<class Other>\
 		proxy_type& operator=(Other const& other){\
@@ -189,7 +189,7 @@ static auto get_tuple_elem(T&& input, std::integral_constant<int,N>) -> decltype
 		operator const_proxy_type() const{return SHARK_BATCH_MAKE_AGGREGATE_INITIALIZER(ATTRIBUTES_SEQ);}\
 	};\
 	struct type{\
-		typedef Batch::value_type value_type;\
+		typedef typename Batch::value_type value_type;\
 		SHARK_BATCH_DECLARE_MEMBERS(SHARK_BATCH_TRANSFORM_TYPES(type,ATTRIBUTES_SEQ))\
 		type()=default;\
 		type(type const&) = default;\
