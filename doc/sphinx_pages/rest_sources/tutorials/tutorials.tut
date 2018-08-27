@@ -52,6 +52,16 @@ discusses the creation and training of multi-layer neural networks
 * :doc:`algorithms/autoencoders`
 * :doc:`algorithms/variational_autoencoders`
 
+Deep Learning: Advanced Techniques
+++++++++++++++++++++++++++++++++++
+This is a small series teaching how to use more advanced techniques to train deep-learning architectures.
+The running theme of this series is to implement a learning algorithm that can assess whether two images of faces
+show the same person. This tutorial is intended to be read in parallel with concept tutorials to fill the gaps.
+
+* :doc:`advanced/data_generators`
+* :doc:`advanced/new_data_types`
+* :doc:`advanced/new_model`
+
 Data Handling
 +++++++++++++
 

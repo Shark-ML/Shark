@@ -1,0 +1,63 @@
+Define New Data Types
+=================================
+
+Shark comes with a set of simple data types that can be used to store and process data. The simplest are scalars, vectors and matrices. 
+There are more complex types that shark supports. For example the pairs of input and labels used by ``LabeledData``, :doxy:`InputLabelPair`.
+However, just defining a data type is not enough, Shark needs to know how to process it. 
+For example, we need to know how batches of input and label pairs should be stored. We could use an ``std::vector<InputLabelPair<...> >``,
+however this is not very efficient. In many cases it would be better to store all inputs in one batch and all labels in a separate batch. 
+This way, a set of vectors can be stored as a matrix and the labels as another vector. Similarly, we have to describe what the shape of
+our data is and we might also want to define how one can reference single elements in a batch.
+All this is tedious work, which requires the definition of several classes.
+Luckily, this process is automatized for simple compound objects, where each data point can be described by a structure.
+For example, we can describe a pair of images of faces using::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair>
+
+For such a structure, we can define the following default behaviour, where a batch can be interpreted as having a structure similar to::
+    
+	struct FacePairBatch{
+		FloatMatrix image1;
+     		FloatMatrix image2;
+	};
+
+and the shape as::
+
+	struct FacePairShape{
+		Shape image1;
+     		Shape image2;
+	};
+
+To generate classes with such a structure, we can use a macro::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_batch>
+
+The macro has to be invoked in the shark namespace.
+Inside the macro, we enumerate each member and their types. It is possible to add template parameters to the empty template parameter list.
+This way, we can omit hard-coding the type of vector used in ``FacePair``.
+
+Working with Batches
+--------------------------------------
+
+We have already seen the most important functions for batch-processing in the previous tutorial.
+Let us recall the code::
+
+..sharkcode<Supervised/FaceID.tpp,data_create_pairs>
+
+
+The functions ``getBatchElement`` and ``createBatch`` are part of the interface to work with batches. The first function returns a proxy object referencing a single element of a batch,
+for example a pair of a matrix-row and a reference to the class label. ``createBatch`` takes an ``std::vector<Element>`` and creates the proper shark-batch type of this set of elements.
+The batch has a type that can be queried via ``Batch<Element>::type``. Its shape type is available using ``shape_type<Element>::type``. Notice that we create a Batch
+of ``InputLabelPair<FacePair, unsigned int>``, thus its shape_type is nested and can be described as::
+
+	struct InputLabelPairShape{
+		FacePairShape input;
+		Shape label;
+	};
+
+
+
+What next?
+----------
+The full example-code can be seen in :doxy:`FaceID.cpp <FaceID.cpp>`.
+In the next step, we will :doc:`./new_model`.

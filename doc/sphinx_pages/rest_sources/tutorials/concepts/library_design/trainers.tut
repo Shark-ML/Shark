@@ -77,7 +77,7 @@ Types                        Description
 ``ModelType``                Type of model which the trainer optimizes
 ``InputType``                Type of inputs the model takes
 ``DatasetType``              The type of dataset that the trainer expects,
-			     this is `UnlabeledData<InputType>`
+			     this is `Data<InputType>`
 ==========================   ==============================================
 
 
@@ -87,7 +87,7 @@ These trainers also offer the following methods:
 =====================================================   ================================================
 Method                                                  Description
 =====================================================   ================================================
-``train(ModelType&, UnlabeledData<InputType>)``         Solves the problem and stores it in the model.
+``train(ModelType&, Data<InputType>)``         		Solves the problem and stores it in the model.
 ``std::string name()``                                  Returns the name of the trainer
 =====================================================   ================================================
 
@@ -97,7 +97,7 @@ Weighting
 
 Both variants of trainers also come in a version with support for weighting,
 :doxy:`AbstractWeightedTrainer` and :doxy:`AbstractWeightedUnsupervisedTrainer`. Both support an additional
-verion of train which can use a :doxy:`WeightedUnlabeledData` or :doxy:`WeightedLabeledData` object which adds
+verion of train which can use a :doxy:`WeightedData` or :doxy:`WeightedLabeledData` object which adds
 an additional weighting factor for each element. This factor must be positive, but does not need to sum to one.
 Using a weighted dataset with all weights equal will lead to the same result as not weighting the dataset.
 
@@ -107,7 +107,7 @@ Both classes declare a new typedef
 Types                        Description
 ==========================   ==============================================
 ``WeightedDatasetType``      The weighted dataset that the trainer expects,
-			     this is `WeightedUnlabeledData<InputType>`
+			     this is `WeightedData<InputType>`
 			     or `WeightedLabeledData<InputType,LabeledType>`
 ==========================   ==============================================
 

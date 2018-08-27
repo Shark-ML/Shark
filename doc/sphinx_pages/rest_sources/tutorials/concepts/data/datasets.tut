@@ -5,7 +5,7 @@ Data Containers
 Data handling is an important aspect of a machine learning
 library. Shark ships with three container classes tailored
 to holding data for machine learning applications:
-:doxy:`Data`, :doxy:`UnlabeledData`, and :doxy:`LabeledData`.
+:doxy:`Data`, and :doxy:`LabeledData`.
 After familiarizing yourself with the basic concepts, have a look at the
 complete list of :ref:`data tutorials <label_for_data_tutorials>`.
 
@@ -61,22 +61,13 @@ we introduce the interface of the data object we want to clarify this distinctio
   general role of a ``std::vector`` only adapted to the special needs
   for fast computation in a machine learning environment.
 
-* :doxy:`UnlabeledData` represents input data which is not labeled.
-  This is the input format used for unsupervised learning methods. The unlabeled
-  data class is a subclass of Data and does not offer much new functionality
-  beyond ``Data``.
-  But it represents an important *semantic* difference, since the data
-  points are interpreted as input data without labels, whereas the above
-  mentioned Data class might store anything (for example model outputs,
-  labels, or points).
-
 * :doxy:`LabeledData` finally represents inputs (data points) augmented with
   labels. Conceptually the class ``LabeledData<I,L>`` can be described roughly
   as a ``Data`` object storing a pair-type of inputs I and labels L, for example
   ``Data<std::pair<I,L> >``. There is however an important difference in how
   labels and inputs are treated in machine learning. Often, especially for
   unsupervised methods, we use only the inputs, thus viewing the object as
-  an ``UnlabeledData<I>``. For evaluation of the model we first use the set
+  an ``Data<I>``. For evaluation of the model we first use the set
   of inputs, then acquire the set of predictions of the model, and finally
   compare this set of predictions to the set of labels by means of a loss
   function. Instead of accessing input-label pairs as a fixed grouping, we
@@ -170,103 +161,8 @@ above). Changing an element in one instance of the data object will
 change the respective elements in all other containers as well.
 This is nearly always undesired and results in hard-to-find bugs.
 
-The elements in :doxy:`UnlabeledData` and :doxy:`LabeledData` objects
-can be conveniently reordered by calling :doxy:`UnlabeledData::shuffle`
-and :doxy:`LabeledData::shuffle`, respectively. This is an examples of
-an operation that needs to reorganize the internal batch structure.
 
 
-Data as a collection of batches
-*******************************
-
-As outlined above, the Data class stores the points internally as batches and
-is therefore optimized for using these batches directly instead of accessing
-single points. Therefore this part of the tutorial will explain how the data
-set provides access to the batches and introduce common usage patterns.
-
-The first thing to note is that the ``Data`` container does not attempt to
-be stl-compatible. This is because it needs to support access to its contents
-at two different levels of granularity, namely batch-wise and for element-wise.
-
-However an stl compatible interface to batches can be acquired with the
-:doxy:`Data::batches` method::
-
-..sharkcode<Data/Datasets.tpp,batches>
-
-or similarly when data is constant or a constant range is desired::
-
-..sharkcode<Data/Datasets.tpp,batches-const>
-
-The above loop still looks a bit inconvenient. We might as well use
-a range-for loop for traversal::
-
-..sharkcode<Data/Datasets.tpp,batches-foreach>
-
-Or we can resort to index access::
-
-..sharkcode<Data/Datasets.tpp,batches-for>
-
-When iterating over batches in an outer loop, individual elements can be
-accessed within each batch in an inner loop::
-
-..sharkcode<Data/Datasets.tpp,batches-doubleloop>
-
-
-Data as a collection of elements
-********************************
-
-While the data object is optimized for batch access, sometimes direct
-access to single elements is needed. Thus the ``Data`` container also
-provides a convenience interface for elements, however, with much worse
-performance guarantees than for batch access. While the interfaces look
-very similar one should be aware of the important differences.
-
-First of all, all elements stored in the data set are only virtual for
-most input types. This means that querying the i-th element of the set
-does not return a reference to it, but instead returns a proxy object
-that acts as a reference. For example when storing ``RealVector``
-elements in a ``Data<RealVector>`` object, elements are stored row-wise
-in a (row-major) ``RealMatrix``. Hence a matrix row is returned as a
-proxy.
-This is no problem most of the time, however when using the returned
-value as an argument to a function like for example::
-
-	void function(RealVector& element);
-
-the compiler will complain that a matrix row is not a vector. In the
-case of::
-
-	void function(RealVector const& element);
-
-the compiler is very helpful, creating a temporary vector and copying
-the matrix row into it. However, this is slow, and moreover it is
-unnecessary. Be aware of this performance pitfall and use template
-arguments or the correct reference type of the data set if possible::
-
-	void function(Data<RealVector>::element_reference const& element);
-
-The second pitfall is that we can't give strong performance guarantees
-for the access methods. As we allow batch resizing and all batches
-having a different size it is not easy to keep track of the actual
-number of elements stored in the set. Thus
-:doxy:`Data::numberOfElements` needs to iterate over all batches and
-hence takes time linear in the number of batches (and thus usually in
-the number of elements). For the same reason, accessing the i-th element
-with :doxy:`Data::element` is a linear time operation in the number of
-batches since it needs to find the batch the element is located in.
-
-.. warning::
-	Element-wise random access to a ``Data`` a object is a linear time
-	operation! It is not to be confused with constant-time element
-	access in arrays. Thus aside from only very
-	small data sets or performance uncritical code you should never use
-	element-wise random-access to a data container.
-
-As a consequence a naive loop iterating over the elements of a ``Data``
-container is a **quadratic time** operation. There are the following
-more appropriate ways of achieving this common operation in linear time::
-
-..sharkcode<Data/Datasets.tpp,elements-loops>
 
 
 Summary of element access
@@ -285,7 +181,6 @@ element_type               The type of elements stored in the object.
 element_reference          Reference to a single element. This is a proxy reference, meaning
                            that it can be something more complex than element_type&, for example
                            an object describing the row of a matrix.
-element_range              Range over the elements.
 batch_type                 The batch type of the Data set. Same as Batch<element_type>::type
 batch_reference            Reference to a batch of points. This is batch_type&.
 batch_range                Range over the batches.
@@ -296,23 +191,8 @@ Methods for batch access. These methods have constant time complexity:
 ==========================================   ======================================================================
 Method                                       Description
 ==========================================   ======================================================================
-size_t numberOfBatches () const              Returns the number of batches in the set.
-batch_reference batch (size_t i)             Returns the i-th batch of the set.
-batch_range batches ()                       Returns an stl-compliant random-access-container over the batches.
-==========================================   ======================================================================
-
-Methods for element access. All these methods have time complexity
-linear in the number of batches:
-
-==========================================   ======================================================================
-Method                                       Description
-==========================================   ======================================================================
-size_t numberOfElements () const             Returns the number of elements in the set.
-element_reference element (size_t i)         Returns the i-th element of the set.
-element_range elements ()                    Returns a bidirectional container of elements. Random access
-                                             is also supported but does not meet stl's time complexity
-                                             requirements. Also be aware that proxy-objects are returned
-                                             instead of references.
+size_t size() const 		             Returns the number of batches in the set.
+batch_reference operator[](size_t i)         Returns the i-th batch of the set.
 ==========================================   ======================================================================
 
 Furthermore, ``LabeledData`` supports direct access to the Containers
@@ -321,7 +201,7 @@ storing elements and labels:
 ==========================================   ======================================================================
 Method                                       Description
 ==========================================   ======================================================================
-UnlabeledData<I>& inputs()                   Returns only the inputs of the LabeledData<I,L> object.
+Data<I>& inputs()                   	     Returns only the inputs of the LabeledData<I,L> object.
 Data<L>& labels()                            Returns only the labels of the LabeledData<I,L> object.
 ==========================================   ======================================================================
 
@@ -333,7 +213,7 @@ Sometimes we want to query basic informations about a data set like input
 dimension or the number of classes of a labeled data set. The data classes
 provide several convenience functions for such queries.
 
-For Data and UnlabeledData there are three functions::
+For Data there are three functions::
 
 ..sharkcode<Data/Datasets.tpp,unlabeled-convenience>
 

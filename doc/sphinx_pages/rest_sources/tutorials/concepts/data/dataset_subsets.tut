@@ -7,7 +7,7 @@ There are different types of subsets, and thus Shark offers a wide
 variety of functions and objects for handling subsets.
 
 At this point recall that in Shark offers the data containers
-:doxy:`Data`, :doxy:`UnlabeledData`, and :doxy:`LabeledData`. Most of
+:doxy:`Data` and :doxy:`LabeledData`. Most of
 the functionalities presented in the following refer to all of these
 containers. If you are not familiar with Shark data containers then you
 way want to work through the tutorial :doc:`Data tutorial <datasets>`
@@ -36,8 +36,7 @@ The following basic functions acquire subsets::
 
 ..sharkcode<Data/Subsets.tpp,subsets>
 
-The functions of course also work with :doxy:`Data` and
-:doxy:`UnlabeledData` objects.
+The functions of course also work with :doxy:`Data` objects.
 
 
 Splitting

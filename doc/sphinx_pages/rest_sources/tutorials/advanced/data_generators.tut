@@ -1,0 +1,85 @@
+
+Data Generators
+=================================
+
+In this tutorial we will learn how to stream data asynchronously into the learning process. This enables
+us to do batch learning with a very large or even infinite dataset. Also data augmentation
+can be implemented this way. In this tutorial, we will load batches of images from a zip-file. 
+In our example, Images are stored as``/s15/3.pgm``, where the 15 is the subject-id and 3 is the
+number of the image of the person. In our dataset, we have 40 subjects with 10 images each.
+
+For this tutorial, we will need the following header-files::
+
+..sharkcode<Supervised/FaceID.tpp,data_includes>
+
+Streaming Data from Disk
+--------------------------------------
+
+First, we need to open our zip file. for this we can use the :doxy:`ZipReader`.
+It allows us to enumerate the file-contents and load single files in the zip-archive::
+
+..sharkcode<Supervised/FaceID.tpp,data_load_zip>
+
+We would like to generate a batch of data by picking a subset of files in every iteration. A nice helper
+for this is the :doxy:`FileList` class. It either enumerates files on the disk or works on a pre-defined set of file-paths,
+for example the files in the zip-archive. We can use a glob-expression to filter out data we are not interested in.
+For example to exclude subfolders s1...s9 as a testset, we can write::
+
+..sharkcode<Supervised/FaceID.tpp,data_enumerate_images>
+
+Note that ``?`` stands for a single letter, while ``*`` is a variable number of letters. In the example we also
+declared a Generator. A generator is a random function, which returns a batch of inputs. When creating
+a generator, we need to provide two arguments: the number of batches it should cache (in our example 4) and the size of a
+batch (in our example 8). Caching allows shark to pre-compute batches in parallel with other computations.
+In our example, using a cache-size of 4 means that the system can use up to 4 threads to pre-compute batches in parallel to other computations.
+
+
+Loading Images and Transforming Generators
+---------------------------------------------------
+
+We now have a function that returns batches of file-paths. We will turn them into batches of pairs of inputs and labels.
+For this, we will first declare a lambda-function, which will load an image from the-zip archive, resizes it and stores
+it together with the label of the person::
+
+..sharkcode<Supervised/FaceID.tpp,data_load_images>
+
+With this lambda function, we can use ``transform`` to turn our generator of paths into a generator of input-label-pairs::
+
+..sharkcode<Supervised/FaceID.tpp,data_transform_image_load>
+
+Transform is smart. It can work with functions that transform single inputs but also accept functions which work on whole batches.
+In our case, the function takes single string for the file-path as argument. However, transform does not know what the shape
+of the resulting batch-elements is. Therefore, we have to provide the shape of the pair of inputs and labels, which
+in our case is the shape of the images and the number of classes.
+
+Next, we will transform the single images into pairs of points which we store as::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair>
+
+We have to tell shark how to work with this new data points. For educational reasons, we will defer the explanation of the following code and its effects to the next tutorial::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_batch>
+
+To create the pairs, we define another lambda function which takes a pair of image-label pairs and creates a batch with all possible pairings. We further
+set a binary label for training, indicating whether the images are from the same person::
+
+..sharkcode<Supervised/FaceID.tpp,data_create_pairs>
+
+In the end, we use the lambda function to transform the generator from the previous tutorial to a generator of batches::
+
+..sharkcode<Supervised/FaceID.tpp,data_generator_pairs>
+
+Note that by this we change the size of the batches from 8 to 64. As batch-sizes are not part of shape, we can change them freely and can even return a variable batch size.
+Still, we had to tell transform the shape of our outputs, ``{{imageShape,imageShape}, 2}``.
+Here, ``{imageShape,imageShape}`` is the shape of a FacePair and ``2`` the number of classes as we now have data for a binary problem.
+We can now use a generator as data source for an error function::
+
+..sharkcode<Supervised/FaceID.tpp,generator_error_usage>
+
+
+
+What next?
+----------
+
+The full example-code can be seen in :doxy:`FaceID.cpp <FaceID.cpp>`. 
+In the next step, we will answer how the macro in the last part of this tutorial worked. So let us explore how to :doc:`./new_data_types`.

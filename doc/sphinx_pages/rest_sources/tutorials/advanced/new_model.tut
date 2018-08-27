@@ -1,0 +1,75 @@
+Define A New Model
+=================================
+
+Shark comes with an extensive list of predefined models. But we certianly do not offer all
+possible architectures for all poblems. For the task of testing whether two models
+are the same, we need a model that transforms a pair of inputs, which we defined in
+the :doc:`previous tutorial <./new_model>` to a class-label. We will use a special architecture,
+where the model can be described as a function
+
+.. math ::
+	f(x_1,x_2)= \text{classifier}(\text{map}(x_1) - \text{map}(x_2)) \enspace,
+
+where classifier and map are two other models which we can define
+freely. In this architecture, we map the images to some intermediate representation. 
+We assume that images from different persons are far apart and therefore we just use the difference in their representation.
+
+The base of our model looks like::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_base>
+
+We take the map and classifier objects as pointer arguments and store them internally. 
+The template Argument of AbstractModel describe the input type, the output type and the type of the parameter vector used.
+In the constructor, we first check that the models have compatible shapes.
+Shark does not care whether the shapes are completely identical as long as they have the same number of parameters.
+Additionally, we set the flag indicating that this model can be differentiated with respect to its derivatives.
+Of course,this ability does not come for free,  we need to implement it!
+First, we have to handle the parameterization. We will declare that our model has a parameter
+vector which is the concatenation of the parameters of the sub-models::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_parameters>
+
+
+We will also declare which shapes it expects for input and output::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_shapes>
+
+
+Evaluating and Differentiating a Model
+-------------------------------------------
+
+Now, we come to the heart of the model definition. In order to implement backpropagation in the derivative, we need to store values
+obtained in the forward-propagation-phase, more exactly we need to store the results of ``map(x)``, and any values, which ``map`` and
+``classifier`` need to store for their derivatives. We will additionally store the result of :math:`\text{map}(x_1) - \text{map}(x_2)`.
+We can not store the values inside the model, because we might want to evaluate the model in parallel.
+Instead, we declare our own struct ``InternalState`` which we derive from :doxy:`State` and implement a function ``createState``::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_state>
+
+We will fill the contents of this struct during evaluation.
+Implementing ``eval`` is straight forward. we get inputs and outputs as well as a state-object
+as arguments and fill those with values::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_eval>
+
+With the stored values, we can implement the derivatives and compute the backpropagation step::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_derivative>
+
+Making it parallel
+-------------------------------------------
+
+Our model is expensive to compute, as we can choose ``map`` to be a deep neural network. Thus we would like to use parallelization to speed up our computations.
+Luckily, we can do this as we have two independent calls to ``m_map->eval``. We can use the Threadpool in Shark to parallelize those two calls::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_parallel_eval>
+
+The same applies for the derivatives::
+
+..sharkcode<Supervised/FaceID.tpp,define_face_pair_model_parallel_derivative>
+
+What next?
+----------
+This is the end of this tutorial.
+We skip the remaining parts of the problem definition as you should now be able to fill the gaps.
+The full example-code can be seen in :doxy:`FaceID.cpp <FaceID.cpp>`.

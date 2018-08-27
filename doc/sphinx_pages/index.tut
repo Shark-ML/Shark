@@ -10,7 +10,9 @@
    rest_sources/tutorials/first_steps/your_programs
    rest_sources/tutorials/first_steps/hello_shark
    rest_sources/tutorials/first_steps/general_optimization_tasks
-
+   rest_sources/tutorials/advanced/data_generators
+   rest_sources/tutorials/advanced/new_data_types
+   rest_sources/tutorials/advanced/new_model
 
    rest_sources/tutorials/concepts/library_design/models
    rest_sources/tutorials/concepts/library_design/kernels
