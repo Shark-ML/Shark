@@ -36,6 +36,7 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/LinAlg/Metrics.h>
 #include <shark/Core/Random.h>
+#include <shark/Core/DLLSupport.h>
 
 #include <numeric>
 
@@ -49,9 +50,9 @@ namespace detail {
  * n-dimensional points that sum to 's' is given by the formula "N over K" where
  * N is n - 2 + s + 1 and K is s.
  */
-std::size_t sumlength(std::size_t const n, std::size_t const sum);
+SHARK_EXPORT_SYMBOL std::size_t sumlength(std::size_t const n, std::size_t const sum);
 
-void pointLattice_helper(
+SHARK_EXPORT_SYMBOL void pointLattice_helper(
 	UIntMatrix & pointMatrix,
 	std::size_t const rowidx,
 	std::size_t const colidx,
@@ -137,14 +138,14 @@ typedef std::pair<double, RealVector> Preference;
 
 /// \brief Return a set of evenly spaced n-dimensional points on the unit sphere
 /// clustered around the specified preference points.
-RealMatrix preferenceAdjustedUnitVectors(
+SHARK_EXPORT_SYMBOL RealMatrix preferenceAdjustedUnitVectors(
 	std::size_t const n, 
 	std::size_t const sum,
 	std::vector<Preference> const & preferences);
 
 /// \brief Return a set of of evenly spaced n-dimensional points on the "unit
 /// simplex" clustered around the specified preference points.
-RealMatrix preferenceAdjustedWeightVectors(
+SHARK_EXPORT_SYMBOL RealMatrix preferenceAdjustedWeightVectors(
 	std::size_t const n,
 	std::size_t const sum,
 	std::vector<Preference> const & preferences);
@@ -161,10 +162,10 @@ std::size_t computeOptimalLatticeTicks(
 );
 
 /// \brief Returns a set of evenly spaced n-dimensional points on the "unit simplex".
-RealMatrix weightLattice(std::size_t const n, std::size_t const sum);
+SHARK_EXPORT_SYMBOL RealMatrix weightLattice(std::size_t const n, std::size_t const sum);
 
 /// \brief Return a set of evenly spaced n-dimensional points on the unit sphere.
-RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum);
+SHARK_EXPORT_SYMBOL RealMatrix unitVectorsOnLattice(std::size_t const n, std::size_t const sum);
 
 /*
  * Computes the pairwise euclidean distance between all row vectors in the
