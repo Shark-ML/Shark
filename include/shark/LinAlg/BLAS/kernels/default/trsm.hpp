@@ -52,14 +52,14 @@ void trsm_block(
 	REMORA_SIZE_CHECK(A().size1() <= maxBlockSize1);
 	typedef typename MatA::value_type value_typeA;
 	typedef typename MatB::value_type value_typeB;
-
+	auto A_elem = A().elements();
 
 	//evaluate and copy block of A
 	std::size_t size = A().size1();
 	value_typeA blockA[maxBlockSize1][maxBlockSize1];
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j <= i; ++j){
-			blockA[i][j] = A()(i,j);
+			blockA[i][j] = A_elem(i,j);
 		}
 	}
 
@@ -107,12 +107,13 @@ void trsm_block(
 	column_major // B is column-major
 ) {
 	typedef typename MatA::value_type value_type;
+	auto A_elem = A().elements();
 	//evaluate and copy block of A
 	std::size_t size = A().size1();
 	value_type blockA[maxBlockSize1][maxBlockSize1];
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = 0; j <= i; ++j){
-			blockA[i][j] = A()(i,j);
+			blockA[i][j] = A_elem(i,j);
 		}
 	}
 
@@ -143,13 +144,13 @@ void trsm_block(
 	REMORA_SIZE_CHECK(A().size1() <= maxBlockSize1);
 	typedef typename MatA::value_type value_typeA;
 	typedef typename MatB::value_type value_typeB;
-
+	auto A_elem = A().elements();
 	//evaluate and copy block of A
 	std::size_t size = A().size1();
 	value_typeA blockA[maxBlockSize1][maxBlockSize1];
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = i; j != size; ++j){
-			blockA[i][j] = A()(i,j);
+			blockA[i][j] = A_elem(i,j);
 		}
 	}
 
@@ -197,12 +198,13 @@ void trsm_block(
 	column_major // B is column-major
 ) {
 	typedef typename MatA::value_type value_type;
+	auto A_elem = A().elements();
 	//evaluate and copy block of A
 	std::size_t size = A().size1();
 	value_type blockA[maxBlockSize1][maxBlockSize1];
 	for(std::size_t i = 0; i != size; ++i){
 		for(std::size_t j = i; j != size; ++j){
-			blockA[i][j] = A()(i,j);
+			blockA[i][j] = A_elem(i,j);
 		}
 	}
 

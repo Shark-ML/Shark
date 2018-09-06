@@ -30,9 +30,13 @@
 
 #include "../detail/traits.hpp"
 #include "default/vector_assign.hpp"
-#ifdef REMORA_USE_GPU
-#include "gpu/vector_assign.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "opencl/vector_assign.hpp"
 #endif
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/vector_assign.hpp"
+#endif
+
 
 namespace remora{namespace kernels {
 

@@ -38,6 +38,11 @@
 #include <cstddef>
 #include <cassert>
 
+#if defined(__HCC__) || defined(__NVCC__)
+#define REMORA_CALL_PREFIX __host__ __device__
+#else
+#define REMORA_CALL_PREFIX 
+#endif
 
 namespace remora{
 	
@@ -109,31 +114,24 @@ struct row_major:public linear_structure{
 	};
 
 	// Indexing conversion to storage element
-	static size_type element(size_type i, size_type j, size_type leading_dimension) {
+	REMORA_CALL_PREFIX static size_type element(size_type i, size_type j, size_type leading_dimension) {
 		return i * leading_dimension + j;
 	}
 
 	// Major and minor indices
 	template<class Index1, class Index2>
-	static Index1 index_M(Index1 const& index1, Index2 const& /* index2 */) {
+	REMORA_CALL_PREFIX static Index1 index_M(Index1 const& index1, Index2 const& /* index2 */) {
 		return index1;
 	}
 	template<class Index1, class Index2>
-	static Index2 index_m(Index1 const& /*index1*/, Index2 const& index2 ) {
+	REMORA_CALL_PREFIX static Index2 index_m(Index1 const& /*index1*/, Index2 const& index2 ) {
 		return index2;
 	}
 	
-	static size_type stride1(size_type /*size_i*/, size_type size_j){
-		return size_j;
-	}
-	static size_type stride2(size_type /*size_i*/, size_type /*size_j*/){
-		return 1;
-	}
-	
-	static size_type stride1(size_type leading_dimension){
+	REMORA_CALL_PREFIX static size_type stride1(size_type leading_dimension){
 		return leading_dimension;
 	}
-	static size_type stride2(size_type /*leading_dimension*/){
+	REMORA_CALL_PREFIX static size_type stride2(size_type /*leading_dimension*/){
 		return 1;
 	}
 };
@@ -161,24 +159,24 @@ struct column_major:public linear_structure{
 	};
 
 	// Indexing conversion to storage element
-	static size_type element(size_type i, size_type j, size_type leading_dimension) {
+	REMORA_CALL_PREFIX static size_type element(size_type i, size_type j, size_type leading_dimension) {
 		return i + j * leading_dimension;
 	}
 
 	// Major and minor indices
 	template<class Index1, class Index2>
-	static Index2 index_M(Index1 const& /*index1*/, Index2 const& index2 ) {
+	REMORA_CALL_PREFIX static Index2 index_M(Index1 const& /*index1*/, Index2 const& index2 ) {
 		return index2;
 	}
 	template<class Index1, class Index2>
-	static Index1 index_m(Index1 const& index1, Index2 const& /* index2 */) {
+	REMORA_CALL_PREFIX static Index1 index_m(Index1 const& index1, Index2 const& /* index2 */) {
 		return index1;
 	}
 	
-	static size_type stride1(size_type /*leading_dimension*/){
+	REMORA_CALL_PREFIX static size_type stride1(size_type /*leading_dimension*/){
 		return 1;
 	}
-	static size_type stride2(size_type leading_dimension){
+	REMORA_CALL_PREFIX static size_type stride2(size_type leading_dimension){
 		return leading_dimension;
 	}
 };
@@ -230,4 +228,5 @@ private:
 
 }
 
+#undef REMORA_CALL_PREFIX
 #endif

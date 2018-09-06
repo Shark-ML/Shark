@@ -132,6 +132,7 @@ struct BaseSparseVector{
 		m_manager.reserve(non_zeros);
 	}
 	
+	no_functor elements() const{return no_functor();};
 	
 	// --------------
 	// ITERATORS
@@ -291,6 +292,8 @@ public:
 	typename device_traits<cpu_tag>::queue_type& queue(){
 		return device_traits<cpu_tag>::default_queue();
 	}
+	
+	no_functor elements() const{return no_functor();};
 	
 	// --------------
 	// ITERATORS

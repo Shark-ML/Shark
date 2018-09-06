@@ -32,9 +32,13 @@
 #define REMORA_KERNELS_FOLD_ROWS_HPP
 
 #include "default/fold_rows.hpp"
-#ifdef REMORA_USE_GPU
-#include "gpu/fold_rows.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "opencl/fold_rows.hpp"
 #endif
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/fold_rows.hpp"
+#endif
+
 
 namespace remora {namespace bindings{
 template<class F,  class G, class M,class V, class Device>

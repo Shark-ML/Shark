@@ -45,13 +45,13 @@ public:
 	typedef vector_set<typename E::const_closure_type, O> const_closure_type;
 	typedef vector_set closure_type;
 	typedef O point_orientation;
-	//~ typedef typename E::orientation storage_orientation;
 	typedef typename E::evaluation_category evaluation_category;
 	typedef typename E::device_type device_type;
 
-	// Construction and destruction
+	// Construction
 	explicit vector_set(expression_closure_type const& e):m_expression(e){}
 
+	// Accessors
 	size_type size() const{
 		return point_orientation::index_M(m_expression.size1(), m_expression.size2());
 	}
@@ -66,7 +66,7 @@ public:
 		return m_expression.queue();
 	}
 	
-	//computation kernels
+	// Computation Kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX, device_type>& X, typename MatX::value_type alpha)const{
 		assign(X, m_expression, alpha);

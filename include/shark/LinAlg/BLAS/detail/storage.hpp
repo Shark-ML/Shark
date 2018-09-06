@@ -107,13 +107,12 @@ struct dense_matrix_storage{
 	
 	template<class Orientation>
 	typename rows_storage<Orientation>::type sub_rows(std::size_t offset, Orientation) const{
-		std::size_t stride = Orientation::index_M(leading_dimension,(std::size_t)1);
-		return {values + offset * stride, leading_dimension};
+		return {values + offset * Orientation::stride1(leading_dimension), leading_dimension};
 	}
 	
 	template<class Orientation>
 	typename row_storage<Orientation>::type row(std::size_t i, Orientation) const{
-		return {values + i * Orientation::index_M(leading_dimension,(std::size_t)1), Orientation::index_m(leading_dimension,(std::size_t)1)};
+		return {values + i * Orientation::stride1(leading_dimension), Orientation::stride2(leading_dimension)};
 	}
 	
 	diag_storage diag() const{

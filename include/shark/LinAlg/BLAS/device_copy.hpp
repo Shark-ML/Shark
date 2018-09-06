@@ -56,8 +56,12 @@ E const&  copy_to_device(matrix_expression<E, cpu_tag> const& e, cpu_tag){
 
 }
 
-#ifdef REMORA_USE_GPU
-#include "gpu/copy.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "opencl/copy.hpp"
+#endif
+
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/copy.hpp"
 #endif
 
 #endif

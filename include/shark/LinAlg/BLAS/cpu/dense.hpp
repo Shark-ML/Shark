@@ -150,6 +150,11 @@ public:
 		return m_values[i*m_stride];
 	}
 	
+	device_traits<cpu_tag>::vector_element<T> elements() const{
+		return {raw_storage()};
+	}
+	
+	
 	void clear(){
 		std::fill(begin(), end(), value_type/*zero*/());
 	}
@@ -286,6 +291,10 @@ public:
 	
 	typename device_traits<cpu_tag>::queue_type& queue()const{
 		return device_traits<cpu_tag>::default_queue();
+	}
+	
+	device_traits<cpu_tag>::matrix_element<T, orientation> elements() const{
+		return {raw_storage()};
 	}
 	
 	// ---------
@@ -568,6 +577,13 @@ public:
 	// ---------
 	// High level interface
 	// ---------
+	
+	device_traits<cpu_tag>::matrix_element<value_type, orientation> elements(){
+		return {raw_storage()};
+	}
+	device_traits<cpu_tag>::matrix_element<value_type const, orientation> elements() const{
+		return {raw_storage()};
+	}
 
 	// Resizing
 	/// \brief Resize a matrix to new dimensions. If resizing is performed, the data is not preserved.
@@ -815,9 +831,17 @@ public:
 		return device_traits<cpu_tag>::default_queue();
 	}
 	
+	
 	// ---------
 	// High level interface
 	// ---------
+	
+	device_traits<cpu_tag>::vector_element<value_type const> elements() const{
+		return {raw_storage()};
+	}
+	device_traits<cpu_tag>::vector_element<value_type> elements(){
+		return {raw_storage()};
+	}
 
 	/// \brief Return the maximum size of the data container.
 	/// Return the upper bound (maximum size) on the data container. Depending on the container, it can be bigger than the current size of the vector.

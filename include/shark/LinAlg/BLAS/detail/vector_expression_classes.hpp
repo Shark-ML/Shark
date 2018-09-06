@@ -38,7 +38,7 @@ namespace remora{
 template<class E>
 class vector_scalar_multiply:public vector_expression<vector_scalar_multiply <E>, typename E::device_type > {
 private:
-	typedef typename device_traits<typename E::device_type>:: template multiply_scalar<typename E::value_type> functor_type;
+	typedef typename device_traits<typename E::device_type>:: template multiply_scalar<typename E::value_type> multiply_functor;
 public:
 	typedef typename E::const_closure_type expression_closure_type;
 	typedef typename E::size_type size_type;
@@ -53,17 +53,14 @@ public:
 	typedef typename E::evaluation_category evaluation_category;
 	typedef typename E::device_type device_type;
 
-	// Construction and destruction
-	// May be used as mutable expression.
+	// Construction
 	vector_scalar_multiply(expression_closure_type const& e, value_type scalar):
 		m_expression(e), m_scalar(scalar) {}
 
-	// to_functors
+	// Accessors
 	size_type size() const {
 		return m_expression.size();
 	}
-
-	// Expression to_functors
 	expression_closure_type const& expression() const {
 		return m_expression;
 	}
@@ -71,40 +68,40 @@ public:
 	value_type scalar()const{
 		return m_scalar;
 	}
-	functor_type functor()const{
-		return functor_type(m_scalar);
-	}
-
 	typename device_traits<device_type>::queue_type& queue()const{
 		return m_expression.queue();
 	}
 
-	// Element access
-	const_reference operator()(std::size_t i) const {
-		return m_scalar * m_expression(i);
+	// Element Functor
+	auto elements() const -> decltype(
+		device_traits<device_type>::make_compose(std::declval<E const&>().elements(), std::declval<multiply_functor&>())
+	){
+		return device_traits<device_type>::make_compose(m_expression.elements(),multiply_functor(m_scalar));
 	}
 	
-	//iterators
-	typedef typename device_traits<device_type>:: template transform_iterator<typename expression_closure_type::const_iterator,functor_type >::type const_iterator;
-	typedef const_iterator iterator;
-	
-	const_iterator begin() const {
-		return const_iterator(m_expression.begin(),functor_type(m_scalar));
-	}
-	const_iterator end() const {
-		return const_iterator(m_expression.end(),functor_type(m_scalar));
-	}
-	
-	//computation kernels
+	//Computation Kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, device_type>& x)const{
 		auto eval_e = eval_block(m_expression);
-		assign(x,vector_scalar_multiply<decltype(eval_e)>(eval_e, m_scalar));
+		typename device_traits<device_type>::template multiply_assign<value_type> f(m_scalar);
+		kernels::assign(x, eval_e, f);
 	}
 	template<class VecX>
 	void plus_assign_to(vector_expression<VecX, device_type>& x)const{
 		auto eval_e = eval_block(m_expression);
-		plus_assign(x,vector_scalar_multiply<decltype(eval_e)>(eval_e, m_scalar));
+		typename device_traits<device_type>::template multiply_and_add<value_type> f(m_scalar);
+		kernels::assign(x, eval_e, f);
+	}
+	
+	//Iterator Access
+	typedef typename device_traits<device_type>:: template transform_iterator<typename expression_closure_type::const_iterator,multiply_functor >::type const_iterator;
+	typedef const_iterator iterator;
+	
+	const_iterator begin() const {
+		return const_iterator(m_expression.begin(),multiply_functor(m_scalar));
+	}
+	const_iterator end() const {
+		return const_iterator(m_expression.end(),multiply_functor(m_scalar));
 	}
 private:
 	expression_closure_type m_expression;
@@ -126,32 +123,27 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef elementwise<dense_tag> evaluation_category;
 	
-	// Construction and destruction
-	scalar_vector()
-	:m_size(0), m_value() {}
+	// Construction
 	explicit scalar_vector(size_type size, value_type value)
 	:m_size(size), m_value(value) {}
-	scalar_vector(const scalar_vector& v)
-	:m_size(v.m_size), m_value(v.m_value) {}
 
-	// to_functors
+	// Accessors
 	size_type size() const {
 		return m_size;
 	}
-    
-    T scalar() const {
+	T scalar() const {
 		return m_value;
 	}
-
-	// Element access
-	const_reference operator()(std::size_t) const {
-		return m_value;
-	}
-	
 	typename device_traits<Device>::queue_type& queue()const{
 		return device_traits<Device>::default_queue();
 	}
-public:
+
+	// Element Functor
+	typename device_traits<Device>:: template constant<value_type> elements() const{
+		return {m_value};
+	}
+
+	// Iterator Access
 	typedef typename device_traits<Device>:: template constant_iterator<T>::type iterator;
 	typedef typename device_traits<Device>:: template constant_iterator<T>::type const_iterator;
 
@@ -183,33 +175,30 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef elementwise<sparse_tag> evaluation_category;
 	
-	// Construction and destruction
-	unit_vector()
-	:m_size(0), m_index(0), m_value(1) {}
+	// Construction
 	explicit unit_vector(size_type size, size_type index, value_type value = value_type(1))
 	:m_size(size), m_index(index), m_value(value) {}
 
+	// Accessors
 	size_type size() const {
 		return m_size;
 	}
-
-    value_type scalar() const {
+	value_type scalar() const {
 		return m_value;
 	}
-    
-    size_type index() const {
+	size_type index() const {
 		return m_index;
-	}
-    
-	// Element access
-	const_reference operator()(size_type const& i) const {
-		REMORA_SIZE_CHECK(i < m_size);
-		return (i == m_index)? m_value : value_type();
 	}
 	typename device_traits<Device>::queue_type& queue()const{
 		return device_traits<Device>::default_queue();
 	}
-public:
+	
+	// Element Functor
+	typename device_traits<Device>:: template unit<value_type> elements() const{
+		return {m_value, m_index};
+	}
+	
+	//Iterator Access
 	typedef typename device_traits<Device>:: template one_hot_iterator<value_type const>::type const_iterator;
 	typedef const_iterator iterator;
 
@@ -223,7 +212,7 @@ public:
 private:
 	size_type m_size;
 	size_type m_index;
-    value_type m_value;
+	value_type m_value;
 };
 
 ///\brief Class implementing vector transformation expressions.
@@ -246,34 +235,33 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef typename E::evaluation_category evaluation_category;
 	typedef typename E::device_type device_type;
-	// Construction and destruction
-	// May be used as mutable expression.
-	vector_unary(expression_closure_type const& e, F const &functor):
+
+	// Construction
+	vector_unary(expression_closure_type const& e, functor_type const &functor):
 		m_expression(e), m_functor(functor) {}
 
-	// to_functors
+	// Accessors
 	size_type size() const {
 		return m_expression.size();
 	}
-
-	// Expression to_functors
 	expression_closure_type const &expression() const {
 		return m_expression;
 	}
-	
 	functor_type const& functor()const{
 		return m_functor;
 	}
 	typename device_traits<device_type>::queue_type& queue()const{
 		return m_expression.queue();
-	}	
-	
-	// Element access
-	const_reference operator()(std::size_t i) const {
-		return m_functor(m_expression(i));
 	}
 	
-	//computation kernels
+	// Element Functor
+	auto elements() const -> decltype(
+		device_traits<device_type>::make_compose(std::declval<E const&>().elements(),std::declval<functor_type&>())
+	){
+		return device_traits<device_type>::make_compose(m_expression.elements(), m_functor);
+	}
+
+	//Computation Kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, device_type>& x)const{
 		assign(x,m_expression);
@@ -286,18 +274,16 @@ public:
 		//also make use of that we can now run the assignment kernel directly with that functor
 		typedef typename device_traits<device_type>::template add<typename VecX::value_type> Add;
 		typedef typename device_traits<device_type>::template identity<typename VecX::value_type> Identity;
-		typedef typename device_traits<device_type>::template transform_arguments< Identity, F, Add> Composed;
-		kernels::assign(x,eval_rhs,Composed(Identity(), m_functor,Add()));
+		kernels::assign(x,eval_rhs,device_traits<device_type>::make_transform_arguments(Identity(), m_functor, Add()));
 	}
 
-	
+	//Iterator Access
 	typedef typename device_traits<device_type>:: template transform_iterator<
 		typename expression_closure_type::const_iterator,
 		functor_type
 	>::type const_iterator;
 	typedef const_iterator iterator;
 
-	// Element lookup
 	const_iterator begin() const {
 		return const_iterator(m_expression.begin(),m_functor);
 	}
@@ -306,7 +292,7 @@ public:
 	}
 private:
 	expression_closure_type m_expression;
-	F m_functor;
+	functor_type m_functor;
 };
 
 template<class E1, class E2>
@@ -329,7 +315,7 @@ public:
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 	typedef typename E1::device_type device_type;
 
-	// Construction and destruction
+	// Construction
 	explicit vector_addition (
 		lhs_closure_type e1, 
 		rhs_closure_type e2
@@ -337,29 +323,35 @@ public:
 		REMORA_SIZE_CHECK(e1.size() == e2.size());
 	}
 
-	// to_functors
+	// Accessors
 	size_type size() const {
 		return m_lhs.size();
 	}
-
-	// Expression to_functors
 	lhs_closure_type const& lhs() const {
 		return m_lhs;
 	}
 	rhs_closure_type const& rhs() const {
 		return m_rhs;
 	}
-
 	typename device_traits<device_type>::queue_type& queue()const{
 		return m_lhs.queue();
 	}
-
-	// Element access
-	const_reference operator()(std::size_t i) const {
-		return m_lhs(i) + m_rhs(i);
+	
+	// Element Functor
+	auto elements() const -> decltype(
+		device_traits<device_type>::make_compose_binary(
+			std::declval<E1 const&>().elements(),
+			std::declval<E2 const&>().elements(),
+			std::declval<functor_type&>()
+		)
+	){
+		return device_traits<device_type>::make_compose_binary(
+			m_lhs.elements(), m_rhs.elements(), functor_type()
+		);
 	}
 	
-	//computation kernels
+	
+	//Computation Kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, device_type>& x)const{
 		//working around a bug in non-dense assign
@@ -377,7 +369,7 @@ public:
 		plus_assign(x,m_rhs);
 	}
 
-	// Iterator types
+	// Iterator Access
 	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename lhs_closure_type::const_iterator,
 		typename rhs_closure_type::const_iterator,
@@ -420,7 +412,8 @@ public:
 	typedef unknown_storage const_storage_type;
 	typedef typename evaluation_restrict_traits<E1,E2>::type evaluation_category;
 	typedef typename E1::device_type device_type;
-	// Construction and destruction
+
+	// Construction
 	explicit vector_binary (
 		lhs_closure_type e1, 
 		rhs_closure_type e2,
@@ -429,12 +422,10 @@ public:
 		REMORA_SIZE_CHECK(e1.size() == e2.size());
 	}
 
-	// to_functors
+	// Accessors
 	size_type size() const {
 		return m_lhs.size ();
 	}
-
-	// Expression to_functors
 	lhs_closure_type const& lhs() const {
 		return m_lhs;
 	}
@@ -445,16 +436,24 @@ public:
 	functor_type const& functor()const{
 		return m_functor;
 	}
-
 	typename device_traits<device_type>::queue_type& queue()const{
 		return m_lhs.queue();
 	}
 
-	// Element access
-	const_reference operator()(std::size_t i) const {
-		return m_functor(m_lhs(i), m_rhs(i));
+	// Element Functor
+	auto elements() const -> decltype(
+		device_traits<device_type>::make_compose_binary(
+			std::declval<E1 const&>().elements(),
+			std::declval<E2 const&>().elements(),
+			std::declval<functor_type&>()
+		)
+	){
+		return device_traits<device_type>::make_compose_binary(
+			m_lhs.elements(), m_rhs.elements(), m_functor
+		);
 	}
 	
+	// Computation Kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, device_type>& x)const{
 		assign(x,m_lhs);
@@ -469,10 +468,7 @@ public:
 		plus_assign(x,e);	
 	}
 
-	// Iterator types
-	
-	// Iterator enhances the iterator of the referenced expressions
-	// with the unary functor.
+	// Iterator Access
 	typedef typename device_traits<device_type>:: template binary_transform_iterator<
 		typename lhs_closure_type::const_iterator,
 		typename rhs_closure_type::const_iterator,
@@ -524,28 +520,28 @@ public:
 	>::type> evaluation_category;
 	typedef typename E1::device_type device_type;
 
-	// Construction and destruction
+	// Construction
 	explicit vector_concat(
 		lhs_closure_type e1, 
 		rhs_closure_type e2
 	):m_lhs(e1),m_rhs(e2){}
 
-	// to_functors
+	// Accessors
 	size_type size() const {
 		return m_lhs.size() + m_rhs.size();
 	}
-
-	// Expression to_functors
 	lhs_closure_type const& lhs() const {
 		return m_lhs;
 	}
 	rhs_closure_type const& rhs() const {
 		return m_rhs;
 	}
-
 	typename device_traits<device_type>::queue_type& queue()const{
 		return m_lhs.queue();
 	}
+	
+	//Element Functor
+	no_functor elements() const{return no_functor();}
 	
 	//computation kernels
 	template<class VecX>
@@ -572,50 +568,6 @@ private:
 	rhs_closure_type m_rhs;
 };
 
-
-//traits for transforming an expression into a functor for gpu usage
-
-template<class E>
-struct ExpressionToFunctor<vector_scalar_multiply<E> >{
-	typedef typename E::device_type device_type;
-	typedef typename device_traits<device_type>::template multiply_scalar<typename E::value_type> functor_type;
-	static auto transform(vector_scalar_multiply<E> const& e) -> decltype(device_traits<device_type>::make_compose(to_functor(e.expression()),e.functor())){
-		return device_traits<device_type>::make_compose(to_functor(e.expression()), e.functor());
-	}
-};
-template<class E1, class E2>
-struct ExpressionToFunctor<vector_addition<E1, E2> >{
-	typedef typename E1::device_type device_type;
-	typedef typename device_traits<device_type>::template add<typename vector_addition<E1, E2>::value_type> functor_type;
-	static auto transform(vector_addition<E1, E2> const& e) -> decltype(device_traits<device_type>::make_compose_binary(to_functor(e.lhs()),to_functor(e.rhs()),functor_type())){
-		return device_traits<device_type>::make_compose_binary(to_functor(e.lhs()),to_functor(e.rhs()),functor_type());
-	}
-};
-
-template<class E, class F>
-struct ExpressionToFunctor<vector_unary<E, F> >{
-	typedef typename E::device_type device_type;
-	static auto transform(vector_unary<E, F> const& e) -> decltype(device_traits<device_type>::make_compose(to_functor(e.expression()),e.functor())){
-		return device_traits<device_type>::make_compose(to_functor(e.expression()),e.functor());
-	}
-};
-
-template<class E1, class E2, class F>
-struct ExpressionToFunctor<vector_binary<E1, E2, F> >{
-	typedef typename E1::device_type device_type;
-	static auto transform(vector_binary<E1, E2, F> const& e) -> decltype(device_traits<device_type>::make_compose_binary(to_functor(e.lhs()),to_functor(e.rhs()), e.functor())){
-		return device_traits<device_type>::make_compose_binary(to_functor(e.lhs()),to_functor(e.rhs()), e.functor());
-	}
-};
-
-template<class T, class Device>
-struct ExpressionToFunctor<scalar_vector<T, Device> >{
-	static typename device_traits<Device>::template constant<T> transform(scalar_vector<T, Device> const& e){
-		return typename device_traits<Device>::template constant<T>(e.scalar());
-	}
-};
-
-
-
 }
+
 #endif

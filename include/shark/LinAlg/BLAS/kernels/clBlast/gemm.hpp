@@ -40,9 +40,9 @@ namespace remora{ namespace kernels{
 // C <- alpha * A * B + beta * C
 template <typename MatA, typename MatB, typename MatC>
 void gemm(
-	matrix_expression<MatA, gpu_tag> const& A,
-	matrix_expression<MatB, gpu_tag> const& B,
-	matrix_expression<MatC, gpu_tag>& C, 
+	matrix_expression<MatA, opencl_tag> const& A,
+	matrix_expression<MatB, opencl_tag> const& B,
+	matrix_expression<MatC, opencl_tag>& C, 
 	typename MatC::value_type const& alpha
 ) {
 	REMORA_SIZE_CHECK(A().size1() == C().size1());

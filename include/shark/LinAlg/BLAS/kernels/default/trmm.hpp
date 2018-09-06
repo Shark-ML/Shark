@@ -52,7 +52,7 @@ struct trmm_block_size {
 template <class E, class T, class block_size, bool unit>
 void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<false,unit>){
 	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
-
+	auto A_elem = A().elements();
 	std::size_t const mc = A().size1();
 	std::size_t const kc = A().size2();
 	static std::size_t const MR = block_size::mr;
@@ -65,7 +65,7 @@ void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size,
 				if(unit && i == j)
 					p[nu] = 1.0;
 				else
-					p[nu] = ((i<mc) && (i >= j)) ? A()(i,j) : T(0);
+					p[nu] = ((i<mc) && (i >= j)) ? A_elem(i,j) : T(0);
 			}
 		}
 	}
@@ -74,7 +74,8 @@ void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size,
 template <class E, class T, class block_size, bool unit>
 void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size, triangular_tag<true,unit>){
 	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
-
+	auto A_elem = A().elements();
+	
 	std::size_t const mc = A().size1();
 	std::size_t const kc = A().size2();
 	static std::size_t const MR = block_size::mr;
@@ -87,7 +88,7 @@ void pack_A_triangular(matrix_expression<E, cpu_tag> const& A, T* p, block_size,
 				if(unit && i == j)
 					p[nu] = 1.0;
 				else
-					p[nu] = ((i<mc) && (i <= j)) ? A()(i,j) : T(0);
+					p[nu] = ((i<mc) && (i <= j)) ? A_elem(i,j) : T(0);
 			}
 		}
 	}

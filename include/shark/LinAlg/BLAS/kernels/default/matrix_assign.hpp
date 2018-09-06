@@ -139,6 +139,8 @@ void matrix_assign(
 	typename M::value_type blockStorage[blockSize][blockSize];
 
 	typedef typename M::size_type size_type;
+	auto e_elem = e().elements();
+	
 	size_type size1 = m().size1();
 	size_type size2 = m().size2();
 	for (size_type iblock = 0; iblock < size1; iblock += blockSize){
@@ -149,7 +151,7 @@ void matrix_assign(
 			//compute block values
 			for (size_type j = 0; j < blockSizej; ++j){
 				for (size_type i = 0; i < blockSizei; ++i){
-					blockStorage[i][j] = e()(iblock+i,jblock+j);
+					blockStorage[i][j] = e_elem(iblock+i,jblock+j);
 				}
 			}
 
@@ -259,11 +261,12 @@ void matrix_assign(
 	triangular<row_major,Triangular>, triangular<column_major,Triangular>,
 	packed_tag, packed_tag
 ) {
+	auto e_elem = e().elements();
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto mpos = m().major_begin(i);
 		auto mend = m().major_end(i);
 		for(; mpos!=mend; ++mpos){
-			*mpos = e()(i,mpos.index());
+			*mpos = e_elem(i,mpos.index());
 		}
 	}
 }
@@ -355,6 +358,7 @@ void matrix_assign_functor(
 	typedef typename M::size_type size_type;
 	size_type size1 = m().size1();
 	size_type size2 = m().size2();
+	auto e_elem = e().elements();
 	for (size_type iblock = 0; iblock < size1; iblock += blockSize){
 		for (size_type jblock = 0; jblock < size2; jblock += blockSize){
 			std::size_t blockSizei = std::min(blockSize,size1-iblock);
@@ -363,7 +367,7 @@ void matrix_assign_functor(
 			//fill the block with the values of e
 			for (size_type j = 0; j < blockSizej; ++j){
 				for (size_type i = 0; i < blockSizei; ++i){
-					blockStorage[i][j] = e()(iblock+i,jblock+j);
+					blockStorage[i][j] = e_elem(iblock+i,jblock+j);
 				}
 			}
 
@@ -437,12 +441,12 @@ void matrix_assign_functor(
 	Tag1, Tag2
 ) {
 	//there is nothing we can do, if F does not leave the non-stored elements 0
-
+	auto e_elem = e().elements();
 	for(std::size_t i = 0; i != m().size1(); ++i){
 		auto mpos = m().major_begin(i);
 		auto mend = m().major_end(i);
 		for(; mpos!=mend; ++mpos){
-			*mpos = f(*mpos,e()(i,mpos.index()));
+			*mpos = f(*mpos,e_elem(i,mpos.index()));
 		}
 	}
 }

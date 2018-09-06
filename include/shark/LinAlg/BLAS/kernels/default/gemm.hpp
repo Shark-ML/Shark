@@ -82,10 +82,11 @@ void gemm(
 ){
 	typedef typename M::value_type value_type;
 	typedef device_traits<cpu_tag>::multiply_and_add<value_type> MultAdd;
+	auto e1_elem = e1().elements();
 	for (std::size_t k = 0; k != e1().size2(); ++k) {
 		for(std::size_t i = 0; i != e1().size1(); ++i){
 			auto row_m = row(m,i);
-			kernels::assign(row_m, row(e2,k), MultAdd(alpha * e1()(i,k)));
+			kernels::assign(row_m, row(e2,k), MultAdd(alpha * e1_elem(i,k)));
 		}
 	}
 }

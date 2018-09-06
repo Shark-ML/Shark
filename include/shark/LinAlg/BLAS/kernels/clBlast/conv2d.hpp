@@ -38,9 +38,9 @@ namespace remora{namespace bindings {
 		
 template<class E1, class E2, class M>
 void conv2d(
-	matrix_expression<E1, gpu_tag> const& images,
-	vector_expression<E2, gpu_tag> const& filter,
-	matrix_expression<M, gpu_tag>& outputs,
+	matrix_expression<E1, opencl_tag> const& images,
+	vector_expression<E2, opencl_tag> const& filter,
+	matrix_expression<M, opencl_tag>& outputs,
 	std::size_t num_channels,
 	std::size_t num_filters,
 	std::size_t image_height,
@@ -75,15 +75,15 @@ void conv2d(
 		//~ std::size_t padded_width = image_width+padding_width;
 		//~ std::size_t paddedSize = padded_width * (image_height + padding_height) * num_channels;
 		//~ //create storage for the image
-		//~ gpu::dense_matrix_storage<value_type, dense_tag> storage = {{context, images().size1() * paddedSize},0,paddedSize};
-		//~ dense_matrix_adaptor<value_type, row_major, gpu_tag> padded_images(storage,images().size1(), paddedSize);
+		//~ opencl::dense_matrix_storage<value_type, dense_tag> storage = {{context, images().size1() * paddedSize},0,paddedSize};
+		//~ dense_matrix_adaptor<value_type, row_major, opencl_tag> padded_images(storage,images().size1(), paddedSize);
 		//~ adaptor.clear();//initialize padding to 0.
 		//~ for(std::size_t im = 0; im != images().size1(); ++im){
 			//~ //cut out the i-th image starting at the first non-zero element
 			//~ //i.e. we skip the initial 0-rows and the first few nonzero element of the first real rows
 			//~ std::size_t offset = im * paddedSize + ((padding_height/2) * padded_width  + padding_width/2) * num_channels;
-			//~ gpu::dense_matrix_storage<value_type, dense_tag> sub_storage = {storage.context, offset, padded_width * num_channels};
-			//~ dense_matrix_adaptor<value_type, row_major, gpu_tag> sub_image(sub_storage,image_height, image_width * num_channels);
+			//~ opencl::dense_matrix_storage<value_type, dense_tag> sub_storage = {storage.context, offset, padded_width * num_channels};
+			//~ dense_matrix_adaptor<value_type, row_major, opencl_tag> sub_image(sub_storage,image_height, image_width * num_channels);
 			//~ noalias(sub_image) = row(images,im);
 		//~ }
 		

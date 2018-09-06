@@ -53,7 +53,6 @@ void tpmv_impl(
 	typedef typename V::value_type value_type;
 	typedef typename V::size_type size_type;
 	size_type size = A().size1();
-	
 	for(size_type i = 0; i != size; ++i){
 		value_type sum(0);
 		auto end = A().major_end(i);

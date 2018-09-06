@@ -82,6 +82,7 @@ public:
 		return m_system_type;
 	}
 	
+	no_functor elements(){ return no_functor();}
 	typedef no_iterator iterator;
 	typedef iterator const_iterator;
 	
@@ -156,6 +157,7 @@ public:
 			return m_system_type;
 	}
 	
+	no_functor elements(){ return no_functor();}
 	typedef no_iterator major_iterator;
 	typedef major_iterator const_major_iterator;
 	

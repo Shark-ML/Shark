@@ -166,25 +166,21 @@ void ensure_size(vector_expression<Vector, Device>& vec,std::size_t size){
 template<class Device>
 struct device_traits;
 
+//pure block expressions do not have an iterator but the interface still requires one.
+// this is our cheap way out.
+struct no_iterator{};
+//some devices do not need a queue but the interface still expects one.
+struct no_queue{};
+//for non-dense expression, the functor interface does not make sense but it is still expected to have elements()
+struct no_functor{};
+
+
 template<class E1, class E2>
 struct common_value_type
 : public std::common_type<
 	typename E1::value_type,
 	typename E2::value_type
 >{};
-
-template<class E>
-struct ExpressionToFunctor;
-
-template<class E, class Device>
-auto to_functor(matrix_expression<E, Device> const& e) -> decltype(ExpressionToFunctor<E>::transform(e())){
-	return ExpressionToFunctor<E>::transform(e());
-}
-
-template<class E, class Device>
-auto to_functor(vector_expression<E, Device> const& e) -> decltype(ExpressionToFunctor<E>::transform(e())){
-	return ExpressionToFunctor<E>::transform(e());
-}
 
 template<class M, class Device>
 typename M::size_type major_size(matrix_expression<M, Device> const& m){
@@ -198,8 +194,8 @@ typename M::size_type minor_size(matrix_expression<M, Device> const& m){
 }
 
 #include "../cpu/traits.hpp"
-#ifdef REMORA_USE_GPU
-#include "../gpu/traits.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "../opencl/traits.hpp"
 #endif
 
 #endif

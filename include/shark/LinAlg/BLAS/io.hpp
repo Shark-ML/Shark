@@ -62,7 +62,7 @@ namespace remora{
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
                                            const vector_expression<VE, cpu_tag> &vec) {
-	auto&& v = eval_block(vec);
+	auto&& v = eval_expression(vec);
         typedef typename VE::size_type size_type;
         size_type size = v.size ();
         std::basic_ostringstream<E, T, std::allocator<E> > s;
@@ -105,7 +105,7 @@ namespace remora{
     //  This function seems to be big. So we do not let the compiler inline it.
     std::basic_ostream<E, T> &operator << (std::basic_ostream<E, T> &os,
                                            const matrix_expression<ME, cpu_tag> &mat) {
-        auto&& m=eval_block(mat);
+        auto&& m=eval_expression(mat);
 	typedef typename ME::size_type size_type;
         size_type size1 = m.size1 ();
         size_type size2 = m.size2 ();

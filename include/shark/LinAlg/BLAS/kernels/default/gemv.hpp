@@ -33,7 +33,7 @@
 #include "../../expression_types.hpp" //matrix/vector_expression
 #include "../../proxy_expressions.hpp" //matrix row,, transpose
 #include "../../detail/traits.hpp" //matrix orientations
-#include "../dot.hpp" //inner product
+#include "../default/dot.hpp" //inner product
 #include "../vector_assign.hpp" //assignment of vectors
 #include <type_traits> //std::false_type marker for unoptimized
 
@@ -51,7 +51,7 @@ void gemv_impl(
 	typedef typename ResultV::value_type value_type;
 	value_type value;
 	for(std::size_t i = 0; i != A().size1();++i){
-		kernels::dot(row(A,i),x,value);
+		bindings::dot(row(A,i), x, value,  typename MatA::evaluation_category::tag(), typename V::evaluation_category::tag());
 		if(value != value_type())//handling of sparse results.
 			result()(i) += alpha * value;
 	}

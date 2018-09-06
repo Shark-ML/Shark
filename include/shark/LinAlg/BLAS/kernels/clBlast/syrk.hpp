@@ -40,8 +40,8 @@ namespace remora{ namespace kernels{
 // C <- C + alpha * A * A^T
 template <bool Upper, typename MatA, typename MatC>
 void syrk(
-	matrix_expression<MatA, gpu_tag> const& A,
-	matrix_expression<MatC, gpu_tag>& C, 
+	matrix_expression<MatA, opencl_tag> const& A,
+	matrix_expression<MatC, opencl_tag>& C, 
 	typename MatC::value_type const& alpha
 ) {
 	REMORA_SIZE_CHECK(A().size1() == C().size1());
