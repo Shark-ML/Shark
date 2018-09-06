@@ -311,7 +311,7 @@ struct matrix_row_optimizer<vector_repeater<V, column_major> >{
 	typedef scalar_vector<typename V::value_type, typename V::device_type> type;
 	
 	static type create(vector_repeater<V, column_major> const& m, std::size_t i){
-		return type(m.num_repetitions(), m.expression()(i));
+		return type(m.num_repetitions(), m.expression().elements()(i));
 	}
 };
 
@@ -344,7 +344,7 @@ struct matrix_row_optimizer<outer_product<V1,V2> >{
 	typedef vector_scalar_multiply<V2> type;
 	
 	static type create(outer_product<V1,V2> const& m, std::size_t i){
-		return type(m.rhs(),m.lhs()(i));
+		return type(m.rhs(),m.lhs().elements()(i));
 	}
 };
 
@@ -370,7 +370,7 @@ struct matrix_row_optimizer<diagonal_matrix<V> >{
 	typedef unit_vector<typename V::value_type, typename V::device_type> type;
 	
 	static type create(diagonal_matrix<V> const& m, std::size_t i){
-		return type(m.size2(),i,m.expression()(i));
+		return type(m.size2(),i,m.expression().elements()(i));
 	}
 };
 

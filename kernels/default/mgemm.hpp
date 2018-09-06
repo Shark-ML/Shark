@@ -145,9 +145,9 @@ void mgemm(
 
 //-- Packing blocks ------------------------------------------------------------
 template <class E, class T, class block_size>
-void pack_A_dense(matrix_expression<E, cpu_tag> const& A, T* p, block_size)
-{
+void pack_A_dense(matrix_expression<E, cpu_tag> const& A, T* p, block_size){
 	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
+	auto A_elem = A().elements();
 
 	std::size_t const mc = A().size1();
 	std::size_t const kc = A().size2();
@@ -158,7 +158,7 @@ void pack_A_dense(matrix_expression<E, cpu_tag> const& A, T* p, block_size)
 	for (std::size_t l=0; l<mp; ++l) {
 		for (std::size_t j=0; j<kc; ++j) {
 			for (std::size_t i = l*MR; i < l*MR + MR; ++i,++nu) {
-				p[nu] = (i<mc) ? A()(i,j) : T(0);
+				p[nu] = (i<mc) ? A_elem(i,j) : T(0);
 			}
 		}
 	}
@@ -168,21 +168,22 @@ void pack_A_dense(matrix_expression<E, cpu_tag> const& A, T* p, block_size)
 template <class E, class T, class block_size>
 void pack_B_dense(matrix_expression<E, cpu_tag> const& B, T* p, block_size)
 {
-    BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
+	BOOST_ALIGN_ASSUME_ALIGNED(p, block_size::block::align);
+	auto B_elem = B().elements();
 
-    std::size_t const kc = B ().size1();
-    std::size_t const nc = B ().size2();
-    static std::size_t const NR = block_size::nr;
-    std::size_t const np = (nc+NR-1) / NR;
+	std::size_t const kc = B ().size1();
+	std::size_t const nc = B ().size2();
+	static std::size_t const NR = block_size::nr;
+	std::size_t const np = (nc+NR-1) / NR;
 
 	std::size_t nu = 0;
-        for (std::size_t l=0; l<np; ++l) {
+	for (std::size_t l=0; l<np; ++l) {
 		for (std::size_t i=0; i<kc; ++i) {
 			for (std::size_t j = l*NR; j < l*NR + NR; ++j,++nu){
-				p[nu] = (j<nc) ? B()(i,j) : T(0);
+				p[nu] = (j<nc) ? B_elem(i,j) : T(0);
 			}
 		}
-        }
+	}
 }
 
 }}

@@ -380,6 +380,8 @@ public:
 	typename device_traits<cpu_tag>::queue_type& queue() const{
 		return m_matrix->queue();
 	}
+	
+	no_functor elements(){return no_functor();};
 
 	void major_reserve(size_type i, size_type non_zeros, bool exact_size = false) {
 		m_matrix->major_reserve(m_major_start + i, non_zeros, exact_size);
@@ -477,6 +479,8 @@ public:
 	typename device_traits<cpu_tag>::queue_type& queue(){
 		return device_traits<cpu_tag>::default_queue();
 	}
+	
+	no_functor elements(){return no_functor();};
 	
 	// --------------
 	// ITERATORS

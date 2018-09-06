@@ -112,6 +112,7 @@ public:
 		return m_alpha;
 	}
 	
+	no_functor elements(){ return no_functor();}
 	typedef no_iterator iterator;
 	typedef iterator const_iterator;
 	
@@ -172,6 +173,7 @@ public:
 		return m_alpha;
 	}
 	
+	no_functor elements(){ return no_functor();}
 	typedef no_iterator major_iterator;
 	typedef no_iterator const_major_iterator;
 	

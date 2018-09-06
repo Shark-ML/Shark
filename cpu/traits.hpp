@@ -33,6 +33,7 @@
 #ifndef REMORA_CPU_TRAITS_HPP
 #define REMORA_CPU_TRAITS_HPP
 
+#include "../detail/traits.hpp"
 #include "../expression_types.hpp"
 #include "iterator.hpp"
 #include <cmath>
@@ -40,14 +41,6 @@
 
 
 namespace remora{
-//pure block expressions do not have an iterator but the interface still requires one.
-// this is our cheap way out.
-struct no_iterator{};
-//some devices do not need a queue but the interface still expects one.
-struct no_queue{};
-
-template<class Device>
-struct device_traits;
 
 template<>
 struct device_traits<cpu_tag>{
@@ -57,19 +50,6 @@ struct device_traits<cpu_tag>{
 	static queue_type& default_queue(){
 		static queue_type queue;
 		return queue;
-	}
-	
-	//adding of indices
-	static std::size_t index_add(std::size_t i, std::size_t j){
-		return i+j;
-	}
-	
-	template<class E>
-	static typename E::reference linearized_matrix_element(matrix_expression<E, cpu_tag> const& e, std::size_t i){
-		std::size_t leading_dimension = E::orientation::index_m(e().size1(), e().size2());
-		std::size_t i1 = i / leading_dimension;
-		std::size_t i2 = i % leading_dimension;
-		return e()(E::orientation::index_M(i1,i2), E::orientation::index_m(i1,i2));
 	}
 	
 	template <class Iterator, class Functor>
@@ -98,24 +78,8 @@ struct device_traits<cpu_tag>{
 	};
 	
 	//functors
-	
-	template<class T>
-	struct constant{
-		typedef T result_type;
-		constant(T const& value): m_value(value){}
-		
-		template<class Arg>
-		T operator()(Arg const&) const{
-			return m_value;
-		}
-		template<class Arg1, class Arg2>
-		T operator()(Arg1 const&, Arg2 const&) const{
-			return {m_value};
-		}
-		
-		T m_value;
-	};
-	
+
+	//Arithmetic functors
 	template<class T>
 	struct add {
 		static const bool left_zero_remains =  false;
@@ -262,34 +226,6 @@ struct device_traits<cpu_tag>{
 		}
 	private:
 		T m_defaultValue;
-	};
-	
-	template<class T>
-	struct identity{
-		typedef T result_type;
-		
-		T operator()(T arg) const{
-			return arg;
-		}
-	};
-	
-	template<class T>
-	struct left_arg{
-		typedef T result_type;
-		static const bool left_zero_remains =  true;
-		static const bool right_zero_remains =  false;
-		T operator()(T arg1, T) const{
-			return arg1;
-		}
-	};
-	template<class T>
-	struct right_arg{
-		typedef T result_type;
-		static const bool left_zero_remains =  false;
-		static const bool right_zero_remains =  true;
-		T operator()(T, T arg2) const{
-			return arg2;
-		}
 	};
 	
 	//math unary functions
@@ -451,7 +387,103 @@ struct device_traits<cpu_tag>{
 		}
 	};
 	
+	//special element structure
+	template<class T>
+	struct constant{
+		typedef T result_type;
+		constant(T const& value): m_value(value){}
+		
+		template<class Arg>
+		T operator()(Arg const&) const{
+			return m_value;
+		}
+		template<class Arg1, class Arg2>
+		T operator()(Arg1 const&, Arg2 const&) const{
+			return {m_value};
+		}
+		
+		T m_value;
+	};
+	template<class T>
+	struct unit{
+		typedef T result_type;
+		unit(T const& value, std::size_t index): m_value(value), m_index(index){}
+		
+		T operator()(std::size_t i) const{
+			return (i == m_index)? m_value : T();
+		}
+		
+		T m_value;
+		std::size_t m_index;
+	};
+	
+	template<class F>
+	struct diag{
+		typedef typename std::remove_reference<typename F::result_type>::type result_type;
+		diag(F const& functor): m_functor(functor){}
+		
+		result_type operator()(std::size_t i, std::size_t j) const{
+			return (i == j)? m_functor(i) : result_type();
+		}
+		
+		F m_functor;
+	};
+	
+	template<class T>
+	struct vector_element{
+		typedef T& result_type;
+		vector_element(dense_vector_storage<T, dense_tag> const& storage):m_storage(storage){}
+		
+		T& operator()(std::size_t i) const{
+			return m_storage.values[i * m_storage.stride];
+		}
+	private:
+		dense_vector_storage<T, dense_tag> m_storage;
+	};
+	template<class T, class Orientation>
+	struct matrix_element{
+		typedef T& result_type;
+		matrix_element(dense_matrix_storage<T, dense_tag> const& storage):m_storage(storage){}
+		
+		T& operator()(std::size_t i, std::size_t j) const{
+			std::size_t stride1 = Orientation::stride1(m_storage.leading_dimension);
+			std::size_t stride2 = Orientation::stride2(m_storage.leading_dimension);
+			return m_storage.values[i * stride1 + j * stride2];
+		}
+	private:
+		dense_matrix_storage<T, dense_tag> m_storage;
+	};
+	
 	//functional
+	
+	template<class T>
+	struct identity{
+		typedef T result_type;
+		
+		T operator()(T arg) const{
+			return arg;
+		}
+	};
+	
+	template<class T>
+	struct left_arg{
+		typedef T result_type;
+		static const bool left_zero_remains =  true;
+		static const bool right_zero_remains =  false;
+		T operator()(T arg1, T) const{
+			return arg1;
+		}
+	};
+	template<class T>
+	struct right_arg{
+		typedef T result_type;
+		static const bool left_zero_remains =  false;
+		static const bool right_zero_remains =  true;
+		T operator()(T, T arg2) const{
+			return arg2;
+		}
+	};
+	
 	template<class F, class G>
 	struct compose{
 		typedef typename G::result_type result_type;

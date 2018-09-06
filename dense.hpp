@@ -37,7 +37,7 @@ namespace remora{
 ///
 /// For a \f$n\f$-dimensional vector \f$v\f$ and \f$0\leq i < n\f$ every element \f$v_i\f$ is mapped
 /// to the \f$i\f$-th element of the container.
-/// The tag descripes whether the vector is residing on a cpu or gpu which change its semantics.
+/// The tag descripes whether the vector is residing on a cpu or opencl which change its semantics.
 ///
 /// \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
 /// \tparam Device the device this vector lives on, the default is cpu_tag for a cpu vector
@@ -276,8 +276,11 @@ struct triangular_proxy_optimizer<dense_matrix_adaptor<T,Orientation, Tag, Devic
 
 //include device dependent implementations
 #include "cpu/dense.hpp"
-#ifdef REMORA_USE_GPU
-#include "gpu/dense.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "opencl/dense.hpp"
+#endif
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/dense.hpp"
 #endif
 
 #endif

@@ -108,7 +108,6 @@ public:
 		return device_traits<cpu_tag>::default_queue();
 	}
 
-
 	// Resizing
 	/** Resize a matrix to new dimensions. If resizing is performed, the data is not preserved.
 	 * \param size the new number of rows and columns
@@ -128,15 +127,17 @@ public:
 		std::fill(m_data.begin(), m_data.end(), value_type/*zero*/());
 	}
 
-	// Element access read only
-	const_reference operator()(size_type i, size_type j) const {
-		REMORA_SIZE_CHECK(i < size1());
-		REMORA_SIZE_CHECK(j < size2());
-		if(!orientation::non_zero(i,j))
-			return value_type();
-		REMORA_SIZE_CHECK(orientation::element(i,j,size1(),packed_tag())<m_data.size());
-		return m_data [orientation::element(i,j,size1(),packed_tag())];
-	}
+	//~ // Element access read only
+	//~ const_reference operator()(size_type i, size_type j) const {
+		//~ REMORA_SIZE_CHECK(i < size1());
+		//~ REMORA_SIZE_CHECK(j < size2());
+		//~ if(!orientation::non_zero(i,j))
+			//~ return value_type();
+		//~ REMORA_SIZE_CHECK(orientation::element(i,j,size1(),packed_tag())<m_data.size());
+		//~ return m_data [orientation::element(i,j,size1(),packed_tag())];
+	//~ }
+	
+	no_functor elements() const{return no_functor();}
 
 	// separate write access
 	void set_element(size_type i,size_type j, value_type t){

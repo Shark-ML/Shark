@@ -46,8 +46,10 @@ void dot(
 ) {
 	std::size_t size = v1().size();
 	result = result_type();
-	for(std::size_t i = 0; i != size; ++i){
-		result += v1()(i) * v2()(i);
+	auto v1_end = v1().end();
+	auto v2_pos = v2().begin();
+	for(auto v1_pos = v1().begin(); v1_pos != v1_end; ++v1_pos, ++v2_pos){
+		result += (*v1_pos) * (*v2_pos);
 	}
 }
 // Sparse case
@@ -95,8 +97,9 @@ void dot(
 	typename E2::const_iterator iter2=v2().begin();
 	typename E2::const_iterator end2=v2().end();
 	result = result_type();
+	auto v1_elem = v1().elements();
 	for(;iter2 != end2;++iter2){
-		result += v1()(iter2.index()) * *iter2;
+		result += v1_elem(iter2.index()) * (*iter2);
 	}
 }
 //Sparse-Dense case is reduced to Dense-Sparse using symmetry.

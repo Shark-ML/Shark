@@ -34,9 +34,8 @@ namespace remora{namespace bindings{
 
 template<class F, class V>
 void apply(vector_expression<V, cpu_tag>& v, F const& f) {
-	typedef typename V::iterator iterator;
-	iterator end = v().end();
-	for (iterator it = v().begin(); it != end; ++it){
+	auto end = v().end();
+	for (auto it = v().begin(); it != end; ++it){
 		*it = f(*it);
 	}
 }
@@ -57,8 +56,10 @@ void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	dense_tag, dense_tag
 ) {
-	for(std::size_t i = 0; i != v().size(); ++i){
-		v()(i) = static_cast<typename V::value_type>(e()(i));
+	auto end = v().end();
+	auto e_it = e().begin();
+	for (auto it = v().begin(); it != end; ++it, ++e_it){
+		*it = static_cast<typename V::value_type>(*e_it);
 	}
 }
 // Dense-packed case
@@ -67,18 +68,17 @@ void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	dense_tag, packed_tag
 ) {
-	typedef typename E::const_iterator EIterator;
 	typedef typename V::value_type value_type;
-	EIterator eiter = e.begin();
-	EIterator eend = e.end();
+	auto eiter = e.begin();
+	auto eend = e.end();
 	//special case:
 	//right hand side is completely 0
 	if(eiter == eend){
 		v().clear();
 		return;
 	}
-	EIterator viter = v.begin();
-	EIterator vend = v.end();
+	auto viter = v.begin();
+	auto vend = v.end();
 	
 	//set the first elements to zero
 	for(;viter.index() != eiter.index(); ++viter){
@@ -100,17 +100,16 @@ void vector_assign(
 	vector_expression<V, cpu_tag>& v, vector_expression<E, cpu_tag> const& e, 
 	packed_tag, packed_tag
 ) {
-	typedef typename E::const_iterator EIterator;
-	EIterator eiter = e.begin();
-	EIterator eend = e.end();
+	auto eiter = e.begin();
+	auto eend = e.end();
 	//special case:
 	//right hand side is completely 0
 	if(eiter == eend){
 		v().clear();
 		return;
 	}
-	EIterator viter = v.begin();
-	EIterator vend = v.end();
+	auto viter = v.begin();
+	auto vend = v.end();
 	
 	//check for compatible layout
 	REMORA_SIZE_CHECK(vend-viter);//empty ranges can't be compatible
@@ -134,9 +133,8 @@ void vector_assign(
 	sparse_tag
 ) {
 	v().clear();
-	typedef typename E::const_iterator iterator;
-	iterator end = e().end();
-	for(iterator it = e().begin(); it != end; ++it){
+	auto end = e().end();
+	for(auto it = e().begin(); it != end; ++it){
 		v()(it.index()) = *it;
 	}
 }
@@ -150,10 +148,10 @@ void vector_assign(
 ) {
 	v().clear();
 	v().reserve(e().size());
-	typename V::iterator targetPos = v().begin();
-	REMORA_RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
+	auto e_elem = e().elements();
+	auto targetPos = v().begin();
 	for(std::size_t i = 0; i != e().size(); ++i){
-		targetPos = v().set_element(targetPos,i,e()(i));
+		targetPos = v().set_element(targetPos,i,e_elem(i));
 	}
 }
 // Sparse-Sparse case
@@ -165,11 +163,9 @@ void vector_assign(
 	sparse_tag
 ) {
 	v().clear();
-	typedef typename E::const_iterator iteratorE;
-	typename V::iterator targetPos = v().begin();
-	REMORA_RANGE_CHECK(targetPos == v().end());//as v is cleared, pos must be equal to end
-	iteratorE end = e().end();
-	for(iteratorE it = e().begin(); it != end; ++it){
+	auto targetPos = v().begin();
+	auto end = e().end();
+	for(auto it = e().begin(); it != end; ++it){
 		targetPos = v().set_element(targetPos,it.index(),*it);
 	}
 }
@@ -186,8 +182,10 @@ void vector_assign_functor(
 	F f,
 	dense_tag, dense_tag
 ) {
-	for(std::size_t i = 0; i != v().size(); ++i){
-		v()(i) = f(v()(i),e()(i));
+	auto end = v().end();
+	auto e_it = e().begin();
+	for (auto it = v().begin(); it != end; ++it, ++e_it){
+		*it = f(*it, *e_it);
 	}
 }
 
@@ -199,13 +197,11 @@ void vector_assign_functor(
 	F f,
 	dense_tag, packed_tag
 ) {
-	typedef typename E::const_iterator EIterator;
-	typedef typename V::const_iterator VIterator;
 	typedef typename V::value_type value_type;
-	EIterator eiter = e().begin();
-	EIterator eend = e().end();
-	VIterator viter = v().begin();
-	VIterator vend = v().end();
+	auto eiter = e().begin();
+	auto eend = e().end();
+	auto viter = v().begin();
+	auto vend = v().end();
 	//right hand side hasnonzero elements
 	if(eiter != eend){
 		//apply f to the first elements for which the right hand side is 0, unless f is the identity
@@ -231,13 +227,11 @@ void vector_assign_functor(
 	F f,
 	packed_tag, packed_tag
 ) {
-	typedef typename E::const_iterator EIterator;
-	typedef typename V::const_iterator VIterator;
 	typedef typename V::value_type value_type;
-	EIterator eiter = e().begin();
-	EIterator eend = e().end();
-	VIterator viter = v().begin();
-	VIterator vend = v().end();
+	auto eiter = e().begin();
+	auto eend = e().end();
+	auto viter = v().begin();
+	auto vend = v().end();
 	
 	//right hand side has nonzero elements
 	if(eiter != eend){
@@ -271,9 +265,8 @@ void vector_assign_functor(
 	F f,
 	dense_tag, sparse_tag
 ) {
-	typedef typename E::const_iterator iterator;
-	iterator end = e().end();
-	for(iterator it = e().begin(); it != end; ++it){
+	auto end = e().end();
+	for(auto it = e().begin(); it != end; ++it){
 		v()(it.index()) = f(v()(it.index()),*it);
 	}
 }
@@ -288,9 +281,10 @@ void vector_assign_functor(
 ){	
 	typedef typename V::size_type size_type;
 	size_type size = e().size();
+	auto e_elem = e().elements();
 	auto it = v().begin();
 	for(size_type i = 0; i != size; ++i){
-		auto val = e()(i);
+		auto val = e_elem(i);
 		if(it == v().end() || it.index() != i){//insert missing elements
 			it = v().set_element(it,i,val); 
 		}else{
@@ -312,8 +306,8 @@ void vector_assign_functor(
 	value_type zero = value_type();
 
 	typename V::iterator it = v().begin();
-	typename E::const_iterator ite = e().begin();
-	typename E::const_iterator ite_end = e().end();
+	auto ite = e().begin();
+	auto ite_end = e().end();
 	while(it != v().end() && ite != ite_end) {
 		size_type it_index = it.index();
 		size_type ite_index = ite.index();

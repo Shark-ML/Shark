@@ -40,9 +40,9 @@ namespace remora{ namespace kernels{
 // v <- v + alpha * A * x
 template <typename MatA, typename VecX, typename VecV>
 void gemv(
-	matrix_expression<MatA, gpu_tag> const& A,
-	vector_expression<VecX, gpu_tag> const& x,
-	vector_expression<VecV, gpu_tag>& v, 
+	matrix_expression<MatA, opencl_tag> const& A,
+	vector_expression<VecX, opencl_tag> const& x,
+	vector_expression<VecV, opencl_tag>& v, 
 	typename VecV::value_type const& alpha
 ) {
 	REMORA_SIZE_CHECK(A().size1() == v().size());

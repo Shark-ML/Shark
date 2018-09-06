@@ -40,8 +40,8 @@ namespace remora{ namespace kernels{
 // solve Ax = b or xA=b with A being triangular
 template <class Triangular,class Side, typename MatA, typename VecB>
 void trsv(
-	matrix_expression<MatA, gpu_tag> const& A, 
-	vector_expression<VecB, gpu_tag>& b
+	matrix_expression<MatA, opencl_tag> const& A, 
+	vector_expression<VecB, opencl_tag>& b
 ){
 	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	REMORA_SIZE_CHECK(A().size1() == b().size());

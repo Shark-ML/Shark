@@ -34,9 +34,9 @@ namespace remora{namespace bindings{
 template<class F, class V>
 void vector_fold(vector_expression<V, cpu_tag> const& v, typename F::result_type& value, dense_tag) {
 	F f;
-	std::size_t size = v().size();
-	for(std::size_t i = 0; i != size; ++i){
-		value = f(value,v()(i));
+	auto end = v().end();
+	for(auto pos = v().begin(); pos != end; ++pos){
+		value = f(value,*pos);
 	}
 }
 

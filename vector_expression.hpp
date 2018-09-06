@@ -29,7 +29,6 @@
 #define REMORA_VECTOR_EXPRESSION_HPP
 
 #include "detail/expression_optimizers.hpp"
-#include "kernels/dot.hpp"
 #include "kernels/vector_fold.hpp"
 #include "kernels/vector_max.hpp"
 
@@ -320,7 +319,7 @@ norm_1(vector_expression<VecV, Device> const& v) {
 	return sum(abs(eval_block(v)));
 }
 
-/// \brief norm_2 v = sum_i |v_i|^2
+/// \brief norm_sqr v = sum_i |v_i|^2
 template<class VecV, class Device>
 typename real_traits<typename VecV::value_type >::type
 norm_sqr(vector_expression<VecV, Device> const& v) {
@@ -358,12 +357,7 @@ inner_prod(
 	vector_expression<VecV2, Device> const& v2
 ) {
 	REMORA_SIZE_CHECK(v1().size() == v2().size());
-	typedef decltype(
-		typename VecV1::value_type() * typename VecV2::value_type()
-	) value_type;
-	value_type result = value_type();
-	kernels::dot(eval_block(v1),eval_block(v2),result);
-	return result;
+	return sum(eval_block(v1 * v2));
 }
 
 

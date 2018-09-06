@@ -94,7 +94,6 @@ void syrk_impl(
 				//load block of the right E into memory
 				auto E_rights = subrange(e, j * MC, j * MC + mc2, k*EC, k*EC + kc );
 				auto E_rights_trans = trans(E_rights);
-				//~ auto E_rights_trans = trans(subrange(e, j * MC, j * MC + mc2, k*EC, k*EC + kc ));
 				pack_B_dense(E_rights_trans, E_right, block_size());
 
 				if(i==j){//diagonal block: we have to ensure that we only access elements on the diagonal

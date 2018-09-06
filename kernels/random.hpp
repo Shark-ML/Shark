@@ -31,9 +31,13 @@
 #define REMORA_KERNELS_RANDOM_HPP
 
 #include "default/random.hpp"
-#ifdef REMORA_USE_GPU
-#include "gpu/random.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "opencl/random.hpp"
 #endif
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/random.hpp"
+#endif
+
 	
 namespace remora{namespace kernels{
 	

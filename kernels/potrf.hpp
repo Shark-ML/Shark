@@ -31,9 +31,11 @@
 #ifndef REMORA_KERNELS_POTRF_HPP
 #define REMORA_KERNELS_POTRF_HPP
 
+#include <type_traits>
 #ifdef REMORA_USE_ATLAS_LAPACK
 #include "atlas/potrf.hpp"
 #else
+
 // if no bindings are included, we have to provide the default has_optimized_gemv
 // otherwise the binding will take care of this
 namespace remora {namespace bindings {
@@ -61,7 +63,13 @@ std::size_t potrf(
 
 }}
 
-#ifdef REMORA_USE_GPU
-#include "gpu/potrf.hpp"
+#ifdef REMORA_USE_OPENCL
+#include "opencl/potrf.hpp"
 #endif
+
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/potrf.hpp"
+#endif
+
+
 #endif

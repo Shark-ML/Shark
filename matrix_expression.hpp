@@ -29,10 +29,8 @@
 #define REMORA_MATRIX_EXPRESSION_HPP
 
 #include "detail/expression_optimizers.hpp"
-#include "kernels/matrix_fold.hpp"
 #include "proxy_expressions.hpp"
 #include "vector_expression.hpp"
-//~ #include "vector_set_expressions.hpp"
 
 namespace remora{
 	
@@ -599,12 +597,13 @@ auto norm_inf(vector_set_expression<S, Device> const& set) ->decltype(max(abs(se
 /// returns a scalar s = sum_ij A_ij
 template<class MatA, class Device>
 typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
-	typedef typename MatA::value_type value_type;
-	typedef typename device_traits<Device>:: template add<value_type> functor_type;
-	auto const& elem_result = eval_block(A);
-	value_type result = 0;
-	kernels::matrix_fold<functor_type>(elem_result,result);
-	return result;
+	typedef typename std::conditional<
+		std::is_same<typename MatA::orientation , unknown_orientation>::value,
+		row_major,
+		typename MatA::orientation 
+	>::type orientation;
+	//sum first matrix-rows/columns together followed by summing those results
+	return sum(sum(as_set(A, orientation())));
 }
 
 
@@ -614,12 +613,13 @@ typename MatA::value_type sum(matrix_expression<MatA, Device> const& A){
 /// returns a scalar s = max_ij A_ij
 template<class MatA, class Device>
 typename MatA::value_type max(matrix_expression<MatA, Device> const& A){
-	typedef typename MatA::value_type value_type;
-	typedef typename device_traits<Device>:: template max<value_type> functor_type;
-	auto const& elem_result = eval_block(A);
-	value_type result = 0;
-	kernels::matrix_fold<functor_type>(elem_result,result);
-	return result;
+	typedef typename std::conditional<
+		std::is_same<typename MatA::orientation , unknown_orientation>::value,
+		row_major,
+		typename MatA::orientation 
+	>::type orientation;
+	//compute first maximum of matrix-rows/columns and take the maximum of those results
+	return max(max(as_set(A, orientation())));
 }
 
 /// \brief Computes the elementwise minimum over all elements of A
@@ -627,12 +627,13 @@ typename MatA::value_type max(matrix_expression<MatA, Device> const& A){
 /// returns a scalar s = min_ij A_ij
 template<class MatA, class Device>
 typename MatA::value_type min(matrix_expression<MatA, Device> const& A){
-	typedef typename MatA::value_type value_type;
-	typedef typename device_traits<Device>:: template min<value_type> functor_type;
-	auto const& elem_result = eval_block(A);
-	value_type result = 0;
-	kernels::matrix_fold<functor_type>(elem_result,result);
-	return result;
+	typedef typename std::conditional<
+		std::is_same<typename MatA::orientation , unknown_orientation>::value,
+		row_major,
+		typename MatA::orientation 
+	>::type orientation;
+	//compute first minimum of matrix-rows/columns and take the minimum of those results
+	return min(min(as_set(A, orientation())));
 }
 
 /// \brief Returns the frobenius inner-product between matrices exprssions 1 and B.
@@ -647,7 +648,7 @@ frobenius_prod(
 ){
 	REMORA_SIZE_CHECK(A().size1() == B().size1());
 	REMORA_SIZE_CHECK(A().size2() == B().size2());
-	return sum(eval_block(A*B));
+	return sum(A*B);
 }
 
 /// \brief Computes the matrix 1-norm |A|_1

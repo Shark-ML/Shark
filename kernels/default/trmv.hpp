@@ -36,7 +36,6 @@
 #include "../../assignment.hpp" //assignment
 #include "../../dense.hpp" //adapt_vector
 #include "../gemv.hpp" //gemv kernel
-#include "../dot.hpp" //dot kernel
 #include <type_traits> //std::false_type marker for unoptimized
 namespace remora{ namespace bindings{
 
@@ -49,6 +48,8 @@ void trmv_impl(
 ){
 	typedef typename MatA::value_type value_typeA;
 	typedef typename V::value_type value_typeV;
+	auto A_elem = A().elements();
+	
 	std::size_t size = A().size1();
 	std::size_t const blockSize = 128;
 	std::size_t numBlocks = size/blockSize;
@@ -77,9 +78,9 @@ void trmv_impl(
 			std::size_t posi = startbi+i;
 			b()(posi) = 0;
 			for(std::size_t j = 0; j < i; ++j){
-				b()(posi) += A()(posi,startbi+j)*values(j);
+				b()(posi) += A_elem(posi,startbi+j)*values(j);
 			}
-			b()(posi) += values(i)*(Unit? value_typeA(1):A()(posi,posi));
+			b()(posi) += values(i)*(Unit? value_typeA(1):A_elem(posi,posi));
 		}
 		//now compute the lower rectangular part of the current block of A
 		kernels::gemv(subrange(A, startbi+sizebi,size,startbi,startbi+sizebi),values,blower,1);
@@ -93,13 +94,16 @@ void trmv_impl(
 	vector_expression<V, cpu_tag>& b,
 	upper, row_major
 ){
+	auto A_elem = A().elements();
 	std::size_t size = A().size1();
 	for (std::size_t i = 0; i < size; ++ i) {
 		if(!Unit){
-			b()(i) *= A()(i,i);
+			b()(i) *= A_elem(i,i);
 		}
-		typename V::value_type result;
-		kernels::dot(subrange(row(A,i),i+1,size),subrange(b(),i+1,size),result);
+		typename V::value_type result = 0;
+		for(std::size_t j = i + 1; j != size; ++j){
+			result += A_elem(i,j) * b()(j);
+		}
 		b()(i) += result;
 	}
 }
@@ -111,16 +115,16 @@ void trmv_impl(
 	vector_expression<V, cpu_tag> &b,
 	lower, column_major
 ){
-
+	auto A_elem = A().elements();
 	std::size_t size = A().size1();
 	for (std::size_t n = 1; n <= size; ++n) {
 		std::size_t i = size-n;
 		double bi = b()(i);
 		if(!Unit){
-			b()(i) *= A()(i,i);
+			b()(i) *= A_elem(i,i);
 		}
 		for(std::size_t k = i+1; k != size; ++k)
-			b()(k) += bi * A()(k,i);
+			b()(k) += bi * A_elem(k,i);
 	}
 }
 
@@ -132,6 +136,7 @@ void trmv_impl(
 	upper, column_major
 ){
 	typedef typename V::value_type value_typeV;
+	auto A_elem = A().elements();
 	std::size_t size = A().size1();
 	std::size_t const blockSize = 128;
 	std::size_t numBlocks = size/blockSize;
@@ -142,7 +147,7 @@ void trmv_impl(
 	// of rows. We start with the first panel
 	//and compute the product of it with the part of the vector
 	// and than just add the next panel on top etc.
-
+	
 	//tmporary storage for subblocks of b
 	value_typeV valueStorage[blockSize];
 
@@ -160,9 +165,9 @@ void trmv_impl(
 		for (std::size_t j = 0; j != sizebj; ++j) {
 			std::size_t posj = startbj+j;
 			for(std::size_t i = 0; i < j; ++i){
-				b()(startbj+i) += A()(startbj+i,posj)*values(j);
+				b()(startbj+i) += A_elem(startbj+i,posj)*values(j);
 			}
-			b()(posj) += values(j)*(Unit? 1.0:A()(posj,posj));
+			b()(posj) += values(j)*(Unit? 1.0:A_elem(posj,posj));
 		}
 		//now compute the right rectangular part of the current block of A
 		kernels::gemv(subrange(A, startbj,startbj+sizebj, startbj+sizebj,size),blower,bupper,1);

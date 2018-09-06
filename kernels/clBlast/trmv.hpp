@@ -40,8 +40,8 @@ namespace remora{ namespace kernels{
 // v <- Av with A being triangular
 template <bool Upper,bool Unit,typename MatA, typename VecV>
 void trmv(
-	matrix_expression<MatA, gpu_tag> const& A, 
-	vector_expression<VecV, gpu_tag>& v
+	matrix_expression<MatA, opencl_tag> const& A, 
+	vector_expression<VecV, opencl_tag>& v
 ){
 	REMORA_SIZE_CHECK(A().size1() == A().size2());
 	REMORA_SIZE_CHECK(A().size2() == v().size());

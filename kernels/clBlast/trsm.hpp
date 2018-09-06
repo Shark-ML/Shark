@@ -41,8 +41,8 @@ namespace remora{ namespace kernels{
 	
 template <class Triangular, typename MatA, typename MatB>
 void trsm_impl(
-	matrix_expression<MatA, gpu_tag> const& A, 
-	matrix_expression<MatB, gpu_tag>& B,
+	matrix_expression<MatA, opencl_tag> const& A, 
+	matrix_expression<MatB, opencl_tag>& B,
 	Triangular,
 	left
 ){	
@@ -86,8 +86,8 @@ void trsm_impl(
 
 template <class Triangular, typename MatA, typename MatB>
 void trsm_impl(
-	matrix_expression<MatA, gpu_tag> const& A, 
-	matrix_expression<MatB, gpu_tag>& B,
+	matrix_expression<MatA, opencl_tag> const& A, 
+	matrix_expression<MatB, opencl_tag>& B,
 	Triangular,
 	right
 ){	
@@ -98,8 +98,8 @@ void trsm_impl(
 // solve AX = B or XA=B with A being triangular
 template <class Triangular, class Side, typename MatA, typename MatB>
 void trsm(
-	matrix_expression<MatA, gpu_tag> const& A, 
-	matrix_expression<MatB, gpu_tag>& B
+	matrix_expression<MatA, opencl_tag> const& A, 
+	matrix_expression<MatB, opencl_tag>& B
 ){
 	trsm_impl(A,B,Triangular(),Side());
 }

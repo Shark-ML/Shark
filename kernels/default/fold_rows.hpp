@@ -68,16 +68,16 @@ void fold_rows(
 	const std::size_t BLOCK_SIZE = 16;
 	typename V::value_type storage[BLOCK_SIZE];
 	std::size_t numBlocks = (n + BLOCK_SIZE - 1) / BLOCK_SIZE; 
-	
+	auto A_elem = A().elements();
 	for(std::size_t b = 0; b != numBlocks; ++b){
 		std::size_t start = b * BLOCK_SIZE;
 		std::size_t cur_size = std::min(BLOCK_SIZE, n - start);
 		for(std::size_t i = 0; i != cur_size; ++i){
-			storage[i] = A()(start + i, 0);
+			storage[i] = A_elem(start + i, 0);
 		}
 		for(std::size_t j = 1; j != A().size2(); ++j){
 			for(std::size_t i = 0; i != cur_size; ++i){
-				storage[i] = f(storage[i], A()(start + i, j));
+				storage[i] = f(storage[i], A_elem(start + i, j));
 			}
 		}
 		for(std::size_t i = 0; i != cur_size; ++i){

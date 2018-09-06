@@ -70,8 +70,11 @@ void syrk(
 
 #ifdef REMORA_USE_CLBLAST
 #include "clBlast/syrk.hpp"
-#elif defined REMORA_USE_GPU
-#include "gpu/syrk.hpp"
+#elif defined REMORA_USE_OPENCL
+#include "opencl/syrk.hpp"
+#endif
+#if defined(__HCC__) || defined(__NVCC__)
+#include "hip/syrk.hpp"
 #endif
 
 #endif
