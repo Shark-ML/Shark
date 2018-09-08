@@ -44,7 +44,6 @@ void dot(
 	dense_tag,
 	dense_tag
 ) {
-	std::size_t size = v1().size();
 	result = result_type();
 	auto v1_end = v1().end();
 	auto v2_pos = v2().begin();

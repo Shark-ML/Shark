@@ -384,6 +384,10 @@ public:
 	typename device_traits<Device>:: template constant<value_type> elements() const{
 		return {m_value};
 	}
+	
+	value_type operator()(std::size_t, std::size_t)const{
+		return m_value;
+	}
     
 	//Iterators
 	typedef typename device_traits<Device>:: template constant_iterator<value_type>::type const_major_iterator;
@@ -549,8 +553,8 @@ public:
 	// Element Functor
 	auto elements() const -> decltype(
 		device_traits<device_type>::make_compose_binary(
-			std::declval<E1 const&>().elements(),
-			std::declval<E2 const&>().elements(),
+			std::declval<lhs_closure_type>().elements(),
+			std::declval<rhs_closure_type>().elements(),
 			std::declval<functor_type&>()
 		)
 	){
@@ -646,8 +650,8 @@ public:
 	//Element Functor
 	auto elements() const -> decltype(
 		device_traits<device_type>::make_transform_arguments(
-			std::declval<E1 const&>().elements(),
-			std::declval<E2 const&>().elements(),
+			std::declval<lhs_closure_type>().elements(),
+			std::declval<rhs_closure_type>().elements(),
 			std::declval<functor_type_op&>()
 		)
 	){
