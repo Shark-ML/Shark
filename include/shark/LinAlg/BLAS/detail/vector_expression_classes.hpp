@@ -74,7 +74,7 @@ public:
 
 	// Element Functor
 	auto elements() const -> decltype(
-		device_traits<device_type>::make_compose(std::declval<E const&>().elements(), std::declval<multiply_functor&>())
+		device_traits<device_type>::make_compose(std::declval<expression_closure_type&>().elements(), std::declval<multiply_functor&>())
 	){
 		return device_traits<device_type>::make_compose(m_expression.elements(),multiply_functor(m_scalar));
 	}
@@ -114,8 +114,8 @@ class scalar_vector:public vector_expression<scalar_vector<T, Device>, Device > 
 public:
 	typedef std::size_t size_type;
 	typedef T value_type;
-	typedef const T& const_reference;
-	typedef const_reference reference;
+	typedef value_type const_reference;
+	typedef value_type reference;
 
 	typedef scalar_vector const_closure_type;
 	typedef scalar_vector closure_type;
@@ -141,6 +141,10 @@ public:
 	// Element Functor
 	typename device_traits<Device>:: template constant<value_type> elements() const{
 		return {m_value};
+	}
+	
+	value_type operator()(std::size_t)const{
+		return m_value;
 	}
 
 	// Iterator Access
@@ -256,7 +260,7 @@ public:
 	
 	// Element Functor
 	auto elements() const -> decltype(
-		device_traits<device_type>::make_compose(std::declval<E const&>().elements(),std::declval<functor_type&>())
+		device_traits<device_type>::make_compose(std::declval<expression_closure_type>().elements(),std::declval<functor_type&>())
 	){
 		return device_traits<device_type>::make_compose(m_expression.elements(), m_functor);
 	}
@@ -340,8 +344,8 @@ public:
 	// Element Functor
 	auto elements() const -> decltype(
 		device_traits<device_type>::make_compose_binary(
-			std::declval<E1 const&>().elements(),
-			std::declval<E2 const&>().elements(),
+			std::declval<lhs_closure_type>().elements(),
+			std::declval<rhs_closure_type>().elements(),
 			std::declval<functor_type&>()
 		)
 	){
@@ -443,8 +447,8 @@ public:
 	// Element Functor
 	auto elements() const -> decltype(
 		device_traits<device_type>::make_compose_binary(
-			std::declval<E1 const&>().elements(),
-			std::declval<E2 const&>().elements(),
+			std::declval<lhs_closure_type>().elements(),
+			std::declval<rhs_closure_type>().elements(),
 			std::declval<functor_type&>()
 		)
 	){
