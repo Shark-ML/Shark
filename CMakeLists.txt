@@ -400,7 +400,7 @@ endif()
 #           BLAS OpenCL configuration
 #####################################################################
 
-option( ENABLE_OPENCL "Use OpenCL and boost.compute" OFF )
+option( ENABLE_OPENCL "Use OpenCL and boost.compute as GPU backend" OFF )
 if(ENABLE_OPENCL)
 	if(${Boost_MINOR_VERSION} LESS 61)
 		message(FATAL_ERROR "Boost below 1.61 does not include Boost.Compute.")
@@ -417,6 +417,21 @@ if(ENABLE_CLBLAST)
 	set(SHARK_USE_CLBLAST 1)
 	list( APPEND LINK_LIBRARIES clblast)
 endif()
+
+
+#####################################################################
+#           HIP configuration
+#####################################################################
+
+option( ENABLE_HIP "Use HIP GPU backend" OFF )
+if(ENABLE_HIP)
+	find_package(HIP REQUIRED)
+	if(NOT HIP_PLATFORM MATCHES "nvcc")
+		message( FATAL_ERROR "HIP is only supported with CUDA backend")
+	endif()
+endif()
+
+
 
 #####################################################################
 #                       Static Code Analysis
@@ -479,10 +494,7 @@ if( MSVC )
 	add_definitions(-D_CRT_SECURE_CPP_OVERLOAD_STANDARD_NAMES=1)
 
 	# Allow multi core compile on Visual Studio
-	set(MULTICORE_COMPILE OFF CACHE BOOL "Compile with all available cores")
-	if (${MULTICORE_COMPILE})
-		add_definitions(${CMAKE_CXX_FLAGS} "/MP")
-	endif(${MULTICORE_COMPILE})
+	add_definitions(${CMAKE_CXX_FLAGS} "/MP")
 endif()
 
 #####################################################################

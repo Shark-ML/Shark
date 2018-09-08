@@ -23,16 +23,16 @@ std::vector<unsigned char> image::writePNG(blas::dense_vector_adaptor<T const> c
 	switch(type){
 	case PixelType::RGB:
 		colorType = PNG_COLOR_TYPE_RGB;
-		SHARK_RUNTIME_CHECK(shape[2] == 3, "RGB image requires 3 input channels");
+		SHARK_RUNTIME_CHECK(shape[0] == 3, "RGB image requires 3 input channels");
 	break;
 	case PixelType::RGBA:
 	case PixelType::ARGB:
 		colorType = PNG_COLOR_TYPE_RGB_ALPHA;
-		SHARK_RUNTIME_CHECK(shape[2] == 4, "RGBA image requires 4 input channels");
+		SHARK_RUNTIME_CHECK(shape[0] == 4, "RGBA image requires 4 input channels");
 	break;
 	case PixelType::Luma:
 		colorType = PNG_COLOR_TYPE_GRAY;
-		SHARK_RUNTIME_CHECK(shape[2] == 1, "Luma image requires 1 input channel");
+		SHARK_RUNTIME_CHECK(shape[0] == 1, "Luma image requires 1 input channel");
 	}
 	
 	//preallocate buffer
@@ -66,7 +66,7 @@ std::vector<unsigned char> image::writePNG(blas::dense_vector_adaptor<T const> c
 
 	//write image header
 	png_set_IHDR(
-		png, info, (png_uint_32)shape[1], (png_uint_32)shape[0], 8, colorType,  
+		png, info, (png_uint_32)shape[2], (png_uint_32)shape[1], 8, colorType,  
 		PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT//last 2 parameters must be set to this
 	);
@@ -74,20 +74,20 @@ std::vector<unsigned char> image::writePNG(blas::dense_vector_adaptor<T const> c
 	
 	
 	//encode the image one line at a time
-	std::vector<png_byte> line(shape[1]*shape[2]);
-	std::size_t imagePos = 0;
-	for(std::size_t i = 0; i != shape[0]; ++i){
-		//convert ARGB to RGBA
-		if(type == PixelType::ARGB){
-			for(std::size_t j = 0; j != line.size(); j+=4, imagePos +=4){
-				line[j] = png_byte(image[imagePos + 1] * 255); 
-				line[j + 1] = (unsigned char)(image[imagePos + 2] * 255 + T(0.5)); 
-				line[j + 2] = (unsigned char)(image[imagePos + 3] * 255 + T(0.5)); 
-				line[j + 3] = (unsigned char)(image[imagePos] * 255 + T(0.5)); 
-			}
-		}else{
-			for(std::size_t j = 0; j != line.size(); ++j, ++imagePos){
-				line[j] = (unsigned char)(image[imagePos]*255 +T(0.5));
+	std::vector<png_byte> line(shape[0] * shape[2]);//width * channels
+	
+	//convert ARGB to RGBA
+	std::size_t index_channels_RGBA[]={0,1,2,3};
+	std::size_t index_channels_ARGB[]={3,0,1,2};
+	std::size_t* index_c = index_channels_RGBA;
+	if(type == PixelType::ARGB){
+		index_c = index_channels_ARGB;
+	}
+	for(std::size_t i = 0; i != shape[1]; ++i){
+		for(std::size_t c = 0; c != shape[0]; ++c){
+			std::size_t imagePos =  c * shape[1] * shape[2] + i * shape[2];
+			for(std::size_t j = index_c[c]; j < line.size(); j += shape[0], ++imagePos){
+				line[j] = (unsigned char)(image[imagePos] * 255 + T(0.5)); 
 			}
 		}
 		png_write_row(png, line.data());
@@ -111,7 +111,7 @@ std::vector<unsigned char> image::writeJPEG(blas::dense_vector_adaptor<T const> 
 	switch(type){
 	case PixelType::RGB:
 		colorType = JCS_RGB;
-		SHARK_RUNTIME_CHECK(shape[2] == 3, "RGB image requires 3 input channels");
+		SHARK_RUNTIME_CHECK(shape[0] == 3, "RGB image requires 3 input channels");
 	break;
 	case PixelType::RGBA:
 	case PixelType::ARGB:
@@ -119,7 +119,7 @@ std::vector<unsigned char> image::writeJPEG(blas::dense_vector_adaptor<T const> 
 	break;
 	case PixelType::Luma:
 		colorType = JCS_GRAYSCALE;
-		SHARK_RUNTIME_CHECK(shape[2] == 1, "Luma image requires 1 input channel");
+		SHARK_RUNTIME_CHECK(shape[0] == 1, "Luma image requires 1 input channel");
 	}
 	
 	
@@ -137,9 +137,9 @@ std::vector<unsigned char> image::writeJPEG(blas::dense_vector_adaptor<T const> 
 	
 	try{
 		//setup file header
-		info.image_width = (JDIMENSION) shape[1];
-		info.image_height = (JDIMENSION) shape[0];
-		info.input_components = (JDIMENSION) shape[2];
+		info.image_width = (JDIMENSION) shape[2];
+		info.image_height = (JDIMENSION) shape[1];
+		info.input_components = (JDIMENSION) shape[0];
 		info.in_color_space = colorType;
 		
 		
@@ -148,11 +148,13 @@ std::vector<unsigned char> image::writeJPEG(blas::dense_vector_adaptor<T const> 
 		jpeg_set_quality(&info, 100, false);
 		jpeg_start_compress(&info, TRUE);
 		
-		std::vector<unsigned char> line(shape[1]*shape[2]);
+		std::vector<unsigned char> line(shape[0] * shape[2]);
 		while (info.next_scanline < info.image_height) {
-			auto row = subrange(image,info.next_scanline * line.size(), (info.next_scanline + 1) * info.next_scanline); 
-			for(std::size_t j = 0; j != line.size(); ++j){
-				line[j] = (unsigned char)(row[j]*255+T(0.5));
+			for(std::size_t c = 0; c != shape[0]; ++c){
+				std::size_t imagePos =  c * shape[1] * shape[2] + info.next_scanline * shape[2];
+				for(std::size_t j = c; j < line.size(); j += shape[0], ++imagePos){
+					line[j] = (unsigned char)(image[imagePos] * 255 + T(0.5)); 
+				}
 			}
 			unsigned char* lines[1] = {line.data()};
 			jpeg_write_scanlines(&info, lines, 1);
@@ -182,10 +184,10 @@ std::vector<unsigned char> image::writePGM(blas::dense_vector_adaptor<T const> c
 	RANGE_CHECK(shape.size() == 3);
 	SHARK_RUNTIME_CHECK(image.size() == shape.numElements(), "Shape does not match input vector size");
 	SHARK_RUNTIME_CHECK(type == PixelType::Luma, "PGM does only support Luma Pixeltype");
-	SHARK_RUNTIME_CHECK(shape[2] == 1, "PGM images cn only have one channel");
+	SHARK_RUNTIME_CHECK(shape[0] == 1, "PGM images cn only have one channel");
 	
 	//create header
-	std::string header = "P5\n" + std::to_string(shape[1]) + ' ' + std::to_string(shape[0]) + "\n255\n";
+	std::string header = "P5\n" + std::to_string(shape[2]) + ' ' + std::to_string(shape[1]) + "\n255\n";
 	//preallocate buffer
 	std::vector<unsigned char> buffer;
 	buffer.reserve(image.size()+header.size());

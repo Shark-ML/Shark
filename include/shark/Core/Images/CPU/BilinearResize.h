@@ -49,7 +49,7 @@ void bilinearResize(
 	Shape const& outShape
 ){
 	SIZE_CHECK(inShape.size() == outShape.size());
-	SIZE_CHECK(inShape.size() == 2 || inShape[2] == outShape[2]);
+	SIZE_CHECK(inShape.size() == 2 || inShape[0] == outShape[0]);
 	SIZE_CHECK(images.size1() == resizedImages.size1());
 	SIZE_CHECK(images.size2() == inShape.numElements());
 	SIZE_CHECK(resizedImages.size2() == outShape.numElements());
@@ -58,17 +58,26 @@ void bilinearResize(
 	std::size_t widthIn = inShape[1];
 	std::size_t heightOut = outShape[0];
 	std::size_t widthOut = outShape[1];
-	std::size_t numChannels = (inShape.size() == 3)? inShape[2]: 1;
+	std::size_t numChannels = 1;
+	if(inShape.size() == 3){
+		heightIn = inShape[1];
+		widthIn = inShape[2];
+		heightOut = outShape[1];
+		widthOut = outShape[2];
+		numChannels = inShape[0];
+	}
 	
-	//fill with 0
-	resizedImages.clear();
+	//merge N and C index and treat each channel as separate image
+	std::size_t numSlices = numChannels * images.size1();
+	auto slices = to_matrix(to_vector(images), numSlices, heightIn * widthIn);
+	auto resizedSlices = to_matrix(to_vector(resizedImages), numSlices, heightOut * widthOut);
 	
 	//we parallelize over images*rows of the result, i.e. each function evaluation computes a full row of the image
 	auto resizeRow = [&](std::size_t id){
-		std::size_t im = id / heightOut; //image-index
-		std::size_t i = id % heightOut; //row-index in image
-		auto pixelsIn = to_matrix(row(images,im), heightIn * widthIn, numChannels);
-		auto pixelsOut = to_matrix(row(resizedImages,im), heightOut * widthOut, numChannels);
+		std::size_t slice = id / heightOut; //slice-index
+		std::size_t i = id % heightOut; //row-index in slice
+		auto pixelsIn = row(slices,slice);
+		auto pixelsOut = row(resizedSlices,slice);
 		
 		double in_per_outi = double(heightIn)/(heightOut);
 		double in_per_outj = double(widthIn)/(widthOut);
@@ -79,7 +88,7 @@ void bilinearResize(
 		double basexj = 0.5 * in_per_outj - 0.5;
 		
 		for(std::size_t j = 0; j != widthOut; ++j){
-			auto outpx = row(pixelsOut, i * widthOut + j);
+			T& outpx = pixelsOut(i * widthOut + j);
 			//calculate coordinates of point wrt input pixel scale
 			//we take into account that pixels have an area, therefore
 			//when upsampling, we have to sample negative coordinates
@@ -95,21 +104,22 @@ void bilinearResize(
 			int jl = int(std::floor(xj + 1.e-8));
 			int jr = int(std::ceil(xj - 1.e-8));
 			
+			outpx = 0;
 			//lower left corner
 			if(il >= 0 && jl  >= 0)
-				noalias(outpx) += T(1 - deltai) * T(1 - deltaj) * row(pixelsIn, il * widthIn + jl);
+				outpx += T(1 - deltai) * T(1 - deltaj) * pixelsIn(il * widthIn + jl);
 			//lower right corner
 			if(il >= 0 && jr  < (int)widthIn)
-				noalias(outpx) += T(1 - deltai) * deltaj * row(pixelsIn, il * widthIn + jr);
+				outpx += T(1 - deltai) * deltaj * pixelsIn(il * widthIn + jr);
 			//upper left corner
 			if(iu < (int)heightIn && jl  >= 0)
-				noalias(outpx) += deltai * T(1 - deltaj) * row(pixelsIn, iu * widthIn + jl);
+				outpx += deltai * T(1 - deltaj) * pixelsIn(iu * widthIn + jl);
 			//upper right corner
 			if(iu < (int)heightIn && jr < (int)widthIn)
-				noalias(outpx) += deltai * deltaj * row(pixelsIn, iu * widthIn + jr);
+				outpx += deltai * deltaj * pixelsIn(iu * widthIn + jr);
 		}
 	};
-	threading::parallelND({images.size1() * heightOut}, {0}, resizeRow, threading::globalThreadPool());
+	threading::parallelND({numSlices * heightOut}, {0}, resizeRow, threading::globalThreadPool());
 }
 
 
@@ -121,7 +131,7 @@ void bilinearResizeWeightedDerivative(
 	Shape const& outShape
 ){
 	SIZE_CHECK(inShape.size() == outShape.size());
-	SIZE_CHECK(inShape.size() == 2 || inShape[2] == outShape[2]);
+	SIZE_CHECK(inShape.size() == 2 || inShape[0] == outShape[0]);
 	SIZE_CHECK(coefficients.size1() == inputDerivatives.size1());
 	SIZE_CHECK(coefficients.size2() == outShape.numElements());
 	SIZE_CHECK(inputDerivatives.size2() == inShape.numElements());
@@ -130,16 +140,28 @@ void bilinearResizeWeightedDerivative(
 	std::size_t widthIn = inShape[1];
 	std::size_t heightOut = outShape[0];
 	std::size_t widthOut = outShape[1];
-	std::size_t numChannels = (inShape.size() == 3)? inShape[2]: 1;
+	std::size_t numChannels = 1;
+	if(inShape.size() == 3){
+		heightIn = inShape[1];
+		widthIn = inShape[2];
+		heightOut = outShape[1];
+		widthOut = outShape[2];
+		numChannels = inShape[0];
+	}
 	inputDerivatives.clear();
+	
+	//merge N and C index and treat each channel as separate image
+	std::size_t numSlices = numChannels * coefficients.size1();
+	auto slices = to_matrix(to_vector(coefficients), numSlices, heightOut * widthOut);
+	auto derivativeSlices = to_matrix(to_vector(inputDerivatives), numSlices, heightIn * widthIn);
 	
 	
 	//we parallelize over images*rows of the result, i.e. each function evaluation computes a full row of the image
 	auto derivativeRow = [&](std::size_t id){
-		std::size_t im = id / heightIn; //image-index
-		std::size_t i = id % heightIn; //row-index in derivative,aka input image row
-		auto coeffs = to_matrix(row(coefficients,im), heightOut * widthOut, numChannels);
-		auto derivs = to_matrix(row(inputDerivatives,im), heightIn * widthIn, numChannels);
+		std::size_t slice = id / heightIn; //slice-index
+		std::size_t i = id % heightIn; //row-index in slice
+		auto coeffs = row(slices,slice);
+		auto derivs = row(derivativeSlices,slice);
 		
 		double out_per_ini = double(heightOut)/heightIn;
 		double out_per_inj = double(widthOut)/widthIn;
@@ -153,7 +175,7 @@ void bilinearResizeWeightedDerivative(
 		double basexj = 0.5 - 0.5 * out_per_inj;
 		
 		for(std::size_t j = 0; j != widthIn; ++j){
-			auto derivp = row(derivs, i * widthIn + j);
+			T& deriv = derivs(i * widthIn + j);
 			
 			double xi = i * out_per_ini - basexi;
 			double xj = j * out_per_inj - basexj;
@@ -188,13 +210,12 @@ void bilinearResizeWeightedDerivative(
 				for(std::size_t j0 = jmin; j0 < jmax; ++j0){
 					T deltaj = T((j0 - xj) * in_per_outj);
 					deltaj = T(1) - std::abs(deltaj);
-					auto coeffp = row(coeffs, i0 * widthOut + j0);
-					noalias(derivp) += deltai * deltaj* coeffp;
+					deriv += deltai * deltaj * coeffs(i0 * widthOut + j0);
 				}
 			}
 		}
 	};
-	threading::parallelND({inputDerivatives.size1() * heightIn}, {0}, derivativeRow, threading::globalThreadPool());
+	threading::parallelND({numSlices * heightIn}, {0}, derivativeRow, threading::globalThreadPool());
 }
 
 

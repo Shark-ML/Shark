@@ -197,11 +197,9 @@ private:
 	RealVector updateWeights(WeightVector const& logWeights){
 		
 		//first calculate the batchLogWeightSum
-		double batchLogWeightSum = logWeights(0);
-		for(std::size_t i = 1; i != logWeights.size(); ++i){
-			double const diff = logWeights(i) - batchLogWeightSum;
-			batchLogWeightSum += softPlus(diff);
-		}
+		double maxWeight = max(logWeights);
+		
+		double batchLogWeightSum = std::log(sum(exp(logWeights - maxWeight))) + maxWeight;
 		
 		if(m_logWeightSum == -1e100){
 			m_logWeightSum = batchLogWeightSum;

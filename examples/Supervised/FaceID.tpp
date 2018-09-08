@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 //###end<data_enumerate_images>
 	
 //###begin<data_load_images>	
-	Shape imageShape = {56,46, 1}; //height x width x channels of image
+	Shape imageShape = {1, 56,46}; //channels x height x width of image
 	// load a single image
 	auto loadPointFromZip = [&](std::string const& path){
 //###begin<data_load_zip>
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 	ErrorFunction<FloatVector> error(pairGenerator, &model, &loss, 2);//use two batches in every iteration
 //###end<generator_error_usage>	
 	std::size_t iterations = 1001;
-	initRandomNormal(faceId,0.001); //init model
+	initRandomNormal(model,0.001); //init model
 	Adam<FloatVector> optimizer;
 	optimizer.setEta(0.01f);//learning rate of the algorithm
 	error.init();

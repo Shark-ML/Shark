@@ -106,7 +106,7 @@ public:
 	
 	///\brief Configures the model.
 	///
-	/// \arg inputShape Shape of the image imHeight x imWidth x channel
+	/// \arg inputShape Shape of the image channel x imHeight x imWidth
 	/// \arg outputShape Shape of the resized output imHeight x imWidth
 	/// \arg type Type of interpolation to perform, default is Spline-Interpolation
 	void setStructure(
@@ -118,12 +118,12 @@ public:
 		m_padding = padding;
 		m_type = type;
 		if(m_padding == Padding::Valid)
-			m_outputShape =  {m_inputShape[0]/m_patch[0], m_inputShape[1]/m_patch[1], m_inputShape[2]};
+			m_outputShape =  {m_inputShape[0], m_inputShape[1]/m_patch[0], m_inputShape[2]/m_patch[1]};
 		else
 			m_outputShape = {
-				(m_inputShape[0] + m_patch[0] - 1)/m_patch[0], 
-				(m_inputShape[1] + m_patch[1] - 1)/m_patch[1], 
-				m_inputShape[2]
+				m_inputShape[0],
+				(m_inputShape[1] + m_patch[0] - 1)/m_patch[0], 
+				(m_inputShape[2] + m_patch[1] - 1)/m_patch[1], 
 			};
 	}
 

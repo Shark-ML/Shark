@@ -8,29 +8,31 @@ namespace shark{
 namespace image{
 template<class T>
 void maxPooling(
-	blas::dense_matrix_adaptor<T const, blas::row_major, blas::continuous_dense_tag, blas::gpu_tag> inputs_unreg, 
+	blas::dense_matrix_adaptor<T const, blas::row_major, blas::continuous_dense_tag, blas::gpu_tag> inputs_imgs, 
 	Shape const& shape,
 	Shape const& patchSize,
-	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::gpu_tag> outputs_unreg
+	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::gpu_tag> outputs_imgs
 ){
 	
-	std::size_t depth = shape[2];
-	std::size_t outputHeight = shape[0]/patchSize[0];
-	std::size_t outputWidth = shape[1]/patchSize[1];
+	std::size_t outputHeight = shape[1]/patchSize[0];
+	std::size_t outputWidth = shape[2]/patchSize[1];
 	std::size_t outputPixels = outputWidth * outputHeight;
-	SIZE_CHECK(inputs_unreg.size2() == shape[0] * shape[1] * depth);
-	SIZE_CHECK(outputs_unreg.size2() == outputPixels * depth);
-	SIZE_CHECK(outputs_unreg.size1() == inputs_unreg.size1());
+	SIZE_CHECK(inputs_imgs.size2() == shape.numElements());
+	SIZE_CHECK(outputs_imgs.size2() == outputPixels * shape[0]);
+	SIZE_CHECK(outputs_imgs.size1() == inputs_unreg.size1());
 
 	blas::gpu::detail::meta_kernel k("shark_max_pooling");
 	std::size_t width_index = k.add_arg<std::size_t>("width");
 	std::size_t height_index = k.add_arg<std::size_t>("height");
-	std::size_t depth_index = k.add_arg<std::size_t>("depth");
 	std::size_t sizeH_index = k.add_arg<std::size_t>("sizeH");
 	std::size_t sizeW_index = k.add_arg<std::size_t>("sizeW");
 	std::size_t numImages_index = k.add_arg<std::size_t>("numImages");
-	auto inputs = k.register_args(to_functor(inputs_unreg));
-	auto outputs = k.register_args(to_functor(outputs_unreg));
+	
+	auto inputs_unreg = to_matrix(to_vector(inputs_imgs), inputs_imgs.size1() * shape[0], shape[1] * shape[2]);
+	auto outputs_unreg = to_matrix(to_vector(outputs_imgs), outputs_imgs.size1() * shape[0], outputHeight * outputWidth);
+	
+	auto inputs = k.register_args(inputs_unreg.elements());
+	auto outputs = k.register_args(outputs_unreg.elements());
 
 	k << "const ulong outputWidth = width / sizeW;\n";
 	k << "const ulong outputHeight = height / sizeH;\n";
@@ -46,28 +48,26 @@ void maxPooling(
 	k << "const ulong startj = (p % outputWidth) * sizeW;\n";
 	k << "const ulong endi = starti + sizeH;\n";
 	k << "const ulong endj = startj + sizeW;\n";
-	k << "for(ulong c = get_local_id(1); c < depth; c += get_local_size(1)){\n";
-	k << "	ulong index = (starti * width + startj) * depth +c;\n";
+	k << "ulong index = starti * width + startj;\n";
 	auto im = k.expr<cl_ulong>("im");
 	auto index = k.expr<cl_ulong>("index");
 		//traverse the patch on the input image and compute maximum
 	k << "	" << k.decl<T>("val") <<" = "<< inputs(im, index) << ";\n";
 	k << "	for(ulong i = starti; i != endi; ++i){\n";
 	k << "		for(ulong j = startj; j != endj; ++j){\n";
-	k << "			index =  (i * width + j) * depth + c;\n";
+	k << "			index =  i * width + j;\n";
 	k << "			val = max(val,"<<inputs(im, index)<<");\n";
 	k << "		}\n";
 	k << "	}\n";
-	k << "	" << outputs(im, k.expr<cl_ulong>("(p * depth + c)"))<<" = val;\n";
+	k << "	" << outputs(im, k.expr<cl_ulong>("p"))<<" = val;\n";
 	k << "}\n";
 	
 	//compile kernel
 	boost::compute::kernel kernel = k.compile(outputs_unreg.queue().get_context());
 	
 	//enqueue kernel with kernel args
-	kernel.set_arg(height_index, shape[0]);
-	kernel.set_arg(width_index, shape[1]);
-	kernel.set_arg(depth_index, shape[2]);
+	kernel.set_arg(height_index, shape[1]);
+	kernel.set_arg(width_index, shape[2]);
 	kernel.set_arg(sizeH_index, patchSize[0]);
 	kernel.set_arg(sizeW_index, patchSize[1]);
 	kernel.set_arg(numImages_index, inputs_unreg.size1());

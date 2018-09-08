@@ -69,14 +69,17 @@ std::pair<blas::vector<T>, Shape> image::readPNG(std::vector<unsigned char> cons
 	//convert to float vector
 	T conv = (T)255.0;
 	blas::vector<T> image(imgWidth * imgHeight * channels);
+	auto imageMat = to_matrix(image, channels, imgWidth * imgHeight);
 	for (std::size_t i=0; i != imgHeight; ++i){
-		for (std::size_t j=0; j != imgWidth * channels; ++j){
-			image[i * imgWidth * channels +j] = rows[i][j]/conv;
+		for (std::size_t j=0; j != imgWidth; ++j){
+			for (std::size_t c = 0; c != channels; ++c){
+				imageMat(c, i * imgWidth + j) = rows[i][j* channels + c]/conv;
+			}
 		}
 	}
 	
 	//done
-	return {std::move(image), {imgHeight, imgWidth, channels}};
+	return {std::move(image), {channels, imgHeight, imgWidth}};
 	
 }
 
@@ -126,16 +129,21 @@ std::pair<blas::vector<T>, Shape> image::readJPEG(std::vector<unsigned char> con
 		jpeg_finish_decompress(&cinfo);
 		jpeg_destroy_decompress(&cinfo);
 		
-		
 		//convert to float vector
 		T conv = (T)255.0;
 		blas::vector<T> image(imgWidth * imgHeight * channels);
-		for (std::size_t i=0; i != image.size(); ++i){
-			image[i] = pixBuf[i] / conv;
+		auto imageMat = to_matrix(image, channels, imgWidth * imgHeight);
+		std::size_t imPos = 0;
+		for (std::size_t i=0; i != imgHeight; ++i){
+			for (std::size_t j=0; j != imgWidth; ++j){
+				for (std::size_t c = 0; c != channels; ++c, ++imPos){
+					imageMat(c, i * imgWidth + j) = pixBuf[imPos] / conv;
+				}
+			}
 		}
 		
 		//done
-		return {std::move(image), {imgHeight, imgWidth, channels}};
+		return {std::move(image), {channels, imgHeight, imgWidth}};
 	
 	}catch(jpeg_error_mgr* mgr){//on failure, write message and rethrow
 		char messageBuffer[JMSG_LENGTH_MAX];
@@ -195,7 +203,7 @@ std::pair<blas::vector<T>, Shape> image::readPGM(std::vector<unsigned char> cons
 		image[i] = ((unsigned char)*pos) / conv;
 	}
 
-	return {std::move(image), {(std::size_t) imgHeight,(std::size_t) imgWidth, 1}};
+	return {std::move(image), {1, (std::size_t) imgHeight,(std::size_t) imgWidth}};
 }
 
 template<class T>

@@ -5,16 +5,16 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include "derivativeTestHelper.h"
 
-
+#include <iostream>
 using namespace shark;
 
 
 BOOST_AUTO_TEST_SUITE (Models_PoolingLayer)
 
 BOOST_AUTO_TEST_CASE( Models_PoolingLayer_MaxPooling_Value){
-	Shape imageShape = {2,4,2};
+	Shape imageShape = {2,2,4};
 	Shape patchShape = {2,2};
-	Shape outputShape = {1,2,2};
+	Shape outputShape = {2,1,2};
 	PoolingLayer<RealVector> model(imageShape, patchShape, Pooling::Maximum);
 	
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), 0);
@@ -22,23 +22,31 @@ BOOST_AUTO_TEST_CASE( Models_PoolingLayer_MaxPooling_Value){
 	BOOST_REQUIRE_EQUAL(model.outputShape(), outputShape);
 
 	RealMatrix dataIn = {
-		{1, 10, 2, 22,	-5, -3, -12, 3,
-		5, 8, 12, 3, 	-8, 7, -16, 2},
-		{5, -3, 1, 3,	1, 10, 2, 22,	
-		-5, 7, 1, 2,	5, 8, 12, 3}
+		{1, 2, 	-5, -12,	
+		  5, 12,	7, 2,
+		
+		  10, 22,	-3, 3,
+		  8, 3,	7, 2},
+		
+		{5, 1,	1, 2,	
+		-5, 1,	5, 12,
+			
+		-3, 3,	10, 22,
+		7, 2,	8, 3}
+		
 	};
 	RealMatrix dataOut = {
-		{12, 22, -5, 7},
-		{5, 7, 12, 22}
+		{12, 7, 22, 7},
+		{5, 12, 7, 22}
 	};
 	
 	RealMatrix test = model(dataIn);
 	BOOST_CHECK_SMALL(norm_inf(test - dataOut), 1.e-10);
 	
 	//create a larger model and test that batch-evaluation is the same
-	imageShape = {10,16,3};
+	imageShape = {3,10,16};
 	patchShape = {5,2};
-	outputShape = {2,8,3};
+	outputShape = {3,2,8};
 	PoolingLayer<RealVector> modelBig(imageShape, patchShape, Pooling::Maximum);
 	BOOST_REQUIRE_EQUAL(modelBig.numberOfParameters(), 0);
 	BOOST_REQUIRE_EQUAL(modelBig.inputShape(), imageShape);
@@ -49,9 +57,9 @@ BOOST_AUTO_TEST_CASE( Models_PoolingLayer_MaxPooling_Value){
 }
 
 BOOST_AUTO_TEST_CASE( Models_PoolingLayer_MaxPooling_Derivative){
-	Shape imageShape = {10,16,3};
+	Shape imageShape = {3,10,16};
 	Shape patchShape = {5,2};
-	Shape outputShape = {2,8,3};
+	Shape outputShape = {3,2,8};
 	PoolingLayer<RealVector> model(imageShape, patchShape, Pooling::Maximum);
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), 0);
 	BOOST_REQUIRE_EQUAL(model.inputShape(), imageShape);

@@ -68,7 +68,7 @@ void resize(
 ){
 	SIZE_CHECK(shapeIn.size() == shapeOut.size());
 	SIZE_CHECK(shapeIn.size() <= 3);
-	SIZE_CHECK(shapeIn.size() == 2 || shapeIn[2] == shapeOut[2] );
+	SIZE_CHECK(shapeIn.size() == 2 || shapeIn[0] == shapeOut[0] );
 	if(method == Interpolation::Linear){
 		image::bilinearResize(
 			typename M1::const_closure_type(images()),
@@ -98,7 +98,7 @@ void resizeWeightedDerivative(
 	SIZE_CHECK(images().size2() == inputDerivatives().size2());
 	SIZE_CHECK(shapeIn.size() == shapeOut.size());
 	SIZE_CHECK(shapeIn.size() <= 3);
-	SIZE_CHECK(shapeIn.size() == 2 || shapeIn[2] == shapeOut[2] );
+	SIZE_CHECK(shapeIn.size() == 2 || shapeIn[0] == shapeOut[0] );
 	if(method == Interpolation::Linear){
 		image::bilinearResizeWeightedDerivative(
 			typename M1::const_closure_type(coefficients()),

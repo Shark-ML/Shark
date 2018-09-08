@@ -131,11 +131,7 @@ private:
 	}
 	template<class Point1, class Point2>
 	double boxVolume(Point1 const& p,Point2 const& ref) const {
-		double volume = 1;
-		for(std::size_t i = 0; i != ref.size(); ++i){
-			volume *= ref(i) - p(i);
-		}
-		return volume;
+		return std::exp(sum(log(ref - p)));
 	}
 };
 }

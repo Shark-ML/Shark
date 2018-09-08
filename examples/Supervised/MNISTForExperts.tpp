@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 	importSparseData( data, argv[1] , 784 , 100);
 	std::cout<<"input shape:"<< data.shape().input<<std::endl;
 	std::cout<<"label shape:"<< data.shape().label<<std::endl;
-	data.shape().input = {28,28,1}; //store shape for model creation
+	data.shape().input = {1,28,28}; //store shape for model creation
 	std::cout<<"input shape:"<< data.shape().input<<std::endl;
 //###end<data>
 

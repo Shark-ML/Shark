@@ -77,7 +77,7 @@ public:
 	
 	///\brief Configures the model.
 	///
-	/// \arg inputShape Shape of the image imHeight x imWidth x channel
+	/// \arg inputShape Shape of the image channel x imHeight x imWidth
 	/// \arg outputShape Shape of the resized output imHeight x imWidth
 	/// \arg type Type of interpolation to perform, default is Linear-Interpolation
 	ResizeLayer(
@@ -115,7 +115,7 @@ public:
 
 	///\brief Configures the model.
 	///
-	/// \arg inputShape Shape of the image imHeight x imWidth x channel
+	/// \arg inputShape Shape of the image channel x imHeight x imWidth
 	/// \arg outputShape Shape of the resized output imHeight x imWidth
 	/// \arg type Type of interpolation to perform, default is Linear-Interpolation
 	void setStructure(
@@ -124,7 +124,7 @@ public:
 		SHARK_RUNTIME_CHECK(type == Interpolation::Linear, "Sorry, only linear interpolation is currently supported");
 		m_type = type;
 		m_inputShape = inputShape;
-		m_outputShape = {outputShape[0], outputShape[1], inputShape[2]};
+		m_outputShape = {inputShape[0], outputShape[0], outputShape[1]};
 	}
 
 	boost::shared_ptr<State> createState()const{

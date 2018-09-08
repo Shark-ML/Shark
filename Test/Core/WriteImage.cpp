@@ -10,20 +10,20 @@ using namespace std;
 
 struct ImageFixture {
 	ImageFixture()
-	: shapeRGBA({32,26,4}), shapeRGB({32,26,3}), shapeGray({32,26,1})
+	: shapeRGBA({4,32,26}), shapeRGB({3,32,26}), shapeGray({1,32,26})
 	, dataRGBA(32*26*4,0), dataARGB(32*26*4,0), dataRGB(32*26*3,0), dataGray(32*26){
 		//red and green channels are 0
 		for(std::size_t i = 0; i != 32; ++i){
 			for(std::size_t j = 0; j != 26; ++j){
-				dataRGBA[(i*26+j)*4+2] = 1.0;//blue channel is maximal
-				dataARGB[(i*26+j)*4+3] = 1.0;
+				dataRGBA[i*26+j+2*32*26] = 1.0;//blue channel is maximal
+				dataARGB[i*26+j+3*32*26] = 1.0;
 				double alpha = 0.0;
 				if( i >= 16)
 					alpha += 2.0/3.0;
 				if(j >= 13)
 					alpha += 1.0/3.0;
-				dataRGBA[(i*26+j)*4+3] = alpha;//alpha channel are 4 squares
-				dataARGB[(i*26+j)*4+0] = alpha;
+				dataRGBA[i*26+j+3*32*26] = alpha;//alpha channel are 4 squares
+				dataARGB[i*26+j+0*32*26] = alpha;
 			}
 		}
 		
@@ -38,9 +38,9 @@ struct ImageFixture {
 				if( i >= 16 && j >= 13)
 					RG = 0.0;
 		
-				dataRGB[(i*26+j)*3+0] = RG;
-				dataRGB[(i*26+j)*3+1] = RG;
-				dataRGB[(i*26+j)*3+2] = 1;
+				dataRGB[i*26+j+0*32*26] = RG;
+				dataRGB[i*26+j+1*32*26] = RG;
+				dataRGB[i*26+j+2*32*26] = 1;
 			}
 		}
 		

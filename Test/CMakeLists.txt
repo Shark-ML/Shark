@@ -174,11 +174,11 @@ shark_add_test( Models/RFClassifier.cpp Models_RFClassifier )
 
 # Core tests
 #shark_add_test( Core/ScopedHandleTests.cpp Core_ScopedHandleTests )
-shark_add_test( Core/Reorder.cpp Core_ImageReorder )
 shark_add_test( Core/Resize.cpp Core_ImageResize )
 shark_add_test( Core/ZipSupport.cpp Core_ZipSupport )
 shark_add_test( Core/ReadImage.cpp Core_ReadImage )
 shark_add_test( Core/WriteImage.cpp Core_WriteImage )
+shark_add_test( Core/Convolution.cpp Core_ImageConvolution )
 
 # Data Tests
 shark_add_test( Data/Csv.cpp Data_Csv )

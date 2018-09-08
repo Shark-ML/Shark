@@ -54,6 +54,7 @@ namespace shark{
 
 namespace blas{
 using namespace remora;
+typedef opencl_tag gpu_tag;
 }
 #define SHARK_VECTOR_MATRIX_TYPEDEFS(basetype, prefix) \
 	typedef blas::vector< basetype > prefix##Vector; \
@@ -76,7 +77,6 @@ typedef blas::matrix< double, blas::row_major, blas::gpu_tag > RealGPUMatrix;
 typedef blas::matrix< float, blas::row_major, blas::gpu_tag > FloatGPUMatrix;
 
 typedef blas::permutation_matrix PermutationMatrix;
-
 ///Type of Data sequences.
 typedef std::deque<RealVector> Sequence;
 }

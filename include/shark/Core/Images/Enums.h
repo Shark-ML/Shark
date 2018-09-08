@@ -42,8 +42,7 @@ enum class Interpolation{
 };
 enum class Padding{
 	Valid,
-	ZeroPad,
-	RepeatBorder
+	ZeroPad
 };
 
 enum class PixelType{
@@ -51,6 +50,12 @@ enum class PixelType{
 	RGBA,
 	ARGB,
 	Luma
+};
+
+enum class ImageFormat{
+	NHWC = 1234,
+	NCHW = 1423,
+	CNHW = 4123,
 };
 
 }

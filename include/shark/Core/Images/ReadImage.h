@@ -44,7 +44,7 @@ namespace shark { namespace image{
 	
 /// \brief Reads a png file stored in a given vector
 ///
-/// The returned shape must be interpreted as height x width x channels. If channel = 3 the stored image was
+/// The returned shape must be interpreted as channels x height x width. If channel = 3 the stored image was
 /// stored as RGB. If channels are 4, the image was encoded as RGBA (even if the original image is stored as ARGB).
 /// a single channel is interpreted as Luma
 template<class T>
@@ -52,20 +52,20 @@ std::pair<blas::vector<T>, Shape> readPNG(std::vector<unsigned char> const& data
 
 /// \brief Reads a jpeg file stored in a given vector
 ///
-/// The returned shape must be interpreted as height x width x channels. If channel = 3 the stored image was
+/// The returned shape must be interpreted as channels x height x width. If channel = 3 the stored image was
 /// stored as RGB. A single channel is interpreted as Luma.
 template<class T>
 std::pair<blas::vector<T>, Shape> readJPEG(std::vector<unsigned char> const& data);
 
 /// \brief Reads a pgm file stored in a given vector
 ///
-/// The returned shape must be interpreted as height x width x channels, where channels = 1.
+/// The returned shape must be interpreted as channels x height x width, where channels = 1.
 template<class T>
 std::pair<blas::vector<T>, Shape> readPGM(std::vector<unsigned char> const& data);
 /// \brief Tries to guess the file format of a file stored in data and read as image
 ///
 /// Typically the first bytes of a file encode its file type. Supported file types are png, jpeg and pgm.
-/// The returned shape must be interpreted as height x width x channels. If channel = 3 the stored image was
+/// The returned shape must be interpreted as channels x height x width. If channel = 3 the stored image was
 /// stored as RGB. If channels are 4, the image was encoded as RGBA (even if the original image is stored as ARGB).
 /// a single channel is interpreted as Luma
 template<class T>
@@ -73,7 +73,7 @@ std::pair<blas::vector<T>, Shape> readImage(std::vector<unsigned char> const& da
 /// \brief Reads an image file
 ///
 /// Typically the first bytes of a file encode its file type. Supported file types are png, jpeg and pgm.
-/// The returned shape must be interpreted as height x width x channels. If channel = 3 the stored image was
+/// The returned shape must be interpreted as channels x height x width. If channel = 3 the stored image was
 /// stored as RGB. If channels are 4, the image was encoded as RGBA (even if the original image is stored as ARGB).
 /// a single channel is interpreted as Luma
 template<class T>

@@ -13,32 +13,37 @@ void maxPooling(
 	Shape const& patchSize,
 	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> outputs
 ){
-	std::size_t depth = shape[2];
-	std::size_t outputHeight = shape[0]/patchSize[0];
-	std::size_t outputWidth = shape[1]/patchSize[1];
+	std::size_t outputHeight = shape[1]/patchSize[0];
+	std::size_t outputWidth = shape[2]/patchSize[1];
 	std::size_t outputPixels = outputWidth * outputHeight;
-	SIZE_CHECK(outputs.size2() == outputPixels * depth);
+	SIZE_CHECK(outputs.size2() == outputPixels * shape[0]);
 	
-	//for all images
+	//reshape to giant single image with shape[0]*numImages channels which are processed independently.
+	auto channelsIn = to_matrix(to_vector(inputs), shape[0] * inputs.size1(), shape[1] * shape[2]);
+	auto channelsOut = to_matrix(to_vector(outputs), shape[0] * inputs.size1(), outputHeight * outputWidth);
+	//for all images and channels
 	for(std::size_t img = 0; img != inputs.size1(); ++img){
-		//Extract single images and create matrices (pixels,channels)
-		auto imageIn = to_matrix(row(inputs,img), shape[0] * shape[1], depth);
-		auto imageOut = to_matrix(row(outputs,img), outputHeight * outputWidth, depth);
-		//traverse over all pixels of the output image
-		for(std::size_t p = 0; p != outputPixels; ++p){
-			auto pixel = row(imageOut,p);
-			//extract pixel coordinates in input image
-			std::size_t starti = (p / outputWidth) * patchSize[0];
-			std::size_t startj = (p % outputWidth) * patchSize[1];
-			std::size_t endi = starti + patchSize[0];
-			std::size_t endj = startj + patchSize[1];
-			
-			//traverse the patch on the input image and compute maximum
-			noalias(pixel) = row(imageIn, starti * shape[1] + startj);
-			for(std::size_t i = starti; i != endi; ++i){
-				for(std::size_t j = startj; j != endj; ++j){
-					std::size_t index = i * shape[1] + j;
-					noalias(pixel) = max(pixel,row(imageIn, index));
+		for(std::size_t c = 0; c != shape[0]; ++c){
+			//Extract current channel
+			auto imageIn = to_matrix(row(channelsIn,img * shape[0] + c), shape[1], shape[2]);
+			auto imageOut = to_matrix(row(channelsOut,img * shape[0] + c), outputHeight, outputWidth);
+			//traverse over all pixels of the output image
+			for(std::size_t i = 0; i != outputHeight; ++i){
+				for(std::size_t j = 0; j != outputWidth; ++j){
+					T& pixel = imageOut(i,j);
+					//extract pixel coordinates in input image
+					std::size_t starti = i * patchSize[0];
+					std::size_t startj = j * patchSize[1];
+					std::size_t endi = starti + patchSize[0];
+					std::size_t endj = startj + patchSize[1];
+					
+					//traverse the patch on the input image and compute maximum
+					pixel = imageIn(starti,startj);
+					for(std::size_t i0 = starti; i0 != endi; ++i0){
+						for(std::size_t j0 = startj; j0 != endj; ++j0){
+							pixel = std::max(pixel, imageIn(i0,j0));
+						}
+					}
 				}
 			}
 		}
@@ -53,40 +58,47 @@ void maxPoolingDerivative(
 	Shape const& patchSize,
 	blas::dense_matrix_adaptor<T, blas::row_major, blas::continuous_dense_tag, blas::cpu_tag> derivatives
 ){
-	std::size_t depth = shape[2];
-	std::size_t outputHeight = shape[0]/patchSize[0];
-	std::size_t outputWidth = shape[1]/patchSize[1];
+	std::size_t outputHeight = shape[1]/patchSize[0];
+	std::size_t outputWidth = shape[2]/patchSize[1];
 	std::size_t outputPixels = outputWidth * outputHeight;
-	SIZE_CHECK(coefficients.size2() == outputPixels * depth);
-	//for all images
+	SIZE_CHECK(coefficients.size2() == outputPixels * shape[0]);
+	derivatives.clear();
+	
+	//reshape to giant single image with shape[0]*numImages channels which are processed independently.
+	auto channelsIn = to_matrix(to_vector(inputs), shape[0] * inputs.size1(), shape[1] * shape[2]);
+	auto channelsCoeffs = to_matrix(to_vector(coefficients), shape[0] * inputs.size1(), outputHeight * outputWidth);
+	auto channelsDer = to_matrix(to_vector(derivatives), shape[0] * inputs.size1(), shape[1] * shape[2]);
+	//for all images and channels
 	for(std::size_t img = 0; img != inputs.size1(); ++img){
-		//Extract single images and create matrices (pixels,channels)
-		auto imageCoeffs = to_matrix(row(coefficients,img),  outputHeight * outputWidth, depth);
-		auto imageIn = to_matrix(row(inputs,img), shape[0] * shape[1], depth);
-		auto imageDer = to_matrix(row(derivatives,img), shape[0] * shape[1], depth);
-		//traverse over all pixels of the output image
-		for(std::size_t p = 0; p != outputPixels; ++p){
-			std::size_t starti = (p / outputWidth) * patchSize[0];
-			std::size_t startj = (p % outputWidth) * patchSize[1];
-			std::size_t endi = starti + patchSize[0];
-			std::size_t endj = startj + patchSize[1];
+		for(std::size_t c = 0; c != shape[0]; ++c){
+			//Extract current channel
+			auto imageCoeffs = to_matrix(row(channelsCoeffs,img * shape[0] + c), outputHeight, outputWidth);
+			auto imageIn = to_matrix(row(channelsIn,img * shape[0] + c), shape[1], shape[2]);
+			auto imageDer = to_matrix(row(channelsDer,img * shape[0] + c), shape[1], shape[2]);
+			//traverse over all pixels of the output image
+			for(std::size_t i = 0; i != outputHeight; ++i){
+				for(std::size_t j = 0; j != outputWidth; ++j){
+					//extract pixel coordinates in input image
+					std::size_t starti = i * patchSize[0];
+					std::size_t startj = j * patchSize[1];
+					std::size_t endi = starti + patchSize[0];
+					std::size_t endj = startj + patchSize[1];
 			
-			//traverse the patch on the input image and compute arg-max for each channel
-			for(std::size_t c = 0; c != depth; ++c){
-				std::size_t maxIndex =  starti * shape[1] + startj;
-				double maxVal = imageIn(maxIndex,c);
-				for(std::size_t i = starti; i != endi; ++i){
-					for(std::size_t j = startj; j != endj; ++j){
-						std::size_t index = i * shape[1] + j;
-						double val = imageIn(index,c);
-						if(val > maxVal){
-							maxVal = val;
-							maxIndex = index;
+					std::size_t maxIndexi =  starti;
+					std::size_t maxIndexj =  startj;
+					double maxVal = imageIn(starti, startj);
+					for(std::size_t i0 = starti; i0 != endi; ++i0){
+						for(std::size_t j0 = startj; j0 != endj; ++j0){
+							if(imageIn(i0,j0) > maxVal){
+								maxVal = imageIn(i0,j0);
+								maxIndexi = i0;
+								maxIndexj = j0;
+							}
 						}
 					}
+					//after arg-max is obtained, update gradient
+					imageDer(maxIndexi, maxIndexj) += imageCoeffs(i,j);
 				}
-				//after arg-max is obtained, update gradient
-				imageDer(maxIndex, c) += imageCoeffs(p,c);
 			}
 		}
 	}

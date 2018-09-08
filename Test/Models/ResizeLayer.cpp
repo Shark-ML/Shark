@@ -13,9 +13,9 @@ using namespace shark;
 BOOST_AUTO_TEST_SUITE (Models_ResizeLayer)
 
 BOOST_AUTO_TEST_CASE( Models_ResizeLayer_Linear_Derivatives){
-	Shape imageShape = {3,4,3};
+	Shape imageShape = {3,3,4};
 	Shape outputShape = {5,2};
-	Shape outputShape3 = {5,2,3};
+	Shape outputShape3 = {3,5,2};
 	ResizeLayer<RealVector> model(imageShape, outputShape, Interpolation::Linear);
 	BOOST_REQUIRE_EQUAL(model.numberOfParameters(), 0);
 	BOOST_REQUIRE_EQUAL(model.inputShape(), imageShape);
@@ -28,8 +28,8 @@ BOOST_AUTO_TEST_CASE( Models_ResizeLayer_Linear_Derivatives){
 BOOST_AUTO_TEST_CASE( Models_ResizeLayer_Spline_GPU){
 	
 	//define model
-	Shape imageShape = {22,41,1};
-	Shape outputShape = {25,18,1};
+	Shape imageShape = {1,22,41};
+	Shape outputShape = {1,25,18};
 	ResizeLayer<FloatVector> model_cpu(imageShape, outputShape, Interpolation::Spline);
 	ResizeLayer<FloatGPUVector> model_gpu(imageShape, outputShape, Interpolation::Spline);
 	
