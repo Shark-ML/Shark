@@ -75,6 +75,8 @@ public:
 		return m_expression.queue();
 	}
 	
+	no_functor elements() const{return no_functor();}
+	
 	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, cpu_tag>& x)const{
@@ -157,6 +159,8 @@ public:
 		return *m_queue;
 	}
 	
+	no_functor elements() const{return no_functor();}
+	
 	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, opencl_tag>& x)const{
@@ -237,6 +241,8 @@ public:
 	boost::compute::command_queue& queue() const{
 		return m_expression.queue();
 	}
+	
+	no_functor elements() const{return no_functor();}
 	
 	//dispatcher to computation kernels
 	template<class MatX>
@@ -325,6 +331,8 @@ public:
 	boost::compute::command_queue& queue() const{
 		return *m_queue;
 	}
+	
+	no_functor elements() const{return no_functor();}
 	
 	//dispatcher to computation kernels
 	template<class MatX>

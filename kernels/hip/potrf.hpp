@@ -49,7 +49,7 @@ __global__ void potrf_block_kernel(hipLaunchParm lp, MatA A, size_t start, size_
 	// Load tile of A into shared memory
 	for(size_t i = hipThreadIdx_x; i < TILE_SIZE; i += numWorkers){
 		for(size_t j = hipThreadIdx_y; j < TILE_SIZE; j += numWorkers){
-			Asub[i][j] = A(min(end-1, start + i), min(end-1, start + j));
+			Asub[i][j] = A(::min(end-1, start + i), ::min(end-1, start + j));
 		}
 	}
 	__threadfence_block();

@@ -131,8 +131,8 @@ __device__ float4 normal4_32_device(float mean, float stddev, uint4 x){
 	return result;
 }
 __device__ uint4 discrete4_32_device(uint4 key, uint4 ctr, uint N, uint4 inc) {
-	uint max_valid = (0xffffffff / N) * N;
-	int num_valid = 0;
+	//~ uint max_valid = (0xffffffff / N) * N;
+	//~ int num_valid = 0;
 	uint res[4];
 	//~ while(num_valid < 4){
 		uint4 x = rng4_32_device(ctr, key);
