@@ -142,6 +142,8 @@ public:
 	void setStructure(
 		Shape const& imageShape, Shape const& filterShape, Padding type = Padding::ZeroPad
 	){
+		SHARK_RUNTIME_CHECK(type != Padding::ZeroPad || filterShape[1]%2 == 1, "padding only allowed with odd-sized kernels");
+		SHARK_RUNTIME_CHECK(type != Padding::ZeroPad || filterShape[2]%2 == 1, "padding only allowed with odd-sized kernels");
 		m_type = type;
 		m_inputShape = imageShape;
 		m_filterShape ={imageShape[0], filterShape[1], filterShape[2]};
@@ -173,7 +175,7 @@ public:
 		
 		image::convolution(
 			inputs, m_filters, outputs,
-			m_inputShape, m_filterShape,
+			m_inputShape, m_filterShape, m_outputShape,
 			paddingHeight, paddingWidth,
 			ImageFormat::NCHW, ImageFormat::NCHW, false
 		);
@@ -215,17 +217,16 @@ public:
 		//derivative of convolution wrt filters
 		std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterShape[1] - 1: 0;
 		std::size_t paddingWidth = (m_type != Padding::Valid) ? m_filterShape[2] - 1: 0;
-		image::convolution(
+		image::convolutionBackwardFilters(
 			inputs, delta, weightGradient,
-			m_inputShape, m_outputShape,
-			paddingHeight, paddingWidth,
-			ImageFormat::CNHW, ImageFormat::CNHW, false
+			m_inputShape, m_outputShape, m_filterShape,
+			paddingHeight, paddingWidth, false
 		);
-		
-		
+
 		//derivatives of offset parameters
 		//note: remora does not support 3d tensors, so we have to slice along the images index and add by hand
 		std::size_t outputsForFilter = m_outputShape[1] * m_outputShape[2];
+		offsetGradient.clear();//this is necessary because of an aparent bug(?) in cudnn that sometiems seem to voerwrite neighbouring indices
 		for(std::size_t i = 0; i != inputs.size1(); ++i){
 			auto slice = to_matrix(row(delta, i), m_filters.size1(), outputsForFilter);
 			noalias(offsetGradient) += sum(as_rows(slice));
@@ -245,20 +246,15 @@ public:
 		BatchOutputType delta = coefficients;
 		m_activation.multiplyDerivative(outputs,delta, state.toState<typename ActivationFunction::State>());
 		
-		std::size_t paddingHeight = m_filterShape[1] - 1;
-		std::size_t paddingWidth = m_filterShape[2] - 1;
-		if(m_type == Padding::Valid){
-			paddingHeight *=2;
-			paddingWidth *=2;
-		}
 		derivatives.resize(inputs.size1(),inputShape().numElements());
 		derivatives.clear();
 		
-		image::convolution(
+		std::size_t paddingHeight = (m_type != Padding::Valid) ? m_filterShape[1] - 1: 0;
+		std::size_t paddingWidth = (m_type != Padding::Valid) ? m_filterShape[2] - 1: 0;
+		image::convolutionBackwardInputs(
 			delta, m_filters, derivatives,
-			m_outputShape, m_filterShape,
-			paddingHeight, paddingWidth,
-			ImageFormat::NCHW, ImageFormat::CNHW, true
+			m_outputShape, m_filterShape, m_inputShape,
+			paddingHeight, paddingWidth, false
 		);
 	}
 

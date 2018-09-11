@@ -17,6 +17,10 @@ find_package(
 )
 
 set( boost_unit_test_lib ${Boost_LIBRARIES})
+set(addTestLinkDef 1)
+if(Boost_USE_STATIC_LIBS)
+	set(addTestLinkDef 0)
+endif()
 
 #####################################################################
 #   Adds a unit test for the shark library                          #
@@ -34,7 +38,9 @@ macro(SHARK_ADD_TEST SRC NAME)
 	target_link_libraries( ${NAME} shark ${boost_unit_test_lib})
 	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 11)
 	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
-
+	if(addTestLinkDef)
+		target_compile_definitions(${NAME} PRIVATE -DBOOST_TEST_DYN_LINK)
+	endif()
 	if(GCOV_CHECK)
 		target_link_libraries( ${NAME} gcov)
 	endif (GCOV_CHECK)
@@ -47,6 +53,36 @@ macro(SHARK_ADD_TEST SRC NAME)
 		add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} COMMAND Coverage)
 	endif (GCOV_CHECK)
 endmacro()
+
+
+macro(SHARK_ADD_HIP_TEST SRC NAME)
+	if(ENABLE_HIP)
+		set_source_files_properties(${SRC} PROPERTIES HIP_SOURCE_PROPERTY_FORMAT 1)
+		hip_add_executable(${NAME} ${SRC})
+		target_link_libraries( ${NAME} shark ${boost_unit_test_lib}  ${CUDA_CUBLAS_LIBRARIES} ${CUDNN_LIBRARIES})
+	else()
+		# Create the test executable
+		add_executable( ${NAME} ${SRC} Models/derivativeTestHelper.h )
+		target_link_libraries( ${NAME} shark ${boost_unit_test_lib})
+		if(addTestLinkDef)
+			target_compile_definitions(${NAME} PRIVATE -DBOOST_TEST_DYN_LINK)
+		endif()
+	endif()
+	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 11)
+	set_property(TARGET ${NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
+
+	if(GCOV_CHECK)
+		target_link_libraries( ${NAME} gcov)
+	endif (GCOV_CHECK)
+
+	# Add the test
+	add_test( NAME ${NAME} COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../)
+	set_target_properties(${NAME} PROPERTIES FOLDER "Tests")
+	if(GCOV_CHECK)
+		add_Test( ${NAME} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${NAME} COMMAND Coverage)
+	endif (GCOV_CHECK)
+endmacro()
+
 
 # LinAlg Tests
 shark_add_test( LinAlg/rotations.cpp LinAlg_rotations )
@@ -134,7 +170,7 @@ shark_add_test( Algorithms/JaakkolaHeuristic.cpp Algorithms_JaakkolaHeuristic )
 # Models
 shark_add_test( Models/ConcatenatedModel.cpp Models_ConcatenatedModel )
 shark_add_test( Models/LinearModel.cpp Models_LinearModel )
-shark_add_test( Models/ConvolutionalModel.cpp Models_ConvolutionalModel )
+shark_add_hip_test( Models/ConvolutionalModel.cpp Models_ConvolutionalModel )
 shark_add_test( Models/ResizeLayer.cpp Models_ResizeLayer )
 shark_add_test( Models/PoolingLayer.cpp Models_PoolingLayer )
 shark_add_test( Models/NearestNeighborModel.cpp Models_NearestNeighborModel )
@@ -178,7 +214,7 @@ shark_add_test( Core/Resize.cpp Core_ImageResize )
 shark_add_test( Core/ZipSupport.cpp Core_ZipSupport )
 shark_add_test( Core/ReadImage.cpp Core_ReadImage )
 shark_add_test( Core/WriteImage.cpp Core_WriteImage )
-shark_add_test( Core/Convolution.cpp Core_ImageConvolution )
+shark_add_hip_test( Core/Convolution.cpp Core_ImageConvolution )
 
 # Data Tests
 shark_add_test( Data/Csv.cpp Data_Csv )

@@ -21,10 +21,12 @@ if(POLICY CMP0053)
 	cmake_policy(SET CMP0053 NEW)
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/contrib/")
+message(STATUS ${CMAKE_MODULE_PATH})
+
 #####################################################################
 # Module Paths
 #####################################################################
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/contrib/")
 
 #=========================================================
 # Output directories.
@@ -257,33 +259,16 @@ list(APPEND LINK_LIBRARIES ${JPEG_LIBRARIES})
 #####################################################################
 #           Boost configuration
 #####################################################################
-set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
 set(Boost_USE_MULTITHREADED ON)
-add_definitions(-DBOOST_PARAMETER_MAX_ARITY=15)
-add_definitions(-DBOOST_FILESYSTEM_VERSION=3)
 add_definitions(-DBOOST_RESULT_OF_USE_DECLTYPE)
 add_definitions(-DBOOST_BIND_NO_PLACEHOLDERS) # clashes with C++11
 
-# Should we link the boost test dynamically
-if(NOT Boost_USE_STATIC_LIBS)
-	add_definitions(-DBOOST_TEST_DYN_LINK)
-	add_definitions(-DBOOST_ALL_DYN_LINK)
-endif()
 
 find_package( 
 	Boost 1.48.0 REQUIRED COMPONENTS
 	serialization
 	filesystem system regex
 )
-
-if(NOT Boost_FOUND)
-	message(FATAL_ERROR "Please make sure Boost 1.48.0 is installed on your system")
-endif()
-
-if (WIN32)
-	# disable autolinking in boost
-	add_definitions( -DBOOST_ALL_NO_LIB )
-endif()
 
 include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
 link_directories( ${Boost_LIBRARY_DIR} )
@@ -353,7 +338,7 @@ if( ENABLE_CBLAS )
 			#vendor versions might come with additional libraries which would be bad.
 			try_compile(CBLAS_COMPILE 
 				"${PROJECT_BINARY_DIR}/cBlasCheck"
-				"${CMAKE_SOURCE_DIR}/cBlasCheck.cpp"
+				"${CMAKE_SOURCE_DIR}/contrib/cBlasCheck.cpp"
 				CMAKE_FLAGS "-DINCLUDE_DIRECTORIES=${CBLAS_INCLUDE_PATH}"
 				LINK_LIBRARIES ${CBLAS_LIBRARY}
 			)
@@ -426,8 +411,12 @@ endif()
 option( ENABLE_HIP "Use HIP GPU backend" OFF )
 if(ENABLE_HIP)
 	find_package(HIP REQUIRED)
-	if(NOT HIP_PLATFORM MATCHES "nvcc")
-		message( FATAL_ERROR "HIP is only supported with CUDA backend")
+	if(HIP_PLATFORM MATCHES "nvcc")
+		find_package(CUDA REQUIRED)
+		find_package(CUDNN REQUIRED)
+	else()
+		#todo: need to implement rocm backend in remora + use MIOpen
+		message( FATAL_ERROR "HIP is currently only supported with CUDA backend")
 	endif()
 endif()
 

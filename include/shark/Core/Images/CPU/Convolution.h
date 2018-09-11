@@ -41,7 +41,7 @@
 namespace shark{
 namespace image{
 	
-namespace detail{
+namespace cpu{
 	
 template<class E1, class E2>
 void im2mat(
@@ -182,6 +182,8 @@ void im2mat_pad(
 		throw SHARKEXCEPTION("format not implemented");
 	}
 }
+}
+
 template<class M1, class M2>
 void convolution(
 	blas::matrix_expression<M1, blas::cpu_tag> const& images, 
@@ -189,6 +191,7 @@ void convolution(
 	blas::matrix_expression<M2, blas::cpu_tag>& results,
 	Shape const& shapeImage,
 	Shape const& shapeFilters,
+	Shape const& shapeResults,
 	std::size_t paddingHeight,
 	std::size_t paddingWidth,
 	ImageFormat imageFormat,
@@ -287,13 +290,13 @@ void convolution(
 	//create matrix representation for convolution. This will always create a matrix 
 	// with rows in NHW format and columns in CHW
 	if(paddingHeight == 0 || paddingWidth == 0){
-		detail::im2mat(
+		cpu::im2mat(
 			images, mat, numChannels, 
 			imageHeight, imageWidth, numImages, filterHeight, filterWidth, 
 			imageFormat
 		);
 	}else{
-		detail::im2mat_pad(
+		cpu::im2mat_pad(
 			images, mat, numChannels, 
 			imageHeight, imageWidth, numImages, filterHeight, filterWidth, imageFormat,
 			paddingTop, paddingBottom, paddingLeft, paddingRight
@@ -320,6 +323,48 @@ void convolution(
 }
 
 
-}}}
+template<class M1, class M2>
+void convolutionBackwardInputs(
+	blas::matrix_expression<M1, blas::cpu_tag> const& delta, 
+	blas::matrix_expression<M1, blas::cpu_tag> const& filters, 
+	blas::matrix_expression<M2, blas::cpu_tag>& derivatives,
+	Shape const& shapeDelta,
+	Shape const& shapeFilters,
+	Shape const& shapeDerivatives,
+	std::size_t paddingHeight,
+	std::size_t paddingWidth,
+	bool flipFilters
+){
+	paddingHeight = 2*(shapeFilters[1] - 1) - paddingHeight;
+	paddingWidth = 2*(shapeFilters[2] - 1) - paddingWidth;
+	convolution(
+		delta, filters, derivatives,
+		shapeDelta, shapeFilters, shapeDerivatives,
+		paddingHeight, paddingWidth,
+		ImageFormat::NCHW, ImageFormat::CNHW, !flipFilters
+	);
+}
+
+template<class M1, class M2>
+void convolutionBackwardFilters(
+	blas::matrix_expression<M1, blas::cpu_tag> const& images,
+	blas::matrix_expression<M1, blas::cpu_tag> const& delta,
+	blas::matrix_expression<M2, blas::cpu_tag>& derivatives,
+	Shape const& shapeImage,
+	Shape const& shapeDelta,
+	Shape const& shapeDerivatives,
+	std::size_t paddingHeight,
+	std::size_t paddingWidth,
+	bool flipFilters
+){
+	image::convolution(
+		images, delta, derivatives,
+		shapeImage, shapeDelta, shapeDerivatives,
+		paddingHeight, paddingWidth,
+		ImageFormat::CNHW, ImageFormat::CNHW, flipFilters
+	);
+}
+
+}}
 
 #endif
