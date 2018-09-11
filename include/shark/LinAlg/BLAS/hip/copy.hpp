@@ -75,6 +75,8 @@ public:
 		return m_expression.queue();
 	}
 	
+	no_functor elements() const{return no_functor();}
+	
 	//dispatcher to computation kernels
 	template<class VecX>
 	void assign_to(vector_expression<VecX, cpu_tag>& x)const{
@@ -161,6 +163,8 @@ public:
 	hip::device& queue() const{
 		return *m_queue;
 	}
+	
+	no_functor elements() const{return no_functor();}
 	
 	//dispatcher to computation kernels
 	template<class VecX>
@@ -260,6 +264,8 @@ public:
 		return m_expression.queue();
 	}
 	
+	no_functor elements() const{return no_functor();}
+	
 	//dispatcher to computation kernels
 	template<class MatX>
 	void assign_to(matrix_expression<MatX, cpu_tag>& X) const{
@@ -353,6 +359,8 @@ public:
 	hip::device& queue() const{
 		return *m_queue;
 	}
+	
+	no_functor elements() const{return no_functor();}
 	
 	//dispatcher to computation kernels
 	template<class MatX>
