@@ -26,7 +26,7 @@ Concept 						Class List
 Quick tutorial
 ++++++++++++++++
 
-In case ou are new to Shark, we give you a quick tour over the core components.
+In case you are new to Shark, we give you a quick tour over the core components.
 We first show how to set up either a traditional Makefile or a CMake file
 for your application program. Then we move on to a simple Hello-World example
 of what linear binary classification can look like in Shark. The third tutorial
