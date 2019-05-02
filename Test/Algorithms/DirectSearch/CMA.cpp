@@ -72,6 +72,16 @@ BOOST_AUTO_TEST_CASE( CMA_Cigar )
 	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
+BOOST_AUTO_TEST_CASE( Active_CMA_Cigar )
+{
+    Cigar function(4);
+    CMA optimizer;
+    optimizer.useActiveUpsates(true);
+
+    std::cout << "Testing: " << optimizer.name() << " with " << function.name() << " and active updates"  << std::endl;
+    testFunction(optimizer, function, 10, 1000, 1E-10);
+}
+
 BOOST_AUTO_TEST_CASE( CMA_Discus )
 {
 	Discus function(3);
@@ -81,6 +91,16 @@ BOOST_AUTO_TEST_CASE( CMA_Discus )
 	testFunction( optimizer, function, 10, 1000, 1E-10 );
 }
 
+BOOST_AUTO_TEST_CASE( Active_CMA_Discus )
+{
+    Discus function(4);
+    CMA optimizer;
+    optimizer.useActiveUpsates(true);
+
+    std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << " and active updates" << std::endl;
+    testFunction(optimizer, function, 10, 1000, 1E-10);
+}
+
 BOOST_AUTO_TEST_CASE( CMA_Ellipsoid )
 {
 	Ellipsoid function(5);
@@ -88,6 +108,16 @@ BOOST_AUTO_TEST_CASE( CMA_Ellipsoid )
 
 	std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << std::endl;
 	testFunction( optimizer, function, 10, 1000, 1E-10 );
+}
+
+BOOST_AUTO_TEST_CASE( Active_CMA_Ellipsoid )
+{
+    Ellipsoid function(10);
+    CMA optimizer;
+    optimizer.useActiveUpsates(true);
+
+    std::cout << "\nTesting: " << optimizer.name() << " with " << function.name() << " and active updates" << std::endl;
+    testFunction(optimizer, function, 10, 1000, 1E-10);
 }
 
 BOOST_AUTO_TEST_CASE( CMA_Rosenbrock )

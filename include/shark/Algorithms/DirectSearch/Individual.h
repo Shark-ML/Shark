@@ -79,6 +79,15 @@ public:
 		}
 	};
 
+	///\brief Reverse ordering relation by the fitness of the individuals(only single objective)
+	struct ReverseFitnessOrdering
+	{
+		bool operator()(Individual const& individual1, Individual const& individual2)
+		{
+			return individual1.unpenalizedFitness()  < individual2.unpenalizedFitness();
+		}
+	};
+
 	/// \brief Default constructor that initializes the individual's attributes to default values.
 	Individual() 
 	: m_rank(0)
