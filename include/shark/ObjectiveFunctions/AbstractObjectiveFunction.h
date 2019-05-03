@@ -40,6 +40,7 @@
 #include <shark/LinAlg/Base.h>
 #include <shark/ObjectiveFunctions/AbstractConstraintHandler.h>
 #include <type_traits>
+#include <atomic>
 namespace shark {
 	
 /// \defgroup objfunctions Objective functions
@@ -175,7 +176,7 @@ public:
 	virtual ~AbstractObjectiveFunction() {}
 
 	virtual void init() {
-		m_evaluationCounter=0;
+		m_evaluationCounter.store(0);
 	}
 	
 	/// \brief Accesses the number of variables
@@ -207,7 +208,7 @@ public:
 		
 	/// \brief Accesses the evaluation counter of the function.
 	std::size_t evaluationCounter() const {
-		return m_evaluationCounter;
+		return m_evaluationCounter.load();
 	}
 	
 	/// \brief Returns the constraint handler of the function if it has one.
@@ -289,7 +290,7 @@ public:
 	}
 
 protected:
-	mutable std::size_t m_evaluationCounter; ///< Evaluation counter, default value: 0.
+	mutable std::atomic_size_t m_evaluationCounter; ///< Evaluation counter, default value: 0.
 	AbstractConstraintHandler<SearchPointType> const* m_constraintHandler;
 	
 	/// \brief helper function which is called to announce the presence of an constraint handler.
