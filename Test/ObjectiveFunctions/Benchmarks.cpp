@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE( Salomon_Derivative )
 	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = f.proposeStartingPoint();
-		shark::testDerivative(f, point,1.e-5);
+		shark::testDerivative(f, point,1.e-6);
 	}
 }
 

@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 	ErrorFunction<FloatVector> error(pairGenerator, &model, &loss, 2);//use two batches in every iteration
 //###end<generator_error_usage>	
 	std::size_t iterations = 1001;
-	initRandomNormal(faceId,0.001); //init model
+	initRandomNormal(model,0.001); //init model
 	Adam<FloatVector> optimizer;
 	optimizer.setEta(0.01f);//learning rate of the algorithm
 	error.init();
