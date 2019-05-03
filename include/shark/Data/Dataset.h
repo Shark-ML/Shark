@@ -663,16 +663,18 @@ LabeledData<I,L> shuffle(LabeledData<I,L> const& data){
 	return toDataset(randomSubset(elements(data), data.numberOfElements()),data.getPartitioning());
 }
 
-/// \brief creates a data object from a range of elements
+/// \brief creates a data object from a range of elements with a given partitioning
 template<class Range>
 Data<typename Range::value_type>
-createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constants::DefaultBatchSize){
+createDataFromRange(Range const& inputs, std::vector<std::size_t> const& partitioning){
 	typedef typename Range::value_type value_type;
 
 	typename Batch<value_type>::shape_type shape;//TODO HACK
-	Data<value_type> data(inputs.size(), shape, maximumBatchSize);
+	Data<value_type> data(partitioning, shape);
+	
+	SHARK_RUNTIME_CHECK(inputs.size() == data.numberOfElements(), "Partition has not the same number of elements as number of elements in the input set");
 
-	//now create the batches taking the remainder into account
+	//now create the batches
 	auto start= inputs.begin();
 	for(std::size_t i = 0; i != data.size(); ++i){
 		std::size_t size = batchSize(data[i]);
@@ -681,6 +683,13 @@ createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constant
 	}
 	data.setShape(detail::InferShape<Data<value_type> >::infer(data));
 	return data;
+}
+/// \brief creates a data object from a range of elements
+template<class Range>
+Data<typename Range::value_type>
+createDataFromRange(Range const& inputs, std::size_t maximumBatchSize = constants::DefaultBatchSize){
+	auto partitioning = detail::optimalBatchSizes(inputs.size(), maximumBatchSize);
+	return createDataFromRange(inputs, partitioning);
 }
 
 /// \brief Convenience Function. Creates a labeled data object from two ranges, representing inputs and labels
@@ -701,6 +710,19 @@ LabeledData<
 	return createLabeledData(
 		createDataFromRange(inputs, maximumBatchSize),
 		createDataFromRange(labels, maximumBatchSize)
+	);
+}
+
+/// \brief creates a labeled data object from two ranges, representing inputs and labels
+template<class RangeI, class RangeL>
+LabeledData<
+	typename RangeI::value_type,
+	typename RangeL::value_type
+> createLabeledDataFromRange(RangeI const& inputs, RangeL const& labels, std::vector<std::size_t> const& partitioning){
+	SHARK_RUNTIME_CHECK(inputs.size() == labels.size(),"Number of inputs and number of labels must agree");
+	return createLabeledData(
+		createDataFromRange(inputs, partitioning),
+		createDataFromRange(labels, partitioning)
 	);
 }
 
