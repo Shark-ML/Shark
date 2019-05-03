@@ -85,7 +85,10 @@ public:
 		
 		auto updateHeap=[&](std::size_t thread){
 			//get the partition of batches for this thread
-			std::size_t workSize = (numBatches + maxThreads - 1) / maxThreads;
+			std::size_t workSize = numBatches / maxThreads;
+			std::size_t rest = numBatches - workSize * maxThreads;
+			if(thread < rest )
+				workSize += 1;
 			std::size_t begin = thread * workSize;
 			std::size_t end = begin + std::min(workSize, numBatches - begin);
 			//iterate over all batches of this thread
