@@ -353,27 +353,28 @@ private:
 };
 
 template<class Parameter>
-void printCSV(Statistics<Parameter> const& statistics){
+void printCSV(Statistics<Parameter> const& statistics, std::ostream& out = std::cout){
 	//first print a legend
-	std::cout<<"# "<<statistics.parameterName();
+	out<<"# "<<statistics.parameterName();
 	for(std::size_t i = 0; i != statistics.numStatistics(); ++i){
 		for(std::size_t j = 0; j != statistics.numDimensions(); ++j){
-			std::cout<<" "<<statistics.statisticName(i)<<"-"<<statistics.dimensionName(j);
+			out<<" "<<statistics.statisticName(i)<<"-"<<statistics.dimensionName(j);
 		}
 	}
-	std::cout<<"\n";
+	out<<"\n";
 	
 	//print results parameter by parameter
-	for(std::size_t k = 0; k != statistics.numParams(); ++k){
-		Parameter param=statistics.parameterValue(k);
-		std::map<std::string,RealVector> paramResults=statistics[param];
-		std::cout<<param;
+	for(auto pos = statistics.begin(); pos != statistics.end(); ++pos){
+		Parameter param=pos->first;
+		std::map<std::string,RealVector> const& paramResults=pos->second;
+		out<<param;
 		for(std::size_t i = 0; i != statistics.numStatistics(); ++i){
+			auto const& stat = paramResults.find(statistics.statisticName(i))->second;
 			for(std::size_t j = 0; j != statistics.numDimensions(); ++j){
-				std::cout<<" "<<paramResults[statistics.statisticName(i)](j);
+				out<<" "<<stat(j);
 			}
 		}
-		std::cout<<"\n";
+		out<<"\n";
 	}
 }
 
