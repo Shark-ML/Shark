@@ -1,0 +1,219 @@
+//===========================================================================
+/*!
+ * 
+ *
+ * \brief       Nadam
+ * 
+ * 
+ *
+ * \author      O. Krause
+ * \date        2019
+ *
+ *
+ * \par Copyright 1995-2017 Shark Development Team
+ * 
+ * <BR><HR>
+ * This file is part of Shark.
+ * <http://shark-ml.org/>
+ * 
+ * Shark is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published 
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * Shark is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+//===========================================================================
+#ifndef SHARK_ML_OPTIMIZER_NADAM_H
+#define SHARK_ML_OPTIMIZER_NADAM_H
+
+#include <shark/Algorithms/AbstractSingleObjectiveOptimizer.h>
+
+namespace shark{
+
+/// \brief Adaptive Moment Estimation Algorithm with Nesterov Acceleration(NADAM)
+///
+/// Dozat, Timothy. "Incorporating nesterov momentum into adam." (2016).
+/// https://openreview.net/pdf?id=OM0jvwB8jIp57ZJjtNEZ
+/// \ingroup gradientopt
+template<class SearchPointType = RealVector>
+class Nadam : public AbstractSingleObjectiveOptimizer<SearchPointType >{
+private:
+	typedef typename SearchPointType::value_type scalar_type;
+public:
+	typedef AbstractObjectiveFunction<SearchPointType,double> ObjectiveFunctionType;
+	Nadam() {
+		this->m_features |= this->REQUIRES_FIRST_DERIVATIVE;
+
+		m_beta1 = scalar_type(0.9);
+		m_beta2 = scalar_type(0.999);
+		m_epsilon = scalar_type(1.e-8);
+		m_eta = scalar_type(0.001);
+		m_decay = scalar_type(1.0/250);
+	}
+
+	/// \brief From INameable: return the class name.
+	std::string name() const
+	{ return "Nadam"; }
+
+	void init(ObjectiveFunctionType const& objectiveFunction, SearchPointType const& startingPoint) {
+		this-> checkFeatures(objectiveFunction);
+		SHARK_RUNTIME_CHECK(startingPoint.size() == objectiveFunction.numberOfVariables(), "Initial starting point and dimensionality of function do not agree");
+		
+		//initialize long term averages
+		m_avgGrad = SearchPointType(startingPoint.size(),0.0);
+		m_secondMoment = SearchPointType(startingPoint.size(),0.0);
+		m_counter = 0;
+		m_bias1 = 1.0;
+		m_bias2 = 1.0;
+		
+		//set point to the current starting point
+		this->m_best.point = startingPoint;
+		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
+	}
+	using AbstractSingleObjectiveOptimizer<SearchPointType >::init;
+
+	/// \brief get learning rate eta
+	scalar_type eta() const {
+		return m_eta;
+	}
+
+	/// \brief set learning rate eta
+	void setEta(scalar_type eta) {
+		SHARK_RUNTIME_CHECK(eta > 0, "eta must be positive.");
+		m_eta = eta;
+	}
+	
+	/// \brief get gradient averaging parameter beta1
+	scalar_type beta1() const {
+		return m_beta1;
+	}
+
+	/// \brief set gradient averaging parameter beta1
+	void setBeta1(scalar_type beta1) {
+		SHARK_RUNTIME_CHECK(beta1 > 0, "beta1 must be positive.");
+		m_beta1 = beta1;
+	}
+	
+	/// \brief get gradient averaging parameter beta2
+	scalar_type beta2() const {
+		return m_beta2;
+	}
+
+	/// \brief set gradient averaging parameter beta2
+	void setBeta2(scalar_type beta2) {
+		SHARK_RUNTIME_CHECK(beta2 > 0, "beta2 must be positive.");
+		m_beta2 = beta2;
+	}
+	
+	/// \brief get minimum noise estimate epsilon
+	scalar_type epsilon() const {
+		return m_epsilon;
+	}
+
+	/// \brief set minimum noise estimate epsilon
+	void setEpsilon(scalar_type epsilon) {
+		SHARK_RUNTIME_CHECK(epsilon > 0, "epsilon must be positive.");
+		m_epsilon = epsilon;
+	}
+	
+	
+	/// \brief Decay speed of beta1 and beta2
+	scalar_type decay() const {
+		return m_decay;
+	}
+
+	/// \brief Set Decay speed of beta1 and beta2
+	void setDecay(scalar_type decay) {
+		SHARK_RUNTIME_CHECK(decay > 0, "decay must be positive.");
+		m_decay = decay;
+	}
+	/// \brief Performs a step of the optimization.
+	///
+	/// First the current guess for gradient and its second moment are updated using
+	/// \f[ g_t = \beta_1 g_{t-1} + (1-\beta1) \frac{\partial}{\partial x} f(x_{t-1})\f]
+	/// \f[ v_t = \beta_2 v_{t-1} + (1-\beta2) (\frac{\partial}{\partial x} f(x_{t-1}))^2\f]
+	///
+	/// The step is then performed as
+	/// \f[ x_{t} = x_{t-1} - \eta * g_t *(sqrt(v_t) + \epsilon)^{-1} \f]
+	/// where a slight step correction is used to remove the bias in the first few iterations where the means are close to 0.
+	void step(ObjectiveFunctionType const& objectiveFunction) {
+		//update learning-rates and bias corrections
+		double beta1t = m_beta1 * (1-0.5*std::pow(0.96, m_decay * m_counter));
+		double beta1next = m_beta1 * (1-0.5*std::pow(0.96, m_decay * m_counter + m_decay));
+		++m_counter;
+		m_bias1 *= beta1t;
+		double bias1next = m_bias1 * beta1next;
+		m_bias2 *= m_beta2;
+		
+		//update long term averages of the gradient and its variance
+		noalias(m_avgGrad) = m_beta1 * m_avgGrad + (1-m_beta1) * m_derivative;
+		noalias(m_secondMoment) = m_beta2 * m_secondMoment + (1-m_beta2)* sqr(m_derivative);
+		
+		//for the first few iterations, bias correction makes a difference
+		auto corrG = m_derivative / (1-m_bias1);
+		auto corrAvgGrad = m_avgGrad / (1-bias1next);
+		auto corrAvgSec = m_secondMoment / (1-m_bias2);
+		
+		auto mbar = (1-beta1t) * corrG + beta1next * corrAvgGrad;
+		noalias(this->m_best.point) -= m_eta * mbar/(sqrt(corrAvgSec) + m_epsilon);
+		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
+	}
+	virtual void read( InArchive & archive ){
+		archive>>m_avgGrad;
+		archive>>m_secondMoment;
+		archive>>m_counter;
+		archive>>m_derivative;
+		archive>>this->m_best;
+		
+		archive>>m_beta1;
+		archive>>m_beta2;
+		archive>>m_bias1;
+		archive>>m_bias2;
+		archive>>m_decay;
+		archive>>m_epsilon;
+		archive>>m_eta;
+	}
+
+	virtual void write( OutArchive & archive ) const
+	{
+		archive<<m_avgGrad;
+		archive<<m_secondMoment;
+		archive<<m_counter;
+		archive<<m_derivative;
+		archive<<this->m_best;
+		
+		archive<<m_beta1;
+		archive<<m_beta2;
+		archive<<m_bias1;
+		archive<<m_bias2;
+		archive<<m_decay;
+		archive<<m_epsilon;
+		archive<<m_eta;
+	}
+
+private:
+	SearchPointType m_avgGrad;
+	SearchPointType m_secondMoment;
+	unsigned int m_counter;
+	SearchPointType m_derivative;
+	
+	scalar_type m_beta1;
+	scalar_type m_beta2;
+	scalar_type m_decay;
+	scalar_type m_bias1;
+	scalar_type m_bias2;
+	scalar_type m_epsilon;
+	scalar_type m_eta;
+};
+
+}
+#endif
+

@@ -99,8 +99,8 @@ public:
 	 *  \brief updates searchdirection and then does simple gradient descent
 	 */
 	void step(ObjectiveFunctionType const& objectiveFunction) {
-		m_path = -m_learningRate * m_derivative + m_momentum * m_path;
-		this->m_best.point+=m_path;
+		m_path = m_momentum * m_path -m_learningRate * m_derivative;
+		this->m_best.point += m_path;
 		this->m_best.value = objectiveFunction.evalDerivative(this->m_best.point,m_derivative);
 	}
 	virtual void read( InArchive & archive )
