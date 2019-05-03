@@ -1,11 +1,11 @@
 /*!
  * 
  *
- * \brief       Convex quadratic benchmark function.
+ * \brief       Rastrigin function
  * 
  *
- * \author      -
- * \date        2010-2011
+ * \author      O.Krause
+ * \date        2019
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -28,28 +28,36 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_DISCUS_H
-#define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_DISCUS_H
+#ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ALPINE_H
+#define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_ALPINE_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
 namespace shark {namespace benchmarks{
 /**
- * \brief Convex quadratic benchmark function.
- * \ingroup benchmarks
+ * \brief Alpine No. 1, A heavily multi-modal benchmark function with spherical level-lines
+ * 
+ * The function definition is:
+ *\f[
+ * f(x) = \sum_i^d |x_i sin(x_i) + 0.1 * x_1|
+ *\f]
+ * The optimum lies at f(0)=0
+ * M. Clerc, "The Swarm and the Queen, Towards a Deterministic and Adaptive Particle Swarm Optimization" 
+ * IEEE Congress on Evolutionary Computation, Washington DC, USA, pp. 1951-1957, 1999.
+ *
+ *  \ingroup benchmarks
  */
-struct Discus : public SingleObjectiveFunction {
-
-	Discus(std::size_t numberOfVariables = 5,double alpha = 1.E-3) : m_alpha(alpha) {
+struct Alpine : public SingleObjectiveFunction {
+	
+	Alpine(std::size_t numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_features |= HAS_FIRST_DERIVATIVE;
-		m_numberOfVariables = numberOfVariables;
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "Discus"; }
+	{ return "Alpine"; }
 
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
@@ -59,8 +67,6 @@ struct Discus : public SingleObjectiveFunction {
 		return true;
 	}
 
-	/// \brief Adjusts the number of variables if the function is scalable.
-	/// \param [in] numberOfVariables The new dimension.
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		m_numberOfVariables = numberOfVariables;
 	}
@@ -69,29 +75,30 @@ struct Discus : public SingleObjectiveFunction {
 		return blas::normal(random::globalRng(), numberOfVariables(), 0.0,1.0, blas::cpu_tag());
 	}
 
-	double eval(SearchPointType const& p) const {
+	double eval(SearchPointType const& x) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
 		m_evaluationCounter++;
-		return m_alpha * norm_sqr(p)+(1.0 - m_alpha)*sqr(p(0));
+		return norm_1(x*sin(x)+0.1*x);
 	}
-	double evalDerivative(SearchPointType const& p, FirstOrderDerivative & derivative ) const {
-		derivative.resize(p.size());
-		noalias(derivative) = (2 * m_alpha) * p;
-		derivative(0) = 2 * p(0);
-		return eval(p);
+	
+	double evalDerivative(SearchPointType const& x, FirstOrderDerivative& derivative) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
+		m_evaluationCounter++;
+		derivative.resize(x.size());
+		double result = 0.0;
+		for(std::size_t i = 0; i != x.size(); ++i){
+			double sx= std::sin(x(i));
+			double vali = x(i) * sx +0.1 * x(i);
+			double sign = vali > 0? 1.0 : -1.0;
+			result += sign * vali;
+			derivative(i) = sign * (sx + x(i) * cos(x(i)) + 0.1);
+		}
+		return result;
 	}
-
-	double alpha() const {
-		return m_alpha;
-	}
-
-	void setAlpha(double alpha) {
-		m_alpha = alpha;
-	}
-
 private:
-	double m_alpha;
 	std::size_t m_numberOfVariables;
 };
+
 }}
 
 #endif

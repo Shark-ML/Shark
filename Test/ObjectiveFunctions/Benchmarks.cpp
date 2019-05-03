@@ -62,7 +62,47 @@ BOOST_AUTO_TEST_CASE( Ellipsoid_Derivative )
 	for(unsigned int i = 0; i != trials; ++i)
 	{
 		shark::RealVector point = ellipsoid.proposeStartingPoint();
-		shark::testDerivative(ellipsoid, point,1.e-4,1.e-9);
+		shark::testDerivative(ellipsoid, point,1.e-4,1.e-5);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Rastrigin_Derivative )
+{
+	const std::size_t dimensions = 5;
+	const unsigned int trials = 10000;
+	
+	shark::benchmarks::Rastrigin f(dimensions);
+	for(unsigned int i = 0; i != trials; ++i)
+	{
+		shark::RealVector point = f.proposeStartingPoint();
+		shark::testDerivative(f, point,1.e-6);
+	}
+}
+
+BOOST_AUTO_TEST_CASE( Salomon_Derivative )
+{
+	const std::size_t dimensions = 5;
+	const unsigned int trials = 10000;
+	
+	shark::benchmarks::Salomon f(dimensions);
+	for(unsigned int i = 0; i != trials; ++i)
+	{
+		shark::RealVector point = f.proposeStartingPoint();
+		shark::testDerivative(f, point,1.e-5);
+	}
+}
+
+
+BOOST_AUTO_TEST_CASE( Alpine_Derivative )
+{
+	const std::size_t dimensions = 5;
+	const unsigned int trials = 10000;
+	
+	shark::benchmarks::Alpine f(dimensions);
+	for(unsigned int i = 0; i != trials; ++i)
+	{
+		shark::RealVector point = f.proposeStartingPoint();
+		shark::testDerivative(f, point,1.e-5);
 	}
 }
 

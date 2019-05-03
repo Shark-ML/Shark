@@ -30,8 +30,11 @@
 #include <shark/ObjectiveFunctions/Benchmarks/ZDT2.h>
 #include <shark/ObjectiveFunctions/Benchmarks/ZDT1.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Himmelblau.h>
+#include <shark/ObjectiveFunctions/Benchmarks/Alpine.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Sphere.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Rosenbrock.h>
+#include <shark/ObjectiveFunctions/Benchmarks/Rastrigin.h>
+#include <shark/ObjectiveFunctions/Benchmarks/Salomon.h>
 #include <shark/ObjectiveFunctions/Benchmarks/LZ9.h>
 #include <shark/ObjectiveFunctions/Benchmarks/LZ8.h>
 #include <shark/ObjectiveFunctions/Benchmarks/LZ7.h>

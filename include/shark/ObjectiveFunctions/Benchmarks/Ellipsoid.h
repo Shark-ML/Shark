@@ -47,7 +47,7 @@ struct Ellipsoid : public SingleObjectiveFunction {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
 		m_features |= HAS_FIRST_DERIVATIVE;
 		m_features |= HAS_SECOND_DERIVATIVE;
-		m_numberOfVariables = numberOfVariables;
+		setNumberOfVariables(numberOfVariables);
 	}
 
 	/// \brief From INameable: return the class name.
@@ -64,51 +64,39 @@ struct Ellipsoid : public SingleObjectiveFunction {
 	
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		m_numberOfVariables = numberOfVariables;
+		m_D.resize(m_numberOfVariables);
+		double sizeMinusOne=m_numberOfVariables - 1.;
+		for( std::size_t i = 0; i < m_numberOfVariables; i++ ){
+			m_D(i) = std::pow( m_alpha, i / sizeMinusOne );
+		}
 	}
 
 	SearchPointType proposeStartingPoint() const {
-		RealVector x(numberOfVariables());
-
-		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(random::globalRng(), 0,1);
-		}
-		return x;
+		return blas::normal(random::globalRng(), numberOfVariables(), 0.0,1.0, blas::cpu_tag());
 	}
 
 	double eval( const SearchPointType & p ) const {
+		SIZE_CHECK(p.size() == m_numberOfVariables);
 		m_evaluationCounter++;
-		double sum = 0;
-		double sizeMinusOne = p.size() - 1.;
-		for( std::size_t i = 0; i < p.size(); i++ ){
-			sum += ::pow( m_alpha, i / sizeMinusOne ) * sqr(p( i ) );
-		}
-
-		return sum;
+		return sum(sqr(p) * m_D);
 	}
 
 	double evalDerivative( const SearchPointType & p, FirstOrderDerivative & derivative ) const {
-		double sizeMinusOne=p.size() - 1.;
 		derivative.resize(p.size());
-		for (std::size_t i = 0; i < p.size(); i++) {
-			derivative(i) = 2 * ::pow(m_alpha, i / sizeMinusOne) * p(i);
-		}
+		noalias(derivative) = 2 * m_D * p;
 		return eval(p);
 	}
 	double evalDerivative(const SearchPointType &p, SecondOrderDerivative &derivative)const {
 		std::size_t size=p.size();
-		double sizeMinusOne=p.size() - 1.;
-		derivative.gradient.resize(size);
 		derivative.hessian.resize(size,size);
 		derivative.hessian.clear();
-		for (std::size_t i = 0; i < size; i++) {
-			derivative.gradient(i) = 2 * std::pow(m_alpha, i / sizeMinusOne ) * p(i);
-			derivative.hessian(i,i) = 2 * std::pow(m_alpha, i /sizeMinusOne );
-		}
-		return eval(p);
+		diag(derivative.hessian) = 2* m_D;
+		return evalDerivative(p, derivative.gradient);
 	}
 private:
 	std::size_t m_numberOfVariables;
 	double m_alpha;
+	RealVector m_D;
 };
 
 }}

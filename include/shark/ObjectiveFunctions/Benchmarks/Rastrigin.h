@@ -1,12 +1,11 @@
 /*!
  * 
  *
- * \brief       Convex quadratic benchmark function with single dominant axis
-
+ * \brief       Rastrigin function
  * 
  *
- * \author      -
- * \date        -
+ * \author      O.Krause
+ * \date        2019
  *
  *
  * \par Copyright 1995-2017 Shark Development Team
@@ -29,26 +28,31 @@
  * along with Shark.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-#ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_ACKLEY_H
-#define SHARK_OBJECTIVEFUNCTIONS_BENCHMARKS_ACKLEY_H
+#ifndef SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_RASTRIGIN_H
+#define SHARK_OBJECTIVEFUNCTIONS_BENCHMARK_RASTRIGIN_H
 
 #include <shark/ObjectiveFunctions/AbstractObjectiveFunction.h>
 #include <shark/Core/Random.h>
 
 namespace shark {namespace benchmarks{
 /**
- * \brief Non-Convex benchmark function with many local optima
- * \ingroup benchmarks
+ * \brief Heavily multi-modal benchmark function
+ * 
+ * Rastrigin is the sum of a simple quadratic function and a cosine-wave function which generates many local optima.
+ * The global optimum lies at x=0 with function-value 0.
+ * f(x)=|x|^2  + 10*sum_i^d (1-cos(2*pi*x_i))
+ *  \ingroup benchmarks
  */
-struct Ackley : public SingleObjectiveFunction {
-	Ackley(std::size_t numberOfVariables = 5) {
+struct Rastrigin : public SingleObjectiveFunction {
+	
+	Rastrigin(std::size_t numberOfVariables = 5):m_numberOfVariables(numberOfVariables) {
 		m_features |= CAN_PROPOSE_STARTING_POINT;
-		m_numberOfVariables = numberOfVariables;
+		m_features |= HAS_FIRST_DERIVATIVE;
 	}
 
 	/// \brief From INameable: return the class name.
 	std::string name() const
-	{ return "Ackley"; }
+	{ return "Rastrigin"; }
 
 	std::size_t numberOfVariables()const{
 		return m_numberOfVariables;
@@ -57,35 +61,29 @@ struct Ackley : public SingleObjectiveFunction {
 	bool hasScalableDimensionality()const{
 		return true;
 	}
-	
-	/// \brief Adjusts the number of variables if the function is scalable.
-	/// \param [in] numberOfVariables The new dimension.
+
 	void setNumberOfVariables( std::size_t numberOfVariables ){
 		m_numberOfVariables = numberOfVariables;
 	}
 
 	SearchPointType proposeStartingPoint() const {
-		return blas::uniform(random::globalRng(), numberOfVariables(), -10.0, 10.0, blas::cpu_tag());
+		return blas::normal(random::globalRng(), numberOfVariables(), 0.0,1.0, blas::cpu_tag());
 	}
 
-	double eval(const SearchPointType &p) const {
+	double eval(SearchPointType const& x) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
 		m_evaluationCounter++;
-
-		const double A = 20.;
-		const double B = 0.2;
-		const double C = 2* M_PI;
-
-		std::size_t n = p.size();
-		double a = 0., b = 0.;
-
-		for (std::size_t i = 0; i < n; ++i) {
-			a += p(i) * p(i);
-			b += cos(C * p(i));
-		}
-
-		return -A * std::exp(-B * std::sqrt(a / n)) - std::exp(b / n) + A + M_E;
+		//for numeric stability, we compute (1-cos(2*pi*x))= 2*(sin(pi*x))**2
+		return norm_sqr(x) + 20*sum(sqr(sin(M_PI*x)));
 	}
 	
+	double evalDerivative(SearchPointType const& x, FirstOrderDerivative& derivative) const {
+		SIZE_CHECK(x.size() == numberOfVariables());
+		derivative.resize(x.size());
+		double twopi=2*M_PI;
+		noalias(derivative) = 2*x + twopi*10 * sin(twopi * x );
+		return eval(x);
+	}
 private:
 	std::size_t m_numberOfVariables;
 };

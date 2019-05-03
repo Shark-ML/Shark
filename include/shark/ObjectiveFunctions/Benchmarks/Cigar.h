@@ -65,27 +65,17 @@ struct Cigar : public SingleObjectiveFunction {
 	}
 
 	SearchPointType proposeStartingPoint() const {
-		RealVector x(numberOfVariables());
-
-		for (std::size_t i = 0; i < x.size(); i++) {
-			x(i) = random::uni(random::globalRng(), 0, 1);
-		}
-		return x;
+		return blas::normal(random::globalRng(), numberOfVariables(), 0.0,1.0, blas::cpu_tag());
 	}
 
 	double eval(const SearchPointType &p) const {
 		m_evaluationCounter++;
-
-		double sum = m_alpha * sqr(p(0));
-		for (std::size_t i = 1; i < p.size(); i++)
-			sum +=  sqr(p(i));
-
-		return sum;
+		return norm_sqr(p)+(m_alpha - 1.0)*sqr(p(0));
 	}
 	double evalDerivative(SearchPointType const& p, FirstOrderDerivative & derivative ) const {
 		derivative.resize(p.size());
-		noalias(derivative) = 2* p;
-		derivative(0) = 2 * m_alpha * p(0);
+		noalias(derivative) = 2 * p;
+		derivative(0) *= m_alpha;
 		return eval(p);
 	}
 
