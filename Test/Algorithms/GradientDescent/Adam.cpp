@@ -4,6 +4,7 @@
 
 #include <shark/ObjectiveFunctions/Benchmarks/Ellipsoid.h>
 #include <shark/Algorithms/GradientDescent/Adam.h>
+#include <boost/mpl/list.hpp>
 
 using namespace shark;
 using namespace shark::benchmarks;

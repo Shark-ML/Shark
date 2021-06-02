@@ -3,6 +3,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <shark/Algorithms/GradientDescent/SteepestDescent.h>
+#include <boost/mpl/list.hpp>
 
 using namespace shark;
 
