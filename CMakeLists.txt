@@ -486,3 +486,9 @@ configure_file(
 add_custom_target(uninstall
 	COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 )
+
+set(target "./tbaali/LinearRegression/linear_regression.cpp")
+
+add_executable(tbaali_main ${target})
+
+target_link_libraries(tbaali_main PRIVATE shark)

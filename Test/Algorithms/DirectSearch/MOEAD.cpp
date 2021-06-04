@@ -9,6 +9,7 @@
 #include "../testFunction.h"
 
 #include <iostream>
+#include <boost/mpl/list.hpp>
 
 using namespace shark;
 using namespace shark::benchmarks;

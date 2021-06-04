@@ -5,6 +5,7 @@
 #include <shark/Algorithms/GradientDescent/Rprop.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Rosenbrock.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Ellipsoid.h>
+#include <boost/mpl/list.hpp>
 
 #include "../testFunction.h"
 

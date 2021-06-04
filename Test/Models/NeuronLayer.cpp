@@ -4,6 +4,7 @@
 #include "derivativeTestHelper.h"
 
 #include <shark/Models/NeuronLayers.h>
+#include <boost/mpl/list.hpp>
 
 using namespace shark;
 
