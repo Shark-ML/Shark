@@ -18,7 +18,7 @@ mathjax_path = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?
 todo_include_todos = True
 
 #set up doxylink tag file
-print 'current working directory', os.path.abspath(os.path.curdir)
+print('current working directory', os.path.abspath(os.path.curdir))
 doxylink = {
         'doxy' : (os.path.abspath('@CMAKE_CURRENT_BINARY_DIR@/doxygen_pages/tag_files/all.tag'), '../../../doxygen_pages/html/')
 }
