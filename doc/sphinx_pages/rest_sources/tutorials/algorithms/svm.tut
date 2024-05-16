@@ -5,7 +5,7 @@ Support Vector Machines: First Steps
 
 Kernel-based learning algorithms such as support vector machine (SVM,
 [CortesVapnik1995]_) classifiers mark the state-of-the art in pattern
-recognition . They employ (Mercer) kernel functions to implicitly
+recognition. They employ (Mercer) kernel functions to implicitly
 define a metric feature space for processing the input data, that is,
 the kernel defines the similarity between observations.  Kernel
 methods are well understood theoretically and give excellent results
