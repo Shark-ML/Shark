@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE ML_SteepestDescent
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <shark/Algorithms/GradientDescent/SteepestDescent.h>
 

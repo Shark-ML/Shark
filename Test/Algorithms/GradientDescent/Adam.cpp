@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE GradDesc_Adam
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <shark/ObjectiveFunctions/Benchmarks/Ellipsoid.h>
 #include <shark/Algorithms/GradientDescent/Adam.h>

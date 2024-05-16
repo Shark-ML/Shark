@@ -1,6 +1,7 @@
 #define BOOST_TEST_MODULE DirectSearch_RVEA
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
+#include <boost/mpl/list.hpp>
 
 #include <shark/Algorithms/DirectSearch/RVEA.h>
 #include <shark/ObjectiveFunctions/Benchmarks/Benchmarks.h>
