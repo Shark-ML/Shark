@@ -394,25 +394,18 @@ def create_role(app, tag_filename, rootdir):
 
         cache_name = os.path.basename(tag_filename)
 
-        app.info(bold('Checking tag file cache for %s: ' % cache_name), nonl=True)
         if not hasattr(app.env, 'doxylink_cache'):
             # no cache present at all, initialise it
-            app.info('No cache at all, rebuilding...')
             mapping = parse_tag_file(tag_file)
             app.env.doxylink_cache = {cache_name: {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}}
         elif not app.env.doxylink_cache.get(cache_name):
             # Main cache is there but the specific sub-cache for this tag file is not
-            app.info('Sub cache is missing, rebuilding...')
             mapping = parse_tag_file(tag_file)
             app.env.doxylink_cache[cache_name] = {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}
         elif app.env.doxylink_cache[cache_name]['mtime'] < os.path.getmtime(tag_filename):
             # tag file has been modified since sub-cache creation
-            app.info('Sub-cache is out of date, rebuilding...')
             mapping = parse_tag_file(tag_file)
             app.env.doxylink_cache[cache_name] = {'mapping': mapping, 'mtime': os.path.getmtime(tag_filename)}
-        else:
-            # The cache is up to date
-            app.info('Sub-cache is up-to-date')
     except FileNotFoundError:
         tag_file = None
         app.warn(standout('Could not find tag file %s. Make sure your `doxylink` config variable is set correctly.' % tag_filename))
