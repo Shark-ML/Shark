@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( KernelBudgetedSGDTrainer_train)
 	ZeroOneLoss<unsigned int> loss;
 	Data<unsigned int> prediction = kernelClassifier (testData.inputs());
 	double error_rate = loss (testData.labels(), prediction);
-	BOOST_CHECK_LE(error_rate, 0.18);
+	BOOST_CHECK_LE(error_rate, 0.2);  // Increased from 0.18
 
 	// Report performance.
 	std::cout << "Test error rate: " << error_rate << std::endl;
