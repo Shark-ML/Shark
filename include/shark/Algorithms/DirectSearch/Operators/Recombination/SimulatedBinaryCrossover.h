@@ -55,6 +55,7 @@ namespace shark {
 
 		/// \brief Mates the supplied individuals.
 		/// 
+        /// \param [in] rng Random number generator.
 		/// \param [in,out] i1 Individual to be mated.
 		/// \param [in,out] i2 Individual to be mated.
 		template<class randomType, typename IndividualType>

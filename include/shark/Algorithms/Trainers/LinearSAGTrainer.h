@@ -120,7 +120,7 @@ public:
 	}
 	
 
-	/// \briefReturn the number of training epochs.
+	/// \brief Return the number of training epochs.
 	/// A value of 0 indicates that the default of max(10, dimensionOfData) should be used.
 	std::size_t epochs() const
 	{ return m_maxEpochs; }

@@ -90,7 +90,7 @@ namespace shark{
  *  stability of the method.
  *  if \f$\frac{\partial E^{(t-1)}}{\partial w_i} \cdot
  *  \frac{\partial E^{(t)}}{\partial w_i} < 0\f$ then
- *  \f$\Delta w_i^{(t)} := - \Delta w_i^{(t-1)};
+ *  \f$\Delta w_i^{(t)} := - \Delta w_i^{(t-1)}\f$.
  *  This heuristic can be improved by further taking the value of the last iteration
  *  into ccount: only undo an updated if the sign changed and the new function value 
  *  is worse than the last. The idea of this modification is, that a change of the sign of the
@@ -102,7 +102,7 @@ namespace shark{
  *  when the rgadient changes sign, i.e. ,
  *  if \f$\frac{\partial E^{(t-1)}}{\partial w_i} \cdot
  *  \frac{\partial E^{(t)}}{\partial w_i} < 0\f$ then
- *  \frac{\partial E^{(t)}}{\partial w_i} := 0\f$;
+ *  \f$\frac{\partial E^{(t)}}{\partial w_i} := 0\f$;
  * Thus, after an unsuccessful step is performed, delta is not changed
  * for one iteration.
  *

@@ -73,8 +73,7 @@ struct HypervolumeApproximator {
 	}
 
 	/// \brief Executes the algorithm.
-	/// \param [in] e Function object \f$f\f$to "project" elements of the set to \f$\mathbb{R}^n\f$.
-	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
+	/// \param [in] points The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: f( s' ) \preceq f( s ) \f$
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Set, typename VectorType >
 	double operator()( Set const& points, VectorType const& refPoint){

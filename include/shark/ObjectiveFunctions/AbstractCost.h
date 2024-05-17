@@ -109,7 +109,11 @@ public:
 	/// \param  predictions  predictions, typically made by a model
 	virtual double eval(Data<LabelType> const& targets, Data<OutputType> const& predictions) const = 0;
 	
-	double operator () (Data<LabelType> const& targets, Data<OutputType> const& predictions) const
+    /// Evaluates the cost of predictions, given targets.
+    /// \param targets Targets of the predictions
+    /// \param predictions Predictions to be compared with the targets
+    /// \return The costs (e.g., error, regret)
+	double operator ()(Data<LabelType> const& targets, Data<OutputType> const& predictions) const
 	{ return eval(targets, predictions); }
 };
 

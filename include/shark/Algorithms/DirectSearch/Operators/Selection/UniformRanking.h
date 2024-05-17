@@ -45,6 +45,7 @@ struct UniformRankingSelection {
 	///   - Carry out roulette wheel selection on the range of individual and 
 	///     offspring individuals until the output range is filled.
 	///
+    /// \param [in] rng Random number generator.
 	/// \param [in] individuals Iterator pointing to the first valid individual.
 	/// \param [in] individualsE Iterator pointing to the first invalid individual.
 	/// \param [in] out Iterator pointing to the first valid element of the output range.

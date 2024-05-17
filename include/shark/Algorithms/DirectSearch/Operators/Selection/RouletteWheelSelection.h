@@ -49,7 +49,8 @@ struct RouletteWheelSelection {
 	/**
 	* \brief Selects an individual from the range of individuals with prob. proportional to its fitness.
 	* 
-	* \param [in] it Iterator pointing to the first valid element.
+	* \param [in] rng Random number generator.
+    * \param [in] it Iterator pointing to the first valid element.
 	* \param [in] itE Iterator pointing to the first invalid element.
 	* \param [in] probabilities selection probabilities of the individuals
 	*/

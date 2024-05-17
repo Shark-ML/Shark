@@ -45,9 +45,9 @@ namespace shark{
 /// \brief Quadratic Problem with only Box-Constraints
 /// Let K the kernel matrix, than the problem has the form
 ///
-/// max_\alpha - 1/2 \alpha^T K \alpha +  \alpha^Tv
+/// \f$max_\alpha - 1/2 \alpha^T K \alpha +  \alpha^Tv\f$
 /// under constraints:
-/// l_i <= \alpha_i <= u_i
+/// \f$l_i <= \alpha_i <= u_i\f$
 template<class MatrixT>
 class GeneralQuadraticProblem{
 public:
@@ -238,10 +238,10 @@ private:
 
 /// \brief Problem formulation for binary C-SVM problems
 ///
-/// max_\alpha - 1/2 \alpha^T K \alpha +  \alpha^Ty
+/// \f$max_\alpha - 1/2 \alpha^T K \alpha +  \alpha^Ty\f$
 /// under constraints:
-/// l_i <= \alpha_i <= u_i
-/// \sum_i \alpha_i = 0
+/// \f$l_i <= \alpha_i <= u_i\f$
+/// \f$\sum_i \alpha_i = 0\f$
 template<class MatrixT>
 class CSVMProblem{
 public:

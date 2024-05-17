@@ -46,7 +46,8 @@ struct EPTournamentSelection {
 
 	/// \brief Selects individuals from the range of individuals.
 	///
-	/// \param [in] it Iterator pointing to the first valid parent individual.
+    /// \param [in] rng Random number generator.
+    /// \param [in] it Iterator pointing to the first valid parent individual.
 	/// \param [in] itE Iterator pointing to the first invalid parent individual.
 	/// \param [in] out Iterator pointing to the first valid element of the output range.
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.

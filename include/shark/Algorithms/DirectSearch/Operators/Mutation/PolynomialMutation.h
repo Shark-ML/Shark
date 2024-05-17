@@ -55,6 +55,7 @@ namespace shark {
 		/// \brief Mutates the supplied individual.
 		///
 		///  for accessing the actual search point.
+        /// \paramm [in] rng Random number generator
 		/// \param [in,out] ind Individual to be mutated.
 		template<typename IndividualType>
 		void operator()(random::rng_type& rng, IndividualType & ind )const{
