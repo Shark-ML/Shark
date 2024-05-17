@@ -97,7 +97,5 @@ KeyValuePair<Key,Value> makeKeyValuePair(Key const& key,Value const& value){
 	return KeyValuePair<Key,Value>(key,value);
 }
 
-/// \endcond
-
 }
 #endif

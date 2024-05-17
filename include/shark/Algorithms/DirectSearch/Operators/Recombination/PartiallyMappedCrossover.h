@@ -14,6 +14,7 @@ struct PartiallyMappedCrossover {
 
 	/// \brief Mates the supplied individuals.
 	/// 
+    /// \param [in] rng Random number generator.
 	/// \param [in,out] individual1 Individual to be mated.
 	/// \param [in,out] individual2 Individual to be mated.
 	template<class Rng, typename IndividualType>

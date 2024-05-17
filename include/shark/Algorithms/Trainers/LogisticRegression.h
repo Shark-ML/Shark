@@ -69,7 +69,7 @@ public:
 	///
 	/// \param  lambda1    value of the 1-norm regularization parameter (see class description)
 	/// \param  lambda2    value of the 2-norm regularization parameter (see class description)
-	/// \param  lbias          whether to train with bias or not
+	/// \param  bias          whether to train with bias or not
 	/// \param  accuracy  stopping criterion for the iterative solver, maximal gradient component of the objective function (see class description)
 	LogisticRegression(double lambda1 = 0, double lambda2 = 0, bool bias = true, double accuracy = 1.e-8)
 	: m_bias(bias){

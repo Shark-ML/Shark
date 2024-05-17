@@ -180,6 +180,5 @@ namespace shark {
 		return -abs(x);
 	}
 }
-/** @}*/ 
 
 #endif 

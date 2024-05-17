@@ -54,8 +54,7 @@ namespace shark {
 
 		/// \brief Mutates the supplied individual.
 		///
-		///  for accessing the actual search point.
-        /// \paramm [in] rng Random number generator
+        /// \param [in] rng Random number generator.
 		/// \param [in,out] ind Individual to be mutated.
 		template<typename IndividualType>
 		void operator()(random::rng_type& rng, IndividualType & ind )const{
@@ -71,7 +70,7 @@ namespace shark {
 						double delta1 = (m_upper( i ) - point[i]) / (m_upper( i ) - m_lower( i ));
 						double delta2 = (point[i] - m_lower( i ) ) / (m_upper( i ) - m_lower( i ));
 						
-						//compute change in delta
+						// Compute change in delta
 						double deltaQ=0;
 						double u = random::uni(rng,0,1);
 						if( u <= .5 ) {

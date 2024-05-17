@@ -66,7 +66,8 @@ struct LinearRankingSelection {
 	///   - Carry out roulette wheel selection on the range of parent and
 	///     offspring individualss until the output range is filled.
 	///
-	/// \param [in] individuals Iterator pointing to the first valid individual.
+	/// \param [in] rng Random number generator.
+    /// \param [in] individuals Iterator pointing to the first valid individual.
 	/// \param [in] individualsE Iterator pointing to the first invalid individual.
 	/// \param [in] out Iterator pointing to the first valid element of the output range.
 	/// \param [in] outE Iterator pointing to the first invalid element of the output range.
