@@ -45,7 +45,7 @@ namespace shark {
 /// \defgroup objfunctions Objective functions
 /// \brief Objective functions for optimization.
 ///
-/// In shark, the learning problem is phrased as an objective function which is then optimized using an \ref optimizer. This allows
+/// In shark, the learning problem is phrased as an objective function which is then optimized using an \ref optimizer . This allows
 /// to test and develop algorithms using \ref benchmarks independent of the problem to solve.
 
 /// \brief Super class of all objective functions for optimization and learning.

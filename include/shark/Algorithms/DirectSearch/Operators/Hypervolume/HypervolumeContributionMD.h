@@ -39,7 +39,7 @@
 namespace shark {
 /// \brief Finds the hypervolume contribution for points in MD
 ///
-/// This implementation is slightly less naive. Instead of calculating Con{x\in S}=Hyp{S}-Hyp{S/x}
+/// This implementation is slightly less naive. Instead of calculating Hyp{S}-Hyp{S/x}
 /// directly, we restrict the volume dominated by points in S to be inside the box [x,ref]. This
 /// leads to points in S not being relevant for the computation and thus can be discarded using
 /// a simple dominance test.
@@ -48,7 +48,7 @@ struct HypervolumeContributionMD {
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
 	/// \param [in] k The number of points to select.
-	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
+	/// \param [in] ref The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
 		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
@@ -75,7 +75,7 @@ struct HypervolumeContributionMD {
 	/// \brief Returns the index of the points with largest contribution.
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
-	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
+	/// \param [in] ref The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
 		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");

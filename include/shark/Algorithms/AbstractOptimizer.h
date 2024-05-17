@@ -38,8 +38,7 @@
 
 namespace shark {
 
-/// \defgroup optimizers
-/// Algorithms to find a local minimum of \ref objfunctions.
+/// \defgroup optimizers Algorithms to find a local minimum of \ref objfunctions.
 
 
 

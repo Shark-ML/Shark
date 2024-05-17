@@ -50,11 +50,11 @@ namespace shark{
 ///  \brief Kernel Target Alignment - a measure of alignment of a kernel Gram matrix with labels.
 ///
 ///The Kernel Target Alignment (KTA) was originally proposed in the paper:<br/>
-///<i>On Kernel-Target Alignment</i>. N. Cristianini, J. Shawe-Taylor,
+///On Kernel-Target Alignment. N. Cristianini, J. Shawe-Taylor,
 ///A. Elisseeff, J. Kandola. Innovations in Machine Learning, 2006.<br/>
 ///Here we provide a version with centering of the features as proposed
 ///in the paper:<br/>
-///<i>Two-Stage Learning Kernel Algorithms</i>. C. Cortes, M. Mohri,
+///Two-Stage Learning Kernel Algorithms. C. Cortes, M. Mohri,
 ///A. Rostamizadeh. ICML 2010.<br/>
 ///
 ///The kernel target alignment is defined as

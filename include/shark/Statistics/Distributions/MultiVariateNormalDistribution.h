@@ -102,6 +102,7 @@ public:
 	}
 
 	/// \brief Samples the distribution.
+    /// \param [in] rng Random number generator.
 	template<class randomType>
 	result_type operator()(randomType& rng) const {
 		RealVector z( m_covarianceMatrix.size1() );
@@ -135,8 +136,7 @@ public:
 	typedef std::pair<RealVector,RealVector> result_type;
 
 	/// \brief Constructor
-	/// \param [in] rng the random number generator
-	/// \param [in] covariance covariance matrix
+	/// \param [in] covariance Covariance matrix.
 	MultiVariateNormalDistributionCholesky( RealMatrix const& covariance){
 		setCovarianceMatrix(covariance);
 	}
@@ -144,7 +144,7 @@ public:
 	MultiVariateNormalDistributionCholesky(){} 
 	
 	/// \brief Stores/Restores the distribution from the supplied archive.
-	///\param [in,out] ar The archive to read from/write to.
+	///\param [in,out] ar Archive to read from/write to.
 	///\param [in] version Currently unused.
 	template<typename Archive>
 	void serialize( Archive & ar, const std::size_t version ) {
@@ -192,6 +192,8 @@ public:
 	///
 	/// Returns a vector pair (y,z) where  y=Lz and, L is the lower cholesky factor and z is a vector
 	/// of normally distributed numbers. Thus y is the real sampled point.
+    ///
+    /// \param [in] rng Random number generator.
 	template<class randomType>
 	result_type operator()(randomType& rng) const {
 		result_type result;

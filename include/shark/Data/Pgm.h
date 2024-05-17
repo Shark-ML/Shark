@@ -249,7 +249,5 @@ void importPGMSet(std::string const&p, Data<T> &set){
 	set.shape() = {info.front().second,info.front().first};
 }
 
-/** @}*/
-
 } // end namespace shark
 #endif
