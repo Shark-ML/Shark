@@ -49,7 +49,7 @@ namespace shark {
 template<class Predicate>
 struct TournamentSelection {
 	TournamentSelection(std::size_t size = 2){
-		tournamentSize = 2;
+		tournamentSize = size;
 	}
 	
 	template<typename IteratorType1, typename IteratorType2>
@@ -66,6 +66,7 @@ struct TournamentSelection {
 	}
 	
 	/// \brief Selects an individual from the range of individuals with prob. proportional to its fitness.
+	/// \param [in] rng Random number generator
 	/// \param [in] it Iterator pointing to the first valid element.
 	/// \param [in] itE Iterator pointing to the first invalid element.
 	/// \return An iterator pointing to the selected individual.
