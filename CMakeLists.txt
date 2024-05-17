@@ -311,6 +311,18 @@ if(ENABLE_CLBLAST)
 endif()
 
 #####################################################################
+#                       OpenSSL
+#####################################################################
+
+find_package(OpenSSL REQUIRED)
+
+message(STATUS "OpenSSL include dir: ${OPENSSL_INCLUDE_DIR}")
+message(STATUS "OpenSSL libraries: ${OPENSSL_LIBRARIES}")
+
+include_directories(${OPENSSL_INCLUDE_DIR})
+list(APPEND LINK_LIBRARIES ${OPENSSL_LIBRARIES})
+
+#####################################################################
 #                       Static Code Analysis
 #####################################################################
 option(USE_CPPCHECK "Use CPPCheck Static Code Analysis" OFF)

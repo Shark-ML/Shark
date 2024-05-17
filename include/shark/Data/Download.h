@@ -58,11 +58,12 @@ namespace shark {
 	
 /// \brief Split a URL into its domain and resource parts.
 ///
-/// Returns a std::pair where the first element is the domain and the second is
-/// the resource. With std::tie you can do pattern-matching:
-/// std::tie(domain, resource) = splitUrl(url);
-/// will fill the std::string variables domain and resource.
-SHARK_EXPORT_SYMBOL std::pair<std::string, std::string> splitUrl(std::string const & url);
+/// Returns a std::tuple where the first element indicates whether a
+/// secure socket is used, the second one is the domain, and the third
+/// is the resource. With std::tie you can do pattern-matching:
+/// std::tie(https, domain, resource) = splitUrl(url);
+/// will fill the variables https, domain and resource.
+SHARK_EXPORT_SYMBOL std::tuple<bool, std::string, std::string> splitUrl(std::string const & url);
 
 /// \brief Download a document with the HTTP protocol.
 ///

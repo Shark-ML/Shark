@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 	LabeledData<RealVector, unsigned int> dataset;
 	try
 	{
-		downloadCsvData(dataset, "http://www.shark-ml.org/data/quickstart-train.csv", LAST_COLUMN, ' ');
+		downloadCsvData(dataset, "https://raw.githubusercontent.com/Shark-ML/Shark/gh-pages/data/quickstart-train.csv", LAST_COLUMN, ' ');
 		BOOST_CHECK_EQUAL(dataset.numberOfElements(), 800);
 		BOOST_CHECK_EQUAL(inputDimension(dataset), 2);
 		BOOST_CHECK_EQUAL(numberOfClasses(dataset), 2);
@@ -44,41 +44,52 @@ BOOST_AUTO_TEST_CASE(Data_Download_URL)
 BOOST_AUTO_TEST_CASE(Data_Download_Url_splitter)
 {
 	using std::make_tuple;
-	std::vector<std::tuple<std::string, std::string, std::string>> data{
-		make_tuple("http://www.shark-ml.org/data/quickstart-train.csv",
-		           "www.shark-ml.org", 
-		           "/data/quickstart-train.csv"),
-			make_tuple("http://dr.dk/nyhederne", 
+	std::vector<std::tuple<std::string, bool, std::string, std::string>> data{
+			make_tuple("https://raw.githubusercontent.com/Shark-ML/Shark/gh-pages/data/quickstart-train.csv",
+			           true,
+			           "raw.githubusercontent.com", 
+			           "/Shark-ML/Shark/gh-pages/data/quickstart-train.csv"),
+			make_tuple("http://dr.dk/nyhederne",
+			           false,
 			           "dr.dk", 
 			           "/nyhederne"),
 			make_tuple("google.com/en?sdfsdfsfs", 
+			           false,
 			           "google.com", 
 			           "/en?sdfsdfsfs"),
 			make_tuple("https://secret.website.com/noaccess", 
+			           true,
 			           "secret.website.com", 
 			           "/noaccess"),
 			make_tuple("http://alexandra.dk", 
+			           false,
 			           "alexandra.dk", 
 			           "/"),
 			make_tuple("alexandra.dk", 
+			           false,
 			           "alexandra.dk", 
 			           "/"),
 			make_tuple("alexandra.dk/about/hello",
+			           false,
 			           "alexandra.dk", 
 			           "/about/hello"),
 			make_tuple("alexandra.dk/", 
+			           false,
 			           "alexandra.dk",
 			           "/"),
 			make_tuple("http://alexandra.dk/",
+			           false,
 			           "alexandra.dk",
 			           "/")
 			};
 	for(auto & tc : data)
 	{
+		bool s;
 		std::string d, r;
-		std::tie(d, r) = splitUrl(std::get<0>(tc));
-		BOOST_CHECK_EQUAL(d, std::get<1>(tc));
-		BOOST_CHECK_EQUAL(r, std::get<2>(tc));
+		std::tie(s, d, r) = splitUrl(std::get<0>(tc));
+		BOOST_CHECK_EQUAL(s, std::get<1>(tc));
+		BOOST_CHECK_EQUAL(d, std::get<2>(tc));
+		BOOST_CHECK_EQUAL(r, std::get<3>(tc));
 	}
 }
 

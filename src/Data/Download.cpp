@@ -31,6 +31,18 @@
  *
  */
 //===========================================================================
+
+#include <string>
+#include <chrono>
+#include <thread>
+#include <map>
+#include <tuple>
+#include <stdexcept>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <cctype>
+
 #ifdef _WIN32
 	#define _WINSOCK_DEPRECATED_NO_WARNINGS
 	#include <winsock2.h>
@@ -47,29 +59,33 @@
 	#include <sys/socket.h>
 	#include <sys/time.h>
 	#include <netdb.h>
+	#include <netinet/in.h>
 	#include <unistd.h>
 	#ifndef MSG_NOSIGNAL
 		#define MSG_NOSIGNAL SO_NOSIGPIPE
 	#endif
 #endif
 
+#include <openssl/opensslv.h>
+#include <openssl/ssl.h>
+#include <openssl/rsa.h>
+#include <openssl/x509.h>
+#include <openssl/evp.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+
 #define SHARK_COMPILE_DLL
 #include <shark/Data/Download.h>
 
-#include <string>
-#include <map>
-#include <stdexcept>
-#include <cstring>
-#include <cctype>
 
 namespace {
 
-/// \brief Simple TCP/IP socket abstraction.
+/// \brief TCP/IP socket abstraction.
 ///
 /// This socket class encapsulates the most basic functionality of
 /// POSIX TCP/IP sockets. It is designed to act as a client, not as a
-/// server of a web service. Its functionality is somewhat tailored to
-/// what's needed for an HTTP download.
+/// server of a m_web service. Its functionality is somewhat tailored to
+/// what's needed for an HTTP or HTTPS download.
 class Socket
 {
 public:
@@ -80,40 +96,106 @@ public:
 #endif
 
 	/// \brief Connect to a remote host.
-	Socket(std::string const& remoteHost, unsigned short remotePort)
-	: m_handle(0)
+	Socket(bool secure, std::string const& remoteHost, unsigned short remotePort = 0)
+	: m_secure(secure)
+	, m_handle(0)
+	, m_ctx(nullptr)
+	, m_web(nullptr)
+	, m_ssl(nullptr)
 	{
-#ifdef _WIN32
-		// initialize Windows network library
-		WSADATA info;
-		int result = WSAStartup(2 /* API version 2.0 */, &info);
+		if (remotePort == 0) remotePort = secure ? 443 : 80;
 
-		m_handle = ::socket(AF_INET, SOCK_STREAM, 0);
-		if (m_handle == INVALID_SOCKET)
+		if (m_secure)
 		{
-			m_handle = 0;
-			return;
+			if (! m_ssl_initialized)
+			{
+				SSL_library_init();
+				OpenSSL_add_all_algorithms();
+				ERR_load_crypto_strings();
+				SSL_load_error_strings();
+				m_ssl_initialized = true;
+			}
+
+			int res;
+
+			const SSL_METHOD* method = SSLv23_method();
+			if (! method) { close(); return; }
+
+			m_ctx = SSL_CTX_new(method);
+			if (! m_ctx) { close(); return; }
+
+			SSL_CTX_set_options(m_ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3 | SSL_OP_NO_COMPRESSION);
+
+			m_web = BIO_new_ssl_connect(m_ctx);
+			if (! m_web) { close(); return; }
+
+			BIO_set_nbio(m_web, 1);   // enable non-blocking mode
+
+			std::string s = remoteHost + ":" + std::to_string(remotePort);
+			res = BIO_set_conn_hostname(m_web, s.c_str());
+			if (res != 1) { close(); return; }
+
+			BIO_get_ssl(m_web, &m_ssl);
+			if (! m_ssl) { close(); return; }
+
+			SSL_set_mode(m_ssl, SSL_MODE_AUTO_RETRY);
+
+			res = SSL_set_tlsext_host_name(m_ssl, remoteHost.c_str());
+			if (res != 1) { close(); return; }
+
+			while (true)
+			{
+				res = BIO_do_connect(m_web);
+				if (res <= 0)
+				{
+					if (BIO_should_retry(m_web)) std::this_thread::sleep_for(std::chrono::milliseconds(1));
+					else { close(); return; }
+				}
+				else break;
+			}
+
+			res = BIO_do_handshake(m_web);
+			if (res != 1) { close(); return; }
+
+			// Step 1: verify a server certificate was presented during the negotiation
+			X509* cert = SSL_get_peer_certificate(m_ssl);
+			if (cert) X509_free(cert);
+			if (! cert) { close(); return; }
 		}
+		else
+		{
+#ifdef _WIN32
+			// initialize Windows network library
+			WSADATA info;
+			int result = WSAStartup(2 /* API version 2.0 */, &info);
+
+			m_handle = ::socket(AF_INET, SOCK_STREAM, 0);
+			if (m_handle == INVALID_SOCKET)
+			{
+				m_handle = 0;
+				return;
+			}
 #else
-		m_handle = ::socket(AF_INET, SOCK_STREAM, 0);
-		if (m_handle <= 0) return;
+			m_handle = ::socket(AF_INET, SOCK_STREAM, 0);
+			if (m_handle <= 0) return;
 #endif
 
-		hostent* host = gethostbyname(remoteHost.c_str());
-		if (! host)
-		{
-			close();
-			return;
+			hostent* host = gethostbyname(remoteHost.c_str());
+			if (! host)
+			{
+				close();
+				return;
+			}
+
+			sockaddr_in addr;
+			addr.sin_family = AF_INET;
+			addr.sin_port = htons(remotePort);
+			addr.sin_addr.s_addr = ((in_addr *)host->h_addr)->s_addr;
+			memset(&(addr.sin_zero), 0, 8);
+
+			int connectionResult = ::connect(m_handle, (sockaddr*)&addr, sizeof(sockaddr));
+			if (connectionResult != 0) close();
 		}
-
-		sockaddr_in addr;
-		addr.sin_family = AF_INET;
-		addr.sin_port = htons(remotePort);
-		addr.sin_addr.s_addr = ((in_addr *)host->h_addr)->s_addr;
-		memset(&(addr.sin_zero), 0, 8);
-
-		int connectionResult = ::connect(m_handle, (sockaddr*)&addr, sizeof(sockaddr));
-		if (connectionResult != 0) close();
 	}
 
 	/// \brief Close the connection
@@ -123,17 +205,30 @@ public:
 
 	/// \brief Check whether the connection is fine.
 	inline bool connected() const
-	{ return (m_handle); }
+	{
+		return m_secure ? (m_ctx && m_web && m_ssl) : (m_handle);
+	}
 
 	/// \brief Close the connection (makes connected() return false).
 	void close()
 	{
+		if (m_secure)
+		{
+			if (m_ctx) SSL_CTX_free(m_ctx);
+			if (m_web) BIO_free_all(m_web);
+			m_ctx = nullptr;
+			m_web = nullptr;
+			m_ssl = nullptr;
+		}
+		else
+		{
 #ifdef _WIN32
-		if (m_handle) ::closesocket(m_handle);
+			if (m_handle) ::closesocket(m_handle);
 #else
-		if (m_handle) ::close(m_handle);
+			if (m_handle) ::close(m_handle);
 #endif
-		m_handle = 0;
+			m_handle = 0;
+		}
 	}
 
 	/// \brief Read data from the socket (blocking).
@@ -144,16 +239,26 @@ public:
 	/// was closed.
 	std::size_t read(char* buffer, std::size_t buffersize)
 	{
-		int ret = recv(m_handle, buffer, buffersize, 0);
-		if (ret <= 0)
+		if (m_secure)
 		{
-			ret = 0;
-			close();
+			int result = BIO_read(m_web, buffer, buffersize);
+			return result;
+//			if (result > 0) return result;
+//			if (! BIO_should_retry(m_web)) { close(); return 0; }
 		}
-		return ret;
+		else
+		{
+			int ret = recv(m_handle, buffer, buffersize, 0);
+			if (ret <= 0)
+			{
+				ret = 0;
+				close();
+			}
+			return ret;
+		}
 	}
 
-	/// \brief Read a CR-LF terminated line by from the socket.
+	/// \brief Read a CR-LF terminated line from the socket.
 	///
 	/// The returned string does not contain the CR-LF code.
 	/// An exception is thrown if reading fails or if a CR not
@@ -201,14 +306,24 @@ public:
 	/// number of bytes written is returned.
 	std::size_t write(const char* buffer, std::size_t buffersize)
 	{
-		if (buffersize == 0) return 0;
-		int ret = send(m_handle, buffer, buffersize, MSG_NOSIGNAL);
-		if (ret <= 0)
+		if (m_secure)
 		{
-			ret = 0;
-			close();
+			int result = BIO_write(m_web, buffer, buffersize);
+			return result;
+//			if (result > 0) return result;
+//			if (! BIO_should_retry(m_web)) { close(); return 0; }
 		}
-		return ret;
+		else
+		{
+			if (buffersize == 0) return 0;
+			int ret = send(m_handle, buffer, buffersize, MSG_NOSIGNAL);
+			if (ret <= 0)
+			{
+				ret = 0;
+				close();
+			}
+			return ret;
+		}
 	}
 
 	/// \brief Write data to the socket.
@@ -228,13 +343,23 @@ public:
 	}
 
 private:
+	bool m_secure;                     ///< is this a secure (https) socket?
+
 	SocketType m_handle;               ///< POSIX socket handle
+
+	SSL_CTX* m_ctx;                    ///< openssl data structure
+	BIO* m_web;                        ///< openssl data structure
+	SSL* m_ssl;                        ///< openssl data structure
+
+	static bool m_ssl_initialized;     ///< is the openssl library initialized?
 };
+
+bool Socket::m_ssl_initialized = false;
 
 } // namespace <anonymous>
 
 
-std::pair<std::string, std::string> shark::splitUrl(std::string const & url)
+std::tuple<bool, std::string, std::string> shark::splitUrl(std::string const & url)
 {
 	std::size_t start = 0;
 	if(url.size() >= 7 && url.substr(0, 7) == "http://")
@@ -257,17 +382,18 @@ std::pair<std::string, std::string> shark::splitUrl(std::string const & url)
 		resource = url.substr(slash_idx);
 	}
 	std::string domain = url.substr(start, slash_idx - start);
-	return std::make_pair(domain, resource);
+	return std::make_tuple(start == 8, domain, resource);
 }
 
 
-std::string shark::download(std::string const& url, unsigned short port){
+std::string shark::download(std::string const& url, unsigned short port) {
 	// split the URL into domain and resource
+	bool https;
 	std::string domain, resource;
-	std::tie(domain, resource) = splitUrl(url);
+	std::tie(https, domain, resource) = splitUrl(url);
 
 	// open a TCP/IP socket connection
-	Socket socket(domain, port);
+	Socket socket(https, domain, port);
 	if(!socket.connected()){
 		throw std::runtime_error("[download] can not connect to url");
 	}
