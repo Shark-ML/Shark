@@ -17,6 +17,9 @@ We kindly ask you to cite Shark in academic work as:
 The article's bibtex entry reads: ::
 
 	@Article{shark08,
+
+.. container:: cibox
+
 		author = {Christian Igel and Verena Heidrich-Meisner and Tobias Glasmachers},
 		title = {Shark},
 		journal = {Journal of Machine Learning Research},

@@ -540,6 +540,7 @@ div.viewcode-block:target {
 div.cibox {
     /*font-size: 0.9em;*/
     /*margin: 0em 1em 0em 1em;*/
+    font-family: monospace;
     margin: 0em;
     border: 1px solid #86989B;
     background-color: #f7f7f7;

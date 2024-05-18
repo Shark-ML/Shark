@@ -2,12 +2,9 @@
 
 {% block extrahead %}
     <link rel="stylesheet" href="{{ pathto('_static/mt_sphinx_shark.css', 1) }}" type="text/css" />
-    <script type="text/javascript">
-       window.MathJax || document.write('<script src="{{ pathto(master_doc, 1) }}/../../../../../contrib/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"><\/script>');
-       <!--delay nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
-    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
     <script src="{{ pathto(master_doc, 1) }}/../../../../mlstyle.js"></script>
-    <!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
 {% endblock %}
 
 {% block header %}
@@ -15,10 +12,6 @@
 
 {%- block htmltitle %}
     {{ super() }}
-    <script type="text/x-mathjax-config">
-        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
-        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
-    </script>
 {%- endblock %}
 
 {%- block sidebarlogo %}

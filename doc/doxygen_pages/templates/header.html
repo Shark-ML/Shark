@@ -1,6 +1,5 @@
 <!-- This comment will put IE 6, 7 and 8 in quirks mode -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!-- CI hack NOve,ber 9, 2017 -->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
@@ -8,15 +7,9 @@
 <script type="text/javaScript" src="$relpath$search/search.js"></script>
 <script type="text/javascript" src="$relpath$jquery.js"></script>
 <script type="text/javascript" src="$relpath$dynsections.js"></script>
-<script type="text/x-mathjax-config">
-        MathJax.Ajax.timeout = 5000;  <!-- 5 second rather than 15 seconds timeout for file access -->
-        <!-- ( nicked from https://groups.google.com/forum/#!msg/mathjax-users/HKA2lNqv-OQ/_Yv72L7MtjYJ ) -->
-</script>
-<script type="text/javascript"
-   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig">
-</script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
 <script src="../../mlstyle.js"></script>
-<!-- nicked from https://groups.google.com/forum/#!msg/mathjax-users/J-36V22-G9Q/AW3ncCbJzS8J -->
 <link href="../css/besser.css" rel="stylesheet" type="text/css"/>
 </head>
 
