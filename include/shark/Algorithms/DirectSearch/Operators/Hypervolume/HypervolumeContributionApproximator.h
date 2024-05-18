@@ -139,6 +139,7 @@ struct HypervolumeContributionApproximator{
 	/// \brief Determines the point contributing the least hypervolume to the overall set of points.
 	///
 	/// \param [in] points pareto front of points
+    /// \param [in] k The number of points to select.
 	/// \param [in] reference The reference point to consider for calculating individual points' contributions.
 	template<class Set,class VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& reference)const{
