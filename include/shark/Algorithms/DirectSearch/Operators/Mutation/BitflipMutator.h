@@ -56,7 +56,7 @@ struct BitflipMutator {
 
 	/// \brief Mutates the supplied individual.
 	/// 
-    /// \prama [in] rng Random number generator.
+    /// \param [in] rng Random number generator.
 	/// \param [in,out] ind Individual to be mutated.
 	template<typename Rng, typename IndividualType>
 	void operator()(Rng& rng, IndividualType &ind) {

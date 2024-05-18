@@ -48,7 +48,7 @@ namespace shark {
 struct HypervolumeCalculatorMDHOY{
 
 	/// \brief Executes the algorithm.
-	/// \param [in] set The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: s' \preceq s \f$
+	/// \param [in] points The set \f$S\f$ of points for which the following assumption needs to hold: \f$\forall s \in S: \lnot \exists s' \in S: s' \preceq s \f$
 	/// \param [in] refPoint The reference point \f$\vec{r} \in \mathbb{R}^n\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$. .
 	template<typename Set, typename VectorType >
 	double operator()( Set const& points, VectorType const& refPoint){

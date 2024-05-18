@@ -275,7 +275,7 @@ public:
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the smallest contributor.
 	/// \param [in] k The number of points to select.
-	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
+	/// \param [in] referencePoint The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& ref)const{
 		SHARK_RUNTIME_CHECK(points.size() >= k, "There must be at least k points in the set");
@@ -349,7 +349,7 @@ public:
 	/// \brief Returns the index of the points with largest contribution as well as their contribution.
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the largest contributor.
-	/// \param [in] referencePointThe reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
+	/// \param [in] referencePoint The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
 		std::vector<Point> front;

@@ -70,12 +70,14 @@ struct EPTournamentSelection {
 	///
 	/// Instead of using an output range, surviving individuals are marked as selected.
 	///
-	/// \param [in] population The population where individuals are selected from
+	/// \param [in] rng Random number generator.
+    /// \param [in] population The population where individuals are selected from
 	/// \param [in] mu number of individuals to select
 	template<typename Population>
 	void operator()(
 		rng_type& rng,
-		Population& population,std::size_t mu
+		Population& population,
+        std::size_t mu
 	){
 		SHARK_RUNTIME_CHECK(population.size() >= mu, "Population Size must be at least mu");
 		typedef typename Population::iterator InIterator;

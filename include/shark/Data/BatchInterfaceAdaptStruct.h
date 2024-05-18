@@ -284,7 +284,8 @@ iterator end(){\
 }\
 const_iterator end()const{\
 	return const_iterator(*this,size());\
-}\
+}
+
 ///\brief This macro can be used to specialize a structure type easily to a batch type.
 ///
 ///Assume, that your input Data looks like:

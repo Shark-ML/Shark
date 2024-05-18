@@ -103,8 +103,6 @@ struct HypervolumeContributionApproximator{
 	double m_errorBound;  ///<The error bound
 
 	/// \brief C'tor
-	/// \param [in] delta the error probability of the least contributor
-	/// \param [in] eps the error bound of the least contributor
 	HypervolumeContributionApproximator()
 	: m_startDeltaMultiplier( 0.1 )
 	, m_multiplierDelta( 0.775 )
@@ -140,7 +138,7 @@ struct HypervolumeContributionApproximator{
 
 	/// \brief Determines the point contributing the least hypervolume to the overall set of points.
 	///
-	/// \param [in] s pareto front of points
+	/// \param [in] points pareto front of points
 	/// \param [in] reference The reference point to consider for calculating individual points' contributions.
 	template<class Set,class VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > smallest(Set const& points, std::size_t k, VectorType const& reference)const{
@@ -358,6 +356,7 @@ private:
 	}
 
 	/// \brief Computes bounding boxes and their volume for the range of points defined by the iterators.
+    /// \param [in] set The set of individuals.
 	template<class Set>
 	void computeBoundingBoxes(Set& set )const{
 		for(auto it = set.begin(); it != set.end(); ++it ) {
