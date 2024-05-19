@@ -6,6 +6,7 @@
 /CPackSourceConfig.cmake
 /CPackConfig.cmake
 /CMakeCache.txt
+/CMakeDoxygenDefaults.cmake
 /cmake_install.cmake
 /bin
 /.settings
@@ -193,6 +194,7 @@ examples/Benchmark/shark/build/
 /doc/latex
 /doc/Makefile
 /doc/CTestTestfile.cmake
+/doc/CMakeDoxygenDefaults.cmake
 /doc/cmake_install.cmake
 /doc/CMakeFiles
 /doc/index.html
