@@ -349,6 +349,7 @@ public:
 	/// \brief Returns the index of the points with largest contribution as well as their contribution.
 	///
 	/// \param [in] points The set \f$S\f$ of points from which to select the largest contributor.
+    /// \param [in] k The number of points to select.
 	/// \param [in] ref The reference Point\f$\vec{r} \in \mathbb{R}^2\f$ for the hypervolume calculation, needs to fulfill: \f$ \forall s \in S: s \preceq \vec{r}\f$.
 	template<class Set, typename VectorType>
 	std::vector<KeyValuePair<double,std::size_t> > largest(Set const& points, std::size_t k, VectorType const& ref)const{
