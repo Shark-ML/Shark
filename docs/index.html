@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<meta name="keywords" content="Shark Machine Learning" />
+	<meta name="robots" content="all" />
+	<title>Shark Machine Learning Library</title>
+	<link rel="shortcut icon" href="shark16.ico"/>
+	<link rel="stylesheet" href="frontpage.css">
+	<script>
+		function smoothScroll(name)
+		{
+			var element = document.getElementsByName(name)[0];
+			var initialpos = window.pageYOffset || document.documentElement.scrollTop;
+			var targetpos = element.getBoundingClientRect().top + window.scrollY - 50;
+			var t = 0;
+			for (var i=1; i<=12; i++) setTimeout(function()
+					{
+						t++;
+						var coeff = Math.sin(t * Math.PI / 24);
+						window.scrollTo(0, (1.0 - coeff) * initialpos + coeff * targetpos);
+					}, 20*i);
+		}
+		function onSearch(event)
+		{
+			event = event || window.event;
+			if (event.keyCode == 13)
+			{
+				// submit search to google
+				var term = document.getElementById('search').value
+				theform = document.createElement("form");
+				theform.method="GET";
+				theform.action="http://www.google.com/search";
+				theinput = document.createElement("input");
+				theinput.type = "text";
+				theinput.name = "q";
+				theinput.value = term + " site:http://shark-ml.org/";
+				theform.appendChild(theinput);
+				document.body.appendChild(theform);
+				theform.submit();
+			}
+		}
+		function toggleLegalNotice()
+		{
+			if (document.getElementById("legal").style.display == "block")
+			{
+				document.getElementById("legal").style.display = "none";
+			}
+			else
+			{
+				document.getElementById("legal").style.display = "block";
+				setTimeout(smoothScroll("legal"), 1);
+			}
+		}
+		function init()
+		{
+			document.getElementById('search').addEventListener('keypress', onSearch);
+		}
+	</script>
+</head>
+
+<body onload="init()">
+
+<!-- header -->
+<div id="header"><div id="header-content">
+	<a href="#section-home" onclick="smoothScroll('section-home'); return false;"><span id="shark">Shark</span></a>
+	&nbsp;
+	<input id="search" class="menu" type="text" placeholder="search" />
+	&nbsp;
+	<a href="#section-news" onclick="smoothScroll('section-news'); return false;"><span class="menu">News</span></a>
+	&nbsp;
+	<a href="#section-downloads" onclick="smoothScroll('section-downloads'); return false;"><span class="menu">Downloads</span></a>
+	&nbsp;
+	<a href="#section-getting-started" onclick="smoothScroll('section-getting-started'); return false;"><span class="menu">Quick&nbsp;Start</span></a>
+	&nbsp;
+	<a href="sphinx_pages/build/html/rest_sources/tutorials/tutorials.html"><span class="menu">Documentation</span></a>
+	&nbsp;
+	<a href="#section-credit" onclick="smoothScroll('section-credit'); return false;"><span class="menu">Credits</span></a>
+</div></div>
+
+<div id="spacer"></div>
+
+<!-- eye-catcher -->
+<div class="section-white"><div class="section-content">
+<a name="section-home"></a>
+<h1>Shark &ndash; Machine Learning</h1>
+<div id="eye-catcher"></div>
+<b>Shark is a fast, modular, feature-rich open-source C++ machine learning library.</b>
+</p>
+<p>
+It provides methods for linear and nonlinear optimization, kernel-based learning
+algorithms, neural networks, and various other machine learning techniques.
+It serves as a powerful toolbox for real world applications as well as for research.
+Shark works on Windows, MacOS&nbsp;X, and Linux. It comes with extensive documentation.
+Shark is licensed under the GNU Lesser General Public License.
+</p>
+</div></div>
+
+<!-- news -->
+<div class="section-colored"><div class="section-content">
+<a name="section-news"></a>
+<h2>News</h2>
+<h3>Shark 4.0 Released</h3>
+<p><span class="date">Juni 9, 2018:</span> We are happy to announce the official release of Shark 4.0.0</p>
+<h3>Shark 3.1 Released</h3>
+<p><span class="date">March 1, 2016:</span> We are happy to announce the official release of Shark 3.1.0.</p>
+<h3>Shark 3.0 Released</h3>
+<p><span class="date">October 27, 2015:</span> We are happy to announce the official release of Shark 3.0.0.</p>
+
+<h3>Shark moves to GitHub</h3>
+<p><span class="date">October 9, 2015:</span> Shark moved to GitHub. Please update your repositories, see the downloads page for more details.</p>
+
+<h3>Shark goes LGPL</h3>
+<p>As of <span class="date">January 2014</span>, Shark is distributed under the permissive
+<a href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License</a>.</p>
+<p><img src="lgplv3-147x51.png"/></p>
+
+</div></div>
+
+<!-- downloads -->
+<div class="section-white"><div class="section-content">
+<a name="section-downloads"></a>
+<h2>Downloads</h2>
+<p>
+The current stable version is Shark&nbsp;4.0, released 9-6-2018.
+</p>
+<div class="note">
+Shark&nbsp;4 is largely incompatible with earlier versions of Shark. We have made interfaces cleaner and support now computation with floating point precision.
+There is also experimental support for GPU compations which is expanded in future minor releases.
+</div>
+<h3>Source Packages</h3>
+<p>
+We have two source packages available:<br/>
+<a class="download" href="https://github.com/Shark-ML/Shark/archive/v4.0.0.zip"><img class="downloadicon" src="download.png">&nbsp;&nbsp;&nbsp;&nbsp;Shark-4.0.0.zip</a>
+<a class="download" href="https://github.com/Shark-ML/Shark/archive/v4.0.0.tar.gz"><img class="downloadicon" src="download.png">&nbsp;&nbsp;&nbsp;&nbsp;Shark-4.0.0.tar.gz</a>
+</p>
+<h3>Shark Repository</h3>
+<p>
+Get the current Shark repository snapshot:
+<div id="git-clone">
+git clone https://github.com/Shark-ML/Shark/
+</div>
+</p>
+<p>
+<table class="status">
+<tr>
+<th>OS</th>
+<th>coverage</th>
+<th>status</th>
+<th>service</th>
+</tr>
+<tr>
+<td>Linux and Mac OS</td><td>library and unit tests</td>
+<td><img src="https://travis-ci.org/Shark-ML/Shark.svg?branch=master" alt="build results Linux and Mac OS"></td>
+<td><a href="https://travis-ci.org/Shark-ML">travis-ci</a></td>
+</tr>
+<tr>
+<td>Windows</td><td>library only, no unit tests</td>
+<td><img src="https://ci.appveyor.com/api/projects/status/github/shark-ml/shark?branch=master&svg=true" alt="build results Windows"></td>
+<td><a href="http://www.appveyor.com/">appveyor</a></td>
+</tr>
+</table>
+</p>
+</div></div>
+
+<!-- quick start -->
+<div class="section-colored"><div class="section-content">
+<a name="section-getting-started"></a>
+<h2>Quick Start</h2>
+<p>
+Let's demonstrate basic use of Shark with very few lines of code.
+This is C++, so we start with includes.
+</p>
+<div class="code"><span class="preproc">#include &lt;shark/Data/Download.h&gt;
+#include &lt;shark/Algorithms/Trainers/LDA.h&gt;
+#include &lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span>
+<span class="keyword">using namespace</span> shark;</div>
+<p>
+Let's load some data for learning.
+</p>
+<div class="code">ClassificationDataset traindata;
+downloadCsvData(traindata,
+                <span class="string">"www.shark-ml.org/data/quickstart-train.csv"</span>,
+                LAST_COLUMN,
+                <span class="string">' '</span>);
+</div>
+<p>
+The next step is to create a predictive model. Here we use a simple linear classifier.
+</p>
+<div class="code">LinearClassifier&lt;&gt; classifier;</div>
+<p>
+The core step of learning is to train the model on data using a trainer.
+In Shark, the trainer is not glued to the model. Instead it is a separate object.
+Here, good old Linear Discriminant Analysis (LDA) suits our needs.
+</p>
+<div class="code">LDA lda;
+lda.train(classifier, traindata);</div>
+<p>
+Congrats! We have a readily trained classifier.
+Let's try it out by applying it to new data.
+</p>
+<div class="code">ClassificationDataset testdata;
+downloadCsvData(testdata,
+                <span class="string">"www.shark-ml.org/data/quickstart-test.csv"</span>,
+                LAST_COLUMN,
+                <span class="string">' '</span>);
+ZeroOneLoss&lt;&gt; loss;
+<span class="keyword">double</span> error = loss(testdata.labels(), classifier(testdata.inputs()));</div>
+<p>
+Further reading:
+<ul>
+	<li><a href="sphinx_pages/build/html/rest_sources/installation.html">Installation Guide</a></li>
+	<li><a href="sphinx_pages/build/html/rest_sources/tutorials/tutorials.html">Tutorials</a></li>
+</ul>
+</p>
+</div></div>
+
+<!-- Why Shark? -->
+<div class="section-white"><div class="section-content">
+<a name="section-why-shark"></a>
+<h2>Why Shark?</h2>
+
+<h3>Speed and flexibility</h3>
+<p>
+Shark provides an excellent trade-off between flexibility and
+ease-of-use on the one hand, and computational efficiency on the other.
+</p>
+
+<h3>One for all</h3>
+<p>
+Shark offers numerous algorithms from various machine learning and computational intelligence domains in a way that they can be easily combined and extended.
+</p>
+
+<h3>Unique features</h3>
+<p>
+Shark comes with a lot of powerful algorithms that are to our best knowledge not implemented in any other library, for example in the domains of model selection and training of binary and multi-class SVMs, or evolutionary single- and multi-objective optimization.
+</p>
+</div></div>
+
+<!-- credits and copyright -->
+<div class="section-colored"><div class="section-content">
+<a name="section-credit"></a>
+<h2>Credits and Copyright</h2>
+<h3>Citing Shark</h3>
+<p>
+We kindly ask you to cite Shark in academic work as:
+</p>
+<p style='font-family: monospace'>
+Christian Igel, Verena Heidrich-Meisner, and Tobias Glasmachers.
+Shark.
+Journal of Machine Learning Research 9, pp. 993-996, 2008.
+<p>
+The article's bibtex entry reads:
+</p>
+<p>
+<pre style='font-family: monospace'>
+@Article{shark08,
+  author = {Christian Igel and Verena Heidrich-Meisner and Tobias Glasmachers},
+  title = {Shark},
+  journal = {Journal of Machine Learning Research},
+  year = {2008},
+  volume = {9},
+  pages = {993--996}
+}
+</pre>
+</p>
+
+<h3>License</h3>
+<p>
+The Shark library is made available under the
+<a href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License</a>.
+</p>
+<p>
+<img src="lgplv3-147x51.png">
+</p>
+
+
+<h3>Hosting institutions</h3>
+
+<p>
+The Shark machine learning library is jointly maintained by researchers from
+<ul>
+	<li><a target="_blank" href="http://www.ini.rub.de/">Institut für Neuroinformatik (INI), Ruhr-Universität Bochum, Germany</a></li>
+	<li><a target="_blank" href="http://www.diku.dk/">Department of Computer Science (DIKU), University of Copenhagen, Denmark</a></li>
+</ul>
+</p>
+
+</div></div>
+
+<!-- footer -->
+<div id="footer"><div id="footer-content">
+<span class="legal-notice" onclick="toggleLegalNotice();">legal notice</span>
+<div id="legal" name="legal">
+<p>
+Copyright (C) 2015-2018 Shark development team.
+</p>
+<p>
+This website is provided in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+</p>
+<p>
+The website contains links to external content. The Shark developers
+have no control over the contents of externally linked websites.
+Therefore they explicitly disclaim responsibility for the contents of
+externally linked pages.
+</p>
+</div>
+</div></div>
+
+</body>
+</html>
