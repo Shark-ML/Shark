@@ -34,7 +34,7 @@
 				theinput = document.createElement("input");
 				theinput.type = "text";
 				theinput.name = "q";
-				theinput.value = term + " site:http://shark-ml.org/";
+				theinput.value = term + " site:https://shark-ml.github.io/Shark/";
 				theform.appendChild(theinput);
 				document.body.appendChild(theform);
 				theform.submit();
@@ -180,7 +180,7 @@ Let's load some data for learning.
 </p>
 <div class="code">ClassificationDataset traindata;
 downloadCsvData(traindata,
-                <span class="string">"www.shark-ml.org/data/quickstart-train.csv"</span>,
+                <span class="string">"https://raw.githubusercontent.com/Shark-ML/Shark/master/docs/data/quickstart-train.csv"</span>,
                 LAST_COLUMN,
                 <span class="string">' '</span>);
 </div>
@@ -201,7 +201,7 @@ Let's try it out by applying it to new data.
 </p>
 <div class="code">ClassificationDataset testdata;
 downloadCsvData(testdata,
-                <span class="string">"www.shark-ml.org/data/quickstart-test.csv"</span>,
+                <span class="string">"https://raw.githubusercontent.com/Shark-ML/Shark/master/docs/data/quickstart-test.csv"</span>,
                 LAST_COLUMN,
                 <span class="string">' '</span>);
 ZeroOneLoss&lt;&gt; loss;
