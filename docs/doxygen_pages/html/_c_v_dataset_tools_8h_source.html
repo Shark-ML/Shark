@@ -285,7 +285,7 @@
 <div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span> </div>
 <div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>            <span class="comment">//if all elements for the current batch are found, create it</span></div>
 <div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>            <span class="keywordflow">if</span> (batchElements[fold].size() == batchSizes[batchNumber]) {</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>                newSet.<a class="code hl_function" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">batch</a>(validationSetStart[fold]) = <a class="code hl_function" href="namespaceshark.html#a229ee860771047d3994953fdda9f5a6a" title="Creates a batch given a set of indices.">subBatch</a>(setView,batchElements[fold]);</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>                newSet.<a class="code hl_function" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">batch</a>(validationSetStart[fold]) = <a class="code hl_function" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a" title="Creates a batch given a set of indices.">subBatch</a>(setView,batchElements[fold]);</div>
 <div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>                batchElements[fold].clear();</div>
 <div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>                ++validationSetStart[fold];</div>
 <div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            }</div>
@@ -493,7 +493,7 @@
 <div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        <span class="comment">//if all elements for the current batch are found, create it</span></div>
 <div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>        std::size_t batchNumber = validationSetStart[partition];</div>
 <div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>        <span class="keywordflow">if</span> (batchElements[partition].size() == batchSizes[batchNumber]) {</div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>            newSet.<a class="code hl_function" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">batch</a>(validationSetStart[partition]) = <a class="code hl_function" href="namespaceshark.html#a229ee860771047d3994953fdda9f5a6a" title="Creates a batch given a set of indices.">subBatch</a>(setView,batchElements[partition]);</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>            newSet.<a class="code hl_function" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">batch</a>(validationSetStart[partition]) = <a class="code hl_function" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a" title="Creates a batch given a set of indices.">subBatch</a>(setView,batchElements[partition]);</div>
 <div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>            batchElements[partition].clear();</div>
 <div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>            ++validationSetStart[partition];</div>
 <div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>        }</div>
@@ -557,7 +557,7 @@
 <div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span>        <span class="comment">//if all elements for the current batch are found, create it</span></div>
 <div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>        std::size_t batchNumber = validationSetStart[partition];</div>
 <div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span>        <span class="keywordflow">if</span> (batchElements[partition].size() == batchSizes[batchNumber]) {</div>
-<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>            newSet.<a class="code hl_function" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">batch</a>(validationSetStart[partition]) = <a class="code hl_function" href="namespaceshark.html#a229ee860771047d3994953fdda9f5a6a" title="Creates a batch given a set of indices.">subBatch</a>(setView,batchElements[partition]);</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>            newSet.<a class="code hl_function" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">batch</a>(validationSetStart[partition]) = <a class="code hl_function" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a" title="Creates a batch given a set of indices.">subBatch</a>(setView,batchElements[partition]);</div>
 <div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span>            batchElements[partition].clear();</div>
 <div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>            ++validationSetStart[partition];</div>
 <div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>        }</div>

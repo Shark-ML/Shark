@@ -36950,6 +36950,76 @@
       <arglist>(std::ostream &amp;stream, const Data&lt; T &gt; &amp;d)</arglist>
     </member>
     <member kind="function">
+      <type>DataView&lt; DatasetType &gt;</type>
+      <name>shark::subset</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga420a47af92d8da0f5e95a7d158521db9</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view, IndexRange const &amp;indizes)</arglist>
+    </member>
+    <member kind="function">
+      <type>DataView&lt; DatasetType &gt;</type>
+      <name>shark::randomSubset</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga6d5f76f9a5891a8675c3ee297d57ad48</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view, std::size_t size)</arglist>
+    </member>
+    <member kind="function">
+      <type>DataView&lt; DatasetType &gt;::batch_type</type>
+      <name>shark::subBatch</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga229ee860771047d3994953fdda9f5a6a</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view, IndexRange const &amp;indizes)</arglist>
+    </member>
+    <member kind="function">
+      <type>DataView&lt; DatasetType &gt;::batch_type</type>
+      <name>shark::randomSubBatch</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga43b37371406e040f057680d5e7182341</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view, std::size_t size)</arglist>
+    </member>
+    <member kind="function">
+      <type>DataView&lt; DatasetType &gt;</type>
+      <name>shark::toView</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga4adbf0bc9537c1829f1e1cd281de560b</anchor>
+      <arglist>(DatasetType &amp;set)</arglist>
+    </member>
+    <member kind="function">
+      <type>DataView&lt; T &gt;::dataset_type</type>
+      <name>shark::toDataset</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga3c0660922e34389d005bb81e9bde0c18</anchor>
+      <arglist>(DataView&lt; T &gt; const &amp;view, std::size_t batchSize=DataView&lt; T &gt;::dataset_type::DefaultBatchSize)</arglist>
+    </member>
+    <member kind="function">
+      <type>std::size_t</type>
+      <name>shark::numberOfClasses</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga884afb6868800ff6f15e9a3dc7f1c73b</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view)</arglist>
+    </member>
+    <member kind="function">
+      <type>std::size_t</type>
+      <name>shark::inputDimension</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga148ab5a691f06b225ccfc21d9e039cef</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view)</arglist>
+    </member>
+    <member kind="function">
+      <type>std::size_t</type>
+      <name>shark::labelDimension</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga248204f65ae4b8c30604f5a609cb7bf6</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view)</arglist>
+    </member>
+    <member kind="function">
+      <type>std::size_t</type>
+      <name>shark::dataDimension</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga5ef7f15d261cffb78c3b8e91765619a2</anchor>
+      <arglist>(DataView&lt; DatasetType &gt; const &amp;view)</arglist>
+    </member>
+    <member kind="function">
       <type>SHARK_EXPORT_SYMBOL std::tuple&lt; bool, std::string, std::string &gt;</type>
       <name>shark::splitUrl</name>
       <anchorfile>group__shark__globals.html</anchorfile>

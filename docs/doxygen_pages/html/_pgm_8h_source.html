@@ -114,36 +114,36 @@
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="preprocessor">#include &lt;<a class="code" href="_dataset_8h.html">shark/Data/Dataset.h</a>&gt;</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceshark.html" title="AbstractMultiObjectiveOptimizer.">shark</a> {</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keyword">namespace </span>detail {</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="keywordtype">void</span> importPGM( std::string <span class="keyword">const</span>&amp; fileName, std::vector&lt;unsigned char&gt;&amp; ppData, std::size_t&amp; sx, std::size_t&amp; sy )</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>{</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    std::ifstream file(fileName.c_str(), std::ios::binary);</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(file, <span class="stringliteral">&quot;Can not open File&quot;</span>);</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    std::string id;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    std::size_t nGrayValues = 0;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    file&gt;&gt; id;</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(<span class="keywordtype">id</span> == <span class="stringliteral">&quot;P5&quot;</span> , <span class="stringliteral">&quot;File &quot;</span> + fileName+ <span class="stringliteral">&quot;is not a pgm&quot;</span>);</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="comment">//ignore comments</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    file &gt;&gt; std::ws;<span class="comment">//skip white space</span></div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordflow">while</span>(file.peek() == <span class="charliteral">&#39;#&#39;</span>){</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        file.ignore(std::numeric_limits&lt;std::streamsize&gt;::max(), <span class="charliteral">&#39;\n&#39;</span>);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    }</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    file &gt;&gt; sx &gt;&gt; sy &gt;&gt; nGrayValues;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(file, <span class="stringliteral">&quot;Error reading file!&quot;</span>);</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(nGrayValues &lt;= 255, <span class="stringliteral">&quot;File &quot;</span> + fileName+ <span class="stringliteral">&quot;unsupported format&quot;</span>);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    </div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    ppData.resize(sx*sy);</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    file.read((<span class="keywordtype">char</span>*)ppData.data(),sx*sy);</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(file, <span class="stringliteral">&quot;Error reading file!&quot;</span>);</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}</div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="comment"></span> </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="comment">/**</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="comment"> * \ingroup shark_globals</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="comment"> * @{</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="comment"></span> </div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="comment">/**</span></div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="comment"> * \ingroup shark_globals</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment"> *</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment"> * @{</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment"> */</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="keyword">namespace </span>detail {</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="keywordtype">void</span> importPGM( std::string <span class="keyword">const</span>&amp; fileName, std::vector&lt;unsigned char&gt;&amp; ppData, std::size_t&amp; sx, std::size_t&amp; sy )</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>{</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    std::ifstream file(fileName.c_str(), std::ios::binary);</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(file, <span class="stringliteral">&quot;Can not open File&quot;</span>);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    </div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    std::string id;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    std::size_t nGrayValues = 0;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    file&gt;&gt; id;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(<span class="keywordtype">id</span> == <span class="stringliteral">&quot;P5&quot;</span> , <span class="stringliteral">&quot;File &quot;</span> + fileName+ <span class="stringliteral">&quot;is not a pgm&quot;</span>);</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    <span class="comment">//ignore comments</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    file &gt;&gt; std::ws;<span class="comment">//skip white space</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keywordflow">while</span>(file.peek() == <span class="charliteral">&#39;#&#39;</span>){</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>        file.ignore(std::numeric_limits&lt;std::streamsize&gt;::max(), <span class="charliteral">&#39;\n&#39;</span>);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    }</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    file &gt;&gt; sx &gt;&gt; sy &gt;&gt; nGrayValues;</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(file, <span class="stringliteral">&quot;Error reading file!&quot;</span>);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(nGrayValues &lt;= 255, <span class="stringliteral">&quot;File &quot;</span> + fileName+ <span class="stringliteral">&quot;unsupported format&quot;</span>);</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>    ppData.resize(sx*sy);</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    file.read((<span class="keywordtype">char</span>*)ppData.data(),sx*sy);</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    <a class="code hl_define" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>(file, <span class="stringliteral">&quot;Error reading file!&quot;</span>);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>}</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="comment"></span> </div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="comment">/// \brief Writes a PGM file.</span></div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="comment">///</span></div>
@@ -326,9 +326,11 @@
 <div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    set.<a class="code hl_function" href="group__shark__globals.html#gabdfa24d4e424c86cf39851c143b2dd37" title="Returns the shape of the elements in the dataset.">shape</a>() = {info.front().second,info.front().first};</div>
 <div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>}</div>
 </div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span> </div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>} <span class="comment">// end namespace shark</span></div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span><span class="comment"></span> </div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span><span class="comment">/** @}*/</span></div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>} <span class="comment">// end namespace shark</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div>
 </body>

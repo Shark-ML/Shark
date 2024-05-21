@@ -191,6 +191,45 @@
 <tr class="memitem:ga9ddad6c2aa073b879ea4c4a2885b3e2f"><td class="memTemplItemLeft" align="right" valign="top">std::ostream &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga9ddad6c2aa073b879ea4c4a2885b3e2f">shark::operator&lt;&lt;</a> (std::ostream &amp;stream, const <a class="el" href="classshark_1_1_data.html">Data</a>&lt; T &gt; &amp;d)</td></tr>
 <tr class="memdesc:ga9ddad6c2aa073b879ea4c4a2885b3e2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Outstream of elements.  <br /></td></tr>
 <tr class="separator:ga9ddad6c2aa073b879ea4c4a2885b3e2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga420a47af92d8da0f5e95a7d158521db9" id="r_ga420a47af92d8da0f5e95a7d158521db9"><td class="memTemplParams" colspan="2">template&lt;class DatasetType , class IndexRange &gt; </td></tr>
+<tr class="memitem:ga420a47af92d8da0f5e95a7d158521db9"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga420a47af92d8da0f5e95a7d158521db9">shark::subset</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view, IndexRange const &amp;indizes)</td></tr>
+<tr class="memdesc:ga420a47af92d8da0f5e95a7d158521db9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a subset of a <a class="el" href="classshark_1_1_data_view.html" title="Constant time Element-Lookup for Datasets.">DataView</a> with elements indexed by indices.  <br /></td></tr>
+<tr class="separator:ga420a47af92d8da0f5e95a7d158521db9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6d5f76f9a5891a8675c3ee297d57ad48" id="r_ga6d5f76f9a5891a8675c3ee297d57ad48"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga6d5f76f9a5891a8675c3ee297d57ad48"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga6d5f76f9a5891a8675c3ee297d57ad48">shark::randomSubset</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view, std::size_t size)</td></tr>
+<tr class="memdesc:ga6d5f76f9a5891a8675c3ee297d57ad48"><td class="mdescLeft">&#160;</td><td class="mdescRight">creates a random subset of a <a class="el" href="classshark_1_1_data_view.html" title="Constant time Element-Lookup for Datasets.">DataView</a> with given size  <br /></td></tr>
+<tr class="separator:ga6d5f76f9a5891a8675c3ee297d57ad48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga229ee860771047d3994953fdda9f5a6a" id="r_ga229ee860771047d3994953fdda9f5a6a"><td class="memTemplParams" colspan="2">template&lt;class DatasetType , class IndexRange &gt; </td></tr>
+<tr class="memitem:ga229ee860771047d3994953fdda9f5a6a"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;::batch_type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a">shark::subBatch</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view, IndexRange const &amp;indizes)</td></tr>
+<tr class="memdesc:ga229ee860771047d3994953fdda9f5a6a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a batch given a set of indices.  <br /></td></tr>
+<tr class="separator:ga229ee860771047d3994953fdda9f5a6a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga43b37371406e040f057680d5e7182341" id="r_ga43b37371406e040f057680d5e7182341"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga43b37371406e040f057680d5e7182341"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;::batch_type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga43b37371406e040f057680d5e7182341">shark::randomSubBatch</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view, std::size_t size)</td></tr>
+<tr class="memdesc:ga43b37371406e040f057680d5e7182341"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a random batch of a given size.  <br /></td></tr>
+<tr class="separator:ga43b37371406e040f057680d5e7182341"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4adbf0bc9537c1829f1e1cd281de560b" id="r_ga4adbf0bc9537c1829f1e1cd281de560b"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga4adbf0bc9537c1829f1e1cd281de560b"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga4adbf0bc9537c1829f1e1cd281de560b">shark::toView</a> (DatasetType &amp;set)</td></tr>
+<tr class="memdesc:ga4adbf0bc9537c1829f1e1cd281de560b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a View from a dataset.  <br /></td></tr>
+<tr class="separator:ga4adbf0bc9537c1829f1e1cd281de560b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3c0660922e34389d005bb81e9bde0c18" id="r_ga3c0660922e34389d005bb81e9bde0c18"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ga3c0660922e34389d005bb81e9bde0c18"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; T &gt;::dataset_type&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga3c0660922e34389d005bb81e9bde0c18">shark::toDataset</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; T &gt; const &amp;view, std::size_t <a class="el" href="namespaceshark.html#af2ab10364feb8a631e0866dcf2f1a4ad">batchSize</a>=<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; T &gt;::dataset_type::DefaultBatchSize)</td></tr>
+<tr class="memdesc:ga3c0660922e34389d005bb81e9bde0c18"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new dataset from a View.  <br /></td></tr>
+<tr class="separator:ga3c0660922e34389d005bb81e9bde0c18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga884afb6868800ff6f15e9a3dc7f1c73b" id="r_ga884afb6868800ff6f15e9a3dc7f1c73b"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga884afb6868800ff6f15e9a3dc7f1c73b"><td class="memTemplItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga884afb6868800ff6f15e9a3dc7f1c73b">shark::numberOfClasses</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view)</td></tr>
+<tr class="separator:ga884afb6868800ff6f15e9a3dc7f1c73b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga148ab5a691f06b225ccfc21d9e039cef" id="r_ga148ab5a691f06b225ccfc21d9e039cef"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga148ab5a691f06b225ccfc21d9e039cef"><td class="memTemplItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga148ab5a691f06b225ccfc21d9e039cef">shark::inputDimension</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view)</td></tr>
+<tr class="memdesc:ga148ab5a691f06b225ccfc21d9e039cef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the input dimensionality of the labeled dataset represented by the view.  <br /></td></tr>
+<tr class="separator:ga148ab5a691f06b225ccfc21d9e039cef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga248204f65ae4b8c30604f5a609cb7bf6" id="r_ga248204f65ae4b8c30604f5a609cb7bf6"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga248204f65ae4b8c30604f5a609cb7bf6"><td class="memTemplItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga248204f65ae4b8c30604f5a609cb7bf6">shark::labelDimension</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view)</td></tr>
+<tr class="memdesc:ga248204f65ae4b8c30604f5a609cb7bf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the label dimensionality of the labeled dataset represented by the view.  <br /></td></tr>
+<tr class="separator:ga248204f65ae4b8c30604f5a609cb7bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5ef7f15d261cffb78c3b8e91765619a2" id="r_ga5ef7f15d261cffb78c3b8e91765619a2"><td class="memTemplParams" colspan="2">template&lt;class DatasetType &gt; </td></tr>
+<tr class="memitem:ga5ef7f15d261cffb78c3b8e91765619a2"><td class="memTemplItemLeft" align="right" valign="top">std::size_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga5ef7f15d261cffb78c3b8e91765619a2">shark::dataDimension</a> (<a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;view)</td></tr>
+<tr class="memdesc:ga5ef7f15d261cffb78c3b8e91765619a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the dimensionality of the dataset represented by the view.  <br /></td></tr>
+<tr class="separator:ga5ef7f15d261cffb78c3b8e91765619a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabeefaf7ce8258b9865c39a8a749e36dd" id="r_gabeefaf7ce8258b9865c39a8a749e36dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_d_l_l_support_8h.html#a54b73283f7f70b27fbd8ac5d4621827f">SHARK_EXPORT_SYMBOL</a> std::tuple&lt; bool, std::string, std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#gabeefaf7ce8258b9865c39a8a749e36dd">shark::splitUrl</a> (std::string const &amp;url)</td></tr>
 <tr class="memdesc:gabeefaf7ce8258b9865c39a8a749e36dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Split a URL into its domain and resource parts.  <br /></td></tr>
 <tr class="separator:gabeefaf7ce8258b9865c39a8a749e36dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -496,7 +535,7 @@ Functions</h2></td></tr>
 <tr class="memitem:ga42c8e836dbb5860d4044d8b19732f794"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements</a> (Range const &amp;indices)</td></tr>
 <tr class="memdesc:ga42c8e836dbb5860d4044d8b19732f794"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reorders elements across batches.  <br /></td></tr>
 <tr class="separator:ga42c8e836dbb5860d4044d8b19732f794"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa2d2689f5da9dbd4eac362d3c03ebcaf" id="r_gaa2d2689f5da9dbd4eac362d3c03ebcaf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#gaa2d2689f5da9dbd4eac362d3c03ebcaf">shark::Data&lt; Type &gt;::indexedSubset</a> (<a class="el" href="group__shark__globals.html#ga3765fd3c920db97545a11dca09b75224">IndexSet</a> const &amp;indices, <a class="el" href="classshark_1_1_data.html">Data</a> &amp;<a class="el" href="namespaceshark.html#a420a47af92d8da0f5e95a7d158521db9">subset</a>, <a class="el" href="classshark_1_1_data.html">Data</a> &amp;complement) const</td></tr>
+<tr class="memitem:gaa2d2689f5da9dbd4eac362d3c03ebcaf" id="r_gaa2d2689f5da9dbd4eac362d3c03ebcaf"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#gaa2d2689f5da9dbd4eac362d3c03ebcaf">shark::Data&lt; Type &gt;::indexedSubset</a> (<a class="el" href="group__shark__globals.html#ga3765fd3c920db97545a11dca09b75224">IndexSet</a> const &amp;indices, <a class="el" href="classshark_1_1_data.html">Data</a> &amp;<a class="el" href="group__shark__globals.html#ga420a47af92d8da0f5e95a7d158521db9">subset</a>, <a class="el" href="classshark_1_1_data.html">Data</a> &amp;complement) const</td></tr>
 <tr class="memdesc:gaa2d2689f5da9dbd4eac362d3c03ebcaf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fill in the subset defined by the list of indices as well as its complement.  <br /></td></tr>
 <tr class="separator:gaa2d2689f5da9dbd4eac362d3c03ebcaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6bc854de0b085583688f1d089fa608b6" id="r_ga6bc854de0b085583688f1d089fa608b6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_data.html">Data</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga6bc854de0b085583688f1d089fa608b6">shark::Data&lt; Type &gt;::indexedSubset</a> (<a class="el" href="group__shark__globals.html#ga3765fd3c920db97545a11dca09b75224">IndexSet</a> const &amp;indices) const</td></tr>
@@ -2009,7 +2048,7 @@ template&lt;class I , class L &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="_c_v_dataset_tools_8h_source.html#l00427">427</a> of file <a class="el" href="_c_v_dataset_tools_8h_source.html">CVDatasetTools.h</a>.</p>
 
-<p class="reference">References <a class="el" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="namespaceshark.html#af2ab10364feb8a631e0866dcf2f1a4ad">shark::batchSize()</a>, <a class="el" href="group__shark__globals.html#ga5333445992cd6b14392cd80a1ab5403c">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfElements()</a>, <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>, <a class="el" href="namespaceshark.html#a229ee860771047d3994953fdda9f5a6a">shark::subBatch()</a>, and <a class="el" href="namespaceshark.html#a3fffe112e8e09ea8f41e4fb7113e93ee">shark::swap()</a>.</p>
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="namespaceshark.html#af2ab10364feb8a631e0866dcf2f1a4ad">shark::batchSize()</a>, <a class="el" href="group__shark__globals.html#ga5333445992cd6b14392cd80a1ab5403c">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfElements()</a>, <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>, <a class="el" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a">shark::subBatch()</a>, and <a class="el" href="namespaceshark.html#a3fffe112e8e09ea8f41e4fb7113e93ee">shark::swap()</a>.</p>
 
 </div>
 </div>
@@ -2120,7 +2159,7 @@ template&lt;class I , class L &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="_c_v_dataset_tools_8h_source.html#l00366">366</a> of file <a class="el" href="_c_v_dataset_tools_8h_source.html">CVDatasetTools.h</a>.</p>
 
-<p class="reference">References <a class="el" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="namespaceshark.html#af2ab10364feb8a631e0866dcf2f1a4ad">shark::batchSize()</a>, <a class="el" href="group__shark__globals.html#ga5333445992cd6b14392cd80a1ab5403c">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfElements()</a>, <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>, <a class="el" href="namespaceshark.html#a229ee860771047d3994953fdda9f5a6a">shark::subBatch()</a>, and <a class="el" href="namespaceshark.html#a3fffe112e8e09ea8f41e4fb7113e93ee">shark::swap()</a>.</p>
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="namespaceshark.html#af2ab10364feb8a631e0866dcf2f1a4ad">shark::batchSize()</a>, <a class="el" href="group__shark__globals.html#ga5333445992cd6b14392cd80a1ab5403c">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfElements()</a>, <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>, <a class="el" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a">shark::subBatch()</a>, and <a class="el" href="namespaceshark.html#a3fffe112e8e09ea8f41e4fb7113e93ee">shark::swap()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="group__shark__globals.html#gac32dddc7b7c3eaa8779dc244c6142eef">shark::createCVIID()</a>, and <a class="el" href="_subsets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>.</p>
 
@@ -3173,7 +3212,7 @@ template&lt;class Type &gt; </div>
 </div>
 </div>
 <a id="ga6231b46b09731352a3cac40709a9625f" name="ga6231b46b09731352a3cac40709a9625f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga6231b46b09731352a3cac40709a9625f">&#9670;&#160;</a></span>dataDimension()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6231b46b09731352a3cac40709a9625f">&#9670;&#160;</a></span>dataDimension() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3196,7 +3235,33 @@ template&lt;class <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3270
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga0ea72a74a21d5ff59772516b83c4a58b">shark::Data&lt; Type &gt;::element()</a>, <a class="el" href="group__shark__globals.html#ga814e8b0028cc90dd2af69805e8f8a04d">shark::Data&lt; Type &gt;::numberOfElements()</a>, and <a class="el" href="_exception_8h.html#a73abb5049a0168d72a48e72dda41708b">SHARK_ASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="namespaceshark.html#a5ef7f15d261cffb78c3b8e91765619a2">shark::dataDimension()</a>, <a class="el" href="namespaceshark.html#a12497998181e61d460632d5bec46f5c5">shark::dataDimension()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a969990014ff8964d6e67fcf72318b02b">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#ad7be3ba6f121a686e6dcbeb87813599f">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga2b2c3bd0c72ef444cbf8de7f96a4b589">shark::getColumn()</a>, <a class="el" href="group__shark__globals.html#gae537f0e90beb970397cd7bb9250984e2">shark::inputDimension()</a>, <a class="el" href="namespaceshark.html#a1a4ae1c1461484d67c14d765c9db9501">shark::inputDimension()</a>, <a class="el" href="classshark_1_1_centroids.html#a162b069a4d71fcec6e7dae5c8251cb2f">shark::Centroids::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga3006553139477e356ee75cd85c190d7c">shark::labelDimension()</a>, <a class="el" href="namespaceshark.html#a1514586242fb20c13fa7d40e634efab7">shark::labelDimension()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_auto_encoder_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga556f3c658db711cb630cc736b9665ec0">shark::setColumn()</a>, <a class="el" href="classshark_1_1_normalize_components_z_c_a.html#a1f7d6ef76cce1d8d85474bbd22452fe2">shark::NormalizeComponentsZCA::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_variance.html#a684b111c701789e332577a6739076c3b">shark::NormalizeComponentsUnitVariance&lt; DataType &gt;::train()</a>, and <a class="el" href="_deep_network_training_r_b_m_8cpp.html#a05058126c2d28e9b8008edd10500114d">trainRBM()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga5ef7f15d261cffb78c3b8e91765619a2">shark::dataDimension()</a>, <a class="el" href="namespaceshark.html#a12497998181e61d460632d5bec46f5c5">shark::dataDimension()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a969990014ff8964d6e67fcf72318b02b">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#ad7be3ba6f121a686e6dcbeb87813599f">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga2b2c3bd0c72ef444cbf8de7f96a4b589">shark::getColumn()</a>, <a class="el" href="group__shark__globals.html#gae537f0e90beb970397cd7bb9250984e2">shark::inputDimension()</a>, <a class="el" href="namespaceshark.html#a1a4ae1c1461484d67c14d765c9db9501">shark::inputDimension()</a>, <a class="el" href="classshark_1_1_centroids.html#a162b069a4d71fcec6e7dae5c8251cb2f">shark::Centroids::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga3006553139477e356ee75cd85c190d7c">shark::labelDimension()</a>, <a class="el" href="namespaceshark.html#a1514586242fb20c13fa7d40e634efab7">shark::labelDimension()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_auto_encoder_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga556f3c658db711cb630cc736b9665ec0">shark::setColumn()</a>, <a class="el" href="classshark_1_1_normalize_components_z_c_a.html#a1f7d6ef76cce1d8d85474bbd22452fe2">shark::NormalizeComponentsZCA::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_variance.html#a684b111c701789e332577a6739076c3b">shark::NormalizeComponentsUnitVariance&lt; DataType &gt;::train()</a>, and <a class="el" href="_deep_network_training_r_b_m_8cpp.html#a05058126c2d28e9b8008edd10500114d">trainRBM()</a>.</p>
+
+</div>
+</div>
+<a id="ga5ef7f15d261cffb78c3b8e91765619a2" name="ga5ef7f15d261cffb78c3b8e91765619a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5ef7f15d261cffb78c3b8e91765619a2">&#9670;&#160;</a></span>dataDimension() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t shark::dataDimension </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the dimensionality of the dataset represented by the view. </p>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00350">350</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, and <a class="el" href="classshark_1_1_data_view.html#a20c3d8aa10aa6056277df2f02261033b">shark::DataView&lt; DatasetType &gt;::dataset()</a>.</p>
 
 </div>
 </div>
@@ -5837,7 +5902,7 @@ template&lt;class Type &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="_dataset_8h_source.html#l00365">365</a> of file <a class="el" href="_dataset_8h_source.html">Dataset.h</a>.</p>
 
-<p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>, <a class="el" href="group__shark__globals.html#ga232e64c2421cd25794c915c399a7cfd5">shark::Data&lt; Type &gt;::m_shape</a>, and <a class="el" href="namespaceshark.html#a420a47af92d8da0f5e95a7d158521db9">shark::subset()</a>.</p>
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>, <a class="el" href="group__shark__globals.html#ga232e64c2421cd25794c915c399a7cfd5">shark::Data&lt; Type &gt;::m_shape</a>, and <a class="el" href="group__shark__globals.html#ga420a47af92d8da0f5e95a7d158521db9">shark::subset()</a>.</p>
 
 </div>
 </div>
@@ -5923,7 +5988,7 @@ template&lt;class Type &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="_dataset_8h_source.html#l00358">358</a> of file <a class="el" href="_dataset_8h_source.html">Dataset.h</a>.</p>
 
-<p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>, and <a class="el" href="namespaceshark.html#a420a47af92d8da0f5e95a7d158521db9">shark::subset()</a>.</p>
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>, and <a class="el" href="group__shark__globals.html#ga420a47af92d8da0f5e95a7d158521db9">shark::subset()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="group__shark__globals.html#gae0d1826d38c41637eaaf99b3813ad133">shark::LabeledData&lt; InputT, LabelT &gt;::indexedSubset()</a>.</p>
 
@@ -6026,8 +6091,34 @@ template&lt;class <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3270
 
 </div>
 </div>
+<a id="ga148ab5a691f06b225ccfc21d9e039cef" name="ga148ab5a691f06b225ccfc21d9e039cef"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga148ab5a691f06b225ccfc21d9e039cef">&#9670;&#160;</a></span>inputDimension() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t shark::inputDimension </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the input dimensionality of the labeled dataset represented by the view. </p>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00339">339</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="classshark_1_1_data_view.html#a20c3d8aa10aa6056277df2f02261033b">shark::DataView&lt; DatasetType &gt;::dataset()</a>, and <a class="el" href="group__shark__globals.html#gae537f0e90beb970397cd7bb9250984e2">shark::inputDimension()</a>.</p>
+
+</div>
+</div>
 <a id="gae537f0e90beb970397cd7bb9250984e2" name="gae537f0e90beb970397cd7bb9250984e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae537f0e90beb970397cd7bb9250984e2">&#9670;&#160;</a></span>inputDimension()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#gae537f0e90beb970397cd7bb9250984e2">&#9670;&#160;</a></span>inputDimension() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6050,7 +6141,7 @@ template&lt;class <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3270
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, and <a class="el" href="group__shark__globals.html#ga6f74e657c7e0c8a32b2456fb328bd653">shark::LabeledData&lt; InputT, LabelT &gt;::inputs()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="classshark_1_1_project_budget_maintenance_strategy_3_01_real_vector_01_4.html#a716c4803d4a64e0e30ef4d57032ed5d9">shark::ProjectBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_r_f_classifier.html#a290cb9386878b0264faf15dae5dc2068">shark::RFClassifier&lt; LabelType &gt;::computeFeatureImportances()</a>, <a class="el" href="namespaceshark.html#a148ab5a691f06b225ccfc21d9e039cef">shark::inputDimension()</a>, <a class="el" href="classshark_1_1_jaakkola_heuristic.html#a7ca97a37b35ece86f17396682b77e8ec">shark::JaakkolaHeuristic::JaakkolaHeuristic()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="logistic__regression___l_b_f_g_s_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="classshark_1_1_squared_hinge_linear_c_svm_trainer.html#a9c7df5c98dee200e4214abac74ad3bab">shark::SquaredHingeLinearCSvmTrainer&lt; InputType &gt;::train()</a>, <a class="el" href="classshark_1_1_lasso_regression.html#acf451db20a82eef8547629c28db9db4e">shark::LassoRegression&lt; InputVectorType &gt;::train()</a>, <a class="el" href="classshark_1_1_r_f_trainer_3_01unsigned_01int_01_4.html#a4c1081a998508d12064ec653130f1a8f">shark::RFTrainer&lt; unsigned int &gt;::train()</a>, and <a class="el" href="classshark_1_1_r_f_trainer_3_01_real_vector_01_4.html#a4975033b328b481f5bbfa2fea88ddcd9">shark::RFTrainer&lt; RealVector &gt;::train()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_project_budget_maintenance_strategy_3_01_real_vector_01_4.html#a716c4803d4a64e0e30ef4d57032ed5d9">shark::ProjectBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_r_f_classifier.html#a290cb9386878b0264faf15dae5dc2068">shark::RFClassifier&lt; LabelType &gt;::computeFeatureImportances()</a>, <a class="el" href="group__shark__globals.html#ga148ab5a691f06b225ccfc21d9e039cef">shark::inputDimension()</a>, <a class="el" href="classshark_1_1_jaakkola_heuristic.html#a7ca97a37b35ece86f17396682b77e8ec">shark::JaakkolaHeuristic::JaakkolaHeuristic()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="logistic__regression___l_b_f_g_s_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="classshark_1_1_squared_hinge_linear_c_svm_trainer.html#a9c7df5c98dee200e4214abac74ad3bab">shark::SquaredHingeLinearCSvmTrainer&lt; InputType &gt;::train()</a>, <a class="el" href="classshark_1_1_lasso_regression.html#acf451db20a82eef8547629c28db9db4e">shark::LassoRegression&lt; InputVectorType &gt;::train()</a>, <a class="el" href="classshark_1_1_r_f_trainer_3_01unsigned_01int_01_4.html#a4c1081a998508d12064ec653130f1a8f">shark::RFTrainer&lt; unsigned int &gt;::train()</a>, and <a class="el" href="classshark_1_1_r_f_trainer_3_01_real_vector_01_4.html#a4975033b328b481f5bbfa2fea88ddcd9">shark::RFTrainer&lt; RealVector &gt;::train()</a>.</p>
 
 </div>
 </div>
@@ -6256,8 +6347,34 @@ template&lt;class InputT , class LabelT &gt; </div>
 
 </div>
 </div>
+<a id="ga248204f65ae4b8c30604f5a609cb7bf6" name="ga248204f65ae4b8c30604f5a609cb7bf6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga248204f65ae4b8c30604f5a609cb7bf6">&#9670;&#160;</a></span>labelDimension() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t shark::labelDimension </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the label dimensionality of the labeled dataset represented by the view. </p>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00344">344</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="classshark_1_1_data_view.html#a20c3d8aa10aa6056277df2f02261033b">shark::DataView&lt; DatasetType &gt;::dataset()</a>, and <a class="el" href="group__shark__globals.html#ga3006553139477e356ee75cd85c190d7c">shark::labelDimension()</a>.</p>
+
+</div>
+</div>
 <a id="ga3006553139477e356ee75cd85c190d7c" name="ga3006553139477e356ee75cd85c190d7c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga3006553139477e356ee75cd85c190d7c">&#9670;&#160;</a></span>labelDimension()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3006553139477e356ee75cd85c190d7c">&#9670;&#160;</a></span>labelDimension() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6280,7 +6397,7 @@ template&lt;class <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3270
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, and <a class="el" href="group__shark__globals.html#ga6328a5aa2570c01a5ac5f25076071663">shark::LabeledData&lt; InputT, LabelT &gt;::labels()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="namespaceshark.html#a248204f65ae4b8c30604f5a609cb7bf6">shark::labelDimension()</a>, <a class="el" href="regression_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="classshark_1_1_regularization_network_trainer.html#a0c203b749f48be1b99e679ea666ff0c0">shark::RegularizationNetworkTrainer&lt; InputType &gt;::train()</a>, and <a class="el" href="classshark_1_1_epsilon_svm_trainer.html#a51d1821c3f6cedeff400e54f6e2b3b5d">shark::EpsilonSvmTrainer&lt; InputType, CacheType &gt;::train()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga248204f65ae4b8c30604f5a609cb7bf6">shark::labelDimension()</a>, <a class="el" href="regression_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="classshark_1_1_regularization_network_trainer.html#a0c203b749f48be1b99e679ea666ff0c0">shark::RegularizationNetworkTrainer&lt; InputType &gt;::train()</a>, and <a class="el" href="classshark_1_1_epsilon_svm_trainer.html#a51d1821c3f6cedeff400e54f6e2b3b5d">shark::EpsilonSvmTrainer&lt; InputType, CacheType &gt;::train()</a>.</p>
 
 </div>
 </div>
@@ -6773,7 +6890,7 @@ template&lt;class InputT , class LabelT &gt; </div>
 </div>
 </div>
 <a id="ga1fee3b5830ae11a78109e8c0265c6569" name="ga1fee3b5830ae11a78109e8c0265c6569"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga1fee3b5830ae11a78109e8c0265c6569">&#9670;&#160;</a></span>numberOfClasses() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1fee3b5830ae11a78109e8c0265c6569">&#9670;&#160;</a></span>numberOfClasses() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -6802,12 +6919,37 @@ template&lt;class InputT , class LabelT &gt; </div>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga73034ee5639176b0d45e1059859d0f0a">shark::Data&lt; Type &gt;::batch()</a>, and <a class="el" href="group__shark__globals.html#gabd82edf467b9b82f4b0a1e70fd695311">shark::Data&lt; Type &gt;::numberOfBatches()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga89490b7ed6f9285ab91cae348c7437b8">shark::classSizes()</a>, <a class="el" href="namespaceshark.html#ac661a3b9018ce302c0af5c45450adb40">shark::classWeight()</a>, <a class="el" href="group__shark__globals.html#gabb5bec2fca9d1eaa2ea58c75d36d1195">shark::createCVSameSizeBalanced()</a>, <a class="el" href="group__shark__globals.html#ga682120386f2b7999fcb3853cd2948bf5">shark::exportSparseData()</a>, <a class="el" href="classshark_1_1_jaakkola_heuristic.html#a7ca97a37b35ece86f17396682b77e8ec">shark::JaakkolaHeuristic::JaakkolaHeuristic()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="logistic__regression___l_b_f_g_s_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="namespaceshark.html#a884afb6868800ff6f15e9a3dc7f1c73b">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#gae0a473ce60b9c72bdfad94bef57c1b47">shark::numberOfClasses()</a>, <a class="el" href="namespaceshark.html#ac00756ac00a20cb161c69cbb30bb0ee3">shark::numberOfClasses()</a>, <a class="el" href="namespaceshark.html#a8c16c27de8c5e84f4aa96b817a47834b">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="classshark_1_1_kernel_budgeted_s_g_d_trainer.html#afc6eff8c84cf39de20aaec579f1716b0">shark::KernelBudgetedSGDTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_kernel_s_g_d_trainer.html#a31c7513f29d280ad3165d18100962391">shark::KernelSGDTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_c_svm_trainer.html#a9e801518bfba9d02e0749181a5deb0fc">shark::CSvmTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_c_svm_trainer.html#a5444acc9ade8ab1c3550bd2efafa4e59">shark::CSvmTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_linear_c_svm_trainer.html#abf7128243c28edc04a01f157593ece98">shark::LinearCSvmTrainer&lt; InputType &gt;::train()</a>, and <a class="el" href="classshark_1_1_missing_feature_svm_trainer.html#a7499797486bf5f13ccf1a29572923cc4">shark::MissingFeatureSvmTrainer&lt; InputType, CacheType &gt;::train()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga89490b7ed6f9285ab91cae348c7437b8">shark::classSizes()</a>, <a class="el" href="namespaceshark.html#ac661a3b9018ce302c0af5c45450adb40">shark::classWeight()</a>, <a class="el" href="group__shark__globals.html#gabb5bec2fca9d1eaa2ea58c75d36d1195">shark::createCVSameSizeBalanced()</a>, <a class="el" href="group__shark__globals.html#ga682120386f2b7999fcb3853cd2948bf5">shark::exportSparseData()</a>, <a class="el" href="classshark_1_1_jaakkola_heuristic.html#a7ca97a37b35ece86f17396682b77e8ec">shark::JaakkolaHeuristic::JaakkolaHeuristic()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="logistic__regression___l_b_f_g_s_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga884afb6868800ff6f15e9a3dc7f1c73b">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#gae0a473ce60b9c72bdfad94bef57c1b47">shark::numberOfClasses()</a>, <a class="el" href="namespaceshark.html#ac00756ac00a20cb161c69cbb30bb0ee3">shark::numberOfClasses()</a>, <a class="el" href="namespaceshark.html#a8c16c27de8c5e84f4aa96b817a47834b">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="classshark_1_1_kernel_budgeted_s_g_d_trainer.html#afc6eff8c84cf39de20aaec579f1716b0">shark::KernelBudgetedSGDTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_kernel_s_g_d_trainer.html#a31c7513f29d280ad3165d18100962391">shark::KernelSGDTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_c_svm_trainer.html#a9e801518bfba9d02e0749181a5deb0fc">shark::CSvmTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_c_svm_trainer.html#a5444acc9ade8ab1c3550bd2efafa4e59">shark::CSvmTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_linear_c_svm_trainer.html#abf7128243c28edc04a01f157593ece98">shark::LinearCSvmTrainer&lt; InputType &gt;::train()</a>, and <a class="el" href="classshark_1_1_missing_feature_svm_trainer.html#a7499797486bf5f13ccf1a29572923cc4">shark::MissingFeatureSvmTrainer&lt; InputType, CacheType &gt;::train()</a>.</p>
+
+</div>
+</div>
+<a id="ga884afb6868800ff6f15e9a3dc7f1c73b" name="ga884afb6868800ff6f15e9a3dc7f1c73b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga884afb6868800ff6f15e9a3dc7f1c73b">&#9670;&#160;</a></span>numberOfClasses() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">std::size_t shark::numberOfClasses </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Return the number of classes (size of the label vector) of a classification dataset with RealVector label encoding. </p>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00333">333</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="classshark_1_1_data_view.html#a20c3d8aa10aa6056277df2f02261033b">shark::DataView&lt; DatasetType &gt;::dataset()</a>, and <a class="el" href="group__shark__globals.html#ga1fee3b5830ae11a78109e8c0265c6569">shark::numberOfClasses()</a>.</p>
 
 </div>
 </div>
 <a id="gae0a473ce60b9c72bdfad94bef57c1b47" name="gae0a473ce60b9c72bdfad94bef57c1b47"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae0a473ce60b9c72bdfad94bef57c1b47">&#9670;&#160;</a></span>numberOfClasses() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#gae0a473ce60b9c72bdfad94bef57c1b47">&#9670;&#160;</a></span>numberOfClasses() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -7297,6 +7439,94 @@ template&lt;class MatrixT &gt; </div>
 <p class="definition">Definition at line <a class="el" href="rotations_8h_source.html#l00198">198</a> of file <a class="el" href="rotations_8h_source.html">rotations.h</a>.</p>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#gaca87daf2818038a5ad7f7b89f0d60d3b">shark::blas::randomRotationMatrix()</a>.</p>
+
+</div>
+</div>
+<a id="ga43b37371406e040f057680d5e7182341" name="ga43b37371406e040f057680d5e7182341"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga43b37371406e040f057680d5e7182341">&#9670;&#160;</a></span>randomSubBatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;::batch_type shark::randomSubBatch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a random batch of a given size. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">view</td><td>the view from which the batch is to be created </td></tr>
+    <tr><td class="paramname">size</td><td>the size of the batch </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00291">291</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="namespaceshark.html#a3acb5af6cfb96640aaf21d3e8be58f80">shark::partial_shuffle()</a>, <a class="el" href="classshark_1_1_data_view.html#a71ba14d4f067dc437d6683dac9982f77">shark::DataView&lt; DatasetType &gt;::size()</a>, and <a class="el" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a">shark::subBatch()</a>.</p>
+
+</div>
+</div>
+<a id="ga6d5f76f9a5891a8675c3ee297d57ad48" name="ga6d5f76f9a5891a8675c3ee297d57ad48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6d5f76f9a5891a8675c3ee297d57ad48">&#9670;&#160;</a></span>randomSubset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; shark::randomSubset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>size</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>creates a random subset of a <a class="el" href="classshark_1_1_data_view.html" title="Constant time Element-Lookup for Datasets.">DataView</a> with given size </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">view</td><td>the view for which the subset is to be created </td></tr>
+    <tr><td class="paramname">size</td><td>the size of the subset </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00263">263</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="namespaceshark.html#a3acb5af6cfb96640aaf21d3e8be58f80">shark::partial_shuffle()</a>, <a class="el" href="classshark_1_1_data_view.html#a71ba14d4f067dc437d6683dac9982f77">shark::DataView&lt; DatasetType &gt;::size()</a>, and <a class="el" href="group__shark__globals.html#ga420a47af92d8da0f5e95a7d158521db9">shark::subset()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_subsets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>.</p>
 
 </div>
 </div>
@@ -8261,6 +8491,141 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a id="ga229ee860771047d3994953fdda9f5a6a" name="ga229ee860771047d3994953fdda9f5a6a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga229ee860771047d3994953fdda9f5a6a">&#9670;&#160;</a></span>subBatch()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType , class IndexRange &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt;::batch_type shark::subBatch </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IndexRange const &amp;&#160;</td>
+          <td class="paramname"><em>indizes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a batch given a set of indices. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">view</td><td>the view from which the batch is to be created </td></tr>
+    <tr><td class="paramname">indizes</td><td>the set of indizes defining the batch </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00275">275</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="namespaceshark.html#a5478d144c4c997faf5c246dd8e2f85b8">shark::createBatch()</a>, and <a class="el" href="group__shark__globals.html#ga420a47af92d8da0f5e95a7d158521db9">shark::subset()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_r_f_classifier.html#a290cb9386878b0264faf15dae5dc2068">shark::RFClassifier&lt; LabelType &gt;::computeFeatureImportances()</a>, <a class="el" href="group__shark__globals.html#ga44f464d4c5fd227a608980516f3aeaf7">shark::createCVFullyIndexed()</a>, <a class="el" href="group__shark__globals.html#gaab4c1c3153591bc8ae8130df6a84c65c">shark::createCVIndexed()</a>, and <a class="el" href="group__shark__globals.html#ga43b37371406e040f057680d5e7182341">shark::randomSubBatch()</a>.</p>
+
+</div>
+</div>
+<a id="ga420a47af92d8da0f5e95a7d158521db9" name="ga420a47af92d8da0f5e95a7d158521db9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga420a47af92d8da0f5e95a7d158521db9">&#9670;&#160;</a></span>subset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType , class IndexRange &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; shark::subset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">IndexRange const &amp;&#160;</td>
+          <td class="paramname"><em>indizes</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a subset of a <a class="el" href="classshark_1_1_data_view.html" title="Constant time Element-Lookup for Datasets.">DataView</a> with elements indexed by indices. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">view</td><td>the view for which the subset is to be created </td></tr>
+    <tr><td class="paramname">indizes</td><td>the index of the elements to be stored in the view <br  />
+ </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00253">253</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_loo_error.html#ac21fc9ca54e8f324cc6136bc5cebb121">shark::LooError&lt; ModelTypeT, LabelType &gt;::eval()</a>, <a class="el" href="group__shark__globals.html#ga6bc854de0b085583688f1d089fa608b6">shark::Data&lt; Type &gt;::indexedSubset()</a>, <a class="el" href="group__shark__globals.html#gaa2d2689f5da9dbd4eac362d3c03ebcaf">shark::Data&lt; Type &gt;::indexedSubset()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#ga6d5f76f9a5891a8675c3ee297d57ad48">shark::randomSubset()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a503aaebca6ce5e7d8a6f79e5e039bd9f">shark::KernelExpansion&lt; InputType &gt;::sparsify()</a>, and <a class="el" href="group__shark__globals.html#ga229ee860771047d3994953fdda9f5a6a">shark::subBatch()</a>.</p>
+
+</div>
+</div>
+<a id="ga3c0660922e34389d005bb81e9bde0c18" name="ga3c0660922e34389d005bb81e9bde0c18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3c0660922e34389d005bb81e9bde0c18">&#9670;&#160;</a></span>toDataset()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; T &gt;::dataset_type shark::toDataset </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; T &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>view</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>batchSize</em> = <code><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt;T&gt;::dataset_type::DefaultBatchSize</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a new dataset from a View. </p>
+<p>When the elements of a View needs to be processed repeatedly it is often better to use the packed format of the Dataset again, since then the faster batch processing can be used</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">view</td><td>the view from which to create the new dataset </td></tr>
+    <tr><td class="paramname">batchSize</td><td>the size of the batches in the dataset </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00320">320</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">References <a class="el" href="namespaceshark.html#af2ab10364feb8a631e0866dcf2f1a4ad">shark::batchSize()</a>, <a class="el" href="classshark_1_1_data_view.html#a3e7c59021eff4745396ed9951c2f05ca">shark::DataView&lt; DatasetType &gt;::begin()</a>, <a class="el" href="classshark_1_1_data_view.html#a238dbacc7eded17835f90c6edccdcb95">shark::DataView&lt; DatasetType &gt;::end()</a>, and <a class="el" href="classshark_1_1_data_view.html#a71ba14d4f067dc437d6683dac9982f77">shark::DataView&lt; DatasetType &gt;::size()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_loo_error.html#ac21fc9ca54e8f324cc6136bc5cebb121">shark::LooError&lt; ModelTypeT, LabelType &gt;::eval()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, and <a class="el" href="classshark_1_1_kernel_expansion.html#a503aaebca6ce5e7d8a6f79e5e039bd9f">shark::KernelExpansion&lt; InputType &gt;::sparsify()</a>.</p>
+
+</div>
+</div>
 <a id="gafd3b31345c566b4bbaf5f5c6398eb23c" name="gafd3b31345c566b4bbaf5f5c6398eb23c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gafd3b31345c566b4bbaf5f5c6398eb23c">&#9670;&#160;</a></span>toGPU() <span class="overload">[1/3]</span></h2>
 
@@ -8337,6 +8702,39 @@ template&lt;class Type , class I , class L &gt; </div>
 <p class="definition">Definition at line <a class="el" href="_device_support_8h_source.html#l00079">79</a> of file <a class="el" href="_device_support_8h_source.html">DeviceSupport.h</a>.</p>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga6f74e657c7e0c8a32b2456fb328bd653">shark::LabeledData&lt; InputT, LabelT &gt;::inputs()</a>, and <a class="el" href="group__shark__globals.html#ga6328a5aa2570c01a5ac5f25076071663">shark::LabeledData&lt; InputT, LabelT &gt;::labels()</a>.</p>
+
+</div>
+</div>
+<a id="ga4adbf0bc9537c1829f1e1cd281de560b" name="ga4adbf0bc9537c1829f1e1cd281de560b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4adbf0bc9537c1829f1e1cd281de560b">&#9670;&#160;</a></span>toView()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class DatasetType &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classshark_1_1_data_view.html">DataView</a>&lt; DatasetType &gt; shark::toView </td>
+          <td>(</td>
+          <td class="paramtype">DatasetType &amp;&#160;</td>
+          <td class="paramname"><em>set</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates a View from a dataset. </p>
+<p>This is just a helper function to omit the actual type of the view</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">set</td><td>the dataset from which to create the view </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_data_view_8h_source.html#l00307">307</a> of file <a class="el" href="_data_view_8h_source.html">DataView.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_kernel_expansion.html#a503aaebca6ce5e7d8a6f79e5e039bd9f">shark::KernelExpansion&lt; InputType &gt;::sparsify()</a>.</p>
 
 </div>
 </div>
