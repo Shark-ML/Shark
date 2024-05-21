@@ -69,9 +69,6 @@ add_custom_target( doc ALL
 		${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/ini_custom_themes/
 		${CMAKE_CURRENT_BINARY_DIR}/sphinx_pages/ini_custom_themes/
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/rest_sources/about_shark/images/
-		${CMAKE_CURRENT_BINARY_DIR}/sphinx_pages/rest_sources/about_shark/images/
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_CURRENT_SOURCE_DIR}/sphinx_pages/rest_sources/tutorials/images/
 		${CMAKE_CURRENT_BINARY_DIR}/sphinx_pages/rest_sources/tutorials/images
 	COMMAND ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/Shark.dox"
