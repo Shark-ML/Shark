@@ -69,22 +69,6 @@ examples/Benchmark/shark/build/
 /Test/EpsilonSteadyStateMOCMA
 /Test/EpsilonMOCMA
 /Test/AGE
-/Test/CMSA_Rosenbrock.html
-/Test/CMSA_Ellipsoid.html
-/Test/CMA_Rosenbrock.html
-/Test/CMA_Ellipsoid.html
-/Test/CMA_Discus.html
-/Test/CMA_Cigar.html
-/Test/OnePlusOneES_Rosenbrock.html
-/Test/OnePlusOneES_Ellipsoid.html
-/Test/OnePlusOneES_Discus.html
-/Test/OnePlusOneES_Cigar.html
-/Test/ElitistCMA_Rosenbrock.html
-/Test/ElitistCMA_Ellipsoid.html
-/Test/ElitistCMA_Discus.html
-/Test/ElitistCMA_Cigar.html
-/Test/CMSA_Discus.html
-/Test/CMSA_Cigar.html
 /Test/bin
 /Test/Models_Softmax
 /Test/Models_SigmoidModel
@@ -130,21 +114,6 @@ examples/Benchmark/shark/build/
 /Test/test_data/curve.dat
 /Test/test_data/cold.txt
 /Test/test_data/check.csv
-/Test/test_data/OnePlusOneES_Ellipsoid.html
-/Test/test_data/OnePlusOneES_Discus.html
-/Test/test_data/OnePlusOneES_Cigar.html
-/Test/test_data/ElitistCMA_Rosenbrock.html
-/Test/test_data/ElitistCMA_Ellipsoid.html
-/Test/test_data/ElitistCMA_Discus.html
-/Test/test_data/ElitistCMA_Cigar.html
-/Test/test_data/CMSA_Rosenbrock.html
-/Test/test_data/CMSA_Ellipsoid.html
-/Test/test_data/CMSA_Discus.html
-/Test/test_data/CMSA_Cigar.html
-/Test/test_data/CMA_Rosenbrock.html
-/Test/test_data/CMA_Ellipsoid.html
-/Test/test_data/CMA_Discus.html
-/Test/test_data/CMA_Cigar.html
 /Test/test_data/thyroid.csv
 /Test/test_data/thyroid.shark-data
 /Test/test_data/new_shark_format
@@ -189,29 +158,26 @@ examples/Benchmark/shark/build/
 /contrib/mathjax/.git
 
 # /doc/
-/doc/Shark.dox
-/doc/CMakeCache.txt
-/doc/latex
-/doc/Makefile
-/doc/CTestTestfile.cmake
-/doc/CMakeDoxygenDefaults.cmake
-/doc/cmake_install.cmake
-/doc/CMakeFiles
-/doc/index.html
-/doc/EALib
-/doc/Array
-/doc/ReClaM
-/doc/Mixture
-/doc/Fuzzy
-/doc/random
-/doc/LinAlg
-/doc/MOO-EALib
-/doc/FileUtil
-/doc/html
-/doc/sphinx_pages/doxylink/__pycache__/
+/docs/Shark.dox
+/docs/CMakeCache.txt
+/docs/latex
+/docs/Makefile
+/docs/CTestTestfile.cmake
+/docs/CMakeDoxygenDefaults.cmake
+/docs/cmake_install.cmake
+/docs/CMakeFiles
+/docs/EALib
+/docs/Array
+/docs/ReClaM
+/docs/Mixture
+/docs/Fuzzy
+/docs/random
+/docs/LinAlg
+/docs/MOO-EALib
+/docs/FileUtil
+/docs/sphinx_pages/doxylink/__pycache__/
 
 # /doc/doxygen_pages/
-/doc/doxygen_pages/html
 
 # /doc/doxygen_pages/tag_files/
 /doc/doxygen_pages/tag_files/all.tag
