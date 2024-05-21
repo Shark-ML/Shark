@@ -1,0 +1,187 @@
+
+Importing Data
+==============
+
+Shark provides a number of containers for data storage.
+Read the basic :ref:`data tutorials <label_for_data_tutorials>`
+first if you are not familiar with these containers. This tutorial
+deals with how to fill the containers with actual data.
+
+For the examples in this tutorial we need the following includes: ::
+
+
+	#include <shark/Data/Dataset.h>
+	#include <shark/Data/DataDistribution.h>
+	#include <shark/Data/Csv.h>
+	#include <shark/Data/SparseData.h>
+	#include <shark/Data/Download.h>
+	#include <iostream>
+	using namespace shark;
+	
+
+For later use we declare a ``Data`` object holding points and a
+``LabeledData`` object (aka ``ClassificationDataset``) holding
+points augmented with unsigned integer labels. ::
+
+
+		Data<RealVector> points;
+		ClassificationDataset dataset;
+	
+
+
+File Formats
+------------
+
+Shark supports a number of standard file formats for data sets, most
+prominently comma(character)-separated-values (CSV) for dense data and
+the LIBSVM format (http://www.csie.ntu.edu.tw/~cjlin/libsvm/) for sparse
+data. Furthermore, images in PGM format can be read.
+
+Shark does not come with its own data set format any more in order to
+avoid further growth of the jungle of data set formats. However, data
+can be serialized, which practically amounts to a data file format.
+
+Most data formats in common use are restricted to (sparse)
+vectorial input data. Thus, when dealing with non-vectorial data
+the user needs to write specialized methods for loading/storing
+the data. It is understood that shark cannot implement any
+possible data format you can dream of. However, if the input
+type is serializable with boost::serialization, then the
+:doxy:`Data` container can be serialized.
+
+
+Generate from Artificial Distributions
+++++++++++++++++++++++++++++++++++++++
+
+Data sets can be generated using artificial distributions.
+Currently, shark comes with a few distributions for testing
+purposes, but if you need automatically generated (pseudo
+random) data then you probably want to create your own
+distribution class. To create your own data distribution,
+you have to derive a class from the :doxy:`DataDistribution`
+or :doxy:`LabeledDataDistribution` interfaces and overload
+the ``draw`` method, which allows shark to draw a examples
+from your probability distribution. Also you can choose which
+types your inputs and labels should have.
+
+As an example, let us generate inputs from the real line with
+labels 0 and 1 with equal probability, with uniform and
+overlapping class-conditional distributions: ::
+
+
+	class YourDistribution : public LabeledDataDistribution<RealVector, unsigned int>
+	{
+	public:
+		void draw(RealVector& input, unsigned int& label) const
+		{
+			input.resize(2);
+			label = random::coinToss(random::globalRng);
+			input(0) = random::uni(random::globalRng, -1,1);
+			input(1) = random::uni(random::globalRng, -1,1) + label;
+		}
+	};
+	
+
+Once the distribution is defined it is easy to generate a data set: ::
+
+
+		YourDistribution distribution;
+		unsigned int numberOfSamples = 1000;
+		dataset = distribution.generateDataset(numberOfSamples);
+	
+
+
+Comma-Separated Values (CSV)
+++++++++++++++++++++++++++++++++++++++++
+
+Shark supports the simplistic but widespread CSV (comma/character
+separated value) data format; however, support of this format is
+currently quite limited. Not all class label types are supported
+and the data must be dense.
+
+Since the separator in the CSV format is left open it needs to be
+specified. A comma (",") is a standard choice, but spaces or tabulators
+are also common. A comma is used as a default.
+
+Now you can call one of the import routines like this::
+
+
+		importCSV(points, "inputs.csv", ',', '#');
+		importCSV(dataset, "data.csv", LAST_COLUMN, ',', '#');
+	
+
+The last two arguments define the separator (here a comma) and the
+character introducing a comment line. Here they are set to their
+default values, which is the comma and the number sign. Exporting
+data is needed less frequently. It works similarly, see
+:doxy:`exportCSV`.
+
+The third argument of the second call is one of the constants
+``FIRST_COLUMN`` or ``LAST_COLUMN``. It indicates that the first
+(or last) number of each line acts as a label - and hence is expected
+to be an integer. If you want to import regression data then you have
+to load data and labels from different csv files and create a
+LabeledData object from the two containers::
+
+
+		Data<RealVector> inputs;
+		Data<RealVector> labels;
+		importCSV(inputs, "inputs.csv");
+		importCSV(labels, "labels.csv");
+		RegressionDataset dataset(inputs, labels);
+	
+
+
+Sparse Format (e.g., LibSVM)
+++++++++++++++++++++++++++++++++++++++++
+
+Shark can import sparse vectorial data files. This data format is in
+widespread use for SVM software packages such as libSVM. It represents
+sparse vectorial data augmented with integer class labels or regression
+labels in an ASCII-based format.
+
+Similar to the CSV import functions we can call ::
+
+
+		importSparseData(dataset, "data.libsvm");
+	
+
+Our ``data`` object defined above represents inputs as type ``RealVector``.
+Hence the above call imports the data into a dense ``RealVector`` container.
+This is only suitable if we know beforehand that the data is not (very) sparse.
+For sparse and often high-dimensional data the above approach is not
+only inefficient, it can also easily result in a huge waste of memory,
+extensive swapping to take place, and even memory allocation failures.
+Instead libSVM data should most often be loaded into sparse vector containers ::
+
+
+		LabeledData<CompressedRealVector, unsigned int> sparse_dataset;
+		importSparseData(sparse_dataset, "data.libsvm");
+	
+
+For sparse data the actual data dimension can be deduced only if the
+highest feature is non-zero for at least one instance. In a setting like
+cross-validation or data sub-sampling this is not always the case.
+Therefore the data dimension can be provided explicitly to
+:doxy:`importSparseData` as a third argument. The optional fourth argument
+specifies the default batch size of the container. It should usually be
+left at its default.
+
+
+Downloading Data from Online Resources
+++++++++++++++++++++++++++++++++++++++++
+
+Shark supports downloading data from websites. This is of interest for
+quick experimentation, as well as for benchmark studies.
+
+Shark supports HTTP downloads of dense (CSV) and sparse (libSVM) data.
+Simply provide the URL to the data file to populate a LabeledData object:
+
+
+		// download dense data
+		downloadCsvData(dataset, "http://www.shark-ml.org/data/quickstart-train.csv", LAST_COLUMN, ' ');
+	
+		// download sparse data
+		downloadSparseData(dataset, "http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/svmguide1");
+	
+

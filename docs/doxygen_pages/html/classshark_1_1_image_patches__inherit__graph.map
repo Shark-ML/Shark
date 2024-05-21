@@ -1,0 +1,5 @@
+<map id="shark::ImagePatches" name="shark::ImagePatches">
+<area shape="rect" id="Node000001" title="Given a set of images, draws a set of image patches of a given size." alt="" coords="10,94,156,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_data_distribution.html" title=" " alt="" coords="5,5,161,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,62,86,93,80,93,80,62"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="shark::NormalizeComponentsZCA" name="shark::NormalizeComponentsZCA">
+<area shape="rect" id="Node000001" title="Train a linear model to whiten the data." alt="" coords="17,94,238,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_unsupervised_trainer.html" title=" " alt="" coords="5,5,250,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="130,62,130,93,125,93,125,62"/>
+</map>

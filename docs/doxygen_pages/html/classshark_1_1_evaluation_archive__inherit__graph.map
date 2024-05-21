@@ -1,0 +1,5 @@
+<map id="shark::EvaluationArchive&lt; PointType, ResultT &gt;" name="shark::EvaluationArchive&lt; PointType, ResultT &gt;">
+<area shape="rect" id="Node000001" title="Objective function wrapper storing all function evaluations." alt="" coords="26,94,192,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_objective_function.html" title="Super class of all objective functions for optimization and learning." alt="" coords="5,5,213,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,62,112,94,106,94,106,62"/>
+</map>

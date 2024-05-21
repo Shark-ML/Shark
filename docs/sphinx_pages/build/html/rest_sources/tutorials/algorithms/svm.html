@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Support Vector Machines: First Steps &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Support Vector Machines: Model Selection Using Cross-Validation and Grid-Search" href="svmModelSelection.html" />
+    <link rel="prev" title="Random Forest" href="rf.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="support-vector-machines-first-steps">
+<h1>Support Vector Machines: First Steps<a class="headerlink" href="#support-vector-machines-first-steps" title="Link to this heading">¶</a></h1>
+<p>Kernel-based learning algorithms such as support vector machine (SVM,
+<a class="reference internal" href="#cortesvapnik1995" id="id1"><span>[CortesVapnik1995]</span></a>) classifiers mark the state-of-the art in pattern
+recognition. They employ (Mercer) kernel functions to implicitly
+define a metric feature space for processing the input data, that is,
+the kernel defines the similarity between observations.  Kernel
+methods are well understood theoretically and give excellent results
+in practice. This tutorial explains how to train a standard
+C-SVM.</p>
+<section id="theoretical-background">
+<h2>Theoretical background<a class="headerlink" href="#theoretical-background" title="Link to this heading">¶</a></h2>
+<p>The general supervised learning problem can be stated as follows.
+Given sample data <span class="math notranslate nohighlight">\(S=\{(x_i,y_i)\,|\,1 \leq i \leq \ell\}\)</span> drawn from an
+unknown distribution <span class="math notranslate nohighlight">\(p\)</span> over <span class="math notranslate nohighlight">\(X \times Y\)</span>, the goal of binary
+classification is to infer a hypothesis <span class="math notranslate nohighlight">\(h:X \to Y\)</span> that minimizes the
+expected risk</p>
+<div class="math notranslate nohighlight">
+\[R_p(h)= \int\limits_{X \times Y} L_{0-1}(y,h(x)) \, \text{d}
+p(x,y) ,\]</div>
+<p>where <span class="math notranslate nohighlight">\(L_{0-1}(y,z)\)</span> is 0
+if <span class="math notranslate nohighlight">\(y=z\)</span> and 1 otherwise.</p>
+<p>Support vector machines (SVMs, <a class="reference internal" href="#cortesvapnik1995" id="id2"><span>[CortesVapnik1995]</span></a>) transfer the input
+data to a feature space and perform linear classification in that space.
+For a positive semi-definite kernel function <span class="math notranslate nohighlight">\(k:X \times X \to\mathbb{R}\)</span>, consider the feature space
+<span class="math notranslate nohighlight">\(\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}\)</span> and
+function class <span class="math notranslate nohighlight">\(\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}\)</span>. The decision boundary induced by the sign of a
+function <span class="math notranslate nohighlight">\(f \in \mathcal H_k^b\)</span> is an affine hyperplane in <span class="math notranslate nohighlight">\(\mathcal H_k\)</span>.
+1-Norm Soft Margin C-SVMs find a solution to</p>
+<div class="math notranslate nohighlight">
+\[\underset{f \in\mathcal H_k^b}{\text{minimize}}  \frac{1}{2} \|f\|_2^2 + C \sum_{i=1}^\ell L_{\text{hinge}}(y_i, f(x_i))\]</div>
+<p>with loss function
+<span class="math notranslate nohighlight">\(L_{\text{hinge}}(y,f(x))=\max\{0, 1-(2y-1)f(x)\}\)</span> for
+<span class="math notranslate nohighlight">\(Y=\{0,1\}\)</span>.
+The parameter <span class="math notranslate nohighlight">\(C &gt;= 0\)</span>
+controls the trade-off between reducing the empirical loss
+<span class="math notranslate nohighlight">\(L_{\text{hinge}}\)</span> and the complexity of the hypothesis <span class="math notranslate nohighlight">\(\|.\|_2\)</span>
+measured by its norm (neglecting the bias parameter <span class="math notranslate nohighlight">\(b\)</span>).</p>
+<p>Here we have adopted the Shark library convention of choosing
+<span class="math notranslate nohighlight">\(Y=\{0,1\}\)</span> instead of <span class="math notranslate nohighlight">\(Y=\{-1,1\}\)</span>. The latter is the
+common choice in the SVM literature. This explains the <span class="math notranslate nohighlight">\(2y-1\)</span>
+instead of a simple <span class="math notranslate nohighlight">\(y\)</span> in the hinge loss definition.</p>
+</section>
+<section id="support-vector-machines-in-shark">
+<h2>Support Vector Machines in Shark<a class="headerlink" href="#support-vector-machines-in-shark" title="Link to this heading">¶</a></h2>
+<p>For this tutorial the following include files are needed:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/CSvmTrainer.h&gt;</span><span class="c1"> // the C-SVM trainer</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/Kernels/GaussianRbfKernel.h&gt;</span><span class="c1"> //the used kernel for the SVM</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span><span class="c1"> //used for evaluation of the classifier</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/DataDistribution.h&gt;</span><span class="c1"> //includes small toy distributions</span>
+</pre></div>
+</div>
+<section id="toy-problem">
+<h3>Toy problem<a class="headerlink" href="#toy-problem" title="Link to this heading">¶</a></h3>
+<p>In this tutorial, we consider an artificial binary benchmark classification
+problem shipped with the Shark library:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">ell</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span><span class="w">     </span><span class="c1">// number of training data point</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">tests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10000</span><span class="p">;</span><span class="w"> </span><span class="c1">// number of test data points</span>
+
+<span class="n">Chessboard</span><span class="w"> </span><span class="n">problem</span><span class="p">;</span><span class="w"> </span><span class="c1">// artificial benchmark data</span>
+<span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">training</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">generateDataset</span><span class="p">(</span><span class="n">ell</span><span class="p">);</span>
+<span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">generateDataset</span><span class="p">(</span><span class="n">tests</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="model-and-learning-algorithm">
+<h3>Model and learning algorithm<a class="headerlink" href="#model-and-learning-algorithm" title="Link to this heading">¶</a></h3>
+<p>To build an SVM, we need a <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_kernel_classifier.html">KernelClassifier</a>  and an
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_c_svm_trainer.html">CSvmTrainer</a>.</p>
+<p>To define our model, we have to choose a kernel function.  Here we
+consider the standard Gaussian/RBF kernel</p>
+<div class="math notranslate nohighlight">
+\[k(x,z) = \exp(\gamma\|x-z\|^2)\]</div>
+<p>by writing:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">gamma</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span><span class="w">         </span><span class="c1">// kernel bandwidth parameter</span>
+
+<span class="n">GaussianRbfKernel</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">kernel</span><span class="p">(</span><span class="n">gamma</span><span class="p">);</span><span class="w"> </span><span class="c1">// Gaussian kernel</span>
+</pre></div>
+</div>
+<p>All kernels such as the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_gaussian_rbf_kernel.html">GaussianRbfKernel</a> are derived from the
+base class <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_abstract_kernel_function.html">AbstractKernelFunction</a>.</p>
+<p>Our model is thus a kernel classifier, which is
+a linear classifier in feature space:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">KernelClassifier</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">kc</span><span class="p">;</span><span class="w"> </span><span class="c1">// (affine) linear function in kernel-induced feature space</span>
+</pre></div>
+</div>
+<p>A <cite>KernelClassifier</cite> can be understood as an <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_classifier.html">Classifier</a> which converts the output
+of a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_kernel_expansion.html">KernelExpansion</a> to a class label by choosing the index of the maximum output.
+The <cite>KernelExpansion</cite> specifies a model from
+<span class="math notranslate nohighlight">\(\mathcal H_k = {\text{span} \{k(x, \cdot) \,|\, x \in X\}}\)</span> or
+<span class="math notranslate nohighlight">\(\mathcal H_k^b = \{f = g + b\,|\, g \in \mathcal H_k, b\in \mathbb{R}\}\)</span>
+depending on whether a bias is used or not.</p>
+<p>Training the machine is done by:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">C</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">;</span><span class="w">          </span><span class="c1">// regularization parameter</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w">           </span><span class="c1">// use bias/offset parameter</span>
+
+<span class="n">CSvmTrainer</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Here <code class="docutils literal notranslate"><span class="pre">C</span></code> denotes the regularization parameter (the SVM uses the 1-norm
+penalty for target margin violations by default) and <cite>bias</cite> the inclusion of a bias term in the solver..
+The Shark SVM training is inspired by <a class="reference internal" href="#changlin2011" id="id3"><span>[ChangLin2011]</span></a>
+but uses unique features <a class="reference internal" href="#glasmachersigel2006" id="id4"><span>[GlasmachersIgel2006]</span></a>.</p>
+<div class="admonition-configuring-the-trainer-further admonition">
+<p class="admonition-title">Configuring the trainer further:</p>
+<p>The above lines construct a default SVM trainer with default
+settings for the underlying quadratic programming optimization
+task. In certain cases, the user may want more fine-grained
+control over the behaviour of the optimizer. For example,
+the memory cache size of the kernel matrix cache and the
+stopping criterion for the solver might be varied. Consider
+the following lines of code:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">        </span><span class="c1">//to use &quot;double&quot; as kernel matrix cache type internally instead of float:</span>
+<span class="w">        </span><span class="n">CSvmTrainer</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="n">C</span><span class="p">,</span><span class="w"> </span><span class="n">bias</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">//to keep non-support vectors after training:</span>
+<span class="w">        </span><span class="n">trainer</span><span class="p">.</span><span class="n">sparsify</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">        </span><span class="c1">//to relax or tighten the stopping criterion from 1e-3 (here, tightened to 1e-6)</span>
+<span class="w">        </span><span class="n">trainer</span><span class="p">.</span><span class="n">stoppingCondition</span><span class="p">().</span><span class="n">minAccuracy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1e-6</span><span class="p">;</span>
+<span class="w">        </span><span class="c1">//to set the cache size to 128MB for double (16**6 times sizeof(double), when double was selected as cache type above)</span>
+<span class="w">        </span><span class="c1">//or to 64MB for float (16**6 times sizeof(float), when the CSvmTrainer is declared without second template argument)</span>
+<span class="w">        </span><span class="n">trainer</span><span class="p">.</span><span class="n">setCacheSize</span><span class="p">(</span><span class="w"> </span><span class="mh">0x1000000</span><span class="w"> </span><span class="p">);</span>
+<span class="w">        </span><span class="n">trainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">kc</span><span class="p">,</span><span class="w"> </span><span class="n">training</span><span class="p">);</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Needed &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">.</span><span class="n">solutionProperties</span><span class="p">().</span><span class="n">seconds</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; seconds to reach a dual of &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">.</span><span class="n">solutionProperties</span><span class="p">().</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The first line uses one more template parameter in this alternative
+trainer declaration, requesting it to use <code class="docutils literal notranslate"><span class="pre">double</span></code> for the matrix
+cache internally (instead of the default <code class="docutils literal notranslate"><span class="pre">float</span></code>). Note that this
+is only needed in very rare, mathematically sensitive cases.
+The second line sets the trainer to <em>not</em> discard non-support
+vectors from the solution kernel expansion after training
+(they are discarded by default). The third line sets the desired
+accuracy to a lower value (i.e., more strict value, implying longer
+optimization times) than the default of 1e-3. The fourth
+line reduces the cache size (counted in numbers of stored
+variables of the matrix cache type) from 512MB to 128MB (had we
+not passed the second template argument in the first line of this
+snippet, it would be a reduction from 256MB to 64MB). The fifth
+line is again identical to the above example. The last line
+illustrates the use of the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_qp_config.html#a0ea8552b2732cbfe664b7d0706c46d80">solutionProperties()</a> method
+to access information about the optimization run after training.
+For more information on available options, see the documentation
+of <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_abstract_svm_trainer.html">AbstractSvmTrainer</a>, <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_qp_stopping_condition.html">QpStoppingCondition</a>,
+and <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_qp_solution_properties.html">QpSolutionProperties</a> (as well as potentially of
+the particular SVM solver you are using, i.e., binary, multi-class,
+one-class, etc.).</p>
+</div>
+</section>
+<section id="evaluating-the-model">
+<h3>Evaluating the model<a class="headerlink" href="#evaluating-the-model" title="Link to this heading">¶</a></h3>
+<p>After training the model, we can evaluate it.  As a performance
+measure, we consider the standard 0-1 loss <span class="math notranslate nohighlight">\(L_{0-1}(y,z)\)</span>
+which we apply to training and test data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loss</span><span class="p">;</span><span class="w"> </span><span class="c1">// 0-1 loss</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kc</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span><span class="w"> </span><span class="c1">// evaluate on training set</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">train_error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;training error:</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w">  </span><span class="n">train_error</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="n">output</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kc</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span><span class="w"> </span><span class="c1">// evaluate on test set</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">test_error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;test error:</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">test_error</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="full-example-program">
+<h2>Full example program<a class="headerlink" href="#full-example-program" title="Link to this heading">¶</a></h2>
+<p>The full example program considered in this tutorial is <a class="reference external" href="../../../../../../doxygen_pages/html/_c_svm_tutorial_8cpp.html">CSvmTutorial.cpp</a>.
+Another relevant example in the <code class="docutils literal notranslate"><span class="pre">examples</span></code> subdirectory is the SVM
+model selection (see the next tutorial on <a class="reference internal" href="svmModelSelection.html"><span class="doc">Support Vector Machines: Model Selection Using Cross-Validation and Grid-Search</span></a>);</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="changlin2011" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">ChangLin2011</a><span class="fn-bracket">]</span></span>
+<p>C.C. Chang and C.-J. Lin. LIBSVM: a library for support vector machines. ACM Transactions on Intelligent Systems and Technology, 2:27:1–27:27, 2011.</p>
+</div>
+<div class="citation" id="cortesvapnik1995" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>CortesVapnik1995<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>C. Cortes and V. Vapnik. Support-Vector
+Networks. Machine Learning, 20, 1995.</p>
+</div>
+<div class="citation" id="glasmachersigel2006" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">GlasmachersIgel2006</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="20">
+<li><p>Glasmachers and C. Igel. Maximum-Gain Working Set Selection for SVMs. Journal of Machine Learning Research 7, 1437-1466, 2006.</p></li>
+</ol>
+</div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Support Vector Machines: First Steps</a><ul>
+<li><a class="reference internal" href="#theoretical-background">Theoretical background</a></li>
+<li><a class="reference internal" href="#support-vector-machines-in-shark">Support Vector Machines in Shark</a></li>
+<li><a class="reference internal" href="#full-example-program">Full example program</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="rf.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Random Forest</a>
+  <a class="topless" href="svmModelSelection.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Support Vector Machines: Model Selection Using Cross-Validation and Grid-Search</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/svm.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

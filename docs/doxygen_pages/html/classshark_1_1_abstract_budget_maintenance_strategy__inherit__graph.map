@@ -1,0 +1,9 @@
+<map id="shark::AbstractBudgetMaintenanceStrategy&lt; InputType &gt;" name="shark::AbstractBudgetMaintenanceStrategy&lt; InputType &gt;">
+<area shape="rect" id="Node000001" title="This is the abstract interface for any budget maintenance strategy." alt="" coords="5,71,231,111"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_merge_budget_maintenance_strategy.html" title="Budget maintenance strategy that merges two vectors." alt="" coords="285,5,498,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="220,64,303,44,304,49,222,69"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_project_budget_maintenance_strategy.html" title="Budget maintenance strategy that projects a vector." alt="" coords="283,71,500,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,88,282,88,282,94,246,94"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_remove_budget_maintenance_strategy.html" title="Budget maintenance strategy that removes a vector." alt="" coords="279,136,504,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="222,113,304,133,303,138,220,118"/>
+</map>

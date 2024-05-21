@@ -1,0 +1,5 @@
+<map id="shark::benchmarks::LZ7" name="shark::benchmarks::LZ7">
+<area shape="rect" id="Node000001" title="Multi&#45;objective optimization benchmark function LZ7." alt="" coords="5,79,168,105"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_objective_function.html" title="Super class of all objective functions for optimization and learning." alt="" coords="9,5,164,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,46,89,79,84,79,84,46"/>
+</map>

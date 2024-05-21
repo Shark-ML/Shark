@@ -1,0 +1,5 @@
+<map id="shark::statistics::FractionMissing" name="shark::statistics::FractionMissing">
+<area shape="rect" id="Node000001" title="for a vector of points computes for every dimension the fraction of missing values" alt="" coords="16,94,139,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1statistics_1_1_base_statistics_object.html" title="Base class for all Statistic Objects to be used with Statistics" alt="" coords="5,5,150,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,62,80,94,75,94,75,62"/>
+</map>

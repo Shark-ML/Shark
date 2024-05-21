@@ -1,0 +1,79 @@
+<map id="shark::AbstractObjectiveFunction&lt; PointType, ResultT &gt;" name="shark::AbstractObjectiveFunction&lt; PointType, ResultT &gt;">
+<area shape="rect" id="Node000001" title="Super class of all objective functions for optimization and learning." alt="" coords="178,1223,385,1263"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_error_function.html" title="Objective function for supervised learning." alt="" coords="472,5,616,46"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="280,1207,281,978,287,813,297,633,316,454,343,288,360,216,380,152,404,98,431,57,449,42,470,32,472,37,452,47,435,61,409,101,385,153,365,217,348,289,321,454,303,634,292,813,286,978,285,1207"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_evaluation_archive.html" title="Objective function wrapper storing all function evaluations." alt="" coords="461,71,627,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="280,1207,283,988,290,833,301,664,320,495,346,340,363,271,383,211,405,161,431,123,444,111,459,102,462,106,447,115,435,126,410,164,388,213,368,273,352,341,325,496,307,664,295,833,288,989,285,1207"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_one_norm_regularizer.html" title="One&#45;norm of the input as an objective function." alt="" coords="453,136,636,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="280,1207,285,1000,293,853,305,695,324,536,350,391,367,327,385,271,407,224,431,188,451,172,454,176,435,191,411,227,390,273,372,329,355,392,329,537,310,695,298,853,290,1000,285,1207"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_two_norm_regularizer.html" title="Two&#45;norm of the input as an objective function." alt="" coords="453,201,636,242"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="280,1207,287,1011,295,873,308,725,327,577,353,441,369,381,387,329,408,285,431,252,450,236,454,241,435,255,413,288,392,331,374,383,359,442,333,578,314,725,301,874,292,1011,286,1207"/>
+<area shape="rect" id="Node000007" href="$structshark_1_1benchmarks_1_1_c_i_g_t_a_b1.html" title="Multi&#45;objective optimization benchmark function CIGTAB 1." alt="" coords="466,266,623,322"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="281,1207,291,1026,315,765,335,630,360,506,392,403,410,363,431,332,446,318,464,308,467,312,449,322,435,335,415,366,397,405,365,507,340,631,321,765,296,1026,287,1207"/>
+<area shape="rect" id="Node000008" href="$structshark_1_1benchmarks_1_1_c_i_g_t_a_b2.html" title="Multi&#45;objective optimization benchmark function CIGTAB 2." alt="" coords="466,346,623,402"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="282,1207,294,1040,320,803,340,681,364,569,395,476,412,440,431,412,446,398,464,388,466,393,449,403,435,415,417,443,400,478,370,570,345,682,325,804,299,1041,287,1207"/>
+<area shape="rect" id="Node000009" href="$structshark_1_1benchmarks_1_1_d_t_l_z1.html" title="Implements the benchmark function DTLZ1." alt="" coords="433,425,655,466"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="282,1207,295,1051,323,833,342,721,367,619,396,535,413,502,431,477,446,464,450,468,435,481,417,505,401,537,372,621,348,722,328,833,301,1051,288,1207"/>
+<area shape="rect" id="Node000010" href="$structshark_1_1benchmarks_1_1_d_t_l_z2.html" title="Implements the benchmark function DTLZ2." alt="" coords="433,491,655,531"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="283,1207,298,1063,327,864,347,763,370,671,398,595,414,565,431,542,446,530,450,534,435,546,419,568,403,597,376,672,352,764,332,865,303,1063,288,1207"/>
+<area shape="rect" id="Node000011" href="$structshark_1_1benchmarks_1_1_d_t_l_z3.html" title="Implements the benchmark function DTLZ3." alt="" coords="433,556,655,597"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="284,1207,301,1075,331,896,351,805,374,723,401,655,416,628,431,608,447,595,450,599,435,612,420,631,406,657,379,724,356,806,336,897,306,1075,289,1207"/>
+<area shape="rect" id="Node000012" href="$structshark_1_1benchmarks_1_1_d_t_l_z4.html" title="Implements the benchmark function DTLZ4." alt="" coords="433,621,655,662"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="285,1207,304,1087,335,928,355,848,378,775,403,714,431,673,447,660,451,664,435,677,408,717,383,776,361,849,341,929,309,1088,290,1208"/>
+<area shape="rect" id="Node000013" href="$structshark_1_1benchmarks_1_1_d_t_l_z5.html" title="Implements the benchmark function DTLZ5." alt="" coords="433,687,655,727"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="280,1207,285,1114,293,1054,306,989,325,921,352,855,387,793,431,738,447,726,451,730,435,742,391,796,356,857,330,923,311,990,299,1055,291,1115,285,1207"/>
+<area shape="rect" id="Node000014" href="$structshark_1_1benchmarks_1_1_d_t_l_z6.html" title="Implements the benchmark function DTLZ6." alt="" coords="433,752,655,793"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="282,1207,291,1125,315,1017,334,959,359,903,391,850,431,804,448,791,451,795,435,808,396,853,364,905,339,961,320,1018,296,1126,287,1208"/>
+<area shape="rect" id="Node000015" href="$structshark_1_1benchmarks_1_1_d_t_l_z7.html" title="Implements the benchmark function DTLZ7." alt="" coords="433,817,655,858"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="284,1207,297,1136,323,1045,343,997,367,951,396,907,431,869,449,856,452,861,435,873,400,911,371,953,348,1000,329,1047,303,1137,289,1208"/>
+<area shape="rect" id="Node000016" href="$structshark_1_1benchmarks_1_1_e_l_l_i1.html" title="Multi&#45;objective optimization benchmark function ELLI1." alt="" coords="436,883,652,923"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="288,1207,304,1148,333,1075,374,999,401,965,431,934,450,922,453,926,435,938,405,968,379,1002,337,1077,309,1150,293,1208"/>
+<area shape="rect" id="Node000017" href="$structshark_1_1benchmarks_1_1_e_l_l_i2.html" title="Multi&#45;objective optimization benchmark function ELLI2." alt="" coords="436,948,652,989"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="292,1207,313,1160,342,1103,382,1047,405,1021,431,998,450,987,452,992,435,1002,409,1025,386,1050,347,1106,317,1162,297,1209"/>
+<area shape="rect" id="Node000018" href="$structshark_1_1benchmarks_1_1_fonseca.html" title="Bi&#45;objective real&#45;valued benchmark function proposed by Fonseca and Flemming." alt="" coords="469,1013,620,1068"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="304,1208,358,1143,393,1108,432,1078,467,1060,470,1064,434,1083,396,1112,362,1146,308,1211"/>
+<area shape="rect" id="Node000019" href="$structshark_1_1benchmarks_1_1_g_s_p.html" title="Real&#45;valued benchmark function with two objectives." alt="" coords="439,1092,649,1133"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="320,1211,372,1176,432,1143,463,1131,465,1136,434,1148,375,1181,323,1216"/>
+<area shape="rect" id="Node000020" href="$structshark_1_1benchmarks_1_1_i_h_r1.html" title="Multi&#45;objective optimization benchmark function IHR1." alt="" coords="438,1157,651,1198"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="380,1216,459,1196,460,1201,381,1221"/>
+<area shape="rect" id="Node000021" href="$structshark_1_1benchmarks_1_1_i_h_r2.html" title="Multi&#45;objective optimization benchmark function IHR 2." alt="" coords="438,1223,651,1263"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="401,1240,437,1240,437,1246,401,1246"/>
+<area shape="rect" id="Node000022" href="$structshark_1_1benchmarks_1_1_i_h_r3.html" title="Multi&#45;objective optimization benchmark function IHR3." alt="" coords="438,1288,651,1329"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="381,1265,460,1285,459,1290,380,1270"/>
+<area shape="rect" id="Node000023" href="$structshark_1_1benchmarks_1_1_i_h_r4.html" title="Multi&#45;objective optimization benchmark function IHR 4." alt="" coords="438,1353,651,1394"/>
+<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="323,1270,375,1305,434,1338,465,1350,463,1355,432,1343,372,1310,320,1275"/>
+<area shape="rect" id="Node000024" href="$structshark_1_1benchmarks_1_1_i_h_r6.html" title="Multi&#45;objective optimization benchmark function IHR 6." alt="" coords="438,1419,651,1459"/>
+<area shape="poly" id="edge23_Node000001_Node000024" title=" " alt="" coords="307,1275,361,1340,396,1374,434,1403,459,1416,456,1420,432,1408,392,1378,357,1344,303,1278"/>
+<area shape="rect" id="Node000025" href="$structshark_1_1benchmarks_1_1_l_z1.html" title="Multi&#45;objective optimization benchmark function LZ1." alt="" coords="442,1484,646,1525"/>
+<area shape="poly" id="edge24_Node000001_Node000025" title=" " alt="" coords="299,1277,320,1321,349,1373,388,1425,435,1469,455,1481,452,1486,431,1473,384,1428,345,1376,315,1323,294,1279"/>
+<area shape="rect" id="Node000026" href="$structshark_1_1benchmarks_1_1_l_z2.html" title="Multi&#45;objective optimization benchmark function LZ2." alt="" coords="442,1549,646,1590"/>
+<area shape="poly" id="edge25_Node000001_Node000026" title=" " alt="" coords="294,1278,311,1334,339,1403,380,1474,406,1506,435,1534,454,1547,451,1551,431,1538,402,1510,376,1477,335,1406,306,1336,289,1279"/>
+<area shape="rect" id="Node000027" href="$structshark_1_1benchmarks_1_1_l_z3.html" title="Multi&#45;objective optimization benchmark function LZ3." alt="" coords="442,1615,646,1655"/>
+<area shape="poly" id="edge26_Node000001_Node000027" title=" " alt="" coords="290,1279,304,1347,330,1433,349,1479,373,1523,401,1564,435,1600,452,1612,449,1616,431,1604,397,1567,368,1525,345,1481,325,1435,299,1348,285,1280"/>
+<area shape="rect" id="Node000028" href="$structshark_1_1benchmarks_1_1_l_z4.html" title="Multi&#45;objective optimization benchmark function LZ4." alt="" coords="442,1680,646,1721"/>
+<area shape="poly" id="edge27_Node000001_Node000028" title=" " alt="" coords="287,1278,298,1358,322,1462,341,1517,365,1571,397,1621,435,1665,451,1677,448,1682,431,1669,392,1624,361,1573,336,1519,316,1463,292,1359,282,1279"/>
+<area shape="rect" id="Node000029" href="$structshark_1_1benchmarks_1_1_l_z5.html" title="Multi&#45;objective optimization benchmark function LZ5." alt="" coords="442,1745,646,1786"/>
+<area shape="poly" id="edge28_Node000001_Node000029" title=" " alt="" coords="285,1278,292,1369,300,1427,313,1490,332,1555,358,1619,392,1678,435,1730,451,1743,447,1747,431,1734,387,1681,353,1621,327,1557,308,1491,295,1428,287,1369,280,1279"/>
+<area shape="rect" id="Node000030" href="$structshark_1_1benchmarks_1_1_l_z6.html" title="Multi&#45;objective optimization benchmark function LZ6." alt="" coords="442,1811,646,1851"/>
+<area shape="poly" id="edge29_Node000001_Node000030" title=" " alt="" coords="290,1278,310,1395,341,1550,361,1628,384,1699,409,1757,435,1796,451,1808,447,1812,431,1799,404,1759,379,1701,356,1630,336,1551,304,1396,285,1279"/>
+<area shape="rect" id="Node000031" href="$structshark_1_1benchmarks_1_1_l_z7.html" title="Multi&#45;objective optimization benchmark function LZ7." alt="" coords="442,1876,646,1917"/>
+<area shape="poly" id="edge30_Node000001_Node000031" title=" " alt="" coords="289,1278,307,1407,337,1582,357,1670,380,1751,406,1817,420,1842,435,1861,450,1873,447,1877,431,1865,416,1845,401,1819,375,1753,352,1672,332,1583,301,1408,284,1279"/>
+<area shape="rect" id="Node000032" href="$structshark_1_1benchmarks_1_1_l_z8.html" title="Multi&#45;objective optimization benchmark function LZ8." alt="" coords="442,1941,646,1982"/>
+<area shape="poly" id="edge31_Node000001_Node000032" title=" " alt="" coords="288,1279,304,1420,333,1615,353,1713,376,1803,404,1877,419,1905,435,1926,450,1939,446,1943,431,1930,414,1908,399,1879,371,1805,348,1714,328,1615,299,1421,283,1279"/>
+<area shape="rect" id="Node000033" href="$structshark_1_1benchmarks_1_1_l_z9.html" title="Multi&#45;objective optimization benchmark function LZ9." alt="" coords="442,2007,646,2047"/>
+<area shape="poly" id="edge32_Node000001_Node000033" title=" " alt="" coords="288,1279,301,1432,329,1646,348,1755,373,1855,401,1937,418,1968,435,1992,450,2004,446,2008,431,1995,413,1971,397,1939,367,1856,343,1756,323,1647,296,1433,282,1279"/>
+<area shape="rect" id="Node000034" href="$classshark_1_1benchmarks_1_1_multi_objective_benchmark.html" title="Creates a multi&#45;objective Benchmark from a set of given single objective functions." alt="" coords="459,2071,629,2127"/>
+<area shape="poly" id="edge33_Node000001_Node000034" title=" " alt="" coords="287,1278,300,1443,326,1676,346,1796,370,1905,400,1995,417,2030,435,2057,460,2077,457,2081,431,2061,412,2033,395,1997,365,1906,341,1797,321,1677,294,1443,282,1279"/>
+<area shape="rect" id="Node000035" href="$structshark_1_1benchmarks_1_1_z_d_t1.html" title="Multi&#45;objective optimization benchmark function ZDT1." alt="" coords="437,2151,652,2191"/>
+<area shape="poly" id="edge34_Node000001_Node000035" title=" " alt="" coords="286,1279,296,1458,305,1582,319,1716,339,1849,364,1970,396,2070,414,2108,435,2137,448,2148,444,2152,431,2141,410,2111,391,2072,359,1971,333,1850,314,1717,300,1583,290,1459,281,1279"/>
+<area shape="rect" id="Node000036" href="$structshark_1_1benchmarks_1_1_z_d_t2.html" title="Multi&#45;objective optimization benchmark function ZDT2." alt="" coords="437,2216,652,2257"/>
+<area shape="poly" id="edge35_Node000001_Node000036" title=" " alt="" coords="286,1279,294,1469,302,1603,316,1746,335,1889,361,2020,376,2078,394,2128,413,2170,435,2201,449,2213,446,2217,431,2205,409,2172,389,2130,371,2079,355,2021,330,1890,311,1747,297,1603,288,1470,281,1279"/>
+<area shape="rect" id="Node000037" href="$structshark_1_1benchmarks_1_1_z_d_t3.html" title="Multi&#45;objective optimization benchmark function ZDT3." alt="" coords="437,2281,652,2322"/>
+<area shape="poly" id="edge36_Node000001_Node000037" title=" " alt="" coords="286,1279,291,1481,299,1623,312,1777,331,1931,357,2072,373,2133,391,2188,412,2232,435,2267,449,2279,446,2283,431,2270,407,2235,386,2190,368,2135,352,2073,325,1931,307,1778,294,1623,286,1481,280,1279"/>
+<area shape="rect" id="Node000038" href="$structshark_1_1benchmarks_1_1_z_d_t4.html" title="Multi&#45;objective optimization benchmark function ZDT4." alt="" coords="437,2347,652,2387"/>
+<area shape="poly" id="edge37_Node000001_Node000038" title=" " alt="" coords="285,1279,289,1492,296,1644,308,1808,327,1972,353,2123,370,2189,389,2247,411,2295,435,2332,449,2344,445,2348,431,2335,406,2298,384,2249,365,2191,348,2124,321,1973,303,1809,291,1644,284,1492,280,1279"/>
+<area shape="rect" id="Node000039" href="$structshark_1_1benchmarks_1_1_z_d_t6.html" title="Multi&#45;objective optimization benchmark function ZDT6." alt="" coords="437,2412,652,2453"/>
+<area shape="poly" id="edge38_Node000001_Node000039" title=" " alt="" coords="285,1279,287,1503,293,1664,304,1839,323,2014,349,2174,367,2245,386,2307,409,2358,435,2397,449,2410,445,2414,431,2401,405,2361,381,2309,361,2246,344,2175,317,2014,299,1839,288,1664,282,1503,280,1279"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="5,1230,130,1256"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,1240,177,1240,177,1246,145,1246"/>
+</map>

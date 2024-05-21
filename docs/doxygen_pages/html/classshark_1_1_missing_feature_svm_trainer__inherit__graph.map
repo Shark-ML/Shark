@@ -1,0 +1,5 @@
+<map id="shark::MissingFeatureSvmTrainer&lt; InputType, CacheType &gt;" name="shark::MissingFeatureSvmTrainer&lt; InputType, CacheType &gt;">
+<area shape="rect" id="Node000001" title="Trainer for binary SVMs natively supporting missing features." alt="" coords="273,20,489,61"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="5,5,225,76"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,38,272,38,272,43,240,43"/>
+</map>

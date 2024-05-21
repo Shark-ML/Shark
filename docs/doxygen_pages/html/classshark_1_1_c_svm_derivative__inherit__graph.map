@@ -1,0 +1,7 @@
+<map id="shark::CSvmDerivative&lt; InputType, CacheType &gt;" name="shark::CSvmDerivative&lt; InputType, CacheType &gt;">
+<area shape="rect" id="Node000001" title="This class provides two main member functions for computing the derivative of a C&#45;SVM hypothesis w...." alt="" coords="59,79,236,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="5,5,138,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,41,131,77,127,80,92,44"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="161,5,286,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="203,44,168,80,164,77,199,41"/>
+</map>

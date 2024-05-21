@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Kernels &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Loss and Cost Functions" href="losses.html" />
+    <link rel="prev" title="Models" href="models.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="kernels">
+<h1>Kernels<a class="headerlink" href="#kernels" title="Link to this heading">¶</a></h1>
+<p>Shark offers a large library of <em>positive semi-definite kernels</em>, that is, functions inducing
+reproducing kernel Hilbert spaces <a class="reference internal" href="#aronszajn1950" id="id1"><span>[Aronszajn1950]</span></a>. They underlie
+the “kernel trick” <a class="reference internal" href="#scholkopf2002" id="id2"><span>[Schölkopf2002]</span></a>, which is used, for instance, in non-linear
+support vector machines (SVMs).</p>
+<p>Given some set <span class="math notranslate nohighlight">\(\mathcal X\)</span>, a positive semi-definite kernel
+<span class="math notranslate nohighlight">\(k:\mathcal X\times\mathcal X\to\mathbb R\)</span>
+is a symmetric function for which</p>
+<div class="math notranslate nohighlight">
+\[\sum_{i=1}^N\sum_{j=1}^N a_i a_j k(x_i, x_j) \ge 0\]</div>
+<p>for all <span class="math notranslate nohighlight">\(N\)</span>, all
+<span class="math notranslate nohighlight">\(x_1,...,x_N\in\mathcal X\)</span>, and all
+<span class="math notranslate nohighlight">\(a_1,...,a_N\in\mathbb R\)</span>.</p>
+<p>A kernel <span class="math notranslate nohighlight">\(k\)</span> on <span class="math notranslate nohighlight">\(\mathcal X\)</span> corresponds to a scalar
+product in a dot product space <span class="math notranslate nohighlight">\(\mathcal H\)</span>, the so called
+feature space:</p>
+<div class="math notranslate nohighlight">
+\[k(x,y) = \langle \phi(x),\phi(y) \rangle_{\mathcal H}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> are elements of <span class="math notranslate nohighlight">\(\mathcal X\)</span> ,
+<span class="math notranslate nohighlight">\(\phi\)</span> is a map from <span class="math notranslate nohighlight">\(\mathcal X\)</span> to <span class="math notranslate nohighlight">\(\mathcal H\)</span>, and
+<span class="math notranslate nohighlight">\(\langle \cdot, \cdot \rangle_{\mathcal H}\)</span> is the scalar product in
+<span class="math notranslate nohighlight">\(\mathcal H\)</span>.
+For details we refer to <a class="reference internal" href="#aronszajn1950" id="id3"><span>[Aronszajn1950]</span></a> and <a class="reference internal" href="#mercer1909" id="id4"><span>[Mercer1909]</span></a>.</p>
+<section id="list-of-classes">
+<h2>List of Classes<a class="headerlink" href="#list-of-classes" title="Link to this heading">¶</a></h2>
+<p>The list of kernels is available in the <a class="reference external" href="../../../../../../../doxygen_pages/html/group__kernels.html">class documentation</a>.
+Functions for optimizing kernel functions are given <a class="reference external" href="../../../../../../../doxygen_pages/html/group__kerneloptimization.html">here</a>.</p>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">¶</a></h2>
+<p>Many machine learning algorithms can be written in a way that the only
+operations involving input elements are scalar products between those
+elements.  A common strategy in machine learning is to map the input
+data into a feature space <span class="math notranslate nohighlight">\(\mathcal H\)</span> and to do the learning in
+this feature space.  If the only operations in <span class="math notranslate nohighlight">\(\mathcal H\)</span> are
+scalar products, these can be replaced by kernel function evaluations
+rendering explicit computations of the mapping <span class="math notranslate nohighlight">\(\phi\)</span> to feature
+space unnecessary. This has some advantages:</p>
+<ul class="simple">
+<li><p>Typically, the kernel can be computed more
+efficiently than the scalar product itself. This allows for working
+in very high-dimensional feature spaces.</p></li>
+<li><p>The kernel provides a clean interface between general and
+problem specific aspects of the learning machine.</p></li>
+</ul>
+<p>Thus, the “kernel trick” allows efficient formulation of nonlinear
+variants of any algorithm that can be expressed in terms of dot
+products.  The choice of the kernel function is crucial for the
+performance of the machine learning algorithm.</p>
+<p>The generic distance between to points mapped to a kernel-induced
+feature space is given by</p>
+<div class="math notranslate nohighlight">
+\[d(x,y) = \sqrt{\langle \phi(x)-\phi(y), \phi(x)-\phi(y) \rangle_{\mathcal H}}
+=\sqrt{k(x,x) - 2k(x,y) + k(y,y)}\]</div>
+<p>where <span class="math notranslate nohighlight">\(d\)</span> is the distance between the points <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span>. We call
+a kernel normalized, if <span class="math notranslate nohighlight">\(k(x,x)=1\)</span> for all <span class="math notranslate nohighlight">\(x\)</span>. In this case calculating
+the distance reduces to <span class="math notranslate nohighlight">\(d(x,y) =\sqrt{2 - 2k(x,y)}\)</span>.</p>
+</section>
+<section id="the-base-class-abstractkernelfunction-inputtypet">
+<span id="label-for-kernels-in-shark"></span><h2>The base class ‘AbstractKernelFunction&lt;InputTypeT&gt;’<a class="headerlink" href="#the-base-class-abstractkernelfunction-inputtypet" title="Link to this heading">¶</a></h2>
+<p>Shark provides strong support for kernel-based algorithms.  All kernel
+functions’ base class is the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_abstract_kernel_function.html">AbstractKernelFunction</a>. A linear
+combination of kernels is represented in Shark as a
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_kernel_expansion.html">KernelExpansion</a></p>
+<div class="math notranslate nohighlight">
+\[\sum_{i=1}^N \alpha_i k(x_i, . ) + b\]</div>
+<p>with <span class="math notranslate nohighlight">\(x_1,...,x_N\in\mathcal X\)</span>,
+<span class="math notranslate nohighlight">\(\alpha_1,...,\alpha_N\in\mathbb R\)</span>, and optional bias/offset
+parameter <span class="math notranslate nohighlight">\(b\in\mathbb R\)</span>.</p>
+<p>Many kernel-based algorithms need to repeatedly evaluate the kernel on
+some training data points <span class="math notranslate nohighlight">\(x_1,\dots,x_N\)</span> or they operate on the
+kernel (Gram) matrix <span class="math notranslate nohighlight">\(K\)</span> with entries <span class="math notranslate nohighlight">\(K_{ij}=k(x_i,x_j)\)</span>
+directly. To save computation time, the matrix <span class="math notranslate nohighlight">\(K\)</span> would be
+stored in memory.  Depending on the hardware, even training sets with
+a few hundred thousand can make this prohibitive. Therefore, often only
+parts of <span class="math notranslate nohighlight">\(K\)</span> are calculated at a time, most often matrix rows
+or blocks. In Shark, the classes <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_kernel_matrix.html">KernelMatrix</a> and
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_cached_matrix.html">CachedMatrix</a> as well as some derived and sibling classes
+encapsulate kernel Gram matrices.</p>
+<section id="types">
+<h3>Types<a class="headerlink" href="#types" title="Link to this heading">¶</a></h3>
+<p>First, we introduce the templated types of a Kernel, which are all inferred from
+the only template argument <code class="docutils literal notranslate"><span class="pre">InputType</span></code> using several metafunctions. As in the Models,
+we have the InputType, and the BatchInputType, which is a batch of inputs.
+In contrast to Models, we also introduce special reference types:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Types</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>InputType</p></td>
+<td><p>Argument type of the kernel</p></td>
+</tr>
+<tr class="row-odd"><td><p>BatchInputType</p></td>
+<td><p>Batch of arguments; same as Batch&lt;InputType&gt;::type</p></td>
+</tr>
+<tr class="row-even"><td><p>ConstInputReference</p></td>
+<td><p>Constant reference to InputType as returned
+by ConstProxyReference&lt;InputType&gt;::type; by default this is InputType const&amp;</p></td>
+</tr>
+<tr class="row-odd"><td><p>ConstBatchInputReference</p></td>
+<td><p>Constant reference to BatchInputType as returned by ConstProxyReference&lt;BatchInputType&gt;::type</p></td>
+</tr>
+</tbody>
+</table>
+<p>The reason for the ConstBatchInputReference and ConstInputReference types
+is that we want to make use of the structure of the arguments to prevent
+unnecessary copying: consider a common case when only single elements
+of a batch of data are to be computed. If the batch type then is
+a matrix, the argument will be a row of this matrix, and not a vector.
+Thus, the argument would be automatically copied into a temporary vector,
+which is then in turn fed into the kernel. This is of course unnecessary,
+and for fast kernels, the copying can exceed the running time of a kernel
+evaluation. Thus we use proxy references for vectors, which simply treat
+matrix rows and vectors in the same way. This optimization right now only
+works for the class of dense vectors and not for example sparse vectors or
+even more complex types.</p>
+<div class="admonition-todo admonition" id="id5">
+<p class="admonition-title">Todo</p>
+<p>implications of this? is there a task in the tracker? etc.</p>
+</div>
+</section>
+<section id="flags">
+<h3>Flags<a class="headerlink" href="#flags" title="Link to this heading">¶</a></h3>
+<p>Like a Model, every kernel has a set of flags and convenience access functions
+which indicate the traits and capabilities of the kernel:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag and accessor function name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HAS_FIRST_PARAMETER_DERIVATIVE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasFirstParameterDerivative</span></code></p></td>
+<td><p>If set, the kernel can evaluate the first derivative w.r.t its parameters</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">HAS_FIRST_INPUT_DERIVATIVE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasFirstInputDerivative</span></code></p></td>
+<td><p>If set, the kernel can evaluate the first derivative w.r.t its left input parameters;
+This is no restriction, since kernel functions are symmetric</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">IS_NORMALIZED</span></code>, <code class="docutils literal notranslate"><span class="pre">isNormalized</span></code></p></td>
+<td><p>For all <span class="math notranslate nohighlight">\(x\)</span> it holds  <span class="math notranslate nohighlight">\(k(x,x)=1\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SUPPORTS_VARIABLE_INPUT_SIZE</span></code>, <code class="docutils literal notranslate"><span class="pre">supportsVariableInputSize</span></code></p></td>
+<td><p>Between different calls to <span class="math notranslate nohighlight">\(k(x,y)\)</span> the number of dimensions of the kernel is
+allowed to vary; this is needed for kernel evaluation of inputs with missing features</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="evaluation">
+<h3>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading">¶</a></h3>
+<p>Next, we introduce the functions evaluating kernels. We have three
+types of functions. The first version simply calculates the kernel
+value given two inputs. The second computes the kernel evaluation of
+two batches of inputs.  Here, the inner product between all points of
+the first and second batch is calculated in Hilbert space.  Thus, the
+resulting type is a matrix of inner products – a block of the kernel
+Gram matrix. The third version takes two batches as well but also a
+state object. The state is a data structure which allows the kernel to
+store intermediate results of the evaluation of the kernel
+values. These can later be reused in the computation of the
+derivatives. Thus, when derivatives are to be computed, this latter
+version must be called beforehand to fill the state object with the
+correct values. There is no version of the derivative with two single
+inputs, because this is a rare use case. If still needed, batches of
+size one should be used. The reason for the state object being external
+to the kernel class is that this design allows for concurrent evaluation
+of the kernel from different threads, with each thread holding its own
+state object.</p>
+<p>With this in mind, we now present the list of functions for <code class="docutils literal notranslate"><span class="pre">eval</span></code>, including
+the convenience <code class="docutils literal notranslate"><span class="pre">operator()</span></code>. Let in the following <code class="docutils literal notranslate"><span class="pre">I</span></code> be a <code class="docutils literal notranslate"><span class="pre">ConstInputReference</span></code>
+and <code class="docutils literal notranslate"><span class="pre">B</span></code> a <code class="docutils literal notranslate"><span class="pre">ConstBatchInputReference</span></code>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>double eval(I x, I z)</p></td>
+<td><p>Calculates <span class="math notranslate nohighlight">\(k(x,z)\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>void eval(B X, B Z, RealMatrix&amp; K)</p></td>
+<td><p>Calculates <span class="math notranslate nohighlight">\(K_{ij}=k(x_i,z_j)\)</span> for all elements
+<span class="math notranslate nohighlight">\(x_i\)</span> of X and <span class="math notranslate nohighlight">\(z_j\)</span> of Z</p></td>
+</tr>
+<tr class="row-even"><td><p>void eval(B X, B Z, RealMatrix&amp; K, State&amp; )</p></td>
+<td><p>Calls eval(X,Z,K) while storing intermediate results
+needed for the derivative functions</p></td>
+</tr>
+<tr class="row-odd"><td><p>double operator()(I x, I z)</p></td>
+<td><p>Calls eval(x,z)</p></td>
+</tr>
+<tr class="row-even"><td><p>RealMatrix operator()(B X, B Z)</p></td>
+<td><p>Calls eval(X,Z,K) and returns K.</p></td>
+</tr>
+</tbody>
+</table>
+<p>For a kernel, it is sufficient to implement the batch version of eval that
+stores the state, since all other functions can rely on it. However, if speed
+is relevant, all three eval functions should be implemented in order to avoid
+unnecessary copy operations.</p>
+</section>
+<section id="distances">
+<h3>Distances<a class="headerlink" href="#distances" title="Link to this heading">¶</a></h3>
+<p>As outlined before, kernels can also be used to compute distances between points in <span class="math notranslate nohighlight">\(\mathcal H\)</span>:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">featureDistanceSqr(I</span> <span class="pre">x,</span> <span class="pre">I</span> <span class="pre">z)</span></code></p></td>
+<td><p>Returns the squared distance between x and z</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">double</span> <span class="pre">featureDistance(I</span> <span class="pre">x,</span> <span class="pre">I</span> <span class="pre">z)</span></code></p></td>
+<td><p>Returns the distance between x and z.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">RealMatrix</span> <span class="pre">featureDistanceSqr(B</span> <span class="pre">X,</span> <span class="pre">B</span> <span class="pre">Z)</span></code></p></td>
+<td><p>Returns the squared distances between all points in X to all
+points in Z.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="derivatives">
+<h3>Derivatives<a class="headerlink" href="#derivatives" title="Link to this heading">¶</a></h3>
+<p>Some Kernels are differentiable with respect to their parameters. This can for example
+be exploited in gradient-based optimization of these parameters, which in turn amounts
+to a computationally efficient way of finding a suitable space <span class="math notranslate nohighlight">\(\mathcal H\)</span> in which
+to solve a given learning problem. Further, if the input space is differentiable as well,
+even the derivative with respect to the inputs can be computed.</p>
+<p>The derivatives are weighted as outlined in <a class="reference internal" href="../optimization/conventions_derivatives.html"><span class="doc">Shark Conventions for Derivatives</span></a>.
+The parameter derivative is a weighted sum of the derivatives of all elements of the block
+of the kernel matrix. The input derivative has only weights for the inputs of the right
+argument.</p>
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>math here? mt: yes please! :)</p>
+</div>
+<p>The methods for evaluating the derivatives are:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">weightedParameterDerivative</span></code></p></td>
+<td><p>Computes the weighted derivative of the parameters over all elements of a block
+of the kernel Gram matrix.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weightedInputDerivative</span></code></p></td>
+<td><p>Computes the derivative with respect of the left argument, weighting over all
+right arguments.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Putting everything together, we can calculate the derivative of a kernel
+like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">BatchInputType</span><span class="w"> </span><span class="n">X</span><span class="p">;</span><span class="w"> </span><span class="c1">//first batch of inputs</span>
+<span class="n">BatchInputType</span><span class="w"> </span><span class="n">Y</span><span class="p">;</span><span class="w"> </span><span class="c1">//second batch of inputs</span>
+<span class="n">RealMatrix</span><span class="w"> </span><span class="n">K</span><span class="p">;</span><span class="w">     </span><span class="c1">//resulting part of the kernel Gram matrix</span>
+<span class="n">MyKernel</span><span class="w"> </span><span class="n">kernel</span><span class="p">;</span><span class="w">  </span><span class="c1">//the differentiable kernel</span>
+
+<span class="c1">// evaluate K for X and Y, store the state</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">State</span><span class="o">&gt;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">kernel</span><span class="p">.</span><span class="n">createState</span><span class="p">();</span>
+<span class="n">kernel</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="p">);</span>
+
+<span class="c1">// somehow compute some weights and calculate the parameter derivative</span>
+<span class="n">RealMatrix</span><span class="w"> </span><span class="n">weights</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">someFunction</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="w"> </span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">Y</span><span class="p">);</span>
+<span class="n">RealVector</span><span class="w"> </span><span class="n">derivative</span><span class="p">;</span>
+<span class="n">kernel</span><span class="p">.</span><span class="n">weightedParameterDerivative</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">Y</span><span class="p">,</span><span class="w"> </span><span class="n">weights</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">state</span><span class="p">,</span><span class="w"> </span><span class="n">derivative</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="id7">
+<p class="admonition-title">Todo</p>
+<p>i think we need some more explanation on the expected size of
+weights, especially since we don’t have type checks in the code
+of weightedParameterDerivative (maybe these should be added, too).
+in any case, the workings of weightedParameterDerivative should be
+explained more, or link to some tutorial where this is done.</p>
+</div>
+</section>
+<section id="other">
+<h3>Other<a class="headerlink" href="#other" title="Link to this heading">¶</a></h3>
+<p>Kernels support several other concepts. They have parameters, can be
+serialized and have an external state object.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">numberOfParameters</span></code></p></td>
+<td><p>The number of parameters which can be optimized</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parameterVector</span></code></p></td>
+<td><p>Returns the current parameters of the kernel object</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">setParameterVector</span></code></p></td>
+<td><p>Sets the new parameter vector</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">createState</span></code></p></td>
+<td><p>Returns a newly created State object holding the state to be stored in eval</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="aronszajn1950" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Aronszajn1950<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id3">2</a>)</span>
+<p>Aronszajn, N. Theory of Reproducing Kernels. Transactions of the American Mathematical Society 68 (3): 337–404, 1950.</p>
+</div>
+<div class="citation" id="mercer1909" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">Mercer1909</a><span class="fn-bracket">]</span></span>
+<p>Mercer, J. Functions of positive and negative type and their connection with the theory of integral equations.
+In Philosophical Transactions of the Royal Society of London, 1909.</p>
+</div>
+<div class="citation" id="scholkopf2002" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Schölkopf2002</a><span class="fn-bracket">]</span></span>
+<p>Schölkopf, B. and Smola, A. Learning with Kernels. MIT Press, 2002.</p>
+</div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Kernels</a><ul>
+<li><a class="reference internal" href="#list-of-classes">List of Classes</a></li>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#the-base-class-abstractkernelfunction-inputtypet">The base class ‘AbstractKernelFunction&lt;InputTypeT&gt;’</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="models.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Models</a>
+  <a class="topless" href="losses.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Loss and Cost Functions</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/library_design/kernels.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

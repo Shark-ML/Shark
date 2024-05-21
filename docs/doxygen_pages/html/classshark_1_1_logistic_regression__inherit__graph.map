@@ -1,0 +1,7 @@
+<map id="shark::LogisticRegression&lt; InputVectorType &gt;" name="shark::LogisticRegression&lt; InputVectorType &gt;">
+<area shape="rect" id="Node000001" title="Trainer for Logistic regression." alt="" coords="258,39,430,79"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_weighted_trainer.html" title="Superclass of weighted supervised learning algorithms." alt="" coords="5,5,210,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,40,258,44,257,49,225,45"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="28,71,187,111"/>
+<area shape="poly" id="edge2_Node000001_Node000006" title=" " alt="" coords="202,76,257,68,257,73,203,81"/>
+</map>

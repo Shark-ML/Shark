@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Hello World &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="General Optimization Tasks" href="general_optimization_tasks.html" />
+    <link rel="prev" title="Your Shark Programs" href="your_programs.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="hello-world">
+<h1>Hello World<a class="headerlink" href="#hello-world" title="Link to this heading">¶</a></h1>
+<p>In this section you will write your first program with Shark.</p>
+<section id="lda-classification">
+<h2>LDA classification<a class="headerlink" href="#lda-classification" title="Link to this heading">¶</a></h2>
+<p>Using a Linear Discriminant Analysis (LDA) as Hello-World (or
+Hello-Shark) program, we will try to separate two classes of inputs
+using a simple linear function. The code for this tutorial can be
+found in <a class="reference external" href="../../../../../../doxygen_pages/html/quickstart_tutorial_8cpp.html">quickstartTutorial.cpp</a> in the
+<code class="docutils literal notranslate"><span class="pre">examples/Supervised</span></code> folder.</p>
+<p>In order to access the LDA, we include its header file and import the Shark
+namespace for convenience. We will also need the header for importing CSV files:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/Csv.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/LDA.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="p">;</span>
+</pre></div>
+</div>
+<section id="data-preparation">
+<h3>Data preparation<a class="headerlink" href="#data-preparation" title="Link to this heading">¶</a></h3>
+<p>Next we would like some data to classify. We can use the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_tree_nearest_neighbors.html#a81535a6dc1129bf3b9c5db033706ee7d">Dataset</a>
+class for holding the data, and load the data with <code class="docutils literal notranslate"><span class="pre">importCSV</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">importCSV</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="w"> </span><span class="n">LAST_COLUMN</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39; &#39;</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">catch</span><span class="w"> </span><span class="p">(...)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;unable to read data from file &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w">  </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="n">exit</span><span class="p">(</span><span class="n">EXIT_FAILURE</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The first line creates a dataset, the data structure used in Shark for holding
+data for supervised learning tasks. Such containers hold pairs
+of input data points and labels. The <code class="docutils literal notranslate"><span class="pre">ClassificationDataset</span></code> used here is
+simply a typedef for
+<code class="docutils literal notranslate"><span class="pre">LabeledData&lt;RealVector,unsigned</span> <span class="pre">int&gt;</span></code>, as we will use real-valued feature
+vectors and integer labels. The second line loads the data file using <code class="docutils literal notranslate"><span class="pre">importCSV</span></code>,
+which can read many CSV-like file formats. Passing <code class="docutils literal notranslate"><span class="pre">LAST_COLUMN</span></code>  as argument indicates
+that the last column of the file holds the class labels.</p>
+<p>For example, let us consider the data in
+<a class="reference download internal" download="" href="../../../_downloads/ec56cdd030da22b2a6d8cae5d7b7f4b1/quickstartData.csv"><code class="xref download docutils literal notranslate"><span class="pre">C.csv</span></code></a>.
+To apply the Shark program to these data, you have to pass the filename as a command line option, e.g.:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="p">.</span><span class="o">/</span><span class="n">quickstartTutorial</span><span class="w"> </span><span class="n">data</span><span class="o">/</span><span class="n">quickstartData</span><span class="p">.</span><span class="n">csv</span>
+</pre></div>
+</div>
+<p>We want to use only one part of all available data for training, and
+set aside another part for testing. The next line splits (i.e.
+removes) a test set from our loaded data and stores it inside a new
+dataset. We choose the training set to be 80% of the available data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">splitAtElement</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="k">static_cast</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mf">0.8</span><span class="o">*</span><span class="n">data</span><span class="p">.</span><span class="n">numberOfElements</span><span class="p">()));</span>
+</pre></div>
+</div>
+<p>After this operation, <code class="docutils literal notranslate"><span class="pre">data</span></code> is only 80% of its former size, and <code class="docutils literal notranslate"><span class="pre">test</span></code> holds the
+remaining 20%. See the <a class="reference internal" href="../tutorials.html#label-for-data-tutorials"><span class="std std-ref">data tutorials</span></a> for similar
+such operations.</p>
+</section>
+<section id="declaring-a-model-and-trainer">
+<h3>Declaring a model and trainer<a class="headerlink" href="#declaring-a-model-and-trainer" title="Link to this heading">¶</a></h3>
+<p>Shark strictly separates the concepts of models and learning algorithm. This means that we
+need to declare a learning algorithm and the right model for it separately. Since the LDA
+uses a linear classifier, we declare an instance of such. It is not needed to specify
+the dimensionality of the input data or the number of classes of our problem, the LDA
+will infer this from the training data itself. The LDA is a separate entity playing
+the role of a trainer.</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">//create a classifier for the problem</span>
+<span class="n">LinearClassifier</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">classifier</span><span class="p">;</span>
+<span class="c1">//create the lda trainer</span>
+<span class="n">LDA</span><span class="w"> </span><span class="n">lda</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>To optimize the model given the training data and using a specific trainer we write</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">lda</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">classifier</span><span class="p">,</span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>After this call, our classifier can directly be used to classify data. But we do not
+know how good our solution is, so let’s evaluate it.</p>
+</section>
+<section id="evaluation">
+<h3>Evaluation<a class="headerlink" href="#evaluation" title="Link to this heading">¶</a></h3>
+<p>One way to evaluate our LDA-trained linear model is to count the number of
+correctly classified test samples. Here, we use a loss function to evaluate the
+fration of incorrectly classified points:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ZeroOneLoss</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">loss</span><span class="p">;</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">predictions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classifier</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss</span><span class="p">(</span><span class="n">test</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="n">predictions</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The result should read:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>RESULTS:
+========
+
+test data size: 200
+error rate: 0.225
+</pre></div>
+</div>
+</section>
+</section>
+<section id="what-you-learned">
+<h2>What you learned<a class="headerlink" href="#what-you-learned" title="Link to this heading">¶</a></h2>
+<p>You should have learned the following aspects in this Tutorial:</p>
+<ul class="simple">
+<li><p>How to use a trainer to train a model</p></li>
+<li><p>How to load data from from a csv file.</p></li>
+<li><p>How to evaluate your model on a test set.</p></li>
+</ul>
+<p>During the course of all tutorials, you will gain a more fine grained knowledge
+about these different aspects.</p>
+</section>
+<section id="what-next">
+<h2>What next?<a class="headerlink" href="#what-next" title="Link to this heading">¶</a></h2>
+<p>In the next tutorial we will investigate how <a class="reference internal" href="general_optimization_tasks.html"><span class="doc">General Optimization Tasks</span></a> are set up, which gives
+you a deeper understanding of the main building blocks of Shark.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Hello World</a><ul>
+<li><a class="reference internal" href="#lda-classification">LDA classification</a></li>
+<li><a class="reference internal" href="#what-you-learned">What you learned</a></li>
+<li><a class="reference internal" href="#what-next">What next?</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="your_programs.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Your Shark Programs</a>
+  <a class="topless" href="general_optimization_tasks.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> General Optimization Tasks</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/first_steps/hello_shark.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

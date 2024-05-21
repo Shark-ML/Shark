@@ -1,0 +1,11 @@
+<map id="shark::statistics::Quantile" name="shark::statistics::Quantile">
+<area shape="rect" id="Node000001" title="For a vector of points computes for every dimension the p&#45;quantile." alt="" coords="198,71,320,111"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1statistics_1_1_lower_quantile.html" title="For a vector of points computes for every dimension the 25%&#45;quantile." alt="" coords="368,5,490,46"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="327,62,373,44,375,49,329,67"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1statistics_1_1_median.html" title="For a vector of points computes for every dimension the median." alt="" coords="368,71,490,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="335,88,368,88,368,94,335,94"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1statistics_1_1_upper_quantile.html" title="For a vector of points computes for every dimension the 75%&#45;quantile." alt="" coords="368,136,490,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="329,115,375,133,373,138,327,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1statistics_1_1_base_statistics_object.html" title="Base class for all Statistic Objects to be used with Statistics" alt="" coords="5,71,150,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="165,88,198,88,198,94,165,94"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="shark::NormalizeKernelUnitVariance&lt; InputType &gt;" name="shark::NormalizeKernelUnitVariance&lt; InputType &gt;">
+<area shape="rect" id="Node000001" title="Determine the scaling factor of a ScaledKernel so that it has unit variance in feature space one on a..." alt="" coords="10,94,191,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="Superclass of unsupervised learning algorithms." alt="" coords="5,5,196,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,62,103,94,98,94,98,62"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="shark::PolynomialKernel&lt; InputType &gt;" name="shark::PolynomialKernel&lt; InputType &gt;">
+<area shape="rect" id="Node000001" title="Polynomial kernel." alt="" coords="23,94,185,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_kernel_function.html" title="Base class of all Kernel functions." alt="" coords="5,5,203,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,62,107,94,101,94,101,62"/>
+</map>

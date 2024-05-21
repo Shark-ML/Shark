@@ -1,0 +1,5 @@
+<map id="shark::ConcatenatedModel&lt; VectorType &gt;" name="shark::ConcatenatedModel&lt; VectorType &gt;">
+<area shape="rect" id="Node000001" title="ConcatenatedModel concatenates two models such that the output of the first model is input to the sec..." alt="" coords="5,109,183,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="5,5,183,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,77,97,109,91,109,91,77"/>
+</map>

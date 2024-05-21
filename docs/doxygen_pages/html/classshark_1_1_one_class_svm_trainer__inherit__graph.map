@@ -1,0 +1,9 @@
+<map id="shark::OneClassSvmTrainer&lt; InputType, CacheType &gt;" name="shark::OneClassSvmTrainer&lt; InputType, CacheType &gt;">
+<area shape="rect" id="Node000001" title="Training of one&#45;class SVMs." alt="" coords="244,78,430,119"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_unsupervised_trainer.html" title=" " alt="" coords="5,5,196,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="212,61,261,75,260,80,210,66"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers." alt="" coords="42,86,159,111"/>
+<area shape="poly" id="edge2_Node000001_Node000005" title=" " alt="" coords="174,96,243,96,243,101,174,101"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="21,136,180,176"/>
+<area shape="poly" id="edge3_Node000001_Node000006" title=" " alt="" coords="194,130,249,117,251,122,195,136"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="shark::SquaredEpsilonHingeLoss" name="shark::SquaredEpsilonHingeLoss">
+<area shape="rect" id="Node000001" title="Hinge&#45;loss for large margin regression using th squared two&#45;norm." alt="" coords="5,94,220,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="21,5,204,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,62,115,93,110,93,110,62"/>
+</map>

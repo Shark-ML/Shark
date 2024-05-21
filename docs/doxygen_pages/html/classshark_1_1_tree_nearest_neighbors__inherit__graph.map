@@ -1,0 +1,5 @@
+<map id="shark::TreeNearestNeighbors&lt; InputType, LabelType &gt;" name="shark::TreeNearestNeighbors&lt; InputType, LabelType &gt;">
+<area shape="rect" id="Node000001" title="Nearest Neighbors implementation using binary trees." alt="" coords="17,94,209,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_nearest_neighbors.html" title="Interface for Nearest Neighbor queries." alt="" coords="5,5,221,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,62,116,94,110,94,110,62"/>
+</map>

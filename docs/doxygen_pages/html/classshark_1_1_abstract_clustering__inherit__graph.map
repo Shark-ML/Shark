@@ -1,0 +1,11 @@
+<map id="shark::AbstractClustering&lt; InputT &gt;" name="shark::AbstractClustering&lt; InputT &gt;">
+<area shape="rect" id="Node000001" title="Base class for clustering." alt="" coords="148,94,318,135"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_hierarchical_clustering.html" title="Clusters defined by a binary space partitioning tree." alt="" coords="138,183,328,223"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="236,150,236,182,230,182,230,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="5,13,130,39"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="106,44,197,91,194,96,103,49"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="153,5,313,46"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,62,236,94,230,94,230,62"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="336,13,468,39"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="366,48,272,96,270,91,364,44"/>
+</map>

@@ -1,0 +1,5 @@
+<map id="shark::GaussianTaskKernel&lt; InputTypeT &gt;" name="shark::GaussianTaskKernel&lt; InputTypeT &gt;">
+<area shape="rect" id="Node000001" title="Special &quot;Gaussian&#45;like&quot; kernel function on tasks." alt="" coords="5,79,187,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_discrete_kernel.html" title="Kernel on a finite, discrete space." alt="" coords="22,5,170,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,46,99,79,93,79,93,46"/>
+</map>

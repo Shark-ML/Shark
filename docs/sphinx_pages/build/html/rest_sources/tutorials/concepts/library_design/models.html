@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Models &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Kernels" href="kernels.html" />
+    <link rel="prev" title="General Optimization Tasks" href="../../first_steps/general_optimization_tasks.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="models">
+<h1>Models<a class="headerlink" href="#models" title="Link to this heading">¶</a></h1>
+<p>Models in Shark can be seen as an abstract concept of a function,
+transforming an input into an output (or: producing an input given an
+output).  In a machine learning context, models often correspond to
+hypotheses. Models represent the solutions to machine learning
+problems. For example, in classification we want to learn a model
+assigning classes to input points. The models are often parameterized,
+and then the process of learning corresponds to optimizing model
+parameters. After learning, the model with the optimized parameters
+represents the solution.</p>
+<p>A simple model is a linear model, which can for example map vectorial
+input to a lower dimensional subspace:</p>
+<div class="math notranslate nohighlight">
+\[f(x) = Ax+b\]</div>
+<p>In this case, we can say that all entries of the matrix <em>A</em> and of the
+vector <em>b</em> form the parameters of the model <em>f</em>.
+Optimizing parameters often requires derivatives
+which requires the model to be differentiable
+with respect to its own parameters.</p>
+<section id="list-of-classes">
+<h2>List of Classes<a class="headerlink" href="#list-of-classes" title="Link to this heading">¶</a></h2>
+<p>The list of models is available in the <a class="reference external" href="../../../../../../../doxygen_pages/html/group__models.html">class documentation</a></p>
+</section>
+<section id="the-base-class-abstractmodel">
+<h2>The base class ‘AbstractModel’<a class="headerlink" href="#the-base-class-abstractmodel" title="Link to this heading">¶</a></h2>
+<p>The base class for models in Shark is the templated class
+<code class="docutils literal notranslate"><span class="pre">AbstractModel&lt;InputTypeT,OutputTypeT&gt;</span></code>. For an in-depth description
+of its methods, check the doxygen documentation of
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_abstract_model.html">shark::AbstractModel</a>.  Here, we describe how the concepts
+introduced above are represented by the interface, and how models can
+be used in Shark.</p>
+<p>In general, most routines are optimized for batch computation (see the
+tutorial on <a class="reference internal" href="batches.html"><span class="doc">Data Batches</span></a>), that is, for processing many
+elements at one time. For example, models support to be evaluated on a
+batch of inputs and to compute their weighted derivatives for a batch
+of inputs at once (also see
+<a class="reference internal" href="../optimization/conventions_derivatives.html"><span class="doc">Shark Conventions for Derivatives</span></a>).</p>
+<p>The AbstractModel class is templatized on the input type as well as
+the output type. For a classification model, the input type is likely
+to be a vector type like <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>, and the output type to be an
+<code class="docutils literal notranslate"><span class="pre">unsigned</span> <span class="pre">int</span></code> for a class label.  From these types, the model
+infers the rest of the types needed for the interface and made public by
+the model:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Types</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">InputType</span></code></p></td>
+<td><p>Shortcut for the input type</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">OutputType</span></code></p></td>
+<td><p>Shortcut for the output type</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BatchInputType</span></code></p></td>
+<td><p>A Batch of inputs as returned by Batch&lt;InputType&gt;::type</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BatchOutputType</span></code></p></td>
+<td><p>A Batch of outputs as returned by Batch&lt;OutputType&gt;::type</p></td>
+</tr>
+</tbody>
+</table>
+<p>The basic capabilities of a model are managed through a set of flags. If a model
+can for example calculate the first input derivative, the flag
+<code class="docutils literal notranslate"><span class="pre">HAS_FIRST_INPUT_DERIVATIVE</span></code> is set. If the flag is not set and a function relying on
+it is called, an exception is thrown. Flags can be queried via
+convenience functions summarized in the table below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Flag and accessor function name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HAS_FIRST_PARAMETER_DERIVATIVE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasFirstParameterDerivative()</span></code></p></td>
+<td><p>First derivative w.r.t. the parameters is available</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">HAS_FIRST_INPUT_DERIVATIVE</span></code>, <code class="docutils literal notranslate"><span class="pre">hasFirstInputDerivative()</span></code></p></td>
+<td><p>First derivative w.r.t. the inputs is available</p></td>
+</tr>
+</tbody>
+</table>
+<p>To evaluate a model, there exist several variants of <code class="docutils literal notranslate"><span class="pre">eval</span></code> and
+<code class="docutils literal notranslate"><span class="pre">operator()</span></code>. The most notable exception is the stateful valuated version of <code class="docutils literal notranslate"><span class="pre">eval</span></code>.
+The state allows the model to store computation results during <code class="docutils literal notranslate"><span class="pre">eval</span></code> which then can be reused
+in the computation of the derivative to save computation time.
+In general, if the state is not required, it is a matter of taste which functions
+are called. We recommend using <code class="docutils literal notranslate"><span class="pre">operator()</span></code> for convenience.
+The list of evaluation functions is:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">eval(InputType</span> <span class="pre">const&amp;,OutputType&amp;)</span></code></p></td>
+<td><p>Evaluates the model’s response to a single input and stores it in the output</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">eval(BatchInputType</span> <span class="pre">const&amp;,</span> <span class="pre">BatchOutputType&amp;)</span></code></p></td>
+<td><p>Evaluates the model’s response to a batch of inputs and stores them, in
+corresponding order, in the output batch type</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">eval(BatchInputType</span> <span class="pre">const&amp;,</span> <span class="pre">BatchOutputType&amp;,</span> <span class="pre">State&amp;</span> <span class="pre">state)</span></code></p></td>
+<td><p>Same as the batch version of eval, but also stores intermediate results which
+can be reused in computing the derivative</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">OutputType</span> <span class="pre">operator()(InputType)</span></code></p></td>
+<td><p>Calls eval(InputType, OutputType) and returns the result</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">BatchOutputType</span> <span class="pre">operator()(BatchInputType)</span></code></p></td>
+<td><p>Calls eval(BatchInputType, BatchOutputType) and returns the result</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Data&lt;OutputType&gt;</span> <span class="pre">operator()(Data&lt;InputType&gt;)</span></code></p></td>
+<td><p>Evaluates the model’s response for a whole dataset and returns the result</p></td>
+</tr>
+</tbody>
+</table>
+<p>The only method required to be implemented in a model is the stateful
+batch input version of eval. All other evaluation methods are inferred
+from this routine. It can also make sense to implement the
+single-input version of eval, because the default implementation would
+otherwise copy the input into a batch of size 1 and then call the
+batch variant. However, the single-input variant will usually not be
+called when performance is important, so not implementing it should
+not have critical drawbacks from the point of view of the standard
+Shark code base. If a model indicates by its flags that it offers
+first derivatives, then the following methods also need to
+be implemented:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">weightedParameterDerivative</span></code></p></td>
+<td><p>Computes first or second drivative w.r.t the parameters for every output value
+and input and weights these results together</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">weightedInputDerivative</span></code></p></td>
+<td><p>Computes first or second drivative w.r.t the inputs for every output value
+and input and weights these results together</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">weightedDerivatives</span></code></p></td>
+<td><p>Computes first input and parameter derivative at the same time, making it
+possible to share calculations of both derivatives. Can be omitted.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The parameter list of these methods is somewhat lengthy, and thus we
+recommend looking up their exact signature in the doxygen
+documentation. However, all versions require the state computed during
+eval. Example code to evaluate the first derivative of a model with
+respect to its parameters thus looks like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">BatchInputType</span><span class="w"> </span><span class="n">inputs</span><span class="p">;</span><span class="w"> </span><span class="c1">//batch of inputs</span>
+<span class="n">BatchOutputType</span><span class="w"> </span><span class="n">outputs</span><span class="p">;</span><span class="w"> </span><span class="c1">//batch of model evaluations</span>
+<span class="n">MyModel</span><span class="w"> </span><span class="n">model</span><span class="p">;</span><span class="w">  </span><span class="c1">//the differentiable model</span>
+
+<span class="c1">// evaluate the model for the inputs and store the intermediate values in the state</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">State</span><span class="o">&gt;</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">createState</span><span class="p">();</span>
+<span class="n">model</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span><span class="n">outputs</span><span class="p">,</span><span class="o">*</span><span class="n">state</span><span class="p">);</span>
+
+<span class="c1">// somehow compute some weights and calculate the parameter derivative</span>
+<span class="n">RealMatrix</span><span class="w"> </span><span class="n">weights</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">someFunction</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span><span class="n">outputs</span><span class="p">);</span>
+<span class="n">RealVector</span><span class="w"> </span><span class="n">derivative</span><span class="p">;</span>
+<span class="n">modl</span><span class="p">.</span><span class="n">weightedParameterDerivative</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span><span class="w"> </span><span class="n">outputs</span><span class="p">,</span><span class="w"> </span><span class="n">weights</span><span class="p">,</span><span class="o">*</span><span class="n">state</span><span class="p">,</span><span class="n">derivative</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>There are a few more methods which result from the fact that AbstractModel
+implements several higher-level interfaces, namely <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_i_parameterizable.html">IParameterizable</a>,
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_i_nameable.html">INameable</a>, and <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_i_serializable.html">ISerializable</a>. For
+example, models are parameterizable and serialized to store results:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">numberOfParameters</span></code></p></td>
+<td><p>Number of parameters which can be optimized</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">parameterVector</span></code></p></td>
+<td><p>Returns the current parameter vector of the model</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">setParameterVector</span></code></p></td>
+<td><p>Sets the parameter vector to new values</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">inputShape</span></code></p></td>
+<td><p>Defines the shape that the model expects as input</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">outputShape</span></code></p></td>
+<td><p>Defines the shape the model will output</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">write</span></code></p></td>
+<td><p>Loads and saves a serializable object</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">createState</span></code></p></td>
+<td><p>Returns a newly created State object holding the state to be stored in eval</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Models</a><ul>
+<li><a class="reference internal" href="#list-of-classes">List of Classes</a></li>
+<li><a class="reference internal" href="#the-base-class-abstractmodel">The base class ‘AbstractModel’</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="../../first_steps/general_optimization_tasks.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> General Optimization Tasks</a>
+  <a class="topless" href="kernels.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Kernels</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/library_design/models.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

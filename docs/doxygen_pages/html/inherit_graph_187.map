@@ -1,0 +1,9 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,78,210,104"/>
+<area shape="rect" id="Node000001" href="$classshark_1_1_indexed_iterator.html" title="creates an Indexed Iterator, an Iterator which also carries index information using index()" alt="" coords="265,5,414,46"/>
+<area shape="poly" id="edge465_Node000000_Node000001" title=" " alt="" coords="170,71,264,44,265,49,171,76"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_indexing_iterator.html" title=" " alt="" coords="264,71,415,111"/>
+<area shape="poly" id="edge466_Node000000_Node000002" title=" " alt="" coords="225,88,263,88,263,94,225,94"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_proxy_iterator.html" title="Creates an iterator which reinterpretes an object as a range." alt="" coords="258,135,421,191"/>
+<area shape="poly" id="edge467_Node000000_Node000003" title=" " alt="" coords="167,106,258,135,256,140,165,112"/>
+</map>

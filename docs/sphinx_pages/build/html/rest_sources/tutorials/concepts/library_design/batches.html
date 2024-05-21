@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Data Batches &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Data Containers" href="../data/datasets.html" />
+    <link rel="prev" title="Trainers" href="trainers.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="data-batches">
+<h1>Data Batches<a class="headerlink" href="#data-batches" title="Link to this heading">¶</a></h1>
+<p>Modern computer architectures have grown more complex due to the fact
+that the speed of modern CPUs improves much faster than the memory access latency
+of the RAM. To achieve the highest performance for numerical data processing, data
+points need to be grouped into smaller subsets which we call batches. A batch can be
+described as a two dimensional structure. The first dimension, which we call “row”,
+represents the different data points, and the second dimension, which we refer to as “column”,
+represents the components of the data space or structure.</p>
+<p>Ideally, after creation of the batches, data should be placed dense in the RAM such that
+the CPU can evaluate the whole batch at once. A typical example of such a structure is a
+matrix when each single data point is a vector. These single vectors are copied into rows
+of the matrix to form a batch.</p>
+<p>A typical example for an algorithm which hugely benefits
+from this new grouping is a linear model without offset. For single vectors x, the
+evaluation of such a linear model would simply be written as</p>
+<div class="math notranslate nohighlight">
+\[f(x)=Ax \enspace .\]</div>
+<p>Here, the computation is a matrix-vector product. Let now X be the matrix holding a
+batch of n vectors, for all of which we want to compute the response of the linear
+model. Then, when the data are stored in batches and our model can operate directly
+on batches, the batch algorithm can be written as</p>
+<div class="math notranslate nohighlight">
+\[f(X)=AX^T \enspace .\]</div>
+<p>Such a transition to aggregate data structures can yield a speedup of at least
+a factor of two when ATLAS is enabled as linear algebra backend, and potentially even
+beyond an order of magnitude, depending on the dimensions of A and X. The reason is
+that the matrix-matrix multiplication can be computed much more memory friendly than
+a series of matrix-vector products. Small blocks of memory can be reused such that the
+CPU can hold these parts in its cache. This reduces the number of memory lookups needed
+from the relatively slow RAM.</p>
+<section id="more-on-batches-in-shark">
+<h2>More on batches in Shark<a class="headerlink" href="#more-on-batches-in-shark" title="Link to this heading">¶</a></h2>
+<p>Usage of batches in Shark is quite simple in most cases. As long as only standard types are
+used as inputs, the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a> class automatically creates efficient batches using a default
+size. At the current state of the library, not all algorithms and models make fullest use of
+the batch interface – but in such cases, safe fallbacks to single element methods are used.</p>
+<p>The mapping between points and batches is quite simple in most cases. Here is a small list:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Point type</p></th>
+<th class="head"><p>Batch type</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>double</p></td>
+<td><p>RealVector</p></td>
+</tr>
+<tr class="row-odd"><td><p>int</p></td>
+<td><p>IntVector</p></td>
+</tr>
+<tr class="row-even"><td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-odd"><td><p>RealVector</p></td>
+<td><p>RealMatrix</p></td>
+</tr>
+<tr class="row-even"><td><p>CompressedIntVector</p></td>
+<td><p>CompressedIntMatrix</p></td>
+</tr>
+<tr class="row-odd"><td><p>…</p></td>
+<td><p>…</p></td>
+</tr>
+<tr class="row-even"><td><p>T</p></td>
+<td><p>std::vector&lt;T&gt;</p></td>
+</tr>
+</tbody>
+</table>
+<p>T here stands for an arbitrary type. So the default case for non-standard points is
+<code class="docutils literal notranslate"><span class="pre">std::vector&lt;T&gt;</span></code>, which enables Shark to generate batches for all types. In other words,
+Shark’s batch interface works seamlessly with strings and graphs, and whatever data
+type a user may need.</p>
+<p>As you can see, the choice of batches is quite convenient for most cases. Single values
+are stored in vectors and vectors in matrices. When you write your own programs you can
+be assured that the batch types are exactly these and do not need to bother about these types.</p>
+</section>
+<section id="element-access">
+<h2>Element Access<a class="headerlink" href="#element-access" title="Link to this heading">¶</a></h2>
+<p>When you want to access the i-th element of the matrix, you can write <code class="docutils literal notranslate"><span class="pre">row(batch,i)</span></code>, or
+to query the size use <code class="docutils literal notranslate"><span class="pre">batch.size1()</span></code>. For vectors you can use <code class="docutils literal notranslate"><span class="pre">batch(i)</span></code> and <code class="docutils literal notranslate"><span class="pre">batch.size()</span></code>.
+But what  happens when a more general algorithm, like for example the error function, is to be
+implemented? In this case you do not know which functions or methods to use, since the types
+shown above have totally different interfaces. Shark circumvents this problem by adapting
+and extending the interface of boost.range:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Function</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>boost::begin(batch)</p></td>
+<td><p>returns an iterator to the beginning of the range of elements</p></td>
+</tr>
+<tr class="row-odd"><td><p>boost::end(batch)</p></td>
+<td><p>returns an iterator to the end of the range of elements</p></td>
+</tr>
+<tr class="row-even"><td><p>boost::size(batch)</p></td>
+<td><p>returns the number of elements in the batch</p></td>
+</tr>
+<tr class="row-odd"><td><p>shark::get(batch,i)</p></td>
+<td><p>returns a reference to the i-th element of the batch</p></td>
+</tr>
+</tbody>
+</table>
+<p>For typical containers which already support <code class="docutils literal notranslate"><span class="pre">batch.begin()</span></code>, <code class="docutils literal notranslate"><span class="pre">batch.end()</span></code> and <code class="docutils literal notranslate"><span class="pre">batch.size()</span></code>,
+the default implementation provided by Boost is sufficient. For the ublas matrices, Shark provides
+reasonably implemented iterators.</p>
+</section>
+<section id="the-batch-t-traits-class">
+<h2>The Batch&lt;T&gt; Traits class<a class="headerlink" href="#the-batch-t-traits-class" title="Link to this heading">¶</a></h2>
+<p>Suppose your data points have an arbitrary type T. There are a few things that you want to know:</p>
+<ul class="simple">
+<li><p>What is the Batch type of T and how can it be created?</p></li>
+<li><p>How many elements does the batch have?</p></li>
+<li><p>How can single elements be accessed?</p></li>
+</ul>
+<p>Typically T cannot answer this question by itself, since we cannot change its definition.
+Even if we could change it for some, it clearly is not possible for basic types like int or
+double. Therefore we need an external class that explicitly represents this information
+for use at compile-time. For Shark batches, this class is the <code class="docutils literal notranslate"><span class="pre">Batch&lt;T&gt;</span></code> class template.
+It is a traits class, meaning that it tells you something about a type, in this case T
+and its batch type. Let’s take a closer look at the basic definition of Batch, for
+now in <code class="docutils literal notranslate"><span class="pre">include/shark/Data/BatchInterface.h</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Batch</span><span class="p">{</span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="n">implementation</span><span class="o">-</span><span class="n">specific</span><span class="o">-</span><span class="n">type</span><span class="w"> </span><span class="n">type</span><span class="p">;</span><span class="w">            </span><span class="c1">//type of a batch</span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="n">implementation</span><span class="o">-</span><span class="n">specific</span><span class="o">-</span><span class="n">type</span><span class="w"> </span><span class="n">reference</span><span class="p">;</span><span class="w">       </span><span class="c1">//reference to an element of the batch</span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="n">implementation</span><span class="o">-</span><span class="n">specific</span><span class="o">-</span><span class="n">type</span><span class="w"> </span><span class="n">const_reference</span><span class="p">;</span><span class="w"> </span><span class="c1">//const_reference to an element of the batch</span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="n">implementation</span><span class="o">-</span><span class="n">specific</span><span class="o">-</span><span class="n">type</span><span class="w"> </span><span class="n">iterator</span><span class="p">;</span><span class="w">        </span><span class="c1">//iterator over all elements of the batch</span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="n">implementation</span><span class="o">-</span><span class="n">specific</span><span class="o">-</span><span class="n">type</span><span class="w"> </span><span class="n">const_iterator</span><span class="p">;</span><span class="w">  </span><span class="c1">//const_iterator over all elements of the batch</span>
+
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="nf">createBatch</span><span class="p">(</span><span class="n">T</span><span class="w"> </span><span class="k">const</span><span class="o">&amp;</span><span class="w"> </span><span class="n">input</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>We introduce class usage in a step-by-step example – improving it as we go
+along until we do not need to know the type of points any more. We begin with
+short example code where the point is a vector and the batch is a matrix:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVector</span><span class="w"> </span><span class="nf">point</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">RealMatrix</span><span class="w"> </span><span class="nf">batchOfPoints</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">row</span><span class="p">(</span><span class="n">batchOfPoints</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">batchOfPoints</span><span class="p">.</span><span class="n">size1</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Let’s answer the first question: how to query the type of a batch?
+This is easy using <code class="docutils literal notranslate"><span class="pre">Batch&lt;T&gt;::type</span></code>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVector</span><span class="w"> </span><span class="nf">point</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">Batch</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">type</span><span class="w"> </span><span class="n">batchOfPoints</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">row</span><span class="p">(</span><span class="n">batchOfPoints</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">batchOfPoints</span><span class="p">.</span><span class="n">size1</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Not bad. Still, we explicitly use that batch is a Matrix by calling
+its size1 member. That’s fine, as long as we know that T can only be a vector. But sometimes
+we do not even know that, typically in generic code. Let’s begin improving it, by changing the
+element access as well as the size query. For the first, we use <code class="docutils literal notranslate"><span class="pre">get</span></code>, and for the second,
+<code class="docutils literal notranslate"><span class="pre">size</span></code>, both from the previous section:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVector</span><span class="w"> </span><span class="nf">point</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">Batch</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">type</span><span class="w"> </span><span class="n">batchOfPoints</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">get</span><span class="p">(</span><span class="n">batchOfPoints</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">batchOfPoints</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Now the last thing missing is the creation of the batch. We always need an element to create
+a batch from it. It serves as blueprint ensuring that the batch can store the elements. For
+example in the case of RealVector, it ensures that the matrix has the same amount of columns
+as the vector has dimensions. In this case, we use the point available:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVector</span><span class="w"> </span><span class="nf">point</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span>
+<span class="n">Batch</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">type</span><span class="w"> </span><span class="n">batchOfPoints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Batch</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">createBatch</span><span class="p">(</span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span>
+<span class="n">get</span><span class="p">(</span><span class="n">batchOfPoints</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">point</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">batchOfPoints</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>While this surely looks more difficult than the first version, it is also completely type
+independent. Note that even when creating batches of size 1, it is still necessary to
+assign the point after batch initialization (as in line three of the above snippet).
+Otherwise, the batches point would be uninitialized.</p>
+</section>
+<section id="adapting-batch-t-for-a-user-defined-structure">
+<h2>Adapting Batch&lt;T&gt; for a user defined structure<a class="headerlink" href="#adapting-batch-t-for-a-user-defined-structure" title="Link to this heading">¶</a></h2>
+<p>Let’s face it: even though we like to pretend that all our data points are vectors,
+we often only make our data look like it when in fact it is a collection of different
+types – for example mixing reals, categorical data and sparse binary features with
+strings of varying lengths, or even graphs. We often have routines that produce these
+features and then spend a lot of time writing code that creates data vectors out of
+the points. Sometimes this is exactly what we want (for example when the model is a
+neural net which does not have a sense of data structure at all). But for more
+specialized methods we might want to represent this structure explicitly. At the
+same time, we want the efficiency of a good data representation in batches. So how do
+we solve it? By creating a batch type and specializing <code class="docutils literal notranslate"><span class="pre">Batch&lt;T&gt;</span></code> on it!</p>
+<p>Let’s start with a simple data point:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">Point</span><span class="p">{</span>
+<span class="w">    </span><span class="n">RealVector</span><span class="w"> </span><span class="n">feature1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SparseIntVector</span><span class="w"> </span><span class="n">feature2</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>There is an easy automatic way to create a sufficient specialisation of batch for <code class="docutils literal notranslate"><span class="pre">Point</span></code> in Shark using the macro SHARK_CREATE_BATCH_INTERFACE:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PointVars (feature1)(feature2)</span>
+<span class="cp">#define PointTypes (RealVector)(SparseIntVector)</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Batch</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="o">&gt;</span><span class="p">{</span>
+<span class="w">    </span><span class="n">SHARK_CREATE_BATCH_INTERFACE</span><span class="p">(</span><span class="w"> </span><span class="n">Point</span><span class="p">,</span>
+<span class="w">        </span><span class="p">(</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="n">feature1</span><span class="p">),(</span><span class="n">SparseIntVector</span><span class="p">,</span><span class="w"> </span><span class="n">feature2</span><span class="p">))</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>This also works when Point is templatized, for example like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Type1</span><span class="p">,</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">Type2</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Point</span><span class="p">{</span>
+<span class="w">    </span><span class="n">RealVector</span><span class="w"> </span><span class="n">feature1</span><span class="p">;</span>
+<span class="w">    </span><span class="n">SparseIntVector</span><span class="w"> </span><span class="n">feature2</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>TG: should it be Type1 feature1; Type2 feature2; ???
+mt: i second this question</p>
+</div>
+<p>In this case, we have to add the template parameters to the Batch specialisation:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#define PointVars (feature1)(feature2)</span>
+<span class="cp">#define PointTypes (Type1)(Type2)</span>
+<span class="cp">#define PointName Point&lt;Type1,Type2&gt;</span>
+<span class="k">template</span><span class="o">&lt;</span><span class="k">class</span><span class="w"> </span><span class="nc">Type1</span><span class="p">,</span><span class="k">class</span><span class="w"> </span><span class="nc">Type2</span><span class="o">&gt;</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Batch</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="o">&gt;</span><span class="p">{</span>
+<span class="w">    </span><span class="n">SHARK_CREATE_BATCH_INTERFACE</span><span class="p">(</span><span class="w"> </span><span class="n">PointName</span><span class="p">,</span><span class="w"> </span><span class="n">PointVars</span><span class="p">,</span><span class="w"> </span><span class="n">PointTypes</span><span class="w"> </span><span class="p">)</span>
+<span class="p">};</span>
+<span class="cp">#undef PointVars</span>
+<span class="cp">#undef PointTypes</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>mt: undef pointname also?</p>
+</div>
+<p>You see how the convenience macro enables the definition of Shark batch types
+for arbitrary data structures without much trouble. Recall that this is only
+necessary for user defined non-vectorial data formats. The standard cases, such
+as stacking vectors into matrices, are already covered by the Shark library itself.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Data Batches</a><ul>
+<li><a class="reference internal" href="#more-on-batches-in-shark">More on batches in Shark</a></li>
+<li><a class="reference internal" href="#element-access">Element Access</a></li>
+<li><a class="reference internal" href="#the-batch-t-traits-class">The Batch&lt;T&gt; Traits class</a></li>
+<li><a class="reference internal" href="#adapting-batch-t-for-a-user-defined-structure">Adapting Batch&lt;T&gt; for a user defined structure</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="trainers.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Trainers</a>
+  <a class="topless" href="../data/datasets.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Data Containers</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/library_design/batches.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

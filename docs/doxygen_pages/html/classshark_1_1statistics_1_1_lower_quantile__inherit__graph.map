@@ -1,0 +1,5 @@
+<map id="shark::statistics::LowerQuantile" name="shark::statistics::LowerQuantile">
+<area shape="rect" id="Node000001" title="For a vector of points computes for every dimension the 25%&#45;quantile." alt="" coords="5,94,128,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1statistics_1_1_quantile.html" title="For a vector of points computes for every dimension the p&#45;quantile." alt="" coords="5,5,128,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="69,62,69,94,64,94,64,62"/>
+</map>

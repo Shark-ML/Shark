@@ -1,0 +1,141 @@
+
+Hello World
+===========
+
+In this section you will write your first program with Shark.
+
+LDA classification
+------------------
+
+Using a Linear Discriminant Analysis (LDA) as Hello-World (or
+Hello-Shark) program, we will try to separate two classes of inputs
+using a simple linear function. The code for this tutorial can be
+found in :doxy:`quickstartTutorial.cpp <quickstartTutorial.cpp>` in the
+``examples/Supervised`` folder.
+
+In order to access the LDA, we include its header file and import the Shark
+namespace for convenience. We will also need the header for importing CSV files::
+
+
+	#include <shark/Data/Csv.h>
+	#include <shark/Algorithms/Trainers/LDA.h>
+	#include <shark/ObjectiveFunctions/Loss/ZeroOneLoss.h>
+	using namespace shark;
+	
+
+Data preparation
+%%%%%%%%%%%%%%%%
+
+Next we would like some data to classify. We can use the :doxy:`Dataset`
+class for holding the data, and load the data with ``importCSV``::
+
+
+		ClassificationDataset data;
+		try {
+			importCSV(data, argv[1], LAST_COLUMN, ' ');
+		} 
+		catch (...) {
+			cerr << "unable to read data from file " <<  argv[1] << endl;
+			exit(EXIT_FAILURE);
+		}
+		
+
+The first line creates a dataset, the data structure used in Shark for holding
+data for supervised learning tasks. Such containers hold pairs
+of input data points and labels. The ``ClassificationDataset`` used here is
+simply a typedef for
+``LabeledData<RealVector,unsigned int>``, as we will use real-valued feature
+vectors and integer labels. The second line loads the data file using ``importCSV``,
+which can read many CSV-like file formats. Passing ``LAST_COLUMN``  as argument indicates
+that the last column of the file holds the class labels.
+
+For example, let us consider the data in
+:download:`C.csv <../../../../../examples/Supervised/data/quickstartData.csv>`.
+To apply the Shark program to these data, you have to pass the filename as a command line option, e.g.: ::
+
+  ./quickstartTutorial data/quickstartData.csv
+
+
+We want to use only one part of all available data for training, and
+set aside another part for testing. The next line splits (i.e.
+removes) a test set from our loaded data and stores it inside a new
+dataset. We choose the training set to be 80% of the available data::
+
+
+		ClassificationDataset test = splitAtElement(data,static_cast<std::size_t>(0.8*data.numberOfElements()));
+		
+
+After this operation, ``data`` is only 80% of its former size, and ``test`` holds the
+remaining 20%. See the :ref:`data tutorials <label_for_data_tutorials>` for similar
+such operations.
+
+Declaring a model and trainer
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Shark strictly separates the concepts of models and learning algorithm. This means that we
+need to declare a learning algorithm and the right model for it separately. Since the LDA
+uses a linear classifier, we declare an instance of such. It is not needed to specify
+the dimensionality of the input data or the number of classes of our problem, the LDA
+will infer this from the training data itself. The LDA is a separate entity playing
+the role of a trainer. ::
+
+
+		//create a classifier for the problem
+		LinearClassifier<> classifier;
+		//create the lda trainer
+		LDA lda;
+		
+
+To optimize the model given the training data and using a specific trainer we write ::
+
+
+		lda.train(classifier,data);
+		
+
+After this call, our classifier can directly be used to classify data. But we do not
+know how good our solution is, so let's evaluate it.
+
+
+Evaluation
+%%%%%%%%%%
+
+One way to evaluate our LDA-trained linear model is to count the number of
+correctly classified test samples. Here, we use a loss function to evaluate the
+fration of incorrectly classified points::
+
+
+		ZeroOneLoss<> loss;
+		Data<unsigned int> predictions = classifier(test.inputs());
+		double error = loss(test.labels(),predictions);
+		
+
+The result should read:
+
+.. code-block:: none
+
+    RESULTS:
+    ========
+
+    test data size: 200
+    error rate: 0.225
+
+What you learned
+----------------
+
+You should have learned the following aspects in this Tutorial:
+
+* How to use a trainer to train a model
+* How to load data from from a csv file.
+* How to evaluate your model on a test set.
+
+During the course of all tutorials, you will gain a more fine grained knowledge
+about these different aspects.
+
+What next?
+----------
+
+In the next tutorial we will investigate how :doc:`./general_optimization_tasks` are set up, which gives
+you a deeper understanding of the main building blocks of Shark.
+
+
+

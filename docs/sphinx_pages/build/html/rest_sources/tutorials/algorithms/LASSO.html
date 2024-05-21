@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>LASSO Regression &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Training Feed-Forward Neural Networks" href="ffnet.html" />
+    <link rel="prev" title="K-Means Clustering" href="kmeans.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="lasso-regression">
+<h1>LASSO Regression<a class="headerlink" href="#lasso-regression" title="Link to this heading">¶</a></h1>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">¶</a></h2>
+<p>LASSO stands for “Least Absolute Shrinkage and Selection Operator”.
+The term is often used synonymous with 1-norm regularization. In its
+most basic form it refers to 1-norm regularized linear regression.
+For the basics on linear regression we refer to the
+<a class="reference internal" href="linearRegression.html"><span class="doc">Linear Regression</span></a> tutorial.</p>
+<p>In contrast to plain linear regression or ridge regression LASSO
+solves a 1-norm regularized problem. For training data</p>
+<div class="math notranslate nohighlight">
+\[S=\{(x_1, y_1), \dots, (x_l, y_l)\} ,\]</div>
+<p>with vector valued inputs <em>x</em> and real valued labels <em>y</em> the following
+optimization problem is solved:</p>
+<div class="math notranslate nohighlight">
+\[\min_w \,\, \lambda \|w\|_1 + \sum_i \|y_i - \langle w, x_i \rangle\|_2^2\]</div>
+<p>The decisive property of LASSO regression is that the one-norm term
+enforces sparseness of the solution. In particular for rather large
+values of <span class="math notranslate nohighlight">\(\lambda\)</span> the solution <em>w</em> has only few non-zero
+components. This allows regression to be meaningful even if the
+feature dimension greatly exceeds the number of data points, since the
+method reduces the linear predictor to few variables. Therefore the
+method is often used for the identification of (hopefully) causal
+relationships: it is hoped that the label is mainly caused by the
+values of rather few features. These are often termed explanatory
+variables.</p>
+<p>LASSO problems can be solved quickly with coordinate descent algorithms,
+see <a class="reference internal" href="#fhht2007" id="id1"><span>[FHHT2007]</span></a>. Shark implements the optimized algorithm from <a class="reference internal" href="#gu2013" id="id2"><span>[GU2013]</span></a>.</p>
+</section>
+<section id="lasso-in-shark">
+<h2>LASSO in Shark<a class="headerlink" href="#lasso-in-shark" title="Link to this heading">¶</a></h2>
+<p>The method in implemented by the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_lasso_regression.html">LassoRegression</a> trainer.
+It operates on a standard <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_linear_model.html">LinearModel</a>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/LassoRegression.h&gt;</span>
+
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+
+<span class="w">        </span><span class="n">LinearModel</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+<span class="w">        </span><span class="n">LassoRegression</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">(</span><span class="n">lambda</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">trainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Of course, <cite>data</cite> is assumed to be training data of appropriate type,
+i.e., <cite>RealVector</cite> inputs and one-dimensional regression labels.
+After training the weight vector of the linear model can be examined
+for non-zero coefficients and therefore for explanatory variables.
+Shark comes with a fully operational example program:</p>
+<p><a class="reference external" href="../../../../../../doxygen_pages/html/_lasso_regression_8cpp.html">LassoRegression.cpp</a></p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="fhht2007" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">FHHT2007</a><span class="fn-bracket">]</span></span>
+<p>J. Friedman, T. Hastie, H. Höfling, and R. Tibshirani.
+Pathwise Coordinate Optimization. The Annals of Applied Statistics, 1(2):302-332, 2007.</p>
+</div>
+<div class="citation" id="gu2013" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">GU2013</a><span class="fn-bracket">]</span></span>
+<p>T. Glasmachers and Ü. Dogan.
+Accelerated Coordinate Descent with Adaptive Coordinate Frequencies.
+In Proceedings of the fifth Asian Conference on Machine Learning (ACML), 2013.</p>
+</div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">LASSO Regression</a><ul>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#lasso-in-shark">LASSO in Shark</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="kmeans.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> K-Means Clustering</a>
+  <a class="topless" href="ffnet.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Training Feed-Forward Neural Networks</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/LASSO.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Data Containers &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Label Formats" href="labels.html" />
+    <link rel="prev" title="Data Batches" href="../library_design/batches.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="data-containers">
+<h1>Data Containers<a class="headerlink" href="#data-containers" title="Link to this heading">¶</a></h1>
+<p>Data handling is an important aspect of a machine learning
+library. Shark ships with three container classes tailored
+to holding data for machine learning applications:
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a>, <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_unlabeled_data.html">UnlabeledData</a>, and <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a>.
+After familiarizing yourself with the basic concepts, have a look at the
+complete list of <a class="reference internal" href="../../tutorials.html#label-for-data-tutorials"><span class="std std-ref">data tutorials</span></a>.</p>
+<p>A decisive difference between Shark 3.x and previous Shark version and
+many other machine learning libraries is that the data is not stored in
+a generic container, but in objects tailored to efficient large-scale
+machine learning.</p>
+<p>The containers presented in this tutorial can all be used by including:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/Dataset.h&gt;</span>
+</pre></div>
+</div>
+<section id="key-properties">
+<h2>Key properties<a class="headerlink" href="#key-properties" title="Link to this heading">¶</a></h2>
+<p>The data containers provided by shark can store all types of data that
+could also be  held in one of the standard template library containers.
+In contrast to  a <code class="docutils literal notranslate"><span class="pre">std::vector</span></code>,  the Data class has three abilities
+that are important in the context of machine learning:</p>
+<ul class="simple">
+<li><p>Elements of a data set are stored in blocks called batches, such that
+computations can be carried out block by block, instead of element
+by element. These batches are optimized for continuous memory access,
+which allows for more efficient processing and thus faster implementations.
+For example, a batch of vectors is stored as a matrix with consecutive
+memory with every point occupying a matrix row, instead of using several vectors
+with memory locations scattered all over the heap. This is achieved through Shark’s
+<a class="reference internal" href="../library_design/batches.html"><span class="doc">batch mechanism</span></a>.</p></li>
+<li><p>A <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a> object can be used to create subsets. This is useful,
+for example, for splitting data into training, validation, and test sets.
+Repeated splitting (for example for cross-validation) is possible without
+expensive deep copy operations.</p></li>
+<li><p>By the same token data can be shared among different <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a> instances.
+Thus creating subsets (on the level of batches) is quite cheap as it does
+not need a physical copy of the contents of the set. One should not confuse
+this with the different concept of lazy-copying, which just delays the copy
+until an actual change is done. Instead sets are shared by default and only
+copied when actually required by the algorithm.</p></li>
+</ul>
+</section>
+<section id="different-types-of-data-sets">
+<h2>Different types of data sets<a class="headerlink" href="#different-types-of-data-sets" title="Link to this heading">¶</a></h2>
+<p>The three data set classes in shark differ not much in their implementation, as
+they all use the same underlying structure. However they provide important semantic
+differentiation as well as special functions tailored to this differentiation. Before
+we introduce the interface of the data object we want to clarify this distinction:</p>
+<ul>
+<li><p><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a> can store arbitrary data. The data class takes the
+general role of a <code class="docutils literal notranslate"><span class="pre">std::vector</span></code> only adapted to the special needs
+for fast computation in a machine learning environment.</p></li>
+<li><p><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_unlabeled_data.html">UnlabeledData</a> represents input data which is not labeled.
+This is the input format used for unsupervised learning methods. The unlabeled
+data class is a subclass of Data and does not offer much new functionality
+beyond <code class="docutils literal notranslate"><span class="pre">Data</span></code>.
+But it represents an important <em>semantic</em> difference, since the data
+points are interpreted as input data without labels, whereas the above
+mentioned Data class might store anything (for example model outputs,
+labels, or points).</p></li>
+<li><p><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a> finally represents inputs (data points) augmented with
+labels. Conceptually the class <code class="docutils literal notranslate"><span class="pre">LabeledData&lt;I,L&gt;</span></code> can be described roughly
+as a <code class="docutils literal notranslate"><span class="pre">Data</span></code> object storing a pair-type of inputs I and labels L, for example
+<code class="docutils literal notranslate"><span class="pre">Data&lt;std::pair&lt;I,L&gt;</span> <span class="pre">&gt;</span></code>. There is however an important difference in how
+labels and inputs are treated in machine learning. Often, especially for
+unsupervised methods, we use only the inputs, thus viewing the object as
+an <code class="docutils literal notranslate"><span class="pre">UnlabeledData&lt;I&gt;</span></code>. For evaluation of the model we first use the set
+of inputs, then acquire the set of predictions of the model, and finally
+compare this set of predictions to the set of labels by means of a loss
+function. Instead of accessing input-label pairs as a fixed grouping, we
+would like to view them as two separate data sets that are conveniently
+bound together. And this is how the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a> object is
+implemented under the hood.</p>
+<p>For convenience, there exist the following three specializations of
+labeled data sets:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ClassificationDataset</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">CompressedRealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">CompressedClassificationDataset</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">RegressionDataset</span><span class="p">;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="the-class-data-t">
+<h2>The class Data&lt;T&gt;<a class="headerlink" href="#the-class-data-t" title="Link to this heading">¶</a></h2>
+<p>This part of the tutorial introduces the interface of <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a>.
+The following descriptions also apply to the two other types of data sets.</p>
+<section id="creation-and-copying-of-data-sets">
+<h3>Creation and copying of data sets<a class="headerlink" href="#creation-and-copying-of-data-sets" title="Link to this heading">¶</a></h3>
+<p>Creating a data set is quite easy and can be achieved in several ways.
+The first and by far easiest way is to load data from a file or to sample
+from a distribution. Examples for this are given in the tutorial on
+<a class="reference internal" href="../../first_steps/general_optimization_tasks.html"><span class="doc">importing data</span></a>.
+In some cases data is already in memory and only needs to be imported
+into a data container. In this case a data set can be created using:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">points</span><span class="p">;</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createDataFromRange</span><span class="p">(</span><span class="n">points</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>A <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a> object is created from inputs and labels:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">inputs</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">labels</span><span class="p">;</span>
+<span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createLabeledDataFromRange</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span><span class="w"> </span><span class="n">labels</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>It is also possible to create an data set with pre-allocated space for
+<em>n</em> points. This requires an example point:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="n">RealVector</span><span class="p">(</span><span class="mi">5</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>In the above example, we create a data container with space for 1000
+5-dimensional vectors. The provided Vector is not copied to all 1000
+elements, but it serves merely as a hint on the structure of the
+objects to be stored. To understand this, remember that objects are
+not stored as single entities, but grouped into batches. A batch of
+<code class="docutils literal notranslate"><span class="pre">RealVector</span></code> objects in a <code class="docutils literal notranslate"><span class="pre">RealMatrix</span></code>. The vector’s dimension
+is required for the proper creation of the matrices holding the
+batches, and this is what the data dimension is required for. In
+essence this call does not create 1000 instances of <code class="docutils literal notranslate"><span class="pre">RealVector?</span></code>
+together with the same amount of memory allocations, but only a hand
+full of matrices. By default a safe size is used for the number of
+elements in a batch, but it can also be actively controlled by adding
+the maximum size of batches as a third parameter:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="n">RealVector</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Data sets can be copied and assigned with the usual operators:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data2</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data2</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Here one of the core features of the <code class="docutils literal notranslate"><span class="pre">Data</span></code> containers comes into play.
+As already mentioned in the key properties section above, assignment
+does not trigger a deep copy operation. Instead data is shared among
+different instances. The above code thus creates a shallow (hence cheap)
+copy of the underlying data. Afterwards both <code class="docutils literal notranslate"><span class="pre">Data</span></code> objects hold
+references to the same data batches.</p>
+<p>Sometimes it is important to ensure that contents (batches) of a
+set are not shared with other instances. This can be ensured with:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">data</span><span class="p">.</span><span class="n">makeIndependent</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>This function creates a deep copy of all batches that were previously
+shared with other <code class="docutils literal notranslate"><span class="pre">Data</span></code> instances.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For efficiency and flexibility, <code class="docutils literal notranslate"><span class="pre">Data</span></code> objects provide full read and
+write access to their internal batch structure. This makes it possible
+to mess with the container’s data sharing capability. A direct
+modification to a shared batch affects all <code class="docutils literal notranslate"><span class="pre">Data</span></code> objects sharing
+this batch, irrespective of which data set was used to access the batch.
+As a precaution measure <strong>always</strong> call <code class="docutils literal notranslate"><span class="pre">makeIndependent</span></code> on a
+<code class="docutils literal notranslate"><span class="pre">Data</span></code> object before modifying its internals.</p>
+</div>
+<p>Data sharing is thread-safe, thus it is perfectly fine to create
+shared copies of (parts of) a data object in multiple threads. However,
+it must be stressed that the <code class="docutils literal notranslate"><span class="pre">Data</span></code> class does not guard against
+changes to the individual batches or single elements (see the warning
+above). Changing an element in one instance of the data object will
+change the respective elements in all other containers as well.
+This is nearly always undesired and results in hard-to-find bugs.</p>
+<p>The elements in <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_unlabeled_data.html">UnlabeledData</a> and <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a> objects
+can be conveniently reordered by calling <a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#ga67bdcaf03984f3f958b83b5a4fafe77e">UnlabeledData::shuffle()</a>
+and <a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#ga96ea65352abe5e2c0787e4154a48972f">LabeledData::shuffle()</a>, respectively. This is an examples of
+an operation that needs to reorganize the internal batch structure.</p>
+<section id="data-as-a-collection-of-batches">
+<h4>Data as a collection of batches<a class="headerlink" href="#data-as-a-collection-of-batches" title="Link to this heading">¶</a></h4>
+<p>As outlined above, the Data class stores the points internally as batches and
+is therefore optimized for using these batches directly instead of accessing
+single points. Therefore this part of the tutorial will explain how the data
+set provides access to the batches and introduce common usage patterns.</p>
+<p>The first thing to note is that the <code class="docutils literal notranslate"><span class="pre">Data</span></code> container does not attempt to
+be stl-compatible. This is because it needs to support access to its contents
+at two different levels of granularity, namely batch-wise and for element-wise.</p>
+<p>However an stl compatible interface to batches can be acquired with the
+<a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#ga4edf9849713708253a4d1f2d31e6187b">Data::batches()</a> method:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">batch_range</span><span class="w"> </span><span class="n">Batches</span><span class="p">;</span>
+<span class="n">Batches</span><span class="w"> </span><span class="n">batches</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">batches</span><span class="p">();</span>
+
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">batches</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">batches</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">batches</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">pos</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">pos</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>or similarly when data is constant or a constant range is desired:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">const_batch_range</span><span class="w"> </span><span class="n">batches</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">batches</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>The above loop still looks a bit inconvenient. We might as well use
+a range-for loop for traversal:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="k">const</span><span class="o">&amp;</span><span class="w"> </span><span class="n">batch</span><span class="o">:</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">batches</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">batch</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Or we can resort to index access:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">numberOfBatches</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">batch</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>When iterating over batches in an outer loop, individual elements can be
+accessed within each batch in an inner loop:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">for</span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="k">const</span><span class="o">&amp;</span><span class="w"> </span><span class="n">batch</span><span class="o">:</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">batches</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">batchSize</span><span class="p">(</span><span class="n">batch</span><span class="p">);</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">getBatchElement</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span><span class="n">i</span><span class="w"> </span><span class="p">);</span><span class="w">   </span><span class="c1">// prints element i of the batch</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="data-as-a-collection-of-elements">
+<h4>Data as a collection of elements<a class="headerlink" href="#data-as-a-collection-of-elements" title="Link to this heading">¶</a></h4>
+<p>While the data object is optimized for batch access, sometimes direct
+access to single elements is needed. Thus the <code class="docutils literal notranslate"><span class="pre">Data</span></code> container also
+provides a convenience interface for elements, however, with much worse
+performance guarantees than for batch access. While the interfaces look
+very similar one should be aware of the important differences.</p>
+<p>First of all, all elements stored in the data set are only virtual for
+most input types. This means that querying the i-th element of the set
+does not return a reference to it, but instead returns a proxy object
+that acts as a reference. For example when storing <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>
+elements in a <code class="docutils literal notranslate"><span class="pre">Data&lt;RealVector&gt;</span></code> object, elements are stored row-wise
+in a (row-major) <code class="docutils literal notranslate"><span class="pre">RealMatrix</span></code>. Hence a matrix row is returned as a
+proxy.
+This is no problem most of the time, however when using the returned
+value as an argument to a function like for example:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="n">RealVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">element</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>the compiler will complain that a matrix row is not a vector. In the
+case of:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="n">RealVector</span><span class="w"> </span><span class="k">const</span><span class="o">&amp;</span><span class="w"> </span><span class="n">element</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>the compiler is very helpful, creating a temporary vector and copying
+the matrix row into it. However, this is slow, and moreover it is
+unnecessary. Be aware of this performance pitfall and use template
+arguments or the correct reference type of the data set if possible:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">void</span><span class="w"> </span><span class="nf">function</span><span class="p">(</span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">element_reference</span><span class="w"> </span><span class="k">const</span><span class="o">&amp;</span><span class="w"> </span><span class="n">element</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The second pitfall is that we can’t give strong performance guarantees
+for the access methods. As we allow batch resizing and all batches
+having a different size it is not easy to keep track of the actual
+number of elements stored in the set. Thus
+<a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#ga814e8b0028cc90dd2af69805e8f8a04d">Data::numberOfElements()</a> needs to iterate over all batches and
+hence takes time linear in the number of batches (and thus usually in
+the number of elements). For the same reason, accessing the i-th element
+with <a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#ga0ea72a74a21d5ff59772516b83c4a58b">Data::element()</a> is a linear time operation in the number of
+batches since it needs to find the batch the element is located in.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Element-wise random access to a <code class="docutils literal notranslate"><span class="pre">Data</span></code> a object is a linear time
+operation! It is not to be confused with constant-time element
+access in arrays. Thus aside from only very
+small data sets or performance uncritical code you should never use
+element-wise random-access to a data container.</p>
+</div>
+<p>As a consequence a naive loop iterating over the elements of a <code class="docutils literal notranslate"><span class="pre">Data</span></code>
+container is a <strong>quadratic time</strong> operation. There are the following
+more appropriate ways of achieving this common operation in linear time:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;::</span><span class="n">element_range</span><span class="w"> </span><span class="n">Elements</span><span class="p">;</span>
+
+<span class="c1">// 1: explicit iterator loop using the range over the elements</span>
+<span class="n">Elements</span><span class="w"> </span><span class="n">elements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">elements</span><span class="p">();</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">elements</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="w"> </span><span class="n">pos</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">elements</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">pos</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">pos</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// 2: foreach</span>
+<span class="c1">//note pass by value, the range returns proxy elements instead of references</span>
+<span class="k">for</span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">element</span><span class="o">:</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">elements</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">element</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="summary-of-element-access">
+<h4>Summary of element access<a class="headerlink" href="#summary-of-element-access" title="Link to this heading">¶</a></h4>
+<p>We will now summarize the above description in a more formal tabular layout.
+For brevity of description we only present the non-const version of each
+method and typedef.</p>
+<p>Typedefs of the <code class="docutils literal notranslate"><span class="pre">Data</span></code> container. For every reference and range there
+exists a corresponding immutable version prepending <code class="docutils literal notranslate"><span class="pre">const_</span></code> to the name:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>element_type</p></td>
+<td><p>The type of elements stored in the object.</p></td>
+</tr>
+<tr class="row-odd"><td><p>element_reference</p></td>
+<td><p>Reference to a single element. This is a proxy reference, meaning
+that it can be something more complex than element_type&amp;, for example
+an object describing the row of a matrix.</p></td>
+</tr>
+<tr class="row-even"><td><p>element_range</p></td>
+<td><p>Range over the elements.</p></td>
+</tr>
+<tr class="row-odd"><td><p>batch_type</p></td>
+<td><p>The batch type of the Data set. Same as Batch&lt;element_type&gt;::type</p></td>
+</tr>
+<tr class="row-even"><td><p>batch_reference</p></td>
+<td><p>Reference to a batch of points. This is batch_type&amp;.</p></td>
+</tr>
+<tr class="row-odd"><td><p>batch_range</p></td>
+<td><p>Range over the batches.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Methods for batch access. These methods have constant time complexity:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>size_t numberOfBatches () const</p></td>
+<td><p>Returns the number of batches in the set.</p></td>
+</tr>
+<tr class="row-odd"><td><p>batch_reference batch (size_t i)</p></td>
+<td><p>Returns the i-th batch of the set.</p></td>
+</tr>
+<tr class="row-even"><td><p>batch_range batches ()</p></td>
+<td><p>Returns an stl-compliant random-access-container over the batches.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Methods for element access. All these methods have time complexity
+linear in the number of batches:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>size_t numberOfElements () const</p></td>
+<td><p>Returns the number of elements in the set.</p></td>
+</tr>
+<tr class="row-odd"><td><p>element_reference element (size_t i)</p></td>
+<td><p>Returns the i-th element of the set.</p></td>
+</tr>
+<tr class="row-even"><td><p>element_range elements ()</p></td>
+<td><p>Returns a bidirectional container of elements. Random access
+is also supported but does not meet stl’s time complexity
+requirements. Also be aware that proxy-objects are returned
+instead of references.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Furthermore, <code class="docutils literal notranslate"><span class="pre">LabeledData</span></code> supports direct access to the Containers
+storing elements and labels:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>UnlabeledData&lt;I&gt;&amp; inputs()</p></td>
+<td><p>Returns only the inputs of the LabeledData&lt;I,L&gt; object.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Data&lt;L&gt;&amp; labels()</p></td>
+<td><p>Returns only the labels of the LabeledData&lt;I,L&gt; object.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="querying-information-about-a-data-set">
+<h2>Querying information about a data set<a class="headerlink" href="#querying-information-about-a-data-set" title="Link to this heading">¶</a></h2>
+<p>Sometimes we want to query basic informations about a data set like input
+dimension or the number of classes of a labeled data set. The data classes
+provide several convenience functions for such queries.</p>
+<p>For Data and UnlabeledData there are three functions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">classes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">numberOfClasses</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w">       </span><span class="c1">// maximal class label minus one</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sizes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classSizes</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// number of occurrences of every class label</span>
+
+<span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dataVec</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dataDimension</span><span class="p">(</span><span class="n">dataVec</span><span class="p">);</span><span class="w">          </span><span class="c1">// dimensionality of the data points</span>
+</pre></div>
+</div>
+<p>For LabeledData we have a similar set of methods:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">classes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">numberOfClasses</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w">       </span><span class="c1">// maximal class label minus one</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">sizes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classSizes</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w"> </span><span class="c1">// number of occurrences of every class label</span>
+<span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">dim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">inputDimension</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w">            </span><span class="c1">// dimensionality of the data points</span>
+</pre></div>
+</div>
+</section>
+<section id="transformation-of-data-sets">
+<h2>Transformation of data sets<a class="headerlink" href="#transformation-of-data-sets" title="Link to this heading">¶</a></h2>
+<p>In many applications data must be pre-processed before actual learning.
+For example, the data mean is to be removed, or labels need to be altered
+in order to fit into Shark’s label convention (see the tutorial on
+<a class="reference internal" href="labels.html"><span class="doc">labels</span></a>).
+For this purpose Shark provides a smart and efficient transformation
+mechanism. Assume function objects f and g such that f(input) returns
+the transformed input vector and g(label) the transformed label. Then we
+can transform data sets by:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">;</span><span class="w">                             </span><span class="c1">// initial data set</span>
+<span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">);</span><span class="w">                         </span><span class="c1">// applies f to each element</span>
+
+<span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">labeledData</span><span class="p">;</span><span class="w"> </span><span class="c1">// initial labeled dataset</span>
+<span class="n">labeledData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transformInputs</span><span class="p">(</span><span class="n">labeledData</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">);</span><span class="w">     </span><span class="c1">// applies f to each input</span>
+<span class="n">labeledData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transformLabels</span><span class="p">(</span><span class="n">labeledData</span><span class="p">,</span><span class="w"> </span><span class="n">g</span><span class="p">);</span><span class="w">     </span><span class="c1">// applies g to each label</span>
+</pre></div>
+</div>
+<p>The transformation mechanism itself is smart! If f does not only provide
+a function f(input) but also f(Batch_of_input&gt;) returning the same
+transformation for a whole batch then this is applied instead. Batch
+transformations are often more efficient than applying the same
+transformation to all elements one after another. Hence this can be a
+real time saver. The models provided by Shark are examples of classes
+satisfying this requirement:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// a linear model, for example for whitening</span>
+<span class="n">LinearModel</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+<span class="c1">// application of the model to the data</span>
+<span class="n">labeledData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transformInputs</span><span class="p">(</span><span class="n">labeledData</span><span class="p">,</span><span class="w"> </span><span class="n">model</span><span class="p">);</span>
+<span class="c1">// or an alternate shortcut:</span>
+<span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>It is easy to write your own transformation.
+A simple example functor that adds a constant to all elements in the
+data set could look like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Add</span>
+<span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">        </span><span class="n">Add</span><span class="p">(</span><span class="n">RealVector</span><span class="w"> </span><span class="n">offset</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">m_offset</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+
+<span class="w">        </span><span class="k">typedef</span><span class="w"> </span><span class="n">RealVector</span><span class="w"> </span><span class="n">result_type</span><span class="p">;</span><span class="w">   </span><span class="c1">// do not forget to specify the result type</span>
+
+<span class="w">        </span><span class="n">RealVector</span><span class="w"> </span><span class="nf">operator</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">(</span><span class="n">RealVector</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// const is important</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="p">(</span><span class="n">input</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">m_offset</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="k">private</span><span class="o">:</span>
+<span class="w">        </span><span class="n">RealVector</span><span class="w"> </span><span class="n">m_offset</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>It is applied to the data set by calling:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RealVector</span><span class="w"> </span><span class="nf">v</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.0</span><span class="p">;</span><span class="w"> </span><span class="n">v</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">;</span>
+<span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">Add</span><span class="p">(</span><span class="n">v</span><span class="p">));</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Never never forget the definition of the <code class="docutils literal notranslate"><span class="pre">result_type</span></code>!
+It is needed by <code class="docutils literal notranslate"><span class="pre">transform</span></code> to be smart, i.e., to deduce
+the corresponding batch type.
+If you happen to get nasty template error messages with
+<code class="docutils literal notranslate"><span class="pre">transform</span></code> then your first bet should be that you maybe
+forget to define the <code class="docutils literal notranslate"><span class="pre">result_type</span></code>.</p>
+</div>
+</section>
+<section id="element-views-dataview-dataset">
+<h2>Element views: DataView&lt;Dataset&gt;<a class="headerlink" href="#element-views-dataview-dataset" title="Link to this heading">¶</a></h2>
+<p>Sometimes one needs to perform intensive single-element, random access to data
+points, for example in decision tree training. In this case, the performance
+guarantees of Data are not sufficient, as every random access to an element needs
+to be translated into a list traversal. For such scenarios, Shark provides the
+class <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data_view.html">DataView</a>. It provides another type of view on a data set under the
+assumption that the data will not change during the lifetime of the DataView
+object. A dataview object consumes linear space, as it stores the exact position
+of every element in the container (i.e., the index of the batch and position
+inside the batch). Thus creating a DataView object might lead to a big initial
+overhead which only pays off if the object is then used a lot. The DataView class
+is made available via:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/DataView.h&gt;</span>
+</pre></div>
+</div>
+<p>Using a DataView object is easy:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dataset</span><span class="p">;</span>
+<span class="n">DataView</span><span class="o">&lt;</span><span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">view</span><span class="p">(</span><span class="n">dataset</span><span class="p">);</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">view</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">view</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Using a DataView object it is also possible to create element-wise subsets which
+can then be transformed back into data sets:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="w"> </span><span class="n">indices</span><span class="p">;</span>
+<span class="c1">// somehow choose a set of indices</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">subsetData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toDataset</span><span class="p">(</span><span class="n">subset</span><span class="p">(</span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">indices</span><span class="p">));</span>
+</pre></div>
+</div>
+<p>After the operation, <code class="docutils literal notranslate"><span class="pre">subset</span></code> holds a copy of the points indexed by the subset operation.
+As in all other data set operations, the subset is organized in several batches. To control the
+maximum size of the batches <code class="docutils literal notranslate"><span class="pre">toDataset</span></code> also takes an optional second parameter:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">subsetData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">toDataset</span><span class="p">(</span><span class="n">subset</span><span class="p">(</span><span class="n">view</span><span class="p">,</span><span class="w"> </span><span class="n">indices</span><span class="p">),</span><span class="w"> </span><span class="n">maximumBatchSize</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>And the usual methods for querying data set informations also works for the view:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dataset</span><span class="p">;</span>
+<span class="n">DataView</span><span class="o">&lt;</span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">view</span><span class="p">(</span><span class="n">dataset</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">numberOfClasses</span><span class="p">(</span><span class="n">view</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">inputDimension</span><span class="p">(</span><span class="n">view</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>See the doxygen documentation for more details!</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Data Containers</a><ul>
+<li><a class="reference internal" href="#key-properties">Key properties</a></li>
+<li><a class="reference internal" href="#different-types-of-data-sets">Different types of data sets</a></li>
+<li><a class="reference internal" href="#the-class-data-t">The class Data&lt;T&gt;</a></li>
+<li><a class="reference internal" href="#querying-information-about-a-data-set">Querying information about a data set</a></li>
+<li><a class="reference internal" href="#transformation-of-data-sets">Transformation of data sets</a></li>
+<li><a class="reference internal" href="#element-views-dataview-dataset">Element views: DataView&lt;Dataset&gt;</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="../library_design/batches.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Data Batches</a>
+  <a class="topless" href="labels.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Label Formats</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/data/datasets.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

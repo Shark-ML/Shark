@@ -1,0 +1,5 @@
+<map id="shark::EmptyState" name="shark::EmptyState">
+<area shape="rect" id="Node000001" title="Default State of an Object which does not need a State." alt="" coords="5,79,136,105"/>
+<area shape="rect" id="Node000002" href="$structshark_1_1_state.html" title="Represents the State of an Object." alt="" coords="24,5,117,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="73,46,73,79,68,79,68,46"/>
+</map>

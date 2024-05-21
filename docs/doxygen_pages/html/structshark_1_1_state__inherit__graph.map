@@ -1,0 +1,7 @@
+<map id="shark::State" name="shark::State">
+<area shape="rect" id="Node000001" title="Represents the State of an Object." alt="" coords="110,5,202,31"/>
+<area shape="rect" id="Node000002" href="$structshark_1_1_empty_state.html" title="Default State of an Object which does not need a State." alt="" coords="5,87,136,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,43,85,88,82,84,130,40"/>
+<area shape="rect" id="Node000003" href="$structshark_1_1_normalizer_neuron_1_1_state.html" title=" " alt="" coords="159,79,326,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="182,40,223,77,219,81,178,44"/>
+</map>

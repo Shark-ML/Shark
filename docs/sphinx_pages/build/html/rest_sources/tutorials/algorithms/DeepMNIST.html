@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Data Shapes and Deep Convolutional Architectures &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Autoencoders" href="autoencoders.html" />
+    <link rel="prev" title="Training Feed-Forward Neural Networks" href="ffnet.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="data-shapes-and-deep-convolutional-architectures">
+<h1>Data Shapes and Deep Convolutional Architectures<a class="headerlink" href="#data-shapes-and-deep-convolutional-architectures" title="Link to this heading">¶</a></h1>
+<p>In this tutorial, we will train a deep convolutional neural network on the MNIST
+dataset.This tutorial is an adaptation of the tensorflow 1.4
+<a class="reference external" href="https://www.tensorflow.org/versions/r1.4/get_started/mnist/pros">Deep MNIST for Experts</a> tutorial
+and the whole code file can be found <a class="reference external" href="../../../../../../doxygen_pages/html/_m_n_i_s_t_for_experts_8cpp.html">here</a>.
+In this tutorial, we want to use a deep neural network architecture based on convolutions.
+For this, we have to introduce a new concept: <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_shape.html">Shapes</a>. All of the computations are performed in floating point precision
+by using <code class="docutils literal notranslate"><span class="pre">FloatVector</span></code> instead of <code class="docutils literal notranslate"><span class="pre">RealVector</span></code> as template arguments.</p>
+<p>For this tutorial, we need the following includes:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/SparseData.h&gt;</span><span class="c1">//for reading in the images as sparseData/Libsvm format</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/LinearModel.h&gt;</span><span class="c1">//single dense layer</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/ConvolutionalModel.h&gt;</span><span class="c1">//single convolutional layer</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/PoolingLayer.h&gt;</span><span class="c1"> //pooling after convolution</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/ConcatenatedModel.h&gt;</span><span class="c1">//for stacking layers</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/GradientDescent/Adam.h&gt;</span><span class="c1">// The Adam optimization algorithm</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/CrossEntropy.h&gt;</span><span class="c1"> //classification loss</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/ErrorFunction.h&gt;</span><span class="c1"> //Error function for optimization</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span><span class="c1"> //evaluation for testing</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="p">;</span>
+</pre></div>
+</div>
+<section id="shapes">
+<h2>Shapes<a class="headerlink" href="#shapes" title="Link to this heading">¶</a></h2>
+<p>In shark, most input data is converted to vector or scalar form. For example an 28x28 image is encoded as a vector with 784 entries. Its class
+label is a single integral number. This
+means that the model taking the image as input has no information about the image size or the number of classes.
+Further, if the input is a convolutional model, its output may have a different number of rows, columns and channels. Keeping
+track of change of dimensionality is an errorprone task which should be avoided.
+Therefore, in this tutorial we will introduce the concept of a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_shape.html">Shape</a>. A shape adds information about the input or output types
+in a vectorial format. For example, images have a 3-d shape: <code class="docutils literal notranslate"><span class="pre">height</span> <span class="pre">x</span> <span class="pre">width</span> <span class="pre">x</span> <span class="pre">channels</span></code>. The class label has a 1-d shape: the number
+of classes. The batchsize is not stored in the shape but separately in each batch.
+By default, when loading a dataset from a file, we have to adapt the shape to its actual dimensionalities:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">LabeledData</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="n">importSparseData</span><span class="p">(</span><span class="w"> </span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="mi">784</span><span class="w"> </span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;input shape:&quot;</span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">inputShape</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;output shape:&quot;</span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">labelShape</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">data</span><span class="p">.</span><span class="n">inputShape</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">1</span><span class="p">};</span><span class="w"> </span><span class="c1">//store shape for model creation</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;input shape:&quot;</span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">inputShape</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>When loading the MNIST dataset, this prints</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>input shape:(784)
+output shape:(10)
+input shape:(28, 28, 1)
+</pre></div>
+</div>
+<p>Most models in shark do not care about the exact shape of objects they get as input or return as outputs.
+For example a linear model can be initialized to return a vector with shape (2352) or a multi-channel image (28,28,3).
+Similarly when a model returns an image (28,28,3) as output shape, the next model can interpret it as (2352), as long as dimensions match, this
+is not a problem.</p>
+</section>
+<section id="deep-convolutional-neural-networks">
+<h2>Deep Convolutional Neural Networks<a class="headerlink" href="#deep-convolutional-neural-networks" title="Link to this heading">¶</a></h2>
+<p>Lets create our neural network!
+We choose the layers of the neural networks as:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_conv2_d_model.html">Convolutional layer</a> with 32 filters of size 5x5 and ReLu <a class="reference external" href="../../../../../../doxygen_pages/html/group__activations.html">activation function</a></p></li>
+<li><p><a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_pooling_layer.html">Max-pooling</a> of size 2x2</p></li>
+<li><p>Convolutional layer with 64 filters of size 5x5 and ReLu activation function</p></li>
+<li><p>Max-pooling of size 2x2</p></li>
+<li><p>A <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_linear_model.html">Dense-layer</a> with 1024 output neurons, bias term and ReLu activation function</p></li>
+<li><p>A final classification layer with one neuron for each class, bias term and linear activation function</p></li>
+</ul>
+<p>In shark, this is implemented as:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Conv2DModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">RectifierNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">conv1</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">inputShape</span><span class="p">(),</span><span class="w"> </span><span class="p">{</span><span class="mi">32</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">});</span>
+<span class="n">PoolingLayer</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pooling1</span><span class="p">(</span><span class="n">conv1</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span><span class="w"> </span><span class="n">Pooling</span><span class="o">::</span><span class="n">Maximum</span><span class="p">,</span><span class="w"> </span><span class="n">Padding</span><span class="o">::</span><span class="n">Valid</span><span class="p">);</span>
+<span class="n">Conv2DModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">RectifierNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">conv2</span><span class="p">(</span><span class="n">pooling1</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="w"> </span><span class="p">{</span><span class="mi">64</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">});</span>
+<span class="n">PoolingLayer</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pooling2</span><span class="p">(</span><span class="n">conv2</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="w"> </span><span class="p">{</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">},</span><span class="w"> </span><span class="n">Pooling</span><span class="o">::</span><span class="n">Maximum</span><span class="p">,</span><span class="w"> </span><span class="n">Padding</span><span class="o">::</span><span class="n">Valid</span><span class="p">);</span>
+<span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">RectifierNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dense1</span><span class="p">(</span><span class="n">pooling2</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="w"> </span><span class="mi">1024</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dense2</span><span class="p">(</span><span class="n">dense1</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">labelShape</span><span class="p">(),</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">conv1</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">pooling1</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">conv2</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">pooling2</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">dense1</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">dense2</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>In the next step, we define our loss and error function for optimization. Again, we use minibatch learning with the batchsize 100 defined
+during loading of the dataset:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CrossEntropy</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loss</span><span class="p">;</span>
+<span class="n">ErrorFunction</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">error</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">loss</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>And optimize it using the Adam algorithm:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">iterations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20001</span><span class="p">;</span>
+<span class="n">initRandomNormal</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="mf">0.0001</span><span class="p">);</span><span class="w"> </span><span class="c1">//init model</span>
+<span class="n">Adam</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">optimizer</span><span class="p">;</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">setEta</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">);</span><span class="c1">//learning rate of the algorithm</span>
+<span class="n">error</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="n">error</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;Optimizing model &quot;</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">iterations</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">){</span>
+<span class="w">        </span><span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">error</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="w">  </span><span class="o">%</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span><span class="c1">//print out timing information and training error</span>
+<span class="w">                </span><span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">classificationLoss</span><span class="p">;</span>
+<span class="w">                </span><span class="kt">double</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classificationLoss</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">inputs</span><span class="p">()));</span>
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="o">&lt;&lt;</span><span class="n">optimizer</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">value</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="o">&lt;&lt;</span><span class="n">error</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<section id="what-next">
+<h3>What next?<a class="headerlink" href="#what-next" title="Link to this heading">¶</a></h3>
+<p>The next tutorials covers <a class="reference internal" href="autoencoders.html"><span class="doc">Autoencoders</span></a></p>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Data Shapes and Deep Convolutional Architectures</a><ul>
+<li><a class="reference internal" href="#shapes">Shapes</a></li>
+<li><a class="reference internal" href="#deep-convolutional-neural-networks">Deep Convolutional Neural Networks</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="ffnet.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Training Feed-Forward Neural Networks</a>
+  <a class="topless" href="autoencoders.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Autoencoders</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/DeepMNIST.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

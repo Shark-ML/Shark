@@ -1,0 +1,5 @@
+<map id="shark::LinearModel&lt; InputType, ActivationFunction &gt;" name="shark::LinearModel&lt; InputType, ActivationFunction &gt;">
+<area shape="rect" id="Node000001" title="Linear Prediction with optional activation function." alt="" coords="5,109,223,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_model.html" title="Base class for all Models." alt="" coords="23,5,205,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="117,77,117,109,111,109,111,77"/>
+</map>

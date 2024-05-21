@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classshark_1_1_binary_tree.html" title="Super class of binary space&#45;partitioning trees." alt="" coords="5,27,138,68"/>
+<area shape="rect" id="Node000001" href="$classshark_1_1_k_d_tree.html" title="KD&#45;tree, a binary space&#45;partitioning tree." alt="" coords="195,5,363,31"/>
+<area shape="poly" id="edge18_Node000000_Node000001" title=" " alt="" coords="153,33,194,27,195,33,154,39"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_l_c_tree.html" title="LC&#45;tree, a binary space&#45;partitioning tree." alt="" coords="186,55,372,96"/>
+<area shape="poly" id="edge19_Node000000_Node000002" title=" " alt="" coords="154,56,186,60,185,66,153,61"/>
+</map>

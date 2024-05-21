@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Random Forest &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Support Vector Machines: First Steps" href="svm.html" />
+    <link rel="prev" title="Variational Autoencoders" href="variational_autoencoders.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="random-forest">
+<h1>Random Forest<a class="headerlink" href="#random-forest" title="Link to this heading">¶</a></h1>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Link to this heading">¶</a></h2>
+<p>Random Forest is a decision tree algorithm for both classification and
+regression. It was first described by <a class="reference internal" href="#breiman2001" id="id1"><span>[Breiman2001]</span></a>. It is a recursive
+algorithm which partitions the training dataset by doing binary splits based on the labels of the data.
+It builds an ensemble of models, and uses randomization to increase the variance
+between the trees of the ensemble. It performs remarkable well in practice, and
+is widely used.</p>
+</section>
+<section id="random-forest-in-shark">
+<h2>Random Forest in Shark<a class="headerlink" href="#random-forest-in-shark" title="Link to this heading">¶</a></h2>
+<p>For this tutorial, the following includes are needed:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/Csv.h&gt;</span><span class="c1"> //importing the file</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/RFTrainer.h&gt;</span><span class="c1"> //the random forest trainer</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span><span class="c1"> //zero one loss for evaluation</span>
+</pre></div>
+</div>
+<section id="sample-classification-problem-protein-fold-prediction">
+<h3>Sample classification problem: Protein fold prediction<a class="headerlink" href="#sample-classification-problem-protein-fold-prediction" title="Link to this heading">¶</a></h3>
+<p>Let us consider the same bioinformatics problem as in the
+<a class="reference internal" href="nearestNeighbor.html"><span class="doc">Nearest Neighbor Classification</span></a> and <a class="reference internal" href="lda.html"><span class="doc">Linear Discriminant Analysis</span></a> tutorial, namely the prediction of the
+secondary structure of proteins. The goal is to assign a protein to
+one out of 27 SCOP fold types <a class="reference internal" href="lda.html#dingdubchak2001a" id="id2"><span>[DingDubchak2001a]</span></a>.  We again consider
+the descriptions of amino-acid sequences provided by
+<a class="reference internal" href="lda.html#damoulasgirolami2008a" id="id3"><span>[DamoulasGirolami2008a]</span></a>.  The data <a class="reference download internal" download="" href="../../../_downloads/24032269c8137371b4d3238c3e8b77d2/C.csv"><code class="xref download docutils literal notranslate"><span class="pre">C.csv</span></code></a>
+provide a description of the amino-acid compositions of 695 proteins
+together with the corresponding fold type. Each row corresponds to a
+protein.  After downloading the data <a class="reference download internal" download="" href="../../../_downloads/24032269c8137371b4d3238c3e8b77d2/C.csv"><code class="xref download docutils literal notranslate"><span class="pre">C.csv</span></code></a> we
+can read, inspect and split the data as described in the
+<a class="reference internal" href="nearestNeighbor.html"><span class="doc">Nearest Neighbor Classification</span></a> tutorial:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">data</span><span class="p">;</span>
+<span class="n">importCSV</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;data/C.csv&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">LAST_COLUMN</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39; &#39;</span><span class="p">);</span>
+
+<span class="c1">//Split the dataset into a training and a test dataset</span>
+<span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">dataTest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">splitAtElement</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="mi">311</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="model-and-learning-algorithm">
+<h3>Model and learning algorithm<a class="headerlink" href="#model-and-learning-algorithm" title="Link to this heading">¶</a></h3>
+<p>We can use the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_r_f_trainer.html">RFTrainer</a> class to train a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_r_f_classifier.html">RFClassifier</a> which represents a Random Forest:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">RFTrainer</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">;</span>
+<span class="n">RFClassifier</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+<span class="n">trainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluating-the-model">
+<h3>Evaluating the model<a class="headerlink" href="#evaluating-the-model" title="Link to this heading">¶</a></h3>
+<p>After training the model we can evaluate it.  As a performance
+measure, we consider the standard 0-1 loss.  The corresponding risk is
+the probability of error, the empirical risk is the average
+classification error.  When measured on set of sample patterns, it
+simply computes the fraction of wrong predictions:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ZeroOneLoss</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">loss</span><span class="p">;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">prediction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Random Forest on training set accuracy: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">loss</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">prediction</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">prediction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">model</span><span class="p">(</span><span class="n">dataTest</span><span class="p">.</span><span class="n">inputs</span><span class="p">());</span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Random Forest on test set accuracy:     &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="mf">1.</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">loss</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">dataTest</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">prediction</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Of course, the accuracy is given by one minus the error.
+In this example, Random Forest outperforms LDA and KNN.</p>
+</section>
+<section id="parameters-of-the-trainer">
+<h3>Parameters of the trainer<a class="headerlink" href="#parameters-of-the-trainer" title="Link to this heading">¶</a></h3>
+<p>The trainer has some properties that can be set to tweak the learning process.
+All parameters have meaningful default values. The parameters are set by the
+following methods:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Effect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">setMTry(size_t</span> <span class="pre">mtry)</span></code></p></td>
+<td><p>Number of random attribute to try at
+each inner node of each tree.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">setNTrees(size_t</span> <span class="pre">nTrees)</span></code></p></td>
+<td><p>Number of trees to be built.
+Typically this would be 100+.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">setNodeSize(size_t</span> <span class="pre">nodeSize)</span></code></p></td>
+<td><p>The maximum nodesize, before a node
+is classified as a leaf. Lowering this
+value makes the trees in the ensemble
+larger and increasing this value
+makes the trees smaller.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">setOOBratio(double</span> <span class="pre">ratio)</span></code></p></td>
+<td><p>Controls the ratio determining
+the number of OOB (out-of-bag)
+samples is sampled from the training
+dataset.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="full-example-program">
+<h2>Full example program<a class="headerlink" href="#full-example-program" title="Link to this heading">¶</a></h2>
+<p>The full example program is
+<a class="reference external" href="../../../../../../doxygen_pages/html/_r_f_tutorial_8cpp.html">RFTutorial.cpp</a>.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="breiman2001" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Breiman2001</a><span class="fn-bracket">]</span></span>
+<p>L. Breiman.
+Random Forests.
+Machine Learning, vol. 45, issue 1, p. 5-32,
+2001</p>
+</div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Random Forest</a><ul>
+<li><a class="reference internal" href="#background">Background</a></li>
+<li><a class="reference internal" href="#random-forest-in-shark">Random Forest in Shark</a></li>
+<li><a class="reference internal" href="#full-example-program">Full example program</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="variational_autoencoders.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Variational Autoencoders</a>
+  <a class="topless" href="svm.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Support Vector Machines: First Steps</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/rf.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

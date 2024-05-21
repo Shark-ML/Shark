@@ -1,0 +1,7 @@
+<map id="shark::Classifier&lt; Model &gt;" name="shark::Classifier&lt; Model &gt;">
+<area shape="rect" id="Node000001" title="Conversion of real&#45;valued or vector valued outputs to class labels." alt="" coords="282,13,406,54"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_linear_classifier.html" title="Basic linear classifier." alt="" coords="454,13,605,54"/>
+<area shape="poly" id="edge2_Node000001_Node000006" title=" " alt="" coords="421,31,454,31,454,36,421,36"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="5,5,234,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="249,31,281,31,281,36,249,36"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="shark::LDA" name="shark::LDA">
+<area shape="rect" id="Node000001" title="Linear Discriminant Analysis (LDA)" alt="" coords="283,46,370,72"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="5,5,235,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="250,44,283,49,282,55,249,49"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="40,71,200,111"/>
+<area shape="poly" id="edge2_Node000001_Node000006" title=" " alt="" coords="215,74,282,63,283,68,215,79"/>
+</map>

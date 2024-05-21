@@ -1,0 +1,5 @@
+<map id="shark::RBM&lt; VisibleLayerT, HiddenLayerT, randomT &gt;" name="shark::RBM&lt; VisibleLayerT, HiddenLayerT, randomT &gt;">
+<area shape="rect" id="Node000001" title="stub for the RBM class. at the moment it is just a holder of the parameter set and the Energy." alt="" coords="5,94,191,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="7,5,189,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,62,101,94,95,94,95,62"/>
+</map>

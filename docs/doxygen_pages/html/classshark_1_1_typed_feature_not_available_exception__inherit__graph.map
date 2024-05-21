@@ -1,0 +1,5 @@
+<map id="shark::TypedFeatureNotAvailableException&lt; Feature &gt;" name="shark::TypedFeatureNotAvailableException&lt; Feature &gt;">
+<area shape="rect" id="Node000001" title="Exception indicating the attempt to use a feature which is not supported." alt="" coords="5,79,220,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_exception.html" title="Top&#45;level exception class of the shark library." alt="" coords="53,5,172,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="115,46,115,79,110,79,110,46"/>
+</map>

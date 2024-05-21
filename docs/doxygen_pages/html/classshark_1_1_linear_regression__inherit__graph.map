@@ -1,0 +1,7 @@
+<map id="shark::LinearRegression" name="shark::LinearRegression">
+<area shape="rect" id="Node000001" title="Linear Regression." alt="" coords="89,94,251,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_trainer.html" title=" " alt="" coords="5,5,156,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,54,158,91,154,95,112,58"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="180,5,339,46"/>
+<area shape="poly" id="edge2_Node000001_Node000005" title=" " alt="" coords="228,58,185,95,182,91,224,54"/>
+</map>

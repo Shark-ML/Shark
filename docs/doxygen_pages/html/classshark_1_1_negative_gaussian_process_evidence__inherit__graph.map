@@ -1,0 +1,5 @@
+<map id="shark::NegativeGaussianProcessEvidence&lt; InputType, OutputType, LabelType &gt;" name="shark::NegativeGaussianProcessEvidence&lt; InputType, OutputType, LabelType &gt;">
+<area shape="rect" id="Node000001" title="Evidence for model selection of a regularization network/Gaussian process." alt="" coords="5,109,229,165"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_objective_function.html" title=" " alt="" coords="34,5,200,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="120,77,120,108,114,108,114,77"/>
+</map>

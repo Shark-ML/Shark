@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Label Formats &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Importing Data" href="import_data.html" />
+    <link rel="prev" title="Data Containers" href="datasets.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="label-formats">
+<h1>Label Formats<a class="headerlink" href="#label-formats" title="Link to this heading">¶</a></h1>
+<p>This tutorial covers label conventions of <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a>,
+and converters between different label formats.
+For other aspects of Shark data containers, please see the
+complete list of <a class="reference internal" href="../../tutorials.html#label-for-data-tutorials"><span class="std std-ref">data tutorials</span></a>.
+Also, please read the following sentences carefully: this tutorial
+does <strong>not</strong> cover in what format you can/should/may bring your
+input data files. It <strong>only</strong> covers how Shark treats labels
+internally. So, in most cases, you will want to read the
+<a class="reference internal" href="import_data.html"><span class="doc">tutorial on importing data</span></a> first to figure
+out how to get your data into Shark. Then, to learn about how
+Shark treats labels and to work with them by writing Shark code,
+read this tutorial here. To prevent a classical pitfall, don’t try
+to bring your data files into a one-hot encoding just because it
+is mentioned on this page.</p>
+<section id="label-conventions">
+<h2>Label Conventions<a class="headerlink" href="#label-conventions" title="Link to this heading">¶</a></h2>
+<p>Many algorithms in Shark are fully templatized. The kernel methods
+for example are designed to work with any input format, and this
+allows for easy employment of, e.g., sparse vector formats.
+Templatization also applies to the labels in a <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a>
+data container: they can either be simple integers for classification,
+or real values for regression, or arbitrarily complex structured types
+for more specialized applications.
+However, while the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a> class and its subclasses do not impose
+any restrictions on label formats, several <em>algorithms</em> within Shark
+(i.e., some which <em>work on or with</em> datasets) in fact do: they may apply
+in a standard classification or regression setting, and might expect
+integer-valued or real-valued labels in accordance with fixed conventions.
+In other words, using custom labels is supported, however, it corresponds
+to non-standard learning tasks and as such might require custom error
+functions, losses, and eventually even the adaptation of trainers.</p>
+<p>In detail, there exists a convention for algorithms in typical
+classification settings, and a convention for regression settings:</p>
+<ul class="simple">
+<li><p>The format for a classification label is a single unsigned integer
+(C++ type <code class="docutils literal notranslate"><span class="pre">unsigned</span> <span class="pre">int</span></code>) in the range <code class="docutils literal notranslate"><span class="pre">0,...,d-1</span></code>. For binary
+(two-class) labels, the wide-spread binary labels <code class="docutils literal notranslate"><span class="pre">-1</span></code>/<code class="docutils literal notranslate"><span class="pre">+1</span></code> are
+no longer supported; instead, <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">1</span></code> is used for the sake of
+consistency with the multi-class case. When required, binary labels
+-1/+1  are converted to 0/1 by setting all -1 labels to 0.</p></li>
+<li><p>Labels for regression are  of type <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>. This is also the
+case for single-dimensional regression problems. In this case the
+label vectors are one-dimensional. The C++ type <code class="docutils literal notranslate"><span class="pre">double</span></code> is not
+used.</p></li>
+</ul>
+<p>Based on the method (model, algorithm), classification labels are
+interpreted differently. The most common interpretation is that of a
+unique atom. By convention, <code class="docutils literal notranslate"><span class="pre">d</span></code> different atoms (in a classification
+task with <code class="docutils literal notranslate"><span class="pre">d</span></code> classes) are chosen as <code class="docutils literal notranslate"><span class="pre">0,...,d-1</span></code>. Such a value can
+also serve as an index (e.g., indexing output neurons) in certain
+circumstances.
+The label <code class="docutils literal notranslate"><span class="pre">c</span></code> can also be interpreted as a <code class="docutils literal notranslate"><span class="pre">d</span></code>-dimensional unit-vector
+for which the <code class="docutils literal notranslate"><span class="pre">c</span></code>-th component is one. This enables the application of,
+e.g., the mean-squared error measure on the output of neural networks
+for classification.</p>
+</section>
+<section id="conversions-of-class-labels">
+<h2>Conversions of class labels<a class="headerlink" href="#conversions-of-class-labels" title="Link to this heading">¶</a></h2>
+<p>Often Models in Shark do not produce the correct output format for
+classification. For example, a neural network for a <code class="docutils literal notranslate"><span class="pre">d</span></code>-class
+classification problem usually encodes its prediction into an output
+of size <code class="docutils literal notranslate"><span class="pre">d</span></code>, with the prediction being understood as the
+index of the output neuron with highest activity. The network output
+is thus a <code class="docutils literal notranslate"><span class="pre">RealVector</span></code> of dimension <code class="docutils literal notranslate"><span class="pre">d</span></code>, not an unsigned integer.
+This is often not a problem, the loss function can interpret
+outputs accordingly and thus a neural network can easily be trained
+in a classification setting, even though the network only returns
+vectors instead of (integer) labels.
+However, if integer labels are indeed needed for further
+post-processing then the output of a Network needs to be transformed.
+This can be done with a helper model</p>
+<ul class="simple">
+<li><p><a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_classifier.html">Classifier</a>:   As input it assumes a d-dimensional
+<code class="docutils literal notranslate"><span class="pre">RealVector</span></code> for classification. It converts the vector to a
+discrete label in the range 0,…,d-1 by finding the index of the
+largest component (the arg max). This is useful for turning the output
+of a support vector machine or neural network for multi-category
+classification into a discrete class label. In the case of d=2 it will transform
+the output to an output based on the sign of the label. positive sign is transformed
+to label, a negative sign to label 0. Additionally the decision thresholds can be adapted
+using bias weights for each model output.</p></li>
+</ul>
+<p>The classifier holds the trained model as its decision function. Therefore creating
+a Classifier from a model can be done via:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">Classifier</span><span class="o">&lt;</span><span class="n">ModelType</span><span class="o">&gt;</span><span class="w"> </span><span class="n">classifier</span><span class="p">;</span><span class="c1">//used after training for classification</span>
+<span class="n">ModelType</span><span class="o">&amp;</span><span class="w"> </span><span class="n">model</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">classifier</span><span class="p">.</span><span class="n">decisionFunction</span><span class="p">();</span><span class="c1">//used -during training</span>
+</pre></div>
+</div>
+<p>Some models are predefined for convenience:
+The <a class="reference external" href="../../../../../../../doxygen_pages/html/structshark_1_1_kernel_classifier.html">KernelClassifier</a> is a classifier using a <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_kernel_expansion.html">KernelExpansion</a>
+and the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_linear_classifier.html">LinearClassifier</a> is a classifier using a <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_linear_model.html">LinearModel</a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Label Formats</a><ul>
+<li><a class="reference internal" href="#label-conventions">Label Conventions</a></li>
+<li><a class="reference internal" href="#conversions-of-class-labels">Conversions of class labels</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="datasets.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Data Containers</a>
+  <a class="topless" href="import_data.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Importing Data</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/data/labels.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

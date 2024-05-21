@@ -1,0 +1,5 @@
+<map id="shark::NormalizeComponentsUnitVariance&lt; DataType &gt;" name="shark::NormalizeComponentsUnitVariance&lt; DataType &gt;">
+<area shape="rect" id="Node000001" title="Train a linear model to normalize the components of a dataset to unit variance, and optionally to zer..." alt="" coords="5,94,200,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_unsupervised_trainer.html" title="Superclass of unsupervised learning algorithms." alt="" coords="7,5,198,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,62,105,94,100,94,100,62"/>
+</map>

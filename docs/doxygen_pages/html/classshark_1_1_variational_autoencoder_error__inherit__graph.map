@@ -1,0 +1,5 @@
+<map id="shark::VariationalAutoencoderError&lt; SearchPointType &gt;" name="shark::VariationalAutoencoderError&lt; SearchPointType &gt;">
+<area shape="rect" id="Node000001" title="Computes the variational autoencoder error function." alt="" coords="5,109,200,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_objective_function.html" title=" " alt="" coords="9,5,196,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,77,105,109,100,109,100,77"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="shark::AbstractSingleObjectiveOptimizer&lt; PointType &gt;" name="shark::AbstractSingleObjectiveOptimizer&lt; PointType &gt;">
+<area shape="rect" id="Node000001" title="Base class for all single objective optimizer." alt="" coords="290,104,491,145"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_abstract_line_search_optimizer.html" title=" " alt="" coords="541,5,716,46"/>
+<area shape="poly" id="edge2_Node000001_Node000005" title=" " alt="" coords="450,95,538,57,570,44,572,49,540,61,452,100"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_adam.html" title="Adaptive Moment Estimation Algorithm (ADAM)" alt="" coords="540,71,718,111"/>
+<area shape="poly" id="edge3_Node000001_Node000006" title=" " alt="" coords="506,105,539,101,540,106,507,111"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1_rprop.html" title="This class offers methods for the usage of the Resilient&#45;Backpropagation&#45;algorithm with/out weight&#45;ba..." alt="" coords="539,136,718,177"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="507,137,539,142,538,147,506,143"/>
+<area shape="rect" id="Node000008" href="$classshark_1_1_steepest_descent.html" title="Standard steepest descent." alt="" coords="548,201,710,242"/>
+<area shape="poly" id="edge5_Node000001_Node000008" title=" " alt="" coords="453,149,540,186,572,198,570,203,538,191,451,154"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_optimizer.html" title=" " alt="" coords="5,97,242,152"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="257,122,289,122,289,127,257,127"/>
+</map>

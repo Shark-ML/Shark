@@ -1,0 +1,7 @@
+<map id="shark::BinaryTree&lt; InputT &gt;" name="shark::BinaryTree&lt; InputT &gt;">
+<area shape="rect" id="Node000001" title="Super class of binary space&#45;partitioning trees." alt="" coords="123,5,255,46"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_k_d_tree.html" title="KD&#45;tree, a binary space&#45;partitioning tree." alt="" coords="5,102,173,127"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,58,104,103,101,99,153,54"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_l_c_tree.html" title="LC&#45;tree, a binary space&#45;partitioning tree." alt="" coords="197,94,384,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="225,54,269,92,266,96,222,58"/>
+</map>

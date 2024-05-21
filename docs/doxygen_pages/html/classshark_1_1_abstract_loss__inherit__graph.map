@@ -1,0 +1,11 @@
+<map id="shark::AbstractLoss&lt; LabelT, OutputT &gt;" name="shark::AbstractLoss&lt; LabelT, OutputT &gt;">
+<area shape="rect" id="Node000001" title="Loss function interface." alt="" coords="192,71,330,111"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_absolute_loss.html" title="absolute loss" alt="" coords="398,5,538,46"/>
+<area shape="poly" id="edge2_Node000001_Node000004" title=" " alt="" coords="341,63,400,44,402,49,343,68"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_squared_loss.html" title="squared loss for regression and classification" alt="" coords="378,71,557,111"/>
+<area shape="poly" id="edge3_Node000001_Node000005" title=" " alt="" coords="345,88,378,88,378,94,345,94"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_zero_one_loss.html" title="0&#45;1&#45;loss for classification." alt="" coords="378,136,557,177"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="343,114,402,133,400,138,341,119"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_cost.html" title="Cost function interface." alt="" coords="5,71,144,111"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,88,191,88,191,94,160,94"/>
+</map>

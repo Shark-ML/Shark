@@ -1,0 +1,5 @@
+<map id="shark::CrossEntropyMethod::ConstantNoise" name="shark::CrossEntropyMethod::ConstantNoise">
+<area shape="rect" id="Node000001" title="Constant noise term z_t = noise." alt="" coords="5,94,190,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_cross_entropy_method_1_1_i_noise_type.html" title="Interface class for noise type." alt="" coords="5,5,190,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,62,100,94,95,94,95,62"/>
+</map>

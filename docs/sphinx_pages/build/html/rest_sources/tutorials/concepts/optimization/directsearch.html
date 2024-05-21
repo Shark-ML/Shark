@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Direct Search Algorithms &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Shark Conventions for Derivatives" href="conventions_derivatives.html" />
+    <link rel="prev" title="Normalization of Input Data" href="../data/normalization.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="direct-search-algorithms">
+<h1>Direct Search Algorithms<a class="headerlink" href="#direct-search-algorithms" title="Link to this heading">¶</a></h1>
+<p>Shark offers classes and methods
+implementing evolutionary single- and multi-objective optimization
+algorithms. The component provides a multitude of different
+evolutionary optimizers together with a rich sample of common
+benchmark functions.</p>
+<p>This section gives an overview of the underlying concepts of the
+component and targets both the library user and a potential
+contributor to Shark.</p>
+<section id="conventions">
+<h2>Conventions<a class="headerlink" href="#conventions" title="Link to this heading">¶</a></h2>
+<p>In case of direct search algorithms, a minimization goal is
+assumed.</p>
+</section>
+<section id="individuals-populations">
+<h2>Individuals &amp; Populations<a class="headerlink" href="#individuals-populations" title="Link to this heading">¶</a></h2>
+<p>Most evolutionary algorithms, both single- and multi-objective, are
+implemented in terms of the evolutionary loop. That is, in every
+iteration of the algorithm, a set of individuals, a so-called
+<em>population</em>, is evolved. In Shark, this concept is modelled in the
+following way:</p>
+<p>An individual consists of:</p>
+<ul class="simple">
+<li><p>chromosomes,</p></li>
+<li><p>the search point associated with the individual as well as</p></li>
+<li><p>the fitness corresponding to the individual’s search point.</p></li>
+</ul>
+<p>Two different types of fitness values are supported, namely the
+penalized and the unpenalized fitness. Whenever an individual’s search
+point violates one ore more constraints of the optimization problem at
+hand, an evolutionary algorithm might choose to <em>encode</em> this
+violation in terms of a penalized fitness value.</p>
+<p>The class <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_individual.html">Individual</a> is templated w.r.t. the type of the search
+point, the type of fitness and w.r.t. the type of the chromosome.
+For the latter one, the type is considered to be default- and
+copy-constructable. The fitness can either be <code class="docutils literal notranslate"><span class="pre">double</span></code> or
+vector values, like <code class="docutils literal notranslate"><span class="pre">RealVector</span></code>. To access the
+chromosome, a templated member function is provided:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Individual</span><span class="o">&lt;</span><span class="w"> </span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">MyIndividual</span><span class="p">;</span>
+<span class="n">MyIndividual</span><span class="w"> </span><span class="n">ind</span><span class="p">;</span>
+<span class="n">ind</span><span class="p">.</span><span class="n">chromosome</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span><span class="w"> </span><span class="c1">// l-value semantic</span>
+</pre></div>
+</div>
+<p>Access to the search point is available by means of:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">ind</span><span class="p">.</span><span class="n">searchPoint</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="p">...;</span>
+</pre></div>
+</div>
+<p>Finally, access to the fitness value(s) can be accessed by :</p>
+<blockquote>
+<div><p>ind.penalizedFitness() =…;
+ind.unpenalizedFitness() =…;</p>
+</div></blockquote>
+<p>For unconstrained fitness functions, both values are the same.
+However in the case that the point violates the boundary, the
+search point is assigned the fitness value of the closest feasible point.
+In that case the penalizedFitness is also assigned an additional error
+depending on the distance of the point to the feasible region.</p>
+<p>Populations, i.e., sets or multi-sets of individuals, are not modelled
+explicitly. Instead, any container type can be used to represent
+populations:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="n">Individual</span><span class="o">&lt;</span><span class="w"> </span><span class="n">RealVector</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">MyIndividual</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Population</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Individual</span><span class="o">&gt;</span><span class="w"> </span><span class="n">RandomAccessPopulation</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="evolutionary-operators-selection-variation-evaluation">
+<h2>Evolutionary Operators - Selection, Variation, Evaluation<a class="headerlink" href="#evolutionary-operators-selection-variation-evaluation" title="Link to this heading">¶</a></h2>
+<p>Typical ingredients of evolutionary algorithms like mutation or crossover are modelled as
+separate operators that do work on a single or a range of individuals. No
+explicit interface is defined to abstract the functionality of
+variation operates but we define loose concepts for every type of
+operator.</p>
+<section id="selection-operator">
+<h3>Selection Operator<a class="headerlink" href="#selection-operator" title="Link to this heading">¶</a></h3>
+<p>A selection operator selects a certain individual from a set of
+individuals. Thus, a selection operator selecting individuals
+uniformly at random can be implemented in the following way:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">UniformSelection</span><span class="p">{</span>
+<span class="w">  </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Iterator</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">Iterator</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="w"> </span><span class="n">Iterator</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">Iterator</span><span class="w"> </span><span class="n">itE</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="p">(</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Rng</span><span class="o">::</span><span class="n">discrete</span><span class="p">(</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">distance</span><span class="p">(</span><span class="w"> </span><span class="n">it</span><span class="p">,</span><span class="w"> </span><span class="n">itE</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>An iterator-based approach is favored in Shark. That is, the
+underlying container are abstracted and no unneccesary copy of
+individuals takes place.</p>
+</section>
+<section id="mutation-operator">
+<h3>Mutation Operator<a class="headerlink" href="#mutation-operator" title="Link to this heading">¶</a></h3>
+<p>A mutation operator alters a single individual and might apply changes
+to both the individual’s search point as well as its chromosomes. In
+general, const and non-const overloads should be available. For
+example, a bitflip mutation can be implemented as follows:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">BitFlipMutation</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Non-const overload. Supplied individual is altered by the operator.</span>
+<span class="w">  </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="kt">void</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">::</span><span class="n">SearchPointType</span><span class="w"> </span><span class="n">PointType</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">PointType</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ind</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">ind</span><span class="p">.</span><span class="n">end</span><span class="p">();</span><span class="w"> </span><span class="o">++</span><span class="n">it</span><span class="w"> </span><span class="p">)</span>
+<span class="w">      </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">Rng</span><span class="o">::</span><span class="n">coinToss</span><span class="p">(</span><span class="w"> </span><span class="mf">1.</span><span class="o">/</span><span class="n">ind</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="o">*</span><span class="n">it</span><span class="w"> </span><span class="o">^=</span><span class="w"> </span><span class="o">*</span><span class="n">it</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Const overload. Mutated individual is returned.</span>
+<span class="w">  </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">Individual</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Individual</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)(</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="p">(</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The bit-flip mutation operator can be applied to a range of
+individuals by means of std::for_each:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Binary encoded individuals with no chromosomes.</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">TypedIndividual</span><span class="o">&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Individual</span><span class="p">;</span>
+<span class="k">typedef</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Population</span><span class="p">;</span>
+
+<span class="n">Population</span><span class="w"> </span><span class="nf">pop</span><span class="p">(</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">make_individual</span><span class="p">(</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">for_each</span><span class="p">(</span><span class="w"> </span><span class="n">pop</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">pop</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">BitFlipMutation</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Putting it all together, we can already define a very simple
+evolutionary algorithm:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/DirectSearch/TypedIndividual.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Benchmarks/OneMax.h&gt;</span>
+
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Rng/GlobalRng.h&gt;</span>
+
+<span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">struct</span><span class="w"> </span><span class="nc">BitFlipMutation</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="k">typedef</span><span class="w"> </span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">::</span><span class="n">SearchPointType</span><span class="w"> </span><span class="n">PointType</span><span class="p">;</span>
+<span class="w">      </span><span class="n">PointType</span><span class="o">::</span><span class="n">iterator</span><span class="w"> </span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ind</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">Rng</span><span class="o">::</span><span class="n">discrete</span><span class="p">(</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">ind</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">);</span>
+<span class="w">      </span><span class="o">*</span><span class="n">it</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">^*</span><span class="n">it</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">&gt;</span>
+<span class="w">    </span><span class="n">Individual</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">ind</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="n">Individual</span><span class="w"> </span><span class="n">result</span><span class="p">;</span>
+<span class="w">      </span><span class="p">(</span><span class="o">*</span><span class="k">this</span><span class="p">)(</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">);</span>
+<span class="w">      </span><span class="k">return</span><span class="p">(</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+
+<span class="c1">// Implements a (1+1)-GA</span>
+<span class="kt">int</span><span class="w"> </span><span class="n">main</span><span class="p">(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Instantiate and configure the objective function.</span>
+<span class="w">  </span><span class="n">shark</span><span class="o">::</span><span class="n">OneMax</span><span class="w"> </span><span class="n">oneMax</span><span class="p">;</span>
+<span class="w">  </span><span class="n">oneMax</span><span class="p">.</span><span class="n">setNoVariables</span><span class="p">(</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Define types for individuals and populations.</span>
+<span class="w">  </span><span class="k">typedef</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">IndividualType</span><span class="o">&lt;</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">BoolVector</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">Individual</span><span class="p">;</span>
+
+
+<span class="w">  </span><span class="c1">// Generate, initialize and evaluate a parent individual.</span>
+<span class="w">  </span><span class="n">Individual</span><span class="w"> </span><span class="nf">parent</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">BoolVector</span><span class="p">(</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="k">for</span><span class="p">(</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="n">parent</span><span class="p">).</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="p">(</span><span class="o">*</span><span class="n">parent</span><span class="p">)(</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">Rng</span><span class="o">::</span><span class="n">coinToss</span><span class="p">(</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">parent</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">PenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="n">parent</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">UnpenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">  </span><span class="n">oneMax</span><span class="p">(</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">Individual</span><span class="w"> </span><span class="nf">offspring</span><span class="p">(</span><span class="w"> </span><span class="n">parent</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">  </span><span class="n">shark</span><span class="o">::</span><span class="n">BitFlipMutation</span><span class="w"> </span><span class="n">mutation</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">while</span><span class="p">(</span><span class="w"> </span><span class="n">parent</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">UnpenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Mating selection.</span>
+<span class="w">    </span><span class="n">offspring</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">parent</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Mutation.</span>
+<span class="w">    </span><span class="n">bfm</span><span class="p">(</span><span class="w"> </span><span class="n">offspring</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Evaluation.</span>
+<span class="w">     </span><span class="n">offspring</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">PenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">     </span><span class="n">offspring</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">UnpenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span>
+<span class="w">     </span><span class="n">oneMax</span><span class="p">(</span><span class="w"> </span><span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Environmental selection.</span>
+<span class="w">    </span><span class="k">if</span><span class="p">(</span>
+<span class="w">      </span><span class="n">offspring</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">UnpenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span>
+<span class="w">      </span><span class="n">parent</span><span class="p">.</span><span class="n">fitness</span><span class="p">(</span><span class="w"> </span><span class="n">shark</span><span class="o">::</span><span class="n">UnpenalizedFitness</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="p">)</span>
+<span class="w">      </span><span class="n">std</span><span class="o">::</span><span class="n">swap</span><span class="p">(</span><span class="w"> </span><span class="n">parent</span><span class="p">,</span><span class="w"> </span><span class="n">offspring</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Print the total number of fitness function evaluations to solve the problem.</span>
+<span class="w">  </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;(1+1)-GA took: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">oneMax</span><span class="p">.</span><span class="n">evaluationCounter</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; to solve OneMax.&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">return</span><span class="p">(</span><span class="w"> </span><span class="n">EXIT_SUCCESS</span><span class="w"> </span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Please see the example OnePlusOneGA for the complete source code and
+refer to the more complex examples for further directions. Please see
+the source code documentation to get a list of mutation operators
+available in the Shark library.</p>
+</section>
+<section id="crossover-operators">
+<h3>Crossover Operators<a class="headerlink" href="#crossover-operators" title="Link to this heading">¶</a></h3>
+<p>Crossover or recombination refers to combining the characteristics of
+two or more parent individuals for producing one or more offspring
+individuals. In the Shark library, crossover operators are modelled as
+function objects. Their characteristics like number of number of
+parent and offspring individuals are modelled in terms of
+RecombinationOperatorTraits. Thus, one point crossover operator can be
+implemented in the following way:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span><span class="w"> </span><span class="nc">OnePointCrossover</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">Individual</span><span class="o">&gt;</span>
+<span class="w">  </span><span class="n">Individual</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">mom</span><span class="p">,</span>
+<span class="w">    </span><span class="k">const</span><span class="w"> </span><span class="n">Individual</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">dad</span><span class="p">,</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
+
+<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="w"> </span><span class="n">mom</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">dad</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="p">)</span>
+<span class="w">      </span><span class="k">throw</span><span class="p">(</span><span class="w"> </span><span class="n">SHARK_EXCEPTOIN</span><span class="p">(</span><span class="w"> </span><span class="s">&quot;Parents need to be of the same size.&quot;</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="n">Individual</span><span class="w"> </span><span class="nf">offspring</span><span class="p">(</span><span class="w"> </span><span class="n">mom</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">copy</span><span class="p">(</span><span class="w"> </span><span class="n">dad</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="n">dad</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">offspring</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">point</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">return</span><span class="p">(</span><span class="w"> </span><span class="n">offspring</span><span class="w"> </span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<p>The operator takes two parent individuals <em>mom</em> and <em>dad</em> as input and
+produces one offspring individual. We make known the input
+and output arity of the operator by specializing
+RecombinationOperatorTraits:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">RecombinationOperatorTraits</span><span class="o">&lt;</span><span class="w"> </span><span class="n">OnePointCrossover</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">INPUT_ARITY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">  </span><span class="k">static</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">OUTPUT_ARITY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Direct Search Algorithms</a><ul>
+<li><a class="reference internal" href="#conventions">Conventions</a></li>
+<li><a class="reference internal" href="#individuals-populations">Individuals &amp; Populations</a></li>
+<li><a class="reference internal" href="#evolutionary-operators-selection-variation-evaluation">Evolutionary Operators - Selection, Variation, Evaluation</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="../data/normalization.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Normalization of Input Data</a>
+  <a class="topless" href="conventions_derivatives.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Shark Conventions for Derivatives</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/optimization/directsearch.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

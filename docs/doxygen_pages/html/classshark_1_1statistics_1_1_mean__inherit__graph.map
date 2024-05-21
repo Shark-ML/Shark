@@ -1,0 +1,5 @@
+<map id="shark::statistics::Mean" name="shark::statistics::Mean">
+<area shape="rect" id="Node000001" title="For a vector of points computes for every dimension the mean." alt="" coords="5,94,160,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1statistics_1_1_base_statistics_object.html" title="Base class for all Statistic Objects to be used with Statistics" alt="" coords="10,5,155,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="85,62,85,93,80,93,80,62"/>
+</map>

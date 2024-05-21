@@ -1,0 +1,5 @@
+<map id="shark::MultiTaskSample&lt; InputTypeT &gt;" name="shark::MultiTaskSample&lt; InputTypeT &gt;">
+<area shape="rect" id="Node000001" title="Aggregation of input data and task index." alt="" coords="5,79,167,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="20,5,152,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,46,89,79,83,79,83,46"/>
+</map>

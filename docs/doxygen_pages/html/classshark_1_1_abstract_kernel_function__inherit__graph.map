@@ -1,0 +1,27 @@
+<map id="shark::AbstractKernelFunction&lt; InputTypeT &gt;" name="shark::AbstractKernelFunction&lt; InputTypeT &gt;">
+<area shape="rect" id="Node000001" title="Base class of all Kernel functions." alt="" coords="200,346,397,387"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_product_kernel.html" title=" " alt="" coords="450,5,652,61"/>
+<area shape="poly" id="edge2_Node000001_Node000006" title=" " alt="" coords="306,330,323,274,351,205,390,134,415,101,443,71,459,59,462,64,447,75,419,104,395,137,355,207,328,276,311,332"/>
+<area shape="rect" id="Node000008" href="$classshark_1_1_a_r_d_kernel_unconstrained.html" title="Automatic relevance detection kernel for unconstrained parameter optimization." alt="" coords="445,85,656,126"/>
+<area shape="poly" id="edge3_Node000001_Node000008" title=" " alt="" coords="310,331,330,286,359,234,397,182,443,136,464,124,467,128,447,141,401,185,364,237,335,289,315,333"/>
+<area shape="rect" id="Node000009" href="$classshark_1_1_gaussian_rbf_kernel.html" title="Gaussian radial basis function kernel." alt="" coords="464,150,638,191"/>
+<area shape="poly" id="edge4_Node000001_Node000009" title=" " alt="" coords="319,332,371,266,405,231,444,202,467,189,470,194,446,206,409,235,375,269,323,335"/>
+<area shape="rect" id="Node000010" href="$classshark_1_1_linear_kernel.html" title="Linear Kernel, parameter free." alt="" coords="484,216,617,256"/>
+<area shape="poly" id="edge5_Node000001_Node000010" title=" " alt="" coords="336,334,386,300,444,267,483,251,485,256,446,272,389,304,339,339"/>
+<area shape="rect" id="Node000011" href="$classshark_1_1_model_kernel.html" title="Kernel function that uses a Model as transformation function for another kernel." alt="" coords="484,281,617,322"/>
+<area shape="poly" id="edge6_Node000001_Node000011" title=" " alt="" coords="394,339,483,316,484,321,395,344"/>
+<area shape="rect" id="Node000012" href="$classshark_1_1_monomial_kernel.html" title="Monomial kernel. Calculates ." alt="" coords="474,346,628,387"/>
+<area shape="poly" id="edge7_Node000001_Node000012" title=" " alt="" coords="412,364,473,364,473,369,412,369"/>
+<area shape="rect" id="Node000013" href="$classshark_1_1_normalized_kernel.html" title="Normalized version of a kernel function." alt="" coords="469,412,633,452"/>
+<area shape="poly" id="edge8_Node000001_Node000013" title=" " alt="" coords="395,389,470,408,469,413,394,394"/>
+<area shape="rect" id="Node000014" href="$classshark_1_1_point_set_kernel.html" title="Normalized version of a kernel function." alt="" coords="477,477,625,518"/>
+<area shape="poly" id="edge9_Node000001_Node000014" title=" " alt="" coords="339,394,389,429,446,461,477,474,475,479,444,466,386,433,336,399"/>
+<area shape="rect" id="Node000015" href="$classshark_1_1_polynomial_kernel.html" title="Polynomial kernel." alt="" coords="470,542,632,583"/>
+<area shape="poly" id="edge10_Node000001_Node000015" title=" " alt="" coords="323,398,375,464,409,498,446,527,470,539,468,544,444,531,405,502,371,467,319,401"/>
+<area shape="rect" id="Node000016" href="$classshark_1_1_scaled_kernel.html" title="Scaled version of a kernel function." alt="" coords="482,608,620,648"/>
+<area shape="poly" id="edge11_Node000001_Node000016" title=" " alt="" coords="315,400,335,444,364,496,401,548,447,592,482,611,480,616,443,597,397,551,359,499,330,447,310,402"/>
+<area shape="rect" id="Node000017" href="$classshark_1_1_weighted_sum_kernel.html" title="Weighted sum of kernel functions." alt="" coords="461,673,640,714"/>
+<area shape="poly" id="edge12_Node000001_Node000017" title=" " alt="" coords="310,401,327,458,354,527,394,597,418,629,447,658,465,670,462,675,443,662,414,633,389,600,349,529,322,459,305,403"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_metric.html" title="Base&#45;class for metrics." alt="" coords="5,346,152,387"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="167,364,199,364,199,369,167,369"/>
+</map>

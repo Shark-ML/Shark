@@ -1,0 +1,35 @@
+<map id="shark::AbstractTrainer&lt; Model, LabelTypeT &gt;" name="shark::AbstractTrainer&lt; Model, LabelTypeT &gt;">
+<area shape="rect" id="Node000001" title="Superclass of supervised learning algorithms." alt="" coords="186,501,341,542"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="396,5,612,61"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="261,485,265,402,271,349,282,291,298,232,320,174,349,119,387,70,399,60,402,64,391,74,354,122,325,176,303,234,287,293,277,350,271,403,267,486"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="394,85,613,155"/>
+<area shape="poly" id="edge4_Node000001_Node000007" title=" " alt="" coords="265,485,275,418,296,333,312,288,332,244,357,202,387,165,399,154,403,158,391,168,361,205,337,247,317,290,301,335,280,419,270,486"/>
+<area shape="rect" id="Node000009" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="396,179,612,234"/>
+<area shape="poly" id="edge5_Node000001_Node000009" title=" " alt="" coords="269,485,283,432,306,368,340,302,362,272,387,245,403,233,406,237,391,248,366,275,344,305,311,370,288,434,274,486"/>
+<area shape="rect" id="Node000011" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="414,258,594,299"/>
+<area shape="poly" id="edge6_Node000001_Node000011" title=" " alt="" coords="274,485,290,444,315,397,347,350,387,310,412,295,414,300,391,314,351,353,319,400,295,447,279,487"/>
+<area shape="rect" id="Node000013" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="395,324,613,364"/>
+<area shape="poly" id="edge7_Node000001_Node000013" title=" " alt="" coords="283,486,326,428,355,399,388,374,409,362,411,367,390,378,359,403,330,432,287,489"/>
+<area shape="rect" id="Node000016" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="402,388,606,444"/>
+<area shape="poly" id="edge8_Node000001_Node000016" title=" " alt="" coords="313,491,388,453,417,442,419,447,390,458,315,495"/>
+<area shape="rect" id="Node000018" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="389,468,618,508"/>
+<area shape="poly" id="edge9_Node000001_Node000018" title=" " alt="" coords="356,506,388,501,389,506,356,511"/>
+<area shape="rect" id="Node000020" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="392,533,616,574"/>
+<area shape="poly" id="edge10_Node000001_Node000020" title=" " alt="" coords="357,531,391,536,391,541,356,536"/>
+<area shape="rect" id="Node000021" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="400,598,607,639"/>
+<area shape="poly" id="edge11_Node000001_Node000021" title=" " alt="" coords="315,547,390,583,425,595,423,600,388,588,313,552"/>
+<area shape="rect" id="Node000023" href="$classshark_1_1_abstract_weighted_trainer.html" title=" " alt="" coords="398,664,610,704"/>
+<area shape="poly" id="edge12_Node000001_Node000023" title=" " alt="" coords="290,552,334,602,361,627,390,648,416,661,413,665,388,653,357,631,330,606,286,556"/>
+<area shape="rect" id="Node000025" href="$classshark_1_1_abstract_svm_trainer.html" title="Super class of all kernelized (non&#45;linear) SVM trainers." alt="" coords="415,728,592,784"/>
+<area shape="poly" id="edge13_Node000001_Node000025" title=" " alt="" coords="281,555,298,592,323,635,353,677,391,714,416,729,413,734,387,718,349,681,318,637,294,594,276,557"/>
+<area shape="rect" id="Node000026" href="$classshark_1_1_abstract_weighted_trainer.html" title="Superclass of weighted supervised learning algorithms." alt="" coords="402,808,606,848"/>
+<area shape="poly" id="edge14_Node000001_Node000026" title=" " alt="" coords="273,556,287,609,309,673,343,738,365,768,391,794,407,805,404,809,387,798,361,771,339,741,304,676,281,611,268,557"/>
+<area shape="rect" id="Node000029" href="$classshark_1_1_lasso_regression.html" title="LASSO Regression." alt="" coords="423,873,585,914"/>
+<area shape="poly" id="edge15_Node000001_Node000029" title=" " alt="" coords="270,557,280,621,300,702,316,745,336,786,361,824,391,858,406,869,423,878,421,882,403,874,387,862,357,827,331,789,311,747,295,704,274,622,265,557"/>
+<area shape="rect" id="Node000030" href="$classshark_1_1_optimization_trainer.html" title="Wrapper for training schemes based on (iterative) optimization." alt="" coords="417,938,591,979"/>
+<area shape="poly" id="edge16_Node000001_Node000030" title=" " alt="" coords="268,556,273,632,292,731,307,783,328,834,356,881,391,923,418,941,415,945,387,927,352,885,324,836,302,785,286,732,268,633,262,557"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="9,483,134,509"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,503,186,508,185,514,149,509"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="5,532,138,558"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="152,532,185,528,185,534,153,538"/>
+</map>

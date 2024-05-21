@@ -1,0 +1,27 @@
+<map id="shark::AbstractCost&lt; LabelT, OutputT &gt;" name="shark::AbstractCost&lt; LabelT, OutputT &gt;">
+<area shape="rect" id="Node000001" title="Cost function interface." alt="" coords="178,345,316,386"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="379,5,561,46"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="249,330,259,270,278,197,293,159,312,121,335,87,362,56,378,44,381,49,366,60,339,90,316,124,298,161,283,199,264,272,254,330"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="370,70,570,126"/>
+<area shape="poly" id="edge3_Node000001_Node000007" title=" " alt="" coords="255,330,269,286,292,234,322,182,362,136,378,124,381,128,366,140,327,185,296,237,274,288,260,331"/>
+<area shape="rect" id="Node000009" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="375,149,565,190"/>
+<area shape="poly" id="edge4_Node000001_Node000009" title=" " alt="" coords="262,330,302,265,330,230,362,201,384,188,387,193,366,205,333,234,306,268,266,333"/>
+<area shape="rect" id="Node000012" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="373,215,566,255"/>
+<area shape="poly" id="edge5_Node000001_Node000012" title=" " alt="" coords="277,333,316,298,363,266,390,253,392,258,365,271,319,302,280,337"/>
+<area shape="rect" id="Node000014" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="376,280,564,321"/>
+<area shape="poly" id="edge6_Node000001_Node000014" title=" " alt="" coords="330,339,397,319,398,324,332,344"/>
+<area shape="rect" id="Node000017" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="385,345,554,386"/>
+<area shape="poly" id="edge7_Node000001_Node000017" title=" " alt="" coords="332,363,384,363,384,368,332,368"/>
+<area shape="rect" id="Node000019" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="401,410,539,466"/>
+<area shape="poly" id="edge8_Node000001_Node000019" title=" " alt="" coords="327,389,401,413,399,418,325,394"/>
+<area shape="rect" id="Node000021" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="364,490,575,546"/>
+<area shape="poly" id="edge9_Node000001_Node000021" title=" " alt="" coords="277,396,316,437,365,475,386,487,384,492,363,480,313,441,273,400"/>
+<area shape="rect" id="Node000022" href="$classshark_1_1_abstract_loss.html" title="Loss function interface." alt="" coords="401,569,539,610"/>
+<area shape="poly" id="edge10_Node000001_Node000022" title=" " alt="" coords="263,399,278,436,301,478,330,520,366,556,401,574,399,579,362,560,326,523,296,481,274,438,258,401"/>
+<area shape="rect" id="Node000026" href="$classshark_1_1_negative_a_u_c.html" title="Negative area under the curve." alt="" coords="380,635,559,675"/>
+<area shape="poly" id="edge11_Node000001_Node000026" title=" " alt="" coords="257,401,270,450,291,509,323,568,343,596,366,620,383,632,380,636,362,624,339,599,318,571,286,511,265,451,252,402"/>
+<area shape="rect" id="Node000027" href="$classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html" title="Negative Wilcoxon&#45;Mann&#45;Whitney statistic." alt="" coords="370,699,569,755"/>
+<area shape="poly" id="edge12_Node000001_Node000027" title=" " alt="" coords="254,401,264,462,283,537,298,577,316,616,339,653,366,685,380,697,376,701,362,689,335,656,312,619,293,579,278,539,259,463,249,402"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="5,353,130,379"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,363,177,363,177,368,145,368"/>
+</map>

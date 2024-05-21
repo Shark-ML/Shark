@@ -1,0 +1,5 @@
+<map id="shark::Batch&lt; blas::vector&lt; T, Device &gt; &gt;" name="shark::Batch&lt; blas::vector&lt; T, Device &gt; &gt;">
+<area shape="rect" id="Node000001" title="specialization for vectors which should be matrices in batch mode!" alt="" coords="13,109,170,150"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,178,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="94,77,94,109,89,109,89,77"/>
+</map>

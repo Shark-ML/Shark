@@ -1,0 +1,5 @@
+<map id="shark::Conv2DModel&lt; VectorType, ActivationFunction &gt;" name="shark::Conv2DModel&lt; VectorType, ActivationFunction &gt;">
+<area shape="rect" id="Node000001" title="Convolutional Model for 2D image data." alt="" coords="5,109,232,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_model.html" title="Base class for all Models." alt="" coords="28,5,209,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,77,121,109,116,109,116,77"/>
+</map>

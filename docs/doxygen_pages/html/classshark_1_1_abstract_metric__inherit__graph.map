@@ -1,0 +1,21 @@
+<map id="shark::AbstractMetric&lt; InputTypeT &gt;" name="shark::AbstractMetric&lt; InputTypeT &gt;">
+<area shape="rect" id="Node000001" title="Base&#45;class for metrics." alt="" coords="213,169,359,210"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_abstract_kernel_function.html" title=" " alt="" coords="426,5,623,46"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="307,155,349,104,376,79,406,57,430,44,433,49,408,61,379,83,353,108,311,158"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_abstract_kernel_function.html" title=" " alt="" coords="426,71,623,111"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="332,159,406,122,441,109,443,114,408,127,335,164"/>
+<area shape="rect" id="Node000009" href="$classshark_1_1_abstract_kernel_function.html" title=" " alt="" coords="426,136,623,177"/>
+<area shape="poly" id="edge6_Node000001_Node000009" title=" " alt="" coords="374,175,425,167,426,173,375,180"/>
+<area shape="rect" id="Node000015" href="$classshark_1_1_abstract_kernel_function.html" title=" " alt="" coords="407,201,641,242"/>
+<area shape="poly" id="edge7_Node000001_Node000015" title=" " alt="" coords="375,199,407,203,406,209,374,204"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="424,267,625,307"/>
+<area shape="poly" id="edge8_Node000001_Node000016" title=" " alt="" coords="335,215,408,251,443,264,441,269,406,256,333,220"/>
+<area shape="rect" id="Node000017" href="$classshark_1_1_abstract_kernel_function.html" title="Base class of all Kernel functions." alt="" coords="426,332,623,373"/>
+<area shape="poly" id="edge9_Node000001_Node000017" title=" " alt="" coords="312,221,353,271,379,296,408,317,433,329,431,334,406,321,376,300,349,274,307,224"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="23,120,147,145"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,147,213,166,212,171,147,153"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="5,169,165,210"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="180,187,212,187,212,192,180,192"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="19,234,151,260"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="147,227,212,208,213,213,148,232"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="shark::KernelExpansion&lt; InputType &gt;" name="shark::KernelExpansion&lt; InputType &gt;">
+<area shape="rect" id="Node000001" title="Linear model in a kernel feature space." alt="" coords="23,94,182,135"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_missing_features_kernel_expansion.html" title="Kernel expansion with missing features support For a choice of kernel, see Kernels." alt="" coords="5,183,200,223"/>
+<area shape="poly" id="edge2_Node000001_Node000006" title=" " alt="" coords="105,150,105,182,100,182,100,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="15,5,190,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,62,105,94,100,94,100,62"/>
+</map>

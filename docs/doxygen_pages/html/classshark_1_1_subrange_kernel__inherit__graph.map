@@ -1,0 +1,7 @@
+<map id="shark::SubrangeKernel&lt; InputType, InnerKernel &gt;" name="shark::SubrangeKernel&lt; InputType, InnerKernel &gt;">
+<area shape="rect" id="Node000001" title="Weighted sum of kernel functions." alt="" coords="246,39,422,79"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,5,198,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="214,39,245,44,245,49,213,44"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_weighted_sum_kernel.html" title="Weighted sum of kernel functions." alt="" coords="12,71,191,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="206,74,245,69,245,74,207,79"/>
+</map>

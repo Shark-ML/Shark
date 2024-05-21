@@ -1,0 +1,11 @@
+<map id="shark::statistics::BaseStatisticsObject" name="shark::statistics::BaseStatisticsObject">
+<area shape="rect" id="Node000001" title="Base class for all Statistic Objects to be used with Statistics" alt="" coords="5,92,150,133"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1statistics_1_1_fraction_missing.html" title="for a vector of points computes for every dimension the fraction of missing values" alt="" coords="214,5,336,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,83,197,55,222,44,224,49,199,60,138,88"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1statistics_1_1_mean.html" title="For a vector of points computes for every dimension the mean." alt="" coords="198,70,352,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="165,97,197,92,198,97,166,102"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1statistics_1_1_quantile.html" title="For a vector of points computes for every dimension the p&#45;quantile." alt="" coords="214,120,336,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="165,122,213,129,213,134,165,127"/>
+<area shape="rect" id="Node000008" href="$classshark_1_1statistics_1_1_variance.html" title="For a vector of points computes for every dimension the variance." alt="" coords="214,185,336,226"/>
+<area shape="poly" id="edge4_Node000001_Node000008" title=" " alt="" coords="133,138,199,170,226,182,224,187,197,175,131,142"/>
+</map>

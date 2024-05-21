@@ -1,0 +1,9 @@
+<map id="shark::AbstractSvmTrainer&lt; InputType, LabelType, Model, Trainer &gt;" name="shark::AbstractSvmTrainer&lt; InputType, LabelType, Model, Trainer &gt;">
+<area shape="rect" id="Node000001" title="Super class of all kernelized (non&#45;linear) SVM trainers." alt="" coords="213,55,390,111"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_trainer.html" title="Superclass of supervised learning algorithms." alt="" coords="7,5,163,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,48,213,57,211,62,177,53"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_qp_config.html" title="Super class of all support vector machine trainers." alt="" coords="27,70,143,96"/>
+<area shape="poly" id="edge2_Node000001_Node000005" title=" " alt="" coords="158,80,212,80,212,86,158,86"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="5,120,165,161"/>
+<area shape="poly" id="edge3_Node000001_Node000006" title=" " alt="" coords="178,113,211,104,213,109,179,118"/>
+</map>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Normalization of Input Data &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Direct Search Algorithms" href="../optimization/directsearch.html" />
+    <link rel="prev" title="Creating and Using Subsets of Data" href="dataset_subsets.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="normalization-of-input-data">
+<h1>Normalization of Input Data<a class="headerlink" href="#normalization-of-input-data" title="Link to this heading">¶</a></h1>
+<p>This short tutorial will demonstrate how data can be normalized using
+Shark. Read the basic <a class="reference internal" href="../../tutorials.html#label-for-data-tutorials"><span class="std std-ref">data tutorials</span></a>
+first if you are not familiar with the <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_data.html">Data</a> containers.</p>
+<p>In this tutorial the term <em>data normalization</em> refers to the process of
+pre-processing feature values of a data set. The usual purpose is to
+make all features comparable, in a sense, by transforming them to a
+uniform scale.</p>
+<p>Shark distinguished between feature-wise normalization and more complex
+methods.</p>
+<section id="feature-wise-normalization">
+<h2>Feature-wise Normalization<a class="headerlink" href="#feature-wise-normalization" title="Link to this heading">¶</a></h2>
+<p>For feature-wise rescaling Shark applies a <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_normalizer.html">Normalizer</a>
+model to the data. This model applies an affine linear function
+<span class="math notranslate nohighlight">\(x \mapsto a x + b\)</span> to each feature component; this is a special
+type of a linear model. Two different trainers for two different types
+of normalization are available. The trainers are
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_normalize_components_unit_interval.html">NormalizeComponentsUnitInterval</a> and
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_normalize_components_unit_variance.html">NormalizeComponentsUnitVariance</a>. The first one normalizes
+every input dimension to the range [0,1]. This operation is meaningful
+if it is known that feature values are bounded. The second class adjusts
+the variance of each component to one, and it can optionally remove the
+mean. This is no whitening, because correlations remain unchanged.
+Removal of the mean is optional. Note that without removal of the mean
+(essentially <span class="math notranslate nohighlight">\(x \mapsto a x\)</span> with <span class="math notranslate nohighlight">\(b = 0\)</span>) this operation
+can be applied efficiently even to extremely high-dimensional sparse
+feature vectors.</p>
+<p>In the following we will normalize data to unit variance and remove the
+mean. This requires the includes:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/Normalizer.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h&gt;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>First we have to train our normalizer model so that it can perform
+the normalization operation:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// create and train data normalizer</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">removeMean</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="n">Normalizer</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalizer</span><span class="p">;</span>
+<span class="n">NormalizeComponentsUnitVariance</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalizingTrainer</span><span class="p">(</span><span class="n">removeMean</span><span class="p">);</span>
+<span class="n">normalizingTrainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">normalizer</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Now the normalizer is ready to use and we can transform the data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// transform data</span>
+<span class="n">UnlabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">normalizedData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">normalizer</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In order to apply such a normalization to <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_labeled_data.html">LabeledData</a>, the
+methods <a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#gaf650c7559860ceb0d6b5e3ef3a1be1f3">transformInputs()</a> and <a class="reference external" href="../../../../../../../doxygen_pages/html/group__shark__globals.html#gad1ee84c65aeab9456e9c873007ea7459">transformLabels()</a> can be used.
+Of course, training and test data can be normalized either independently
+or with the same model.</p>
+<p>A normalizer can be concatenated with another model. This comes handy
+when a model should handle a stream of new input data. Only one call is
+needed to use the normalization followed by the trained model:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="cpf">&lt;shark/Models/ConcatenatedModel.h&gt;</span>
+<span class="c1">//...</span>
+
+<span class="n">YourModel</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+<span class="n">ConcatenatedModel</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="p">,</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">completeModel</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">normalizer</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">model</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+<section id="whitening">
+<h2>Whitening<a class="headerlink" href="#whitening" title="Link to this heading">¶</a></h2>
+<p>As noted above the feature-wise rescaling to unit variance does not
+remove correlations between features. A full whitening of the data is
+requires for this purpose. The resulting transformation is represented
+by a <a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_linear_model.html">LinearModel</a>, which is trained by a
+<a class="reference external" href="../../../../../../../doxygen_pages/html/classshark_1_1_normalize_components_whitening.html">NormalizeComponentsWhitening</a> trainer. The following code is
+analog of the above feature-wise normalization:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/LinearModel.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/NormalizeComponentsWhitening.h&gt;</span>
+
+
+
+<span class="w">        </span><span class="c1">// create and train data normalizer</span>
+<span class="w">        </span><span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">whitener</span><span class="p">;</span>
+<span class="w">        </span><span class="n">NormalizeComponentsWhitening</span><span class="w"> </span><span class="n">whiteningTrainer</span><span class="p">;</span>
+<span class="w">        </span><span class="n">whiteningTrainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="n">whitener</span><span class="p">,</span><span class="w"> </span><span class="n">data</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Now the normalizer is ready to use and we can transform the data:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// transform data</span>
+<span class="n">UnlabeledData</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">whitenedData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transform</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">whitener</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>A few notes are in place. First of all note that different types of
+pre-processing steps are suitable for different types of data. Second,
+not all procedures scale well to high-dimensional feature spaces. Third,
+it usually makes sense to combine feature rescaling with a feature
+selection (e.g., filtering) technique. Such techniques are beyond the
+scope of this tutorial.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Normalization of Input Data</a><ul>
+<li><a class="reference internal" href="#feature-wise-normalization">Feature-wise Normalization</a></li>
+<li><a class="reference internal" href="#whitening">Whitening</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="dataset_subsets.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Creating and Using Subsets of Data</a>
+  <a class="topless" href="../optimization/directsearch.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Direct Search Algorithms</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/data/normalization.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

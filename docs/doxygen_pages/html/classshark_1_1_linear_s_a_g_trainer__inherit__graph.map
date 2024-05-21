@@ -1,0 +1,7 @@
+<map id="shark::LinearSAGTrainer&lt; InputType, LabelType &gt;" name="shark::LinearSAGTrainer&lt; InputType, LabelType &gt;">
+<area shape="rect" id="Node000001" title="Stochastic Average Gradient Method for training of linear models,." alt="" coords="241,49,410,90"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_weighted_trainer.html" title="Superclass of weighted supervised learning algorithms." alt="" coords="5,5,193,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="209,48,241,53,240,58,208,53"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="19,85,179,126"/>
+<area shape="poly" id="edge2_Node000001_Node000006" title=" " alt="" coords="194,87,240,80,241,85,195,93"/>
+</map>

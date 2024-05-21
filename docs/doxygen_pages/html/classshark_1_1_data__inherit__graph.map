@@ -1,0 +1,11 @@
+<map id="shark::Data&lt; Type &gt;" name="shark::Data&lt; Type &gt;">
+<area shape="rect" id="Node000001" title="Data container." alt="" coords="186,78,327,104"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_unlabeled_data.html" title=" " alt="" coords="375,5,522,46"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="310,70,386,44,387,49,312,75"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_unlabeled_data.html" title=" " alt="" coords="375,71,522,111"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="342,88,375,88,375,94,342,94"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_unlabeled_data.html" title=" " alt="" coords="375,136,522,177"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="312,107,387,133,386,138,310,112"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="5,78,138,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,88,185,88,185,94,153,94"/>
+</map>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>The RBM Module &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Training Binary Restricted Boltzmann Machines" href="binary_rbm.html" />
+    <link rel="prev" title="Creating Multi-Objective Benchmarks with Shark" href="MOOExperiment.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="the-rbm-module">
+<h1>The RBM Module<a class="headerlink" href="#the-rbm-module" title="Link to this heading">¶</a></h1>
+<p>The following sections will briefly describe Restricted Boltzmann Machines (RBM).
+After that a short summary of the design goals and the target audience is given and
+in the last part the different components of the library are presented.
+This documentation should only be seen as a birds eye view of the module.
+Further tutorials will describe the components and the RBM in more detail.</p>
+<section id="what-is-an-rbm">
+<h2>What is an RBM?<a class="headerlink" href="#what-is-an-rbm" title="Link to this heading">¶</a></h2>
+<p>RBMs belong to the class of undirected graphical models (Markov random fields).
+The undirected graph of an RBM has an bipartite structure as shown in the figure below.
+RBMs hold two sets of random variables (also called neurons): one layer of visible variables
+to represent observable data and one layer of hidden variables to capture dependencies between the visible variables.
+As indicated by the missing edges between the variables inside one layer in the graph the
+variables of one layer are independent of each other given the states of the variables of the other layer.</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="../../../_images/rbm_graph.svg"><img alt="the bipartite graphical model of an RBM" height="139" src="../../../_images/rbm_graph.svg" width="238" /></a>
+</figure>
+<p>As for any Markov random field with a strictly positive probability distribution
+the joint distribution of an RBM is given by a Gibbs distribution</p>
+<div class="math notranslate nohighlight">
+\[p(\vec v,\vec h)={e^{- \frac{1}{T} E(\vec v, \vec h)}}/{Z},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\vec v\)</span> and <span class="math notranslate nohighlight">\(\vec h\)</span> are the vectors of the states of the
+visible and the hidden variables respectively,
+<em>T</em> is a constant called temperature (it is usually set to 1)
+and <em>Z</em> is a normalization constant called the partition function:</p>
+<div class="math notranslate nohighlight">
+\[Z=\sum_{ \vec v, \vec h}e^{- \frac{1}{T} E(\vec v,\vec h)}\]</div>
+<p>Based on
+Welling at al. <a class="reference internal" href="#wellingetal2005" id="id1"><span>[WellingEtAl2005]</span></a>, we define a generalized form of the
+energy function as</p>
+<div class="math notranslate nohighlight">
+\[E(\vec v,\vec h)=  f_h(\vec h) + f_v(\vec v) + \sum_{k,l} \phi_{hk}(\vec h) W_{k,l} \phi_{vl}(\vec v).\]</div>
+<p>The terms <span class="math notranslate nohighlight">\(f_h(\vec h)\)</span> and  <span class="math notranslate nohighlight">\(f_v(\vec v)\)</span> are
+associated to either only the hidden or the visible neurons and
+the third term models the interaction between visible and hidden variables.
+Note that the energy function given here differs from the one
+given by Welling at al. <a class="reference internal" href="#wellingetal2005" id="id2"><span>[WellingEtAl2005]</span></a> in an important fact:
+out of practical design reasons we define one function f_h (or f_v) for all hidden (or all visible) neurons jointly
+instead of having one for each singe hidden (or visible) neuron. This would
+allow to introduce dependancies between the variables of one layer - and thus to define
+a model that does not correspond to an RBM.
+If f_h (or analogously f_v) however is a sum of terms each depending only on the value
+of one neuron we obtain the energy function of an RBM.</p>
+<p>In the standard case of an binary RBM <a class="reference internal" href="#smolensky1986" id="id3"><span>[Smolensky1986]</span></a> <a class="reference internal" href="#hinton2007" id="id4"><span>[Hinton2007]</span></a> we have <span class="math notranslate nohighlight">\(f_h(\vec h) = \vec h^T  \vec c\)</span>
+and <span class="math notranslate nohighlight">\(f_v(\vec v) = \vec v^T \vec b\)</span>, where <span class="math notranslate nohighlight">\(\vec c\)</span> and <span class="math notranslate nohighlight">\(\vec b\)</span>
+are the vectors of the bias parameters for the hidden and the visible neurons respectively.
+Furthermore, the interaction term simplifies to <span class="math notranslate nohighlight">\(\vec h^T W \vec v\)</span>, where <span class="math notranslate nohighlight">\(W\)</span>
+is the matrix of the connection weights between hidden and visible variables, so we have just
+one single ‘phi-function’ for each layer that is the identity function.</p>
+<p>The parameterization of the RBM depends on the chosen energy function and thus can vary.
+Training an RBM corresponds to searching for the parameters that maximize the
+log-likelihood of the training data. This does not require the data to have
+labels associated with them so that the RBM can be used as an unsupervised learning technique.
+Unfortunately the gradient of the log-likelihood can not be computed efficiently and
+thus the optimization problem is hard. Instead of computing the gradient directly,
+it is approximated using Markov Chain Monte Carlo (MCMC) techniques.</p>
+<p>Usually the MCMC techniques are based on Gibbs Sampling because the independence of the
+variables of one layer given the state of the other makes this sampling scheme
+especially easy: sampling a new state for all hidden variables in the first step and
+sampling a new state for all visible variables in the second.</p>
+<p>The concrete form of the conditional distribution depends on the energy function.
+Choosing a suitable energy function leads to conditional distributions which are
+well known and can be efficiently sampled from. Adding constraints on the form of the
+energy as for example the formula of Welling et al. given above, even the inverse operation
+- creating a joint probability distribution from given conditional distributions -
+is possible.
+Thus it is possible to identify kinds of neurons with their corresponding conditional
+probability distributions. This leads to names like “binary neurons” or “Gaussian neurons”.</p>
+</section>
+<section id="design-goals">
+<h2>Design goals<a class="headerlink" href="#design-goals" title="Link to this heading">¶</a></h2>
+<p>As we have seen above, RBMs are quite complex. There are a lot of different types of RBMs
+and there are a lot of aspects which can be changed. Typical software tools until now
+usually only supported a small range of RBMs. They are often implemented by hand for every
+type of conditional distribution of the hidden and visible neurons. Often, these implementations
+are very efficient but they are not useful when new ideas need to be implemented.
+Often, small changes make a reimplementation of big parts of the code necessary.
+Our implementation tries to avoid this by offering very flexible components. We wanted
+to be able to represent all kinds of RBMs with valid energy functions.
+Furthermore, we tried to optimize the library for standard  energy types.
+For more complex kinds of RBMs this library will most likely not be able to compete with
+specialized implementations in terms of execution speed. But it will reduce the amount of
+time needed until a program is properly debugged and stable. Thus it makes it easy to try
+out new kinds of RBMs.</p>
+<p>To achieve flexibility, the usual components of a RBM learning process are separated and
+highly abstracted. Every component itself covers only a small aspect of the program and all
+components can be freely combined. For example different energy functions can be composed out
+of any two (different) types of neurons. The neurons carry the information needed to define
+the complete joint distribution.</p>
+<p>If a completely different type of RBM needs to be implemented, the definition of the
+energy can be replaced as a whole with a more suitable structure. But this should not be
+needed often since the default energy can represent most of the energy functions discussed
+in the literature, for example the energy of Gaussian RBMs, simple binary RBMs and those
+using neurons with truncated exponentials as conditional distributions.</p>
+<p>This level of abstraction leads to a very efficient development process. If for example a Gaussian
+RBM is trained with Contrastive Divergence <a class="reference internal" href="#hinton2002" id="id5"><span>[Hinton2002]</span></a> and the data turns out not to be modeled very well, the
+neurons can be changed without a need to change the implementation of contrastive divergence.
+When Contrastive Divergence is the problem, choosing another learning algorithm is also only a
+matter of a few lines of code.</p>
+</section>
+<section id="design">
+<h2>Design<a class="headerlink" href="#design" title="Link to this heading">¶</a></h2>
+<p>To achieve the desired flexibility, the module relies heavily on
+templates. Most of the components described in the following depend on
+the others as template parameters.  Changing a template parameter will
+change the behavior of the components and give rise for a new learning
+algorithm as will be described later. The advantage of templates is,
+that a lot of information can be processed during compile time.  This
+allows the <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_energy.html">Energy</a> function to define types based on it’s
+parameters and to choose the correct algorithms at compile time. For
+example when the partition function is calculated (what is only
+possible if the number of neurons in one of the layers is small), the
+correct implementation is chosen based on the type of State Space
+(e.g., <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_two_state_space.html">TwoStateSpace</a> <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_real_space.html">RealSpace</a>) the Neurons are
+defined on.</p>
+<p>The <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_energy.html">Energy</a> is the most basic concept of the RBM
+module. Mathematically, it defines the family of probability
+distributions modeled by the RBM. Therefore a lot of work is done by
+this class.  Aside from calculating the energy, it also defines the
+types of the neurons in the hidden and visible layer (e.g.,
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_binary_layer.html">BinaryLayer</a> or <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_gaussian_layer.html">GaussianLayer</a>) .  The layers are tied
+together by an interaction term which is usually a
+vector-matrix-vector product. The parameters of the neurons and the
+interaction term together define the parameters of the
+distribution. In the most known energy functions the sets of
+parameters are made up of the bias vectors of the layers and the
+weight matrix of the interaction term.  But for example Gaussian
+distributions can also define variance parameters. More fancy
+distributions like the Beta-Distribution also require additional
+weight matrices.</p>
+<p>RBM training is based on steepest ascent on an approximation of the
+gradient of the log-likelihood. There are a lot of different approximation
+algorithms, most of them relying on Markov Chain Monte Carlo sampling schemes.
+In this implementation these sampling schemes are based on two components:
+the transition operator and the Markov chain.
+The transition operator takes a pair of visible and hidden states and
+samples a new pair from them. Additionally a lot of information needed
+for calculating the gradient can be stored, for example the
+conditional probability for a binary unit to be one. The most prominent example of such a transition
+operator is <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_gibbs_operator.html">GibbsOperator</a> <a class="reference internal" href="#gemangeman1984" id="id6"><span>[GemanGeman1984]</span></a>. For real valued cases also Hamilton Sampling can be used.
+A Markov chain holds the current state of the hidden and visible variables and
+generates the transitions to the next states by a transition operator.
+It can be applied repeatedly to run the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_markov_chain.html">MarkovChain</a> several steps at once.
+Applying the transition operator at different temperatures leads to a tempered Markov Chain.</p>
+<p>Most often we need samples to approximate the log-likelihood gradient,
+but also some approximations of the partition function rely on these samples.
+Since different Energies lead to different log-likelihood gradients, the energy provides the information
+how to approximate the gradient of the energy function given a sample.
+Still, there are different ways to organize the sampling process.
+Most often, it has to be decided whether samples should be generated by one Markov Chain only (<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_single_chain_approximator.html">SingleChainApproximator</a>)
+or whether several independent Markov chains should be used (<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_multi_chain_approximator.html">MultiChainApproximator</a>).</p>
+<p>A lot of standard algorithms can be created by using the components. For example a Gibbs Operator with a standard
+Markov chain and a gradient approximation using several independent chains gives raise to the
+Persistent Contrastive Divergence <a class="reference internal" href="#tieleman2008" id="id7"><span>[Tieleman2008]</span></a> algorithm.
+Using an ensemble of tempered Markov chains will create Parallel Tempering <a class="reference internal" href="#desjardinsetal2010" id="id8"><span>[DesjardinsEtAl2010]</span></a>.</p>
+</section>
+<section id="implementation-status">
+<h2>Implementation Status<a class="headerlink" href="#implementation-status" title="Link to this heading">¶</a></h2>
+<p>Not all parts described above are available in the current release. Missing are</p>
+<ul class="simple">
+<li><p>Hamiltonian Sampling Operator,</p></li>
+<li><p>Several Neurons and Energies,</p></li>
+<li><p>Tempered Transitions.</p></li>
+</ul>
+<p>However, they will be available in the near future after some further testing.</p>
+</section>
+<section id="what-now">
+<h2>What now?<a class="headerlink" href="#what-now" title="Link to this heading">¶</a></h2>
+<p>You can see how to train a simple RBM with binary neurons in the tutorial
+<a class="reference internal" href="binary_rbm.html"><span class="doc">Training Binary Restricted Boltzmann Machines</span></a>.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="wellingetal2005" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>WellingEtAl2005<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
+<p>M. Welling, M. Rosen-Zvi, G.E. Hinton, L.K. Saul.
+Exponential Family Harmoniums with an Application to Information Retrieval.
+Advances in Neural Information Processing Systems (NIPS 17), MIT Press, 2005, 1481-1488</p>
+</div>
+<div class="citation" id="gemangeman1984" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">GemanGeman1984</a><span class="fn-bracket">]</span></span>
+<p>S. Geman and D. Geman. Stochastic relaxation, Gibbs distributions and the Bayesian restoration of images.
+IEEE Transactions on Pattern Analysis and Machine Intelligence, Routledge, 1984, 6, 721-741</p>
+</div>
+<div class="citation" id="smolensky1986" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">Smolensky1986</a><span class="fn-bracket">]</span></span>
+<p>P. Smolensky Information Processing in Dynamical Systems: Foundations of Harmony Theory Parallel distributed processing:
+explorations in the microstructure of cognition, vol. 1: Foundations, MIT Press, 1986, 194-281</p>
+</div>
+<div class="citation" id="hinton2002" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">Hinton2002</a><span class="fn-bracket">]</span></span>
+<p>G.E. Hinton.  Training Products of Experts by Minimizing Contrastive Divergence Neural Computation, 2002, 14, 1771-1800</p>
+</div>
+<div class="citation" id="tieleman2008" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">Tieleman2008</a><span class="fn-bracket">]</span></span>
+<p>T. Tieleman. Training restricted Boltzmann machines using approximations to the likelihood gradient.
+International Conference on Machine learning (ICML), ACM, 2008, 1064-1071</p>
+</div>
+<div class="citation" id="desjardinsetal2010" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">DesjardinsEtAl2010</a><span class="fn-bracket">]</span></span>
+<p>G. Desjardins, A. Courville, Y. Bengio, P. Vincent, O. Dellaleau.
+Parallel Tempering for Training of Restricted Boltzmann Machines.
+Journal of Machine Learning Research Workshop and Conference Proceedings, 2010, 9, 145-152</p>
+</div>
+<div class="citation" id="hinton2007" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">Hinton2007</a><span class="fn-bracket">]</span></span>
+<p>G.E. Hinton. Learning multiple layers of representation.
+Trends in Cognitive Sciences, 2007, 11, 428-434</p>
+</div>
+<div class="citation" id="mackay2002" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>MacKay2002<span class="fn-bracket">]</span></span>
+<p>D.J.C.MacKay.
+Information Theory, Inference &amp; Learning Algorithms. Cambridge
+University Press, 2002.</p>
+</div>
+<div class="citation" id="welling2007" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>Welling2007<span class="fn-bracket">]</span></span>
+<p>M. Welling.
+<a class="reference external" href="http://www.scholarpedia.org/article/Product_of_experts">Product of experts</a>. Scholarpedia,
+2(10):3879, 2007.</p>
+</div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">The RBM Module</a><ul>
+<li><a class="reference internal" href="#what-is-an-rbm">What is an RBM?</a></li>
+<li><a class="reference internal" href="#design-goals">Design goals</a></li>
+<li><a class="reference internal" href="#design">Design</a></li>
+<li><a class="reference internal" href="#implementation-status">Implementation Status</a></li>
+<li><a class="reference internal" href="#what-now">What now?</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="MOOExperiment.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Creating Multi-Objective Benchmarks with Shark</a>
+  <a class="topless" href="binary_rbm.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Training Binary Restricted Boltzmann Machines</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/rbm_module.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

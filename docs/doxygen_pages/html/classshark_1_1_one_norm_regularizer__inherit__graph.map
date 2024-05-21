@@ -1,0 +1,5 @@
+<map id="shark::OneNormRegularizer&lt; SearchPointType &gt;" name="shark::OneNormRegularizer&lt; SearchPointType &gt;">
+<area shape="rect" id="Node000001" title="One&#45;norm of the input as an objective function." alt="" coords="17,94,201,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_objective_function.html" title="Super class of all objective functions for optimization and learning." alt="" coords="5,5,213,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="112,62,112,94,106,94,106,62"/>
+</map>

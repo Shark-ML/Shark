@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Variational Autoencoders &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Random Forest" href="rf.html" />
+    <link rel="prev" title="Autoencoders" href="autoencoders.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="variational-autoencoders">
+<h1>Variational Autoencoders<a class="headerlink" href="#variational-autoencoders" title="Link to this heading">¶</a></h1>
+<p>Variational autoencoders are an extension to normal autoencoders.
+They have an underlying generative model which is trained using an lower bound of the
+maximum likelihood objective function.
+The optimisation problem for input data <span class="math notranslate nohighlight">\(\vec{x}_1,\dots,\vec{x}_N\)</span> is stated as:</p>
+<div class="math notranslate nohighlight">
+\[\min_{\theta} \frac 1 N \sum_{i=1}^N E_{q(\vec z \| \vec x_i)}\left\{(\vec x_i - f(\vec z))^2\right\} + \lambda \cdot KL( q(\vec z \| \vec x_i)|| \mathcal{N}(0,I)) \enspace .\]</div>
+<p>The encoder is represented by a distribution <code class="docutils literal notranslate"><span class="pre">q</span></code>, that is learning a normal distribution from which we sample hidden states <code class="docutils literal notranslate"><span class="pre">z</span></code>.
+The decoder then performs the reconstruction <code class="docutils literal notranslate"><span class="pre">f(z)</span></code> and the squared loss between original point and reconstruction is computed. Without
+an regularization term, the encoder will learn a distribution with a very small variance as larger variances would make reconstruction harder.
+Tehrefore, a second term, the KL divergence is added which measures how different the <code class="docutils literal notranslate"><span class="pre">q</span></code> is from a standard normal distribution.
+In this tutorial, we will train such a model. The full example program is given in <a class="reference external" href="../../../../../../doxygen_pages/html/_variational_autoencoder_8cpp.html">VariationalAutoencoder.cpp</a>.</p>
+<p>For this tutorial, we need the following includes:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/SparseData.h&gt;</span><span class="c1">//for reading in the images as sparseData/Libsvm format</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/Pgm.h&gt;</span><span class="c1">//for printing out reconstructions</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/LinearModel.h&gt;</span><span class="c1">//single dense layer</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/ConcatenatedModel.h&gt;</span><span class="c1">//for stacking layers</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/GradientDescent/Adam.h&gt;</span><span class="c1">// The Adam optimization algorithm</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/SquaredLoss.h&gt;</span><span class="c1"> //squared loss function (can also be cross-entropy for greyscale images)</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/VariationalAutoencoderError.h&gt;</span><span class="c1"> //variational autoencoder error function</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="p">;</span>
+</pre></div>
+</div>
+<section id="defining-the-model">
+<h2>Defining the model<a class="headerlink" href="#defining-the-model" title="Link to this heading">¶</a></h2>
+<p>A variational autoencoder consists of two models, the encoder and the decoder. The encoder must have linear output
+neurons and two times the number of outputs as the inputs of the decoder. For each input of the decoder, the encoder must learn the
+mean and variance. We will showcase only a very simple pair of models:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">//build encoder network</span>
+<span class="c1">//note that the output layer must be linear and must have twice the number of outputs than the decoder inputs</span>
+<span class="c1">//as we have to model mean and variance for each decoder-input.</span>
+<span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">RectifierNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">encoder1</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">inputShape</span><span class="p">(),</span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">LinearNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">encoder2</span><span class="p">(</span><span class="n">encoder1</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="mi">2</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">encoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">encoder1</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">encoder2</span><span class="p">;</span>
+
+<span class="c1">//build decoder network</span>
+<span class="c1">//MNIST is scaled between 0 and 1 so a sigmoid output makes predicting compeltely black and completely white pixels easier</span>
+<span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">RectifierNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">decoder1</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="n">LinearModel</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="p">,</span><span class="w"> </span><span class="n">LogisticNeuron</span><span class="o">&gt;</span><span class="w"> </span><span class="n">decoder2</span><span class="p">(</span><span class="n">decoder1</span><span class="p">.</span><span class="n">outputShape</span><span class="p">(),</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">inputShape</span><span class="p">(),</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">decoder</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decoder1</span><span class="w"> </span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">decoder2</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Instead of the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_error_function.html">ErrorFunction</a> we will use the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_variational_autoencoder_error.html">VariationalAutoencoderError</a>. It takes the dataset, encoder and decoder models, the loss function and the strength
+of regularization, lambda:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">SquaredLoss</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loss</span><span class="p">;</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span>
+<span class="n">VariationalAutoencoderError</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">error</span><span class="p">(</span><span class="n">data</span><span class="p">.</span><span class="n">inputs</span><span class="p">(),</span><span class="w"> </span><span class="o">&amp;</span><span class="n">encoder</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">decoder</span><span class="p">,</span><span class="o">&amp;</span><span class="n">loss</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Lastly, we optimize the objective using <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_adam.html">Adam</a>. Take into account that encoder and decoder have to be initialized separately:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">iterations</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20000</span><span class="p">;</span>
+<span class="n">Adam</span><span class="o">&lt;</span><span class="n">FloatVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">optimizer</span><span class="p">;</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">setEta</span><span class="p">(</span><span class="mf">0.001</span><span class="p">);</span>
+<span class="n">initRandomNormal</span><span class="p">(</span><span class="n">encoder</span><span class="p">,</span><span class="mf">0.0001</span><span class="p">);</span>
+<span class="n">initRandomNormal</span><span class="p">(</span><span class="n">decoder</span><span class="p">,</span><span class="mf">0.0001</span><span class="p">);</span>
+<span class="n">error</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+<span class="n">optimizer</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="n">error</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="s">&quot;Optimizing model &quot;</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="k">for</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="kt">size_t</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">iterations</span><span class="p">;</span><span class="w"> </span><span class="o">++</span><span class="n">i</span><span class="p">){</span>
+<span class="w">        </span><span class="n">optimizer</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="n">error</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">100</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">){</span>
+<span class="w">                </span><span class="c1">//create some reconstructions for evaluation</span>
+<span class="w">                </span><span class="k">auto</span><span class="w"> </span><span class="k">const</span><span class="o">&amp;</span><span class="w"> </span><span class="n">batch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">data</span><span class="p">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="n">input</span><span class="p">;</span>
+<span class="w">                </span><span class="n">RealMatrix</span><span class="w"> </span><span class="n">reconstructed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decoder</span><span class="p">(</span><span class="n">error</span><span class="p">.</span><span class="n">sampleZ</span><span class="p">(</span><span class="n">optimizer</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="p">,</span><span class="w"> </span><span class="n">batch</span><span class="p">));</span>
+
+<span class="w">                </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="o">&lt;&lt;</span><span class="n">optimizer</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">value</span><span class="o">&lt;&lt;</span><span class="s">&quot; &quot;</span><span class="o">&lt;&lt;</span><span class="n">loss</span><span class="p">(</span><span class="n">batch</span><span class="p">,</span><span class="w"> </span><span class="n">reconstructed</span><span class="p">)</span><span class="o">/</span><span class="n">batch</span><span class="p">.</span><span class="n">size1</span><span class="p">()</span><span class="o">&lt;&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">                </span><span class="c1">//store reconstructions</span>
+<span class="w">                </span><span class="n">exportFiltersToPGMGrid</span><span class="p">(</span><span class="s">&quot;reconstructed&quot;</span><span class="o">+</span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="w"> </span><span class="n">reconstructed</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">28</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Variational Autoencoders</a><ul>
+<li><a class="reference internal" href="#defining-the-model">Defining the model</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="autoencoders.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Autoencoders</a>
+  <a class="topless" href="rf.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Random Forest</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/variational_autoencoders.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

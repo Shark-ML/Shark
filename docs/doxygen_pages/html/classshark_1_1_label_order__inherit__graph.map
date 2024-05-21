@@ -1,0 +1,5 @@
+<map id="shark::LabelOrder" name="shark::LabelOrder">
+<area shape="rect" id="Node000001" title="This will normalize the labels of a given dataset to 0..N&#45;1." alt="" coords="5,79,130,105"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="5,5,130,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="70,46,70,79,65,79,65,46"/>
+</map>

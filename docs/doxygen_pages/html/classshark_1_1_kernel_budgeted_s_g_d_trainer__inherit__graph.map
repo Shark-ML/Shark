@@ -1,0 +1,7 @@
+<map id="shark::KernelBudgetedSGDTrainer&lt; InputType, CacheType &gt;" name="shark::KernelBudgetedSGDTrainer&lt; InputType, CacheType &gt;">
+<area shape="rect" id="Node000001" title="Budgeted stochastic gradient descent training for kernel&#45;based models." alt="" coords="272,39,494,79"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_trainer.html" title=" " alt="" coords="5,5,224,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="240,39,272,43,271,48,239,44"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="35,71,194,111"/>
+<area shape="poly" id="edge2_Node000001_Node000005" title=" " alt="" coords="209,77,271,70,272,75,210,82"/>
+</map>

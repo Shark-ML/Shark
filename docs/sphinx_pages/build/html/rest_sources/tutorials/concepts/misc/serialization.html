@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Serialization &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="Principal Component Analysis" href="../../algorithms/pca.html" />
+    <link rel="prev" title="Iterative Calculation of Statistics" href="statistics.html" />
+    <link rel="stylesheet" href="../../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="serialization">
+<h1>Serialization<a class="headerlink" href="#serialization" title="Link to this heading">¶</a></h1>
+<p>Most objects in Shark can be serialized, meaning that their internal
+state can be transferred from and to a stream, e.g., for loading and
+saving. This short tutorial demonstrates how to use this feature.</p>
+<p>Let us start with a basic machine learning example, similar to the one
+developed in the <a class="reference internal" href="../../algorithms/svm.html"><span class="doc">Support Vector Machines: First Steps</span></a> tutorial:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/SvmTrainer.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/Kernels/GaussianRbfKernel.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/DataDistribution.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;fstream&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="o">**</span><span class="w"> </span><span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">        </span><span class="c1">// generate synthetic data</span>
+<span class="w">        </span><span class="n">Chessboard</span><span class="w"> </span><span class="n">prob</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">training</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span><span class="w"> </span><span class="mi">500</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// define a model</span>
+<span class="w">        </span><span class="n">GaussianRbfKernel</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">kernel</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="w">        </span><span class="n">KernelExpansion</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ke</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// train the model</span>
+<span class="w">        </span><span class="n">CSvmTrainer</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trainer</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="mf">1000.0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">trainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ke</span><span class="p">,</span><span class="w"> </span><span class="n">training</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// evaluate the trained model on the training set</span>
+<span class="w">        </span><span class="n">Data</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output</span><span class="p">;</span>
+<span class="w">        </span><span class="n">ke</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">inputs</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="w">        </span><span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loss</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">trainError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;training error of the original model:</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainError</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This program trains a support vector machine and outputs its training
+error. Now let’s assume we want to store the trained model for later
+use, e.g., as a recovery point in a long running process. We extend the
+above program:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// save the model to the file &quot;svm.model&quot;</span>
+<span class="n">ofstream</span><span class="w"> </span><span class="n">ofs</span><span class="p">(</span><span class="s">&quot;svm.model&quot;</span><span class="p">);</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">archive</span><span class="o">::</span><span class="n">polymorphic_text_oarchive</span><span class="w"> </span><span class="nf">oa</span><span class="p">(</span><span class="n">ofs</span><span class="p">);</span>
+<span class="n">ke</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">oa</span><span class="p">);</span>
+<span class="n">ofs</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>Shark makes heavy use of templates. This has many great advantages,
+but in this case makes life a bit harder. The kernel expansion model
+internally holds a list of all support vectors, and they are objects of
+an arbitrary type that comes as a template argument. In other words, the
+<code class="docutils literal notranslate"><span class="pre">KernelExpansion</span></code> code does not know anything about this type and how
+to serialize it. Now, this unknown and possibly user defined type needs
+to be serialized to a file, since it is an important part of the model’s
+state. This is where the serialization capability of boost comes into
+play, since the boost serialization library offers a principled solution
+to this problem.</p>
+<p>Use of this feature is easy. We construct a boost archive object and
+call the <code class="docutils literal notranslate"><span class="pre">write</span></code> method of the kernel expansion. The model stores its
+internal state in the archive. Another interesting aspect of this
+construction is the handling of the kernel parameters, in this case the
+bandwidth parameter of the Gaussian RBF kernel. This parameter has been
+set to 0.5 in the above example, and since the kernel is an integral
+part of the kernel expansion, the kernel state it stored alongside the
+other parameters.</p>
+<p>Now let’s assume disaster has happened: our long running process was
+killed, maybe by a power outage. We are lucky, because we have stored
+the kernel expansion model to disk. So let’s continue the process with
+the stored model, instead of going through the possibly lengthy training
+process again:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// load the file &quot;svm.model&quot; into a new model</span>
+<span class="n">GaussianRbfKernel</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">kernelLoad</span><span class="p">(</span><span class="nb">true</span><span class="p">);</span>
+<span class="n">KernelExpansion</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">keLoad</span><span class="p">(</span><span class="o">&amp;</span><span class="n">kernelLoad</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+<span class="n">ifstream</span><span class="w"> </span><span class="n">ifs</span><span class="p">(</span><span class="s">&quot;svm.model&quot;</span><span class="p">);</span>
+<span class="n">boost</span><span class="o">::</span><span class="n">archive</span><span class="o">::</span><span class="n">polymorphic_text_iarchive</span><span class="w"> </span><span class="nf">ia</span><span class="p">(</span><span class="n">ifs</span><span class="p">);</span>
+<span class="n">keLoad</span><span class="p">.</span><span class="n">read</span><span class="p">(</span><span class="n">ia</span><span class="p">);</span>
+<span class="n">ifs</span><span class="p">.</span><span class="n">close</span><span class="p">();</span>
+</pre></div>
+</div>
+<p>That’s all. We construct a boost archive for input and invoke the
+<code class="docutils literal notranslate"><span class="pre">read</span></code> method of a fresh kernel expansion model. Note that we have
+provided the kernel expansion object already with the right type of
+kernel object, but we have not set its parameters. All parameters
+(support vectors, weights and bias of the kernel expansion and bandwidth
+of the kernel) are restored from disk, and the model is straight away
+ready for evaluation:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// evaluate the loaded model on the training set</span>
+<span class="n">keLoad</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">inputs</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="n">trainError</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="n">training</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output</span><span class="p">);</span>
+<span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;training error of the loaded model:</span><span class="se">\t</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainError</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div>
+  <a class="topless" href="statistics.html" title="previous chapter">
+	  <img class="navicon" src="../../../../_static/icon_backward.png" alt="prev"/> Iterative Calculation of Statistics</a>
+  <a class="topless" href="../../algorithms/pca.html" title="next chapter">
+	  <img class="navicon" src="../../../../_static/icon_forward.png" alt="next"/> Principal Component Analysis</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../../_sources/rest_sources/tutorials/concepts/misc/serialization.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

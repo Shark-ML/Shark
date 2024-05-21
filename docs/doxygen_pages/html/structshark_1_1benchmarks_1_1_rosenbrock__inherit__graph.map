@@ -1,0 +1,5 @@
+<map id="shark::benchmarks::Rosenbrock" name="shark::benchmarks::Rosenbrock">
+<area shape="rect" id="Node000001" title="Generalized Rosenbrock benchmark function." alt="" coords="16,79,157,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_objective_function.html" title=" " alt="" coords="5,5,168,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,46,89,79,84,79,84,46"/>
+</map>

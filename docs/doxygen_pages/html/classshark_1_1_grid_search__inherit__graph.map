@@ -1,0 +1,5 @@
+<map id="shark::GridSearch" name="shark::GridSearch">
+<area shape="rect" id="Node000001" title="Optimize by trying out a grid of configurations." alt="" coords="43,94,169,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_single_objective_optimizer.html" title=" " alt="" coords="5,5,207,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="109,62,109,93,103,93,103,62"/>
+</map>

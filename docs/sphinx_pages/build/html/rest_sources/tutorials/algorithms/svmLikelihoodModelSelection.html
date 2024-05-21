@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Support Vector Machines: Likelihood-based Model Selection &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Linear Kernel Combinations (and a bit of MKL)" href="lkc-mkl.html" />
+    <link rel="prev" title="Support Vector Machines: Model Selection Using Cross-Validation and Grid-Search" href="svmModelSelection.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="support-vector-machines-likelihood-based-model-selection">
+<h1>Support Vector Machines: Likelihood-based Model Selection<a class="headerlink" href="#support-vector-machines-likelihood-based-model-selection" title="Link to this heading">¶</a></h1>
+<p>Please first read the <a class="reference internal" href="svm.html"><span class="doc">Support Vector Machines: First Steps</span></a> tutorial, and possibly also the
+<a class="reference internal" href="svmModelSelection.html"><span class="doc">Support Vector Machines: Model Selection Using Cross-Validation and Grid-Search</span></a> tutorial for traditional approaches to SVM model
+selection.</p>
+<section id="motivation">
+<h2>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">¶</a></h2>
+<p>The previous tutorial explained that the performance of an SVM classifier depends
+on the choice of regularization parameter <span class="math notranslate nohighlight">\(C\)</span> and the kernel parameters.
+We also presented the most common method to find SVM hyperparameters: grid search
+on the cross-validation error. This is suited for kernels with only one or two
+parameters, because a two- or three-dimensional SVM hyperparameter search space
+can still be sufficiently covered by a fixed grid of search points. Using naive
+heuristics like <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_nested_grid_search.html">NestedGridSearch</a>, where the search resolution increases
+iteratively, a four- or perhaps even five-dimensional SVM hyperparameter space
+can maybe still be sampled sufficiently. But we do not get around the fact that
+grid search-based SVM model selection suffers from the curse of dimensionality.</p>
+<p>Naturally, much research has been directed toward differentiable estimates of,
+substitutes for, or bounds on the generalization error. A good overview is given
+in our paper <a class="reference internal" href="#glasmachersigel2010" id="id1"><span>[GlasmachersIgel2010]</span></a>. There, we also present a novel model selection
+criterion that is differentiable (in almost all practical cases) with respect to
+the regularization and kernel parameters. In practical experiments, it compared
+very favorably to other gradient-based model selection criteria. We consider it
+the current state-of-the-art for gradient-based SVM model selection, and especially
+when the number of examples is relatively small. In the next paragraphs, we explain
+how to use this maximum-likelihood based approach to SVM model selection in Shark.
+For theoretical details and background, please consult the original article.</p>
+</section>
+<section id="the-toy-problem">
+<h2>The toy problem<a class="headerlink" href="#the-toy-problem" title="Link to this heading">¶</a></h2>
+<p>Assume we have a higher- or high-dimensional kernel, for example an “Automatic
+Relevance Detection” (ARD) kernel, which has one parameter for each input
+dimension:</p>
+<div class="math notranslate nohighlight">
+\[k(x, z) = \exp( - \sum_i \gamma_i (x_i - z_i)^2 )\]</div>
+<p>Such a kernel can be useful when the individual features correlate much
+differently with the labels, hence calling for individual bandwidths
+<span class="math notranslate nohighlight">\(\gamma_i\)</span> per feature. (From another angle, learning the ARD kernel
+bandwidths corresponds to learning a linear transformation of the input space.)</p>
+<p>In <a class="reference internal" href="#glasmachersigel2010" id="id2"><span>[GlasmachersIgel2010]</span></a>, a toy problem is introduced which well lends itself
+to an ARD kernel and the optimization of its parameters. It creates a binary
+classification dataset of dimension <span class="math notranslate nohighlight">\(2d\)</span> in the following way: first, fix
+a positive or negative label <span class="math notranslate nohighlight">\(y\)</span>, i.e., <span class="math notranslate nohighlight">\(1\)</span> or <span class="math notranslate nohighlight">\(0\)</span>, respectively.
+Then, fill the first <span class="math notranslate nohighlight">\(d\)</span> dimensions by</p>
+<div class="math notranslate nohighlight">
+\[y - 0.5 + \mathcal N(0.0,1.0) \enspace .\]</div>
+<p>That is, produce Gaussian distributed noise around <span class="math notranslate nohighlight">\(+0.5\)</span> for positive label
+and <span class="math notranslate nohighlight">\(-0.5\)</span> for negative label. The second <span class="math notranslate nohighlight">\(d\)</span> dimensions are simply filled
+with only Gaussian noise <span class="math notranslate nohighlight">\(\sim \mathcal N(0.0,1.0)\)</span>. Overall, there will be
+<span class="math notranslate nohighlight">\(d\)</span> dimensions which are correlated with the labels and hence informative, and
+<span class="math notranslate nohighlight">\(d\)</span> dimensions which are not correlated with the labels and uninformative.</p>
+<p>By design, this toy problem is well tailored to an ARD kernel. The ARD kernel
+weights corresponding to the uninformative dimensions would best be optimized out
+to be zero, since these dimensions on average hold no information relevant to the
+classification problem. In the following, we will use our maximum-likelihood model
+selection criterion to optimize the hyperparameters of an SVM using an ARD kernel
+on such a toy problem. Ideally, the kernel weights will afterwards reflect the
+nature of the underlying distribution. (And we will see that they do.)</p>
+</section>
+<section id="likelihood-based-model-selection-in-shark">
+<h2>Likelihood-based model selection in Shark<a class="headerlink" href="#likelihood-based-model-selection-in-shark" title="Link to this heading">¶</a></h2>
+<p>You can find the source code for the following example in
+<a class="reference external" href="../../../../../../doxygen_pages/html/_c_svm_max_likelihood_m_s_8cpp.html">CSvmMaxLikelihoodMS.cpp</a> (as generated by its according .tpp file). There,
+one trial is wrapped by the function <code class="docutils literal notranslate"><span class="pre">run_one_trial()</span></code>, which takes a verbosity
+preference as argument. The first trial is carried out verbosely, the 100 aggregating
+trials (which take a long time) silently and only the overall hyperparameter averages
+are printed. The tutorial below mostly covers the functionality of the <code class="docutils literal notranslate"><span class="pre">run_one_trial()</span></code>
+function. For the complete program, see the example .cpp file.</p>
+<p>The key class for maximum-likelihood based SVM model selection in Shark
+is <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_svm_logistic_interpretation.html">SvmLogisticInterpretation</a>, and we include its header. To create
+the toy problem via the aptly named <code class="docutils literal notranslate"><span class="pre">PamiToy</span></code> distribution, we also include
+the header for data distributions; and the gradient-based optimizer “Rprop”,
+with which we will optimize the SVM hyperparameters under the
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_svm_logistic_interpretation.html">SvmLogisticInterpretation</a> criterion. With various other helpers,
+our complete list of includes and namespaces becomes:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/Dataset.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/CVDatasetTools.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/DataDistribution.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Data/Statistics.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Models/Kernels/ArdKernel.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/QP/QuadraticProgram.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/CSvmTrainer.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/GradientDescent/Rprop.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Loss/ZeroOneLoss.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/SvmLogisticInterpretation.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/Trainers/NormalizeComponentsUnitVariance.h&gt;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">shark</span><span class="p">;</span>
+</pre></div>
+</div>
+<section id="creating-the-toy-problem">
+<h3>Creating the toy problem<a class="headerlink" href="#creating-the-toy-problem" title="Link to this heading">¶</a></h3>
+<p>First, define the basic dimensionalities, here using <span class="math notranslate nohighlight">\(d=5\)</span>:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// define the basic dimensionality of the problem</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">useful_dim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">noise_dim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">total_dim</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">useful_dim</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">noise_dim</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Then set up the above described classification problem:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up the classification problem from a DataDistribution</span>
+<span class="n">PamiToy</span><span class="w"> </span><span class="nf">problem</span><span class="p">(</span><span class="w"> </span><span class="n">useful_dim</span><span class="p">,</span><span class="w"> </span><span class="n">noise_dim</span><span class="w"> </span><span class="p">);</span>
+
+<span class="c1">// construct training and test sets from the problem distribution</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">train_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">;</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">test_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span><span class="p">;</span>
+<span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">generateDataset</span><span class="p">(</span><span class="w"> </span><span class="n">train_size</span><span class="w"> </span><span class="p">);</span>
+<span class="n">ClassificationDataset</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">problem</span><span class="p">.</span><span class="n">generateDataset</span><span class="p">(</span><span class="w"> </span><span class="n">test_size</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>and normalize the data to unit variance in the training set as usual:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// normalize data as usual</span>
+<span class="n">Normalizer</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">normalizer</span><span class="p">;</span>
+<span class="n">NormalizeComponentsUnitVariance</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">normalizationTrainer</span><span class="p">(</span><span class="nb">false</span><span class="p">);</span>
+<span class="n">normalizationTrainer</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="w"> </span><span class="n">normalizer</span><span class="p">,</span><span class="w"> </span><span class="n">train</span><span class="p">.</span><span class="n">inputs</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="n">train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transformInputs</span><span class="p">(</span><span class="w"> </span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">normalizer</span><span class="w"> </span><span class="p">);</span>
+<span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transformInputs</span><span class="p">(</span><span class="w"> </span><span class="n">test</span><span class="p">,</span><span class="w"> </span><span class="n">normalizer</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Then create the ARD kernel with appropriate dimensions (kernel parameter
+initialization will come later):</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up the ArdKernel</span>
+<span class="n">DenseARDKernel</span><span class="w"> </span><span class="nf">kernel</span><span class="p">(</span><span class="w"> </span><span class="n">total_dim</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//for now with arbitrary value for gamma (gets properly initialized later)</span>
+</pre></div>
+</div>
+</section>
+<section id="data-folds-and-model-selection-criterion">
+<h3>Data folds and model selection criterion<a class="headerlink" href="#data-folds-and-model-selection-criterion" title="Link to this heading">¶</a></h3>
+<p>Before we go ahead and declare our model selection criterion (i.e., objective
+funtion), we first have to partition the training data into folds: the
+<a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_svm_logistic_interpretation.html">SvmLogisticInterpretation</a> class requires to be passed data in the
+form of a <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_c_v_folds.html">CVFolds</a> object. That is, it demands an existing partitioning
+for cross-validation. This way, control over the type of data partitioning
+(e.g., stratified vs. IID, etc.) strictly remains with the user:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up partitions for cross-validation</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">num_folds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">;</span>
+<span class="n">CVFolds</span><span class="o">&lt;</span><span class="n">ClassificationDataset</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cv_folds</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">createCVIID</span><span class="p">(</span><span class="w"> </span><span class="n">train</span><span class="p">,</span><span class="w"> </span><span class="n">num_folds</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The next three lines now finally set up the maximum-likelihood based objective
+function for model selection:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up the learning machine</span>
+<span class="kt">bool</span><span class="w"> </span><span class="n">log_enc_c</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span><span class="w"> </span><span class="c1">//use log encoding for the regularization parameter C</span>
+<span class="n">QpStoppingCondition</span><span class="w"> </span><span class="nf">stop</span><span class="p">(</span><span class="mf">1e-12</span><span class="p">);</span><span class="w"> </span><span class="c1">//use a very conservative stopping criterion for the individual SVM runs</span>
+<span class="n">SvmLogisticInterpretation</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">mlms</span><span class="p">(</span><span class="w"> </span><span class="n">cv_folds</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="n">log_enc_c</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">stop</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//the main class for this tutorial</span>
+<span class="c1">//SvmLogisticInterpretation&lt;&gt; mlms( cv_folds, &amp;kernel, log_enc_c ); //also possible without stopping criterion</span>
+</pre></div>
+</div>
+<p>The first line specifies that in this case, we want to allow for unconstrained optimization
+of the regularization parameter (i.e., we do not want to bother with the possibility of the
+optimizer accidentally driving <span class="math notranslate nohighlight">\(C\)</span> into the negative half-space). However, <code class="docutils literal notranslate"><span class="pre">true</span></code>
+is also the default, so we could have omitted it had we not passed a custom stopping
+criterion. The second line sets up a <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_qp_stopping_condition.html">QpStoppingCondition</a> with a very conservative
+(= small) stopping criterion value. This gets used by all SVMs that the
+SvmLogisticInterpretation will train internally.</p>
+<div class="admonition-note-on-the-stopping-criterion admonition">
+<p class="admonition-title">Note on the stopping criterion</p>
+<p>Here, the <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1_qp_stopping_condition.html">QpStoppingCondition</a> is
+set to a rather small, or conservative, value for the final KKT violation. In general,
+the computation of the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_svm_logistic_interpretation.html">SvmLogisticInterpretation</a> criterion is somewhat volatile
+and requires high computational accuracy. For that reason, we use a very conservative
+stopping criterion in this tutorial. In a real-world setting this can be relaxed somewhat,
+as long as the signs of the gradient of the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_svm_logistic_interpretation.html">SvmLogisticInterpretation</a> will be correct
+“often enough”. To date, we do not have an airtight method to properly choose the stopping
+criterion so that it is loose enough to allow fast optimization, but tight enough to ensure
+a proper optimization path. A well-performing heuristic used in <a class="reference internal" href="#glasmachersigel2010" id="id3"><span>[GlasmachersIgel2010]</span></a> was
+to set the      maximum number of iterations to 200 times the input dimension. This     proved
+robust enough to have produced the state-of-the-art results given in the paper.</p>
+</div>
+<p>In the last line, we finally find the declaration of our objective function, which takes as
+arguments the CVFolds object, kernel, log-encoding information, and the stopping criterion
+(optional).</p>
+</section>
+<section id="the-optimization-process">
+<h3>The optimization process<a class="headerlink" href="#the-optimization-process" title="Link to this heading">¶</a></h3>
+<p>Now we only need to set a starting point for the optimization process, and we choose
+<span class="math notranslate nohighlight">\(C=1\)</span> and <span class="math notranslate nohighlight">\(\gamma_i = 0.5/(2d)\)</span> as motivated in the paper:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up a starting point for the optimization process</span>
+<span class="n">RealVector</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="w"> </span><span class="n">total_dim</span><span class="o">+</span><span class="mi">1</span><span class="w"> </span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">log_enc_c</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="n">start</span><span class="p">(</span><span class="w"> </span><span class="n">total_dim</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">start</span><span class="p">(</span><span class="w"> </span><span class="n">total_dim</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1.0</span><span class="p">;</span><span class="w"> </span><span class="c1">//start at C = 1.0</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">k</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">&lt;</span><span class="n">total_dim</span><span class="p">;</span><span class="w"> </span><span class="n">k</span><span class="o">++</span><span class="w"> </span><span class="p">)</span>
+<span class="w">    </span><span class="n">start</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">total_dim</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>(Note that by convention, the CSvmTrainer stores the regularization parameter <span class="math notranslate nohighlight">\(C\)</span>
+last in the parameter vector, and the SvmLogisticInterpretation honors this convention.)</p>
+<p>One single evaluation of the objective function at this current point looks like this:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// for illustration purposes, we also evalute the model selection criterion a single time at the starting point</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">start_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mlms</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="w"> </span><span class="n">start</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>A simple <code class="docutils literal notranslate"><span class="pre">cout</span></code> command can tell us that the value we get from that last call
+(on our development machine) is <code class="docutils literal notranslate"><span class="pre">0.337388</span></code>.</p>
+<p>Next, we set up an <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_rprop.html">Rprop</a> optimizer, choosing the same parameters
+for it as in the original paper, except with a lower number of total iterations:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// set up the optimizer</span>
+<span class="n">Rprop</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="n">rprop</span><span class="p">;</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">stepsize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">stop_delta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">1e-3</span><span class="p">;</span>
+<span class="n">mlms</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+<span class="n">rprop</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="w"> </span><span class="n">mlms</span><span class="p">,</span><span class="w"> </span><span class="n">start</span><span class="p">,</span><span class="w"> </span><span class="n">stepsize</span><span class="w"> </span><span class="p">);</span>
+<span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">its</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">50</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The main process of this tutorial – optimizing the SVM hyperparameters under the
+SvmLogisticInterpretation objective function – is now straightforward:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// start the optimization loop</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">its</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">rprop</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="w"> </span><span class="n">mlms</span><span class="w"> </span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;iteration &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;: current NCLL = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w">  </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; at parameter: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">maxDelta</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">stop_delta</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Rprop quit pecause of small progress &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">        </span><span class="k">break</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="evaluation-after-optimization">
+<h3>Evaluation after optimization<a class="headerlink" href="#evaluation-after-optimization" title="Link to this heading">¶</a></h3>
+<p>After the optimization loop, we would like to do several things: query the
+final objective function value, view the final hyperparameters, train a
+final SVM with them, and view the train and test errors obtained from that.
+For the latter tasks, there are at least two different ways to transfer the
+final hyperparameters from the model selection process to the final SVM. In
+both cases, care must be taken at one spot or another to correctly specify
+the encoding style for the regularization parameter (namely, the same as
+previously used by the SvmLogisticInterpretation object). These slightly
+error-prone lines are below marked with an <code class="docutils literal notranslate"><span class="pre">//Attention</span></code> comment. Before
+presenting each of the two approaches, we declase some general helper variables:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="kt">double</span><span class="w"> </span><span class="n">C_reg</span><span class="p">;</span><span class="w"> </span><span class="c1">//will hold regularization parameter</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">test_error_v1</span><span class="p">,</span><span class="w"> </span><span class="n">train_error_v1</span><span class="p">;</span><span class="w"> </span><span class="c1">//will hold errors determined via method 1</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">test_error_v2</span><span class="p">,</span><span class="w"> </span><span class="n">train_error_v2</span><span class="p">;</span><span class="w"> </span><span class="c1">//will hold errors determined via method 2</span>
+</pre></div>
+</div>
+<section id="option-1-implicit-manual-copy">
+<h4>Option 1: Implicit/manual copy<a class="headerlink" href="#option-1-implicit-manual-copy" title="Link to this heading">¶</a></h4>
+<p>The first variant is to exploit an implicit parameter copy that takes place
+when calling <code class="docutils literal notranslate"><span class="pre">SvmLogisticInterpretation::eval(...)</span></code>. This copies (only) the
+kernel parameters from the RProp solution vector into the kernel function used
+by the CSvmTrainer. But we still need to take care of the regularization parameter
+C. For this, we manually obtain the value of C, but carefully minding the
+parameter encoding…</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// copy final parameters, variant one</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">end_value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">mlms</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//this at the same time copies the most recent parameters from rprop to the kernel.</span>
+<span class="n">C_reg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">log_enc_c</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="n">exp</span><span class="p">(</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="p">(</span><span class="n">total_dim</span><span class="p">)</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="p">(</span><span class="n">total_dim</span><span class="p">)</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//ATTENTION: mind the encoding</span>
+</pre></div>
+</div>
+<p>… and print the parameter set:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Value of model selection criterion at final point: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">end_value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Done optimizing the SVM hyperparameters. The final parameters (true/unencoded) are:&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;        C = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">C_reg</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">&lt;</span><span class="n">total_dim</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="w"> </span><span class="p">)</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;        gamma(&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;) = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kernel</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()(</span><span class="n">i</span><span class="p">)</span><span class="o">*</span><span class="n">kernel</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()(</span><span class="n">i</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    (as also given by kernel.gammaVector() : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kernel</span><span class="p">.</span><span class="n">gammaVector</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; ) &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>The objective function value we get (on our development machine) is <code class="docutils literal notranslate"><span class="pre">0.335099</span></code>,
+so the initial parameter guess in this case was already quite good (in terms of
+the associated objective function value).</p>
+<p>For C and the gamma parameters, the output says:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>C = 1.71335
+gamma(0) = 0.460517
+gamma(1) = 0.0193955
+gamma(2) = 0.0277312
+gamma(3) = 0.0235109
+gamma(4) = 0.0308288
+gamma(5) = 0
+gamma(6) = 0.000977712
+gamma(7) = 0
+gamma(8) = 0.0171233
+gamma(9) = 0
+</pre></div>
+</div>
+<p>In the majority of cases, the ARD kernel parameters corresponding to uninformative
+feature dimensions were learned to be (close to) zero. However, for some reason,
+the value of <code class="docutils literal notranslate"><span class="pre">gamma(8)</span></code> is almost in the range of its informative counterparts
+(on our development machine).</p>
+<p>With the SVM hyperparameters, we can now set up and train the final SVM, in order
+to see the “best” performance by our newly found “best” hyperparameters. As a
+sanity check, we print the hyperparameters again as accessed through the SVM trainer
+after its construction:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// construct and train the final learner</span>
+<span class="n">KernelClassifier</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">svm_v1</span><span class="p">;</span>
+<span class="n">CSvmTrainer</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trainer_v1</span><span class="p">(</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="n">C_reg</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">log_enc_c</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//encoding does not really matter in this case b/c it does not affect the ctor</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Used mlms.eval(...) to copy kernel.parameterVector() &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">kernel</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    into trainer_v1.parameterVector() &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainer_v1</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    , where C (the last parameter) was set manually to &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainer_v1</span><span class="p">.</span><span class="n">C</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="n">trainer_v1</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="w"> </span><span class="n">svm_v1</span><span class="p">,</span><span class="w"> </span><span class="n">train</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//the kernel has the right parameters, and we copied C, so we are good to go</span>
+</pre></div>
+</div>
+<p>Now that the final SVM was trained, we only need to pipe training and test set
+through it and a proper loss function to get the training and test errors:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// evaluate the final trained classifier on training and test set</span>
+<span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loss_v1</span><span class="p">;</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output_v1</span><span class="p">;</span><span class="w"> </span><span class="c1">//real-valued output</span>
+<span class="n">output_v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">svm_v1</span><span class="p">(</span><span class="w"> </span><span class="n">train</span><span class="p">.</span><span class="n">inputs</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="n">train_error_v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss_v1</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="w"> </span><span class="n">train</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output_v1</span><span class="w"> </span><span class="p">);</span>
+<span class="n">output_v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">svm_v1</span><span class="p">(</span><span class="w"> </span><span class="n">test</span><span class="p">.</span><span class="n">inputs</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="n">test_error_v1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss_v1</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="w"> </span><span class="n">test</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output_v1</span><span class="w"> </span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    training error via possibility 1:  &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w">  </span><span class="n">train_error_v1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    test error via possibility 1:      &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">test_error_v1</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>On our development machine, we obtain:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>training error:  0.116
+test error:      0.1374
+</pre></div>
+</div>
+<p>Our mission is now finished, and we present a second variant to copy the
+hyperparameters – namely via <code class="docutils literal notranslate"><span class="pre">solution().point</span></code>. We prefer this second
+variant, as it does not rely on calling <code class="docutils literal notranslate"><span class="pre">eval(...)</span></code> on the objective function
+first.</p>
+</section>
+<section id="option-2-using-solution-point">
+<h4>Option 2: Using solution().point<a class="headerlink" href="#option-2-using-solution-point" title="Link to this heading">¶</a></h4>
+<p>For this alternative take, we copy all the hyperparameters found by the optimizer
+into the CSvmTrainer. This is simply done via the setParameterVector method of
+the CSvmTrainer:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">KernelClassifier</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">svm_v2</span><span class="p">;</span>
+<span class="n">CSvmTrainer</span><span class="o">&lt;</span><span class="n">RealVector</span><span class="o">&gt;</span><span class="w"> </span><span class="n">trainer_v2</span><span class="p">(</span><span class="w"> </span><span class="o">&amp;</span><span class="n">kernel</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">,</span><span class="w"> </span><span class="n">log_enc_c</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//ATTENTION: must be constructed with same log-encoding preference</span>
+<span class="n">trainer_v2</span><span class="p">.</span><span class="n">setParameterVector</span><span class="p">(</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="w"> </span><span class="p">);</span><span class="w"> </span><span class="c1">//copy best hyperparameters to svm trainer</span>
+</pre></div>
+</div>
+<p>Again, we print the trainer’s parameter vector for comparison:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    Copied rprop.solution().point = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">rprop</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    into trainer_v2.parameterVector(), now = &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">trainer_v2</span><span class="p">.</span><span class="n">parameterVector</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Training is now as simple as:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">trainer_v2</span><span class="p">.</span><span class="n">train</span><span class="p">(</span><span class="w"> </span><span class="n">svm_v2</span><span class="p">,</span><span class="w"> </span><span class="n">train</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>To evaluate this second SVM’s prediction, again pipe all data through the SVM
+and a proper loss:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// evaluate the final trained classifier on training and test set</span>
+<span class="n">ZeroOneLoss</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">loss_v2</span><span class="p">;</span>
+<span class="n">Data</span><span class="o">&lt;</span><span class="kt">unsigned</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">output_v2</span><span class="p">;</span><span class="w"> </span><span class="c1">//real-valued output</span>
+<span class="n">output_v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">svm_v2</span><span class="p">(</span><span class="w"> </span><span class="n">train</span><span class="p">.</span><span class="n">inputs</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="n">train_error_v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss_v2</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="w"> </span><span class="n">train</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output_v2</span><span class="w"> </span><span class="p">);</span>
+<span class="n">output_v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">svm_v2</span><span class="p">(</span><span class="w"> </span><span class="n">test</span><span class="p">.</span><span class="n">inputs</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="n">test_error_v2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loss_v2</span><span class="p">.</span><span class="n">eval</span><span class="p">(</span><span class="w"> </span><span class="n">test</span><span class="p">.</span><span class="n">labels</span><span class="p">(),</span><span class="w"> </span><span class="n">output_v2</span><span class="w"> </span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">verbose</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    training error via possibility 2:  &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w">  </span><span class="n">train_error_v2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;    test error via possibility 2:      &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">test_error_v2</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;That&#39;s all folks - we are done!&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>And we are happy to get the same results as above:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>training error:  0.116
+test error:      0.1374
+</pre></div>
+</div>
+</section>
+</section>
+<section id="repetition-over-100-trials">
+<h3>Repetition over 100 trials<a class="headerlink" href="#repetition-over-100-trials" title="Link to this heading">¶</a></h3>
+<p>We now examine the distribution of hyperparameter values over several trials on
+different realizations of the toy problem distribution. We repeat the experiment
+100 times, and note the means and variances of the SVM hyperparameters. This also
+mostly follows the methodology in <a class="reference internal" href="#glasmachersigel2010" id="id4"><span>[GlasmachersIgel2010]</span></a>. We obtain the following
+results (where the last/11th entry is the regularization parameter C):</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0174454</span><span class="w">  </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000372237</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0243765</span><span class="w">  </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.00276891</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0170669</span><span class="w">  </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000236762</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0148257</span><span class="w">  </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000139686</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0175333</span><span class="w">  </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000225192</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.00810077</span><span class="w"> </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000397033</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.00831601</span><span class="w"> </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000484481</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0134892</span><span class="w">  </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000909667</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.00652671</span><span class="w"> </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000238294</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="mf">0.00863524</span><span class="w"> </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000432687</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">param</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="mf">1.68555</span><span class="w">    </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.971377</span>
+
+<span class="n">avg</span><span class="o">-</span><span class="n">error</span><span class="o">-</span><span class="n">train</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.12594</span><span class="w">    </span><span class="o">+-</span><span class="w"> </span><span class="mf">0.000294276</span>
+<span class="n">avg</span><span class="o">-</span><span class="n">error</span><span class="o">-</span><span class="n">test</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="mf">0.137724</span><span class="w">   </span><span class="o">+-</span><span class="w"> </span><span class="mf">4.49206e-05</span>
+</pre></div>
+</div>
+<p>We see that on average, the <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_svm_logistic_interpretation.html">SvmLogisticInterpretation</a> objective clearly
+selects a meaningful model with an emphasis on the informative parameters. At the
+same time, some tendency still exists for the uninformative parameters to be different
+from completely zero. Note that the mean test error is well below 14%, which is an
+excellent value for an SVM on this toy problem.</p>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="glasmachersigel2010" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>GlasmachersIgel2010<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>,<a role="doc-backlink" href="#id3">3</a>,<a role="doc-backlink" href="#id4">4</a>)</span>
+<p>T. Glasmachers and C. Igel. Maximum Likelihood Model Selection
+for 1-Norm Soft Margin SVMs with Multiple Parameters. IEEE Transactions on Pattern
+Analysis and Machine Intelligence, 2010.</p>
+</div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Support Vector Machines: Likelihood-based Model Selection</a><ul>
+<li><a class="reference internal" href="#motivation">Motivation</a></li>
+<li><a class="reference internal" href="#the-toy-problem">The toy problem</a></li>
+<li><a class="reference internal" href="#likelihood-based-model-selection-in-shark">Likelihood-based model selection in Shark</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="svmModelSelection.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Support Vector Machines: Model Selection Using Cross-Validation and Grid-Search</a>
+  <a class="topless" href="lkc-mkl.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Linear Kernel Combinations (and a bit of MKL)</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/svmLikelihoodModelSelection.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

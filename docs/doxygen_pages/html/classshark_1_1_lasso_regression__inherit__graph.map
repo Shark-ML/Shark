@@ -1,0 +1,7 @@
+<map id="shark::LassoRegression&lt; InputVectorType &gt;" name="shark::LassoRegression&lt; InputVectorType &gt;">
+<area shape="rect" id="Node000001" title="LASSO Regression." alt="" coords="93,94,255,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_trainer.html" title="Superclass of supervised learning algorithms." alt="" coords="5,5,161,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,55,155,92,151,95,112,59"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="185,5,344,46"/>
+<area shape="poly" id="edge2_Node000001_Node000005" title=" " alt="" coords="235,59,196,95,192,92,231,55"/>
+</map>

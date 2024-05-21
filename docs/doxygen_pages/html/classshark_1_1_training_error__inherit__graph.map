@@ -1,0 +1,5 @@
+<map id="shark::TrainingError&lt; PointType &gt;" name="shark::TrainingError&lt; PointType &gt;">
+<area shape="rect" id="Node000001" title="This stopping criterion tracks the improvement of the error function of the training error over an in..." alt="" coords="43,94,178,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_stopping_criterion.html" title="Base class for stopping criteria of optimization algorithms." alt="" coords="5,5,216,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,62,113,94,108,94,108,62"/>
+</map>

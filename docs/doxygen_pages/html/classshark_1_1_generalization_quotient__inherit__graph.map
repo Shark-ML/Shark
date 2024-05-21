@@ -1,0 +1,5 @@
+<map id="shark::GeneralizationQuotient&lt; PointType &gt;" name="shark::GeneralizationQuotient&lt; PointType &gt;">
+<area shape="rect" id="Node000001" title="SStopping criterion monitoring the quotient of generalization loss and training progress." alt="" coords="14,94,207,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_stopping_criterion.html" title="Base class for stopping criteria of optimization algorithms." alt="" coords="5,5,216,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,62,113,94,108,94,108,62"/>
+</map>

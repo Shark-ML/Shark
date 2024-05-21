@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Your Shark Programs &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Hello World" href="hello_shark.html" />
+    <link rel="prev" title="Tutorials" href="../tutorials.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="your-shark-programs">
+<h1>Your Shark Programs<a class="headerlink" href="#your-shark-programs" title="Link to this heading">¶</a></h1>
+<p>To use the Shark library’s functionality, you usually write your own
+C++ programs and link them against the Shark library. We below give an example configuration for
+CMake, which we recommend using (see
+<a class="reference external" href="http://cmake.org/runningcmake/">here</a> for an introduction). A minimal setup, compiling a program <code class="docutils literal notranslate"><span class="pre">ExampleProject</span></code> from
+an input file <code class="docutils literal notranslate"><span class="pre">HelloWorld.cpp</span></code> is given by</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cmake_minimum_required(VERSION 2.8)
+
+project(ExampleProject)
+
+# Find the Shark libraries and includes
+# set Shark_DIR to the proper location of Shark
+find_package(Shark REQUIRED)
+include(${SHARK_USE_FILE})
+
+# Executable
+add_executable(ExampleProject HelloWorld.cpp)
+set_property(TARGET ExampleProject PROPERTY CXX_STANDARD 11)
+target_link_libraries(ExampleProject ${SHARK_LIBRARIES})
+</pre></div>
+</div>
+<p>You can find the template CMakeLists.txt in your example folder at
+<code class="docutils literal notranslate"><span class="pre">ExampleProject/CMakeLists.txt</span></code>.  It automatically links to all
+libraries used by your Shark build configuration and sets the required
+compiler flags.</p>
+<p>In the following, we describe the command line usage of the file for linux.
+If shark was installed, chances are that cmake knows where to find shark
+and a simple call to</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cmake .
+make
+</pre></div>
+</div>
+<p>will build the project. If Shark is not installed, or installed to a non-standard path,
+the path to the proper <code class="docutils literal notranslate"><span class="pre">SharkConfig.cmake</span></code> file is needed</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cmake &quot;-DShark_DIR=/Path/To/Shark/&quot; .
+</pre></div>
+</div>
+<p>If shark was not installed, <code class="docutils literal notranslate"><span class="pre">/Path/To/Shark/</span></code> is simply the build directory,
+otherwise it is <code class="docutils literal notranslate"><span class="pre">/Shark/Install/Directory/lib/CMake/Shark</span></code>.
+For example, if the install directory is <code class="docutils literal notranslate"><span class="pre">~/</span></code>, the command
+is</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>cmake &quot;-DShark_DIR=~/lib/CMake/Shark&quot; .
+</pre></div>
+</div>
+<p>You can easily change the build options using cmake or its guis (e.g., ccmake), see <a class="reference internal" href="../../installation.html"><span class="doc">Installing Shark</span></a> for specific options.</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div>
+  <a class="topless" href="../tutorials.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Tutorials</a>
+  <a class="topless" href="hello_shark.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Hello World</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/first_steps/your_programs.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

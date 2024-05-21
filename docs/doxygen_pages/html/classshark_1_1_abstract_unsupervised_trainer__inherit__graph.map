@@ -1,0 +1,15 @@
+<map id="shark::AbstractUnsupervisedTrainer&lt; Model &gt;" name="shark::AbstractUnsupervisedTrainer&lt; Model &gt;">
+<area shape="rect" id="Node000001" title="Superclass of unsupervised learning algorithms." alt="" coords="186,104,376,145"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_abstract_weighted_unsupervised_trainer.html" title="Superclass of weighted unsupervised learning algorithms." alt="" coords="424,5,668,46"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="336,94,423,57,462,44,463,49,425,61,338,99"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_normalize_components_unit_interval.html" title="Train a model to normalize the components of a dataset to fit into the unit inverval." alt="" coords="449,71,643,111"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="391,108,448,101,449,106,392,113"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_normalize_components_unit_variance.html" title="Train a linear model to normalize the components of a dataset to unit variance, and optionally to zer..." alt="" coords="449,136,643,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="392,135,449,142,448,147,391,140"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1_normalize_kernel_unit_variance.html" title="Determine the scaling factor of a ScaledKernel so that it has unit variance in feature space one on a..." alt="" coords="456,201,637,242"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="338,149,425,186,463,198,462,203,423,191,336,154"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_nameable.html" title="This class is an interface for all objects which can have a name." alt="" coords="9,86,134,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,106,186,110,185,115,149,111"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="5,136,138,161"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,136,185,133,185,138,154,142"/>
+</map>

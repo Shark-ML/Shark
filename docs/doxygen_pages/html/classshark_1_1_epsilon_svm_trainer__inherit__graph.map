@@ -1,0 +1,5 @@
+<map id="shark::EpsilonSvmTrainer&lt; InputType, CacheType &gt;" name="shark::EpsilonSvmTrainer&lt; InputType, CacheType &gt;">
+<area shape="rect" id="Node000001" title="Training of Epsilon&#45;SVMs for regression." alt="" coords="25,109,202,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="5,5,222,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="116,77,116,109,111,109,111,77"/>
+</map>

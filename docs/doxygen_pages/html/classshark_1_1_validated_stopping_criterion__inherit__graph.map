@@ -1,0 +1,5 @@
+<map id="shark::ValidatedStoppingCriterion" name="shark::ValidatedStoppingCriterion">
+<area shape="rect" id="Node000001" title="Given the current Result set of the optimizer, calculates the validation error using a validation fun..." alt="" coords="28,109,193,150"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_stopping_criterion.html" title=" " alt="" coords="5,5,216,61"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,77,113,109,108,109,108,77"/>
+</map>

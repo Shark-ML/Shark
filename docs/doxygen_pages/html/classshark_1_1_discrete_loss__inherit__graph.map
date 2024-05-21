@@ -1,0 +1,5 @@
+<map id="shark::DiscreteLoss" name="shark::DiscreteLoss">
+<area shape="rect" id="Node000001" title="flexible loss for classification" alt="" coords="33,94,171,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_loss.html" title=" " alt="" coords="5,5,199,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="105,62,105,93,99,93,99,62"/>
+</map>

@@ -1,0 +1,19 @@
+<map id="shark::QpConfig" name="shark::QpConfig">
+<area shape="rect" id="Node000001" title="Super class of all support vector machine trainers." alt="" coords="5,339,122,365"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="170,5,400,91"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="67,324,79,277,98,218,127,156,146,127,168,101,181,89,184,93,172,105,150,130,132,159,103,220,84,278,72,325"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="177,115,393,171"/>
+<area shape="poly" id="edge2_Node000001_Node000004" title=" " alt="" coords="72,324,107,252,135,213,168,179,183,169,186,173,171,184,139,217,112,255,77,326"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="175,194,395,265"/>
+<area shape="poly" id="edge3_Node000001_Node000007" title=" " alt="" coords="91,327,127,300,168,274,189,263,192,268,171,278,130,305,94,332"/>
+<area shape="rect" id="Node000009" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="177,288,393,344"/>
+<area shape="poly" id="edge4_Node000001_Node000009" title=" " alt="" coords="137,338,176,331,177,336,138,343"/>
+<area shape="rect" id="Node000011" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="195,368,375,409"/>
+<area shape="poly" id="edge5_Node000001_Node000011" title=" " alt="" coords="138,361,195,371,194,376,137,367"/>
+<area shape="rect" id="Node000013" href="$classshark_1_1_abstract_linear_svm_trainer.html" title="Super class of all linear SVM trainers." alt="" coords="199,433,371,474"/>
+<area shape="poly" id="edge6_Node000001_Node000013" title=" " alt="" coords="96,372,131,396,171,418,203,430,201,435,169,423,128,400,93,377"/>
+<area shape="rect" id="Node000016" href="$classshark_1_1_abstract_svm_trainer.html" title="Super class of all kernelized (non&#45;linear) SVM trainers." alt="" coords="196,498,374,553"/>
+<area shape="poly" id="edge7_Node000001_Node000016" title=" " alt="" coords="82,377,118,431,143,459,171,483,197,498,194,503,168,488,139,463,114,434,77,380"/>
+<area shape="rect" id="Node000017" href="$classshark_1_1_one_class_svm_trainer.html" title="Training of one&#45;class SVMs." alt="" coords="192,577,378,618"/>
+<area shape="poly" id="edge8_Node000001_Node000017" title=" " alt="" coords="73,379,85,421,105,470,133,521,151,544,171,563,193,577,190,581,168,568,147,547,129,524,100,473,80,422,68,381"/>
+</map>

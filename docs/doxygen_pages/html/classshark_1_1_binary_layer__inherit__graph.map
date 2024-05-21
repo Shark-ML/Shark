@@ -1,0 +1,7 @@
+<map id="shark::BinaryLayer" name="shark::BinaryLayer">
+<area shape="rect" id="Node000001" title="Layer of binary units taking values in {0,1}." alt="" coords="90,94,221,120"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_i_serializable.html" title="Abstracts serializing functionality." alt="" coords="5,13,138,39"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,47,144,92,141,95,93,51"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_i_parameterizable.html" title="Top level interface for everything that holds parameters." alt="" coords="161,5,321,46"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="210,59,170,95,167,91,207,55"/>
+</map>

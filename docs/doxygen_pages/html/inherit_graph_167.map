@@ -1,0 +1,17 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classshark_1_1statistics_1_1_base_statistics_object.html" title="Base class for all Statistic Objects to be used with Statistics" alt="" coords="5,92,150,133"/>
+<area shape="rect" id="Node000001" href="$classshark_1_1statistics_1_1_fraction_missing.html" title="for a vector of points computes for every dimension the fraction of missing values" alt="" coords="214,5,336,46"/>
+<area shape="poly" id="edge456_Node000000_Node000001" title=" " alt="" coords="136,83,197,55,222,44,224,49,199,60,138,88"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1statistics_1_1_mean.html" title="For a vector of points computes for every dimension the mean." alt="" coords="198,70,352,96"/>
+<area shape="poly" id="edge457_Node000000_Node000002" title=" " alt="" coords="165,97,197,92,198,97,166,102"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1statistics_1_1_quantile.html" title="For a vector of points computes for every dimension the p&#45;quantile." alt="" coords="214,120,336,161"/>
+<area shape="poly" id="edge458_Node000000_Node000003" title=" " alt="" coords="165,122,213,129,213,134,165,127"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1statistics_1_1_variance.html" title="For a vector of points computes for every dimension the variance." alt="" coords="214,185,336,226"/>
+<area shape="poly" id="edge462_Node000000_Node000007" title=" " alt="" coords="133,138,199,170,226,182,224,187,197,175,131,142"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1statistics_1_1_lower_quantile.html" title="For a vector of points computes for every dimension the 25%&#45;quantile." alt="" coords="400,55,522,95"/>
+<area shape="poly" id="edge459_Node000003_Node000004" title=" " alt="" coords="348,112,400,93,402,98,350,117"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1statistics_1_1_median.html" title="For a vector of points computes for every dimension the median." alt="" coords="400,120,522,161"/>
+<area shape="poly" id="edge460_Node000003_Node000005" title=" " alt="" coords="351,138,400,138,400,143,351,143"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1statistics_1_1_upper_quantile.html" title="For a vector of points computes for every dimension the 75%&#45;quantile." alt="" coords="400,185,522,226"/>
+<area shape="poly" id="edge461_Node000003_Node000006" title=" " alt="" coords="350,164,402,182,400,187,348,169"/>
+</map>

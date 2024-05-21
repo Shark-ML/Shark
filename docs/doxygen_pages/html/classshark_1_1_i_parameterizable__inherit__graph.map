@@ -1,0 +1,91 @@
+<map id="shark::IParameterizable&lt; VectorType &gt;" name="shark::IParameterizable&lt; VectorType &gt;">
+<area shape="rect" id="Node000001" title="Top level interface for everything that holds parameters." alt="" coords="5,1849,165,1890"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_clustering.html" title=" " alt="" coords="295,5,464,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,1834,86,1474,92,1203,101,908,117,618,139,361,153,253,170,164,189,98,211,57,228,42,249,31,293,20,295,25,251,36,231,46,215,61,194,100,175,166,159,254,144,361,122,618,107,908,97,1203,92,1474,89,1834"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_abstract_metric.html" title=" " alt="" coords="306,71,453,111"/>
+<area shape="poly" id="edge2_Node000001_Node000004" title=" " alt="" coords="84,1834,87,1485,93,1223,103,939,119,661,141,414,155,311,171,226,189,162,211,123,231,106,254,94,305,84,306,90,256,99,234,110,215,126,194,164,176,227,160,311,146,414,124,661,109,940,98,1223,93,1485,89,1834"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_abstract_metric.html" title=" " alt="" coords="306,136,453,177"/>
+<area shape="poly" id="edge3_Node000001_Node000005" title=" " alt="" coords="84,1834,88,1497,95,1245,105,973,121,705,143,467,157,368,172,287,190,226,211,188,231,171,254,160,305,150,306,155,256,165,234,175,215,191,195,228,178,288,162,369,148,468,126,705,110,973,100,1245,94,1497,89,1834"/>
+<area shape="rect" id="Node000006" href="$classshark_1_1_abstract_metric.html" title=" " alt="" coords="306,201,453,242"/>
+<area shape="poly" id="edge4_Node000001_Node000006" title=" " alt="" coords="84,1833,89,1508,107,1004,123,747,145,520,158,425,174,347,191,288,211,252,231,235,255,224,305,214,306,220,256,229,234,240,215,255,196,290,179,348,163,426,150,520,128,747,112,1004,94,1508,89,1834"/>
+<area shape="rect" id="Node000007" href="$classshark_1_1_abstract_metric.html" title=" " alt="" coords="278,266,481,322"/>
+<area shape="poly" id="edge5_Node000001_Node000007" title=" " alt="" coords="84,1834,91,1523,111,1046,127,802,148,587,161,497,176,422,192,367,211,332,241,308,277,295,278,300,243,313,215,335,197,369,181,424,167,497,154,587,132,802,116,1046,96,1524,89,1834"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="301,346,458,402"/>
+<area shape="poly" id="edge6_Node000001_Node000008" title=" " alt="" coords="84,1834,92,1538,113,1085,129,855,151,652,163,567,177,497,193,445,211,412,230,395,252,383,300,371,301,376,254,388,233,400,215,415,198,447,183,498,169,568,156,653,135,856,118,1086,98,1538,90,1834"/>
+<area shape="rect" id="Node000009" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="291,425,468,466"/>
+<area shape="poly" id="edge7_Node000001_Node000009" title=" " alt="" coords="84,1834,93,1550,114,1118,130,899,152,705,164,624,178,558,193,508,211,477,228,463,247,452,290,441,292,446,249,457,231,467,215,481,198,510,183,559,169,625,157,706,136,899,119,1118,98,1550,90,1834"/>
+<area shape="rect" id="Node000011" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="288,491,471,531"/>
+<area shape="poly" id="edge8_Node000001_Node000011" title=" " alt="" coords="85,1834,94,1561,116,1149,132,941,153,757,179,618,194,570,211,541,227,527,246,517,287,506,288,511,248,522,230,532,215,545,199,573,184,619,159,758,138,942,121,1150,99,1561,90,1834"/>
+<area shape="rect" id="Node000015" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="265,555,494,611"/>
+<area shape="poly" id="edge9_Node000001_Node000015" title=" " alt="" coords="85,1834,96,1575,119,1190,136,996,157,824,181,693,195,649,211,621,235,601,263,589,266,593,238,606,215,625,200,651,187,695,162,825,142,996,125,1191,101,1576,90,1834"/>
+<area shape="rect" id="Node000025" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="307,635,452,675"/>
+<area shape="poly" id="edge10_Node000001_Node000025" title=" " alt="" coords="85,1834,96,1587,120,1222,137,1038,158,876,182,753,196,711,211,685,231,669,255,658,306,648,307,653,257,663,234,673,215,689,201,713,187,754,163,877,143,1038,126,1222,102,1587,90,1834"/>
+<area shape="rect" id="Node000027" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="291,699,468,755"/>
+<area shape="poly" id="edge11_Node000001_Node000027" title=" " alt="" coords="85,1834,98,1603,124,1263,141,1093,161,943,184,828,197,789,211,765,227,750,247,739,290,726,291,731,249,744,231,755,215,769,202,792,189,830,166,943,146,1093,129,1264,104,1603,91,1834"/>
+<area shape="rect" id="Node000029" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="293,779,466,835"/>
+<area shape="poly" id="edge12_Node000001_Node000029" title=" " alt="" coords="86,1834,100,1617,126,1304,144,1147,164,1008,186,903,198,868,211,845,228,830,248,819,292,806,293,811,250,824,231,834,215,849,203,870,191,905,169,1009,149,1147,132,1304,105,1618,91,1834"/>
+<area shape="rect" id="Node000030" title=" " alt="" coords="236,859,523,945"/>
+<area shape="poly" id="edge13_Node000001_Node000030" title=" " alt="" coords="84,1834,88,1652,94,1525,105,1389,120,1254,142,1129,172,1026,190,986,211,955,233,934,237,938,215,958,195,988,177,1028,148,1130,126,1254,110,1390,99,1525,93,1652,89,1834"/>
+<area shape="rect" id="Node000031" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="300,968,459,1009"/>
+<area shape="poly" id="edge14_Node000001_Node000031" title=" " alt="" coords="84,1834,88,1662,94,1544,105,1418,120,1292,143,1178,172,1084,190,1047,211,1020,230,1004,252,994,299,983,300,988,254,999,233,1009,215,1024,195,1050,177,1086,148,1179,126,1293,110,1418,100,1545,93,1663,89,1834"/>
+<area shape="rect" id="Node000032" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="292,1033,467,1074"/>
+<area shape="poly" id="edge15_Node000001_Node000032" title=" " alt="" coords="84,1834,90,1673,109,1448,125,1333,146,1228,175,1142,192,1109,211,1084,228,1070,248,1060,291,1049,292,1054,250,1065,231,1074,215,1088,196,1112,180,1144,152,1230,130,1334,114,1449,96,1674,90,1834"/>
+<area shape="rect" id="Node000038" title=" " alt="" coords="269,1098,490,1199"/>
+<area shape="poly" id="edge16_Node000001_Node000038" title=" " alt="" coords="86,1833,98,1698,121,1512,138,1417,158,1331,182,1259,196,1231,211,1209,237,1186,267,1169,270,1174,240,1190,215,1213,200,1234,187,1261,163,1332,143,1418,126,1513,103,1698,91,1834"/>
+<area shape="rect" id="Node000039" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="304,1223,455,1279"/>
+<area shape="poly" id="edge17_Node000001_Node000039" title=" " alt="" coords="87,1834,99,1712,123,1549,140,1467,160,1392,183,1331,211,1289,231,1273,254,1262,303,1249,304,1255,256,1267,234,1278,215,1293,188,1333,165,1394,145,1468,129,1550,105,1713,92,1834"/>
+<area shape="rect" id="Node000040" title=" " alt="" coords="232,1303,527,1404"/>
+<area shape="poly" id="edge18_Node000001_Node000040" title=" " alt="" coords="83,1834,88,1750,105,1639,121,1579,144,1520,173,1464,211,1415,229,1398,233,1402,215,1418,178,1467,148,1522,126,1581,111,1640,93,1751,89,1834"/>
+<area shape="rect" id="Node000041" href="$classshark_1_1_abstract_model.html" title=" " alt="" coords="303,1428,456,1469"/>
+<area shape="poly" id="edge19_Node000001_Node000041" title=" " alt="" coords="84,1833,90,1759,108,1662,125,1612,146,1563,175,1518,211,1478,231,1464,254,1454,302,1444,303,1449,256,1459,234,1469,214,1482,179,1521,151,1565,130,1614,114,1664,95,1759,89,1834"/>
+<area shape="rect" id="Node000042" title=" " alt="" coords="236,1492,523,1578"/>
+<area shape="poly" id="edge20_Node000001_Node000042" title=" " alt="" coords="90,1833,104,1779,127,1714,162,1646,185,1615,211,1588,234,1571,237,1575,214,1592,189,1619,167,1649,132,1716,109,1781,95,1835"/>
+<area shape="rect" id="Node000043" title=" " alt="" coords="257,1602,502,1732"/>
+<area shape="poly" id="edge21_Node000001_Node000043" title=" " alt="" coords="111,1836,156,1789,211,1742,255,1716,257,1720,214,1747,159,1793,115,1839"/>
+<area shape="rect" id="Node000044" title=" " alt="" coords="213,1757,546,1857"/>
+<area shape="poly" id="edge22_Node000001_Node000044" title=" " alt="" coords="180,1847,212,1840,213,1845,181,1852"/>
+<area shape="rect" id="Node000045" title=" " alt="" coords="257,1882,502,1983"/>
+<area shape="poly" id="edge23_Node000001_Node000045" title=" " alt="" coords="181,1887,257,1904,256,1909,179,1892"/>
+<area shape="rect" id="Node000051" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="264,2007,495,2093"/>
+<area shape="poly" id="edge24_Node000001_Node000051" title=" " alt="" coords="113,1900,158,1948,185,1972,214,1993,265,2017,263,2022,211,1997,181,1976,154,1952,110,1904"/>
+<area shape="rect" id="Node000053" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="271,2117,488,2172"/>
+<area shape="poly" id="edge25_Node000001_Node000053" title=" " alt="" coords="98,1904,113,1950,137,2004,171,2057,191,2081,214,2102,241,2118,272,2130,270,2135,239,2123,211,2106,187,2085,166,2060,132,2006,108,1952,93,1906"/>
+<area shape="rect" id="Node000056" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="270,2196,489,2266"/>
+<area shape="poly" id="edge26_Node000001_Node000056" title=" " alt="" coords="93,1905,104,1965,126,2040,142,2079,162,2117,186,2152,214,2182,241,2200,270,2213,268,2218,238,2205,211,2186,182,2155,157,2120,137,2081,121,2042,99,1967,88,1906"/>
+<area shape="rect" id="Node000058" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="271,2290,488,2346"/>
+<area shape="poly" id="edge27_Node000001_Node000058" title=" " alt="" coords="89,1905,94,1982,112,2083,128,2135,150,2187,178,2234,214,2276,241,2294,272,2306,270,2311,238,2299,211,2280,174,2237,145,2189,123,2137,107,2084,89,1983,84,1906"/>
+<area shape="rect" id="Node000060" href="$classshark_1_1_abstract_svm_trainer.html" title=" " alt="" coords="289,2369,470,2410"/>
+<area shape="poly" id="edge28_Node000001_Node000060" title=" " alt="" coords="93,1905,108,2010,134,2146,151,2213,170,2274,191,2323,215,2356,231,2368,249,2377,289,2388,288,2393,247,2382,228,2373,211,2360,186,2326,165,2276,146,2214,129,2147,103,2011,88,1906"/>
+<area shape="rect" id="Node000062" href="$classshark_1_1_abstract_clustering.html" title="Base class for clustering." alt="" coords="295,2435,464,2475"/>
+<area shape="poly" id="edge29_Node000001_Node000062" title=" " alt="" coords="92,1905,105,2022,130,2177,146,2255,166,2325,189,2382,215,2420,232,2433,251,2443,295,2453,294,2459,250,2448,229,2438,211,2423,184,2384,161,2327,141,2256,124,2178,100,2023,87,1906"/>
+<area shape="rect" id="Node000064" href="$classshark_1_1_abstract_linear_svm_trainer.html" title="Super class of all linear SVM trainers." alt="" coords="293,2500,466,2541"/>
+<area shape="poly" id="edge30_Node000001_Node000064" title=" " alt="" coords="91,1905,102,2035,125,2209,142,2297,162,2377,186,2442,200,2467,215,2485,231,2498,251,2508,293,2519,292,2524,249,2513,229,2503,211,2489,195,2470,181,2444,157,2379,136,2298,120,2210,97,2035,86,1906"/>
+<area shape="rect" id="Node000067" href="$classshark_1_1_abstract_metric.html" title="Base&#45;class for metrics." alt="" coords="306,2565,453,2606"/>
+<area shape="poly" id="edge31_Node000001_Node000067" title=" " alt="" coords="91,1906,100,2047,121,2242,137,2340,158,2429,184,2502,198,2530,215,2550,234,2566,257,2576,306,2586,305,2591,255,2581,231,2570,211,2554,194,2533,179,2504,153,2431,132,2341,116,2242,94,2048,85,1906"/>
+<area shape="rect" id="Node000094" href="$classshark_1_1_abstract_model.html" title="Base class for all Models." alt="" coords="289,2630,470,2686"/>
+<area shape="poly" id="edge32_Node000001_Node000094" title=" " alt="" coords="90,1906,98,2059,117,2272,134,2381,155,2480,182,2561,197,2592,215,2616,230,2629,248,2640,289,2652,287,2657,246,2644,227,2634,211,2619,193,2595,177,2563,150,2482,128,2382,112,2273,92,2059,85,1906"/>
+<area shape="rect" id="Node000117" href="$classshark_1_1_abstract_svm_trainer.html" title="Super class of all kernelized (non&#45;linear) SVM trainers." alt="" coords="291,2710,468,2766"/>
+<area shape="poly" id="edge33_Node000001_Node000117" title=" " alt="" coords="89,1906,95,2073,112,2311,128,2433,150,2544,179,2635,196,2669,215,2696,231,2710,249,2720,291,2733,289,2738,247,2725,228,2714,211,2699,191,2672,174,2637,145,2545,123,2433,107,2311,89,2074,84,1906"/>
+<area shape="rect" id="Node000118" href="$classshark_1_1_binary_layer.html" title="Layer of binary units taking values in {0,1}." alt="" coords="306,2790,453,2816"/>
+<area shape="poly" id="edge34_Node000001_Node000118" title=" " alt="" coords="89,1906,90,2089,95,2216,105,2352,120,2486,143,2609,157,2663,174,2709,193,2747,215,2776,234,2791,257,2800,306,2807,305,2813,255,2805,231,2795,211,2780,188,2750,169,2711,152,2664,138,2610,115,2487,100,2352,90,2216,85,2089,83,1906"/>
+<area shape="rect" id="Node000119" href="$classshark_1_1_bipolar_layer.html" title="Layer of bipolar units taking values in {&#45;1,1}." alt="" coords="305,2840,454,2865"/>
+<area shape="poly" id="edge35_Node000001_Node000119" title=" " alt="" coords="91,1906,106,2111,132,2404,150,2551,169,2679,191,2776,203,2808,215,2827,234,2841,256,2850,304,2857,304,2863,254,2855,231,2846,211,2830,198,2810,186,2777,164,2680,144,2551,127,2405,100,2111,86,1906"/>
+<area shape="rect" id="Node000120" href="$classshark_1_1_gaussian_layer.html" title="A layer of Gaussian neurons." alt="" coords="297,2889,462,2915"/>
+<area shape="poly" id="edge36_Node000001_Node000120" title=" " alt="" coords="91,1905,105,2120,131,2429,148,2584,168,2719,190,2822,202,2856,215,2876,232,2889,252,2899,297,2907,296,2912,251,2904,229,2894,211,2879,197,2858,185,2823,163,2720,143,2584,125,2430,99,2120,86,1906"/>
+<area shape="rect" id="Node000121" href="$classshark_1_1_kernel_budgeted_s_g_d_trainer.html" title="Budgeted stochastic gradient descent training for kernel&#45;based models." alt="" coords="268,2939,491,2979"/>
+<area shape="poly" id="edge37_Node000001_Node000121" title=" " alt="" coords="91,1905,104,2129,130,2453,147,2616,167,2759,190,2868,202,2904,215,2925,239,2944,269,2955,267,2960,237,2948,211,2929,197,2906,185,2869,162,2760,142,2617,124,2454,99,2129,85,1906"/>
+<area shape="rect" id="Node000122" href="$classshark_1_1_kernel_s_g_d_trainer.html" title="Generic stochastic gradient descent training for kernel&#45;based models." alt="" coords="291,3004,468,3045"/>
+<area shape="poly" id="edge38_Node000001_Node000122" title=" " alt="" coords="91,1905,103,2140,128,2486,145,2659,165,2812,189,2928,201,2966,215,2989,231,3003,249,3013,291,3024,290,3029,247,3018,228,3007,211,2993,197,2968,183,2929,160,2813,140,2660,123,2486,98,2141,85,1906"/>
+<area shape="rect" id="Node000123" href="$classshark_1_1_l_d_a.html" title="Linear Discriminant Analysis (LDA)" alt="" coords="328,3069,431,3095"/>
+<area shape="poly" id="edge39_Node000001_Node000123" title=" " alt="" coords="90,1906,101,2153,125,2520,142,2704,162,2867,187,2989,200,3030,215,3055,239,3072,268,3082,298,3086,327,3086,327,3091,298,3091,266,3087,236,3077,211,3058,195,3033,182,2991,157,2868,136,2705,119,2520,96,2154,85,1906"/>
+<area shape="rect" id="Node000124" href="$classshark_1_1_lasso_regression.html" title="LASSO Regression." alt="" coords="298,3119,461,3159"/>
+<area shape="poly" id="edge40_Node000001_Node000124" title=" " alt="" coords="90,1905,101,2162,124,2544,141,2738,161,2908,186,3036,200,3080,215,3105,232,3120,253,3130,298,3140,297,3145,251,3135,229,3124,211,3109,195,3082,181,3038,156,2908,136,2738,119,2545,95,2162,85,1906"/>
+<area shape="rect" id="Node000125" href="$classshark_1_1_linear_regression.html" title="Linear Regression." alt="" coords="290,3184,469,3209"/>
+<area shape="poly" id="edge41_Node000001_Node000125" title=" " alt="" coords="90,1905,99,2174,121,2577,138,2781,159,2961,184,3097,199,3142,215,3169,230,3182,249,3191,290,3200,289,3206,247,3196,228,3187,211,3173,194,3144,179,3098,153,2962,132,2782,116,2578,94,2174,85,1906"/>
+<area shape="rect" id="Node000126" href="$classshark_1_1_linear_s_a_g_trainer.html" title="Stochastic Average Gradient Method for training of linear models,." alt="" coords="295,3233,464,3274"/>
+<area shape="poly" id="edge42_Node000001_Node000126" title=" " alt="" coords="90,1905,99,2183,120,2602,137,2815,158,3002,184,3144,199,3192,215,3220,231,3234,251,3244,295,3254,294,3260,249,3249,228,3239,211,3223,194,3194,179,3145,153,3003,132,2815,115,2603,93,2183,84,1906"/>
+<area shape="rect" id="Node000127" href="$classshark_1_1_logistic_regression.html" title="Trainer for Logistic regression." alt="" coords="293,3299,466,3339"/>
+<area shape="poly" id="edge43_Node000001_Node000127" title=" " alt="" coords="90,1906,98,2195,119,2635,135,2858,156,3055,169,3137,183,3204,198,3254,215,3284,231,3298,250,3308,293,3319,292,3324,248,3313,228,3302,211,3287,193,3256,178,3205,164,3138,151,3055,130,2858,113,2635,92,2196,84,1906"/>
+<area shape="rect" id="Node000128" href="$classshark_1_1_one_class_svm_trainer.html" title="Training of one&#45;class SVMs." alt="" coords="286,3364,473,3405"/>
+<area shape="poly" id="edge44_Node000001_Node000128" title=" " alt="" coords="90,1905,97,2206,116,2667,133,2901,154,3108,167,3194,181,3265,197,3318,215,3349,230,3362,247,3372,286,3383,285,3388,245,3377,226,3367,211,3353,192,3320,176,3266,162,3195,149,3109,127,2902,111,2667,91,2207,84,1906"/>
+</map>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    
+    <title>Covariance Matrix Adaptation Evolution Strategy &#8212; Shark 3.0a documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mt_sphinx_deriv.css?v=6ec4729f" />
+    <script src="../../../_static/documentation_options.js?v=db277b1a"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS-MML_HTMLorMML&delayStartupUntilConfig"></script>
+    <link rel="icon" href="../../../_static/shark16.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Multi-Objective Covariance Matrix Adaptation Evolution Strategy" href="mocma.html" />
+    <link rel="prev" title="Kernelized Budgeted Stochastic Gradient Descent" href="kernelBudgetedSGD.html" />
+    <link rel="stylesheet" href="../../../_static/mt_sphinx_shark.css" type="text/css" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3.0.1/es5/tex-mml-chtml.js"></script>
+    <script src="../../../index/../../../../mlstyle.js"></script>
+
+  </head><body>
+
+    <div id="shark_old">
+        <div id="wrap">
+            <div id="header">
+                <div id="site-name"><a href="/shark/index.html">Shark machine learning library</a></div>
+                <ul id="nav">
+                    <li  class="first" >
+                        <a href="../../installation.html">Installation</a>
+                    </li>
+                    <li  class="active" >
+                        <a href="../tutorials.html">Tutorials</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../benchmark.html">Benchmarks</a>
+                    </li>
+		    <li  class="first" >
+                        <a href="../../../index/../../../../doxygen_pages/html/classes.html">Documentation</a>
+                        <ul>
+                            <li><a href="../../quickref/quickref.html">Quick references</a></li>
+                            <li><a href="../../../index/../../../../doxygen_pages/html/classes.html">Class list</a></li>
+                            <li class="last"><a href="../../../index/../../../../doxygen_pages/html/group__shark__globals.html">Global functions</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="covariance-matrix-adaptation-evolution-strategy">
+<h1>Covariance Matrix Adaptation Evolution Strategy<a class="headerlink" href="#covariance-matrix-adaptation-evolution-strategy" title="Link to this heading">¶</a></h1>
+<p>The covariance matrix adaptation evolution strategy (CMA-ES) is one of
+the most powerful evolutionary algorithms for single-objective
+real-valued optimization <a class="reference internal" href="#hansen2004" id="id1"><span>[Hansen2004]</span></a>. The algorithm relies on normally distributed
+mutative steps to explore the search space while adjusting its
+mutation distribution to make successful steps from the recent past
+more likely in the future. In addition, a separate step-size is
+maintained and adapted.</p>
+<p>In Shark, we provide a reference implementation of the algorithm (see
+<a class="reference external" href="../../../../../../doxygen_pages/html/_c_m_a_8h.html">CMA.h</a>) that is integrated with the optimizer class
+hierarchy. Our implementation is based on the
+description given in <a class="reference internal" href="#hansen2011" id="id2"><span>[Hansen2011]</span></a>.</p>
+<p>This tutorial illustrates applying the CMA-ES to the <a class="reference external" href="../../../../../../doxygen_pages/html/structshark_1_1benchmarks_1_1_sphere.html">Sphere</a>
+benchmark function. Please note that the methods presented here apply
+to all single-objective optimizers available in the Shark
+library. That is, applying an optimizer to an objective function
+requires the following steps:</p>
+<ul class="simple">
+<li><p>Instantiate and configure the objective function.</p></li>
+<li><p>Instantiate the optimizer.</p></li>
+<li><p>Configure the optimizer instance for the objective function instance.</p></li>
+<li><p>Execute the optimizer until a termination criterion is fulfilled.</p></li>
+</ul>
+<p>The code for this tutorial can be found in
+<a class="reference external" href="../../../../../../doxygen_pages/html/_c_m_a_simple_8cpp.html">CMASimple.cpp</a>.
+First of all, the following header files are required:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="c1">// Implementation of the CMA-ES</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/Algorithms/DirectSearch/CMA.h&gt;</span>
+<span class="c1">// Access to benchmark functions</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;shark/ObjectiveFunctions/Benchmarks/Benchmarks.h&gt;</span>
+</pre></div>
+</div>
+<p>Next, an instance of the objective function is created and configured
+for a two-dimensional search space:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">benchmarks</span><span class="o">::</span><span class="n">Sphere</span><span class="w"> </span><span class="nf">sphere</span><span class="p">(</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Thereafter, the optimizer is instantiated and initialized for the objective function instance:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">CMA</span><span class="w"> </span><span class="n">cma</span><span class="p">;</span>
+<span class="n">cma</span><span class="p">.</span><span class="n">setInitialSigma</span><span class="p">(</span><span class="mf">0.1</span><span class="p">);</span><span class="c1">// Explicitely set initial global step size.</span>
+<span class="n">sphere</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+<span class="n">cma</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="w"> </span><span class="n">sphere</span><span class="p">,</span><span class="w"> </span><span class="n">sphere</span><span class="p">.</span><span class="n">proposeStartingPoint</span><span class="p">());</span>
+</pre></div>
+</div>
+<p>Here, we delegate the setup of constants and initialization of the
+algorithm’s state completely to the implementation.  It tries to find a suitable estimate for the internal parameters,
+namely mu and lambda and also sets a default step size. Nevertheless, the
+class <a class="reference external" href="../../../../../../doxygen_pages/html/classshark_1_1_c_m_a.html">CMA</a> offers an additional init-method that allows for
+fine grained control over the initial algorithm configuration.
+Afterwards we can use the CMA to find a solution which is good enough and print the optimization path:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="k">do</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">cma</span><span class="p">.</span><span class="n">step</span><span class="p">(</span><span class="w"> </span><span class="n">sphere</span><span class="w"> </span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Report information on the optimizer state and the current solution to the console.</span>
+<span class="w">        </span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">sphere</span><span class="p">.</span><span class="n">evaluationCounter</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cma</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cma</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cma</span><span class="p">.</span><span class="n">sigma</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="p">(</span><span class="n">cma</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1E-20</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In general, the result of an iteration of a single-objective optimizer
+is a tuple consisting of the best known search point and its
+associated fitness.</p>
+<section id="covariance-matrix-adaptation-in-detail">
+<h2>Covariance Matrix Adaptation in Detail<a class="headerlink" href="#covariance-matrix-adaptation-in-detail" title="Link to this heading">¶</a></h2>
+<p>In the example above, a very rough overview of the CMA, its
+implementation in Shark and its application to an example problem has
+been presented. We now dive into the algorithm in even more
+detail. For the reminder of the section, we assume the reader to be
+familiar with the first part of the tutorial. Moreover, we assume an
+audience that is familiar with the CMA-ES.</p>
+<p>The implementation supports different types of weighted recombination.
+The following table shows the recombination types and the corresponding formulars for the weights:</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Recombination type</p></th>
+<th class="head"><p>Weigth calculation</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CMA::EQUAL</p></td>
+<td><p><span class="math notranslate nohighlight">\(\forall 1 \leq i \leq \mu: w_i = 1/\mu\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>CMA::LINEAR</p></td>
+<td><p><span class="math notranslate nohighlight">\(\forall 1 \leq i \leq \mu: w'_i = \mu-i, w_i=\frac{w'_i}{\sum_{i=1}^{\mu} w'_i}\)</span></p></td>
+</tr>
+<tr class="row-even"><td><p>CMA::SUPERLINEAR</p></td>
+<td><p><span class="math notranslate nohighlight">\(\forall 1 \leq i \leq \mu: w'_i = \ln( \mu + 0.5 ) - \ln( i ), w_i=\frac{w'_i}{\sum_{i=1}^{\mu} w'_i}\)</span></p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<section id="empirically-analyzing-the-cma-es">
+<h3>Empirically Analyzing the CMA-ES<a class="headerlink" href="#empirically-analyzing-the-cma-es" title="Link to this heading">¶</a></h3>
+<p>In this section, usage of the probe framework for empirical algorithm analysis is illustrated.
+The code for this part of the tutorial can be found in
+<a class="reference external" href="../../../../../../doxygen_pages/html/_c_m_a_plot_8cpp.html">CMAPlot.cpp</a>.</p>
+<p>In this tutorial, results are written to two comma-separated values files, i.e.:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>results.txt: Contains the numerical results of executing the CMA.</p></li>
+<li><p>plot.txt: Contains gnuplot plotting commands for subsequent visualization purposes.</p></li>
+</ul>
+</div></blockquote>
+<p>We consider the Himmelblau fitness function (see <a class="reference external" href="http://en.wikipedia.org/wiki/Himmelblau%27s_function">http://en.wikipedia.org/wiki/Himmelblau%27s_function</a> ).
+As before, we start over with instantiating und configuring both the optimizer and the fitness function:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">benchmarks</span><span class="o">::</span><span class="n">Himmelblau</span><span class="w"> </span><span class="n">hb</span><span class="p">;</span>
+<span class="n">CMA</span><span class="w"> </span><span class="n">cma</span><span class="p">;</span>
+<span class="n">hb</span><span class="p">.</span><span class="n">init</span><span class="p">();</span>
+<span class="n">cma</span><span class="p">.</span><span class="n">init</span><span class="p">(</span><span class="w"> </span><span class="n">hb</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Next, we iterate the CMA instance until a solution of sufficient quality is found.
+After every iteration of the algorithm, we extract some values of
+interest from the value store and write them in an appropriate format
+to the result files:</p>
+<div class="highlight-c++ notranslate"><div class="highlight"><pre><span></span><span class="n">results</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">hb</span><span class="p">.</span><span class="n">evaluationCounter</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w">        </span><span class="c1">// Column 1</span>
+<span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cma</span><span class="p">.</span><span class="n">condition</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w">               </span><span class="c1">// Column 2</span>
+<span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cma</span><span class="p">.</span><span class="n">sigma</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w">                   </span><span class="c1">// Column 3</span>
+<span class="w">        </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">cma</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">;</span><span class="w">         </span><span class="c1">// Column 4</span>
+<span class="n">copy</span><span class="p">(</span>
+<span class="w">     </span><span class="n">cma</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span>
+<span class="w">     </span><span class="n">cma</span><span class="p">.</span><span class="n">solution</span><span class="p">().</span><span class="n">point</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w">                </span><span class="c1">// Column 5 &amp; 6</span>
+<span class="w">     </span><span class="n">ostream_iterator</span><span class="o">&lt;</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(</span><span class="w"> </span><span class="n">results</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="p">)</span>
+<span class="w">     </span><span class="p">);</span>
+<span class="n">copy</span><span class="p">(</span>
+<span class="w">     </span><span class="n">cma</span><span class="p">.</span><span class="n">mean</span><span class="p">().</span><span class="n">begin</span><span class="p">(),</span><span class="w">                        </span><span class="c1">// Column 7 &amp; 8</span>
+<span class="w">     </span><span class="n">cma</span><span class="p">.</span><span class="n">mean</span><span class="p">().</span><span class="n">end</span><span class="p">(),</span>
+<span class="w">     </span><span class="n">ostream_iterator</span><span class="o">&lt;</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="o">&gt;</span><span class="p">(</span><span class="w"> </span><span class="n">results</span><span class="p">,</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="w"> </span><span class="p">)</span>
+<span class="w">      </span><span class="p">);</span>
+<span class="n">results</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">endl</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Please note that the current solution is not equal to the population
+mean reported by the CMA instance as the population mean is the result
+of the recombination operator applied to the respective parent
+population.</p>
+<p>Finally, we present the results of the example in the following plot:</p>
+<a class="reference internal image-reference" href="../../../_images/cma_himmelblau.svg"><img alt="../../../_images/cma_himmelblau.svg" class="align-center" height="500px" src="../../../_images/cma_himmelblau.svg" width="700px" /></a>
+<section id="references">
+<h4>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h4>
+<div role="list" class="citation-list">
+<div class="citation" id="hansen2004" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">Hansen2004</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="14">
+<li><p>Hansen and S. Kern. Evaluating the CMA Evolution Strategy on Multimodal Test Functions. In Eighth International Conference on Parallel Problem Solving from Nature PPSN VIII, Proceedings, pp. 282-291, Berlin: Springer, 2004.</p></li>
+</ol>
+</div>
+<div class="citation" id="hansen2011" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">Hansen2011</a><span class="fn-bracket">]</span></span>
+<ol class="upperalpha simple" start="14">
+<li><p>Hansen. The CMA Evolution Startegy: A Tutorial, June 28, 2011.</p></li>
+</ol>
+</div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+	<div class="mt_ltocwrapper">
+		<ul>
+<li><a class="reference internal" href="#">Covariance Matrix Adaptation Evolution Strategy</a><ul>
+<li><a class="reference internal" href="#covariance-matrix-adaptation-in-detail">Covariance Matrix Adaptation in Detail</a></li>
+</ul>
+</li>
+</ul>
+
+	</div>
+<div>
+  <a class="topless" href="kernelBudgetedSGD.html" title="previous chapter">
+	  <img class="navicon" src="../../../_static/icon_backward.png" alt="prev"/> Kernelized Budgeted Stochastic Gradient Descent</a>
+  <a class="topless" href="mocma.html" title="next chapter">
+	  <img class="navicon" src="../../../_static/icon_forward.png" alt="next"/> Multi-Objective Covariance Matrix Adaptation Evolution Strategy</a>
+</div> 
+<div id="searchbox" style="display: none">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" size="12" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+      <input class="mtsubmitbutton" type="submit" value="Find" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+<p class="mtshowsource">
+  <a href="../../../_sources/rest_sources/tutorials/algorithms/cma.rst.txt"
+           rel="nofollow"><img class="sourceicon" src="../../../_static/icon_eject.png" alt="prev"/> Show page source</a>
+</p>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <div class="footer">
+        <div class="footerlogos">
+            <a href="http://validator.w3.org/check/referer" title="Valid XHTML 1.0">
+                <img class="footerlogos" src="../../../_static/xhtml_validation.png" alt="Valid XHTML 1.0" />
+            </a>
+            <a href="http://jigsaw.w3.org/css-validator/check/referer?profile=css3" title="Valid CSS3">
+                <img class="footerlogos" src="../../../_static/css_validation.png" alt="Valid CSS3" />
+            </a>
+        </div>
+            &copy; The Shark developer team.
+           Created on 21/05/2024
+           using <a href="http://sphinx.pocoo.org/">Sphinx</a> 7.3.7
+    </div>
+  </body>
+</html>

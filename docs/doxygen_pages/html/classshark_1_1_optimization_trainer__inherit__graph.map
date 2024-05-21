@@ -1,0 +1,5 @@
+<map id="shark::OptimizationTrainer&lt; Model, LabelTypeT &gt;" name="shark::OptimizationTrainer&lt; Model, LabelTypeT &gt;">
+<area shape="rect" id="Node000001" title="Wrapper for training schemes based on (iterative) optimization." alt="" coords="5,94,180,135"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_abstract_trainer.html" title="Superclass of supervised learning algorithms." alt="" coords="15,5,170,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="95,62,95,94,90,94,90,62"/>
+</map>

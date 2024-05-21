@@ -1,0 +1,7 @@
+<map id="shark::CrossEntropyMethod::INoiseType" name="shark::CrossEntropyMethod::INoiseType">
+<area shape="rect" id="Node000001" title="Interface class for noise type." alt="" coords="109,5,294,46"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_cross_entropy_method_1_1_constant_noise.html" title="Constant noise term z_t = noise." alt="" coords="5,94,190,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="168,58,123,96,119,92,165,54"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_cross_entropy_method_1_1_linear_noise.html" title="Linear noise term z_t = a + t / b." alt="" coords="213,94,398,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,54,284,92,280,96,235,58"/>
+</map>

@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classshark_1_1_abstract_stopping_criterion.html" title="Base class for stopping criteria of optimization algorithms." alt="" coords="5,136,216,177"/>
+<area shape="rect" id="Node000001" href="$classshark_1_1_generalization_loss.html" title="The generalization loss calculates the relative increase of the validation error compared to the mini..." alt="" coords="274,5,447,46"/>
+<area shape="poly" id="edge11_Node000000_Node000001" title=" " alt="" coords="151,125,203,90,262,57,291,44,294,49,265,61,206,95,154,129"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_generalization_quotient.html" title="SStopping criterion monitoring the quotient of generalization loss and training progress." alt="" coords="264,71,457,111"/>
+<area shape="poly" id="edge12_Node000000_Node000002" title=" " alt="" coords="205,129,279,109,280,115,206,134"/>
+<area shape="rect" id="Node000003" href="$classshark_1_1_max_iterations.html" title="This stopping criterion stops after a fixed number of iterations." alt="" coords="290,136,431,177"/>
+<area shape="poly" id="edge13_Node000000_Node000003" title=" " alt="" coords="231,154,290,154,290,159,231,159"/>
+<area shape="rect" id="Node000004" href="$classshark_1_1_training_error.html" title="This stopping criterion tracks the improvement of the error function of the training error over an in..." alt="" coords="293,201,428,242"/>
+<area shape="poly" id="edge14_Node000000_Node000004" title=" " alt="" coords="207,179,293,201,292,207,205,184"/>
+<area shape="rect" id="Node000005" href="$classshark_1_1_training_progress.html" title="This stopping criterion tracks the improvement of the training error over an interval of iterations." alt="" coords="281,267,440,307"/>
+<area shape="poly" id="edge15_Node000000_Node000005" title=" " alt="" coords="154,184,206,218,265,251,294,264,291,268,262,256,203,223,151,188"/>
+</map>

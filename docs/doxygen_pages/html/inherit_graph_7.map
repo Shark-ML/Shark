@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classshark_1_1_abstract_nearest_neighbors.html" title="Interface for Nearest Neighbor queries." alt="" coords="5,39,221,79"/>
+<area shape="rect" id="Node000001" href="$classshark_1_1_simple_nearest_neighbors.html" title="Brute force optimized nearest neighbor implementation." alt="" coords="269,5,475,46"/>
+<area shape="poly" id="edge9_Node000000_Node000001" title=" " alt="" coords="236,40,268,36,269,42,237,46"/>
+<area shape="rect" id="Node000002" href="$classshark_1_1_tree_nearest_neighbors.html" title="Nearest Neighbors implementation using binary trees." alt="" coords="276,71,468,111"/>
+<area shape="poly" id="edge10_Node000000_Node000002" title=" " alt="" coords="236,72,276,76,275,82,236,77"/>
+</map>
