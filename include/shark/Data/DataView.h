@@ -239,6 +239,12 @@ private:
 	std::vector<Index> m_indices;//stores for every element of the set it's position inside the dataset
 };
 
+/**
+ * \ingroup shark_globals
+ *
+ * @{
+ */
+
 /// \brief creates a subset of a DataView with elements indexed by indices
 ///
 /// \param view the view for which the subset is to be created

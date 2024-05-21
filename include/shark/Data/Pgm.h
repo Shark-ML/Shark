@@ -47,6 +47,12 @@
 
 namespace shark {
 
+/**
+ * \ingroup shark_globals
+ *
+ * @{
+ */
+
 namespace detail {
 void importPGM( std::string const& fileName, std::vector<unsigned char>& ppData, std::size_t& sx, std::size_t& sy )
 {
@@ -70,12 +76,6 @@ void importPGM( std::string const& fileName, std::vector<unsigned char>& ppData,
 	file.read((char*)ppData.data(),sx*sy);
 	SHARK_RUNTIME_CHECK(file, "Error reading file!");
 }
-
-/**
- * \ingroup shark_globals
- *
- * @{
- */
 
 /// \brief Writes a PGM file.
 ///
@@ -248,6 +248,8 @@ void importPGMSet(std::string const&p, Data<T> &set){
 	set = createDataFromRange(container);
 	set.shape() = {info.front().second,info.front().first};
 }
+
+/** @}*/
 
 } // end namespace shark
 #endif
