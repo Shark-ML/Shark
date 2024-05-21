@@ -4,7 +4,7 @@
 #       Optionally included sub-probjects:
 #         * Test/CMakeLists.txt
 #         * examples/CMakeLists.txt
-#         * doc/CMakeLists.txt
+#         * docs/CMakeLists.txt
 #####################################################################
 project( shark )
 cmake_minimum_required( VERSION 3.1 FATAL_ERROR)
@@ -90,7 +90,7 @@ set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 set( CPACK_DEBIAN_PACKAGE_MAINTAINER "Christian Igel <c.igel@ieee.org>" )
 
 #####################################################################
-#    Adjust include, lib, example and doc paths for installation
+#    Adjust include, lib, example and docs paths for installation
 #####################################################################
 if( UNIX )
 	include(GNUInstallDirs)
@@ -99,14 +99,14 @@ if( UNIX )
 	set( SHARK_INSTALL_LIB_DIR ${CMAKE_INSTALL_LIBDIR} CACHE STRING "" )
 	set( SHARK_INSTALL_CONTRIB_DIR ${CMAKE_INSTALL_DATADIR}/shark/contrib CACHE STRING "" )
 	set( SHARK_INSTALL_EXAMPLE_DIR ${CMAKE_INSTALL_DATADIR}/shark/examples CACHE STRING "" )
-	set( SHARK_INSTALL_DOC_DIR ${CMAKE_INSTALL_DATADIR}/shark/doc CACHE STRING "" )
+	set( SHARK_INSTALL_DOC_DIR ${CMAKE_INSTALL_DATADIR}/shark/docs CACHE STRING "" )
 else()
 	set( SHARK_INSTALL_BIN_DIR bin )
 	set( SHARK_INSTALL_INCLUDE_DIR include/shark/ )
 	set( SHARK_INSTALL_LIB_DIR lib/ )
 	set( SHARK_INSTALL_CONTRIB_DIR contrib/ )
 	set( SHARK_INSTALL_EXAMPLE_DIR examples/ )
-	set( SHARK_INSTALL_DOC_DIR doc )
+	set( SHARK_INSTALL_DOC_DIR docs )
 endif()
 
 #####################################################################
@@ -418,7 +418,7 @@ endif()
 #####################################################################
 option(BUILD_DOCUMENTATION "Build documentation." OFF)
 if(BUILD_DOCUMENTATION)
-	add_subdirectory(doc)
+	add_subdirectory(docs)
 endif()
 
 ###################################################################
