@@ -157,7 +157,7 @@ examples/Benchmark/shark/build/
 /contrib/mathjax/.gitignore
 /contrib/mathjax/.git
 
-# /doc/
+# /docs/
 /docs/Shark.dox
 /docs/CMakeCache.txt
 /docs/latex
@@ -199,6 +199,24 @@ doc/sphinx_pages/rest_sources/tutorials/concepts/data/normalization.rst
 doc/sphinx_pages/rest_sources/tutorials/concepts/misc/random_numbers.rst
 doc/sphinx_pages/rest_sources/tutorials/concepts/misc/versatile_classification.rst
 
+# tutToRst
+docs/tutToRst/CMakeFiles/CMakeDirectoryInformation.cmake
+docs/tutToRst/CMakeFiles/progress.marks
+docs/tutToRst/CMakeFiles/tut2rst.dir/DependInfo.cmake
+docs/tutToRst/CMakeFiles/tut2rst.dir/build.make
+docs/tutToRst/CMakeFiles/tut2rst.dir/cmake_clean.cmake
+docs/tutToRst/CMakeFiles/tut2rst.dir/compiler_depend.internal
+docs/tutToRst/CMakeFiles/tut2rst.dir/compiler_depend.make
+docs/tutToRst/CMakeFiles/tut2rst.dir/compiler_depend.ts
+docs/tutToRst/CMakeFiles/tut2rst.dir/depend.make
+docs/tutToRst/CMakeFiles/tut2rst.dir/flags.make
+docs/tutToRst/CMakeFiles/tut2rst.dir/link.txt
+docs/tutToRst/CMakeFiles/tut2rst.dir/progress.make
+docs/tutToRst/CMakeFiles/tut2rst.dir/tut2rst.cpp.o
+docs/tutToRst/CMakeFiles/tut2rst.dir/tut2rst.cpp.o.d
+docs/tutToRst/CTestTestfile.cmake
+docs/tutToRst/Makefile
+docs/tutToRst/cmake_install.cmake
 
 
 # /examples/
