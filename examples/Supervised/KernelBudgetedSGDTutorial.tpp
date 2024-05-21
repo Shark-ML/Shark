@@ -23,9 +23,6 @@ public:
         input(0) = random::gauss(random::globalRng) + 3.0 * label;
     }
 };
-/// @endcond
-
-
 
 
 int main(int argc, char** argv)
