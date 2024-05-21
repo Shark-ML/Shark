@@ -245,7 +245,7 @@ private:
  * @{
  */
 
-/// \brief creates a subset of a DataView with elements indexed by indices
+/// \brief Creates a subset of a DataView with elements indexed by indices
 ///
 /// \param view the view for which the subset is to be created
 /// \param indizes the index of the elements to be stored in the view 
