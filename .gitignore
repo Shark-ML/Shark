@@ -26,6 +26,9 @@
 SharkConfig.cmake
 SharkConfigVersion.cmake
 SharkTargets.cmake
+/CMakeDoxyfile.in
+/DartConfiguration.tcl
+/cmake_uninstall.cmake
 
 /Testing
 /build
@@ -233,6 +236,7 @@ examples/EA/SOO/*.cpp
 examples/Statistics/*.cpp
 examples/Supervised/*.cpp
 examples/Unsupervised/*.cpp
+examples/Data/*.cpp
 
 # /examples/ExampleProject/
 /examples/ExampleProject/CMakeLists.txt
@@ -253,3 +257,10 @@ examples/Unsupervised/*.cpp
 /src/*.dsw
 /src/Makefile
 /src/Makefile.in
+src/CMakeFiles/
+src/cmake_install.cmake
+
+# other files in /include
+include/CMakeFiles/
+include/Makefile
+include/cmake_install.cmake
