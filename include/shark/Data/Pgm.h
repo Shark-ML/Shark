@@ -48,8 +48,7 @@
 namespace shark {
 
 /**
- * \ingroup shark_globals
- *
+ * \addtogroup shark_globals
  * @{
  */
 
