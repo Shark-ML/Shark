@@ -670,6 +670,28 @@
     <includes id="_kernel_expansion_8h" name="KernelExpansion.h" local="no" import="no" module="no" objc="no">shark/Models/Kernels/KernelExpansion.h</includes>
   </compound>
   <compound kind="file">
+    <name>.!48366!SteadyStateMOCMA.h</name>
+    <path>include/shark/Algorithms/DirectSearch/</path>
+    <filename>_8_948366_9_steady_state_m_o_c_m_a_8h.html</filename>
+    <includes id="_hypervolume_indicator_8h" name="HypervolumeIndicator.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h</includes>
+    <includes id="_additive_epsilon_indicator_8h" name="AdditiveEpsilonIndicator.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h</includes>
+    <includes id="_indicator_based_selection_8h" name="IndicatorBasedSelection.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h</includes>
+    <includes id="_penalizing_evaluator_8h" name="PenalizingEvaluator.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h</includes>
+    <includes id="_c_m_a_individual_8h" name="CMAIndividual.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/CMA/CMAIndividual.h</includes>
+    <includes id="_abstract_multi_objective_optimizer_8h" name="AbstractMultiObjectiveOptimizer.h" local="no" import="no" module="no" objc="no">shark/Algorithms/AbstractMultiObjectiveOptimizer.h</includes>
+  </compound>
+  <compound kind="file">
+    <name>.!48368!MOCMA.h</name>
+    <path>include/shark/Algorithms/DirectSearch/</path>
+    <filename>_8_948368_9_m_o_c_m_a_8h.html</filename>
+    <includes id="_hypervolume_indicator_8h" name="HypervolumeIndicator.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Indicators/HypervolumeIndicator.h</includes>
+    <includes id="_additive_epsilon_indicator_8h" name="AdditiveEpsilonIndicator.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Indicators/AdditiveEpsilonIndicator.h</includes>
+    <includes id="_indicator_based_selection_8h" name="IndicatorBasedSelection.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Selection/IndicatorBasedSelection.h</includes>
+    <includes id="_penalizing_evaluator_8h" name="PenalizingEvaluator.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/Operators/Evaluation/PenalizingEvaluator.h</includes>
+    <includes id="_c_m_a_individual_8h" name="CMAIndividual.h" local="no" import="no" module="no" objc="no">shark/Algorithms/DirectSearch/CMA/CMAIndividual.h</includes>
+    <includes id="_abstract_multi_objective_optimizer_8h" name="AbstractMultiObjectiveOptimizer.h" local="no" import="no" module="no" objc="no">shark/Algorithms/AbstractMultiObjectiveOptimizer.h</includes>
+  </compound>
+  <compound kind="file">
     <name>CMA.h</name>
     <path>include/shark/Algorithms/DirectSearch/</path>
     <filename>_c_m_a_8h.html</filename>
@@ -38251,6 +38273,41 @@
       <anchorfile>group__shark__globals.html</anchorfile>
       <anchor>ga03c6faca0987d05d7a952dd21fc3d9aa</anchor>
       <arglist>(LabeledData&lt; I, L &gt; const &amp;data)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>shark::importPGM</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga45ff5a792e6e1552e25bafc527a49825</anchor>
+      <arglist>(std::string const &amp;fileName, T &amp;data, std::size_t &amp;sx, std::size_t &amp;sy)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>shark::exportPGM</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>ga3dd3d34b531f41052cad2eb70198a092</anchor>
+      <arglist>(std::string const &amp;fileName, T const &amp;data, std::size_t sx, std::size_t sy, bool normalize=false)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>shark::exportFiltersToPGMGrid</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>gae049ff21921b0cae7f75669c1a150a09</anchor>
+      <arglist>(std::string const &amp;basename, RealMatrix const &amp;filters, std::size_t width, std::size_t height)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>shark::exportFiltersToPGMGrid</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>gaf2bd14cfe0ae426e1dba04703f89a691</anchor>
+      <arglist>(std::string const &amp;basename, Data&lt; RealVector &gt; const &amp;filters, std::size_t width, std::size_t height)</arglist>
+    </member>
+    <member kind="function">
+      <type>void</type>
+      <name>shark::importPGMSet</name>
+      <anchorfile>group__shark__globals.html</anchorfile>
+      <anchor>gab96fa7c3a2939a73db2108bb6c41686a</anchor>
+      <arglist>(std::string const &amp;p, Data&lt; T &gt; &amp;set)</arglist>
     </member>
     <member kind="variable" static="yes">
       <type>static const double</type>

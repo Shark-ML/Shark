@@ -769,6 +769,24 @@ Functions</h2></td></tr>
 <tr class="memitem:ga03c6faca0987d05d7a952dd21fc3d9aa"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="classshark_1_1_labeled_data.html">LabeledData</a>&lt; blas::vector&lt; Type, blas::gpu_tag &gt;, blas::vector&lt; Type, blas::gpu_tag &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga03c6faca0987d05d7a952dd21fc3d9aa">shark::toGPU</a> (<a class="el" href="classshark_1_1_labeled_data.html">LabeledData</a>&lt; I, L &gt; const &amp;data)</td></tr>
 <tr class="memdesc:ga03c6faca0987d05d7a952dd21fc3d9aa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transfers a labeled dataset from CPU to the GPU/OpenCL device.  <br /></td></tr>
 <tr class="separator:ga03c6faca0987d05d7a952dd21fc3d9aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga45ff5a792e6e1552e25bafc527a49825" id="r_ga45ff5a792e6e1552e25bafc527a49825"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ga45ff5a792e6e1552e25bafc527a49825"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga45ff5a792e6e1552e25bafc527a49825">shark::importPGM</a> (std::string const &amp;fileName, T &amp;data, std::size_t &amp;sx, std::size_t &amp;sy)</td></tr>
+<tr class="memdesc:ga45ff5a792e6e1552e25bafc527a49825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Import a PGM image from file.  <br /></td></tr>
+<tr class="separator:ga45ff5a792e6e1552e25bafc527a49825"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3dd3d34b531f41052cad2eb70198a092" id="r_ga3dd3d34b531f41052cad2eb70198a092"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ga3dd3d34b531f41052cad2eb70198a092"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#ga3dd3d34b531f41052cad2eb70198a092">shark::exportPGM</a> (std::string const &amp;fileName, T const &amp;data, std::size_t sx, std::size_t sy, bool normalize=false)</td></tr>
+<tr class="memdesc:ga3dd3d34b531f41052cad2eb70198a092"><td class="mdescLeft">&#160;</td><td class="mdescRight">Export a PGM image to file.  <br /></td></tr>
+<tr class="separator:ga3dd3d34b531f41052cad2eb70198a092"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae049ff21921b0cae7f75669c1a150a09" id="r_gae049ff21921b0cae7f75669c1a150a09"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#gae049ff21921b0cae7f75669c1a150a09">shark::exportFiltersToPGMGrid</a> (std::string const &amp;basename, RealMatrix const &amp;filters, std::size_t width, std::size_t height)</td></tr>
+<tr class="memdesc:gae049ff21921b0cae7f75669c1a150a09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exports a set of filters as a grid image.  <br /></td></tr>
+<tr class="separator:gae049ff21921b0cae7f75669c1a150a09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2bd14cfe0ae426e1dba04703f89a691" id="r_gaf2bd14cfe0ae426e1dba04703f89a691"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid</a> (std::string const &amp;basename, <a class="el" href="classshark_1_1_data.html">Data</a>&lt; RealVector &gt; const &amp;filters, std::size_t width, std::size_t height)</td></tr>
+<tr class="memdesc:gaf2bd14cfe0ae426e1dba04703f89a691"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exports a set of filters as a grid image.  <br /></td></tr>
+<tr class="separator:gaf2bd14cfe0ae426e1dba04703f89a691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab96fa7c3a2939a73db2108bb6c41686a" id="r_gab96fa7c3a2939a73db2108bb6c41686a"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:gab96fa7c3a2939a73db2108bb6c41686a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__shark__globals.html#gab96fa7c3a2939a73db2108bb6c41686a">shark::importPGMSet</a> (std::string const &amp;p, <a class="el" href="classshark_1_1_data.html">Data</a>&lt; T &gt; &amp;set)</td></tr>
+<tr class="memdesc:gab96fa7c3a2939a73db2108bb6c41686a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Import PGM images scanning a directory recursively.  <br /></td></tr>
+<tr class="separator:gab96fa7c3a2939a73db2108bb6c41686a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -1539,7 +1557,7 @@ template&lt;class Type &gt; </div>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="group__shark__globals.html#ga575c51a098b17178c4443c6ffe98d8db">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="group__kernels.html#gafb6b639ff5daa090b08b13e97e78a7bc">shark::calculateKernelMatrixParameterDerivative()</a>, <a class="el" href="group__kernels.html#ga3fafbf415f6fec4d166ade39dccbc01a">shark::calculateMixedKernelMatrix()</a>, <a class="el" href="group__kernels.html#ga3eaca71bfc1467b79c9341dcfcad25c1">shark::calculateRegularizedKernelMatrix()</a>, <a class="el" href="group__shark__globals.html#ga89490b7ed6f9285ab91cae348c7437b8">shark::classSizes()</a>, <a class="el" href="group__shark__globals.html#ga1a1a4f4249f709e6169a601a9a857fa8">shark::createDataFromRange()</a>, <a class="el" href="classshark_1_1_difference_kernel_matrix.html#ab999126ee7b40e3c33a05a38d685d81a">shark::DifferenceKernelMatrix&lt; InputType, CacheType &gt;::entry()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a9a55c5a7f5e4b7f447f299c1b19050e2">shark::KernelExpansion&lt; InputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_abstract_loss.html#a0d53dd678d58b2cb3a213cdc829937da">shark::AbstractLoss&lt; LabelT, OutputT &gt;::eval()</a>, <a class="el" href="classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html#ad29ef56602b3431b411320d95434a0ac">shark::ZeroOneLoss&lt; unsigned int, blas::vector&lt; Float &gt; &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#ab16ec2478fb6e4c863193554e5eb2047">shark::NegativeLogLikelihood::eval()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a1c248c666ed60b7f985a5e05f2a822c8">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#aa877cede0623b9d651f8385f9b611c82">shark::NegativeLogLikelihood::evalDerivative()</a>, <a class="el" href="classshark_1_1_contrastive_divergence.html#a62d35d6d633fd3688fcfa2fe8926ad0d">shark::ContrastiveDivergence&lt; Operator &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a8b3b2f63448cb50dbcac630b10982341">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::evalDerivative()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga8bd9251209d0aa390d1da4d6e839861e">shark::LabeledData&lt; InputT, LabelT &gt;::LabeledData()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#ga1fee3b5830ae11a78109e8c0265c6569">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#gadbf9ee4b9fcc8d6ae46467b3fd7721ad">shark::Data&lt; Type &gt;::push_back()</a>, <a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements()</a>, <a class="el" href="group__shark__globals.html#gaabc1f57dc805faf96d59ab1ff6d4a171">shark::Data&lt; Type &gt;::splice()</a>, <a class="el" href="group__shark__globals.html#gaf9900fbc117dd6259136a3dd2056c11e">shark::Data&lt; Type &gt;::splitBatch()</a>, <a class="el" href="group__shark__globals.html#gafd3b31345c566b4bbaf5f5c6398eb23c">shark::toGPU()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="classshark_1_1_normalize_kernel_unit_variance.html#a4bdc12938183edab9acdfd89bde72286">shark::NormalizeKernelUnitVariance&lt; InputType &gt;::train()</a>, <a class="el" href="group__shark__globals.html#gad97d7b9b78b05c23c26660304a4430fb">shark::transform()</a>, and <a class="el" href="group__shark__globals.html#gab87e0d38b9fbf74d9a97ee02e8ab273b">shark::transform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga192f5eced10acf38f3ae723a3c400d98">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="group__shark__globals.html#ga575c51a098b17178c4443c6ffe98d8db">shark::LabeledData&lt; InputT, LabelT &gt;::batch()</a>, <a class="el" href="group__kernels.html#gafb6b639ff5daa090b08b13e97e78a7bc">shark::calculateKernelMatrixParameterDerivative()</a>, <a class="el" href="group__kernels.html#ga3fafbf415f6fec4d166ade39dccbc01a">shark::calculateMixedKernelMatrix()</a>, <a class="el" href="group__kernels.html#ga3eaca71bfc1467b79c9341dcfcad25c1">shark::calculateRegularizedKernelMatrix()</a>, <a class="el" href="group__shark__globals.html#ga89490b7ed6f9285ab91cae348c7437b8">shark::classSizes()</a>, <a class="el" href="group__shark__globals.html#ga1a1a4f4249f709e6169a601a9a857fa8">shark::createDataFromRange()</a>, <a class="el" href="classshark_1_1_difference_kernel_matrix.html#ab999126ee7b40e3c33a05a38d685d81a">shark::DifferenceKernelMatrix&lt; InputType, CacheType &gt;::entry()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a9a55c5a7f5e4b7f447f299c1b19050e2">shark::KernelExpansion&lt; InputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_abstract_loss.html#a0d53dd678d58b2cb3a213cdc829937da">shark::AbstractLoss&lt; LabelT, OutputT &gt;::eval()</a>, <a class="el" href="classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html#ad29ef56602b3431b411320d95434a0ac">shark::ZeroOneLoss&lt; unsigned int, blas::vector&lt; Float &gt; &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#ab16ec2478fb6e4c863193554e5eb2047">shark::NegativeLogLikelihood::eval()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a1c248c666ed60b7f985a5e05f2a822c8">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#aa877cede0623b9d651f8385f9b611c82">shark::NegativeLogLikelihood::evalDerivative()</a>, <a class="el" href="classshark_1_1_contrastive_divergence.html#a62d35d6d633fd3688fcfa2fe8926ad0d">shark::ContrastiveDivergence&lt; Operator &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a8b3b2f63448cb50dbcac630b10982341">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::evalDerivative()</a>, <a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga8bd9251209d0aa390d1da4d6e839861e">shark::LabeledData&lt; InputT, LabelT &gt;::LabeledData()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#ga1fee3b5830ae11a78109e8c0265c6569">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#gadbf9ee4b9fcc8d6ae46467b3fd7721ad">shark::Data&lt; Type &gt;::push_back()</a>, <a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements()</a>, <a class="el" href="group__shark__globals.html#gaabc1f57dc805faf96d59ab1ff6d4a171">shark::Data&lt; Type &gt;::splice()</a>, <a class="el" href="group__shark__globals.html#gaf9900fbc117dd6259136a3dd2056c11e">shark::Data&lt; Type &gt;::splitBatch()</a>, <a class="el" href="group__shark__globals.html#gafd3b31345c566b4bbaf5f5c6398eb23c">shark::toGPU()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="classshark_1_1_normalize_kernel_unit_variance.html#a4bdc12938183edab9acdfd89bde72286">shark::NormalizeKernelUnitVariance&lt; InputType &gt;::train()</a>, <a class="el" href="group__shark__globals.html#gad97d7b9b78b05c23c26660304a4430fb">shark::transform()</a>, and <a class="el" href="group__shark__globals.html#gab87e0d38b9fbf74d9a97ee02e8ab273b">shark::transform()</a>.</p>
 
 </div>
 </div>
@@ -2312,7 +2330,7 @@ template&lt;class Range &gt; </div>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga73034ee5639176b0d45e1059859d0f0a">shark::Data&lt; Type &gt;::batch()</a>, and <a class="el" href="group__shark__globals.html#gabdfa24d4e424c86cf39851c143b2dd37">shark::Data&lt; Type &gt;::shape()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="classshark_1_1_bars_and_stripes.html#a4aacf9ae2eb982898f45075e93d584d8">shark::BarsAndStripes::BarsAndStripes()</a>, <a class="el" href="_p_c_a_8cpp.html#a642f675b882ffab29fa85acf04830e30">createData()</a>, <a class="el" href="namespaceshark.html#aa0791f90b873248bed8c9f7be007cd2a">shark::createLabeledDataFromRange()</a>, <a class="el" href="group__shark__globals.html#ga409b50a287df842bd49e7434a8bbf69e">shark::createLabeledDataFromRange()</a>, <a class="el" href="namespaceshark.html#ad9ed735e63f102b04c82053f8f2922f0">shark::createUnlabeledDataFromRange()</a>, <a class="el" href="group__shark__globals.html#ga28f4e36576738062f68ba0ca3e0033be">shark::createUnlabeledDataFromRange()</a>, <a class="el" href="namespaceshark.html#ab96fa7c3a2939a73db2108bb6c41686a">shark::importPGMSet()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_mkl_kernel_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, and <a class="el" href="classshark_1_1_shifter.html#ac21cf17a7ec41054823beaac148ad979">shark::Shifter::Shifter()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_bars_and_stripes.html#a4aacf9ae2eb982898f45075e93d584d8">shark::BarsAndStripes::BarsAndStripes()</a>, <a class="el" href="_p_c_a_8cpp.html#a642f675b882ffab29fa85acf04830e30">createData()</a>, <a class="el" href="namespaceshark.html#aa0791f90b873248bed8c9f7be007cd2a">shark::createLabeledDataFromRange()</a>, <a class="el" href="group__shark__globals.html#ga409b50a287df842bd49e7434a8bbf69e">shark::createLabeledDataFromRange()</a>, <a class="el" href="namespaceshark.html#ad9ed735e63f102b04c82053f8f2922f0">shark::createUnlabeledDataFromRange()</a>, <a class="el" href="group__shark__globals.html#ga28f4e36576738062f68ba0ca3e0033be">shark::createUnlabeledDataFromRange()</a>, <a class="el" href="group__shark__globals.html#gab96fa7c3a2939a73db2108bb6c41686a">shark::importPGMSet()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_mkl_kernel_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, and <a class="el" href="classshark_1_1_shifter.html#ac21cf17a7ec41054823beaac148ad979">shark::Shifter::Shifter()</a>.</p>
 
 </div>
 </div>
@@ -3235,7 +3253,7 @@ template&lt;class <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3270
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga0ea72a74a21d5ff59772516b83c4a58b">shark::Data&lt; Type &gt;::element()</a>, <a class="el" href="group__shark__globals.html#ga814e8b0028cc90dd2af69805e8f8a04d">shark::Data&lt; Type &gt;::numberOfElements()</a>, and <a class="el" href="_exception_8h.html#a73abb5049a0168d72a48e72dda41708b">SHARK_ASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga5ef7f15d261cffb78c3b8e91765619a2">shark::dataDimension()</a>, <a class="el" href="namespaceshark.html#a12497998181e61d460632d5bec46f5c5">shark::dataDimension()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a969990014ff8964d6e67fcf72318b02b">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#ad7be3ba6f121a686e6dcbeb87813599f">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga2b2c3bd0c72ef444cbf8de7f96a4b589">shark::getColumn()</a>, <a class="el" href="group__shark__globals.html#gae537f0e90beb970397cd7bb9250984e2">shark::inputDimension()</a>, <a class="el" href="namespaceshark.html#a1a4ae1c1461484d67c14d765c9db9501">shark::inputDimension()</a>, <a class="el" href="classshark_1_1_centroids.html#a162b069a4d71fcec6e7dae5c8251cb2f">shark::Centroids::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga3006553139477e356ee75cd85c190d7c">shark::labelDimension()</a>, <a class="el" href="namespaceshark.html#a1514586242fb20c13fa7d40e634efab7">shark::labelDimension()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_auto_encoder_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga556f3c658db711cb630cc736b9665ec0">shark::setColumn()</a>, <a class="el" href="classshark_1_1_normalize_components_z_c_a.html#a1f7d6ef76cce1d8d85474bbd22452fe2">shark::NormalizeComponentsZCA::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_variance.html#a684b111c701789e332577a6739076c3b">shark::NormalizeComponentsUnitVariance&lt; DataType &gt;::train()</a>, and <a class="el" href="_deep_network_training_r_b_m_8cpp.html#a05058126c2d28e9b8008edd10500114d">trainRBM()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#ga5ef7f15d261cffb78c3b8e91765619a2">shark::dataDimension()</a>, <a class="el" href="namespaceshark.html#a12497998181e61d460632d5bec46f5c5">shark::dataDimension()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a969990014ff8964d6e67fcf72318b02b">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#ad7be3ba6f121a686e6dcbeb87813599f">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga2b2c3bd0c72ef444cbf8de7f96a4b589">shark::getColumn()</a>, <a class="el" href="group__shark__globals.html#gae537f0e90beb970397cd7bb9250984e2">shark::inputDimension()</a>, <a class="el" href="namespaceshark.html#a1a4ae1c1461484d67c14d765c9db9501">shark::inputDimension()</a>, <a class="el" href="classshark_1_1_centroids.html#a162b069a4d71fcec6e7dae5c8251cb2f">shark::Centroids::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga3006553139477e356ee75cd85c190d7c">shark::labelDimension()</a>, <a class="el" href="namespaceshark.html#a1514586242fb20c13fa7d40e634efab7">shark::labelDimension()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_auto_encoder_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga556f3c658db711cb630cc736b9665ec0">shark::setColumn()</a>, <a class="el" href="classshark_1_1_normalize_components_z_c_a.html#a1f7d6ef76cce1d8d85474bbd22452fe2">shark::NormalizeComponentsZCA::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_variance.html#a684b111c701789e332577a6739076c3b">shark::NormalizeComponentsUnitVariance&lt; DataType &gt;::train()</a>, and <a class="el" href="_deep_network_training_r_b_m_8cpp.html#a05058126c2d28e9b8008edd10500114d">trainRBM()</a>.</p>
 
 </div>
 </div>
@@ -3564,7 +3582,7 @@ template&lt;class Type &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="_dataset_8h_source.html#l00232">232</a> of file <a class="el" href="_dataset_8h_source.html">Dataset.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a26faf1b7720149479335a6cf8aeebb38">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_project_budget_maintenance_strategy_3_01_real_vector_01_4.html#a716c4803d4a64e0e30ef4d57032ed5d9">shark::ProjectBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_remove_budget_maintenance_strategy.html#a795f1710e6f333fcf7c7baad2e7bcc54">shark::RemoveBudgetMaintenanceStrategy&lt; InputType &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a24063221b317718fb10aa445b2fc8d76">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a601a22cd57543675bacf599f9cd1fc7c">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a2b7aab493bbff7b3308c718c1dcd2370">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, <a class="el" href="classshark_1_1_image_patches.html#a01400c960d4da83f22837902c459d35e">shark::ImagePatches::draw()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#aa2f5af11ed9351eb339943a4a0ef2e38">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_svm_logistic_interpretation.html#aaf23373024f5c16cb6de60ee2c4fc2c8">shark::SvmLogisticInterpretation&lt; InputType &gt;::evalDerivative()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="classshark_1_1_general_quadratic_problem.html#aeeb68a46c6b9d19b029fba3b415e0c53">shark::GeneralQuadraticProblem&lt; MatrixT &gt;::GeneralQuadraticProblem()</a>, <a class="el" href="classshark_1_1_markov_chain.html#aeca1e601f471e959b5047b9afa9b7a72">shark::MarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="classshark_1_1_tempered_markov_chain.html#a09bdfb62397058b4f8ef2cff44e55654">shark::TemperedMarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="_c_svm_max_likelihood_m_s_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_mkl_kernel_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="classshark_1_1_c_svm_derivative.html#a2e46e908d670b88e6e5ab32f3482e7d8">shark::CSvmDerivative&lt; InputType, CacheType &gt;::modelCSvmParameterDerivative()</a>, <a class="el" href="classshark_1_1_label_order.html#ab1dc3f2600d83fd8a1837cc4acf0ca4d">shark::LabelOrder::normalizeLabels()</a>, <a class="el" href="classshark_1_1_qp_mc_box_decomp.html#af0e3156b64e9f2b9f879549393ddc219">shark::QpMcBoxDecomp&lt; Matrix &gt;::QpMcBoxDecomp()</a>, <a class="el" href="classshark_1_1_qp_mc_simplex_decomp.html#a902ef2e3553bb5cf42a5126199301abe">shark::QpMcSimplexDecomp&lt; Matrix &gt;::QpMcSimplexDecomp()</a>, <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a50f9819caf20e6bedad5e6735e5db2e0">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::reduceBudget()</a>, <a class="el" href="classshark_1_1_label_order.html#ac3a45a99342f3d066d85bc8b2bbbe86b">shark::LabelOrder::restoreOriginalLabels()</a>, <a class="el" href="classshark_1_1_kernel_budgeted_s_g_d_trainer.html#afc6eff8c84cf39de20aaec579f1716b0">shark::KernelBudgetedSGDTrainer&lt; InputType, CacheType &gt;::train()</a>, and <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a26faf1b7720149479335a6cf8aeebb38">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_project_budget_maintenance_strategy_3_01_real_vector_01_4.html#a716c4803d4a64e0e30ef4d57032ed5d9">shark::ProjectBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_remove_budget_maintenance_strategy.html#a795f1710e6f333fcf7c7baad2e7bcc54">shark::RemoveBudgetMaintenanceStrategy&lt; InputType &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a24063221b317718fb10aa445b2fc8d76">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a601a22cd57543675bacf599f9cd1fc7c">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a2b7aab493bbff7b3308c718c1dcd2370">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, <a class="el" href="classshark_1_1_image_patches.html#a01400c960d4da83f22837902c459d35e">shark::ImagePatches::draw()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#aa2f5af11ed9351eb339943a4a0ef2e38">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_svm_logistic_interpretation.html#aaf23373024f5c16cb6de60ee2c4fc2c8">shark::SvmLogisticInterpretation&lt; InputType &gt;::evalDerivative()</a>, <a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="classshark_1_1_general_quadratic_problem.html#aeeb68a46c6b9d19b029fba3b415e0c53">shark::GeneralQuadraticProblem&lt; MatrixT &gt;::GeneralQuadraticProblem()</a>, <a class="el" href="classshark_1_1_markov_chain.html#aeca1e601f471e959b5047b9afa9b7a72">shark::MarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="classshark_1_1_tempered_markov_chain.html#a09bdfb62397058b4f8ef2cff44e55654">shark::TemperedMarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="_c_svm_max_likelihood_m_s_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_mkl_kernel_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="classshark_1_1_c_svm_derivative.html#a2e46e908d670b88e6e5ab32f3482e7d8">shark::CSvmDerivative&lt; InputType, CacheType &gt;::modelCSvmParameterDerivative()</a>, <a class="el" href="classshark_1_1_label_order.html#ab1dc3f2600d83fd8a1837cc4acf0ca4d">shark::LabelOrder::normalizeLabels()</a>, <a class="el" href="classshark_1_1_qp_mc_box_decomp.html#af0e3156b64e9f2b9f879549393ddc219">shark::QpMcBoxDecomp&lt; Matrix &gt;::QpMcBoxDecomp()</a>, <a class="el" href="classshark_1_1_qp_mc_simplex_decomp.html#a902ef2e3553bb5cf42a5126199301abe">shark::QpMcSimplexDecomp&lt; Matrix &gt;::QpMcSimplexDecomp()</a>, <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a50f9819caf20e6bedad5e6735e5db2e0">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::reduceBudget()</a>, <a class="el" href="classshark_1_1_label_order.html#ac3a45a99342f3d066d85bc8b2bbbe86b">shark::LabelOrder::restoreOriginalLabels()</a>, <a class="el" href="classshark_1_1_kernel_budgeted_s_g_d_trainer.html#afc6eff8c84cf39de20aaec579f1716b0">shark::KernelBudgetedSGDTrainer&lt; InputType, CacheType &gt;::train()</a>, and <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>.</p>
 
 </div>
 </div>
@@ -4201,6 +4219,134 @@ template&lt;typename <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3
 
 </div>
 </div>
+<a id="gaf2bd14cfe0ae426e1dba04703f89a691" name="gaf2bd14cfe0ae426e1dba04703f89a691"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf2bd14cfe0ae426e1dba04703f89a691">&#9670;&#160;</a></span>exportFiltersToPGMGrid() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void shark::exportFiltersToPGMGrid </td>
+          <td>(</td>
+          <td class="paramtype">std::string const &amp;&#160;</td>
+          <td class="paramname"><em>basename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data.html">Data</a>&lt; RealVector &gt; const &amp;&#160;</td>
+          <td class="paramname"><em>filters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exports a set of filters as a grid image. </p>
+<p>It is assumed that the filters each form a row in the filter-matrix. Moreover, the sizes of the filter images has to be given and it must gold width*height=W.size2(). The filters a re printed on a single image as a grid. The grid will be close to square. And the image are separated by a black 1 pixel wide line. The output will be normalized so that all images are on the same scale. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">basename</td><td>File to write to. ".pgm" is appended to the filename </td></tr>
+    <tr><td class="paramname">filters</td><td>Matrix storing the filters row by row </td></tr>
+    <tr><td class="paramname">width</td><td>Width of the filter image </td></tr>
+    <tr><td class="paramname">height</td><td>Height of th filter image </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_pgm_8h_source.html#l00182">182</a> of file <a class="el" href="_pgm_8h_source.html">Pgm.h</a>.</p>
+
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga73034ee5639176b0d45e1059859d0f0a">shark::Data&lt; Type &gt;::batch()</a>, <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, <a class="el" href="group__shark__globals.html#ga0ea72a74a21d5ff59772516b83c4a58b">shark::Data&lt; Type &gt;::element()</a>, <a class="el" href="group__shark__globals.html#ga3dd3d34b531f41052cad2eb70198a092">shark::exportPGM()</a>, <a class="el" href="group__shark__globals.html#gabd82edf467b9b82f4b0a1e70fd695311">shark::Data&lt; Type &gt;::numberOfBatches()</a>, <a class="el" href="group__shark__globals.html#ga814e8b0028cc90dd2af69805e8f8a04d">shark::Data&lt; Type &gt;::numberOfElements()</a>, and <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>.</p>
+
+</div>
+</div>
+<a id="gae049ff21921b0cae7f75669c1a150a09" name="gae049ff21921b0cae7f75669c1a150a09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae049ff21921b0cae7f75669c1a150a09">&#9670;&#160;</a></span>exportFiltersToPGMGrid() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void shark::exportFiltersToPGMGrid </td>
+          <td>(</td>
+          <td class="paramtype">std::string const &amp;&#160;</td>
+          <td class="paramname"><em>basename</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">RealMatrix const &amp;&#160;</td>
+          <td class="paramname"><em>filters</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Exports a set of filters as a grid image. </p>
+<p>It is assumed that the filters each form a row in the filter-matrix. Moreover, the sizes of the filter images has to be given and it must gold width*height=W.size2(). The filters a re printed on a single image as a grid. The grid will be close to square. And the image are separated by a black 1 pixel wide line. The output will be normalized so that all images are on the same scale. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">basename</td><td>File to write to. ".pgm" is appended to the filename </td></tr>
+    <tr><td class="paramname">filters</td><td>Matrix storing the filters row by row </td></tr>
+    <tr><td class="paramname">width</td><td>Width of the filter image </td></tr>
+    <tr><td class="paramname">height</td><td>Height of th filter image </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_pgm_8h_source.html#l00145">145</a> of file <a class="el" href="_pgm_8h_source.html">Pgm.h</a>.</p>
+
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga3dd3d34b531f41052cad2eb70198a092">shark::exportPGM()</a>, and <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_auto_encoder_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>.</p>
+
+</div>
+</div>
 <a id="gaff457dd5765f70c216e99daa8729f653" name="gaff457dd5765f70c216e99daa8729f653"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaff457dd5765f70c216e99daa8729f653">&#9670;&#160;</a></span>exportKernelMatrix() <span class="overload">[1/2]</span></h2>
 
@@ -4342,6 +4488,72 @@ template&lt;typename <a class="el" href="_multi_task_svm_8cpp.html#a0dea9a3a85d3
 <p class="definition">Definition at line <a class="el" href="_export_kernel_matrix_8h_source.html#l00273">273</a> of file <a class="el" href="_export_kernel_matrix_8h_source.html">ExportKernelMatrix.h</a>.</p>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#gaff457dd5765f70c216e99daa8729f653">shark::exportKernelMatrix()</a>.</p>
+
+</div>
+</div>
+<a id="ga3dd3d34b531f41052cad2eb70198a092" name="ga3dd3d34b531f41052cad2eb70198a092"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3dd3d34b531f41052cad2eb70198a092">&#9670;&#160;</a></span>exportPGM()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void shark::exportPGM </td>
+          <td>(</td>
+          <td class="paramtype">std::string const &amp;&#160;</td>
+          <td class="paramname"><em>fileName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T const &amp;&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>sx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t&#160;</td>
+          <td class="paramname"><em>sy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>normalize</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Export a PGM image to file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fileName</td><td>File to write to </td></tr>
+    <tr><td class="paramname">data</td><td>Linear object storing image </td></tr>
+    <tr><td class="paramname">sx</td><td>Width of image </td></tr>
+    <tr><td class="paramname">sy</td><td>Height of image </td></tr>
+    <tr><td class="paramname">normalize</td><td>Adjust values to [0,255], default false </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_pgm_8h_source.html#l00117">117</a> of file <a class="el" href="_pgm_8h_source.html">Pgm.h</a>.</p>
+
+<p class="reference">References <a class="el" href="_exception_8h.html#a42a6a50e4d06c00d60fbca5333f40768">SIZE_CHECK</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#gae049ff21921b0cae7f75669c1a150a09">shark::exportFiltersToPGMGrid()</a>, and <a class="el" href="_p_c_a_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>.</p>
 
 </div>
 </div>
@@ -5141,6 +5353,109 @@ template&lt;class T &gt; </div>
 <p class="definition">Definition at line <a class="el" href="_csv_8h_source.html#l00403">403</a> of file <a class="el" href="_csv_8h_source.html">Csv.h</a>.</p>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#gacff789463206c23dd0a0e5a6af745bac">shark::csvStringToData()</a>, and <a class="el" href="_exception_8h.html#adce1f80097c69010f5eab2618fa2e971">SHARK_RUNTIME_CHECK</a>.</p>
+
+</div>
+</div>
+<a id="ga45ff5a792e6e1552e25bafc527a49825" name="ga45ff5a792e6e1552e25bafc527a49825"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga45ff5a792e6e1552e25bafc527a49825">&#9670;&#160;</a></span>importPGM()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void shark::importPGM </td>
+          <td>(</td>
+          <td class="paramtype">std::string const &amp;&#160;</td>
+          <td class="paramname"><em>fileName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t &amp;&#160;</td>
+          <td class="paramname"><em>sx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::size_t &amp;&#160;</td>
+          <td class="paramname"><em>sy</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Import a PGM image from file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fileName</td><td>The file to read from </td></tr>
+    <tr><td class="paramname">data</td><td>Linear object for storing image </td></tr>
+    <tr><td class="paramname">sx</td><td>Width of imported image </td></tr>
+    <tr><td class="paramname">sy</td><td>Height of imported image </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_pgm_8h_source.html#l00102">102</a> of file <a class="el" href="_pgm_8h_source.html">Pgm.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="group__shark__globals.html#gab96fa7c3a2939a73db2108bb6c41686a">shark::importPGMSet()</a>.</p>
+
+</div>
+</div>
+<a id="gab96fa7c3a2939a73db2108bb6c41686a" name="gab96fa7c3a2939a73db2108bb6c41686a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab96fa7c3a2939a73db2108bb6c41686a">&#9670;&#160;</a></span>importPGMSet()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void shark::importPGMSet </td>
+          <td>(</td>
+          <td class="paramtype">std::string const &amp;&#160;</td>
+          <td class="paramname"><em>p</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classshark_1_1_data.html">Data</a>&lt; T &gt; &amp;&#160;</td>
+          <td class="paramname"><em>set</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Import PGM images scanning a directory recursively. </p>
+<p>All images are required to have the same size. the shape of the images is stored in set.shape()</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">p</td><td>Directory </td></tr>
+    <tr><td class="paramname">set</td><td>Set storing images </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p class="definition">Definition at line <a class="el" href="_pgm_8h_source.html#l00221">221</a> of file <a class="el" href="_pgm_8h_source.html">Pgm.h</a>.</p>
+
+<p class="reference">References <a class="el" href="group__shark__globals.html#ga1a1a4f4249f709e6169a601a9a857fa8">shark::createDataFromRange()</a>, <a class="el" href="group__shark__globals.html#ga45ff5a792e6e1552e25bafc527a49825">shark::importPGM()</a>, <a class="el" href="group__shark__globals.html#gabdfa24d4e424c86cf39851c143b2dd37">shark::Data&lt; Type &gt;::shape()</a>, and <a class="el" href="_exception_8h.html#a4e03d7dfdfe8cbc90447fa829fc09e4f">SHARKEXCEPTION</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="_p_c_a_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>.</p>
 
 </div>
 </div>
@@ -6850,7 +7165,7 @@ template&lt;class Type &gt; </div>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="group__kernels.html#gafb6b639ff5daa090b08b13e97e78a7bc">shark::calculateKernelMatrixParameterDerivative()</a>, <a class="el" href="group__kernels.html#ga3fafbf415f6fec4d166ade39dccbc01a">shark::calculateMixedKernelMatrix()</a>, <a class="el" href="group__kernels.html#ga3eaca71bfc1467b79c9341dcfcad25c1">shark::calculateRegularizedKernelMatrix()</a>, <a class="el" href="group__shark__globals.html#ga89490b7ed6f9285ab91cae348c7437b8">shark::classSizes()</a>, <a class="el" href="group__shark__globals.html#ga4d53c5d59826b9e611a19f31fcc0029d">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="group__shark__globals.html#gad9b0233e3adc882ed94f418f80767b09">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a9a55c5a7f5e4b7f447f299c1b19050e2">shark::KernelExpansion&lt; InputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_abstract_loss.html#a0d53dd678d58b2cb3a213cdc829937da">shark::AbstractLoss&lt; LabelT, OutputT &gt;::eval()</a>, <a class="el" href="classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html#ad29ef56602b3431b411320d95434a0ac">shark::ZeroOneLoss&lt; unsigned int, blas::vector&lt; Float &gt; &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#ab16ec2478fb6e4c863193554e5eb2047">shark::NegativeLogLikelihood::eval()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a1c248c666ed60b7f985a5e05f2a822c8">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#aa877cede0623b9d651f8385f9b611c82">shark::NegativeLogLikelihood::evalDerivative()</a>, <a class="el" href="classshark_1_1_contrastive_divergence.html#a62d35d6d633fd3688fcfa2fe8926ad0d">shark::ContrastiveDivergence&lt; Operator &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a8b3b2f63448cb50dbcac630b10982341">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::evalDerivative()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga8bd9251209d0aa390d1da4d6e839861e">shark::LabeledData&lt; InputT, LabelT &gt;::LabeledData()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#gaca4b1e6083184385dba76a21b4c1d42b">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfBatches()</a>, <a class="el" href="group__shark__globals.html#ga1fee3b5830ae11a78109e8c0265c6569">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="classshark_1_1_normalize_kernel_unit_variance.html#a4bdc12938183edab9acdfd89bde72286">shark::NormalizeKernelUnitVariance&lt; InputType &gt;::train()</a>, <a class="el" href="group__shark__globals.html#gad97d7b9b78b05c23c26660304a4430fb">shark::transform()</a>, and <a class="el" href="group__shark__globals.html#gab87e0d38b9fbf74d9a97ee02e8ab273b">shark::transform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="group__kernels.html#gafb6b639ff5daa090b08b13e97e78a7bc">shark::calculateKernelMatrixParameterDerivative()</a>, <a class="el" href="group__kernels.html#ga3fafbf415f6fec4d166ade39dccbc01a">shark::calculateMixedKernelMatrix()</a>, <a class="el" href="group__kernels.html#ga3eaca71bfc1467b79c9341dcfcad25c1">shark::calculateRegularizedKernelMatrix()</a>, <a class="el" href="group__shark__globals.html#ga89490b7ed6f9285ab91cae348c7437b8">shark::classSizes()</a>, <a class="el" href="group__shark__globals.html#ga4d53c5d59826b9e611a19f31fcc0029d">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="group__shark__globals.html#gad9b0233e3adc882ed94f418f80767b09">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a9a55c5a7f5e4b7f447f299c1b19050e2">shark::KernelExpansion&lt; InputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_abstract_loss.html#a0d53dd678d58b2cb3a213cdc829937da">shark::AbstractLoss&lt; LabelT, OutputT &gt;::eval()</a>, <a class="el" href="classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html#ad29ef56602b3431b411320d95434a0ac">shark::ZeroOneLoss&lt; unsigned int, blas::vector&lt; Float &gt; &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#ab16ec2478fb6e4c863193554e5eb2047">shark::NegativeLogLikelihood::eval()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a1c248c666ed60b7f985a5e05f2a822c8">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#aa877cede0623b9d651f8385f9b611c82">shark::NegativeLogLikelihood::evalDerivative()</a>, <a class="el" href="classshark_1_1_contrastive_divergence.html#a62d35d6d633fd3688fcfa2fe8926ad0d">shark::ContrastiveDivergence&lt; Operator &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_variational_autoencoder_error.html#a8b3b2f63448cb50dbcac630b10982341">shark::VariationalAutoencoderError&lt; SearchPointType &gt;::evalDerivative()</a>, <a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="group__shark__globals.html#ga8bd9251209d0aa390d1da4d6e839861e">shark::LabeledData&lt; InputT, LabelT &gt;::LabeledData()</a>, <a class="el" href="_datasets_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#gaca4b1e6083184385dba76a21b4c1d42b">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfBatches()</a>, <a class="el" href="group__shark__globals.html#ga1fee3b5830ae11a78109e8c0265c6569">shark::numberOfClasses()</a>, <a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="classshark_1_1_normalize_kernel_unit_variance.html#a4bdc12938183edab9acdfd89bde72286">shark::NormalizeKernelUnitVariance&lt; InputType &gt;::train()</a>, <a class="el" href="group__shark__globals.html#gad97d7b9b78b05c23c26660304a4430fb">shark::transform()</a>, and <a class="el" href="group__shark__globals.html#gab87e0d38b9fbf74d9a97ee02e8ab273b">shark::transform()</a>.</p>
 
 </div>
 </div>
@@ -7005,7 +7320,7 @@ template&lt;class Type &gt; </div>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga2296f2d35aff4d00d07a5d6c99015197">shark::Data&lt; Type &gt;::m_data</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a26faf1b7720149479335a6cf8aeebb38">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_project_budget_maintenance_strategy_3_01_real_vector_01_4.html#a716c4803d4a64e0e30ef4d57032ed5d9">shark::ProjectBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_remove_budget_maintenance_strategy.html#a795f1710e6f333fcf7c7baad2e7bcc54">shark::RemoveBudgetMaintenanceStrategy&lt; InputType &gt;::addToModel()</a>, <a class="el" href="namespaceshark.html#a78ea17b764fda3618970ff23a975ea3e">shark::bootstrap()</a>, <a class="el" href="group__kernels.html#ga3fafbf415f6fec4d166ade39dccbc01a">shark::calculateMixedKernelMatrix()</a>, <a class="el" href="group__kernels.html#ga3eaca71bfc1467b79c9341dcfcad25c1">shark::calculateRegularizedKernelMatrix()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a24063221b317718fb10aa445b2fc8d76">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a601a22cd57543675bacf599f9cd1fc7c">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a2b7aab493bbff7b3308c718c1dcd2370">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, <a class="el" href="group__shark__globals.html#ga4d53c5d59826b9e611a19f31fcc0029d">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="group__shark__globals.html#gad9b0233e3adc882ed94f418f80767b09">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a969990014ff8964d6e67fcf72318b02b">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#ad7be3ba6f121a686e6dcbeb87813599f">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_abstract_loss.html#a0d53dd678d58b2cb3a213cdc829937da">shark::AbstractLoss&lt; LabelT, OutputT &gt;::eval()</a>, <a class="el" href="classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html#ad29ef56602b3431b411320d95434a0ac">shark::ZeroOneLoss&lt; unsigned int, blas::vector&lt; Float &gt; &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#ab16ec2478fb6e4c863193554e5eb2047">shark::NegativeLogLikelihood::eval()</a>, <a class="el" href="classshark_1_1_exact_gradient.html#ac633cfe3ffabe6a136ed64243e18dd66">shark::ExactGradient&lt; RBMType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#aa877cede0623b9d651f8385f9b611c82">shark::NegativeLogLikelihood::evalDerivative()</a>, <a class="el" href="classshark_1_1_exact_gradient.html#aef523213c55d8c9c6261abfe3c4c6bcf">shark::ExactGradient&lt; RBMType &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_single_chain_approximator.html#ae8a55add4de41e9c37141e14eda96fee">shark::SingleChainApproximator&lt; MarkovChainType &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_example_modified_kernel_matrix.html#a11477f113015a5aa760ddbd930b7df2f">shark::ExampleModifiedKernelMatrix&lt; InputType, CacheType &gt;::ExampleModifiedKernelMatrix()</a>, <a class="el" href="namespaceshark.html#af2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="classshark_1_1_gaussian_kernel_matrix.html#a767b86dbac41de377ba0a53a16706dbe">shark::GaussianKernelMatrix&lt; T, CacheType &gt;::GaussianKernelMatrix()</a>, <a class="el" href="classshark_1_1_general_quadratic_problem.html#aeeb68a46c6b9d19b029fba3b415e0c53">shark::GeneralQuadraticProblem&lt; MatrixT &gt;::GeneralQuadraticProblem()</a>, <a class="el" href="group__shark__globals.html#ga2b2c3bd0c72ef444cbf8de7f96a4b589">shark::getColumn()</a>, <a class="el" href="classshark_1_1_markov_chain.html#aeca1e601f471e959b5047b9afa9b7a72">shark::MarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="classshark_1_1_tempered_markov_chain.html#a09bdfb62397058b4f8ef2cff44e55654">shark::TemperedMarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="classshark_1_1_kernel_matrix.html#aa486dd918e3c6d34246eeacd348cba93">shark::KernelMatrix&lt; InputType, CacheType &gt;::KernelMatrix()</a>, <a class="el" href="namespaceshark.html#a568356ff4d6d42f5c11402e9cac7d8aa">shark::kMeans()</a>, <a class="el" href="group__shark__globals.html#ga8bd9251209d0aa390d1da4d6e839861e">shark::LabeledData&lt; InputT, LabelT &gt;::LabeledData()</a>, <a class="el" href="_p_c_a_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_kernel_budgeted_s_g_d_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga5333445992cd6b14392cd80a1ab5403c">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfElements()</a>, <a class="el" href="classshark_1_1_qp_mc_box_decomp.html#af0e3156b64e9f2b9f879549393ddc219">shark::QpMcBoxDecomp&lt; Matrix &gt;::QpMcBoxDecomp()</a>, <a class="el" href="classshark_1_1_qp_mc_simplex_decomp.html#a902ef2e3553bb5cf42a5126199301abe">shark::QpMcSimplexDecomp&lt; Matrix &gt;::QpMcSimplexDecomp()</a>, <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a50f9819caf20e6bedad5e6735e5db2e0">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::reduceBudget()</a>, <a class="el" href="group__shark__globals.html#ga556f3c658db711cb630cc736b9665ec0">shark::setColumn()</a>, <a class="el" href="classshark_1_1_multi_chain_approximator.html#aefcaae99947142a6dc5bc810b808ba8c">shark::MultiChainApproximator&lt; MarkovChainType &gt;::setData()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a38c97766f52bf00e5b0120c46c15f37f">shark::KernelExpansion&lt; InputType &gt;::setStructure()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a503aaebca6ce5e7d8a6f79e5e039bd9f">shark::KernelExpansion&lt; InputType &gt;::sparsify()</a>, <a class="el" href="classshark_1_1_ranking_svm_trainer.html#a2a7c219733a19872f9f340bc2051335b">shark::RankingSvmTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_z_c_a.html#a1f7d6ef76cce1d8d85474bbd22452fe2">shark::NormalizeComponentsZCA::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_variance.html#a684b111c701789e332577a6739076c3b">shark::NormalizeComponentsUnitVariance&lt; DataType &gt;::train()</a>, and <a class="el" href="classshark_1_1_normalize_kernel_unit_variance.html#a4bdc12938183edab9acdfd89bde72286">shark::NormalizeKernelUnitVariance&lt; InputType &gt;::train()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a26faf1b7720149479335a6cf8aeebb38">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_project_budget_maintenance_strategy_3_01_real_vector_01_4.html#a716c4803d4a64e0e30ef4d57032ed5d9">shark::ProjectBudgetMaintenanceStrategy&lt; RealVector &gt;::addToModel()</a>, <a class="el" href="classshark_1_1_remove_budget_maintenance_strategy.html#a795f1710e6f333fcf7c7baad2e7bcc54">shark::RemoveBudgetMaintenanceStrategy&lt; InputType &gt;::addToModel()</a>, <a class="el" href="namespaceshark.html#a78ea17b764fda3618970ff23a975ea3e">shark::bootstrap()</a>, <a class="el" href="group__kernels.html#ga3fafbf415f6fec4d166ade39dccbc01a">shark::calculateMixedKernelMatrix()</a>, <a class="el" href="group__kernels.html#ga3eaca71bfc1467b79c9341dcfcad25c1">shark::calculateRegularizedKernelMatrix()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a24063221b317718fb10aa445b2fc8d76">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a601a22cd57543675bacf599f9cd1fc7c">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="classshark_1_1_c_s_v_m_problem.html#a2b7aab493bbff7b3308c718c1dcd2370">shark::CSVMProblem&lt; MatrixT &gt;::CSVMProblem()</a>, <a class="el" href="group__shark__globals.html#ga6231b46b09731352a3cac40709a9625f">shark::dataDimension()</a>, <a class="el" href="group__shark__globals.html#ga4d53c5d59826b9e611a19f31fcc0029d">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="group__shark__globals.html#gad9b0233e3adc882ed94f418f80767b09">shark::Data&lt; Type &gt;::elements()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a969990014ff8964d6e67fcf72318b02b">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_wilcoxon_mann_whitney_statistic.html#ad7be3ba6f121a686e6dcbeb87813599f">shark::NegativeWilcoxonMannWhitneyStatistic&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_a_u_c.html#a5265a1b04657e60004f9a681027cfea4">shark::NegativeAUC&lt; LabelType, OutputType &gt;::eval()</a>, <a class="el" href="classshark_1_1_abstract_loss.html#a0d53dd678d58b2cb3a213cdc829937da">shark::AbstractLoss&lt; LabelT, OutputT &gt;::eval()</a>, <a class="el" href="classshark_1_1_zero_one_loss_3_01unsigned_01int_00_01blas_1_1vector_3_01_float_01_4_01_4.html#ad29ef56602b3431b411320d95434a0ac">shark::ZeroOneLoss&lt; unsigned int, blas::vector&lt; Float &gt; &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#ab16ec2478fb6e4c863193554e5eb2047">shark::NegativeLogLikelihood::eval()</a>, <a class="el" href="classshark_1_1_exact_gradient.html#ac633cfe3ffabe6a136ed64243e18dd66">shark::ExactGradient&lt; RBMType &gt;::eval()</a>, <a class="el" href="classshark_1_1_negative_log_likelihood.html#aa877cede0623b9d651f8385f9b611c82">shark::NegativeLogLikelihood::evalDerivative()</a>, <a class="el" href="classshark_1_1_exact_gradient.html#aef523213c55d8c9c6261abfe3c4c6bcf">shark::ExactGradient&lt; RBMType &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_single_chain_approximator.html#ae8a55add4de41e9c37141e14eda96fee">shark::SingleChainApproximator&lt; MarkovChainType &gt;::evalDerivative()</a>, <a class="el" href="classshark_1_1_example_modified_kernel_matrix.html#a11477f113015a5aa760ddbd930b7df2f">shark::ExampleModifiedKernelMatrix&lt; InputType, CacheType &gt;::ExampleModifiedKernelMatrix()</a>, <a class="el" href="group__shark__globals.html#gaf2bd14cfe0ae426e1dba04703f89a691">shark::exportFiltersToPGMGrid()</a>, <a class="el" href="classshark_1_1_gaussian_kernel_matrix.html#a767b86dbac41de377ba0a53a16706dbe">shark::GaussianKernelMatrix&lt; T, CacheType &gt;::GaussianKernelMatrix()</a>, <a class="el" href="classshark_1_1_general_quadratic_problem.html#aeeb68a46c6b9d19b029fba3b415e0c53">shark::GeneralQuadraticProblem&lt; MatrixT &gt;::GeneralQuadraticProblem()</a>, <a class="el" href="group__shark__globals.html#ga2b2c3bd0c72ef444cbf8de7f96a4b589">shark::getColumn()</a>, <a class="el" href="classshark_1_1_markov_chain.html#aeca1e601f471e959b5047b9afa9b7a72">shark::MarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="classshark_1_1_tempered_markov_chain.html#a09bdfb62397058b4f8ef2cff44e55654">shark::TemperedMarkovChain&lt; Operator &gt;::initializeChain()</a>, <a class="el" href="classshark_1_1_kernel_matrix.html#aa486dd918e3c6d34246eeacd348cba93">shark::KernelMatrix&lt; InputType, CacheType &gt;::KernelMatrix()</a>, <a class="el" href="namespaceshark.html#a568356ff4d6d42f5c11402e9cac7d8aa">shark::kMeans()</a>, <a class="el" href="group__shark__globals.html#ga8bd9251209d0aa390d1da4d6e839861e">shark::LabeledData&lt; InputT, LabelT &gt;::LabeledData()</a>, <a class="el" href="_p_c_a_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="_kernel_budgeted_s_g_d_tutorial_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main()</a>, <a class="el" href="group__shark__globals.html#ga5333445992cd6b14392cd80a1ab5403c">shark::LabeledData&lt; InputT, LabelT &gt;::numberOfElements()</a>, <a class="el" href="classshark_1_1_qp_mc_box_decomp.html#af0e3156b64e9f2b9f879549393ddc219">shark::QpMcBoxDecomp&lt; Matrix &gt;::QpMcBoxDecomp()</a>, <a class="el" href="classshark_1_1_qp_mc_simplex_decomp.html#a902ef2e3553bb5cf42a5126199301abe">shark::QpMcSimplexDecomp&lt; Matrix &gt;::QpMcSimplexDecomp()</a>, <a class="el" href="classshark_1_1_merge_budget_maintenance_strategy_3_01_real_vector_01_4.html#a50f9819caf20e6bedad5e6735e5db2e0">shark::MergeBudgetMaintenanceStrategy&lt; RealVector &gt;::reduceBudget()</a>, <a class="el" href="group__shark__globals.html#ga556f3c658db711cb630cc736b9665ec0">shark::setColumn()</a>, <a class="el" href="classshark_1_1_multi_chain_approximator.html#aefcaae99947142a6dc5bc810b808ba8c">shark::MultiChainApproximator&lt; MarkovChainType &gt;::setData()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a38c97766f52bf00e5b0120c46c15f37f">shark::KernelExpansion&lt; InputType &gt;::setStructure()</a>, <a class="el" href="classshark_1_1_kernel_expansion.html#a503aaebca6ce5e7d8a6f79e5e039bd9f">shark::KernelExpansion&lt; InputType &gt;::sparsify()</a>, <a class="el" href="classshark_1_1_ranking_svm_trainer.html#a2a7c219733a19872f9f340bc2051335b">shark::RankingSvmTrainer&lt; InputType, CacheType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_z_c_a.html#a1f7d6ef76cce1d8d85474bbd22452fe2">shark::NormalizeComponentsZCA::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_interval.html#aba27460590d2bad0fed075ae88dc916d">shark::NormalizeComponentsUnitInterval&lt; DataType &gt;::train()</a>, <a class="el" href="classshark_1_1_normalize_components_unit_variance.html#a684b111c701789e332577a6739076c3b">shark::NormalizeComponentsUnitVariance&lt; DataType &gt;::train()</a>, and <a class="el" href="classshark_1_1_normalize_kernel_unit_variance.html#a4bdc12938183edab9acdfd89bde72286">shark::NormalizeKernelUnitVariance&lt; InputType &gt;::train()</a>.</p>
 
 </div>
 </div>
@@ -8039,7 +8354,7 @@ template&lt;class Type &gt; </div>
 
 <p class="reference">References <a class="el" href="group__shark__globals.html#ga232e64c2421cd25794c915c399a7cfd5">shark::Data&lt; Type &gt;::m_shape</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="namespaceshark.html#a78ea17b764fda3618970ff23a975ea3e">shark::bootstrap()</a>, <a class="el" href="group__shark__globals.html#ga1a1a4f4249f709e6169a601a9a857fa8">shark::createDataFromRange()</a>, <a class="el" href="namespaceshark.html#ab96fa7c3a2939a73db2108bb6c41686a">shark::importPGMSet()</a>, <a class="el" href="group__shark__globals.html#ga3eace53afd7b57c7ba1b1619a43a1f97">shark::LabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#a78fdd89eae099be245faff5907baa867">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga134d41e34c69c494346367a570bf4ff8">shark::LabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#a4b369aa6cfa440ecb7f5a150e645a2a9">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga71c45aa6968c8e9ea6ca43ab13f4b9a7">shark::LabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#a5f6639432fcc7498e0cbb4e74a956ab6">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="group__shark__globals.html#ga7f3308a970a6f4fe96aebf23755a6430">shark::LabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#ab551802a4a3d30b09984ee7c92ca64b5">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="_p_c_a_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements()</a>, <a class="el" href="group__shark__globals.html#gafd3b31345c566b4bbaf5f5c6398eb23c">shark::toGPU()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="group__shark__globals.html#gad97d7b9b78b05c23c26660304a4430fb">shark::transform()</a>, and <a class="el" href="group__shark__globals.html#gab87e0d38b9fbf74d9a97ee02e8ab273b">shark::transform()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="namespaceshark.html#a78ea17b764fda3618970ff23a975ea3e">shark::bootstrap()</a>, <a class="el" href="group__shark__globals.html#ga1a1a4f4249f709e6169a601a9a857fa8">shark::createDataFromRange()</a>, <a class="el" href="group__shark__globals.html#gab96fa7c3a2939a73db2108bb6c41686a">shark::importPGMSet()</a>, <a class="el" href="group__shark__globals.html#ga3eace53afd7b57c7ba1b1619a43a1f97">shark::LabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#a78fdd89eae099be245faff5907baa867">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga134d41e34c69c494346367a570bf4ff8">shark::LabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#a4b369aa6cfa440ecb7f5a150e645a2a9">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::inputShape()</a>, <a class="el" href="group__shark__globals.html#ga71c45aa6968c8e9ea6ca43ab13f4b9a7">shark::LabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#a5f6639432fcc7498e0cbb4e74a956ab6">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="group__shark__globals.html#ga7f3308a970a6f4fe96aebf23755a6430">shark::LabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="classshark_1_1_weighted_labeled_data.html#ab551802a4a3d30b09984ee7c92ca64b5">shark::WeightedLabeledData&lt; InputT, LabelT &gt;::labelShape()</a>, <a class="el" href="_p_c_a_tutorial_8cpp.html#ae66f6b31b5ad750f1fe042a706a4e3d4">main()</a>, <a class="el" href="group__shark__globals.html#ga42c8e836dbb5860d4044d8b19732f794">shark::Data&lt; Type &gt;::reorderElements()</a>, <a class="el" href="group__shark__globals.html#gafd3b31345c566b4bbaf5f5c6398eb23c">shark::toGPU()</a>, <a class="el" href="group__shark__globals.html#gadd98c8990a51f5c5d1625cdf06874ccc">shark::toGPU()</a>, <a class="el" href="group__shark__globals.html#gad97d7b9b78b05c23c26660304a4430fb">shark::transform()</a>, and <a class="el" href="group__shark__globals.html#gab87e0d38b9fbf74d9a97ee02e8ab273b">shark::transform()</a>.</p>
 
 </div>
 </div>
