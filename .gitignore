@@ -1,3 +1,5 @@
+# backup files
+*.bak
 
 # /
 /CMakeFiles
