@@ -109,7 +109,7 @@ int main(int argc, char** argv)
 	ClassificationDataset dataset;
 //###begin<download-url>
 	// download dense data
-	downloadCsvData(dataset, "http://www.shark-ml.org/data/quickstart-train.csv", LAST_COLUMN, ' ');
+	downloadCsvData(dataset, "https://raw.githubusercontent.com/Shark-ML/Shark/master/docs/data/quickstart-train.csv", LAST_COLUMN, ' ');
 
 	// download sparse data
 	downloadSparseData(dataset, "http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/binary/svmguide1");
