@@ -36,7 +36,7 @@ which can read many CSV-like file formats. Passing ``LAST_COLUMN``  as argument 
 that the last column of the file holds the class labels.
 
 For example, let us consider the data in
-:download:`C.csv <../../../../../examples/Supervised/data/quickstartData.csv>`.
+:download:`quickstartData.csv <../../../../../examples/Supervised/data/quickstartData.csv>`.
 To apply the Shark program to these data, you have to pass the filename as a command line option, e.g.: ::
 
   ./quickstartTutorial data/quickstartData.csv
