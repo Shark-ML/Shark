@@ -506,7 +506,8 @@ span.lineno {
     text-align: right;
     border-right: 2px solid #0F0;
     background-color: #E8E8E8;
-        white-space: pre;
+    white-space: pre;
+    user-select: none;
 }
 span.lineno a {
     background-color: #D8D8D8;
