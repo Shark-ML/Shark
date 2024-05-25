@@ -2,8 +2,6 @@
    :hidden:
 
    rest_sources/installation
-   rest_sources/benchmark
-
 
    rest_sources/tutorials/tutorials
 
