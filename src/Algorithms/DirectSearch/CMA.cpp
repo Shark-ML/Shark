@@ -237,22 +237,31 @@ void CMA::doInit(
 	
 		
 	//weighting of the k-best individuals
-	m_weights.resize(m_mu);
+	m_weights.resize(m_mu * 2);
+	RealVector negativeWeights(m_mu, 0.);
 	switch (m_recombinationType) {
 	case EQUAL:
-		for (std::size_t i = 0; i < m_mu; i++)
+		for (std::size_t i = 0; i < m_mu; i++) {
 			m_weights(i) = 1;
+			negativeWeights(i) = -1.;
+		}
 		break;
 	case LINEAR:
-		for (std::size_t i = 0; i < m_mu; i++)
+		for (std::size_t i = 0; i < m_mu; i++) {
 			m_weights(i) = (double)(mu-i);
+			negativeWeights(i) = static_cast<double>(mu - (m_lambda - i - 1.));
+		}
 		break;
 	case SUPERLINEAR:
-		for (std::size_t i = 0; i < m_mu; i++)
+		for (std::size_t i = 0; i < m_mu; i++) {
 			m_weights(i) = ::log(mu + 0.5) - ::log(1. + i); // eq. (45)
+			negativeWeights(i) = ::log(mu + 0.5) - ::log(1. + (m_lambda - i - 1.));
+		}
 		break;
 	}
-	m_weights /= sum(m_weights); // eq. (45)
+	const double weightSum = sum(m_weights);
+	m_weights /= weightSum; // eq. (45)
+	negativeWeights /= weightSum; // Normalize the negative weights.
 	m_muEff = 1. / sum(sqr(m_weights)); // equal to sum(m_weights)^2 / sum(sqr(m_weights))
 
 	// Step size control
@@ -261,9 +270,17 @@ void CMA::doInit(
 
 	m_cC = (4. + m_muEff / m_numberOfVariables) / (m_numberOfVariables + 4. +  2 * m_muEff / m_numberOfVariables); // eq. (47)
 	m_c1 = 2 / (sqr(m_numberOfVariables + 1.3) + m_muEff); // eq. (48)
-	double alphaMu = 2.;
-	double rankMuAlpha = 0.3;//but is it really?
-	m_cMu = std::min(1. - m_c1, alphaMu * ( rankMuAlpha + m_muEff - 2. + 1./m_muEff) / (sqr(m_numberOfVariables + 2) + alphaMu * m_muEff / 2)); // eq. (49)
+	m_cMu = std::min(1. - m_c1, 2. * (.25 + m_muEff + 1. / m_muEff - 2.) / (std::pow(m_numberOfVariables + 2., 2.) + 2. * m_muEff / 2.)); // eq. (49)
+
+	// Normalize the negative weights                          
+	const double negativeWeightSum = sum(negativeWeights);
+	const double negativeMultiplier = 1. + m_c1 / m_cMu;
+	negativeWeights /= -negativeWeightSum;
+	negativeWeights *= negativeMultiplier;
+
+	for (std::size_t i = 0; i < negativeWeights.size(); ++i) {
+		m_weights(2 * m_mu - i - 1) = negativeWeights[i];
+	}
 	
 	std::size_t pos = std::min_element(initialValues.begin(),initialValues.end())-initialValues.begin();
 	m_mean = initialSearchPoints[pos];
@@ -299,13 +316,7 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 
 	// Covariance matrix update
 	RealMatrix& C = m_mutationDistribution.covarianceMatrix();
-	RealMatrix Z( m_numberOfVariables, m_numberOfVariables, 0.0); // matric for rank-mu update
-	for( std::size_t i = 0; i < m_mu; i++ ) {
-		noalias(Z) += m_weights( i ) * blas::outer_prod(
-			selectedOffspring[i].searchPoint() - m_mean,
-			selectedOffspring[i].searchPoint() - m_mean
-		);
-	}
+
 	double n = static_cast<double>(m_numberOfVariables);
 	double expectedChi = std::sqrt( n )*(1. - 1./(4.*n) + 1./(21.*n*n));
 	double hSigLHS = norm_2( m_evolutionPathSigma ) / std::sqrt(1. - pow((1 - m_cSigma), 2.*(m_counter+1)));
@@ -314,8 +325,63 @@ void CMA::updatePopulation( std::vector<IndividualType> const& offspring ) {
 	if(hSigLHS < hSigRHS) hSig = 1.;
 	double deltaHSig = (1.-hSig*hSig) * m_cC * (2. - m_cC);
 
-	m_evolutionPathC = (1. - m_cC ) * m_evolutionPathC + hSig * std::sqrt( m_cC * (2. - m_cC) * m_muEff ) * y; // eq. (42)
-	noalias(C) = (1.-m_c1 - m_cMu) * C + m_c1 * ( blas::outer_prod( m_evolutionPathC, m_evolutionPathC ) + deltaHSig * C) + m_cMu * 1./sqr( m_sigma ) * Z; // eq. (43)
+	const double c1a = m_c1 * (1. - (1. - (hSig * hSig)) * m_cC * (2. - m_cC));
+
+	if (m_useActiveUpdates) {
+		// Copy the weights from as they are altered based on the length of the                                                       
+		// the rejected solutions.                                                                                                    
+		RealVector tempWeights(m_numberOfVariables + 1, 0.);
+		tempWeights(0) = c1a;
+		for (std::size_t i = 0; i < m_weights.size(); ++i)
+		{
+			tempWeights(i + 1) = m_weights(i) * m_cMu;
+		}
+
+		// Add rejected samples to the selected offspring                                                                             
+		std::vector< IndividualType > rejectedOffspring(m_mu);
+		ElitistSelection<IndividualType::ReverseFitnessOrdering > rejectedSelection;
+		rejectedSelection(offspring.begin(), offspring.end(), rejectedOffspring.begin(), rejectedOffspring.end());
+		std::reverse(rejectedOffspring.begin(), rejectedOffspring.end());
+
+		selectedOffspring.insert(selectedOffspring.end(), rejectedOffspring.begin(), rejectedOffspring.end());
+
+		const double weightSum = sum(tempWeights);
+
+		const RealMatrix &B = m_mutationDistribution.eigenVectors();
+		const RealVector &D = sqrt(max(m_mutationDistribution.eigenValues(), 0));
+
+		RealMatrix vectors(m_numberOfVariables + 1, m_numberOfVariables);
+
+		// Build the matrix for combined rank-1 and rank-mu updates                                                                   
+		row(vectors, 0) = m_evolutionPathC * sqrt(m_c1 / (c1a + 1e-23));
+		for (int k = 0; k < selectedOffspring.size(); ++k)
+		{
+			const unsigned int weightIndex = k + 1;
+			RealVector normalized = (selectedOffspring[k].searchPoint() - m_mean) / m_sigma;
+
+			if (tempWeights[weightIndex] < 0.)
+			{
+				const double mahalanobisNorm = sqrt(sum(sqr((trans(B) % normalized) / D)));
+				tempWeights[weightIndex] *= static_cast<double>(m_numberOfVariables) / sqr(mahalanobisNorm + 1e-9);
+			}
+
+			row(vectors, weightIndex) = normalized;
+		}
+
+		m_evolutionPathC = (1. - m_cC) * m_evolutionPathC + hSig * (std::sqrt(m_cC * (2. - m_cC) * m_muEff) / m_sigma) * (m - m_mean);
+		noalias(C) = C * (1. - weightSum) + trans(to_diagonal(tempWeights) % vectors) % vectors;
+	} else {
+		RealMatrix Z(m_numberOfVariables, m_numberOfVariables, 0.0); // matric for rank-mu update
+		for (std::size_t i = 0; i < m_mu; i++) {
+			noalias(Z) += m_weights(i) * blas::outer_prod(
+				selectedOffspring[i].searchPoint() - m_mean,
+				selectedOffspring[i].searchPoint() - m_mean
+			);
+		}
+
+		m_evolutionPathC = (1. - m_cC) * m_evolutionPathC + hSig * std::sqrt(m_cC * (2. - m_cC) * m_muEff) * y; // eq. (42)
+		noalias(C) = (1. - m_c1 - m_cMu) * C + m_c1 * (blas::outer_prod(m_evolutionPathC, m_evolutionPathC) + deltaHSig * C) + m_cMu * 1. / sqr(m_sigma) * Z; // eq. (43)
+	}
 
 	// Step size update
 	RealVector CInvY = blas::prod( m_mutationDistribution.eigenVectors(), z ); // C^(-1/2)y = Bz
