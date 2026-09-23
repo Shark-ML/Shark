@@ -500,7 +500,11 @@ public:
 	typedef typename BaseIterator::iterator_category iterator_category;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
+#if __cplusplus > 201703L
+	typedef typename std::invoke_result<F, typename BaseIterator::value_type>::type value_type;
+#else
 	typedef typename std::result_of<F(typename BaseIterator::value_type)>::type value_type;
+#endif
 	typedef value_type reference;
 	typedef value_type *pointer;
 
@@ -660,7 +664,11 @@ template<class Iterator1, class Iterator2, class F>
 class binary_transform_iterator:
 public random_access_iterator_base<
 	binary_transform_iterator<Iterator1,Iterator2,F>,
+#if __cplusplus > 201703L
+	typename std::invoke_result<F, typename Iterator1::value_type, typename Iterator2::value_type>::type,
+#else
 	typename std::result_of<F(typename Iterator1::value_type, typename Iterator2::value_type)>::type,
+#endif
 	typename iterator_restrict_traits<
 		typename Iterator1::iterator_category,
 		typename Iterator2::iterator_category
@@ -676,7 +684,11 @@ public:
 	>::iterator_category iterator_category;
 	typedef std::size_t size_type;
 	typedef std::ptrdiff_t difference_type;
+#if __cplusplus > 201703L
+	typedef typename std::invoke_result<F, typename Iterator1::value_type, typename Iterator2::value_type>::type value_type;
+#else
 	typedef typename std::result_of<F(typename Iterator1::value_type, typename Iterator2::value_type)>::type value_type;
+#endif
 	typedef value_type reference;
 	typedef value_type *pointer;
 

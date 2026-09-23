@@ -646,13 +646,21 @@ private:
 	template<class B>
 	struct TransformedDataElementTypeFromBatch{
 		typedef typename batch_to_element<
+#if __cplusplus > 201703L
+			typename std::invoke_result<Functor&&,B>::type
+#else
 			typename std::result_of<Functor&&(B)>::type 
+#endif
 		>::type type;
 	};
 public:
 	typedef typename boost::mpl::eval_if<
 		CanBeCalled<Functor,T>,
+#if __cplusplus > 201703L
+		std::invoke_result<Functor&&, T >,
+#else
 		std::result_of<Functor&&(T) >,
+#endif
 		TransformedDataElementTypeFromBatch<
 			typename Batch<T>::type 
 		>
